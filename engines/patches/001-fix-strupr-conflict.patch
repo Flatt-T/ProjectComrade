@@ -1,0 +1,13 @@
+diff --git a/common/wwstd.h b/common/wwstd.h
+index 1234567..abcdefg 100644
+--- a/common/wwstd.h
++++ b/common/wwstd.h
+@@ -260,7 +260,7 @@ inline int strnicmp(const char* s1, const char* s2, size_t n)
+    }
+ }
+ 
+-inline static char* strupr(char* str)
++inline static char* ww_strupr(char* str)
+ {
+     char* ret = str;
+     while (*str != '\0') {
