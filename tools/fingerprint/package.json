@@ -1,0 +1,16 @@
+{
+  "name": "@comrade/tools-fingerprint",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate-rights": "ts-node validate-rights.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.2"
+  }
+}
