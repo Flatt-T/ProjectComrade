@@ -1,13 +1,29 @@
-diff --git a/common/wwstd.h b/common/wwstd.h
-index 1234567..abcdefg 100644
+﻿diff --git a/common/wwstd.h b/common/wwstd.h
+index 5e41f06..4452f79 100644
 --- a/common/wwstd.h
 +++ b/common/wwstd.h
-@@ -260,7 +260,7 @@ inline int strnicmp(const char* s1, const char* s2, size_t n)
-    }
+@@ -130,7 +130,7 @@ template <class T> T MAX(T a, T b)
+ #define PROC_PENTIUM 2
+ 
+ // Inline Routines
+-//════════════════
++//´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢´┐¢
+ //
+ // These Template functions are generally used
+ // by classes when they havce over loaded > and <.
+@@ -260,6 +260,7 @@ inline static void _splitpath(const char* path, char* drive, char* dir, char* fn
+     }
  }
  
--inline static char* strupr(char* str)
-+inline static char* ww_strupr(char* str)
++#ifndef __EMSCRIPTEN__
+ inline static char* strupr(char* str)
  {
      char* ret = str;
-     while (*str != '\0') {
+@@ -269,6 +270,7 @@ inline static char* strupr(char* str)
+     }
+     return ret;
+ }
++#endif
+ 
+ inline static void strrev(char* str)
+ {

@@ -1,0 +1,26 @@
+﻿diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8d094fa..082bebb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -141,9 +141,18 @@ endif()
+ 
+ if(SDL2)
+     message("Find path is ${CMAKE_FIND_ROOT_PATH}")
+-    find_package(SDL2 REQUIRED)
+-    list(APPEND VANILLA_LIBS ${SDL2_LIBRARY})
+-    include_directories(${SDL2_INCLUDE_DIR})
++    
++    # Emscripten provides SDL2 in its sysroot
++    if(EMSCRIPTEN)
++        message("Using Emscripten's built-in SDL2")
++        # Emscripten requires -sUSE_SDL=2 during compilation and linking
++        add_compile_options("-sUSE_SDL=2")
++        add_link_options("-sUSE_SDL=2")
++    else()
++        find_package(SDL2 REQUIRED)
++        list(APPEND VANILLA_LIBS ${SDL2_LIBRARY})
++        include_directories(${SDL2_INCLUDE_DIR})
++    endif()
+ 
+     # winuser.h defines VK_ macros but it can be prevented
+     if(WIN32)
