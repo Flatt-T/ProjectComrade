@@ -18,7 +18,7 @@ jobs:
           version: 9.15.0
       - uses: actions/setup-node@v4
         with:
-          node-version: '24.21.0'
+          node-version: '24.13.0'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
@@ -35,7 +35,7 @@ jobs:
           version: 9.15.0
       - uses: actions/setup-node@v4
         with:
-          node-version: '24.21.0'
+          node-version: '24.13.0'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:unit
@@ -51,7 +51,7 @@ jobs:
           version: 9.15.0
       - uses: actions/setup-node@v4
         with:
-          node-version: '24.21.0'
+          node-version: '24.13.0'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:integration
@@ -67,7 +67,7 @@ jobs:
           version: 9.15.0
       - uses: actions/setup-node@v4
         with:
-          node-version: '24.21.0'
+          node-version: '24.13.0'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit

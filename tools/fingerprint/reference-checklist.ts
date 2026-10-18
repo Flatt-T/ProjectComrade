@@ -95,6 +95,7 @@ const requiredFiles: ReferenceFile[] = [
 ];
 
 function generateChecklist(basePath: string = '.') {
+  const resolvedBasePath = join(process.cwd(), basePath);
   console.log('Reference File Checklist');
   console.log('=======================\n');
 
@@ -103,7 +104,7 @@ function generateChecklist(basePath: string = '.') {
     console.log(`Status: ${ref.status}\n`);
 
     for (const file of ref.requiredFiles) {
-      const fullPath = join(basePath, file);
+      const fullPath = join(resolvedBasePath, file);
       const exists = existsSync(fullPath);
       const status = exists ? '✓' : '✗';
       console.log(`  ${status} ${file}`);

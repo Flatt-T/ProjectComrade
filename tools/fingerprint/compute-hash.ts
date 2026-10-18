@@ -6,7 +6,7 @@
 
 import { createHash } from 'crypto';
 import { readFileSync, existsSync, statSync } from 'fs';
-import { join, relative } from 'path';
+import { join } from 'path';
 
 interface FileHash {
   path: string;
@@ -17,7 +17,9 @@ interface FileHash {
 
 function computeFileHash(filePath: string): FileHash {
   try {
-    if (!existsSync(filePath)) {
+    const resolvedPath = join(process.cwd(), filePath);
+    
+    if (!existsSync(resolvedPath)) {
       return {
         path: filePath,
         size: 0,
@@ -26,20 +28,20 @@ function computeFileHash(filePath: string): FileHash {
       };
     }
 
-    const stats = statSync(filePath);
-    const content = readFileSync(filePath);
+    const stats = statSync(resolvedPath);
+    const content = readFileSync(resolvedPath);
     const hash = createHash('sha256');
     hash.update(content);
     const sha256 = hash.digest('hex');
 
     return {
-      path: relative(process.cwd(), filePath),
+      path: filePath,
       size: stats.size,
       sha256
     };
   } catch (e) {
     return {
-      path: relative(process.cwd(), filePath),
+      path: filePath,
       size: 0,
       sha256: '',
       error: e instanceof Error ? e.message : String(e)
