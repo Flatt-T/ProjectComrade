@@ -1,0 +1,250 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "COMRADE Parity Fixture Schema",
+  "description": "Schema for deterministic parity fixtures comparing candidate build against original reference",
+  "type": "object",
+  "required": [
+    "fixtureId",
+    "referenceId",
+    "referenceBuildId",
+    "title",
+    "scenarioFamily",
+    "initialState",
+    "settings",
+    "inputTrace",
+    "expectedObservations",
+    "sourceEvidence",
+    "oracleCaptureMethod",
+    "expectedInvariants",
+    "tolerancePolicy",
+    "linkedCatalogIds"
+  ],
+  "properties": {
+    "fixtureId": {
+      "type": "string",
+      "description": "Unique fixture identifier (e.g., TD-ECON-001)"
+    },
+    "referenceId": {
+      "type": "string",
+      "description": "Reference identifier from reference-builds.lock.json (e.g., TD-CLASSIC-001)"
+    },
+    "referenceBuildId": {
+      "type": "string",
+      "description": "Specific edition/patch identifier (e.g., td-gog-1995)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable fixture title"
+    },
+    "scenarioFamily": {
+      "type": "string",
+      "enum": ["economy", "movement", "production", "combat", "victory", "visibility", "ui"],
+      "description": "Scenario family category per COMRADE08"
+    },
+    "initialState": {
+      "type": "object",
+      "description": "Initial game state including map hash, starting credits, unit positions, fog state",
+      "required": ["mapHash", "startingCredits", "playerFactions"],
+      "properties": {
+        "mapHash": {
+          "type": "string",
+          "description": "SHA-256 hash of the map file"
+        },
+        "startingCredits": {
+          "type": "integer",
+          "description": "Starting credits per player"
+        },
+        "playerFactions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Faction assignments per player slot"
+        },
+        "seed": {
+          "type": "integer",
+          "description": "Controllable RNG seed where applicable"
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Game settings used in the fixture",
+      "required": ["gameSpeed", "unitCap", "techLevel"],
+      "properties": {
+        "gameSpeed": {
+          "type": "string",
+          "description": "Game speed setting (e.g., 'normal', 'fast')"
+        },
+        "unitCap": {
+          "type": "integer",
+          "description": "Unit cap setting"
+        },
+        "techLevel": {
+          "type": "integer",
+          "description": "Tech level setting"
+        },
+        "fogOfWar": {
+          "type": "boolean",
+          "description": "Fog of war enabled"
+        },
+        "shroud": {
+          "type": "boolean",
+          "description": "Shroud enabled"
+        }
+      }
+    },
+    "inputTrace": {
+      "type": "array",
+      "description": "Ordered input trace with timing semantics",
+      "items": {
+        "type": "object",
+        "required": ["tick", "command", "parameters"],
+        "properties": {
+          "tick": {
+            "type": "integer",
+            "description": "Simulation tick at which command is issued"
+          },
+          "command": {
+            "type": "string",
+            "description": "Command type (e.g., 'move', 'build', 'attack', 'stop')"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Command-specific parameters (unit IDs, coordinates, target, etc.)"
+          },
+          "playerId": {
+            "type": "integer",
+            "description": "Player issuing the command"
+          }
+        }
+      }
+    },
+    "expectedObservations": {
+      "type": "object",
+      "description": "Expected event trace and state observations at specified checkpoints",
+      "required": ["checkpoints"],
+      "properties": {
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tick", "observations"],
+            "properties": {
+              "tick": {
+                "type": "integer",
+                "description": "Simulation tick for this checkpoint"
+              },
+              "observations": {
+                "type": "object",
+                "description": "Expected state at this checkpoint (credits, unit counts, positions, health, etc.)"
+              }
+            }
+          }
+        },
+        "eventTrace": {
+          "type": "array",
+          "description": "Expected sequence of events (unit produced, unit destroyed, building captured, etc.)",
+          "items": {
+            "type": "object",
+            "required": ["tick", "eventType", "parameters"],
+            "properties": {
+              "tick": {"type": "integer"},
+              "eventType": {"type": "string"},
+              "parameters": {"type": "object"}
+            }
+          }
+        }
+      }
+    },
+    "sourceEvidence": {
+      "type": "object",
+      "description": "Evidence linking this fixture to source/reference data",
+      "required": ["captureDate", "captureMethod", "referenceVersion"],
+      "properties": {
+        "captureDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "captureMethod": {
+          "type": "string",
+          "enum": ["source-instrumentation", "controlled-recording", "manual-observation", "repeatable-experiment"],
+          "description": "How the expected result was obtained"
+        },
+        "referenceVersion": {
+          "type": "string",
+          "description": "Exact reference build version used for capture"
+        },
+        "recordingFile": {
+          "type": "string",
+          "description": "Path to recording file if applicable"
+        },
+        "observer": {
+          "type": "string",
+          "description": "Who performed the observation/verification"
+        }
+      }
+    },
+    "oracleCaptureMethod": {
+      "type": "string",
+      "description": "Method used to obtain oracle output (e.g., 'native-game-run', 'source-trace', 'instrumented-build')",
+      "enum": ["native-game-run", "source-trace", "instrumented-build", "repeatable-experiment"]
+    },
+    "expectedInvariants": {
+      "type": "array",
+      "description": "Invariant properties that must hold throughout the fixture",
+      "items": {
+        "type": "object",
+        "required": ["property", "condition"],
+        "properties": {
+          "property": {
+            "type": "string",
+            "description": "Property name (e.g., 'unit-health-never-negative', 'credits-never-exceed-cap')"
+          },
+          "condition": {
+            "type": "string",
+            "description": "Invariant condition (e.g., '>= 0', '<= 10000')"
+          }
+        }
+      }
+    },
+    "tolerancePolicy": {
+      "type": "object",
+      "description": "Tolerance policy for comparisons",
+      "properties": {
+        "integerFields": {
+          "type": "string",
+          "enum": ["exact", "bounded"],
+          "description": "Tolerance for integer comparisons (credits, HP, etc.)"
+        },
+        "floatingPointFields": {
+          "type": "string",
+          "enum": ["exact", "epsilon", "bounded"],
+          "description": "Tolerance for floating-point comparisons"
+        },
+        "epsilon": {
+          "type": "number",
+          "description": "Epsilon value for floating-point comparisons"
+        },
+        "rendering": {
+          "type": "string",
+          "enum": ["exact", "pixel-tolerance", "device-justified"],
+          "description": "Tolerance for rendering comparisons"
+        },
+        "audio": {
+          "type": "string",
+          "enum": ["exact", "time-tolerance", "device-justified"],
+          "description": "Tolerance for audio comparisons"
+        }
+      }
+    },
+    "linkedCatalogIds": {
+      "type": "array",
+      "description": "Catalog entity/weapon/upgrade IDs tested by this fixture",
+      "items": {"type": "string"}
+    },
+    "knownLimitations": {
+      "type": "array",
+      "description": "Known limitations or uncertainties in this fixture",
+      "items": {"type": "string"}
+    }
+  }
+}

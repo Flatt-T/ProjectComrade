@@ -1,0 +1,552 @@
+{
+  "schemaVersion": "1.0.0",
+  "referenceId": "RA1-CLASSIC-001",
+  "referenceBuildId": "ra1-gog-1996",
+  "generatedAt": "2026-10-18T00:00:00Z",
+  "notes": "BLOCKER: These are template fixtures. Actual hashes, observations and evidence must be populated from controlled observations of approved reference builds. All expected results are placeholders marked BLOCKED.",
+  "fixtures": [
+    {
+      "fixtureId": "RA1-ECON-001",
+      "title": "Basic ore truck cycle - single refinery",
+      "scenarioFamily": "economy",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["Allies", "Soviets"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "ore-truck-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 100, "y": 200}}, "playerId": 0},
+        {"tick": 100, "command": "harvest", "parameters": {"fieldId": "ore-1"}, "playerId": 0},
+        {"tick": 300, "command": "return", "parameters": {"targetId": "refinery-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 100,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "ore-truck-1.state": "harvesting",
+              "ore-truck-1.cargo": "BLOCKED-awaiting-reference"
+            }
+          },
+          {
+            "tick": 500,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "ore-truck-1.state": "idle",
+              "ore-truck-1.cargo": 0
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"},
+        {"property": "ore-truck-1.cargo", "condition": ">= 0 and <= max_capacity"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["ore-truck", "refinery", "ore"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-ECON-002",
+      "title": "Gem field harvesting (higher value)",
+      "scenarioFamily": "economy",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["Allies"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "ore-truck-1"}, "playerId": 0},
+        {"tick": 10, "command": "harvest", "parameters": {"fieldId": "gems-1"}, "playerId": 0},
+        {"tick": 300, "command": "return", "parameters": {"targetId": "refinery-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 500,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "credits.gain.rate": "BLOCKED-awaiting-reference"
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["ore-truck", "refinery", "gems"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-MOVE-001",
+      "title": "Basic unit movement",
+      "scenarioFamily": "movement",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["Allies"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "unit-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 500, "y": 500}}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 300,
+            "observations": {
+              "unit-1.position": {"x": 500, "y": 500},
+              "unit-1.state": "idle"
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "unit-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["rifle-infantry"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-PROD-001",
+      "title": "Basic unit production",
+      "scenarioFamily": "production",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["Allies"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-building", "parameters": {"buildingId": "barracks-1"}, "playerId": 0},
+        {"tick": 10, "command": "produce", "parameters": {"unitType": "rifle-infantry"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 200,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "barracks-1.queue": []
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-produced", "parameters": {"unitType": "rifle-infantry"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["barracks", "rifle-infantry"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-COMBAT-001",
+      "title": "Basic infantry attack",
+      "scenarioFamily": "combat",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["Allies", "Soviets"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "unit-allies-1"}, "playerId": 0},
+        {"tick": 10, "command": "attack", "parameters": {"targetId": "unit-soviets-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 100,
+            "observations": {
+              "unit-soviets-1.state": "destroyed"
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-destroyed", "parameters": {"unitId": "unit-soviets-1"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "unit-allies-1.hp", "condition": ">= 0 and <= max_hp"},
+        {"property": "unit-soviets-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["rifle-infantry", "weapon-rifle"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-NAVAL-001",
+      "title": "Basic naval unit movement",
+      "scenarioFamily": "movement",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["Allies"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 3,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "destroyer-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 800, "y": 800}}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 400,
+            "observations": {
+              "destroyer-1.position": {"x": 800, "y": 800},
+              "destroyer-1.state": "idle"
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "destroyer-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["destroyer"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-AIR-001",
+      "title": "Basic aircraft movement and rearm",
+      "scenarioFamily": "movement",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 15000,
+        "playerFactions": ["Allies"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 3,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "longbow-1"}, "playerId": 0},
+        {"tick": 10, "command": "attack", "parameters": {"target": {"x": 500, "y": 500}}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 50,
+            "observations": {
+              "longbow-1.state": "attacking",
+              "longbow-1.ammo": "BLOCKED-awaiting-reference"
+            }
+          },
+          {
+            "tick": 200,
+            "observations": {
+              "longbow-1.state": "returning"
+            }
+          },
+          {
+            "tick": 400,
+            "observations": {
+              "longbow-1.state": "rearming",
+              "longbow-1.ammo": "BLOCKED-awaiting-reference"
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "longbow-1.hp", "condition": ">= 0 and <= max_hp"},
+        {"property": "longbow-1.ammo", "condition": ">= 0 and <= max_ammo"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["longbow-helicopter"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-COMBAT-002",
+      "title": "Submarine detection and attack",
+      "scenarioFamily": "combat",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 20000,
+        "playerFactions": ["Allies", "Soviets"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 3,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "destroyer-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 500, "y": 500}}, "playerId": 0},
+        {"tick": 100, "command": "attack", "parameters": {"targetId": "submarine-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 100,
+            "observations": {
+              "submarine-1.detected": true
+            }
+          },
+          {
+            "tick": 300,
+            "observations": {
+              "submarine-1.state": "destroyed"
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-detected", "parameters": {"unitId": "submarine-1"}},
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-destroyed", "parameters": {"unitId": "submarine-1"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "destroyer-1.hp", "condition": ">= 0 and <= max_hp"},
+        {"property": "submarine-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["destroyer", "submarine", "weapon-depth-charge"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-ECON-003",
+      "title": "Spy cash capture",
+      "scenarioFamily": "economy",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["Allies", "Soviets"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 2,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "spy-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 300, "y": 300}}, "playerId": 0},
+        {"tick": 100, "command": "enter-building", "parameters": {"targetId": "refinery-soviet"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 120,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "credits.gain": "BLOCKED-awaiting-reference"
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "spy-cash-captured", "parameters": {"amount": "BLOCKED-awaiting-reference"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["spy", "refinery"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "RA1-VICTORY-001",
+      "title": "Destroy all enemy structures",
+      "scenarioFamily": "victory",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["Allies", "Soviets"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "unit-allies-1"}, "playerId": 0},
+        {"tick": 10, "command": "attack", "parameters": {"targetId": "conyard-soviet"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 500,
+            "observations": {
+              "conyard-soviet.hp": 0,
+              "gameState": "victory",
+              "winner": "Allies"
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "building-destroyed", "parameters": {"buildingId": "conyard-soviet"}},
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "game-ended", "parameters": {"result": "victory", "winner": "Allies"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra1-gog-1996",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "conyard-soviet.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["construction-yard"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    }
+  ]
+}

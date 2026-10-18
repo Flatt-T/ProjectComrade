@@ -1,0 +1,595 @@
+{
+  "schemaVersion": "1.0.0",
+  "referenceId": "TD-CLASSIC-001",
+  "referenceBuildId": "td-gog-1995",
+  "generatedAt": "2026-10-18T00:00:00Z",
+  "notes": "BLOCKER: These are template fixtures. Actual hashes, observations and evidence must be populated from controlled observations of approved reference builds. All expected results are placeholders marked BLOCKED.",
+  "fixtures": [
+    {
+      "fixtureId": "TD-ECON-001",
+      "title": "Basic harvester cycle - single refinery",
+      "scenarioFamily": "economy",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["GDI", "Nod"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "harvester-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 100, "y": 200}}, "playerId": 0},
+        {"tick": 100, "command": "harvest", "parameters": {"fieldId": "tiberium-1"}, "playerId": 0},
+        {"tick": 300, "command": "return", "parameters": {"targetId": "refinery-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 100,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "harvester-1.state": "harvesting",
+              "harvester-1.cargo": "BLOCKED-awaiting-reference"
+            }
+          },
+          {
+            "tick": 300,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "harvester-1.state": "returning",
+              "harvester-1.cargo": "BLOCKED-awaiting-reference"
+            }
+          },
+          {
+            "tick": 500,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "harvester-1.state": "idle",
+              "harvester-1.cargo": 0
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"},
+        {"property": "harvester-1.cargo", "condition": ">= 0 and <= max_capacity"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact",
+        "floatingPointFields": "not-applicable"
+      },
+      "linkedCatalogIds": ["harvester", "refinery", "tiberium"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-ECON-002",
+      "title": "Two harvesters competing for same refinery",
+      "scenarioFamily": "economy",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "harvester-1"}, "playerId": 0},
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "harvester-2"}, "playerId": 0},
+        {"tick": 10, "command": "harvest", "parameters": {"fieldId": "tiberium-1"}, "playerId": 0},
+        {"tick": 300, "command": "return", "parameters": {"targetId": "refinery-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 600,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "refinery-1.queueLength": "BLOCKED-awaiting-reference"
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"},
+        {"property": "refinery-1.queueLength", "condition": ">= 0 and <= 2"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["harvester", "refinery"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-MOVE-001",
+      "title": "Basic unit movement to destination",
+      "scenarioFamily": "movement",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "unit-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 500, "y": 500}}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 100,
+            "observations": {
+              "unit-1.position": "BLOCKED-awaiting-reference",
+              "unit-1.state": "moving"
+            }
+          },
+          {
+            "tick": 300,
+            "observations": {
+              "unit-1.position": {"x": 500, "y": 500},
+              "unit-1.state": "idle"
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "unit-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["infantry-soldier"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-PROD-001",
+      "title": "Basic unit production from factory",
+      "scenarioFamily": "production",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-building", "parameters": {"buildingId": "barracks-1"}, "playerId": 0},
+        {"tick": 10, "command": "produce", "parameters": {"unitType": "soldier"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 10,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "barracks-1.queue": [{"unitType": "soldier", "progress": 0}]
+            }
+          },
+          {
+            "tick": 200,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "barracks-1.queue": []
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-produced", "parameters": {"unitType": "soldier"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"},
+        {"property": "barracks-1.queue.length", "condition": ">= 0"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["barracks", "soldier"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-COMBAT-001",
+      "title": "Basic infantry attack",
+      "scenarioFamily": "combat",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["GDI", "Nod"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "unit-gdi-1"}, "playerId": 0},
+        {"tick": 10, "command": "attack", "parameters": {"targetId": "unit-nod-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 50,
+            "observations": {
+              "unit-gdi-1.hp": "BLOCKED-awaiting-reference",
+              "unit-nod-1.hp": "BLOCKED-awaiting-reference"
+            }
+          },
+          {
+            "tick": 100,
+            "observations": {
+              "unit-nod-1.state": "destroyed"
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-destroyed", "parameters": {"unitId": "unit-nod-1"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "unit-gdi-1.hp", "condition": ">= 0 and <= max_hp"},
+        {"property": "unit-nod-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["infantry-soldier", "weapon-rifle"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-VICTORY-001",
+      "title": "Destroy all enemy structures",
+      "scenarioFamily": "victory",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["GDI", "Nod"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "unit-gdi-1"}, "playerId": 0},
+        {"tick": 10, "command": "attack", "parameters": {"targetId": "building-nod-conyard"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 500,
+            "observations": {
+              "building-nod-conyard.hp": 0,
+              "gameState": "victory",
+              "winner": "GDI"
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "building-destroyed", "parameters": {"buildingId": "building-nod-conyard"}},
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "game-ended", "parameters": {"result": "victory", "winner": "GDI"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "building-nod-conyard.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["construction-yard"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-ECON-003",
+      "title": "Power plant construction and power changes",
+      "scenarioFamily": "economy",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "place-building", "parameters": {"buildingType": "power-plant", "position": {"x": 100, "y": 100}}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 0,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "powerLevel": "BLOCKED-awaiting-reference"
+            }
+          },
+          {
+            "tick": 200,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "powerLevel": "BLOCKED-awaiting-reference",
+              "power-plant.state": "operational"
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"},
+        {"property": "powerLevel", "condition": ">= 0"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["power-plant"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-MOVE-002",
+      "title": "Pathfinding around obstacle",
+      "scenarioFamily": "movement",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 5000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "unit-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 800, "y": 800}}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 100,
+            "observations": {
+              "unit-1.position": "BLOCKED-awaiting-reference",
+              "unit-1.state": "moving"
+            }
+          },
+          {
+            "tick": 500,
+            "observations": {
+              "unit-1.position": {"x": 800, "y": 800},
+              "unit-1.state": "idle"
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "unit-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["infantry-soldier"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-PROD-002",
+      "title": "Building construction with power dependency",
+      "scenarioFamily": "production",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 1,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "place-building", "parameters": {"buildingType": "refinery", "position": {"x": 200, "y": 200}}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 0,
+            "observations": {
+              "credits": "BLOCKED-awaiting-reference",
+              "refinery.state": "placing"
+            }
+          },
+          {
+            "tick": 100,
+            "observations": {
+              "refinery.state": "constructing",
+              "refinery.progress": "BLOCKED-awaiting-reference"
+            }
+          },
+          {
+            "tick": 500,
+            "observations": {
+              "refinery.state": "operational",
+              "refinery.progress": 100
+            }
+          }
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"},
+        {"property": "refinery.progress", "condition": ">= 0 and <= 100"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["refinery", "power-plant"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    },
+    {
+      "fixtureId": "TD-COMBAT-002",
+      "title": "Tank vs infantry weapon interaction",
+      "scenarioFamily": "combat",
+      "status": "blocked-awaiting-reference",
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["GDI", "Nod"],
+        "seed": 42
+      },
+      "settings": {
+        "gameSpeed": "normal",
+        "unitCap": 50,
+        "techLevel": 2,
+        "fogOfWar": false,
+        "shroud": false
+      },
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "tank-gdi-1"}, "playerId": 0},
+        {"tick": 10, "command": "attack", "parameters": {"targetId": "infantry-nod-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {
+            "tick": 50,
+            "observations": {
+              "tank-gdi-1.hp": "BLOCKED-awaiting-reference",
+              "infantry-nod-1.hp": "BLOCKED-awaiting-reference"
+            }
+          },
+          {
+            "tick": 100,
+            "observations": {
+              "infantry-nod-1.state": "destroyed"
+            }
+          }
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-destroyed", "parameters": {"unitId": "infantry-nod-1"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "td-gog-1995",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "tank-gdi-1.hp", "condition": ">= 0 and <= max_hp"},
+        {"property": "infantry-nod-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {
+        "integerFields": "exact"
+      },
+      "linkedCatalogIds": ["tank", "infantry", "weapon-cannon"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data"]
+    }
+  ]
+}

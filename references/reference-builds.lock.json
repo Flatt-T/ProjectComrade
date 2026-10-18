@@ -1,0 +1,424 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-10-18T00:00:00Z",
+  "notes": "BLOCKER: Actual hash values must be computed from real permitted files. This template shows required structure; all hash fields are placeholders marked BLOCKED until owner provides verified reference builds.",
+  "titles": {
+    "td-classic": {
+      "displayName": "Command & Conquer: Tiberian Dawn (Classic)",
+      "referenceId": "TD-CLASSIC-001",
+      "status": "blocked-awaiting-reference",
+      "editions": [
+        {
+          "editionId": "td-gog-1995",
+          "displayName": "GOG Classic Release",
+          "platform": "Windows",
+          "language": "en-US",
+          "patchLevel": "original",
+          "status": "blocked-awaiting-verification",
+          "executables": {
+            "primary": {
+              "filename": "C&C95.exe",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "sizeBytes": null,
+              "acquisitionUrl": "BLOCKED-awaiting-owner-provision",
+              "rights": "local-import-only",
+              "rightsSource": "ledger-009"
+            }
+          },
+          "dataArchives": {
+            "mix": [
+              {
+                "filename": "CONQUER.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "DESERT.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "GENERAL.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "SCENARIO.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "SOUNDS.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "TEMPERAT.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "WINTER.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              }
+            ]
+          },
+          "rulesFiles": {
+            "primary": {
+              "filename": "RULES.INI",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "source": "extracted-from-data"
+            }
+          },
+          "environment": {
+            "os": "Windows 95/98/XP compatible",
+            "installer": "BLOCKED-awaiting-verification",
+            "setupInstructions": "BLOCKED-awaiting-owner-provision"
+          }
+        }
+      ],
+      "sourceCorrespondence": {
+        "eaSourceRepo": "https://github.com/electronicarts/CnC_Tiberian_Dawn",
+        "sourceCommit": "BLOCKED-awaiting-pin",
+        "correspondenceNotes": "EA source provenance; README states raw release does not fully compile",
+        "deviationsLedger": "references/deviations/td-classic.csv"
+      }
+    },
+    "ra1-classic": {
+      "displayName": "Command & Conquer: Red Alert (Classic)",
+      "referenceId": "RA1-CLASSIC-001",
+      "status": "blocked-awaiting-reference",
+      "editions": [
+        {
+          "editionId": "ra1-gog-1996",
+          "displayName": "GOG Classic Release (Base Game)",
+          "platform": "Windows",
+          "language": "en-US",
+          "patchLevel": "original",
+          "status": "blocked-awaiting-verification",
+          "expansionProfile": "base",
+          "executables": {
+            "primary": {
+              "filename": "RA95.exe",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "sizeBytes": null,
+              "acquisitionUrl": "BLOCKED-awaiting-owner-provision",
+              "rights": "local-import-only",
+              "rightsSource": "ledger-010"
+            }
+          },
+          "dataArchives": {
+            "mix": [
+              {
+                "filename": "ALLIES.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "HRIDES.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "MAIN.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "LOCAL.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "RA2.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": false,
+                "note": "Expansion content; separate profile required"
+              },
+              {
+                "filename": "SOUNDS.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "SOVIET.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              }
+            ]
+          },
+          "rulesFiles": {
+            "primary": {
+              "filename": "RULES.INI",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "source": "extracted-from-data"
+            }
+          },
+          "environment": {
+            "os": "Windows 95/98/XP compatible",
+            "installer": "BLOCKED-awaiting-verification",
+            "setupInstructions": "BLOCKED-awaiting-owner-provision"
+          }
+        },
+        {
+          "editionId": "ra1-counterstrike",
+          "displayName": "Red Alert: Counterstrike Expansion",
+          "platform": "Windows",
+          "language": "en-US",
+          "patchLevel": "original",
+          "status": "blocked-awaiting-verification",
+          "expansionProfile": "counterstrike",
+          "requiresBase": "ra1-gog-1996",
+          "executables": {
+            "primary": {
+              "filename": "RA95-CS.exe",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "sizeBytes": null,
+              "acquisitionUrl": "BLOCKED-awaiting-owner-provision",
+              "rights": "local-import-only",
+              "rightsSource": "ledger-010"
+            }
+          },
+          "dataArchives": {
+            "mix": [
+              {
+                "filename": "RA2.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true,
+                "note": "Counterstrike content"
+              }
+            ]
+          },
+          "rulesFiles": {
+            "primary": {
+              "filename": "RULES.INI",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "source": "extracted-from-data",
+              "note": "Contains expansion-specific overrides"
+            }
+          }
+        },
+        {
+          "editionId": "ra1-aftermath",
+          "displayName": "Red Alert: Aftermath Expansion",
+          "platform": "Windows",
+          "language": "en-US",
+          "patchLevel": "original",
+          "status": "blocked-awaiting-verification",
+          "expansionProfile": "aftermath",
+          "requiresBase": "ra1-gog-1996",
+          "executables": {
+            "primary": {
+              "filename": "RA95-AM.exe",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "sizeBytes": null,
+              "acquisitionUrl": "BLOCKED-awaiting-owner-provision",
+              "rights": "local-import-only",
+              "rightsSource": "ledger-010"
+            }
+          },
+          "dataArchives": {
+            "mix": [
+              {
+                "filename": "RA2.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true,
+                "note": "Aftermath content"
+              }
+            ]
+          },
+          "rulesFiles": {
+            "primary": {
+              "filename": "RULES.INI",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "source": "extracted-from-data",
+              "note": "Contains expansion-specific overrides"
+            }
+          }
+        }
+      ],
+      "sourceCorrespondence": {
+        "eaSourceRepo": "https://github.com/electronicarts/CnC_Red_Alert",
+        "sourceCommit": "BLOCKED-awaiting-pin",
+        "correspondenceNotes": "EA source provenance; separate licence review from TD",
+        "deviationsLedger": "references/deviations/ra1-classic.csv"
+      }
+    },
+    "d2k-classic": {
+      "displayName": "Dune 2000",
+      "referenceId": "D2K-CLASSIC-001",
+      "status": "blocked-awaiting-reference",
+      "notes": "Dune 2000, NOT Dune II. Lawful reference binaries/data and permitted engine approach must be established before production implementation.",
+      "editions": [
+        {
+          "editionId": "d2k-gog-1998",
+          "displayName": "GOG Classic Release",
+          "platform": "Windows",
+          "language": "en-US",
+          "patchLevel": "original",
+          "status": "blocked-awaiting-verification",
+          "executables": {
+            "primary": {
+              "filename": "DUNE2000.exe",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "sizeBytes": null,
+              "acquisitionUrl": "BLOCKED-awaiting-owner-provision",
+              "rights": "local-import-only",
+              "rightsSource": "ledger-011"
+            }
+          },
+          "dataArchives": {
+            "mix": [
+              {
+                "filename": "DUNE2.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "DUNE2A.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              }
+            ]
+          },
+          "rulesFiles": {
+            "primary": {
+              "filename": "RULES.INI",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "source": "extracted-from-data"
+            }
+          },
+          "environment": {
+            "os": "Windows 95/98/XP compatible",
+            "installer": "BLOCKED-awaiting-verification",
+            "setupInstructions": "BLOCKED-awaiting-owner-provision"
+          }
+        }
+      ],
+      "sourceCorrespondence": {
+        "eaSourceRepo": "BLOCKED-no-public-source",
+        "sourceCommit": "not-applicable",
+        "correspondenceNotes": "No EA public source for Dune 2000; must rely on controlled observations of approved reference",
+        "deviationsLedger": "references/deviations/d2k-classic.csv"
+      }
+    },
+    "ra2-classic": {
+      "displayName": "Command & Conquer: Red Alert 2 (Optional Extension)",
+      "referenceId": "RA2-CLASSIC-001",
+      "status": "blocked-awaiting-reference",
+      "notes": "RA2 is optional separately gated extension. Integration path requires Chrono Divide or other compatible component with confirmed licence.",
+      "editions": [
+        {
+          "editionId": "ra2-gog-2000",
+          "displayName": "GOG Classic Release (Base Game)",
+          "platform": "Windows",
+          "language": "en-US",
+          "patchLevel": "original",
+          "status": "blocked-awaiting-verification",
+          "expansionProfile": "base",
+          "executables": {
+            "primary": {
+              "filename": "RA2.EXE",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "sizeBytes": null,
+              "acquisitionUrl": "BLOCKED-awaiting-owner-provision",
+              "rights": "local-import-only",
+              "rightsSource": "ledger-012"
+            }
+          },
+          "dataArchives": {
+            "mix": [
+              {
+                "filename": "LOCAL.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              },
+              {
+                "filename": "RA2.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              }
+            ]
+          },
+          "rulesFiles": {
+            "primary": {
+              "filename": "RULES.INI",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "source": "extracted-from-data"
+            }
+          },
+          "environment": {
+            "os": "Windows 95/98/XP compatible",
+            "installer": "BLOCKED-awaiting-verification",
+            "setupInstructions": "BLOCKED-awaiting-owner-provision"
+          }
+        },
+        {
+          "editionId": "ra2-yuris-revenge",
+          "displayName": "Red Alert 2: Yuri's Revenge Expansion",
+          "platform": "Windows",
+          "language": "en-US",
+          "patchLevel": "original",
+          "status": "blocked-awaiting-verification",
+          "expansionProfile": "yuris-revenge",
+          "requiresBase": "ra2-gog-2000",
+          "executables": {
+            "primary": {
+              "filename": "RA2MD.EXE",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "sizeBytes": null,
+              "acquisitionUrl": "BLOCKED-awaiting-owner-provision",
+              "rights": "local-import-only",
+              "rightsSource": "ledger-012"
+            }
+          },
+          "dataArchives": {
+            "mix": [
+              {
+                "filename": "RA2MD.MIX",
+                "sha256": "BLOCKED-awaiting-real-file",
+                "sizeBytes": null,
+                "required": true
+              }
+            ]
+          },
+          "rulesFiles": {
+            "primary": {
+              "filename": "RULES.INI",
+              "sha256": "BLOCKED-awaiting-real-file",
+              "source": "extracted-from-data",
+              "note": "Contains Yuri's Revenge-specific overrides"
+            }
+          }
+        }
+      ],
+      "sourceCorrespondence": {
+        "eaSourceRepo": "BLOCKED-no-public-source",
+        "sourceCommit": "not-applicable",
+        "correspondenceNotes": "No EA public source for RA2; separate integration/licence inquiry required for Chrono Divide or other compatible engine",
+        "deviationsLedger": "references/deviations/ra2-classic.csv"
+      }
+    }
+  }
+}

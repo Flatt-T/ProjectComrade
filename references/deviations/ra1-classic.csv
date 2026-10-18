@@ -1,0 +1,5 @@
+deviation_id,category,description,source,evidence_date,impact_level,notes
+DEV-RA1-001,source-compatibility,EA source may have separate licence terms from TD,ledger-002,2026-10-18,low,Separate licence review required; do not presume identical provenance
+DEV-RA1-002,engine-choice,Using Vanilla Conquer preservation fork instead of EA source directly,ledger-003,2026-10-18,unknown,Browser/headless compatibility not proved; requires C04 spike
+DEV-RA1-003,port-behavior,Emscripten runtime adaptation (filesystem, timing, networking),COMRADE01 S11-S14,2026-10-18,unknown,Browser networking differs from native sockets; WSS bridge must be engineered
+DEV-RA1-004,expansion-separation,Counterstrike and Aftermath must have explicit profiles and separate asset/rules hashes,COMRADE03,2026-10-18,medium,Do not silently introduce expansion units into base-game match

@@ -1,0 +1,4 @@
+deviation_id,category,description,source,evidence_date,impact_level,notes
+DEV-TD-001,source-compatibility,EA source README states raw release does not fully compile,https://github.com/electronicarts/CnC_Tiberian_Dawn,2026-10-18,medium,Missing/legacy dependencies require resolution before native build
+DEV-TD-002,engine-choice,Using Vanilla Conquer preservation fork instead of EA source directly,ledger-003,2026-10-18,unknown,Browser/headless compatibility not proved; requires C04 spike
+DEV-TD-003,port-behavior,Emscripten runtime adaptation (filesystem, timing, networking),COMRADE01 S11-S14,2026-10-18,unknown,Browser networking differs from native sockets; WSS bridge must be engineered

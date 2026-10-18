@@ -1,0 +1,193 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "COMRADE Control Binding Capture Template",
+  "description": "Template for capturing and documenting default control bindings and settings from original reference",
+  "type": "object",
+  "required": [
+    "referenceId",
+    "referenceBuildId",
+    "captureDate",
+    "captureMethod",
+    "defaultControls",
+    "defaultSettings",
+    "mouseBindings",
+    "keyboardBindings"
+  ],
+  "properties": {
+    "referenceId": {
+      "type": "string",
+      "description": "Reference identifier (e.g., TD-CLASSIC-001)"
+    },
+    "referenceBuildId": {
+      "type": "string",
+      "description": "Specific edition/patch identifier (e.g., td-gog-1995)"
+    },
+    "captureDate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "captureMethod": {
+      "type": "string",
+      "enum": ["manual-inspection", "config-file-parse", "runtime-observation"],
+      "description": "How the bindings were captured"
+    },
+    "defaultControls": {
+      "type": "object",
+      "description": "Default control scheme settings",
+      "properties": {
+        "selectionBox": {
+          "type": "string",
+          "description": "Default selection box behavior (e.g., 'drag', 'click')"
+        },
+        "scrolling": {
+          "type": "object",
+          "description": "Map scrolling behavior",
+          "properties": {
+            "edgeScroll": {"type": "boolean"},
+            "middleMouseScroll": {"type": "boolean"},
+            "scrollSpeed": {"type": "string"}
+          }
+        },
+        "grouping": {
+          "type": "object",
+          "description": "Control group behavior",
+          "properties": {
+            "maxGroups": {"type": "integer"},
+            "groupSizeLimit": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "defaultSettings": {
+      "type": "object",
+      "description": "Default game settings from reference",
+      "properties": {
+        "gameSpeed": {
+          "type": "string",
+          "description": "Default game speed setting"
+        },
+        "scrollSpeed": {
+          "type": "string",
+          "description": "Default scroll speed"
+        },
+        "volume": {
+          "type": "object",
+          "description": "Default volume settings",
+          "properties": {
+            "music": {"type": "integer"},
+            "sfx": {"type": "integer"},
+            "speech": {"type": "integer"}
+          }
+        },
+        "resolution": {
+          "type": "string",
+          "description": "Default resolution or resolution class"
+        },
+        "fogOfWar": {
+          "type": "boolean",
+          "description": "Default fog of war setting"
+        },
+        "shroud": {
+          "type": "boolean",
+          "description": "Default shroud setting"
+        }
+      }
+    },
+    "mouseBindings": {
+      "type": "array",
+      "description": "Mouse button bindings",
+      "items": {
+        "type": "object",
+        "required": ["button", "action", "context"],
+        "properties": {
+          "button": {
+            "type": "string",
+            "enum": ["left", "right", "middle", "x1", "x2"],
+            "description": "Mouse button"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action performed (e.g., 'select', 'command', 'context-menu')"
+          },
+          "context": {
+            "type": "string",
+            "description": "Context for this binding (e.g., 'on-unit', 'on-ground', 'on-building')"
+          },
+          "modifiers": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Required key modifiers (e.g., ['shift', 'ctrl'])"
+          }
+        }
+      }
+    },
+    "keyboardBindings": {
+      "type": "array",
+      "description": "Keyboard key bindings",
+      "items": {
+        "type": "object",
+        "required": ["key", "action", "context"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key identifier (e.g., 'A', 'F1', 'SPACE')"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action performed (e.g., 'attack-move', 'guard', 'stop')"
+          },
+          "context": {
+            "type": "string",
+            "description": "Context for this binding (e.g., 'units-selected', 'building-selected', 'global')"
+          },
+          "modifiers": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Required key modifiers (e.g., ['ctrl', 'alt'])"
+          }
+        }
+      }
+    },
+    "controlGroups": {
+      "type": "object",
+      "description": "Control group key bindings",
+      "properties": {
+        "assignGroup": {
+          "type": "string",
+          "description": "Key/modifier to assign selected units to group (e.g., 'ctrl+number')"
+        },
+        "selectGroup": {
+          "type": "string",
+          "description": "Key to select group (e.g., 'number')"
+        },
+        "appendGroup": {
+          "type": "string",
+          "description": "Key to append group to selection (e.g., 'shift+number')"
+        }
+      }
+    },
+    "sidebarBindings": {
+      "type": "object",
+      "description": "Sidebar/build menu bindings",
+      "properties": {
+        "nextTab": {"type": "string"},
+        "prevTab": {"type": "string"},
+        "placeBuilding": {"type": "string"},
+        "cancelPlacement": {"type": "string"}
+      }
+    },
+    "minimapBindings": {
+      "type": "object",
+      "description": "Minimap bindings",
+      "properties": {
+        "moveCamera": {"type": "string"},
+        "selectUnits": {"type": "string"}
+      }
+    },
+    "notes": {
+      "type": "array",
+      "description": "Additional notes on control behavior",
+      "items": {"type": "string"}
+    }
+  }
+}

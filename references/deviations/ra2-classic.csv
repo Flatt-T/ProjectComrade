@@ -1,0 +1,4 @@
+deviation_id,category,description,source,evidence_date,impact_level,notes
+DEV-RA2-001,source-availability,No EA public source for RA2,COMRADE01,2026-10-18,high,Separate integration/licence inquiry required
+DEV-RA2-002,integration-path,Chrono Divide or other compatible component requires confirmed licence and integration path,ledger-005/ledger-006,2026-10-18,critical,Blocked until licence inquiry completed; public API example not proof of engine/source rights
+DEV-RA2-003,gate-status,RA2 is optional separately gated extension,COMRADE01/COMRADE03,2026-10-18,informational,RA1 is selected from user's RA1-or-RA2 alternative; RA2 work blocked until core gates pass
