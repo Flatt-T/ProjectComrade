@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "validate-rights": "ts-node validate-rights.ts",
+    "compute-hash": "ts-node compute-hash.ts",
+    "reference-checklist": "ts-node reference-checklist.ts",
     "build": "tsc",
     "clean": "rm -rf dist"
   },

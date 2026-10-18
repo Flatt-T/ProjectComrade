@@ -1,15 +1,16 @@
 {
   "schemaVersion": "1.0.0",
   "referenceId": "TD-CLASSIC-001",
-  "referenceBuildId": "td-gog-1995",
+  "referenceBuildId": "BLOCKED-awaiting-owner-provision",
   "generatedAt": "2026-10-18T00:00:00Z",
-  "notes": "BLOCKER: These are template fixtures. Actual hashes, observations and evidence must be populated from controlled observations of approved reference builds. All expected results are placeholders marked BLOCKED.",
+  "fixtureType": "scenario-template",
+  "notes": "These are PROPOSED SCENARIO TEMPLATES, not verified oracle fixtures. They define test structure and coverage areas but contain NO actual expected results. All expected results are placeholders marked BLOCKED. Verified oracle fixtures require controlled observations of approved reference builds with actual hash values and evidence.",
   "fixtures": [
     {
       "fixtureId": "TD-ECON-001",
       "title": "Basic harvester cycle - single refinery",
       "scenarioFamily": "economy",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -79,7 +80,7 @@
       "fixtureId": "TD-ECON-002",
       "title": "Two harvesters competing for same refinery",
       "scenarioFamily": "economy",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,
@@ -131,7 +132,7 @@
       "fixtureId": "TD-MOVE-001",
       "title": "Basic unit movement to destination",
       "scenarioFamily": "movement",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -187,7 +188,7 @@
       "fixtureId": "TD-PROD-001",
       "title": "Basic unit production from factory",
       "scenarioFamily": "production",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,
@@ -247,7 +248,7 @@
       "fixtureId": "TD-COMBAT-001",
       "title": "Basic infantry attack",
       "scenarioFamily": "combat",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -306,7 +307,7 @@
       "fixtureId": "TD-VICTORY-001",
       "title": "Destroy all enemy structures",
       "scenarioFamily": "victory",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,
@@ -360,7 +361,7 @@
       "fixtureId": "TD-ECON-003",
       "title": "Power plant construction and power changes",
       "scenarioFamily": "economy",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -417,7 +418,7 @@
       "fixtureId": "TD-MOVE-002",
       "title": "Pathfinding around obstacle",
       "scenarioFamily": "movement",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -473,7 +474,7 @@
       "fixtureId": "TD-PROD-002",
       "title": "Building construction with power dependency",
       "scenarioFamily": "production",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,
@@ -536,7 +537,7 @@
       "fixtureId": "TD-COMBAT-002",
       "title": "Tank vs infantry weapon interaction",
       "scenarioFamily": "combat",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,

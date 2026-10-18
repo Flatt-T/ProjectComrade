@@ -1,15 +1,16 @@
 {
   "schemaVersion": "1.0.0",
   "referenceId": "RA1-CLASSIC-001",
-  "referenceBuildId": "ra1-gog-1996",
+  "referenceBuildId": "BLOCKED-awaiting-owner-provision",
   "generatedAt": "2026-10-18T00:00:00Z",
-  "notes": "BLOCKER: These are template fixtures. Actual hashes, observations and evidence must be populated from controlled observations of approved reference builds. All expected results are placeholders marked BLOCKED.",
+  "fixtureType": "scenario-template",
+  "notes": "These are PROPOSED SCENARIO TEMPLATES, not verified oracle fixtures. They define test structure and coverage areas but contain NO actual expected results. All expected results are placeholders marked BLOCKED. Verified oracle fixtures require controlled observations of approved reference builds with actual hash values and evidence.",
   "fixtures": [
     {
       "fixtureId": "RA1-ECON-001",
       "title": "Basic ore truck cycle - single refinery",
       "scenarioFamily": "economy",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -70,7 +71,7 @@
       "fixtureId": "RA1-ECON-002",
       "title": "Gem field harvesting (higher value)",
       "scenarioFamily": "economy",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -120,7 +121,7 @@
       "fixtureId": "RA1-MOVE-001",
       "title": "Basic unit movement",
       "scenarioFamily": "movement",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -169,7 +170,7 @@
       "fixtureId": "RA1-PROD-001",
       "title": "Basic unit production",
       "scenarioFamily": "production",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,
@@ -221,7 +222,7 @@
       "fixtureId": "RA1-COMBAT-001",
       "title": "Basic infantry attack",
       "scenarioFamily": "combat",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 5000,
@@ -273,7 +274,7 @@
       "fixtureId": "RA1-NAVAL-001",
       "title": "Basic naval unit movement",
       "scenarioFamily": "movement",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,
@@ -322,7 +323,7 @@
       "fixtureId": "RA1-AIR-001",
       "title": "Basic aircraft movement and rearm",
       "scenarioFamily": "movement",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 15000,
@@ -385,7 +386,7 @@
       "fixtureId": "RA1-COMBAT-002",
       "title": "Submarine detection and attack",
       "scenarioFamily": "combat",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 20000,
@@ -445,7 +446,7 @@
       "fixtureId": "RA1-ECON-003",
       "title": "Spy cash capture",
       "scenarioFamily": "economy",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,
@@ -498,7 +499,7 @@
       "fixtureId": "RA1-VICTORY-001",
       "title": "Destroy all enemy structures",
       "scenarioFamily": "victory",
-      "status": "blocked-awaiting-reference",
+      "template": true,
       "initialState": {
         "mapHash": "BLOCKED-awaiting-map-file",
         "startingCredits": 10000,

@@ -1,13 +1,21 @@
-## C02 Evidence
+## C02 Evidence (Corrected 2026-10-18)
 
 Created reference build lock file at `references/reference-builds.lock.json` with structure for TD, RA1, D2K, and RA2. All hash values are BLOCKED placeholders awaiting owner-provided verified reference builds.
 
+### Corrections from Original Submission
+
+**Original claim:** "GOG Classic Release (td-gog-1995)"  
+**Corrected:** These are EXAMPLE identifiers only. Actual reference builds must be provided by owner with verified edition/patch/language/expansion information. Do not treat example identifiers as established facts.
+
+**Original claim:** "Baseline fixtures" implying verified oracle fixtures  
+**Corrected:** These are PROPOSED SCENARIO TEMPLATES only. All 20 fixtures now marked with `"template": true`. They define test structure and coverage areas but contain NO actual expected results. Verified oracle fixtures require controlled observations with actual hash values.
+
 ### Reference Build Structure
 
-- **TD-CLASSIC-001**: GOG Classic Release (td-gog-1995) - executables, MIX archives, RULES.INI, environment setup BLOCKED
-- **RA1-CLASSIC-001**: GOG Classic Release (ra1-gog-1996) base game, plus Counterstrike and Aftermath expansion profiles - all BLOCKED
-- **D2K-CLASSIC-001**: GOG Classic Release (d2k-gog-1998) - BLOCKED; note: this is Dune 2000 NOT Dune II
-- **RA2-CLASSIC-001**: GOG Classic Release (ra2-gog-2000) base and Yuri's Revenge - BLOCKED; optional separately gated extension
+- **TD-CLASSIC-001**: BLOCKED-awaiting-owner-provision - No actual reference build provided
+- **RA1-CLASSIC-001**: BLOCKED-awaiting-owner-provision - No actual reference build provided
+- **D2K-CLASSIC-001**: BLOCKED-awaiting-owner-provision - No actual reference build provided; note: this is Dune 2000 NOT Dune II
+- **RA2-CLASSIC-001**: BLOCKED-awaiting-owner-provision - No actual reference build provided; optional separately gated extension
 
 ### Deviations Ledgers
 
@@ -32,33 +40,46 @@ Created `references/fixture-schema.json` defining complete fixture structure wit
 
 Created `references/control-binding-template.json` for capturing default controls and settings.
 
-### Baseline Fixtures
+### Scenario Templates (Not Verified Fixtures)
 
-Created 10 TD baseline fixtures in `references/fixtures/td-baseline.json`:
+Created 10 TD scenario templates in `references/fixtures/td-baseline.json` (marked `"template": true`):
 - Economy: basic harvester cycle, two harvesters competing, power plant construction
 - Movement: basic movement, pathfinding around obstacle
 - Production: unit production, building construction with power dependency
 - Combat: infantry attack, tank vs infantry weapon interaction
 - Victory: destroy all enemy structures
 
-Created 10 RA1 baseline fixtures in `references/fixtures/ra1-baseline.json`:
+Created 10 RA1 scenario templates in `references/fixtures/ra1-baseline.json` (marked `"template": true`):
 - Economy: ore truck cycle, gem field harvesting, spy cash capture
 - Movement: basic movement, naval movement, aircraft movement and rearm
 - Production: unit production
 - Combat: infantry attack, submarine detection and attack
 - Victory: destroy all enemy structures
 
+**Important:** These templates define test structure but contain NO actual expected results. All expected credits, HP, positions, timings, etc. are placeholders marked BLOCKED.
+
 ### Blockers
 
-All fixture expected results (observations, hashes, timings) are BLOCKED placeholders. Actual values must be computed from controlled observations of approved reference builds. Missing binaries/permissions/internal visibility are explicit blockers with exact needed input.
+- No actual reference builds provided
+- No actual hash values available
+- No verified oracle fixtures created
+- No actual game data for testing
+- Example unit caps, timings, commands, expected states are not established facts
 
 ### Acceptance Status
 
-- Schema and structure: APPROVED
+- Schema and structure: COMPLETE
+- Scenario templates: COMPLETE (not verified fixtures)
 - Actual hash values: BLOCKED awaiting owner-provided reference builds
-- Fixture expected results: BLOCKED awaiting controlled observations
-- This establishes evidence structure, not proof of full-game parity
+- Verified oracle fixtures: NOT CREATED
+- Fingerprinting tool: NOT YET IMPLEMENTED (next step)
 
-### Next Issue
+### Next Steps
 
-Ready to proceed to C03 (THU-1334) to bootstrap reproducible monorepo, engine toolchain and CI. Reference build actual values can be populated when owner provides verified binaries.
+Build local fingerprinting tool to compute SHA-256 hashes of provided reference files. This tool will:
+- Accept file paths as input
+- Compute SHA-256 hashes
+- Validate against reference-builds.lock.json structure
+- Generate reference-file checklist
+
+Do not proceed to C03 until C02 actual acceptance criteria are met.
