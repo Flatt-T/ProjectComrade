@@ -1,0 +1,3 @@
+[submodule "engines/vendor/Vanilla-Conquer"]
+	path = engines/vendor/Vanilla-Conquer
+	url = https://github.com/TheAssemblyArmada/Vanilla-Conquer
