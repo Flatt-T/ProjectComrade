@@ -1,0 +1,13 @@
+{
+  "name": "@comrade/tests-parity",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "echo 'Parity tests not yet implemented - requires C04 engine proof'",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  }
+}

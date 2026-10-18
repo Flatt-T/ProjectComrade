@@ -1,0 +1,36 @@
+{
+  "name": "comrade-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "description": "COMRADE - Browser RTS Classics Monorepo",
+  "license": "MIT",
+  "scripts": {
+    "dev": "pnpm --filter './apps/*' dev",
+    "build": "pnpm --filter './apps/*' build && pnpm --filter './packages/*' build",
+    "test": "pnpm --filter './tests/*' test",
+    "test:unit": "pnpm --filter './tests/unit' test",
+    "test:integration": "pnpm --filter './tests/integration' test",
+    "test:e2e": "pnpm --filter './tests/e2e' test",
+    "test:parity": "pnpm --filter './tests/parity' test",
+    "test:security": "pnpm --filter './tests/security' test",
+    "test:performance": "pnpm --filter './tests/performance' test",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "typecheck": "tsc --noEmit",
+    "clean": "pnpm --filter './apps/*' clean && pnpm --filter './packages/*' clean && pnpm --filter './tests/*' clean",
+    "ci": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:integration"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=8.10.0"
+  },
+  "packageManager": "pnpm@8.10.0"
+}

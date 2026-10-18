@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10.0'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+  test-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10.0'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm test:unit
+
+  test-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10.0'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm test:integration
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10.0'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm audit
+      # TODO: Add SBOM generation and licence scanning

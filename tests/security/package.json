@@ -1,0 +1,13 @@
+{
+  "name": "@comrade/tests-security",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "echo 'Security tests not yet implemented'",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  }
+}

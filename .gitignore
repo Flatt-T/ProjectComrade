@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Engine build artifacts
+engines/vendor/*/build/
+engines/vendor/*/obj/
+engines/adapters/*/build/
+engines/adapters/*/obj/
+*.wasm
+*.js
+*.mem
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Rights/Reference sensitive data (owner-provided)
+references/actual-binaries/
+references/recordings/
+rights/actual-licences/

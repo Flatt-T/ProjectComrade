@@ -1,0 +1,13 @@
+{
+  "name": "@comrade/tests-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "echo 'E2E tests not yet implemented'",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  }
+}
