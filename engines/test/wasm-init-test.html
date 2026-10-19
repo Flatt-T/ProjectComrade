@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla TD WASM Initialization Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        #log {
+            white-space: pre-wrap;
+            background: #000;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            margin-top: 10px;
+        }
+        .error { color: #ff0000; }
+        .success { color: #00ff00; }
+        .info { color: #ffff00; }
+    </style>
+</head>
+<body>
+    <h1>Vanilla TD WASM Module Initialization Test</h1>
+    <button id="load-btn">Load Module</button>
+    <div id="log"></div>
+
+    <script>
+        const log = document.getElementById('log');
+        const loadBtn = document.getElementById('load-btn');
+
+        function appendLog(message, className = '') {
+            const div = document.createElement('div');
+            div.className = className;
+            div.textContent = `[${new Date().toISOString()}] ${message}`;
+            log.appendChild(div);
+            console.log(message);
+        }
+
+        loadBtn.addEventListener('click', async () => {
+            appendLog('Loading vanillatd.js module...', 'info');
+            
+            try {
+                // Load the Emscripten-generated module
+                const response = await fetch('../engines/vendor/Vanilla-Conquer/build-wasm-sdl2/vanillatd.js');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                appendLog('Fetched vanillatd.js successfully', 'success');
+                
+                const jsCode = await response.text();
+                appendLog(`JS code size: ${jsCode.length} bytes`, 'info');
+                
+                // Create a blob URL to execute the module
+                const blob = new Blob([jsCode], { type: 'application/javascript' });
+                const blobUrl = URL.createObjectURL(blob);
+                
+                // Import as module
+                const module = await import(blobUrl);
+                appendLog('Module loaded successfully', 'success');
+                appendLog(`Module exports: ${Object.keys(module).join(', ')}`, 'info');
+                
+                // Check if the module has the expected Emscripten exports
+                if (module.default) {
+                    appendLog('Module has default export', 'success');
+                    if (module.default._main) {
+                        appendLog('Module has _main function', 'success');
+                    }
+                }
+                
+                URL.revokeObjectURL(blobUrl);
+                appendLog('Module initialization test completed', 'success');
+                
+            } catch (error) {
+                appendLog(`Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

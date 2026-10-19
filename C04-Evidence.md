@@ -64,13 +64,19 @@ Enabled features:
 
 1. **Compilation:** ✅ COMPLETE (387/387 units built)
 2. **Linking:** ✅ COMPLETE (both vanillatd and vanillara linked successfully)
-3. **Module initialization:** NOT YET TESTED
-4. **Gameplay execution:** NOT YET TESTED
-5. **Reference fidelity:** BLOCKED (requires proprietary game assets)
+3. **Module Structure:** ✅ VERIFIED (inspected JS files contain Module, _main, .wasm references)
+4. **Module Initialization:** NOT YET TESTED (browser test created, needs HTTP server)
+5. **Gameplay execution:** NOT YET TESTED
+6. **Reference fidelity:** BLOCKED (requires proprietary game assets)
 
 #### Next Steps
 
 1. Test module initialization of vanillatd.js and vanillara.js
+   - Created browser test harness: `engines/test/wasm-init-test.html`
+   - Created Node.js inspector: `engines/test/inspect-wasm.js`
+   - Verified module structure: contains Module, _main, .wasm references
+   - Requires HTTP server to load WASM modules (browser security)
+
 2. Implement MEMFS integration for game data loading (COMRADE02)
 3. Create browser harness to test minimal input/framebuffer
 4. Implement headless configuration with null video/audio backends
