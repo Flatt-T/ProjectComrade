@@ -86,4 +86,5 @@ Enabled features:
 - Game logic is portable; platform I/O layer works via SDL2 on Emscripten
 
 #### Commit
-**36af8e6** - C03/C04: Fix dependency vulnerabilities, document SDL2 WASM build success
+**1ab9030** - C03: Update dependencies to resolve critical/high vulnerabilities
+**e2d8fb9** - C03/C04: Fix dependency vulnerabilities, document SDL2 WASM build success
