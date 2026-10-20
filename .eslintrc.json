@@ -23,6 +23,7 @@
     "coverage/",
     "*.config.js",
     "*.config.ts",
-    "engines/vendor/"
+    "engines/",
+    "apps/web/public/engines/"
   ]
 }

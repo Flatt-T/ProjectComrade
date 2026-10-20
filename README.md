@@ -4,6 +4,8 @@ Faithful four-player browser platform for classic RTS games: Command & Conquer, 
 
 ## Status
 
+**Development deployment:** [Build and deployment runbook](docs/runbooks/deployment.md). The C04 workbench initializes Tiberian Dawn and Red Alert WASM and imports owner-supplied data into local MEMFS. Gameplay remains unverified. Release builds and container publication run on `main`; Proxmox deployment requires a configured runner and Cloudflare route.
+
 **Milestone M0 (Foundational Gates):**
 - [x] C01: Code, asset and brand rights ledger
 - [x] C02: Reference builds and parity fixtures (structure complete, actual values blocked awaiting owner-provided reference)

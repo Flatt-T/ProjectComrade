@@ -1,0 +1,18 @@
+services:
+  comrade:
+    image: ${COMRADE_IMAGE:?Set COMRADE_IMAGE to the published image digest}
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m

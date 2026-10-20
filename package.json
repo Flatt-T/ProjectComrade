@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "pnpm --filter './apps/*' dev",
-    "build": "pnpm --filter '@comrade/web' build && pnpm --filter '@comrade/service' build && pnpm --filter '@comrade/contracts' build && pnpm --filter '@comrade/client-runtime' build && pnpm --filter '@comrade/pack-sdk' build",
+    "build": "pnpm --filter @comrade/web build && pnpm --filter @comrade/service build && pnpm --filter @comrade/contracts build && pnpm --filter @comrade/client-runtime build && pnpm --filter @comrade/pack-sdk build",
     "test": "pnpm test:unit && pnpm test:integration",
     "test:unit": "vitest run tests/unit",
     "test:integration": "echo 'Integration tests not yet implemented'",
@@ -25,6 +25,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.2",
+    "playwright": "1.56.1",
     "prettier": "^3.9.10",
     "typescript": "^5.9.3",
     "vite": "^6.4.4",

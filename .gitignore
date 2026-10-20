@@ -15,6 +15,7 @@ engines/adapters/*/obj/
 *.wasm
 *.js
 *.mem
+apps/web/public/engines/
 
 # Test coverage
 coverage/
