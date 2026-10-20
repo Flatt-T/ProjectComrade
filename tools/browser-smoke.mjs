@@ -12,12 +12,17 @@ try {
       AudioContext.prototype.createBufferSource = function (...args) { window.__comradeAudioSources++; return original.apply(this, args); };
     });
     const errors = [];
+    const engineRequests = [];
     page.on('pageerror', error => errors.push(error.message));
+    page.on('request', request => { if (/\/engines\/vanillatd\.(js|wasm)(\?|$)/.test(request.url())) engineRequests.push(request.url()); });
     await page.goto(process.env.COMRADE_URL || 'http://127.0.0.1:3001');
     assert.equal(await page.locator('input[type=file]').count(), 0);
     if (faction === 'nod') await page.getByRole('button', { name: 'NOD Brotherhood of Nod' }).click();
     await page.getByRole('button', { name: `DEPLOY ${faction.toUpperCase()} FORCES` }).click();
     await page.waitForFunction(() => window.comrade?.snapshot().frame > 30, null, { timeout: 120000 });
+    const release = await page.evaluate(async () => (await (await fetch('/health', { cache: 'no-store' })).json()).commit);
+    assert.equal(engineRequests.length, 2);
+    for (const request of engineRequests) assert.equal(new URL(request).searchParams.get('release'), release, 'Engine JS and WASM must match the deployed release');
     const initial = await page.evaluate(() => window.comrade.snapshot());
     assert.equal(initial.credits, 6000);
     assert.equal(initial.power, 140);

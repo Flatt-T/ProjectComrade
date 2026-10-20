@@ -50,11 +50,17 @@ export async function mountGameFiles(engine: EngineModule, files: LocalGameFile[
 
 export async function loadEngine(game: 'td' | 'ra', canvas: HTMLCanvasElement, print: (line: string) => void, faction: Faction = 'gdi'): Promise<EngineModule> {
   const name = game === 'td' ? 'vanillatd' : 'vanillara';
-  const url = `/engines/${name}.js`;
+  const healthResponse = await fetch('/health', { cache: 'no-store' });
+  if (!healthResponse.ok) throw new Error('Cannot resolve the deployed engine version');
+  const { commit } = await healthResponse.json();
+  if (typeof commit !== 'string' || !/^(development|[a-f0-9]{40})$/.test(commit)) throw new Error('Invalid deployed engine version');
+  // The public edge caches JS/WASM independently of the hashed application bundle.
+  const version = encodeURIComponent(commit);
+  const url = `/engines/${name}.js?release=${version}`;
   const { default: factory } = await import(/* @vite-ignore */ url);
   const engine = await factory({
     canvas, noInitialRun: true, thisProgram: '/comrade/data/engine', comradeFaction: faction, comradePointerInside: false,
-    locateFile: (file: string) => `/engines/${file}`,
+    locateFile: (file: string) => `/engines/${file}?release=${version}`,
     print, printErr: print,
     onAbort: (reason: string) => print(`Engine aborted: ${reason}`),
   });
