@@ -47,10 +47,12 @@ export async function loadEngine(game: 'td' | 'ra', canvas: HTMLCanvasElement, p
   const name = game === 'td' ? 'vanillatd' : 'vanillara';
   const url = `/engines/${name}.js`;
   const { default: factory } = await import(/* @vite-ignore */ url);
-  return factory({
+  const engine = await factory({
     canvas, noInitialRun: true, thisProgram: '/comrade/data/engine',
     locateFile: (file: string) => `/engines/${file}`,
     print, printErr: print,
     onAbort: (reason: string) => print(`Engine aborted: ${reason}`),
   });
+  if (!engine.FS || typeof engine.callMain !== 'function') throw new Error('Engine is missing required filesystem or launch exports');
+  return engine;
 }
