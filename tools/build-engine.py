@@ -33,6 +33,10 @@ replace("common/CMakeLists.txt", "list(APPEND COMMONV_SRC video_null.cpp)",
         "list(APPEND COMMONV_SRC video_null.cpp wwkeyboard_null.cpp)")
 replace("common/wwmouse.cpp", "DWORD user, DWORD res2, DWORD res3",
         "DWORD_PTR user, DWORD_PTR res2, DWORD_PTR res3")
+for game in ('tiberiandawn', 'redalert'):
+    replace(f'{game}/winstub.cpp',
+            'long FAR PASCAL Windows_Procedure(HWND hwnd, UINT message, UINT wParam, LONG lParam)',
+            'LRESULT CALLBACK Windows_Procedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)')
 shutil.copyfile(ROOT / "engines/adapters/td-ra/wwkeyboard_null.cpp", source / "common/wwkeyboard_null.cpp")
 replace("CMakeLists.txt", "add_subdirectory(common)", """if(EMSCRIPTEN)
     add_compile_options(-sUSE_SDL=2)
