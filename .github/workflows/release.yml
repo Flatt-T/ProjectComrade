@@ -133,7 +133,8 @@ jobs:
           deadline = time.monotonic() + 900
           while time.monotonic() < deadline:
               try:
-                  with urllib.request.urlopen('https://projectcomrade.thunderchildcreativetechnologies.com/health', timeout=15) as response:
+                  request = urllib.request.Request('https://projectcomrade.thunderchildcreativetechnologies.com/health', headers={'User-Agent': 'ProjectComrade-deployment'})
+                  with urllib.request.urlopen(request, timeout=15) as response:
                       health = json.load(response)
                   if health.get('status') == 'ok' and health.get('commit') == os.environ['EXPECTED_COMMIT']:
                       print('Public deployment verified:', health['commit'])
