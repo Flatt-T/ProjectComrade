@@ -9,6 +9,18 @@
 - Production service serves the compiled UI and WASM with the correct MIME type, health endpoint and bounded `/ws` transport placeholder. Container and Compose definitions include a health check, non-root runtime and loopback origin binding.
 - Main-branch release workflow builds WASM/native artifacts, validates browser initialization, and publishes the image. Deploy is gated on repository variable `COMRADE_DEPLOY_ENABLED` and a dedicated runner.
 
+## Verified hosted release
+
+Release commit: `7a450a585de278cc17398bc59e3aa5cd3277df4f`.
+GitHub run: https://github.com/Flatt-T/ProjectComrade/actions/runs/39475714528 — successful.
+
+- Linux WASM build: passed for both games.
+- Windows MSVC x64 native headless build: passed for both games after correcting legacy timer and window callback signatures in the disposable source copy.
+- CI lint, typecheck, 16 unit tests and application build: passed.
+- Headless Chromium: both actual WASM factories initialized and passed MEMFS read/write over HTTP.
+- Production Docker image built and published: `ghcr.io/flatt-t/projectcomrade@sha256:f8a7a4f3171ea2ae2d8b59ce5d9bfa831cebf29526d0a3a8d42039a1643bf320`.
+- Deployment job: skipped because the deployment gate is disabled. No repository secrets, variables or self-hosted runners were configured at inspection. Public-domain and container-runtime validation remain pending infrastructure access.
+
 ## External blockers
 
 At inspection, no Proxmox connector was available and reading the local SSH config was denied. Cluster connection details were requested. The connected Cloudflare account `9c43bb554d99b7acc1f24b30cd90eddb` returned no `thunderchildcreative.com` zone; correct account access was requested. No container or DNS route is claimed as provisioned without those dependencies.

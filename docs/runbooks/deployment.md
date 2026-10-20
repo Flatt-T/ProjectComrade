@@ -2,6 +2,8 @@
 
 Target: `https://projectcomrade.thunderchildcreative.com`.
 
+Verified initial image: `ghcr.io/flatt-t/projectcomrade@sha256:f8a7a4f3171ea2ae2d8b59ce5d9bfa831cebf29526d0a3a8d42039a1643bf320` ([successful release](https://github.com/Flatt-T/ProjectComrade/actions/runs/39475714528)). The initial release is published but has not been deployed to Proxmox.
+
 ## Build and validation
 
 `pnpm install --frozen-lockfile`, then `pnpm lint`, `pnpm typecheck`, `pnpm test:unit`, and `pnpm build`.
