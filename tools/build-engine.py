@@ -16,11 +16,13 @@ if not source.exists():
 
 def replace(file, old, new):
     path = source / file
-    text = path.read_text()
+    # Upstream headers contain legacy single-byte comment characters.
+    # Latin-1 round-trips every byte consistently on Windows and Linux.
+    text = path.read_text(encoding='latin-1')
     if new not in text:
         if old not in text:
             raise RuntimeError(f"Upstream patch no longer applies: {file}")
-        path.write_text(text.replace(old, new))
+        path.write_text(text.replace(old, new), encoding='latin-1')
 
 replace("common/wwstd.h", "inline static char* strupr(char* str)",
         "#if !defined(__EMSCRIPTEN__)\ninline static char* strupr(char* str)")
@@ -29,6 +31,8 @@ replace("common/wwstd.h", "inline static void strrev(char* str)",
 replace("CMakeLists.txt", "if(SDL2)\n    message", "if(SDL2 AND NOT EMSCRIPTEN)\n    message")
 replace("common/CMakeLists.txt", "list(APPEND COMMONV_SRC video_null.cpp)",
         "list(APPEND COMMONV_SRC video_null.cpp wwkeyboard_null.cpp)")
+replace("common/wwmouse.cpp", "DWORD user, DWORD res2, DWORD res3",
+        "DWORD_PTR user, DWORD_PTR res2, DWORD_PTR res3")
 shutil.copyfile(ROOT / "engines/adapters/td-ra/wwkeyboard_null.cpp", source / "common/wwkeyboard_null.cpp")
 replace("CMakeLists.txt", "add_subdirectory(common)", """if(EMSCRIPTEN)
     add_compile_options(-sUSE_SDL=2)
