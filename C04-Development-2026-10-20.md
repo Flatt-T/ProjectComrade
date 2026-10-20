@@ -32,3 +32,22 @@ Original game data is absent. Gameplay, reference fidelity and authentic asset h
 The owner supplied Proxmox host `192.168.1.200` and corrected the domain to `thunderchildcreativetechnologies.com`. The target hostname is now `projectcomrade.thunderchildcreativetechnologies.com` in the release workflow and runbook.
 
 The host responds on Proxmox TCP port 8006, but non-interactive SSH as `root` rejects the available key. The connected Cloudflare account lists no zones at all, including the corrected domain. Authentication details and correct Cloudflare account access were requested. Provisioning and public deployment remain pending.
+
+## Live deployment completed
+
+The owner identified the operations workspace at `C:\ProjectsOnTheGo\AWS Cost optimisation`; its credential locations successfully authenticated Proxmox, Cloudflare DNS and NPM. No credential values were copied into this repository.
+
+- New unprivileged Debian 13 LXC **280**, **projectcomrade-01**, on **prx-h2**, **10.1.0.60**. Allocated 2 CPU cores, 4 GiB RAM, 24 GiB local-lvm disk; Docker/Compose installed and enabled.
+- Public URL: https://projectcomrade.thunderchildcreativetechnologies.com
+- Cloudflare proxied A record created; NPM proxy **49** forwards to `10.1.0.60:3001`, WebSockets enabled. Let's Encrypt certificate **68** attached with forced HTTPS.
+- A credential-free systemd pull service checks validated public GitHub releases every two minutes, verifies the bundle checksum and loaded image ID, then deploys with Compose health checks and rollback on failed updates. No self-hosted GitHub runner was installed.
+- Live app commit: `a2d726f438af9022a9b5b789852caf87721cefe0`.
+- Loaded image ID: `sha256:321203a84c4b65ca0bad90fcd156088861803d67c956ded1e557d976294cd908`.
+- Bundle SHA-256: `aa043a733f4a85448a81613023e2ac9fffecafedbf578f4e01f85258fde63617`.
+- Main build/release/deployment workflow: https://github.com/Flatt-T/ProjectComrade/actions/runs/39494601940 — **all jobs passed**, including public commit verification.
+- Public `/health`: HTTP 200 with the expected commit; container health: healthy.
+- Both actual TD/RA WASM factories initialized over the public HTTPS hostname in Microsoft Edge and passed MEMFS write/read checks.
+- Both WASM downloads serve `application/wasm`; corresponding-source and licence endpoints return HTTP 200.
+- Public `wss://projectcomrade.thunderchildcreativetechnologies.com/ws` handshake passed with certificate validation enabled using the workstation's system trust store. A second deployment-service run correctly skipped the already deployed commit.
+
+Gameplay, parity, networking and audio remain gated on execution with original game data. A working WebSocket transport does not implement the multiplayer protocol.

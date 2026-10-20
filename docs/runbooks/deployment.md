@@ -2,7 +2,7 @@
 
 Target: `https://projectcomrade.thunderchildcreativetechnologies.com`.
 
-Verified initial image: `ghcr.io/flatt-t/projectcomrade@sha256:f8a7a4f3171ea2ae2d8b59ce5d9bfa831cebf29526d0a3a8d42039a1643bf320` ([successful release](https://github.com/Flatt-T/ProjectComrade/actions/runs/39475714528)). The initial release is published but has not been deployed to Proxmox.
+Initial verified engine/container build: [GitHub Actions](https://github.com/Flatt-T/ProjectComrade/actions/runs/39475714528).
 
 ## Build and validation
 
@@ -15,30 +15,31 @@ Serve the built app with `STATIC_ROOT=apps/web/dist node apps/service/dist/index
 
 ## Proxmox service
 
-Provision a dedicated unprivileged Debian LXC on the chosen cluster node with a free VMID, at least 2 CPU cores, 2 GiB RAM and 12 GiB storage. Inspect cluster capacity, storage, bridge and available templates before selecting these values. Enable nesting only if Docker is used inside LXC. Install Docker Engine and Compose. Do not expose the Proxmox management API through the public application route.
+The service lives in unprivileged Debian 13 LXC **280**, `projectcomrade-01`, on **prx-h2 / 192.168.1.200**. It has **2 cores, 4 GiB RAM, 24 GiB local-lvm disk**, and **10.1.0.60/24** on `vmbr0v10`, gateway/DNS `10.1.0.1`. Docker nesting and keyctl are enabled. No existing guests were repurposed.
 
-Register a dedicated GitHub Actions runner with labels `self-hosted,linux,comrade-deploy` in this service. Only the deployment job uses it; builds and PR checks use GitHub-hosted runners. Give its service account Docker access. Since the repository is public, restrict the runner group to the release workflow where your GitHub plan supports this; otherwise use an isolated disposable runner. Do not run untrusted PR workflows there.
+`infra/proxmox-stage.sh` records the creation recipe; it refuses to overwrite an existing guest. `infra/prepare-service.sh` prepares only the dedicated guest. Bootstrap SSH uses the existing operator key at its workstation secret location; no key material is stored in this repository.
 
-The workflow publishes `ghcr.io/flatt-t/projectcomrade:<commit>` and deploys its immutable digest. Ensure the package can be pulled from the container (public visibility or a host-side read-packages credential). Set repository variable `COMRADE_DEPLOY_ENABLED=true` only after the runner, pull access and tunnel work. Deployment runs Compose with health checks and verifies the public `/health` endpoint.
+The main-branch workflow builds WASM and native engines, runs lint/types/unit/browser checks, publishes GHCR, and exports the image plus a SHA-256/image-ID manifest into a public GitHub Release tagged `main-<commit>`. The `COMRADE_DEPLOY_ENABLED=true` repository variable enables release publication. PRs do not publish or deploy.
+
+Inside the guest, `comrade-deploy.timer` runs every two minutes. `/usr/local/lib/comrade-pull-deploy.py` downloads releases over HTTPS without GitHub credentials, verifies the commit format, archive checksum and loaded image ID, then starts Compose with health checks. On a failed update it restores the previous loaded image. State is `/opt/comrade/current.json`; Compose is `/opt/comrade/compose.yml`. Actions waits until the public `/health` reports the expected commit, so publishing alone does not mark deployment successful. No self-hosted GitHub runner is installed.
 
 ## Cloudflare route
 
-In the account owning `thunderchildcreativetechnologies.com`, create a dedicated remotely managed tunnel, run its connector on the service host, and configure:
+The route uses the existing Nginx Proxy Manager edge rather than a new tunnel:
 
-```yaml
-ingress:
-  - hostname: projectcomrade.thunderchildcreativetechnologies.com
-    service: http://localhost:3001
-  - service: http_status:404
-```
+- Cloudflare zone: `85400a3889dbd309007a2876f833c9f1`.
+- Proxied A record: `projectcomrade` → `109.145.201.162` (record `27280e70a44a06352e96ed03c7381cc7`).
+- NPM: proxy host **49**, domain `projectcomrade.thunderchildcreativetechnologies.com` → `http://10.1.0.60:3001`, WebSockets enabled, forced HTTPS.
+- NPM Let's Encrypt certificate **68**, initially expires 18 January 2027; normal NPM renewal applies.
+- Compose binds port 3001 to the guest's workload address. For local development it defaults to loopback unless `COMRADE_BIND_ADDRESS` is set.
 
-Create a proxied CNAME `projectcomrade` pointing to `<tunnel-id>.cfargotunnel.com`. The connector must share the host network with the application port or use its reachable private address. Compose binds the app to loopback. Store the tunnel token on the host, outside Git; never put it in workflow logs.
-
-Cloudflare reference: https://developers.cloudflare.com/tunnel/features/locally-managed-tunnels/create-local-tunnel/
+Operator credential locations are documented in `C:\ProjectsOnTheGo\AWS Cost optimisation`. Keep values outside this repository and workflow logs. Only the new DNS record, certificate and proxy host were created for this service.
 
 ## Rollback
 
-Set `COMRADE_IMAGE` to the previous verified `ghcr.io/flatt-t/projectcomrade@sha256:...`, then run `docker compose -p comrade -f infra/containers/compose.yml up -d --wait`. Verify local and public `/health` and initialize each game in the browser. No player assets are persisted on the service.
+Stop `comrade-deploy.timer` before a manual rollback, or it will converge back to the latest release. On the guest, set `COMRADE_IMAGE=ghcr.io/flatt-t/projectcomrade:<previous-commit>` and `COMRADE_BIND_ADDRESS=10.1.0.60`, then run `docker compose -p comrade -f /opt/comrade/compose.yml up -d --pull never --wait`. Previous images remain loaded. Verify public `/health` and initialize both games. Restart the timer when ready to follow the latest release again.
+
+Inspect deployment with `journalctl -u comrade-deploy.service`, `cat /opt/comrade/current.json`, and `docker compose -p comrade -f /opt/comrade/compose.yml ps` (set the image/bind environment first). No player assets are persisted on the service.
 
 ## Current limits
 

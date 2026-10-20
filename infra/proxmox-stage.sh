@@ -16,6 +16,6 @@ pct create "$vmid" "local:vztmpl/$template" \
   --features nesting=1,keyctl=1 --onboot 1 \
   --net0 name=eth0,bridge=vmbr0v10,ip=10.1.0.60/24,gw=10.1.0.1,type=veth \
   --nameserver 10.1.0.1 --ssh-public-keys /root/comrade-bootstrap.pub \
-  --description 'Project Comrade browser engine workbench and dedicated deployment runner'
+  --description 'Project Comrade browser engine workbench with credential-free release deployment'
 pct start "$vmid"
 pct exec "$vmid" -- hostname

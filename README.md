@@ -4,13 +4,13 @@ Faithful four-player browser platform for classic RTS games: Command & Conquer, 
 
 ## Status
 
-**Development deployment:** [Build and deployment runbook](docs/runbooks/deployment.md). The C04 workbench initializes Tiberian Dawn and Red Alert WASM and imports owner-supplied data into local MEMFS. Gameplay remains unverified. Release builds and container publication run on `main`; Proxmox deployment requires a configured runner and Cloudflare route.
+**Development deployment:** [Build and deployment runbook](docs/runbooks/deployment.md). The C04 workbench initializes Tiberian Dawn and Red Alert WASM and imports owner-supplied data into local MEMFS. Gameplay remains unverified. Validated `main` releases deploy automatically to the dedicated Proxmox guest through a credential-free pull service.
 
 **Milestone M0 (Foundational Gates):**
 - [x] C01: Code, asset and brand rights ledger
 - [x] C02: Reference builds and parity fixtures (structure complete, actual values blocked awaiting owner-provided reference)
-- [ ] C03: Reproducible monorepo, engine toolchain and CI (in progress)
-- [ ] C04: Vanilla Conquer native, WebAssembly and headless execution (blocked pending C03 completion)
+- [x] C03: Reproducible monorepo, engine toolchain and CI
+- [ ] C04: Native/headless compilation and browser WASM initialization verified; gameplay and fidelity await game data
 
 ## Project Structure
 
@@ -68,10 +68,9 @@ infra/
 
 ### Prerequisites
 
-- Node.js >= 20.10.0
-- pnpm >= 8.10.0
-- TypeScript >= 5.3.2
-- Emscripten (for WASM builds - see engine toolchain setup)
+- Node.js 24.13.0 and pnpm 9.15.0
+- Python 3.11+, CMake >=3.25, Ninja
+- Emscripten 6.0.12 for WASM builds; MSVC C++ workload and Windows SDK for Windows native builds
 
 ### Installation
 
@@ -102,7 +101,7 @@ pnpm test:performance
 
 ### Engine Builds
 
-Engine build scripts will be implemented after C04 completes the Vanilla Conquer spike (THU-1335). Currently blocked pending engine proof.
+With the toolchain on PATH, run `python tools/build-engine.py wasm` before `pnpm build`. This prepares a patched disposable upstream copy and places both browser engines in the app's public assets. Run `python tools/build-engine.py native` for null video/audio/input binaries. Original game data is not included. See the deployment runbook for browser smoke checks and hosted build evidence.
 
 ## Documentation
 
