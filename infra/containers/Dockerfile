@@ -5,7 +5,8 @@ COPY . .
 RUN pnpm install --frozen-lockfile && pnpm build
 
 FROM node:24.13.0-bookworm-slim
-ENV NODE_ENV=production PORT=3001
+ARG COMRADE_COMMIT=development
+ENV NODE_ENV=production PORT=3001 COMRADE_COMMIT=${COMRADE_COMMIT}
 WORKDIR /app
 COPY --from=build /app/apps/web/dist ./public
 COPY --from=build /app/apps/service/dist ./apps/service/dist

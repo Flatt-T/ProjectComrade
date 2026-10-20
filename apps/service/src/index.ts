@@ -10,8 +10,8 @@ const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javasc
 const server = createServer(async (req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (req.url === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok' }));
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify({ status: 'ok', commit: process.env.COMRADE_COMMIT || 'development' }));
   } else if (req.method === 'GET' || req.method === 'HEAD') {
     try {
       const pathname = decodeURIComponent(new URL(req.url || '/', 'http://localhost').pathname);

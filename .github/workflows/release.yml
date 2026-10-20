@@ -83,6 +83,7 @@ jobs:
           file: infra/containers/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/flatt-t/projectcomrade:${{ github.sha }}
+          build-args: COMRADE_COMMIT=${{ github.sha }}
       - name: Prepare deployment bundle
         if: github.event_name != 'pull_request'
         env:
@@ -109,6 +110,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.COMRADE_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-24.04
     environment: production
+    timeout-minutes: 20
     permissions:
       contents: write
     steps:
@@ -122,3 +124,23 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create main-${{ github.sha }} deployment-bundle/* --target ${{ github.sha }} --title 'Project Comrade ${{ github.sha }}' --notes 'Validated WASM, MSVC and browser build. The Proxmox service verifies and deploys this bundle automatically.' --latest
+      - name: Verify public deployment matches this commit
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          deadline = time.monotonic() + 900
+          while time.monotonic() < deadline:
+              try:
+                  with urllib.request.urlopen('https://projectcomrade.thunderchildcreativetechnologies.com/health', timeout=15) as response:
+                      health = json.load(response)
+                  if health.get('status') == 'ok' and health.get('commit') == os.environ['EXPECTED_COMMIT']:
+                      print('Public deployment verified:', health['commit'])
+                      break
+              except Exception:
+                  pass
+              time.sleep(15)
+          else:
+              raise SystemExit('Public deployment did not reach the expected commit')
+          PY
