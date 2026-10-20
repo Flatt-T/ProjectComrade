@@ -9,7 +9,7 @@ Initial verified engine/container build: [GitHub Actions](https://github.com/Fla
 `pnpm install --frozen-lockfile`, then `pnpm lint`, `pnpm typecheck`, `pnpm test:unit`, and `pnpm build`.
 With Emscripten 6.0.12, CMake >=3.25 and Ninja on PATH, run `python tools/build-engine.py wasm` **before** the app build. The script prepares a disposable upstream source copy, applies the documented portability changes, and writes both JS/WASM pairs into `apps/web/public/engines`. The pinned upstream submodule remains untouched. Remove the disposable `build/engine-source` directory when changing the pinned upstream revision.
 
-Serve the built app with `STATIC_ROOT=apps/web/dist node apps/service/dist/index.js` (set the environment variable using your shell's syntax). Run `pnpm exec playwright install chromium` and `node tools/browser-smoke.mjs`. Both factories must resolve and pass a real MEMFS write/read probe over HTTP. This does not start gameplay.
+Run `python tools/prepare-content.py` before the app build. Serve with `STATIC_ROOT=apps/web/dist node apps/service/dist/index.js` (using your shell's environment syntax). Run `pnpm exec playwright install chromium` and `node tools/browser-smoke.mjs`. Checks start GDI and Nod without file input, verify native harvesting, construction/placement, training, combat damage and running audio. Screenshots are retained in `build/evidence` and as workflow artifacts.
 
 `python tools/build-engine.py native` builds both games with null video, audio, and input. On Windows, install the MSVC C++ workload and Windows SDK. The `native` release job validates with MSVC on Windows 2022. Null-input linking is a platform proof, not a completed headless simulation runner.
 
@@ -43,4 +43,4 @@ Inspect deployment with `journalctl -u comrade-deploy.service`, `cat /opt/comrad
 
 ## Current limits
 
-Only engine initialization and local filesystem loading can be validated without original game data. Local files stay in volatile browser memory. Gameplay, edition hashes, reference fidelity, deterministic headless stepping, multiplayer and browser audio remain unverified or unimplemented. Do not interpret a successful health check as gameplay readiness.
+The TD slice bundles pinned freeware content and an authored map. Classic artwork is scaled, not redrawn in HD. Full reference parity, deterministic headless stepping, synchronized multiplayer, campaigns and other games remain future work. Health confirms deployment identity; browser tests establish the playable slice. See ADR 006 for the updated project direction.

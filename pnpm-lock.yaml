@@ -41,6 +41,9 @@ importers:
 
   apps/service:
     dependencies:
+      '@comrade/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       ws:
         specifier: ^8.14.2
         version: 8.22.0
@@ -60,6 +63,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@comrade/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -84,6 +90,10 @@ importers:
         version: 6.4.4(@types/node@24.19.2)(tsx@4.23.15)
 
   packages/client-runtime:
+    dependencies:
+      '@comrade/contracts':
+        specifier: workspace:*
+        version: link:../contracts
     devDependencies:
       typescript:
         specifier: ^5.3.2

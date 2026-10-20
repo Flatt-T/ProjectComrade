@@ -9,7 +9,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "ws": "^8.14.2"
+    "ws": "^8.14.2",
+    "@comrade/contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

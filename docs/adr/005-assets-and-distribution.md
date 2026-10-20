@@ -1,6 +1,6 @@
 # ADR 005: Assets and Distribution Rights
 
-**Status:** Proposed
+**Status:** Historical. The pinned TD freeware slice is superseded by [ADR 006](006-playable-td-slice.md); other assets remain gated.
 **Date:** 2026-10-18
 **Context:** COMRADE C01 - Establish code, asset and brand rights ledger
 

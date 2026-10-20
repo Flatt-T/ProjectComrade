@@ -2,6 +2,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
+import { RoomCoordinator } from './rooms.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -31,17 +32,22 @@ const server = createServer(async (req, res) => {
 });
 
 const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 65536 });
+const rooms = new RoomCoordinator();
 
 wss.on('connection', (ws) => {
-  console.log('Client connected');
+  if (wss.clients.size > 128) { ws.close(1013, 'Connection capacity reached'); return; }
+  const id = rooms.connect(message => ws.send(message));
+  let messages = 0;
+  const interval = setInterval(() => { messages = 0; }, 1000);
 
   ws.on('message', (data) => {
-    void data;
-    // TODO: Implement room coordinator and match protocol
+    if (++messages > 30) { ws.close(1008, 'Message rate exceeded'); return; }
+    rooms.receive(id, data.toString());
   });
 
   ws.on('close', () => {
-    console.log('Client disconnected');
+    clearInterval(interval);
+    rooms.disconnect(id);
   });
 });
 

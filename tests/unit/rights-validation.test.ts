@@ -78,6 +78,15 @@ describe('Rights validation', () => {
     expect(result.reason).toContain('public distribution is blocked');
   });
 
+  it('allows only exact hashes from the explicitly bundled freeware pack', () => {
+    const ledger = loadLedger();
+    const pack = ledger.get('ledger-017')!;
+    const hash = pack.assetHashes!['CONQUER.MIX'];
+    expect(validateAsset('CONQUER.MIX', ledger, hash).valid).toBe(true);
+    expect(validateAsset('CONQUER.MIX', ledger, '0'.repeat(64)).valid).toBe(false);
+    expect(validateAsset('unknown.mix', ledger, hash).valid).toBe(false);
+  });
+
   it('should allow non-asset files', () => {
     const ledger = loadLedger();
     

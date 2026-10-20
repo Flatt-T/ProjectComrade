@@ -1,16 +1,18 @@
 # COMRADE - Browser RTS Classics
 
-Faithful four-player browser platform for classic RTS games: Command & Conquer, Red Alert 1, Dune 2000, and optionally Red Alert 2.
+A browser RTS platform beginning with a self-contained C&C Tiberian Dawn slice: original GDI/Nod teams, themes and rules, bundled freeware content, and an authored map. This unofficial community project requires no player file uploads.
 
 ## Status
 
-**Development deployment:** [Build and deployment runbook](docs/runbooks/deployment.md). The C04 workbench initializes Tiberian Dawn and Red Alert WASM and imports owner-supplied data into local MEMFS. Gameplay remains unverified. Validated `main` releases deploy automatically to the dedicated Proxmox guest through a credential-free pull service.
+**Playable slice:** [Launch Project Comrade](https://projectcomrade.thunderchildcreativetechnologies.com). Choose GDI or Nod, deploy, harvest Tiberium, construct buildings, train infantry and fight the opposing base on Tiberium Crossing. Content loads automatically into verified MEMFS. Vanilla Conquer supplies the original simulation; OpenRA is a content source only. Main-branch releases deploy to Proxmox through the [existing pipeline](docs/runbooks/deployment.md).
+
+The responsive/fullscreen view scales the classic 640×400 framebuffer. It is **not redrawn HD artwork**. Higher-detail sprites, terrain and a larger native viewport are subsequent work. Contracts and room coordination are implemented; synchronized online matches are not enabled. See [ADR 006](docs/adr/006-playable-td-slice.md) for scope and provenance.
 
 **Milestone M0 (Foundational Gates):**
 - [x] C01: Code, asset and brand rights ledger
-- [x] C02: Reference builds and parity fixtures (structure complete, actual values blocked awaiting owner-provided reference)
+- [ ] C02 full reference parity: fixture structure exists; independent reference measurements remain future work
 - [x] C03: Reproducible monorepo, engine toolchain and CI
-- [ ] C04: Native/headless compilation and browser WASM initialization verified; gameplay and fidelity await game data
+- [x] C04 foundation: WASM gameplay, bundled content, native orders, OpenAL audio and MSVC compilation; full reference parity remains future work
 
 ## Project Structure
 
@@ -101,7 +103,7 @@ pnpm test:performance
 
 ### Engine Builds
 
-With the toolchain on PATH, run `python tools/build-engine.py wasm` before `pnpm build`. This prepares a patched disposable upstream copy and places both browser engines in the app's public assets. Run `python tools/build-engine.py native` for null video/audio/input binaries. Original game data is not included. See the deployment runbook for browser smoke checks and hosted build evidence.
+With the toolchain on PATH, run `python tools/prepare-content.py` and `python tools/build-engine.py wasm` before `pnpm build`. These prepare pinned freeware content and patched browser engines. Run `python tools/build-engine.py native` for null video/audio/input binaries. See the deployment runbook for browser gameplay checks and hosted evidence.
 
 ## Documentation
 
@@ -132,6 +134,6 @@ All third-party licences are recorded in `rights/ledger.jsonl` and must be retai
 
 ## Rights and Permissions
 
-Classic game assets (artwork, sound, music, maps, fonts) are proprietary to Electronic Arts and related rights holders. Public distribution of these assets is **blocked** until explicit approval is obtained. The project supports a local-import mode where users provide their own original game media; this mode requires hash verification and does not transmit asset bytes to external servers.
+Classic artwork and sound remain EA / Westwood content, separate from GPL engine code and the Comrade-authored map and UI. The TD slice automatically bundles an explicitly selected, hash-pinned freeware pack from OpenRA and CnCNet sources. This is not a blanket approval for other games or unknown retail assets. No player import is required.
 
-See `rights/ledger.jsonl` and `docs/adr/005-assets-and-distribution.md` for complete rights information.
+See `rights/ledger.jsonl` and [ADR 006](docs/adr/006-playable-td-slice.md) for current provenance and scope.

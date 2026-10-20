@@ -4,7 +4,7 @@ import { mountGameFiles, EngineModule } from '../../packages/client-runtime/src/
 function fixture() {
   const data = new Map<string, Uint8Array>();
   let cwd = '';
-  const engine: EngineModule = { FS: {
+  const engine: EngineModule = { UTF8ToString: () => '', FS: {
     mkdirTree() {}, writeFile(path, bytes) { data.set(path, bytes); },
     readFile(path) { return data.get(path)!; }, chdir(path) { cwd = path; },
   }, callMain() { throw new Error('Mount must not start main'); } };
