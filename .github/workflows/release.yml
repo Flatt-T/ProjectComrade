@@ -83,17 +83,42 @@ jobs:
           file: infra/containers/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/flatt-t/projectcomrade:${{ github.sha }}
+      - name: Prepare deployment bundle
+        if: github.event_name != 'pull_request'
+        env:
+          COMMIT: ${{ github.sha }}
+        run: |
+          mkdir -p deployment-bundle
+          docker pull ghcr.io/flatt-t/projectcomrade:$COMMIT
+          docker save ghcr.io/flatt-t/projectcomrade:$COMMIT | gzip > deployment-bundle/comrade-image.tar.gz
+          export IMAGE_ID=$(docker image inspect ghcr.io/flatt-t/projectcomrade:$COMMIT --format '{{.Id}}')
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          p = pathlib.Path('deployment-bundle/comrade-image.tar.gz')
+          manifest = {'commit': os.environ['COMMIT'], 'image_id': os.environ['IMAGE_ID'], 'archive_sha256': hashlib.file_digest(p.open('rb'), 'sha256').hexdigest()}
+          pathlib.Path('deployment-bundle/deploy.json').write_text(json.dumps(manifest))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: deployment-bundle
+          path: deployment-bundle
+          retention-days: 3
   deploy:
     needs: image
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.COMRADE_DEPLOY_ENABLED == 'true'
-    runs-on: [self-hosted, linux, comrade-deploy]
+    runs-on: ubuntu-24.04
     environment: production
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy immutable image and verify health
+      - uses: actions/download-artifact@v4
+        with:
+          name: deployment-bundle
+          path: deployment-bundle
+      - name: Publish verified deployment release
         env:
-          COMRADE_IMAGE: ghcr.io/flatt-t/projectcomrade@${{ needs.image.outputs.digest }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker compose -p comrade -f infra/containers/compose.yml pull
-          docker compose -p comrade -f infra/containers/compose.yml up -d --wait --wait-timeout 90
-          curl --fail --retry 5 --retry-delay 3 https://projectcomrade.thunderchildcreativetechnologies.com/health
+          gh release create main-${{ github.sha }} deployment-bundle/* --target ${{ github.sha }} --title 'Project Comrade ${{ github.sha }}' --notes 'Validated WASM, MSVC and browser build. The Proxmox service verifies and deploys this bundle automatically.' --latest

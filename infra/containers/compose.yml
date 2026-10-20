@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     init: true
     ports:
-      - "127.0.0.1:3001:3001"
+      - "${COMRADE_BIND_ADDRESS:-127.0.0.1}:3001:3001"
     environment:
       NODE_ENV: production
       PORT: "3001"
