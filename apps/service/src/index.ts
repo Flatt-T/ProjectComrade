@@ -35,6 +35,8 @@ const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 65536 });
 const rooms = new RoomCoordinator();
 
 wss.on('connection', (ws) => {
+  // Receiver errors (oversized frames, invalid UTF-8) belong to this peer.
+  ws.on('error', () => ws.terminate());
   if (wss.clients.size > 128) { ws.close(1013, 'Connection capacity reached'); return; }
   const id = rooms.connect(message => ws.send(message));
   let messages = 0;

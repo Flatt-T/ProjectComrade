@@ -31,11 +31,18 @@ try {
   const other = hostClient === a ? b : a;
   send(a, { type: 'ready', ready: true }); send(b, { type: 'ready', ready: true });
   await until(() => latestRoom(a).players.every(p => p.ready));
+  const oversized = connect();
+  let rejected = false;
+  oversized.ws.addEventListener('close', () => { rejected = true; });
+  await until(() => oversized.messages.some(m => m.type === 'welcome'));
+  oversized.ws.send('x'.repeat(70000));
+  await until(() => rejected);
+  assert.equal((await (await fetch(`${base}/health`)).json()).status, 'ok', 'An oversized peer must not crash the service');
   send(hostClient, { type: 'start' });
   await until(() => hostClient.messages.some(m => m.type === 'error' && /not enabled/.test(m.message)));
   hostClient.ws.close();
   await until(() => latestRoom(other).players.length === 1);
   assert.notEqual(latestRoom(other).host, host);
   assert.equal(latestRoom(other).players[0].ready, false);
-  console.log('Public health, room membership/readiness, guarded match start and host transfer passed');
+  console.log('Health, room membership/readiness, oversized-peer isolation, guarded match start and host transfer passed');
 } finally { for (const ws of clients) ws.close(); }
