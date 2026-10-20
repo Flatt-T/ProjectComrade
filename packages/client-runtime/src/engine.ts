@@ -73,13 +73,13 @@ export async function loadEngine(game: 'td' | 'ra', canvas: HTMLCanvasElement, p
 import { Faction, parseContentManifest } from '@comrade/contracts';
 
 export async function mountBundledContent(engine: EngineModule, faction: Faction, progress: (message: string) => void) {
-  const response = await fetch('/content/td/manifest.json');
+  const response = await fetch('/content/td/manifest.json', { cache: 'no-store' });
   if (!response.ok) throw new Error('Content pack unavailable');
   const manifest = parseContentManifest(await response.json());
   const files: LocalGameFile[] = [];
   for (const file of manifest.files) {
     progress(`Preparing ${file.name}`);
-    const response = await fetch(`/content/td/${file.name}`);
+    const response = await fetch(`/content/td/${file.name}?sha256=${file.sha256}`);
     if (!response.ok) throw new Error(`Cannot load ${file.name}`);
     let buffer = await response.arrayBuffer();
     const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', buffer)), n => n.toString(16).padStart(2, '0')).join('');

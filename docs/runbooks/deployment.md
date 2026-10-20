@@ -21,7 +21,7 @@ The service lives in unprivileged Debian 13 LXC **280**, `projectcomrade-01`, on
 
 The main-branch workflow builds WASM and native engines, runs lint/types/unit/browser checks, publishes GHCR, and exports the image plus a SHA-256/image-ID manifest into a public GitHub Release tagged `main-<commit>`. The `COMRADE_DEPLOY_ENABLED=true` repository variable enables release publication. PRs do not publish or deploy.
 
-The browser resolves `/health` without caching and loads engine JS and WASM with that release ID in their URLs. This prevents the public edge's static-file cache from mixing releases. Browser checks verify both engine requests use the deployed ID.
+The browser resolves `/health` without caching and loads engine JS and WASM with that release ID in their URLs. Resource files use their SHA-256 in the URL and the content manifest is fetched without caching. This prevents the public edge's static-file cache from mixing releases or maps. Browser checks verify engine and resource URL versions.
 
 Inside the guest, `comrade-deploy.timer` runs every two minutes. `/usr/local/lib/comrade-pull-deploy.py` downloads releases over HTTPS without GitHub credentials, verifies the commit format, archive checksum and loaded image ID, then starts Compose with health checks. On a failed update it restores the previous loaded image. State is `/opt/comrade/current.json`; Compose is `/opt/comrade/compose.yml`. Actions waits until the public `/health` reports the expected commit, so publishing alone does not mark deployment successful. No self-hosted GitHub runner is installed.
 

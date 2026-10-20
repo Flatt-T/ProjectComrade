@@ -13,8 +13,10 @@ try {
     });
     const errors = [];
     const engineRequests = [];
+    const contentRequests = [];
     page.on('pageerror', error => errors.push(error.message));
     page.on('request', request => { if (/\/engines\/vanillatd\.(js|wasm)(\?|$)/.test(request.url())) engineRequests.push(request.url()); });
+    page.on('request', request => { if (/\/content\/td\/[^/]+\.(MIX|INI|BIN)(\?|$)/.test(request.url())) contentRequests.push(request.url()); });
     await page.goto(process.env.COMRADE_URL || 'http://127.0.0.1:3001');
     assert.equal(await page.locator('input[type=file]').count(), 0);
     if (faction === 'nod') await page.getByRole('button', { name: 'NOD Brotherhood of Nod' }).click();
@@ -23,6 +25,8 @@ try {
     const release = await page.evaluate(async () => (await (await fetch('/health', { cache: 'no-store' })).json()).commit);
     assert.equal(engineRequests.length, 2);
     for (const request of engineRequests) assert.equal(new URL(request).searchParams.get('release'), release, 'Engine JS and WASM must match the deployed release');
+    assert.ok(contentRequests.length >= 3);
+    for (const request of contentRequests) assert.match(new URL(request).searchParams.get('sha256') || '', /^[a-f0-9]{64}$/, 'Game resources must use content-versioned URLs');
     const initial = await page.evaluate(() => window.comrade.snapshot());
     assert.equal(initial.credits, 6000);
     assert.equal(initial.power, 140);
