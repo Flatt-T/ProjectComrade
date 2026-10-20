@@ -26,3 +26,9 @@ GitHub run: https://github.com/Flatt-T/ProjectComrade/actions/runs/39475714528 â
 At inspection, no Proxmox connector was available and reading the local SSH config was denied. Cluster connection details were requested. The connected Cloudflare account `9c43bb554d99b7acc1f24b30cd90eddb` returned no `thunderchildcreative.com` zone; correct account access was requested. No container or DNS route is claimed as provisioned without those dependencies.
 
 Original game data is absent. Gameplay, reference fidelity and authentic asset hashes are unverified. Network/audio remain deferred until the core engine executes with data.
+
+## Corrected infrastructure target
+
+The owner supplied Proxmox host `192.168.1.200` and corrected the domain to `thunderchildcreativetechnologies.com`. The target hostname is now `projectcomrade.thunderchildcreativetechnologies.com` in the release workflow and runbook.
+
+The host responds on Proxmox TCP port 8006, but non-interactive SSH as `root` rejects the available key. The connected Cloudflare account lists no zones at all, including the corrected domain. Authentication details and correct Cloudflare account access were requested. Provisioning and public deployment remain pending.

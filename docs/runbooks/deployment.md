@@ -1,6 +1,6 @@
 # Project Comrade deployment
 
-Target: `https://projectcomrade.thunderchildcreative.com`.
+Target: `https://projectcomrade.thunderchildcreativetechnologies.com`.
 
 Verified initial image: `ghcr.io/flatt-t/projectcomrade@sha256:f8a7a4f3171ea2ae2d8b59ce5d9bfa831cebf29526d0a3a8d42039a1643bf320` ([successful release](https://github.com/Flatt-T/ProjectComrade/actions/runs/39475714528)). The initial release is published but has not been deployed to Proxmox.
 
@@ -23,11 +23,11 @@ The workflow publishes `ghcr.io/flatt-t/projectcomrade:<commit>` and deploys its
 
 ## Cloudflare route
 
-In the account owning `thunderchildcreative.com`, create a dedicated remotely managed tunnel, run its connector on the service host, and configure:
+In the account owning `thunderchildcreativetechnologies.com`, create a dedicated remotely managed tunnel, run its connector on the service host, and configure:
 
 ```yaml
 ingress:
-  - hostname: projectcomrade.thunderchildcreative.com
+  - hostname: projectcomrade.thunderchildcreativetechnologies.com
     service: http://localhost:3001
   - service: http_status:404
 ```
