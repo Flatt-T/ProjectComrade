@@ -135,7 +135,7 @@ export class LockstepSession implements Session {
 
 const ints = (v: unknown, max = 128): v is number[] => Array.isArray(v) && v.length <= max && v.every(n => Number.isSafeInteger(n) && n >= 0);
 const int = (v: unknown): v is number => Number.isSafeInteger(v) && (v as number) >= 0 && (v as number) < 1e7;
-const item = (v: unknown): v is string => typeof v === 'string' && /^[a-z0-9-]{1,32}$/.test(v);
+const item = (v: unknown): v is string => typeof v === 'string' && /^(?:(?:upgrade|starport):)?[a-z0-9-]{1,32}$/.test(v);
 
 /** Validate a command received from the network; anything malformed is dropped on every client. */
 export function parseCommand(raw: unknown): Command | null {
@@ -148,6 +148,8 @@ export function parseCommand(raw: unknown): Command | null {
       return ints(c.ids) && int(c.target) ? { t: 'attack', ids: c.ids, target: c.target, force: c.force === true } : null;
     case 'fireAt':
       return ints(c.ids) && int(c.x) && int(c.y) ? { t: 'fireAt', ids: c.ids, x: c.x, y: c.y } : null;
+    case 'enter':
+      return ints(c.ids) && int(c.target) ? { t: 'enter', ids: c.ids, target: c.target } : null;
     case 'stop': case 'deploy': case 'guard': case 'scatter':
       return ints(c.ids) ? { t: c.t, ids: c.ids } : null;
     case 'build': case 'cancel':
@@ -157,7 +159,9 @@ export function parseCommand(raw: unknown): Command | null {
     case 'sell': case 'repair':
       return int(c.id) ? { t: c.t, id: c.id } : null;
     case 'super':
-      return int(c.id) && int(c.x) && int(c.y) ? { t: 'super', id: c.id, x: c.x, y: c.y } : null;
+      if (!int(c.id) || !int(c.x) || !int(c.y)) return null;
+      // Two-point powers (Chronosphere) carry a destination.
+      return int(c.x2) && int(c.y2) ? { t: 'super', id: c.id, x: c.x, y: c.y, x2: c.x2, y2: c.y2 } : { t: 'super', id: c.id, x: c.x, y: c.y };
     case 'rally':
       return int(c.x) && int(c.y) ? { t: 'rally', x: c.x, y: c.y } : null;
     case 'surrender':

@@ -1,19 +1,32 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LaunchRequest, styleInfo } from '@comrade/contracts';
-import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, QueueKind, Session } from '../../../packages/fusion/src/index';
+import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, QueueKind, RulePack, Session } from '../../../packages/fusion/src/index';
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
 
 type Mode = 'normal' | 'place' | 'sell' | 'repair' | 'attackMove' | 'super';
-interface SuperView { id: number; name: string; frac: number; ready: boolean }
-const TABS: { id: QueueKind; label: string }[] = [
+interface SuperView { id: number; name: string; frac: number; ready: boolean; kind: string }
+const ALL_TABS: { id: QueueKind; label: string }[] = [
   { id: 'structure', label: 'Base' }, { id: 'defense', label: 'Defence' }, { id: 'infantry', label: 'Infantry' }, { id: 'vehicle', label: 'Vehicles' },
+  { id: 'aircraft', label: 'Air' }, { id: 'naval', label: 'Navy' }, { id: 'starport', label: 'Starport' },
 ];
+/** Sidebar tabs this game uses: air, navy and the Starport only where the pack has them. */
+function tabsFor(pack: RulePack) {
+  const units = Object.values(pack.units);
+  return ALL_TABS.filter(t => t.id === 'starport' ? units.some(u => u.starport) : ['aircraft', 'naval'].includes(t.id) ? units.some(u => (u.queue ?? u.kind) === t.id) : true);
+}
+/** Display name for a sidebar item, including upgrades and Starport orders. */
+function itemName(pack: RulePack, item: string) {
+  const base = item.replace(/^(upgrade|starport):/, '');
+  const name = (pack.units[base] ?? pack.structures[base])?.name ?? base;
+  return item.startsWith('upgrade:') ? `Upgrade ${name}` : name;
+}
+const RANKS = ['', ' · Veteran', ' · Elite'];
 
 interface QueueView { items: string[]; paid: number; ready: boolean }
 interface UiState {
   tick: number; credits: number; storage: number; powerGen: number; powerUse: number; radar: boolean;
-  options: Record<QueueKind, string[]>; queues: Record<QueueKind, QueueView>;
+  options: Record<QueueKind, string[]>; queues: Record<QueueKind, QueueView>; costs: Record<string, number>;
   selection: { name: string; hp: number; max: number; count: number; deploy: boolean; own: boolean; structure: boolean } | null;
   status: string; over: boolean; won: boolean; defeated: boolean; stats: { built: number; lost: number; killed: number; harvested: number };
   supers: SuperView[];
@@ -33,6 +46,9 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const mode = useRef<Mode>('normal');
   const placing = useRef<string | null>(null);
   const superId = useRef<number>(0);
+  /** Chronosphere: the first click picks what to move, the second where to. */
+  const superFrom = useRef<{ x: number; y: number } | null>(null);
+  const tabs = useMemo(() => tabsFor(pack), [pack]);
   /** Last place our forces took damage, for Space (jump to alert). */
   const lastAlert = useRef<{ x: number; y: number } | null>(null);
   const groups = useRef(new Map<number, number[]>());
@@ -115,7 +131,13 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         uiTimer = now;
         const options = {} as Record<QueueKind, string[]>;
         const queues = {} as Record<QueueKind, QueueView>;
-        for (const t of TABS) { options[t.id] = game.buildOptions(me, t.id); const q = me.queues[t.id]; queues[t.id] = { items: [...q.items], paid: q.paid, ready: q.ready }; }
+        const costs: Record<string, number> = {};
+        for (const t of tabs) {
+          options[t.id] = game.buildOptions(me, t.id);
+          for (const item of options[t.id]) costs[item] = game.costOf(item, me);
+          const q = me.queues[t.id]; queues[t.id] = { items: [...q.items], paid: q.paid, ready: q.ready };
+          for (const item of q.items) costs[item] ??= game.costOf(item, me);
+        }
         const sel = [...renderer.selected].map(id => game.entities.get(id)).filter((e): e is Entity => !!e);
         const first = sel[0];
         const firstDef = first ? (first.kind === 'unit' ? pack.units[first.type] : pack.structures[first.type]) : undefined;
@@ -129,7 +151,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           if (units > prev.units && game.tick > 30) say('Unit ready');
           if (low && !prev.low) say('Low power');
           if (myHp < prev.hp - 40 && now - lastAttackWarning > 12000) { lastAttackWarning = now; say('Our base is under attack'); }
-          if (me.credits === 0 && TABS.some(t => queues[t.id].items.length && !queues[t.id].ready)) { if (Math.floor(now / 4000) % 4 === 0) say('Insufficient funds'); }
+          if (me.credits === 0 && tabs.some(t => queues[t.id].items.length && !queues[t.id].ready)) { if (Math.floor(now / 4000) % 4 === 0) say('Insufficient funds'); }
         }
         for (const e of game.entities.values()) {
           if (e.owner !== slot) continue;
@@ -146,10 +168,14 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           const ready = e.charge >= sw.charge;
           if (ready && !readySupers.has(e.id) && game.tick > 30) say(`${sw.name} ready`);
           if (ready) readySupers.add(e.id); else readySupers.delete(e.id);
-          supers.push({ id: e.id, name: sw.name, frac: Math.min(1, e.charge / sw.charge), ready });
+          supers.push({ id: e.id, name: sw.name, frac: Math.min(1, e.charge / sw.charge), ready, kind: sw.kind });
         }
         for (const fx of game.effects) {
-          if (announced.has(fx) || game.tick - fx.tick > fx.dur || !['superLaunch', 'ionCharge', 'stormClouds'].includes(fx.kind)) continue;
+          if (fx.kind === 'infiltrate' && fx.owner !== slot && !announced.has(fx) && game.tick - fx.tick < fx.dur && game.entities.get([...game.entities.values()].find(e => e.kind === 'structure' && e.x === fx.x && e.y === fx.y)?.id ?? 0)?.owner === slot) { announced.add(fx); say('Building infiltrated'); }
+          if (fx.kind === 'capture' && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say(fx.owner === slot ? 'Building captured' : 'Our building has been captured'); }
+          if (fx.kind === 'promote' && fx.owner === slot && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say('Unit promoted'); }
+          if (fx.kind === 'upgrade' && fx.owner === slot && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say('Upgrade complete'); }
+          if (announced.has(fx) || game.tick - fx.tick > fx.dur || !['superLaunch', 'ionCharge', 'stormClouds', 'paradrop', 'reinforce', 'chronoCharge', 'curtainCharge'].includes(fx.kind)) continue;
           announced.add(fx);
           const name = fx.color ?? 'Superweapon';
           if (fx.owner === slot) say(fx.kind === 'stormClouds' ? `${name} unleashed` : `${name} launched`);
@@ -158,9 +184,9 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         prev = { ready: { structure: queues.structure.ready, defense: queues.defense.ready }, units, low, hp: myHp, over: game.over };
         setUi({
           tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues,
-          selection: first ? { name: firstDef?.name ?? first.type, hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!pack.units[e.type].deploysTo), own: first.owner === slot, structure: first.kind === 'structure' } : null,
+          selection: first ? { name: (firstDef?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!(pack.units[e.type].deploysTo || pack.units[e.type].deployWeapon || pack.units[e.type].lure)), own: first.owner === slot, structure: first.kind === 'structure' } : null,
           status: status === 'waiting' ? 'Waiting for other commanders…' : status === 'desync' ? 'Desynchronised — the match cannot continue' : '',
-          over: game.over, won: game.over && game.winnerTeam === me.team, defeated: me.defeated, stats: { ...me.stats }, supers,
+          over: game.over, won: game.over && game.winnerTeam === me.team, defeated: me.defeated, stats: { ...me.stats }, supers, costs,
         });
       }
       raf = requestAnimationFrame(loop);
@@ -234,6 +260,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   }, []);
 
   function setMode(m: Mode) {
+    if (m !== 'super') superFrom.current = null;
     mode.current = m; setModeView(m);
     if (m !== 'place') placing.current = null;
   }
@@ -306,8 +333,13 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       return;
     }
     if (mode.current === 'super' && superId.current) {
-      session.issue({ t: 'super', id: superId.current, x: Math.max(0, cell.x), y: Math.max(0, cell.y) });
-      mark('#ff5a4a'); superId.current = 0; setMode('normal');
+      const s = game.entities.get(superId.current);
+      const sw = s ? game.superweaponOf(s) : undefined;
+      const x = Math.max(0, cell.x), y = Math.max(0, cell.y);
+      if (sw?.kind === 'chrono' && !superFrom.current) { superFrom.current = { x, y }; mark('#8fd4ff'); say('Select the destination'); return; }
+      if (sw?.kind === 'chrono' && superFrom.current) session.issue({ t: 'super', id: superId.current, x: superFrom.current.x, y: superFrom.current.y, x2: x, y2: y });
+      else session.issue({ t: 'super', id: superId.current, x, y });
+      mark('#ff5a4a'); superId.current = 0; superFrom.current = null; setMode('normal');
       return;
     }
     if (mode.current === 'sell' || mode.current === 'repair') {
@@ -328,6 +360,22 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     if (mods.alt && units.length) {
       session.issue({ t: 'move', ids: units.map(u => u.id), x: Math.max(0, cell.x), y: Math.max(0, cell.y) });
       mark('#7dff7a'); return;
+    }
+    if (target && target.kind === 'structure' && units.length) {
+      const sdef = pack.structures[target.type];
+      const enemy = game.isEnemy(slot, target.owner);
+      const enter = units.filter(u => {
+        const d = pack.units[u.type];
+        if (d.engineer) return enemy || target.owner === slot && target.hp < target.maxHp;
+        if (d.spy) return enemy;
+        return target.owner === slot && (sdef.repairPad && d.kind !== 'infantry' && d.kind !== 'aircraft' || sdef.airfield && d.kind === 'aircraft');
+      });
+      if (enter.length) {
+        session.issue({ t: 'enter', ids: enter.map(u => u.id), target: target.id });
+        const rest = units.filter(u => !enter.includes(u));
+        if (rest.length && enemy) session.issue({ t: 'attack', ids: rest.map(u => u.id), target: target.id });
+        mark(enemy ? '#ffd24a' : '#7dff7a'); return;
+      }
     }
     if (target && target.owner === slot) {
       // Clicking a selected MCV again deploys it (RA2 style).
@@ -397,7 +445,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     if ((queue === 'structure' || queue === 'defense') && q.ready && q.items[0] === item) { placing.current = item; mode.current = 'place'; setModeView('place'); return; }
     if ((queue === 'structure' || queue === 'defense') && q.items.length && q.items[0] !== item) { say('Building in progress'); return; }
     r.session.issue({ t: 'build', item });
-    if (r.game.players[slot].credits < r.game.costOf(item)) say('Insufficient funds');
+    if (r.game.players[slot].credits < r.game.costOf(item, r.game.players[slot])) say('Insufficient funds');
   }
   function cancelItem(ev: React.MouseEvent, item: string) {
     ev.preventDefault();
@@ -421,7 +469,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       </div>
       <div className="fusion-messages">{messages.filter(m => performance.now() - m.at < 5000).map(m => <p key={m.at}>{m.text}</p>)}</div>
       {ui?.status && <div className="fusion-banner">{ui.status}</div>}
-      {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? 'Choose the target — right-click cancels' : 'Attack-move — click a destination'}</div>}
+      {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? (superFrom.current ? 'Choose the destination — right-click cancels' : 'Choose the target — right-click cancels') : 'Attack-move — click a destination'}</div>}
       {help && <div className="fusion-help" onClick={() => setHelp(false)}>
         <h3>Controls</h3>
         <p><b>Left click</b> select · order move / attack / harvest · <b>Right click</b> deselect / cancel</p>
@@ -431,6 +479,8 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <p><b>T</b> same type (twice: whole map) · <b>P</b> all combat units · <b>G</b> guard · <b>X</b> scatter · <b>S</b> stop · <b>D</b> deploy · <b>A</b> attack-move</p>
         <p><b>H</b> home · <b>Space</b> last alert · <b>Esc</b> cancel · <b>F1</b> this card</p>
         <p><b>Click a selected MCV</b> to deploy · <b>Wheel</b> zoom · <b>Arrows / screen edge</b> scroll</p>
+        <p><b>Engineer</b> on a building: capture (enemy) or repair (own) · <b>Spy</b>: infiltrate · <b>Damaged vehicle</b> on a repair pad: repair · <b>Aircraft</b> on an airfield: rearm</p>
+        <p><b>D</b> also digs in G.I.s, sets up Desolators and starts Thumpers · <b>Chronosphere</b>: pick the area, then the destination</p>
       </div>}
       {ui && (ui.over || ui.defeated) && <div className="fusion-over">
         <p className="eyebrow">{style.name.toUpperCase()}</p>
@@ -447,31 +497,31 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           <i style={{ height: `${Math.round(powerFrac * 100)}%` }} />
         </div>
       </div>
-      <div className="fusion-tabs">{TABS.map(t => <button key={t.id} className={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>
+      <div className={`fusion-tabs n${tabs.length}`}>{tabs.map(t => <button key={t.id} className={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>
         {t.label}{ui?.queues[t.id].ready ? ' ●' : ''}</button>)}</div>
       <div className="fusion-items">
         {(ui?.options[tab] ?? []).map(item => {
-          const def = pack.units[item] ?? pack.structures[item];
+          const name = itemName(pack, item), cost = ui!.costs[item] ?? 0;
           const q = ui!.queues[tab];
           const active = q.items[0] === item;
           const count = q.items.filter(i => i === item).length;
-          const progress = active ? Math.min(1, q.paid / Math.max(1, def.cost)) : 0;
-          return <button key={item} className={`fusion-item ${active && q.ready ? 'ready' : ''}`} title={`${def.name} — ${def.cost}`} data-item={item}
+          const progress = active ? Math.min(1, q.paid / Math.max(1, cost)) : 0;
+          return <button key={item} className={`fusion-item ${active && q.ready ? 'ready' : ''} ${item.startsWith('upgrade:') ? 'upgrade' : ''}`} title={`${name} — ${cost}`} data-item={item}
             onClick={() => clickItem(item, tab)} onContextMenu={e => cancelItem(e, item)}>
             <Icon game={rig.current?.game} item={item} color={faction.color} accent={faction.accent} />
             {active && !q.ready && <span className="sweep" style={{ height: `${Math.round((1 - progress) * 100)}%` }} />}
-            <span className="label">{active && q.ready ? 'READY' : def.name}</span>
-            <span className="cost">{def.cost}</span>
+            <span className="label">{active && q.ready ? 'READY' : name}</span>
+            <span className="cost">{cost}</span>
             {count > 1 && <span className="count">{count}</span>}
           </button>;
         })}
-        {ui && !ui.options[tab].length && <p className="fusion-empty">{tab === 'structure' || tab === 'defense' ? 'Deploy your MCV to build.' : 'Build the right factory to unlock.'}</p>}
+        {ui && !ui.options[tab]?.length && <p className="fusion-empty">{tab === 'structure' || tab === 'defense' ? 'Deploy your MCV to build.' : tab === 'starport' ? 'Build a Starport to order from CHOAM.' : 'Build the right factory to unlock.'}</p>}
       </div>
       {ui?.supers.map(sp => <button key={sp.id} className={`fusion-super ${sp.ready ? 'ready' : ''}`} disabled={!sp.ready}
         onClick={() => { superId.current = sp.id; setMode('super'); }}>
         <span className="name">{sp.name}</span>
         <span className="bar"><i style={{ width: `${Math.round(sp.frac * 100)}%` }} /></span>
-        <span className="state">{sp.ready ? 'READY — CLICK TO TARGET' : `${Math.round(sp.frac * 100)}%`}</span>
+        <span className="state">{sp.ready ? (sp.kind === 'reinforce' || sp.kind === 'paradrop' ? 'READY — CLICK TO CALL IN' : 'READY — CLICK TO TARGET') : `${Math.round(sp.frac * 100)}%`}</span>
       </button>)}
       <div className="fusion-actions">
         <button className={modeView === 'sell' ? 'on' : ''} onClick={() => setMode(modeView === 'sell' ? 'normal' : 'sell')}>SELL</button>

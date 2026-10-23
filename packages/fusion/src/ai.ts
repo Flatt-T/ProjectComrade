@@ -42,33 +42,47 @@ export function runAI(game: Game, p: Player, s: AIState) {
   const count = (pred: (id: string) => boolean) => structures.filter(e => pred(e.type)).length;
   const sdef = (id: string) => game.pack.structures[id];
 
-  // 2. Base building.
+  // 2. Base building. While a building or upgrade is waiting, the army stops spending.
   const sq = p.queues.structure;
+  let saving = sq.items.length > 0 && !sq.ready;
   if (sq.ready) {
     const item = sq.items[0];
     const spot = findSite(game, p, item, base.x, base.y, 14);
     if (spot) game.enqueue(p.slot, { t: 'place', item, x: spot.x, y: spot.y });
     else game.enqueue(p.slot, { t: 'cancel', item });
   } else if (!sq.items.length) {
-    const options = game.buildOptions(p, 'structure').filter(id => !sdef(id).floor && !sdef(id).wall);
+    const all = game.buildOptions(p, 'structure');
+    // Shipyards need a coastline next to the base; the skirmish AI fights on land.
+    const options = all.filter(id => !id.includes(':') && !sdef(id).floor && !sdef(id).wall && !sdef(id).onWater);
+    const upgrades = all.filter(id => id.startsWith('upgrade:'));
     // A construction yard may supply a little power (Dune); still build real power first.
     const hasPowerPlant = structures.some(e => sdef(e.type).power > 0 && !sdef(e.type).constructionYard);
-    const pick = choose(options, [
+    // Core base first, then factory upgrades (they unlock most of the Dune arsenal), then the rest.
+    const core = choose(options, [
       id => sdef(id).power > 0 && (!hasPowerPlant || p.powerGen - p.powerUse < 40),
       id => !!sdef(id).refinery && count(t => !!sdef(t).refinery) < 1,
       id => sdef(id).produces === 'infantry' && !owned.has(id),
       id => sdef(id).produces === 'vehicle' && !owned.has(id),
+    ]);
+    const upgrade = !core ? upgrades.sort()[0] : undefined;
+    const core2 = !core && !upgrade ? choose(options, [
       id => !!sdef(id).refinery && count(t => !!sdef(t).refinery) < 2,
       id => !!sdef(id).radar && !owned.has(id),
+    ]) : undefined;
+    const pick = core ?? upgrade ?? core2 ?? choose(options, [
       id => !!sdef(id).storage && !sdef(id).refinery && p.storage > 0 && p.credits > p.storage * 0.8,
       id => !owned.has(id) && sdef(id).power <= 0,
       id => sdef(id).produces === 'vehicle' && count(t => sdef(t).produces === 'vehicle') < 2 && p.credits > 3000,
     ]);
-    if (pick && p.credits >= Math.min(game.costOf(pick), 600)) game.enqueue(p.slot, { t: 'build', item: pick });
+    // The structure tab is paid first every tick, so core buildings and upgrades are queued at
+    // once and the army waits; extras wait for the money.
+    const essential = !!(core || upgrade || core2);
+    if (pick && (essential || p.credits >= Math.min(game.costOf(pick, p), 600))) { game.enqueue(p.slot, { t: 'build', item: pick }); saving ||= essential; }
   }
 
   // Keep damaged buildings repaired while the treasury allows it.
-  if (p.credits > 800) for (const e of structures) if (!e.repairing && e.hp < e.maxHp * 0.75) { game.enqueue(p.slot, { t: 'repair', id: e.id }); break; }
+  // Dune buildings off concrete erode back to half health anyway, so only mend those badly hurt.
+  if (p.credits > 800) for (const e of structures) if (!e.repairing && e.hp < e.maxHp * (e.exposed ? 0.4 : 0.75)) { game.enqueue(p.slot, { t: 'repair', id: e.id }); break; }
 
   // 3. Defences once the economy is running.
   const dq = p.queues.defense;
@@ -94,34 +108,65 @@ export function runAI(game: Game, p: Player, s: AIState) {
   if (vq.items.length < 2) {
     const options = game.buildOptions(p, 'vehicle');
     const harvester = options.find(id => game.pack.units[id].harvester);
-    if (harvester && harvesters < refineries) game.enqueue(p.slot, { t: 'build', item: harvester });
-    else if (p.credits > 400) {
+    if (harvester && harvesters < Math.min(6, refineries * 2)) game.enqueue(p.slot, { t: 'build', item: harvester });
+    else {
+      // Only queue what the treasury covers outright, keeping a reserve while saving.
       const combat = options.filter(id => !game.pack.units[id].harvester && !game.pack.units[id].deploysTo && game.pack.units[id].weapon);
-      if (combat.length) game.enqueue(p.slot, { t: 'build', item: combat[game.rng.int(combat.length)] });
+      const item = combat.length ? combat[game.rng.int(combat.length)] : undefined;
+      if (item && p.credits >= game.costOf(item, p) + (saving ? 800 : 200)) game.enqueue(p.slot, { t: 'build', item });
     }
   }
+  // Air power: a few aircraft when the treasury allows.
+  const aq = p.queues.aircraft;
+  const fliers = units.filter(u => game.pack.units[u.type].kind === 'aircraft').length;
+  if (!aq.items.length && !saving && p.credits > 1500 && fliers < 4) {
+    const options = game.buildOptions(p, 'aircraft').filter(id => game.pack.units[id].weapon);
+    if (options.length) game.enqueue(p.slot, { t: 'build', item: options[game.rng.int(options.length)] });
+  }
   const iq = p.queues.infantry;
-  if (iq.items.length < 2 && p.credits > 300) {
+  if (iq.items.length < 2) {
     const combat = game.buildOptions(p, 'infantry').filter(id => game.pack.units[id].weapon);
-    if (combat.length) game.enqueue(p.slot, { t: 'build', item: combat[game.rng.int(combat.length)] });
+    const item = combat.length ? combat[game.rng.int(combat.length)] : undefined;
+    if (item && p.credits >= game.costOf(item, p) + (saving ? 800 : 100)) game.enqueue(p.slot, { t: 'build', item });
   }
   if (!s.rallySet) {
     const enemy = nearestEnemyBase(game, p, base);
     if (enemy) { game.enqueue(p.slot, { t: 'rally', x: base.x + Math.sign(enemy.x - base.x) * 6, y: base.y + Math.sign(enemy.y - base.y) * 6 }); s.rallySet = true; }
   }
 
-  // Superweapons fire at the enemy base as soon as they are charged.
+  // Superweapons fire at the enemy base as soon as they are charged; the Iron Curtain
+  // shields the army, and the Chronosphere is left to human hands.
   for (const e of structures) {
     const sw = game.superweaponOf(e);
-    if (!sw || e.charge < sw.charge) continue;
-    const target = nearestEnemyBase(game, p, base);
+    if (!sw || e.charge < sw.charge || sw.kind === 'chrono') continue;
+    if (sw.kind === 'curtain') {
+      const lead = units.find(u => game.pack.units[u.type].weapon && game.pack.units[u.type].kind === 'vehicle' && u.order === 'attackMove');
+      if (lead) game.enqueue(p.slot, { t: 'super', id: e.id, x: toCell(lead.x), y: toCell(lead.y) });
+      continue;
+    }
+    const target = sw.atBase ? base : nearestEnemyBase(game, p, base);
     if (target) game.enqueue(p.slot, { t: 'super', id: e.id, x: target.x + 1, y: target.y + 1 });
+  }
+
+  // Saboteurs and other charge-layers go for the nearest enemy building.
+  for (const u of units) {
+    const d = game.pack.units[u.type];
+    if (!d.c4 || d.weapon || u.order !== 'idle') continue;
+    const t = nearestEnemyStructure(game, p, u);
+    if (t) game.enqueue(p.slot, { t: 'attack', ids: [u.id], target: t.id });
+  }
+  // Strike aircraft fly sorties against the nearest enemy building once rearmed.
+  for (const u of units) {
+    const d = game.pack.units[u.type];
+    if (!d.ammo || u.order !== 'idle' || u.ammo < d.ammo) continue;
+    const t = nearestEnemyStructure(game, p, u);
+    if (t) game.enqueue(p.slot, { t: 'attack', ids: [u.id], target: t.id });
   }
 
   // 5. Army: defend the base, then attack in growing waves.
   const army = units.filter(u => {
     const d = game.pack.units[u.type];
-    return d.weapon && !d.harvester && !d.deploysTo;
+    return d.weapon && !d.harvester && !d.deploysTo && !d.ammo;
   });
   const idle = army.filter(u => u.order === 'idle');
   const intruder = findIntruder(game, p, base, 12);
@@ -190,11 +235,21 @@ function nearestEnemyBase(game: Game, p: Player, base: { x: number; y: number })
   return best;
 }
 
+function nearestEnemyStructure(game: Game, p: Player, from: Entity): Entity | undefined {
+  let best: Entity | undefined, bestD = Infinity;
+  for (const e of game.entities.values()) {
+    if (e.hp <= 0 || e.kind !== 'structure' || !game.isEnemy(p.slot, e.owner) || game.pack.structures[e.type].wall) continue;
+    const d = (e.x - from.x) ** 2 + (e.y - from.y) ** 2;
+    if (d < bestD) { bestD = d; best = e; }
+  }
+  return best;
+}
+
 function findIntruder(game: Game, p: Player, base: { x: number; y: number }, radius: number): Entity | undefined {
   const r = radius * LEPTONS;
   const bx = base.x * LEPTONS, by = base.y * LEPTONS;
   for (const e of game.entities.values()) {
-    if (e.hp <= 0 || e.kind !== 'unit' || !game.isEnemy(p.slot, e.owner)) continue;
+    if (e.hp <= 0 || e.kind !== 'unit' || e.carriedBy || e.disguised || !game.isEnemy(p.slot, e.owner)) continue;
     if (Math.abs(e.x - bx) < r && Math.abs(e.y - by) < r) return e;
   }
   return undefined;

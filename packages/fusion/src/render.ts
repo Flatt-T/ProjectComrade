@@ -6,7 +6,7 @@ import { LEPTONS } from './core';
 import type { Effect, Entity, Game, Projectile } from './game';
 import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
-import { ArtStyle, buildingMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
+import { ArtStyle, FLYING, ROTATING_DEFENCES, buildingMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
 import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
 
 export interface Camera { x: number; y: number; zoom: number }
@@ -103,7 +103,8 @@ export class FusionRenderer {
       if (e.hp <= 0 || e.kind !== 'unit') continue;
       if (e.owner !== this.viewer && viewer && !viewer.visible[this.game.cellOf(e)]) continue;
       const p = this.toScreen(e.x, e.y);
-      const d = Math.hypot(p.x - sx, p.y - sy + 4);
+      const lift = this.altitude(e) * this.view.zScale * this.camera.zoom;
+      const d = Math.hypot(p.x - sx, p.y - lift - sy + 4);
       if (d < bestD) { best = e; bestD = d; }
     }
     if (best) return best;
@@ -116,6 +117,20 @@ export class FusionRenderer {
   }
 
   // ------------------------------------------------------------ sprite cache
+
+  /** Height a unit flies at, in cells (0 on the ground). */
+  altitude(e: Entity): number {
+    const def = this.game.pack.units[e.type];
+    if (!def || def.kind !== 'aircraft') return 0;
+    // Carryalls and jets settle onto their pad while rearming or idle at base.
+    const pad = e.order === 'rearm' && e.x === e.px && e.y === e.py;
+    return (def.altitude ?? 1.5) * (pad ? 0.25 : 1);
+  }
+
+  /** Enemy units hidden by their own ability (Mirage Tank, submarines, Fremen, spies). */
+  private hiddenFromViewer(e: Entity): boolean {
+    return e.disguised && this.game.isEnemy(this.viewer, e.owner);
+  }
 
   private style(owner: number): ArtStyle { return styleFor(this.game.pack.id, this.game.players[owner]?.side ?? ''); }
   private teamColor(owner: number): RGB { return hexToRgb(this.game.players[owner]?.color ?? '#9a9a9a'); }
@@ -228,7 +243,18 @@ export class FusionRenderer {
         case 'bloom': e.emit(p.x, p.y, 2, 26, 'sand', 1.5); break;
         case 'wormEat': e.emit(p.x, p.y, 2, 30, 'sand', 1.6); break;
         case 'wormDive': e.emit(p.x, p.y, 2, 14, 'sand', 1.2); break;
-        case 'chrono': e.emit(p.x, p.y, 6, 14, 'blue', 0.8); break;
+        case 'chrono': if (!fx.x2) e.emit(p.x, p.y, 6, 14, 'blue', 0.8); break;
+        case 'chronoFlash': e.emit(p.x, p.y, 12, 40, 'blue', 1.6); this.shake = Math.max(this.shake, 3); break;
+        case 'capture': case 'upgrade': case 'promote': e.emit(p.x, p.y - 10, 4, 10, 'spark', 0.8); break;
+        case 'delivery': case 'lift': case 'drop': case 'dig': case 'undig': case 'parachute': e.emit(p.x, p.y, 2, 8, 'dust', 0.9); break;
+        case 'droneIn': case 'enter': case 'repairFx': e.emit(p.x, p.y - 4, 3, 5, 'spark', 0.6); break;
+        case 'reinforce': e.emit(p.x, p.y, 4, 20, 'sand', 1.3); break;
+      }
+      if (fx.kind === 'explosion' && fx.x2 >= 512) {
+        // Demolition Truck, Kirov crash, reactor meltdown: a much bigger blast.
+        const k = fx.x2 / 512;
+        e.emit(p.x, p.y, 8, 26 * k, 'fire', 1.8 * k); e.emit(p.x, p.y, 12, 18 * k, 'smoke', 1.8 * k); e.emit(p.x, p.y, 6, 14 * k, 'debris', 1.5);
+        this.decal(p.x, p.y, (fx.x2 / LEPTONS) * cell * 0.6, 'crater', 50000); this.shake = Math.max(this.shake, 6 * k);
       }
     }
   }
@@ -358,9 +384,20 @@ export class FusionRenderer {
     for (const e of game.entities.values()) {
       if (e.hp <= 0) continue;
       if (e.kind === 'unit') {
+        if (e.carriedBy) continue; // Drawn by its carrier (cargo) or hidden inside its victim (drone).
         if (e.owner !== this.viewer && viewer && !viewer.visible[game.cellOf(e)]) continue;
         const lx = e.px + (e.x - e.px) * alpha, ly = e.py + (e.y - e.py) * alpha;
-        items.push({ depth: depthOf(lx / LEPTONS, ly / LEPTONS), draw: () => this.drawUnit(e, lx, ly) });
+        if (this.hiddenFromViewer(e)) {
+          // A disguised Mirage Tank shows the enemy a tree; everything else simply vanishes.
+          if (game.pack.units[e.type].shape === 'mirage') items.push({ depth: depthOf(lx / LEPTONS, ly / LEPTONS), draw: () => {
+            const s = this.sprite('tree|1', () => bake(treeMesh(1), this.view));
+            const p = this.project(lx / LEPTONS - 0.5, ly / LEPTONS - 0.5);
+            this.blit(s, p.x, p.y);
+          } });
+          continue;
+        }
+        const air = this.altitude(e) > 0;
+        items.push({ depth: depthOf(lx / LEPTONS, ly / LEPTONS) + (air ? 10000 : 0), draw: () => this.drawUnit(e, lx, ly) });
       } else {
         if (viewer && !viewer.explored[e.cy * game.map.w + e.cx]) continue;
         items.push({ depth: depthOf(e.cx + e.w - 0.5, e.cy + e.h - 0.5) - 0.01, draw: () => this.drawStructure(e) });
@@ -421,6 +458,7 @@ export class FusionRenderer {
       }
       if (e.hp < e.maxHp * 0.25) { ctx.fillStyle = `rgba(255,${120 + (this.frame % 8) * 12},40,0.8)`; ctx.beginPath(); ctx.arc(c.x, c.y - 10, 3 + (this.frame % 5), 0, Math.PI * 2); ctx.fill(); }
     }
+    this.statusMarks(e, this.project(e.cx + e.w / 2, e.cy + e.h / 2), Math.max(e.w, e.h) * 16);
     if (e.repairing && this.frame % 30 < 18) {
       const c = this.project(e.cx + e.w / 2, e.cy + e.h / 2);
       ctx.font = '12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🔧', c.x, c.y - 30);
@@ -437,12 +475,22 @@ export class FusionRenderer {
     const { ctx } = this;
     const t = this.frame / 30;
     const zs = this.view.zScale;
-    if (shape === 'turret' || shape === 'rocketturret') {
+    if (ROTATING_DEFENCES.has(shape)) {
       if (shape === 'turret' && style === 'allied') return; // The Allied pillbox has no visible gun.
       const r = this.rot(e.turret);
       const s = this.sprite(`dt|${shape}|${style}|${color}|${r.key}`, () => bake(defenseTurretMesh(shape, style, team).rotated(r.angle), this.view, undefined, { shadow: false }));
-      const c = this.project(e.cx + 0.5, e.cy + 0.5);
+      const c = this.project(e.cx + e.w / 2, e.cy + e.h / 2);
       this.blit(s, c.x, c.y);
+    } else if (shape === 'chronosphere' && !off) {
+      const c = this.project(e.cx + e.w / 2, e.cy + e.h / 2);
+      this.glow(c.x, c.y - 1.1 * zs, 18 + 4 * Math.sin(t * 3), '150,230,255', 0.6);
+    } else if (shape === 'curtain' && !off) {
+      const c = this.project(e.cx + e.w / 2, e.cy + e.h / 2);
+      this.glow(c.x, c.y - 1.0 * zs, 16 + 3 * Math.sin(t * 4), '255,90,60', 0.55);
+    } else if ((shape === 'gap' || shape === 'sensor' || shape === 'cloning') && !off) {
+      const c = this.project(e.cx + e.w / 2, e.cy + e.h / 2);
+      const rgb = shape === 'gap' ? '150,225,255' : shape === 'sensor' ? '205,130,255' : '150,240,190';
+      this.glow(c.x, c.y - (shape === 'cloning' ? 0.7 : 1.6) * zs, 10 + 3 * Math.sin(t * 5 + e.id), rgb, 0.6);
     } else if (shape === 'radar') {
       const soviet = style === 'soviet';
       const c = this.project(e.cx + (soviet ? 1 : e.w - 0.6), e.cy + (soviet ? 1 : 0.65));
@@ -511,13 +559,43 @@ export class FusionRenderer {
   private drawUnit(e: Entity, lx: number, ly: number) {
     const { ctx, game } = this;
     const def = game.pack.units[e.type];
-    const p = this.project(lx / LEPTONS, ly / LEPTONS);
+    const ground = this.project(lx / LEPTONS, ly / LEPTONS);
+    const lift = this.altitude(e) * this.view.zScale;
+    // Ships ride the swell; aircraft hang above their own shadow.
+    const bob = def.kind === 'naval' ? Math.sin(this.frame / 18 + e.id) * 0.9 : lift ? Math.sin(this.frame / 25 + e.id) * 1.5 : 0;
+    const p = { x: ground.x, y: ground.y - lift + bob };
     const style = this.style(e.owner), team = this.teamColor(e.owner);
     const color = game.players[e.owner]?.color ?? '';
-    if (def.kind === 'infantry') this.drawInfantry(e, def.shape, p.x, p.y, color);
-    else {
+    if (lift) {
+      const size = FLYING.has(def.shape) ? (def.shape === 'kirov' ? 26 : 13) : 6;
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath(); ctx.ellipse(ground.x, ground.y, size, size * (this.iso ? 0.45 : 0.6), 0, 0, Math.PI * 2); ctx.fill();
+    }
+    if (e.disguised) ctx.globalAlpha = 0.5; // Own hidden units show ghosted.
+    if (def.kind === 'infantry' || def.shape === 'rocketeer') {
+      if (def.shape === 'rocketeer') {
+        // Jetpack flame under a flying soldier.
+        ctx.fillStyle = `rgba(255,${170 + (this.frame % 4) * 20},80,0.9)`;
+        ctx.beginPath(); ctx.ellipse(p.x, p.y + 2, 1.8, 4 + (this.frame % 3), 0, 0, Math.PI * 2); ctx.fill();
+      }
+      this.drawInfantry(e, def.shape, p.x, p.y, color);
+    } else {
+      if (e.carrying) {
+        // Carryall cargo hangs just below it.
+        const cargo = game.entities.get(e.carrying);
+        if (cargo) {
+          const cd = game.pack.units[cargo.type], r = this.rot(e.facing);
+          const cs = this.sprite(`h|${cd.shape}|${style}|${color}|${r.key}`, () => bake(hullMesh(cd.shape, style, team).rotated(r.angle), this.view));
+          this.blit(cs, p.x, p.y + 8);
+        }
+      }
       const hull = this.rot(e.facing);
-      const hs = this.sprite(`h|${def.shape}|${style}|${color}|${hull.key}`, () => bake(hullMesh(def.shape, style, team).rotated(hull.angle), this.view));
+      const air = FLYING.has(def.shape);
+      const hs = this.sprite(`h|${def.shape}|${style}|${color}|${hull.key}`, () => bake(hullMesh(def.shape, style, team).rotated(hull.angle), this.view, undefined, { shadow: !air && def.kind !== 'naval' }));
+      if (def.kind === 'naval') {
+        ctx.strokeStyle = 'rgba(220,240,255,0.35)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.ellipse(ground.x, ground.y + 1, def.shape === 'ship-carrier' || def.shape === 'ship-dreadnought' ? 40 : def.shape.startsWith('ship') || def.shape === 'sub' ? 30 : 18, this.iso ? 9 : 12, 0, 0, Math.PI * 2); ctx.stroke();
+      }
       this.blit(hs, p.x, p.y);
       if (hasTurret(def.shape)) {
         const tr = this.rot(e.turret);
@@ -531,13 +609,65 @@ export class FusionRenderer {
         ctx.globalAlpha = 1;
       }
     }
+    ctx.globalAlpha = 1;
     if (e.convertedUntil) { ctx.fillStyle = 'rgba(120,255,120,0.22)'; ctx.beginPath(); ctx.arc(p.x, p.y - 4, 14, 0, Math.PI * 2); ctx.fill(); }
+    if (!e.convertedUntil && e.owner !== e.originalOwner) {
+      // Mind-controlled: a violet halo.
+      ctx.strokeStyle = `rgba(205,130,255,${0.5 + 0.3 * Math.sin(this.frame / 6)})`; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y - 4, 12, 6, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    if (e.drone) {
+      // A terror drone clinging to the hull.
+      ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(p.x + 4, p.y - 12, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = this.frame % 10 < 5 ? '#ff4030' : '#a02010'; ctx.fillRect(p.x + 5, p.y - 13, 1.5, 1.5);
+    }
+    if (e.deployed) this.deployedLook(e, def.shape, ground.x, ground.y);
+    this.statusMarks(e, p, def.kind === 'infantry' ? 8 : 16);
+    if (e.rank) this.chevrons(p.x + (def.kind === 'infantry' ? 6 : 12), p.y - (def.kind === 'infantry' ? 16 : 20), e.rank);
     if (this.selected.has(e.id)) {
       ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.2;
       const r = def.kind === 'infantry' ? 7 : 15;
       ctx.beginPath(); ctx.ellipse(p.x, p.y + 1, r, this.iso ? r * 0.5 : r * 0.6, 0, 0, Math.PI * 2); ctx.stroke();
     }
     if (this.selected.has(e.id) || this.hover === e.id) this.healthBar(p.x, p.y - (def.kind === 'infantry' ? 18 : 24), def.kind === 'infantry' ? 14 : 26, e.hp / e.maxHp, this.selected.has(e.id));
+  }
+
+  /** Iron Curtain sheen and a blinking planted charge, for units and buildings alike. */
+  private statusMarks(e: Entity, p: { x: number; y: number }, r: number) {
+    const { ctx, game } = this;
+    if (e.invulnUntil > game.tick) {
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = `rgba(255,40,30,${0.22 + 0.12 * Math.sin(this.frame / 5)})`;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y - r * 0.4, r, r * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    if (e.c4At > game.tick && this.frame % 12 < 6) {
+      ctx.fillStyle = '#ff2a1a'; ctx.beginPath(); ctx.arc(p.x, p.y - r * 0.6, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  /** Veterancy chevrons: one for veteran, two for elite. */
+  private chevrons(x: number, y: number, rank: number) {
+    const { ctx } = this;
+    ctx.strokeStyle = rank >= 2 ? '#ffd24a' : '#e8e8e8'; ctx.lineWidth = 1.6;
+    for (let k = 0; k < Math.min(2, rank); k++) {
+      ctx.beginPath(); ctx.moveTo(x - 3, y + k * 3.5); ctx.lineTo(x, y - 2.5 + k * 3.5); ctx.lineTo(x + 3, y + k * 3.5); ctx.stroke();
+    }
+  }
+
+  /** Deployed stances: G.I. sandbags, Desolator rad cloud, a thumping Thumper. */
+  private deployedLook(e: Entity, shape: string, x: number, y: number) {
+    const { ctx } = this;
+    if (shape === 'desolator') {
+      this.glow(x, y - 2, 20 + 4 * Math.sin(this.frame / 8), '150,255,120', 0.35);
+    } else if (shape === 'thumper') {
+      const k = Math.abs(Math.sin(this.frame / 4));
+      ctx.fillStyle = '#6a6052'; ctx.fillRect(x + 4, y - 8 - k * 4, 3, 8);
+      if (k < 0.2) this.fx.emit(x + 5, y, 2, 1, 'sand', 0.4);
+    } else {
+      ctx.fillStyle = '#9a8a64';
+      for (let k = 0; k < 6; k++) { const a = (k / 6) * Math.PI * 2; ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * 7, y + Math.sin(a) * (this.iso ? 3.5 : 5), 3, 2, 0, 0, Math.PI * 2); ctx.fill(); }
+    }
   }
 
   private drawInfantry(e: Entity, shape: string, x: number, y: number, color: string) {
@@ -570,8 +700,19 @@ export class FusionRenderer {
     ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y - 7.5, 3, 3.8, 0, 0, Math.PI * 2); ctx.fill();
     // Head and helmet.
     ctx.fillStyle = '#e2bf94'; ctx.beginPath(); ctx.arc(x, y - 12, 1.9, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = shape === 'infantry-elite' ? '#222' : mid;
+    const helmet: Record<string, string> = { 'infantry-elite': '#222', engineer: '#e8c640', spy: '#2a2a30', saboteur: '#1a1a1a', yuri: '#c9a07c', ivan: '#5a3a24', chrono: '#9fd4ff', desolator: '#3e5a2c', thumper: '#8a7350' };
+    ctx.fillStyle = helmet[shape] ?? mid;
     ctx.beginPath(); ctx.arc(x, y - 12.6, 2.2, Math.PI, Math.PI * 2); ctx.fill();
+    if (shape === 'chrono') this.glow(x, y - 8, 8, '140,200,255', 0.35 + 0.15 * Math.sin(this.frame / 6));
+    if (shape === 'yuri') this.glow(x, y - 12, 6, '205,130,255', 0.3);
+    if (shape === 'desolator') { ctx.fillStyle = '#7fbf4a'; ctx.fillRect(x - 4, y - 10, 2, 5); }
+    if (shape === 'ivan') { ctx.fillStyle = '#c03020'; ctx.beginPath(); ctx.arc(x - cos * 4, y - 7, 1.8, 0, Math.PI * 2); ctx.fill(); }
+    if (shape === 'engineer' || shape === 'spy' || shape === 'thumper' || shape === 'saboteur' || shape === 'yuri') {
+      // No rifle: a toolbox, a briefcase, the thumper or a satchel instead.
+      ctx.fillStyle = shape === 'engineer' ? '#c8a030' : shape === 'thumper' ? '#6a6052' : '#3a3530';
+      ctx.fillRect(x + cos * 3 - 1.5, y - 6, 3, 3);
+      return;
+    }
     // Weapon pointing along the facing.
     ctx.strokeStyle = shape === 'infantry-rocket' ? '#6f7a62' : '#1e1e1e';
     ctx.lineWidth = shape === 'infantry-rocket' ? 2.4 : 1.4;
@@ -619,6 +760,16 @@ export class FusionRenderer {
       const w = game.pack.weapons[pr.weapon];
       const f = this.flight(pr);
       if (w.visual === 'missile') missile(ctx, f.x, f.y - f.z, f.angle, 3.2, Math.random() * 0.6);
+      else if (w.visual === 'bomb') {
+        // Kirov bombs drop from the airship to the ground.
+        const src = game.entities.get(pr.source);
+        const drop = src ? this.altitude(src) * this.view.zScale : 0;
+        const total = Math.max(1, Math.hypot(pr.tx - pr.sx, pr.ty - pr.sy)), done = Math.hypot(pr.x - pr.sx, pr.y - pr.sy) / total;
+        ctx.fillStyle = '#2a2622'; ctx.beginPath(); ctx.ellipse(f.x, f.y - drop * (1 - done), 2.2, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+      } else if (w.visual === 'torpedo') {
+        ctx.strokeStyle = 'rgba(230,245,255,0.7)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(f.x - Math.cos(f.angle) * 12, f.y - Math.sin(f.angle) * 12); ctx.lineTo(f.x, f.y); ctx.stroke();
+      }
       else if (w.visual === 'artillery') {
         // Shell on a ballistic arc, its shadow racing along the ground.
         ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(f.x, f.y, 3, this.iso ? 1.5 : 2, 0, 0, Math.PI * 2); ctx.fill();
@@ -674,7 +825,8 @@ export class FusionRenderer {
           break;
         case 'explosion': case 'bigExplosion': case 'vehicleDeath': case 'death': case 'crush': case 'wormEat': {
           const big = fx.kind === 'bigExplosion';
-          const r = (big ? 30 : fx.kind === 'wormEat' ? 22 : fx.kind === 'death' || fx.kind === 'crush' ? 6 : fx.kind === 'vehicleDeath' ? 18 : 15) * (0.35 + t);
+          const blast = fx.kind === 'explosion' && fx.x2 >= 512 ? (fx.x2 / LEPTONS) * cell * 0.7 : 0;
+          const r = (blast || (big ? 30 : fx.kind === 'wormEat' ? 22 : fx.kind === 'death' || fx.kind === 'crush' ? 6 : fx.kind === 'vehicleDeath' ? 18 : 15)) * (0.35 + t);
           if (fx.kind === 'wormEat') { ctx.fillStyle = `rgba(170,120,64,${1 - t})`; ctx.beginPath(); ctx.arc(a.x, a.y - 4, r, 0, Math.PI * 2); ctx.fill(); break; }
           const g = ctx.createRadialGradient(a.x, a.y - 6, 0, a.x, a.y - 6, r);
           g.addColorStop(0, `rgba(255,250,210,${1 - t})`); g.addColorStop(0.35, `rgba(255,180,60,${0.95 * (1 - t)})`);
@@ -808,7 +960,69 @@ export class FusionRenderer {
           bolt(ctx, a.x + (Math.random() - 0.5) * 60, a.y - 300, a.x, a.y - 4, 18, 1 - t);
           this.glow(a.x, a.y, cell * 1.2, '200,220,255', 1 - t);
           break;
+        case 'laser': case 'rad': case 'psychic': {
+          const rgb = fx.kind === 'laser' ? '255,250,200' : fx.kind === 'rad' ? '150,255,110' : '205,130,255';
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.strokeStyle = `rgba(${rgb},${1 - t})`; ctx.lineWidth = 3 * (1 - t) + 1;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 10);
+          if (fx.kind === 'psychic') for (let k = 1; k <= 8; k++) ctx.lineTo(a.x + (b.x - a.x) * k / 8 + Math.sin(k * 2 + this.frame / 2) * 3, a.y - 10 + (b.y - a.y + 5) * k / 8);
+          else ctx.lineTo(b.x, b.y - 5);
+          ctx.stroke(); ctx.globalCompositeOperation = 'source-over';
+          break;
+        }
+        case 'paradrop': {
+          // The transport plane crosses toward the drop zone.
+          const sx = a.x - 400 * (1 - t), sy = a.y - 70 - 150 * (1 - t);
+          ctx.fillStyle = 'rgba(40,44,48,0.9)';
+          ctx.beginPath(); ctx.moveTo(sx + 16, sy); ctx.lineTo(sx - 12, sy - 4); ctx.lineTo(sx - 12, sy + 4); ctx.closePath(); ctx.fill();
+          ctx.fillRect(sx - 4, sy - 14, 4, 28);
+          break;
+        }
+        case 'parachute': {
+          const y = a.y - 50 * (1 - t);
+          ctx.fillStyle = `rgba(235,235,225,${1 - t * 0.5})`;
+          ctx.beginPath(); ctx.arc(a.x, y - 14, 7, Math.PI, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = 'rgba(80,80,80,0.6)'; ctx.lineWidth = 0.6;
+          ctx.beginPath(); ctx.moveTo(a.x - 7, y - 14); ctx.lineTo(a.x, y - 6); ctx.lineTo(a.x + 7, y - 14); ctx.stroke();
+          break;
+        }
+        case 'chronoCharge': case 'curtainCharge': {
+          const rgb = fx.kind === 'chronoCharge' ? '140,210,255' : '255,80,60';
+          const pulse = 0.5 + 0.5 * Math.sin(age / 3);
+          for (const q of fx.kind === 'chronoCharge' ? [a, b] : [a]) {
+            ctx.strokeStyle = `rgba(${rgb},${0.4 + 0.4 * pulse})`; ctx.lineWidth = 2;
+            const rr = cell * (fx.kind === 'chronoCharge' ? 2.5 : fx.x2 / LEPTONS) * (0.8 + 0.2 * pulse);
+            ctx.beginPath(); ctx.ellipse(q.x, q.y, rr, rr * squash, 0, 0, Math.PI * 2); ctx.stroke();
+          }
+          break;
+        }
+        case 'chronoFlash': case 'curtain': {
+          if (fx.kind === 'curtain' && t > 0.1) break;
+          const rgb = fx.kind === 'chronoFlash' ? '160,220,255' : '255,70,50';
+          this.glow(a.x, a.y, cell * (fx.x2 / LEPTONS) * 1.2, rgb, 1 - t * (fx.kind === 'curtain' ? 10 : 1));
+          break;
+        }
+        case 'infiltrate': case 'promote': case 'upgrade': case 'capture': {
+          // Floating callout above the target.
+          const label = fx.kind === 'promote' ? (fx.x2 >= 2 ? 'ELITE' : 'VETERAN') : fx.kind === 'upgrade' ? 'UPGRADED' : fx.kind === 'capture' ? 'CAPTURED'
+            : ({ steal: 'CREDITS STOLEN', blackout: 'POWER DOWN', reshroud: 'RADAR JAMMED', veteran: 'TECH STOLEN', super: 'TIMER RESET' } as Record<string, string>)[fx.color ?? ''] ?? 'INFILTRATED';
+          ctx.font = 'bold 10px ui-monospace, monospace'; ctx.textAlign = 'center';
+          ctx.fillStyle = `rgba(0,0,0,${0.6 * (1 - t)})`; ctx.fillText(label, a.x + 1, a.y - 28 - t * 20 + 1);
+          ctx.fillStyle = `rgba(255,236,150,${1 - t})`; ctx.fillText(label, a.x, a.y - 28 - t * 20);
+          break;
+        }
+        case 'c4':
+          if (age % 10 < 5) { ctx.fillStyle = '#ff2a1a'; ctx.beginPath(); ctx.arc(a.x, a.y - 8, 3, 0, Math.PI * 2); ctx.fill(); }
+          break;
         case 'chrono': case 'convert': case 'bloom': case 'build': case 'denied': case 'wormDive': {
+          if (fx.kind === 'chrono' && fx.x2) {
+            // Chrono Legionnaire beam.
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.strokeStyle = `rgba(150,215,255,${1 - t})`; ctx.lineWidth = 4 * (1 - t) + 1;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y - 10); ctx.lineTo(b.x, b.y - 5); ctx.stroke();
+            ctx.globalCompositeOperation = 'source-over';
+            break;
+          }
           const color = fx.kind === 'chrono' ? '120,190,255' : fx.kind === 'convert' ? '130,255,120' : fx.kind === 'bloom' ? '240,140,60' : fx.kind === 'denied' ? '255,80,60' : '230,220,200';
           ctx.strokeStyle = `rgba(${color},${1 - t})`; ctx.lineWidth = 2;
           ctx.beginPath(); ctx.ellipse(a.x, a.y - 4, 6 + t * 18, (6 + t * 18) * squash, 0, 0, Math.PI * 2); ctx.stroke();
@@ -984,15 +1198,16 @@ export function drawIcon(target: HTMLCanvasElement, game: Game, item: string, co
   const side = game.pack.factions.find(f => f.color === color)?.side ?? '';
   const style = styleFor(game.pack.id, side);
   const team = hexToRgb(color);
-  const unit = game.pack.units[item], s = game.pack.structures[item];
-  const key = `${game.pack.id}|${item}|${color}`;
+  const base = item.replace(/^(upgrade|starport):/, '');
+  const unit = game.pack.units[base], s = game.pack.structures[base];
+  const key = `${game.pack.id}|${base}|${color}`;
   let sprite = iconCache.get(key);
   if (!sprite) {
     if (s?.floor) {
       const c = concreteTile(view);
       sprite = { canvas: c, ox: c.width / 2, oy: c.height / 2 };
     } else if (s) sprite = bake(s.wall ? wallMesh(10, style) : buildingMesh(s.shape, s.w, s.h, style, team), view, undefined, { shadow: false });
-    else if (unit && unit.kind === 'vehicle') {
+    else if (unit && unit.kind !== 'infantry' && unit.shape !== 'rocketeer') {
       const m = hullMesh(unit.shape, style, team);
       if (hasTurret(unit.shape)) m.merge(turretMesh(unit.shape, style, team));
       sprite = bake(m.rotated(Math.PI * 0.15), view, undefined, { shadow: false });
@@ -1012,5 +1227,11 @@ export function drawIcon(target: HTMLCanvasElement, game: Game, item: string, co
     g.strokeStyle = unit.shape === 'infantry-rocket' ? accent : '#1e1e1e'; g.lineWidth = unit.shape === 'infantry-rocket' ? 4 : 2.5;
     g.beginPath(); g.moveTo(-2, -8); g.lineTo(14, -12); g.stroke();
     g.restore();
+  }
+  if (item.startsWith('upgrade:')) {
+    // Upgrade badge: a bold arrow in the corner.
+    g.fillStyle = '#ffd24a'; g.strokeStyle = '#3a2a00'; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(W - 12, 4); g.lineTo(W - 3, 14); g.lineTo(W - 8, 14); g.lineTo(W - 8, 22); g.lineTo(W - 16, 22); g.lineTo(W - 16, 14); g.lineTo(W - 21, 14); g.closePath();
+    g.fill(); g.stroke();
   }
 }

@@ -1,7 +1,7 @@
 import { Hasher, LEPTONS, Rng, cellCenter, dist, facingDelta, facingTo, toCell } from './core';
-import { MapData, buildableTerrain, generateMap, inBounds, passable, resourceIndex, terrainPassable } from './map';
+import { MapData, buildableTerrain, generateMap, inBounds, isWater, passable, resourceIndex, terrainPassable } from './map';
 import { findPath, nearestCell } from './path';
-import { MapPreset, QueueKind, RulePack, StructureDef, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules';
+import { InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules';
 import { runAI, AIState, createAIState } from './ai';
 
 export type Command =
@@ -14,13 +14,15 @@ export type Command =
   | { t: 'harvest'; ids: number[]; x: number; y: number }
   | { t: 'stop'; ids: number[] }
   | { t: 'deploy'; ids: number[] }
+  /** Engineers capture or repair, spies infiltrate, damaged vehicles visit a repair pad, aircraft land to rearm. */
+  | { t: 'enter'; ids: number[]; target: number }
   | { t: 'build'; item: string }
   | { t: 'cancel'; item: string }
   | { t: 'place'; item: string; x: number; y: number }
   | { t: 'sell'; id: number }
   | { t: 'repair'; id: number }
   | { t: 'rally'; x: number; y: number }
-  | { t: 'super'; id: number; x: number; y: number }
+  | { t: 'super'; id: number; x: number; y: number; x2?: number; y2?: number }
   | { t: 'surrender' };
 
 export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number }
@@ -35,7 +37,7 @@ export interface GameSetup {
   techLevel?: number;
 }
 
-export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy';
+export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy' | 'enter' | 'rearm' | 'ferry';
 export type HarvestState = 'seek' | 'gather' | 'toRefinery' | 'unload';
 
 export interface Entity {
@@ -88,6 +90,28 @@ export interface Entity {
   force: boolean;
   /** Cell targeted by a force-fire on open ground. */
   fireCell: number;
+  /** Veterancy: experience (value of kills) and rank (0 rookie, 1 veteran, 2 elite). */
+  xp: number;
+  rank: number;
+  /** Aircraft ammunition left. */
+  ammo: number;
+  /** Deployed in place (GI sandbags, Desolator, Thumper). */
+  deployed: boolean;
+  /** Mirage Tank: hidden from enemies after standing still. */
+  disguised: boolean;
+  stillTicks: number;
+  /** Carryall cargo, or the carrier/vehicle this unit is riding in (terror drones ride their victims). */
+  carrying: number;
+  carriedBy: number;
+  /** Yuri: the unit under permanent mind control. */
+  controls: number;
+  /** A planted charge: detonation tick and the player who planted it. */
+  c4At: number;
+  c4By: number;
+  /** Iron Curtain: invulnerable until this tick. */
+  invulnUntil: number;
+  /** Terror drone inside this vehicle. */
+  drone: number;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -111,16 +135,38 @@ export interface Player {
   visible: Uint8Array;
   rally: number;
   stats: { built: number; lost: number; killed: number; harvested: number };
+  /** Upgrade level bought for each structure type (Dune factories and yard). */
+  upgrades: Record<string, number>;
+  /** A spy in a power plant shuts the grid down until this tick. */
+  blackoutUntil: number;
+  /** A spy in a factory makes everything it builds start as a veteran. */
+  veteranQueues: QueueKind[];
+  /** Cached from owned support buildings whenever the base changes. */
+  incomeBonus: number;
+  costReduction: number;
 }
 
 export interface Projectile { id: number; owner: number; weapon: string; x: number; y: number; sx: number; sy: number; tx: number; ty: number; target: number; source: number }
 /** Visual-only event for the renderer. `item`/`owner` let it draw the right sprite. */
 export interface Effect { kind: string; x: number; y: number; x2: number; y2: number; tick: number; dur: number; color?: string; item?: string; owner?: number }
 /** A scheduled superweapon impact, resolved deterministically on its tick. */
-export interface Strike { tick: number; x: number; y: number; owner: number; damage: number; radius: number; kind: 'missile' | 'ion' | 'bolt'; name: string }
+export interface Strike {
+  tick: number; x: number; y: number; owner: number; damage: number; radius: number;
+  kind: 'missile' | 'ion' | 'bolt' | 'drop' | 'chrono' | 'curtain';
+  name: string;
+  /** Chronosphere destination. */
+  x2?: number; y2?: number;
+  /** Paradrops and reinforcements. */
+  units?: string[];
+  /** Iron Curtain length. */
+  duration?: number;
+}
 export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number }
 
-const QUEUES: QueueKind[] = ['structure', 'defense', 'infantry', 'vehicle'];
+const QUEUES: QueueKind[] = ['structure', 'defense', 'infantry', 'vehicle', 'aircraft', 'naval', 'starport'];
+const UPGRADE = 'upgrade:', STARPORT = 'starport:';
+/** Arm's length from a building's edge: any cell touching it, diagonals included. */
+const REACH = 288;
 
 export class Game {
   readonly pack: RulePack;
@@ -134,6 +180,8 @@ export class Game {
   worms: Worm[] = [];
   strikes: Strike[] = [];
   tick = 0;
+  /** Dune Starport: CHOAM price level in percent. */
+  market = 100;
   over = false;
   winnerTeam = -1;
   private nextId = 1;
@@ -158,9 +206,10 @@ export class Game {
       this.players.push({
         slot, name: p.name, faction: faction.id, side: faction.side, color: faction.color, accent: faction.accent,
         ai: p.ai, team: p.team ?? slot, credits, storage: 0, powerGen: 0, powerUse: 0, defeated: false,
-        queues: { structure: queue(), defense: queue(), infantry: queue(), vehicle: queue() },
+        queues: { structure: queue(), defense: queue(), infantry: queue(), vehicle: queue(), aircraft: queue(), naval: queue(), starport: queue() },
         explored: new Uint8Array(size), visible: new Uint8Array(size), rally: -1,
         stats: { built: 0, lost: 0, killed: 0, harvested: 0 },
+        upgrades: {}, blackoutUntil: 0, veteranQueues: [], incomeBonus: 0, costReduction: 0,
       });
       this.ai.push(p.ai ? createAIState(slot) : null);
       // The MCV sits on the start cell; the escort forms up outside its deploy footprint.
@@ -177,7 +226,7 @@ export class Game {
       faction.startUnits.filter(t => t !== mcvType).forEach(type => {
         const origin = (Math.min(this.map.h - 1, fy + (yard?.h ?? 1) + 1)) * this.map.w + start.x;
         const cell = nearestCell(this.map, origin, 8,
-          i => passable(this.pack, this.map, i, this.pack.units[type].kind) && !this.unitInCell(i) && !inFootprint(i));
+          i => passable(this.pack, this.map, i, this.moveClass(this.pack.units[type])) && !this.unitInCell(i) && !inFootprint(i));
         if (cell >= 0) this.spawnUnit(type, slot, cell);
       });
     });
@@ -196,12 +245,14 @@ export class Game {
   private apply(slot: number, cmd: Command) {
     const player = this.players[slot];
     if (!player || player.defeated) return;
-    const own = (ids: number[]) => ids.map(id => this.entities.get(id)).filter((e): e is Entity => !!e && e.owner === slot && e.kind === 'unit' && e.hp > 0);
+    const own = (ids: number[]) => ids.map(id => this.entities.get(id)).filter((e): e is Entity => !!e && e.owner === slot && e.kind === 'unit' && e.hp > 0 && !e.carriedBy);
     switch (cmd.t) {
       case 'move': case 'attackMove': {
         const units = own(cmd.ids);
         const goals = this.spreadGoals(units, this.cellIndex(cmd.x, cmd.y));
         units.forEach((u, n) => {
+          u.deployed = false;
+          if (u.carrying) this.drop(u);
           u.order = cmd.t; u.target = 0; u.force = false; u.goal = goals[n]; u.resume = goals[n]; u.path = this.pathFor(u, goals[n]);
           if (u.hstate) u.hstate = 'seek';
         });
@@ -212,8 +263,7 @@ export class Game {
         if (!target || target.hp <= 0) break;
         const kind = this.targetKind(target);
         for (const u of own(cmd.ids)) {
-          const w = this.weaponOf(u);
-          if (w && weaponCanTarget(w, kind) && (cmd.force || this.isEnemy(slot, target.owner) || target.owner < 0)) {
+          if (this.canEngage(u, target, kind) && (cmd.force || this.isEnemy(slot, target.owner) || target.owner < 0)) {
             u.order = 'attack'; u.target = target.id; u.force = !!cmd.force; u.path = []; u.repathTick = 0; u.resume = -1;
           }
         }
@@ -230,7 +280,7 @@ export class Game {
         break;
       case 'scatter':
         for (const u of own(cmd.ids)) {
-          const kind = this.unitDef(u).kind;
+          const kind = this.moveClass(this.unitDef(u));
           const here = this.cellOf(u);
           const cell = nearestCell(this.map, this.cellIndex((here % this.map.w) + this.rng.int(5) - 2, Math.floor(here / this.map.w) + this.rng.int(5) - 2), 3,
             i => i !== here && passable(this.pack, this.map, i, kind));
@@ -248,6 +298,23 @@ export class Game {
       case 'deploy':
         for (const u of own(cmd.ids)) this.deploy(u);
         break;
+      case 'enter': {
+        const target = this.entities.get(cmd.target);
+        if (!target || target.hp <= 0 || target.kind !== 'structure') break;
+        for (const u of own(cmd.ids)) {
+          const def = this.unitDef(u);
+          const sdef = this.structDef(target);
+          const enemy = this.isEnemy(slot, target.owner);
+          const ok = def.engineer ? enemy || target.owner === slot && target.hp < target.maxHp
+            : def.spy ? enemy
+            : target.owner === slot && (sdef.repairPad && def.kind !== 'infantry' && def.kind !== 'aircraft' || sdef.airfield && def.kind === 'aircraft');
+          if (!ok) continue;
+          u.deployed = false;
+          if (sdef.airfield && def.kind === 'aircraft') { u.order = 'rearm'; u.dock = target.id; u.path = [this.cellOf(target)]; continue; }
+          u.order = 'enter'; u.target = target.id; u.path = []; u.repathTick = 0;
+        }
+        break;
+      }
       case 'build': this.startBuild(player, cmd.item); break;
       case 'cancel': this.cancelBuild(player, cmd.item); break;
       case 'place': this.place(player, cmd.item, cmd.x, cmd.y); break;
@@ -268,7 +335,7 @@ export class Game {
         break;
       }
       case 'rally': player.rally = this.cellIndex(cmd.x, cmd.y); break;
-      case 'super': this.launchSuper(player, cmd.id, cmd.x, cmd.y); break;
+      case 'super': this.launchSuper(player, cmd.id, cmd.x, cmd.y, cmd.x2, cmd.y2); break;
       case 'surrender': this.defeat(player); break;
     }
   }
@@ -288,12 +355,21 @@ export class Game {
       const ai = this.ai[p.slot];
       if (ai && !p.defeated && (this.tick + p.slot * 5) % 15 === 0) runAI(this, p, ai);
     }
+    for (const p of this.players) if (p.blackoutUntil && this.tick >= p.blackoutUntil) { p.blackoutUntil = 0; this.powerDirty = true; }
+    const market = this.pack.mechanics.market;
+    if (market && this.tick % market.every === 0) this.market = market.min + this.rng.int(market.max - market.min + 1);
     if (this.powerDirty) this.updatePower();
     for (const p of this.players) if (!p.defeated) this.production(p);
     for (const e of this.entities.values()) {
       e.px = e.x; e.py = e.y;
       if (e.hp <= 0) continue;
+      if (e.c4At && this.tick >= e.c4At) {
+        this.effect('bigExplosion', e.x, e.y, 0, 0, 30);
+        this.damage(e, e.hp, e.c4By);
+        continue;
+      }
       if (e.convertedUntil && this.tick >= e.convertedUntil) { e.owner = e.originalOwner; e.convertedUntil = 0; e.order = 'idle'; e.target = 0; e.path = []; }
+      if (e.carriedBy) continue; // Moved by whatever carries it.
       if (e.kind === 'unit') this.unitThink(e); else this.structureThink(e);
     }
     this.updateProjectiles();
@@ -310,13 +386,24 @@ export class Game {
   cellIndex(x: number, y: number) { return Math.max(0, Math.min(this.map.h - 1, y)) * this.map.w + Math.max(0, Math.min(this.map.w - 1, x)); }
   cellOf(e: { x: number; y: number }) { return this.cellIndex(toCell(e.x), toCell(e.y)); }
   unitDef(e: Entity): UnitDef { return this.pack.units[e.type]; }
+  moveClass(def: UnitDef): MoveClass { return def.amphibious ? 'amphibious' : def.kind; }
+  isAircraft(e: Entity) { return e.kind === 'unit' && this.pack.units[e.type].kind === 'aircraft'; }
   structDef(e: Entity): StructureDef { return this.pack.structures[e.type]; }
   weaponOf(e: Entity): WeaponDef | undefined {
-    const id = e.kind === 'unit' ? this.pack.units[e.type]?.weapon : this.pack.structures[e.type]?.weapon;
+    const def = e.kind === 'unit' ? this.pack.units[e.type] : undefined;
+    const id = def ? (e.deployed && def.deployWeapon) || def.weapon : this.pack.structures[e.type]?.weapon;
     return id ? this.pack.weapons[id] : undefined;
   }
-  targetKind(e: Entity): 'infantry' | 'vehicle' | 'structure' {
+  targetKind(e: Entity): TargetKind {
     return e.kind === 'structure' ? 'structure' : this.pack.units[e.type].kind;
+  }
+  /** Can this unit be ordered to attack that target, by weapon or by a special ability? */
+  canEngage(u: Entity, t: Entity, kind = this.targetKind(t)): boolean {
+    const def = this.unitDef(u);
+    if (def.c4 && (kind === 'structure' || !def.weapon)) return true;
+    if (def.terror && kind === 'vehicle') return true;
+    const w = this.weaponOf(u);
+    return !!w && weaponCanTarget(w, kind);
   }
   sightOf(e: Entity) { return e.kind === 'unit' ? this.pack.units[e.type].sight : this.pack.structures[e.type].sight; }
   armorOf(e: Entity) { return e.kind === 'unit' ? this.pack.units[e.type].armor : this.pack.structures[e.type].armor; }
@@ -327,6 +414,7 @@ export class Game {
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
+      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, drone: 0,
     };
   }
 
@@ -334,6 +422,7 @@ export class Game {
     const def = this.pack.units[type];
     const e = this.blank(type, 'unit', owner, cellCenter(cell % this.map.w), cellCenter(Math.floor(cell / this.map.w)), def.hp);
     if (def.harvester) e.order = 'harvest';
+    e.ammo = def.ammo ?? 0;
     this.entities.set(e.id, e);
     return e;
   }
@@ -353,14 +442,15 @@ export class Game {
     }
     if (def.refinery?.freeUnit) {
       const dock = this.cellIndex(cx + def.refinery.dockX, cy + def.refinery.dockY);
-      const cell = nearestCell(this.map, dock, 4, i => passable(this.pack, this.map, i, 'vehicle'));
+      const free = this.pack.units[def.refinery.freeUnit];
+      const cell = free ? nearestCell(this.map, dock, 4, i => passable(this.pack, this.map, i, this.moveClass(free))) : -1;
       if (cell >= 0) this.spawnUnit(def.refinery.freeUnit, owner, cell);
     }
     return e;
   }
 
   unitInCell(cell: number, except = 0): Entity | undefined {
-    for (const e of this.entities.values()) if (e.kind === 'unit' && e.hp > 0 && e.id !== except && this.cellOf(e) === cell) return e;
+    for (const e of this.entities.values()) if (e.kind === 'unit' && e.hp > 0 && e.id !== except && !e.carriedBy && !this.isAircraft(e) && this.cellOf(e) === cell) return e;
     return undefined;
   }
 
@@ -389,7 +479,7 @@ export class Game {
   private spreadGoals(units: Entity[], center: number): number[] {
     const taken = new Set<number>();
     return units.map(u => {
-      const kind = this.unitDef(u).kind;
+      const kind = this.moveClass(this.unitDef(u));
       const cell = nearestCell(this.map, center, 8, i => !taken.has(i) && passable(this.pack, this.map, i, kind));
       const goal = cell >= 0 ? cell : center;
       taken.add(goal);
@@ -398,23 +488,28 @@ export class Game {
   }
 
   private pathFor(u: Entity, goal: number, allow?: number): number[] {
-    return findPath(this.pack, this.map, this.unitDef(u).kind, this.cellOf(u), goal, { allow });
+    return findPath(this.pack, this.map, this.moveClass(this.unitDef(u)), this.cellOf(u), goal, { allow });
   }
 
   // ---------------------------------------------------------------- production
 
-  /** Structures the player currently owns, by type id. */
-  owned(p: Player): Set<string> {
-    const set = new Set<string>();
-    for (const e of this.entities.values()) if (e.owner === p.slot && e.kind === 'structure' && e.hp > 0) set.add(e.type);
-    return set;
+  /** Structures the player currently owns, by type id, with the upgrade level bought for each. */
+  owned(p: Player): Map<string, number> {
+    const map = new Map<string, number>();
+    for (const e of this.entities.values()) if (e.owner === p.slot && e.kind === 'structure' && e.hp > 0) map.set(e.type, p.upgrades[e.type] ?? 0);
+    return map;
   }
 
+  /** The unit or structure an item builds ('upgrade:x' and 'starport:x' are pseudo-items). */
+  baseItem(item: string) { return item.startsWith(UPGRADE) ? item.slice(UPGRADE.length) : item.startsWith(STARPORT) ? item.slice(STARPORT.length) : item; }
+
   queueFor(item: string): QueueKind | null {
+    if (item.startsWith(UPGRADE)) return this.pack.structures[item.slice(UPGRADE.length)]?.upgrades ? 'structure' : null;
+    if (item.startsWith(STARPORT)) return this.pack.units[item.slice(STARPORT.length)]?.starport ? 'starport' : null;
     const s = this.pack.structures[item];
     if (s) return s.queue;
     const u = this.pack.units[item];
-    if (u) return u.kind === 'infantry' ? 'infantry' : 'vehicle';
+    if (u) return u.queue ?? u.kind;
     return null;
   }
 
@@ -430,22 +525,38 @@ export class Game {
   }
 
   canBuild(p: Player, item: string, owned = this.owned(p)): boolean {
-    const def: UnitDef | StructureDef | undefined = this.pack.structures[item] ?? this.pack.units[item];
-    if (!def || def.tech > this.techCap || !factionCanUse(def, p.faction)) return false;
-    if (!prereqsMet(def.prereqs, owned)) return false;
-    const queue = this.queueFor(item)!;
+    const queue = this.queueFor(item);
+    if (!queue) return false;
+    const base = this.baseItem(item);
+    const def: UnitDef | StructureDef | undefined = this.pack.structures[base] ?? this.pack.units[base];
+    if (!def || def.tech > this.techCap || !factionCanUse(def, p.faction, p.side)) return false;
+    if (item.startsWith(UPGRADE)) {
+      // Upgrades are bought once the building stands, up to its number of levels.
+      const level = owned.get(base);
+      if (level === undefined || level >= ((def as StructureDef).upgrades ?? 0) || p.queues.structure.items.includes(item)) return false;
+    } else if (!item.startsWith(STARPORT) && !prereqsMet(def.prereqs, owned)) return false;
     return this.factories(p, queue).length > 0;
   }
 
   buildOptions(p: Player, queue: QueueKind): string[] {
     const owned = this.owned(p);
-    const pool = queue === 'structure' || queue === 'defense'
-      ? Object.values(this.pack.structures).filter(s => s.queue === queue).map(s => s.id)
-      : Object.values(this.pack.units).filter(u => (u.kind === 'infantry') === (queue === 'infantry')).map(u => u.id);
+    let pool: string[];
+    if (queue === 'structure' || queue === 'defense') {
+      pool = Object.values(this.pack.structures).filter(s => s.queue === queue).map(s => s.id);
+      if (queue === 'structure') pool.push(...Object.values(this.pack.structures).filter(s => s.upgrades).map(s => UPGRADE + s.id));
+    } else if (queue === 'starport') pool = Object.values(this.pack.units).filter(u => u.starport).map(u => STARPORT + u.id);
+    else pool = Object.values(this.pack.units).filter(u => (u.queue ?? u.kind) === queue).map(u => u.id);
     return pool.filter(id => this.canBuild(p, id, owned));
   }
 
-  costOf(item: string) { return (this.pack.structures[item] ?? this.pack.units[item])?.cost ?? 0; }
+  /** Price of an item for a player: upgrades, CHOAM prices and Industrial Plant discounts apply. */
+  costOf(item: string, p?: Player): number {
+    if (item.startsWith(UPGRADE)) return this.pack.structures[item.slice(UPGRADE.length)]?.upgradeCost ?? 0;
+    if (item.startsWith(STARPORT)) return Math.floor(((this.pack.units[item.slice(STARPORT.length)]?.cost ?? 0) * this.market) / 100);
+    const unit = this.pack.units[item];
+    if (unit && p?.costReduction && unit.kind !== 'infantry') return Math.floor((unit.cost * (100 - p.costReduction)) / 100);
+    return (this.pack.structures[item] ?? unit)?.cost ?? 0;
+  }
 
   private startBuild(p: Player, item: string) {
     const queue = this.queueFor(item);
@@ -475,7 +586,7 @@ export class Game {
       const item = q.items[0];
       const factories = this.factories(p, kind);
       if (!factories.length) continue;
-      const cost = this.costOf(item);
+      const cost = this.costOf(item, p);
       let speed = 100 + (factories.length - 1) * this.pack.extraFactoryBonus;
       if (p.powerUse > p.powerGen) speed = Math.floor((speed * this.pack.lowPowerProductionPercent) / 100);
       // Credits are charged as production progresses, like the originals.
@@ -486,22 +597,46 @@ export class Game {
       if (pay <= 0 && q.paid < cost) continue;
       p.credits -= pay; q.paid += pay;
       if (q.paid < cost) continue;
+      if (item.startsWith(UPGRADE)) {
+        const base = item.slice(UPGRADE.length);
+        p.upgrades[base] = (p.upgrades[base] ?? 0) + 1;
+        for (const e of this.entities.values()) if (e.owner === p.slot && e.type === base && e.hp > 0) { const fx = this.effect('upgrade', e.x, e.y, 0, 0, 30); fx.owner = p.slot; }
+        q.items.shift(); q.paid = 0; q.acc = 0;
+        continue;
+      }
       if (kind === 'structure' || kind === 'defense') { q.ready = true; continue; }
-      // Unit complete: roll it out of the factory nearest the rally point.
-      const def = this.pack.units[item];
+      const unitId = this.baseItem(item);
+      const def = this.pack.units[unitId];
       // Roll out of the factory the unit actually requires (tanks from the Heavy Factory).
-      const named = new Set(def.prereqs.flatMap(r => r.split('|')));
-      const factory = factories.find(f => named.has(f.type)) ?? factories[0];
-      const exit = nearestCell(this.map, this.cellIndex(factory.cx + (factory.w >> 1), factory.cy + factory.h), 6,
-        i => passable(this.pack, this.map, i, def.kind) && !this.unitInCell(i));
+      const named = new Set(def.prereqs.flatMap(r => r.split('|').map(a => a.split('@')[0])));
+      const factory = kind === 'starport' ? factories[0] : factories.find(f => named.has(f.type)) ?? factories[0];
+      const exit = this.exitCell(factory, def);
       if (exit < 0) continue;
-      const unit = this.spawnUnit(item, p.slot, exit);
+      const unit = this.spawnUnit(unitId, p.slot, exit);
       unit.facing = 128; unit.turret = 128;
-      if (!def.harvester && p.rally >= 0) {
-        unit.order = 'move'; unit.goal = p.rally; unit.path = this.pathFor(unit, p.rally);
+      if (p.veteranQueues.includes(kind)) { unit.rank = 1; unit.xp = def.cost * (this.pack.veterancy?.veteran ?? 1); }
+      if (kind === 'starport') { const fx = this.effect('delivery', unit.x, unit.y, 0, 0, 30); fx.owner = p.slot; }
+      const sendToRally = (u: Entity) => {
+        const d = this.unitDef(u);
+        if (!d.harvester && !d.carrier && !d.ammo && p.rally >= 0) { u.order = 'move'; u.goal = p.rally; u.path = this.pathFor(u, p.rally); }
+      };
+      sendToRally(unit);
+      // Cloning Vats copy every infantry unit trained.
+      if (def.kind === 'infantry' && !def.noClone) for (const vat of this.entities.values()) {
+        if (vat.owner !== p.slot || vat.kind !== 'structure' || vat.hp <= 0 || !this.structDef(vat).cloning) continue;
+        const at = this.exitCell(vat, def);
+        if (at >= 0) { const clone = this.spawnUnit(unitId, p.slot, at); clone.rank = unit.rank; clone.xp = unit.xp; sendToRally(clone); }
       }
       q.items.shift(); q.paid = 0; q.acc = 0;
     }
+  }
+
+  /** Where a new unit appears: aircraft over the pad, ships on nearby water, the rest at the door. */
+  private exitCell(factory: Entity, def: UnitDef): number {
+    const cls = this.moveClass(def);
+    if (cls === 'aircraft') return this.cellIndex(factory.cx + (factory.w >> 1), factory.cy + (factory.h >> 1));
+    const origin = cls === 'naval' ? this.cellIndex(factory.cx + (factory.w >> 1), factory.cy + (factory.h >> 1)) : this.cellIndex(factory.cx + (factory.w >> 1), factory.cy + factory.h);
+    return nearestCell(this.map, origin, 6, i => passable(this.pack, this.map, i, cls) && !this.unitInCell(i));
   }
 
   /** Placement check shared by the UI ghost, the AI and the place command. */
@@ -511,7 +646,9 @@ export class Game {
     for (let cy = y; cy < y + def.h; cy++) for (let cx = x; cx < x + def.w; cx++) {
       if (!inBounds(this.map, cx, cy)) return false;
       const i = cy * this.map.w + cx;
-      if (this.map.occupied[i] || !buildableTerrain(this.pack, this.map, i)) return false;
+      if (this.map.occupied[i]) return false;
+      // Shipyards float; everything else needs dry, buildable ground.
+      if (def.onWater ? !isWater(this.pack, this.map, i) : !buildableTerrain(this.pack, this.map, i)) return false;
       if (def.floor && this.map.concrete[i]) return false;
       if (!def.floor && this.unitInCell(i, ignoreUnit)) return false;
     }
@@ -555,6 +692,12 @@ export class Game {
 
   private deploy(u: Entity) {
     const def = this.unitDef(u);
+    if (def.deployWeapon || def.lure) {
+      // Toggle a deployed stance: dig in, set up, or start thumping.
+      u.deployed = !u.deployed; u.path = []; u.order = 'idle'; u.target = 0;
+      const fx = this.effect(u.deployed ? 'dig' : 'undig', u.x, u.y, 0, 0, 15); fx.item = u.type; fx.owner = u.owner;
+      return;
+    }
     if (!def.deploysTo) return;
     const s = this.pack.structures[def.deploysTo];
     const cx = toCell(u.x) - (s.w >> 1), cy = toCell(u.y) - (s.h >> 1);
@@ -566,14 +709,18 @@ export class Game {
   }
 
   private updatePower() {
-    for (const p of this.players) { p.powerGen = 0; p.powerUse = 0; }
+    for (const p of this.players) { p.powerGen = 0; p.powerUse = 0; p.incomeBonus = 0; p.costReduction = 0; }
     for (const e of this.entities.values()) {
       if (e.kind !== 'structure' || e.hp <= 0) continue;
       const p = this.players[e.owner];
       if (!p) continue;
-      const power = this.pack.structures[e.type].power;
-      if (power > 0) p.powerGen += power; else p.powerUse -= power;
+      const def = this.pack.structures[e.type];
+      if (def.power > 0) p.powerGen += def.power; else p.powerUse -= def.power;
+      // Support buildings do not stack, like the originals.
+      p.incomeBonus = Math.max(p.incomeBonus, def.incomeBonus ?? 0);
+      p.costReduction = Math.max(p.costReduction, def.costReduction ?? 0);
     }
+    for (const p of this.players) if (p.blackoutUntil) p.powerGen = 0;
     this.powerDirty = false;
   }
 
@@ -585,16 +732,32 @@ export class Game {
     const def = this.unitDef(u);
     if (u.cooldown > 0) u.cooldown--;
     if (def.regen && u.hp < u.maxHp && this.tick % 30 === 0) u.hp = Math.min(u.maxHp, u.hp + def.regen);
+    // Elite units patch themselves up.
+    if (u.rank >= 2 && u.hp < u.maxHp && this.tick % 45 === 0) u.hp = Math.min(u.maxHp, u.hp + Math.max(1, Math.floor(u.maxHp / 100)));
+    if (def.disguise) {
+      u.stillTicks = u.x === u.px && u.y === u.py ? u.stillTicks + 1 : 0;
+      u.disguised = u.stillTicks > 45;
+    }
+    if (u.drone) this.droneBite(u);
+    if (def.carrier && (u.order === 'idle' || u.order === 'ferry')) { this.ferry(u, def); return; }
     if (def.harvester && (u.order === 'harvest' || u.order === 'idle')) { u.order = 'harvest'; this.harvest(u, def); return; }
+    if (def.ammo && u.ammo <= 0 && u.order !== 'rearm' && u.order !== 'move') { u.order = 'rearm'; u.dock = 0; u.path = []; }
+    if (u.order === 'rearm') { this.rearm(u, def); return; }
+    if (u.order === 'enter') { this.enterThink(u, def); return; }
     const weapon = this.weaponOf(u);
     if (u.order === 'attack') {
       const t = this.entities.get(u.target);
-      if (!t || t.hp <= 0 || !u.force && !this.isEnemy(u.owner, t.owner) && !t.convertedUntil && t.owner !== -1) {
+      if (!t || t.hp <= 0 || t.carriedBy || !u.force && !this.isEnemy(u.owner, t.owner) && !t.convertedUntil && t.owner !== -1) {
         u.target = 0; u.force = false;
+        if (def.ammo) { u.order = 'rearm'; u.dock = 0; u.path = []; return; } // Jets head home after a sortie.
         if (u.resume >= 0 && this.cellOf(u) !== u.resume && u.goal === u.resume) { u.order = 'attackMove'; u.path = this.pathFor(u, u.resume); } else u.order = 'idle';
         return;
       }
-      if (weapon && this.inRange(u, t, weapon)) { u.path = []; this.aimAndFire(u, t, weapon); return; }
+      const kind = this.targetKind(t);
+      if (def.c4 && (kind === 'structure' || !weapon) || def.terror && kind === 'vehicle') {
+        // Hands-on abilities: walk up and plant the charge, or jump inside the vehicle.
+        if (this.distTo(u.x, u.y, t) <= (t.kind === 'structure' ? REACH : 160)) { u.path = []; this.contact(u, def, t); return; }
+      } else if (weapon && this.inRange(u, t, weapon)) { u.path = []; this.aimAndFire(u, t, weapon); return; }
       if (!u.path.length || this.tick >= u.repathTick) {
         u.path = this.pathFor(u, this.cellOf(t)); u.repathTick = this.tick + 20;
       }
@@ -610,8 +773,9 @@ export class Game {
       this.move(u, def);
       return;
     }
-    // Idle and attack-moving units engage what they can see.
-    if (weapon && (u.order === 'idle' || u.order === 'attackMove') && (this.tick + u.id) % 8 === 0) {
+    // Idle and attack-moving units engage what they can see. Jets only strike when ordered,
+    // and a thumping Thumper just thumps.
+    if (weapon && !def.ammo && (u.order === 'idle' || u.order === 'attackMove') && (this.tick + u.id) % 8 === 0) {
       const reach = u.order === 'attackMove' ? def.sight * LEPTONS : weapon.range + LEPTONS;
       const t = this.acquire(u, reach, weapon);
       if (t) { u.order = 'attack'; u.target = t.id; u.repathTick = 0; return; }
@@ -628,10 +792,12 @@ export class Game {
   }
 
   private acquire(a: Entity, reach: number, w: WeaponDef): Entity | undefined {
+    // Yuri holds one mind at a time.
+    if (w.converts && w.converts < 0 && a.controls && (this.entities.get(a.controls)?.hp ?? 0) > 0) return undefined;
     let best: Entity | undefined; let bestD = reach + 1;
     const viewer = this.players[a.owner];
     for (const e of this.entities.values()) {
-      if (e.hp <= 0 || !this.isEnemy(a.owner, e.owner)) continue;
+      if (e.hp <= 0 || e.carriedBy || e.disguised || e.invulnUntil > this.tick || !this.isEnemy(a.owner, e.owner)) continue;
       if (!weaponCanTarget(w, this.targetKind(e))) continue;
       if (viewer && !viewer.visible[this.cellOf(e)]) continue;
       const d = this.distTo(a.x, a.y, e);
@@ -646,7 +812,8 @@ export class Game {
   private move(u: Entity, def: UnitDef) {
     if (!u.path.length) return;
     const next = u.path[0];
-    if (!terrainPassable(this.pack, this.map, next, def.kind) || this.map.occupied[next] && this.map.occupied[next] !== u.dock) {
+    const cls = this.moveClass(def);
+    if (cls !== 'aircraft' && (!terrainPassable(this.pack, this.map, next, cls) || this.map.occupied[next] && this.map.occupied[next] !== u.dock)) {
       // Something was built in the way; find a new route.
       const goal = u.path[u.path.length - 1];
       u.path = this.pathFor(u, goal);
@@ -655,19 +822,19 @@ export class Game {
     const tx = cellCenter(next % this.map.w), ty = cellCenter(Math.floor(next / this.map.w));
     const dx = tx - u.x, dy = ty - u.y;
     const want = facingTo(dx, dy);
-    if (def.kind === 'vehicle' && def.turn) {
+    if ((def.kind === 'vehicle' || def.kind === 'naval') && def.turn) {
       const delta = facingDelta(u.facing, want);
       const stepTurn = Math.min(Math.abs(delta), def.turn);
       u.facing = (u.facing + Math.sign(delta) * stepTurn) & 255;
       if (Math.abs(delta) > 40) return; // Turn in place before driving, like the classics.
     } else u.facing = want;
     u.turret = u.facing;
-    const terrainSpeed = this.pack.terrains[this.map.terrain[this.cellOf(u)]].speed;
+    const terrainSpeed = cls === 'aircraft' ? 100 : this.pack.terrains[this.map.terrain[this.cellOf(u)]].speed || 100;
     const step = Math.max(1, Math.floor((def.speed * terrainSpeed) / 100));
     const d = dist(u.x, u.y, tx, ty);
     if (d <= step) {
       u.x = tx; u.y = ty; u.path.shift();
-      if (def.crusher) this.crush(u, next);
+      if (def.crusher && def.kind === 'vehicle') this.crush(u, next);
     } else {
       u.x += Math.trunc((dx * step) / d);
       u.y += Math.trunc((dy * step) / d);
@@ -676,26 +843,197 @@ export class Game {
 
   private crush(u: Entity, cell: number) {
     for (const e of this.entities.values()) {
-      if (e.kind !== 'unit' || e.hp <= 0 || e.id === u.id || !this.isEnemy(u.owner, e.owner)) continue;
-      if (this.unitDef(e).crushable && this.cellOf(e) === cell) { this.damage(e, e.hp, u.owner); this.effect('crush', e.x, e.y, 0, 0, 12); }
+      if (e.kind !== 'unit' || e.hp <= 0 || e.id === u.id || e.carriedBy || !this.isEnemy(u.owner, e.owner)) continue;
+      if (this.unitDef(e).crushable && this.cellOf(e) === cell) { this.damage(e, e.hp, u.owner, u.id); this.effect('crush', e.x, e.y, 0, 0, 12); }
     }
   }
 
+  // ---------------------------------------------------------------- special abilities
+
+  /** Aircraft fly back to the nearest airfield and reload one shot at a time. */
+  private rearm(u: Entity, def: UnitDef) {
+    let pad = this.entities.get(u.dock);
+    if (!pad || pad.hp <= 0 || pad.owner !== u.owner || pad.kind !== 'structure' || !this.structDef(pad).airfield) {
+      pad = undefined; let best = Infinity;
+      for (const e of this.entities.values()) {
+        if (e.owner !== u.owner || e.kind !== 'structure' || e.hp <= 0 || !this.structDef(e).airfield) continue;
+        const d = dist(u.x, u.y, e.x, e.y);
+        if (d < best) { best = d; pad = e; }
+      }
+      if (!pad) { if (u.ammo > 0) u.order = 'idle'; return; } // Circle until an airfield stands.
+      u.dock = pad.id; u.path = [this.cellOf(pad)];
+    }
+    if (this.distTo(u.x, u.y, pad) > 0 || u.path.length) {
+      if (!u.path.length) u.path = [this.cellOf(pad)];
+      this.move(u, def);
+      return;
+    }
+    if (u.ammo < (def.ammo ?? 0)) { if (this.tick % 30 === 0) u.ammo++; return; }
+    u.order = 'idle';
+  }
+
+  /** Where a harvester is heading, for the Carryall: its refinery or its spice field. */
+  private harvestGoal(h: Entity): number {
+    if (h.hstate === 'toRefinery') {
+      const ref = this.nearestRefinery(h);
+      if (!ref) return -1;
+      const r = this.structDef(ref).refinery!;
+      return this.cellIndex(ref.cx + r.dockX, ref.cy + r.dockY);
+    }
+    if (h.hstate === 'seek' && h.harvestCell >= 0 && h.path.length) return h.harvestCell;
+    return -1;
+  }
+
+  /** Dune Carryall: pick up harvesters facing a long drive and fly them there. */
+  private ferry(u: Entity, def: UnitDef) {
+    if (u.order === 'idle') {
+      if ((this.tick + u.id) % 15 !== 0) return;
+      const busy = new Set<number>();
+      for (const e of this.entities.values()) if (e.kind === 'unit' && e.owner === u.owner && e.order === 'ferry') busy.add(e.target);
+      let best: Entity | undefined, bestD = Infinity, dest = -1;
+      for (const h of this.entities.values()) {
+        if (h.owner !== u.owner || h.kind !== 'unit' || h.hp <= 0 || h.carriedBy || busy.has(h.id)) continue;
+        const hd = this.unitDef(h);
+        if (!hd.harvester || hd.harvester.teleport) continue;
+        const goal = this.harvestGoal(h);
+        if (goal < 0 || dist(h.x, h.y, cellCenter(goal % this.map.w), cellCenter(Math.floor(goal / this.map.w))) < 12 * LEPTONS) continue;
+        const d = dist(u.x, u.y, h.x, h.y);
+        if (d < bestD) { bestD = d; best = h; dest = goal; }
+      }
+      if (best) { u.order = 'ferry'; u.target = best.id; u.goal = dest; u.path = [this.cellOf(best)]; }
+      return;
+    }
+    const h = this.entities.get(u.target);
+    if (!h || h.hp <= 0 || h.owner !== u.owner) { if (u.carrying) this.drop(u); u.order = 'idle'; u.target = 0; u.path = []; return; }
+    if (!u.carrying) {
+      if (h.carriedBy || h.hstate === 'unload' || h.hstate === 'gather') { u.order = 'idle'; u.target = 0; u.path = []; return; }
+      if (dist(u.x, u.y, h.x, h.y) <= 64) {
+        u.carrying = h.id; h.carriedBy = u.id; h.path = [];
+        u.path = [u.goal];
+        this.effect('lift', h.x, h.y, 0, 0, 10);
+      } else { u.path = [this.cellOf(h)]; this.move(u, def); }
+      return;
+    }
+    if (!u.path.length) { this.drop(u); u.order = 'idle'; u.target = 0; return; }
+    this.move(u, def);
+    h.x = u.x; h.y = u.y;
+  }
+
+  private drop(u: Entity) {
+    const h = this.entities.get(u.carrying);
+    u.carrying = 0;
+    if (!h) return;
+    h.carriedBy = 0;
+    const cls = this.moveClass(this.unitDef(h));
+    const cell = nearestCell(this.map, this.cellOf(u), 4, i => passable(this.pack, this.map, i, cls) && !this.unitInCell(i, h.id));
+    if (cell < 0) { this.damage(h, h.hp, -1); return; }
+    h.x = h.px = cellCenter(cell % this.map.w); h.y = h.py = cellCenter(Math.floor(cell / this.map.w)); h.path = [];
+    this.effect('drop', h.x, h.y, 0, 0, 10);
+  }
+
+  private enterThink(u: Entity, def: UnitDef) {
+    const t = this.entities.get(u.target);
+    if (!t || t.hp <= 0) { u.order = 'idle'; u.target = 0; u.path = []; return; }
+    if (this.distTo(u.x, u.y, t) <= REACH) { u.path = []; this.enterAct(u, def, t); return; }
+    if (!u.path.length || this.tick >= u.repathTick) { u.path = this.pathFor(u, this.cellOf(t)); u.repathTick = this.tick + 20; }
+    if (!u.path.length) { u.order = 'idle'; u.target = 0; return; }
+    this.move(u, def);
+  }
+
+  private enterAct(u: Entity, def: UnitDef, t: Entity) {
+    const enemy = this.isEnemy(u.owner, t.owner);
+    if (def.engineer) {
+      if (enemy) this.capture(t, u.owner);
+      else if (t.owner === u.owner) { t.hp = t.maxHp; this.effect('repairFx', t.x, t.y, 0, 0, 20); }
+      this.consume(u);
+      return;
+    }
+    if (def.spy && enemy) { this.infiltrate(t, u.owner); this.consume(u); return; }
+    // Anything else (a vehicle at a repair pad) parks here; the pad does the work.
+    u.order = 'idle'; u.target = 0;
+  }
+
+  /** The unit is used up by its ability (it goes inside, or goes up with the charge). */
+  private consume(u: Entity) {
+    const fx = this.effect('enter', u.x, u.y, 0, 0, 10); fx.owner = u.owner;
+    u.hp = 0;
+  }
+
+  private capture(s: Entity, owner: number) {
+    const def = this.structDef(s);
+    const from = this.players[s.owner], to = this.players[owner];
+    if (def.storage) { if (from) from.storage -= def.storage; if (to) to.storage += def.storage; }
+    s.owner = owner; s.originalOwner = owner; s.repairing = false; s.target = 0; s.charge = 0;
+    this.powerDirty = true;
+    const fx = this.effect('capture', s.x, s.y, 0, 0, 30); fx.owner = owner; fx.item = s.type;
+  }
+
+  private infiltrate(s: Entity, spyOwner: number) {
+    const def = this.structDef(s);
+    const victim = this.players[s.owner], spy = this.players[spyOwner];
+    if (!victim || !spy) return;
+    const effect: InfiltrationEffect | 'super' | undefined = def.infiltrate
+      ?? (def.refinery || def.storage ? 'steal'
+        : def.power > 0 ? 'blackout'
+        : def.radar ? 'reshroud'
+        : def.produces && def.produces !== 'starport' ? 'veteran'
+        : def.superweapon ? 'super' : undefined);
+    switch (effect) {
+      case 'steal': { const take = Math.floor(victim.credits / 2); victim.credits -= take; spy.credits += take; break; }
+      case 'blackout': victim.blackoutUntil = this.tick + 900; this.powerDirty = true; break;
+      case 'reshroud': victim.explored.fill(0); break;
+      case 'veteran': if (def.produces && !spy.veteranQueues.includes(def.produces)) spy.veteranQueues.push(def.produces); break;
+      case 'super': s.charge = 0; break;
+    }
+    const fx = this.effect('infiltrate', s.x, s.y, 0, 0, 30); fx.owner = spyOwner; fx.item = s.type; fx.color = effect ?? 'none';
+  }
+
+  /** C4 and terror drones: abilities used at arm's length. */
+  private contact(u: Entity, def: UnitDef, t: Entity) {
+    u.order = 'idle'; u.target = 0;
+    if (def.terror && t.kind === 'unit' && this.unitDef(t).kind === 'vehicle') {
+      if (t.drone) return; // Already infested.
+      t.drone = u.id; u.carriedBy = t.id; u.x = t.x; u.y = t.y;
+      this.effect('droneIn', t.x, t.y, 0, 0, 12);
+      return;
+    }
+    if (def.c4 && !t.c4At) {
+      t.c4At = this.tick + def.c4; t.c4By = u.owner;
+      const fx = this.effect('c4', t.x, t.y, 0, 0, def.c4); fx.owner = u.owner;
+    }
+    if (def.expendable) this.consume(u);
+  }
+
+  /** A terror drone inside a vehicle chews through it until it dies or reaches a repair pad. */
+  private droneBite(v: Entity) {
+    const drone = this.entities.get(v.drone);
+    if (!drone || drone.hp <= 0) { v.drone = 0; return; }
+    drone.px = drone.x; drone.py = drone.y; drone.x = v.x; drone.y = v.y;
+    if (this.tick % 15 === 0) this.damage(v, this.unitDef(drone).terror ?? 0, drone.owner, drone.id);
+  }
+
+  // ---------------------------------------------------------------- weapons
+
   private aimAndFire(a: Entity, t: Entity | undefined, w: WeaponDef, gx = t?.x ?? 0, gy = t?.y ?? 0) {
     const want = facingTo(gx - a.x, gy - a.y);
-    if (a.kind === 'unit' && this.unitDef(a).kind === 'infantry') a.facing = want;
+    const udef = a.kind === 'unit' ? this.unitDef(a) : undefined;
+    if (udef && (udef.kind === 'infantry' || udef.kind === 'aircraft')) a.facing = want;
     const delta = facingDelta(a.turret, want);
     a.turret = (a.turret + Math.sign(delta) * Math.min(Math.abs(delta), 16)) & 255;
-    if (a.kind === 'unit' && this.unitDef(a).kind === 'vehicle' && !this.unitDef(a).shape.includes('turret')) {
+    if (udef && (udef.kind === 'vehicle' || udef.kind === 'naval') && !udef.shape.includes('turret')) {
       // Fixed-gun vehicles turn the whole hull.
       const d2 = facingDelta(a.facing, want);
-      a.facing = (a.facing + Math.sign(d2) * Math.min(Math.abs(d2), this.unitDef(a).turn ?? 8)) & 255;
+      a.facing = (a.facing + Math.sign(d2) * Math.min(Math.abs(d2), udef.turn ?? 8)) & 255;
       if (Math.abs(d2) > 16) return;
     }
     if (Math.abs(delta) > 24 || a.cooldown > 0) return;
+    if (w.converts && w.converts < 0 && a.controls && (this.entities.get(a.controls)?.hp ?? 0) > 0) return;
+    if (udef?.ammo) { if (a.ammo <= 0) return; a.ammo--; }
     a.cooldown = w.rof;
+    a.stillTicks = 0; a.disguised = false;
     const shots = w.burst ?? 1;
     for (let s = 0; s < shots; s++) this.fire(a, t, w, s, gx, gy);
+    if (w.suicide) this.damage(a, a.hp, -1);
   }
 
   private fire(a: Entity, t: Entity | undefined, w: WeaponDef, shot: number, gx: number, gy: number) {
@@ -709,11 +1047,11 @@ export class Game {
       // Sonic waves hurt everything along the line, friend or foe.
       const len = Math.max(1, dist(a.x, a.y, tx, ty));
       for (const e of this.entities.values()) {
-        if (e.hp <= 0 || e.id === a.id) continue;
+        if (e.hp <= 0 || e.id === a.id || e.carriedBy || !weaponCanTarget(w, this.targetKind(e))) continue;
         const along = ((e.x - a.x) * (tx - a.x) + (e.y - a.y) * (ty - a.y)) / len;
         if (along < 0 || along > len + 128) continue;
         const px = a.x + ((tx - a.x) * along) / len, py = a.y + ((ty - a.y) * along) / len;
-        if (dist(e.x, e.y, Math.round(px), Math.round(py)) < 160) this.hit(e, w, a.owner, 100);
+        if (dist(e.x, e.y, Math.round(px), Math.round(py)) < 160) this.hit(e, w, a.owner, 100, a.id);
       }
       this.effect('sonic', a.x, a.y, tx, ty, 12);
       return;
@@ -731,7 +1069,7 @@ export class Game {
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const pr = this.projectiles[i];
       const w = this.pack.weapons[pr.weapon];
-      if (w.visual === 'missile') {
+      if (w.visual === 'missile' || w.visual === 'torpedo') {
         const t = this.entities.get(pr.target);
         if (t && t.hp > 0) { pr.tx = t.x; pr.ty = t.y; }
       }
@@ -747,20 +1085,33 @@ export class Game {
   }
 
   private impact(w: WeaponDef, owner: number, target: Entity | undefined, x: number, y: number, source: number) {
-    this.effect(w.splash ? 'explosion' : 'hit', x, y, 0, 0, w.splash ? 14 : 6);
-    if (w.converts && target && target.kind === 'unit' && target.hp > 0 && this.unitDef(target).kind === 'vehicle' && target.owner !== owner && target.owner >= 0) {
-      target.originalOwner = target.convertedUntil ? target.originalOwner : target.owner;
-      target.owner = owner; target.convertedUntil = this.tick + w.converts; target.order = 'idle'; target.target = 0; target.path = [];
-      this.effect('convert', target.x, target.y, 0, 0, 20);
+    // Big blasts (Demolition Truck, Kirov crash, reactor meltdown) carry their radius for the renderer.
+    this.effect(w.splash ? 'explosion' : 'hit', x, y, w.splash ?? 0, 0, w.splash ? (w.splash >= 512 ? 30 : 14) : 6);
+    if (w.converts && target && target.kind === 'unit' && target.hp > 0 && target.owner !== owner && target.owner >= 0 && !target.carriedBy) {
+      const kind = this.unitDef(target).kind;
+      if (w.converts < 0) {
+        // Yuri: permanent control of one victim, freed if Yuri dies.
+        const yuri = this.entities.get(source);
+        if (yuri && yuri.hp > 0 && kind !== 'aircraft' && !((this.entities.get(yuri.controls)?.hp ?? 0) > 0)) {
+          if (!target.convertedUntil) target.originalOwner = target.owner;
+          target.owner = owner; target.convertedUntil = 0; target.order = 'idle'; target.target = 0; target.path = [];
+          yuri.controls = target.id;
+          this.effect('convert', target.x, target.y, 0, 0, 20);
+        }
+      } else if (kind === 'vehicle') {
+        target.originalOwner = target.convertedUntil ? target.originalOwner : target.owner;
+        target.owner = owner; target.convertedUntil = this.tick + w.converts; target.order = 'idle'; target.target = 0; target.path = [];
+        this.effect('convert', target.x, target.y, 0, 0, 20);
+      }
     }
     if (!target && !w.splash) {
       // A ground shot still hits whatever is standing where it lands.
-      for (const e of this.entities.values()) if (e.hp > 0 && this.distTo(x, y, e) <= 96) { target = e; break; }
+      for (const e of this.entities.values()) if (e.hp > 0 && !e.carriedBy && weaponCanTarget(w, this.targetKind(e)) && this.distTo(x, y, e) <= 96) { target = e; break; }
     }
     if (target && target.hp > 0 && (!w.splash || this.distTo(x, y, target) <= LEPTONS)) this.hit(target, w, owner, 100, source);
     if (w.splash) {
       for (const e of this.entities.values()) {
-        if (e.hp <= 0 || e === target) continue;
+        if (e.hp <= 0 || e === target || e.carriedBy || !weaponCanTarget(w, this.targetKind(e))) continue;
         const d = this.distTo(x, y, e);
         if (d >= w.splash) continue;
         this.hit(e, w, owner, Math.floor(((w.splash - d) * 100) / w.splash), source);
@@ -770,19 +1121,27 @@ export class Game {
   }
 
   private hit(e: Entity, w: WeaponDef, owner: number, percent: number, source = 0) {
+    if (e.invulnUntil > this.tick) return;
     const vs = this.pack.warheads[w.warhead]?.vs[this.armorOf(e)] ?? 100;
-    const amount = Math.floor((w.damage * vs * percent) / 10000);
+    let amount = Math.floor((w.damage * vs * percent) / 10000);
+    // Veterans hit harder and shrug off more.
+    const vet = this.pack.veterancy;
+    if (vet) {
+      const src = source ? this.entities.get(source) : undefined;
+      if (src?.rank) amount = Math.floor((amount * (100 + vet.firepower * src.rank)) / 100);
+      if (e.rank) amount = Math.floor((amount * 100) / (100 + vet.armour * e.rank));
+    }
     if (amount <= 0) return;
-    this.damage(e, amount, owner);
+    this.damage(e, amount, owner, source);
     // Idle units retaliate.
-    if (e.hp > 0 && e.kind === 'unit' && e.order === 'idle' && source && this.weaponOf(e) && !this.unitDef(e).harvester) {
+    if (e.hp > 0 && e.kind === 'unit' && e.order === 'idle' && source && this.weaponOf(e) && !this.unitDef(e).harvester && !this.unitDef(e).ammo) {
       const attacker = this.entities.get(source);
-      if (attacker && this.isEnemy(e.owner, attacker.owner)) { e.order = 'attack'; e.target = attacker.id; }
+      if (attacker && this.isEnemy(e.owner, attacker.owner) && this.canEngage(e, attacker)) { e.order = 'attack'; e.target = attacker.id; }
     }
   }
 
-  damage(e: Entity, amount: number, by: number) {
-    if (e.hp <= 0) return;
+  damage(e: Entity, amount: number, by: number, source = 0, quiet = false) {
+    if (e.hp <= 0 || e.invulnUntil > this.tick && !quiet) return;
     e.hp -= amount;
     if (e.hp <= 0) {
       e.hp = 0;
@@ -790,8 +1149,23 @@ export class Game {
       if (killer && by !== e.owner) killer.stats.killed++;
       const victim = this.players[e.owner];
       if (victim) victim.stats.lost++;
+      if (source && by !== e.owner) this.award(source, e);
       this.effect(e.kind === 'structure' ? 'bigExplosion' : this.unitDef(e).kind === 'infantry' ? 'death' : 'vehicleDeath', e.x, e.y, 0, 0, e.kind === 'structure' ? 30 : 18);
+      // Some things go out with a bang (Devastator, Demolition Truck, Kirov, Nuclear Reactor).
+      const dw = e.kind === 'unit' ? this.unitDef(e).deathWeapon : this.structDef(e).deathWeapon;
+      if (dw && !quiet && this.pack.weapons[dw]) this.impact(this.pack.weapons[dw], e.owner, undefined, e.x, e.y, 0);
     }
+  }
+
+  /** Veterancy: kills earn experience worth the victim's cost. */
+  private award(source: number, victim: Entity) {
+    const vet = this.pack.veterancy;
+    const src = this.entities.get(source);
+    if (!vet || !src || src.kind !== 'unit' || src.hp <= 0) return;
+    src.xp += victim.kind === 'unit' ? this.unitDef(victim).cost : this.structDef(victim).cost;
+    const cost = Math.max(1, this.unitDef(src).cost);
+    const rank = src.xp >= cost * vet.elite ? 2 : src.xp >= cost * vet.veteran ? 1 : 0;
+    if (rank > src.rank) { src.rank = rank; const fx = this.effect('promote', src.x, src.y, rank, 0, 30); fx.owner = src.owner; }
   }
 
   // ---------------------------------------------------------------- harvesting
@@ -828,17 +1202,9 @@ export class Game {
       return;
     }
     if (u.hstate === 'toRefinery') {
-      let ref = this.entities.get(u.dock);
-      if (!ref || ref.hp <= 0 || ref.owner !== u.owner) {
-        ref = undefined; let best = Infinity;
-        for (const e of this.entities.values()) {
-          if (e.owner !== u.owner || e.kind !== 'structure' || e.hp <= 0 || !this.pack.structures[e.type].refinery) continue;
-          const d = dist(u.x, u.y, e.x, e.y);
-          if (d < best) { best = d; ref = e; }
-        }
-        if (!ref) return; // No refinery: wait loaded until one is built.
-        u.dock = ref.id;
-      }
+      const ref = this.nearestRefinery(u);
+      if (!ref) return; // No refinery: wait loaded until one is built.
+      u.dock = ref.id;
       const r = this.pack.structures[ref.type].refinery!;
       const dockCell = this.cellIndex(ref.cx + r.dockX, ref.cy + r.dockY);
       if (h.teleport && this.cellOf(u) !== dockCell) {
@@ -868,11 +1234,24 @@ export class Game {
       u.cargo--; u.cargoValue -= each;
       // With storage rules (Dune silos), anything above capacity is lost; starting
       // credits above capacity are never reduced. Packs without storage are unlimited.
-      const next = p.credits + each;
+      const next = p.credits + each + Math.floor((each * p.incomeBonus) / 100);
       p.credits = p.storage > 0 && next > p.storage ? Math.max(p.credits, p.storage) : next;
       p.stats.harvested += each;
     }
     if (u.cargo === 0) { u.cargoValue = 0; ref.dockedBy = 0; u.hstate = 'seek'; u.path = []; }
+  }
+
+  /** The refinery a harvester is using, or the nearest one its owner has. */
+  private nearestRefinery(u: Entity): Entity | undefined {
+    const docked = this.entities.get(u.dock);
+    if (docked && docked.hp > 0 && docked.owner === u.owner && docked.kind === 'structure' && this.structDef(docked).refinery) return docked;
+    let ref: Entity | undefined, best = Infinity;
+    for (const e of this.entities.values()) {
+      if (e.owner !== u.owner || e.kind !== 'structure' || e.hp <= 0 || !this.pack.structures[e.type].refinery) continue;
+      const d = dist(u.x, u.y, e.x, e.y);
+      if (d < best) { best = d; ref = e; }
+    }
+    return ref;
   }
 
   // ---------------------------------------------------------------- structures
@@ -892,6 +1271,7 @@ export class Game {
       const floor = Math.floor((s.maxHp * concrete.uncoveredStartPercent) / 100);
       if (s.hp > floor) s.hp = Math.max(floor, s.hp - Math.max(1, Math.floor(s.maxHp / 200)));
     }
+    if (def.repairPad && p && this.tick % 6 === 0) this.servicePad(s, p);
     const sw = this.superweaponOf(s);
     if (sw && s.charge < sw.charge && !this.lowPower(s.owner)) s.charge++;
     if (s.cooldown > 0) s.cooldown--;
@@ -903,6 +1283,22 @@ export class Game {
       s.target = t?.id ?? 0;
     }
     if (t) this.aimAndFire(s, t, w);
+  }
+
+  /** Service Depot / Repair Pad: mends vehicles parked beside it and evicts terror drones. */
+  private servicePad(s: Entity, p: Player) {
+    for (const u of this.entities.values()) {
+      if (u.kind !== 'unit' || u.owner !== s.owner || u.hp <= 0 || u.carriedBy || u.path.length) continue;
+      const kind = this.unitDef(u).kind;
+      if (kind === 'infantry' || kind === 'aircraft' || this.distTo(u.x, u.y, s) > REACH) continue;
+      if (u.drone) { const d = this.entities.get(u.drone); if (d) this.damage(d, d.hp, s.owner); u.drone = 0; }
+      if (u.hp >= u.maxHp) continue;
+      const heal = Math.max(1, Math.floor(u.maxHp / 40));
+      const cost = Math.max(1, Math.floor((this.unitDef(u).cost * heal) / (u.maxHp * 4)));
+      if (p.credits < cost) break;
+      p.credits -= cost; u.hp = Math.min(u.maxHp, u.hp + heal);
+      if (this.tick % 30 === 0) this.effect('repairFx', u.x, u.y, 0, 0, 10);
+    }
   }
 
   // ---------------------------------------------------------------- mechanics
@@ -977,13 +1373,14 @@ export class Game {
       }
       if (worm.hp <= 0) { worm.hidden = 600; this.effect('wormDive', worm.x, worm.y, 0, 0, 20); continue; }
       let prey = this.entities.get(worm.target);
-      if (!prey || prey.hp <= 0 || prey.kind !== 'unit' || !isSand(prey.x, prey.y)) {
+      if (!prey || prey.hp <= 0 || prey.kind !== 'unit' || prey.carriedBy || !isSand(prey.x, prey.y)) {
         prey = undefined; worm.target = 0;
         if ((this.tick + worm.id) % 10 === 0) {
           let best = cfg.sight * LEPTONS;
           for (const e of this.entities.values()) {
-            if (e.kind !== 'unit' || e.hp <= 0 || !isSand(e.x, e.y)) continue;
-            const d = dist(worm.x, worm.y, e.x, e.y);
+            if (e.kind !== 'unit' || e.hp <= 0 || e.carriedBy || this.isAircraft(e) || !isSand(e.x, e.y)) continue;
+            // A thumping Thumper draws worms from anywhere on the map.
+            const d = this.unitDef(e).lure && e.deployed ? 0 : dist(worm.x, worm.y, e.x, e.y);
             if (d < best) { best = d; prey = e; }
           }
           if (prey) worm.target = prey.id;
@@ -1013,22 +1410,53 @@ export class Game {
 
   private updateFog() {
     const { w, h } = this.map;
+    // Gap Generators: each cell records, as bits, the teams shrouding it.
+    let gap: Uint8Array | null = null;
+    for (const e of this.entities.values()) {
+      if (e.kind !== 'structure' || e.hp <= 0) continue;
+      const r = this.structDef(e).gap;
+      if (!r || this.lowPower(e.owner)) continue;
+      const field = gap ??= new Uint8Array(w * h);
+      const bit = 1 << ((this.players[e.owner]?.team ?? 0) & 7);
+      this.disc(toCell(e.x), toCell(e.y), r, i => { field[i] |= bit; });
+    }
     for (const p of this.players) p.visible.fill(0);
     for (const e of this.entities.values()) {
       if (e.hp <= 0) continue;
       const p = this.players[e.owner];
       if (!p) continue;
-      const r = this.sightOf(e);
-      const cx = toCell(e.x), cy = toCell(e.y);
-      for (let dy = -r; dy <= r; dy++) {
-        const y = cy + dy;
-        if (y < 0 || y >= h) continue;
-        const span = Math.floor(Math.sqrt(r * r - dy * dy) + 0.5);
-        for (let x = Math.max(0, cx - span); x <= Math.min(w - 1, cx + span); x++) {
-          const i = y * w + x;
-          p.visible[i] = 1; p.explored[i] = 1;
-        }
+      const mine = 1 << (p.team & 7);
+      this.disc(toCell(e.x), toCell(e.y), this.sightOf(e), (i, d2) => {
+        // Inside an enemy gap field, eyes reach only the next cell.
+        if (gap && (gap[i] & ~mine) && d2 > 2) return;
+        p.visible[i] = 1; p.explored[i] = 1;
+      });
+    }
+    for (const e of this.entities.values()) {
+      if (e.kind !== 'structure' || e.hp <= 0) continue;
+      const def = this.structDef(e);
+      const p = this.players[e.owner];
+      if (!p || !(def.satellite || def.sensor) || this.lowPower(e.owner)) continue;
+      if (def.satellite) p.explored.fill(1);
+      if (def.sensor) {
+        const r = def.sensor * LEPTONS;
+        for (const u of this.entities.values()) if (u.kind === 'unit' && u.hp > 0 && this.isEnemy(e.owner, u.owner) && dist(e.x, e.y, u.x, u.y) <= r) p.visible[this.cellOf(u)] = 1;
       }
+    }
+    if (gap) for (const p of this.players) {
+      const mine = 1 << (p.team & 7);
+      for (let i = 0; i < w * h; i++) if ((gap[i] & ~mine) && !p.visible[i]) p.explored[i] = 0;
+    }
+  }
+
+  /** Visit every cell of a disc; the callback gets the cell and its squared distance. */
+  private disc(cx: number, cy: number, r: number, fn: (i: number, d2: number) => void) {
+    const { w, h } = this.map;
+    for (let dy = -r; dy <= r; dy++) {
+      const y = cy + dy;
+      if (y < 0 || y >= h) continue;
+      const span = Math.floor(Math.sqrt(r * r - dy * dy) + 0.5);
+      for (let x = Math.max(0, cx - span); x <= Math.min(w - 1, cx + span); x++) fn(y * w + x, (x - cx) * (x - cx) + dy * dy);
     }
   }
 
@@ -1044,6 +1472,20 @@ export class Game {
       this.powerDirty = true;
       if (died) this.effect('rubble', e.x, e.y, e.w, e.h, 600);
     }
+    // Untangle riders: carried cargo falls with its carrier, drones hop out, minds are freed.
+    if (e.carrying) { const c = this.entities.get(e.carrying); if (c) { c.carriedBy = 0; this.damage(c, c.hp, -1); } }
+    if (e.drone) { const d = this.entities.get(e.drone); if (d) d.carriedBy = 0; }
+    if (e.carriedBy) {
+      const c = this.entities.get(e.carriedBy);
+      if (c) { if (c.drone === e.id) c.drone = 0; if (c.carrying === e.id) c.carrying = 0; }
+    }
+    if (e.controls) {
+      const v = this.entities.get(e.controls);
+      if (v && v.hp > 0 && !v.convertedUntil && v.owner !== v.originalOwner) {
+        v.owner = v.originalOwner; v.order = 'idle'; v.target = 0; v.path = [];
+        this.effect('convert', v.x, v.y, 0, 0, 20);
+      }
+    }
     this.entities.delete(e.id);
   }
 
@@ -1054,7 +1496,7 @@ export class Game {
   private defeat(p: Player) {
     if (p.defeated) return;
     p.defeated = true;
-    for (const e of this.entities.values()) if (e.owner === p.slot && e.hp > 0) { this.damage(e, e.hp, -1); }
+    for (const e of this.entities.values()) if (e.owner === p.slot && e.hp > 0) { this.damage(e, e.hp, -1, 0, true); }
   }
 
   private checkVictory() {
@@ -1074,34 +1516,60 @@ export class Game {
   // ---------------------------------------------------------------- superweapons
 
   /** The superweapon a structure carries for its owner's faction, if any. */
-  superweaponOf(e: Entity) {
+  superweaponOf(e: Entity): SuperweaponDef | undefined {
     if (e.kind !== 'structure') return undefined;
     const sw = this.pack.structures[e.type]?.superweapon;
-    if (!sw) return undefined;
-    const faction = this.players[e.owner]?.faction;
-    return !sw.factions || (faction && sw.factions.includes(faction)) ? sw : undefined;
+    const p = this.players[e.owner];
+    if (!sw || !p) return undefined;
+    return (Array.isArray(sw) ? sw : [sw]).find(d => factionCanUse(d, p.faction, p.side));
   }
 
-  private launchSuper(p: Player, id: number, x: number, y: number) {
+  private launchSuper(p: Player, id: number, x: number, y: number, x2?: number, y2?: number) {
     const s = this.entities.get(id);
     if (!s || s.owner !== p.slot || s.hp <= 0) return;
     const sw = this.superweaponOf(s);
     if (!sw || s.charge < sw.charge) return;
+    if (sw.kind === 'chrono' && (x2 === undefined || y2 === undefined)) return;
     s.charge = 0;
-    const tx = cellCenter(Math.max(0, Math.min(this.map.w - 1, x))), ty = cellCenter(Math.max(0, Math.min(this.map.h - 1, y)));
+    const cx = (v: number) => cellCenter(Math.max(0, Math.min(this.map.w - 1, v)));
+    const cy = (v: number) => cellCenter(Math.max(0, Math.min(this.map.h - 1, v)));
+    const tx = cx(x), ty = cy(y);
     const tag = (fx: Effect) => { fx.owner = p.slot; fx.item = sw.id; fx.color = sw.name; return fx; };
-    if (sw.kind === 'storm') {
-      const duration = sw.duration ?? 200, count = sw.strikes ?? 20;
-      tag(this.effect('stormClouds', tx, ty, sw.radius, 0, sw.delay + duration));
-      for (let k = 0; k < count; k++) {
-        // Integer scatter inside the storm's square (deterministic, no trigonometry).
-        const bx = tx + this.rng.int(sw.radius * 2) - sw.radius, by = ty + this.rng.int(sw.radius * 2) - sw.radius;
-        this.strikes.push({ tick: this.tick + sw.delay + Math.floor((k * duration) / count), x: bx, y: by, owner: p.slot, damage: sw.damage, radius: sw.boltRadius ?? 384, kind: 'bolt', name: sw.name });
+    const base = { tick: this.tick + sw.delay, owner: p.slot, damage: sw.damage, radius: sw.radius, name: sw.name };
+    switch (sw.kind) {
+      case 'storm': {
+        const duration = sw.duration ?? 200, count = sw.strikes ?? 20;
+        tag(this.effect('stormClouds', tx, ty, sw.radius, 0, sw.delay + duration));
+        for (let k = 0; k < count; k++) {
+          // Integer scatter inside the storm's square (deterministic, no trigonometry).
+          const bx = tx + this.rng.int(sw.radius * 2) - sw.radius, by = ty + this.rng.int(sw.radius * 2) - sw.radius;
+          this.strikes.push({ ...base, tick: this.tick + sw.delay + Math.floor((k * duration) / count), x: bx, y: by, radius: sw.boltRadius ?? 384, kind: 'bolt' });
+        }
+        break;
       }
-    } else {
-      tag(this.effect(sw.kind === 'missile' ? 'superLaunch' : 'ionCharge', s.x, s.y, tx, ty, sw.delay));
-      if (sw.kind === 'missile') tag(this.effect('superIncoming', tx, ty, s.x, s.y, sw.delay));
-      this.strikes.push({ tick: this.tick + sw.delay, x: tx, y: ty, owner: p.slot, damage: sw.damage, radius: sw.radius, kind: sw.kind, name: sw.name });
+      case 'missile': case 'ion':
+        tag(this.effect(sw.kind === 'missile' ? 'superLaunch' : 'ionCharge', s.x, s.y, tx, ty, sw.delay));
+        if (sw.kind === 'missile') tag(this.effect('superIncoming', tx, ty, s.x, s.y, sw.delay));
+        this.strikes.push({ ...base, x: tx, y: ty, kind: sw.kind });
+        break;
+      case 'paradrop': case 'reinforce': {
+        // Paratroopers and Fremen arrive at the target; the Ordos Saboteur walks out of the palace.
+        const at = sw.atBase ? this.cellIndex(s.cx + (s.w >> 1), s.cy + s.h) : this.cellIndex(toCell(tx), toCell(ty));
+        const dx = cellCenter(at % this.map.w), dy = cellCenter(Math.floor(at / this.map.w));
+        tag(this.effect(sw.kind, dx, dy, s.x, s.y, sw.delay));
+        this.strikes.push({ ...base, x: dx, y: dy, kind: 'drop', units: sw.units ?? [] });
+        break;
+      }
+      case 'chrono': {
+        const ex = cx(x2!), ey = cy(y2!);
+        tag(this.effect('chronoCharge', tx, ty, ex, ey, sw.delay));
+        this.strikes.push({ ...base, x: tx, y: ty, x2: ex, y2: ey, kind: 'chrono' });
+        break;
+      }
+      case 'curtain':
+        tag(this.effect('curtainCharge', tx, ty, sw.radius, 0, sw.delay));
+        this.strikes.push({ ...base, x: tx, y: ty, kind: 'curtain', duration: sw.duration ?? 450 });
+        break;
     }
   }
 
@@ -1111,10 +1579,13 @@ export class Game {
     if (!due.length) return;
     this.strikes = this.strikes.filter(s => s.tick > this.tick);
     for (const s of due) {
+      if (s.kind === 'drop') { this.dropUnits(s); continue; }
+      if (s.kind === 'chrono') { this.chronoShift(s); continue; }
+      if (s.kind === 'curtain') { this.ironCurtain(s); continue; }
       const fx = this.effect(s.kind === 'missile' ? 'nuke' : s.kind === 'ion' ? 'ionStrike' : 'lightning', s.x, s.y, s.radius, 0, s.kind === 'bolt' ? 12 : s.kind === 'ion' ? 45 : 90);
       fx.owner = s.owner; fx.color = s.name;
       for (const e of this.entities.values()) {
-        if (e.hp <= 0) continue;
+        if (e.hp <= 0 || e.carriedBy) continue;
         const d = this.distTo(s.x, s.y, e);
         if (d >= s.radius) continue;
         // Full damage at the centre, a quarter at the edge.
@@ -1124,11 +1595,55 @@ export class Game {
     }
   }
 
+  private dropUnits(s: Strike) {
+    const origin = this.cellIndex(toCell(s.x), toCell(s.y));
+    for (const type of s.units ?? []) {
+      const def = this.pack.units[type];
+      if (!def) continue;
+      const cell = nearestCell(this.map, origin, 6, i => passable(this.pack, this.map, i, this.moveClass(def)) && !this.unitInCell(i));
+      if (cell < 0) continue;
+      const u = this.spawnUnit(type, s.owner, cell);
+      const fx = this.effect('parachute', u.x, u.y, 0, 0, 20); fx.owner = s.owner; fx.item = type;
+    }
+  }
+
+  /** Chronosphere: vehicles in the circle jump to the same spot around the destination; infantry do not survive it. */
+  private chronoShift(s: Strike) {
+    const fx1 = this.effect('chronoFlash', s.x, s.y, s.radius, 0, 30); fx1.owner = s.owner;
+    const fx2 = this.effect('chronoFlash', s.x2!, s.y2!, s.radius, 0, 30); fx2.owner = s.owner;
+    const ox = toCell(s.x), oy = toCell(s.y), dx = toCell(s.x2!), dy = toCell(s.y2!);
+    const caught: Entity[] = [];
+    for (const e of this.entities.values()) {
+      if (e.kind === 'unit' && e.hp > 0 && !e.carriedBy && !this.isAircraft(e) && dist(e.x, e.y, s.x, s.y) < s.radius) caught.push(e);
+    }
+    for (const e of caught) {
+      const def = this.unitDef(e);
+      if (def.kind === 'infantry') { this.damage(e, e.hp, s.owner); continue; }
+      const cxx = toCell(e.x) - ox + dx, cyy = toCell(e.y) - oy + dy;
+      const cls = this.moveClass(def);
+      const cell = inBounds(this.map, cxx, cyy) ? nearestCell(this.map, this.cellIndex(cxx, cyy), 2, i => passable(this.pack, this.map, i, cls) && !this.unitInCell(i, e.id)) : -1;
+      if (cell < 0) { this.damage(e, e.hp, s.owner); continue; }
+      e.x = e.px = cellCenter(cell % this.map.w); e.y = e.py = cellCenter(Math.floor(cell / this.map.w));
+      e.path = []; e.order = 'idle'; e.target = 0;
+    }
+  }
+
+  /** Iron Curtain: vehicles and buildings become invulnerable; infantry are killed. */
+  private ironCurtain(s: Strike) {
+    const fx = this.effect('curtain', s.x, s.y, s.radius, 0, s.duration ?? 450); fx.owner = s.owner;
+    for (const e of this.entities.values()) {
+      if (e.hp <= 0 || e.carriedBy || this.distTo(s.x, s.y, e) >= s.radius) continue;
+      if (e.kind === 'unit' && this.unitDef(e).kind === 'infantry') { this.damage(e, e.hp, s.owner); continue; }
+      e.invulnUntil = this.tick + (s.duration ?? 450);
+    }
+  }
+
   /** Desync detector: identical on every client running the same commands. */
   checksum(): number {
     const h = new Hasher().add(this.tick).add(this.rng.seed);
     for (const p of this.players) h.add(p.credits).add(p.defeated ? 1 : 0);
-    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge);
+    h.add(this.market);
+    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0);
     for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
     for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden);

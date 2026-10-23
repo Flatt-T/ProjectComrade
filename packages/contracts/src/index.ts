@@ -18,7 +18,18 @@ export const STYLES: StyleInfo[] = [
   { id: 'dune2k', name: 'Dune Style', engine: 'fusion', pack: 'dune', playable: true, lockstep: true, blurb: 'Spice, sandworms and three Great Houses. Replicated on the Fusion Engine.',
     factions: [{ id: 'atreides', name: 'Atreides', full: 'House Atreides', blurb: 'Fremen allies and the Sonic Tank.' }, { id: 'harkonnen', name: 'Harkonnen', full: 'House Harkonnen', blurb: 'Sardaukar and the Devastator.' }, { id: 'ordos', name: 'Ordos', full: 'House Ordos', blurb: 'Raiders and the Deviator.' }] },
   { id: 'ra2', name: 'Red Alert 2 Style', engine: 'fusion', pack: 'ra2', playable: true, lockstep: true, blurb: 'Allies versus Soviets in isometric 3/4 view. Replicated on the Fusion Engine.',
-    factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: 'Prism tech, Chrono Miners, the Grizzly.' }, { id: 'soviets', name: 'Soviets', full: 'Soviet Union', blurb: 'Tesla power, Rhino armour, the Apocalypse.' }] },
+    // Countries alternate sides so default seating puts the Allies against the Soviets.
+    factions: [
+      { id: 'america', name: 'America', full: 'Allies · United States', blurb: 'Paratroopers.' },
+      { id: 'russia', name: 'Russia', full: 'Soviets · Russia', blurb: 'Tesla Tank.' },
+      { id: 'korea', name: 'Korea', full: 'Allies · Korea', blurb: 'Black Eagle jets.' },
+      { id: 'libya', name: 'Libya', full: 'Soviets · Libya', blurb: 'Demolition Truck.' },
+      { id: 'france', name: 'France', full: 'Allies · France', blurb: 'Grand Cannon.' },
+      { id: 'iraq', name: 'Iraq', full: 'Soviets · Iraq', blurb: 'Desolator.' },
+      { id: 'germany', name: 'Germany', full: 'Allies · Germany', blurb: 'Tank Destroyer.' },
+      { id: 'cuba', name: 'Cuba', full: 'Soviets · Cuba', blurb: 'Terrorist.' },
+      { id: 'britain', name: 'Great Britain', full: 'Allies · Great Britain', blurb: 'Sniper.' },
+    ] },
   { id: 'ra1', name: 'Red Alert', engine: 'vanilla-ra', playable: false, lockstep: false, blurb: 'Original engine built; content pack and map pending (ADR 007).',
     factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: '' }, { id: 'soviet', name: 'Soviet', full: 'Soviet Union', blurb: '' }] },
 ];

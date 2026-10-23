@@ -1,4 +1,4 @@
-import { MapPreset, RulePack, UnitKind } from './rules';
+import { MapPreset, MoveClass, RulePack } from './rules';
 
 export interface MapData {
   w: number;
@@ -112,13 +112,25 @@ export function inBounds(map: MapData, x: number, y: number): boolean {
   return x >= 0 && y >= 0 && x < map.w && y < map.h;
 }
 
-export function terrainPassable(pack: RulePack, map: MapData, i: number, kind: UnitKind): boolean {
+export function terrainPassable(pack: RulePack, map: MapData, i: number, kind: MoveClass): boolean {
   const t = pack.terrains[map.terrain[i]];
-  return kind === 'infantry' ? t.foot : t.vehicle;
+  switch (kind) {
+    case 'infantry': return t.foot;
+    case 'vehicle': return t.vehicle;
+    case 'naval': return !!t.water;
+    case 'amphibious': return t.vehicle || !!t.water;
+    case 'aircraft': return true;
+  }
 }
 
-export function passable(pack: RulePack, map: MapData, i: number, kind: UnitKind): boolean {
-  return map.occupied[i] === 0 && terrainPassable(pack, map, i, kind);
+/** Aircraft fly over buildings; everything else needs a free cell. */
+export function passable(pack: RulePack, map: MapData, i: number, kind: MoveClass): boolean {
+  return (kind === 'aircraft' || map.occupied[i] === 0) && terrainPassable(pack, map, i, kind);
+}
+
+/** Cells of open water (shipyards, naval spawn points). */
+export function isWater(pack: RulePack, map: MapData, i: number): boolean {
+  return !!pack.terrains[map.terrain[i]].water;
 }
 
 /** Terrain suitability for a structure cell, ignoring other structures and units. */

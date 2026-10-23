@@ -101,7 +101,7 @@ describe('fusion gameplay', () => {
   it('ra2: chrono miners teleport home and ore regrows', () => {
     const game = new Game(ai2(ra2Pack, 11));
     run(game, 15 * 60 * 3);
-    const allies = game.players.find(p => p.faction === 'allies')!;
+    const allies = game.players.find(p => p.side === 'allies')!;
     expect(allies.stats.harvested).toBeGreaterThan(0);
     expect(game.effects.some(e => e.kind === 'chrono') || allies.stats.harvested > 0).toBe(true);
     const ore = game.map.resKind.findIndex(k => k > 0 && !!ra2Pack.resources[k - 1].regrows);
@@ -158,7 +158,7 @@ describe('fusion lockstep multiplayer', () => {
   }
   const setup = (): GameSetup => ({
     pack: ra2Pack, mapId: 'four-corners', seed: 2024,
-    players: [{ name: 'Human A', faction: 'allies', ai: false }, { name: 'Human B', faction: 'soviets', ai: false }, { name: 'AI', faction: 'soviets', ai: true }],
+    players: [{ name: 'Human A', faction: 'america', ai: false }, { name: 'Human B', faction: 'russia', ai: false }, { name: 'AI', faction: 'russia', ai: true }],
   });
 
   it('keeps every client in sync with different commands and network jitter', () => {
@@ -221,7 +221,7 @@ describe('fusion packs compose from existing games', () => {
       mechanics: { buildOn: ['rock'], sandworm: dunePack.mechanics.sandworm, bloom: dunePack.mechanics.bloom },
       fidelityNote: 'Original fusion game.',
     };
-    const game = new Game({ pack: fusion, mapId: 'arrakis-basin', seed: 21, players: [{ name: 'A', faction: 'allies', ai: true }, { name: 'S', faction: 'soviets', ai: true }] });
+    const game = new Game({ pack: fusion, mapId: 'arrakis-basin', seed: 21, players: [{ name: 'A', faction: 'america', ai: true }, { name: 'S', faction: 'russia', ai: true }] });
     run(game, 15 * 60 * 5);
     for (const p of game.players) {
       expect(p.stats.built).toBeGreaterThanOrEqual(4);
@@ -232,7 +232,7 @@ describe('fusion packs compose from existing games', () => {
 });
 
 describe('fusion superweapons', () => {
-  const setup = (seed = 8): GameSetup => ({ pack: ra2Pack, mapId: 'temperate-valley', seed, players: [{ name: 'S', faction: 'soviets', ai: false }, { name: 'A', faction: 'allies', ai: false }] });
+  const setup = (seed = 8): GameSetup => ({ pack: ra2Pack, mapId: 'temperate-valley', seed, players: [{ name: 'S', faction: 'russia', ai: false }, { name: 'A', faction: 'america', ai: false }] });
   const enemyHp = (g: Game) => [...g.entities.values()].filter(e => e.owner === 1).reduce((n, e) => n + e.hp, 0);
 
   function armed(type: string, seed = 8) {
@@ -270,7 +270,7 @@ describe('fusion superweapons', () => {
   });
 
   it('calls down a lightning storm as a series of scheduled strikes', () => {
-    const g = new Game({ ...setup(), players: [{ name: 'A', faction: 'allies', ai: false }, { name: 'S', faction: 'soviets', ai: false }] });
+    const g = new Game({ ...setup(), players: [{ name: 'A', faction: 'america', ai: false }, { name: 'S', faction: 'russia', ai: false }] });
     const start = g.mapPreset.starts[0];
     const s = g.spawnStructure('a-weather', 0, start.x + 3, start.y + 4);
     const sw = g.superweaponOf(s)!;
@@ -283,10 +283,10 @@ describe('fusion superweapons', () => {
     expect(g.effects.filter(e => e.kind === 'lightning').length).toBeGreaterThan(5);
   });
 
-  it('gives the Death Hand only to the Harkonnen palace', () => {
+  it('gives each Great House its own palace power', () => {
     const g = new Game({ pack: dunePack, mapId: 'arrakis-basin', seed: 2, players: [{ name: 'A', faction: 'atreides', ai: false }, { name: 'H', faction: 'harkonnen', ai: false }] });
     const a = g.spawnStructure('palace', 0, 10, 10), h = g.spawnStructure('palace', 1, 50, 50);
-    expect(g.superweaponOf(a)).toBeUndefined();
+    expect(g.superweaponOf(a)?.name).toBe('Fremen Warriors');
     expect(g.superweaponOf(h)?.name).toBe('Death Hand');
     // Charging pauses on low power: a lone palace has no windtraps.
     for (let i = 0; i < 30; i++) g.step();
@@ -300,7 +300,7 @@ describe('fusion superweapons', () => {
         superweapon: { id: 'ion', name: 'Ion Cannon', kind: 'ion', charge: 100, damage: 1500, radius: 640, delay: 30 } } },
     };
     const run = () => {
-      const g = new Game({ pack, mapId: 'temperate-valley', seed: 4, players: [{ name: 'A', faction: 'allies', ai: false }, { name: 'S', faction: 'soviets', ai: false }] });
+      const g = new Game({ pack, mapId: 'temperate-valley', seed: 4, players: [{ name: 'A', faction: 'america', ai: false }, { name: 'S', faction: 'russia', ai: false }] });
       const s = g.spawnStructure('uplink', 0, 12, 14);
       for (let i = 0; i < 110; i++) g.step();
       const target = [...g.entities.values()].find(e => e.owner === 1)!;
@@ -316,7 +316,7 @@ describe('fusion superweapons', () => {
 });
 
 describe('fusion classic controls', () => {
-  const twoHumans = (): Game => new Game({ pack: ra2Pack, mapId: 'temperate-valley', seed: 12, players: [{ name: 'A', faction: 'allies', ai: false }, { name: 'S', faction: 'soviets', ai: false }] });
+  const twoHumans = (): Game => new Game({ pack: ra2Pack, mapId: 'temperate-valley', seed: 12, players: [{ name: 'A', faction: 'america', ai: false }, { name: 'S', faction: 'russia', ai: false }] });
   const mine = (g: Game, type: string) => [...g.entities.values()].filter(e => e.owner === 0 && e.type === type);
 
   it('Ctrl force-fire attacks a friendly unit; a plain attack on a friend is refused', () => {

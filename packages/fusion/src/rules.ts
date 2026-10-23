@@ -3,8 +3,11 @@
 // leptons (256 per cell) unless noted, all durations in ticks (15 per second).
 
 export type Projection = 'ortho' | 'iso';
-export type UnitKind = 'infantry' | 'vehicle';
-export type QueueKind = 'structure' | 'defense' | 'infantry' | 'vehicle';
+export type UnitKind = 'infantry' | 'vehicle' | 'aircraft' | 'naval';
+/** Movement class used for pathfinding and terrain checks. */
+export type MoveClass = UnitKind | 'amphibious';
+export type QueueKind = 'structure' | 'defense' | 'infantry' | 'vehicle' | 'aircraft' | 'naval' | 'starport';
+export type TargetKind = 'infantry' | 'vehicle' | 'aircraft' | 'naval' | 'structure';
 
 export interface TerrainDef {
   id: string;
@@ -12,6 +15,8 @@ export interface TerrainDef {
   /** Can infantry / vehicles enter this terrain? */
   foot: boolean;
   vehicle: boolean;
+  /** Navigable by ships. */
+  water?: boolean;
   /** Can structures be placed here (before mechanic restrictions)? */
   buildable: boolean;
   /** Movement speed multiplier in percent. */
@@ -42,7 +47,7 @@ export interface WarheadDef {
   vs: Record<string, number>;
 }
 
-export type WeaponVisual = 'bullet' | 'cannon' | 'missile' | 'laser' | 'tesla' | 'prism' | 'sonic' | 'flame' | 'artillery';
+export type WeaponVisual = 'bullet' | 'cannon' | 'missile' | 'laser' | 'tesla' | 'prism' | 'sonic' | 'flame' | 'artillery' | 'chrono' | 'psychic' | 'rad' | 'torpedo' | 'bomb';
 
 export interface WeaponDef {
   id: string;
@@ -61,10 +66,15 @@ export interface WeaponDef {
   visual: WeaponVisual;
   /** Damages every unit in a line to the target (Sonic Tank). */
   line?: boolean;
-  /** Converts the target to the attacker's side for this many ticks (Deviator). */
+  /**
+   * Takes control of the target instead of damaging it: positive = ticks before it
+   * reverts (Deviator), -1 = permanent (Yuri's mind control, one victim at a time).
+   */
   converts?: number;
-  /** Restrict what the weapon will engage (e.g. attack dogs: infantry only). */
-  targets?: ('infantry' | 'vehicle' | 'structure')[];
+  /** What the weapon may engage. Omitted means ground targets only (no aircraft). */
+  targets?: TargetKind[];
+  /** Firing destroys the shooter (Demolition Truck, Crazy Ivan's bomb run). */
+  suicide?: boolean;
 }
 
 export interface HarvesterDef {
@@ -94,25 +104,61 @@ export interface UnitDef {
   weapon?: string;
   /**
    * Structures that must exist before this can be built. Every entry is required;
-   * an entry may list alternatives separated by '|' (e.g. 'a-barracks|s-barracks').
+   * an entry may list alternatives separated by '|' (e.g. 'a-barracks|s-barracks'),
+   * and 'heavyfactory@1' additionally needs that building upgraded once.
    */
   prereqs: string[];
-  /** Factions allowed to build it; omitted means every faction of the pack. */
+  /** Factions or sides allowed to build it; omitted means everyone in the pack. */
   factions?: string[];
   /** Tech level 1..10; the lobby's tech setting caps what is available. */
   tech: number;
+  /** Production tab override (e.g. the Kirov rolls out of the War Factory). */
+  queue?: QueueKind;
   harvester?: HarvesterDef;
   /** Deploys into this structure in place (MCV). */
   deploysTo?: string;
   crusher?: boolean;
   crushable?: boolean;
+  /** Moves over both land and water. */
+  amphibious?: boolean;
+  /** Aircraft: shots before returning to an airfield to rearm (omitted = unlimited). */
+  ammo?: number;
+  /** Flying height in cells, for drawing. */
+  altitude?: number;
+  /** Dune Carryall: automatically airlifts harvesters. */
+  carrier?: boolean;
+  // ---- abilities
+  /** Captures enemy buildings or fully repairs friendly ones, and is used up. */
+  engineer?: boolean;
+  /** Infiltrates enemy buildings for an effect that depends on the building. */
+  spy?: boolean;
+  /** Plants a charge on a building (or anything, for Crazy Ivan) that detonates after this many ticks. */
+  c4?: number;
+  /** Latches onto a vehicle and destroys it from inside, this much damage per second. */
+  terror?: number;
+  /** Becomes invisible to the enemy while standing still (Mirage Tank). */
+  disguise?: boolean;
+  /** Deploying swaps to this weapon and roots the unit (Desolator, GI sandbags). */
+  deployWeapon?: string;
+  /** Deploying lures sandworms (Thumper). */
+  lure?: boolean;
+  /** Explodes with this weapon when destroyed (Devastator, Demolition Truck, Kirov). */
+  deathWeapon?: string;
+  /** Used up by its special ability (Saboteur, Crazy Ivan's charge is not). Engineers and spies always are. */
+  expendable?: boolean;
+  /** Not copied by Cloning Vats. */
+  noClone?: boolean;
+  /** Sold at the Dune Starport at the fluctuating CHOAM price. */
+  starport?: boolean;
   /** Sprite key for the procedural renderer. */
   shape: string;
   /** AI hint. */
-  role?: 'combat' | 'support' | 'scout' | 'siege';
-  /** Self-heals slowly (Dune Ordos / RA2 veterancy stand-in). */
+  role?: 'combat' | 'support' | 'scout' | 'siege' | 'antiair';
+  /** Self-heals slowly. */
   regen?: number;
 }
+
+export type InfiltrationEffect = 'steal' | 'blackout' | 'reshroud' | 'veteran';
 
 export interface StructureDef {
   id: string;
@@ -146,12 +192,37 @@ export interface StructureDef {
   /** Floor tile (Dune concrete); occupies no blocking footprint once placed. */
   floor?: boolean;
   wall?: boolean;
-  /** Superweapon this building charges and fires. */
-  superweapon?: SuperweaponDef;
+  /** Must be built on water (shipyards). */
+  onWater?: boolean;
+  /** Aircraft land here to rearm. */
+  airfield?: boolean;
+  /** Repairs friendly vehicles parked next to it (Service Depot, Repair Pad). */
+  repairPad?: boolean;
+  /** Every infantry unit trained also produces a free copy (Cloning Vats). */
+  cloning?: boolean;
+  /** Extra percent on every harvester load (Ore Purifier). */
+  incomeBonus?: number;
+  /** Shrouds the area from enemies (Gap Generator), radius in cells. */
+  gap?: number;
+  /** Reveals the whole map to its owner (Spy Satellite Uplink). */
+  satellite?: boolean;
+  /** Reveals enemy units within this radius in cells (Psychic Sensor). */
+  sensor?: number;
+  /** Explodes with this weapon when destroyed (Nuclear Reactor). */
+  deathWeapon?: string;
+  /** Percent off every vehicle, aircraft and ship (Industrial Plant); does not stack. */
+  costReduction?: number;
+  /** Number of upgrades the building offers (Dune factories), and their price. */
+  upgrades?: number;
+  upgradeCost?: number;
+  /** What a spy achieves inside it; derived from the building's role when omitted. */
+  infiltrate?: InfiltrationEffect;
+  /** Superweapon this building charges and fires; a list gives each faction its own (Dune palaces). */
+  superweapon?: SuperweaponDef | SuperweaponDef[];
   shape: string;
 }
 
-export type SuperweaponKind = 'missile' | 'storm' | 'ion';
+export type SuperweaponKind = 'missile' | 'storm' | 'ion' | 'reinforce' | 'paradrop' | 'chrono' | 'curtain';
 
 export interface SuperweaponDef {
   id: string;
@@ -160,15 +231,20 @@ export interface SuperweaponDef {
   /** Ticks to charge; charging pauses while the owner is low on power. */
   charge: number;
   damage: number;
-  /** Blast radius in leptons. */
+  /** Blast or effect radius in leptons. */
   radius: number;
   /** Ticks from launch to impact (missile flight, ion focusing, storm gathering). */
   delay: number;
   /** Storms: lightning strikes spread over `duration` ticks, each hitting `boltRadius`. */
   strikes?: number;
+  /** Storm length, or how long the Iron Curtain protects. */
   duration?: number;
   boltRadius?: number;
-  /** Only these factions get it from a shared building (e.g. the Harkonnen Palace). */
+  /** Reinforcements and paradrops: the units delivered. */
+  units?: string[];
+  /** Reinforcements appear beside the building rather than at the target (Saboteur). */
+  atBase?: boolean;
+  /** Only these factions or sides get it from a shared building (e.g. the Harkonnen Palace). */
   factions?: string[];
 }
 
@@ -219,6 +295,17 @@ export interface Mechanics {
   bloom?: { everyTicks: number; radius: number; resource: string };
   /** Resource regrowth on existing cells (RA2 ore). */
   regrowth?: { everyTicks: number; amount: number; spreadChance: number };
+  /** Dune Starport: CHOAM prices drift between these percentages every `every` ticks. */
+  market?: { min: number; max: number; every: number };
+}
+
+export interface Veterancy {
+  /** Experience (value of kills) needed, as a multiple of the unit's own cost. */
+  veteran: number;
+  elite: number;
+  /** Damage and armour bonus per rank, in percent. */
+  firepower: number;
+  armour: number;
 }
 
 export interface RulePack {
@@ -244,18 +331,26 @@ export interface RulePack {
   buildRadius: number;
   sellRefundPercent: number;
   mechanics: Mechanics;
+  veterancy?: Veterancy;
   /** Credit line shown in-game: these are approximations of the classic values. */
   fidelityNote: string;
 }
 
-export function factionCanUse(def: { factions?: string[] }, faction: string): boolean {
-  return !def.factions || def.factions.includes(faction);
+/** Lists name factions (countries/houses) or whole sides; either matches. */
+export function factionCanUse(def: { factions?: string[] }, faction: string, side?: string): boolean {
+  return !def.factions || def.factions.includes(faction) || (!!side && def.factions.includes(side));
 }
 
-export function prereqsMet(prereqs: string[], owned: Set<string>): boolean {
-  return prereqs.every(entry => entry.split('|').some(id => owned.has(id)));
+/** `owned` maps structure type to the player's upgrade level for it (0 when not upgraded). */
+export function prereqsMet(prereqs: string[], owned: Map<string, number> | Set<string>): boolean {
+  const level = (id: string) => owned instanceof Map ? owned.get(id) : owned.has(id) ? 0 : undefined;
+  return prereqs.every(entry => entry.split('|').some(alt => {
+    const [id, need] = alt.split('@');
+    const have = level(id);
+    return have !== undefined && have >= Number(need ?? 0);
+  }));
 }
 
-export function weaponCanTarget(w: WeaponDef, kind: 'infantry' | 'vehicle' | 'structure'): boolean {
-  return !w.targets || w.targets.includes(kind);
+export function weaponCanTarget(w: WeaponDef, kind: TargetKind): boolean {
+  return w.targets ? w.targets.includes(kind) : kind !== 'aircraft';
 }

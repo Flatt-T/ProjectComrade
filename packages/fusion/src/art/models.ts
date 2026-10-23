@@ -2,7 +2,7 @@
 // Dune 2000's rounded cream-metal structures with house accents, Red Alert 2's ribbed
 // silver Allied and brutal concrete Soviet buildings, light hulls with player markings.
 // All geometry is original; only the visual language follows the references.
-import { Mesh, RGB, tint } from './forge';
+import { Mesh, RGB, Vec3, tint } from './forge';
 
 export type ArtStyle = 'dune' | 'allied' | 'soviet';
 
@@ -20,6 +20,9 @@ const PALETTES: Record<ArtStyle, Palette> = {
 };
 const GLOW_BLUE: RGB = [150, 225, 255];
 const GLOW_CYAN: RGB = [170, 245, 255];
+const GLOW_RED: RGB = [255, 96, 70];
+const GLOW_GREEN: RGB = [150, 255, 130];
+const GLOW_PURPLE: RGB = [205, 130, 255];
 const TRACK: RGB = [52, 49, 45];
 const BARREL: RGB = [70, 68, 64];
 
@@ -43,11 +46,42 @@ function vault(m: Mesh, x0: number, y0: number, x1: number, y1: number, z0: numb
   for (let x = x0 + 0.35; x < x1 - 0.2; x += 0.75) m.box(x, y0 + 0.02, z0, x + 0.05, y1 - 0.02, z0 + rise + 0.015, tint(color, 0.9));
 }
 
+/** A body of revolution along X (blimps, fuselages, submarine hulls); `profile` gives the radius along it. */
+function lathe(m: Mesh, x0: number, x1: number, yc: number, zc: number, profile: (t: number) => number, color: RGB, rings = 10, segs = 12, squash = 1) {
+  const ring = (k: number) => {
+    const t = k / rings, x = x0 + (x1 - x0) * t, r = Math.max(0.001, profile(t));
+    return Array.from({ length: segs }, (_, i) => {
+      const a = (i / segs) * Math.PI * 2;
+      return [x, yc + Math.cos(a) * r, zc + Math.sin(a) * r * squash] as Vec3;
+    });
+  };
+  let prev = ring(0);
+  for (let k = 1; k <= rings; k++) {
+    const cur = ring(k);
+    for (let i = 0; i < segs; i++) { const j = (i + 1) % segs; m.add([prev[i], cur[i], cur[j], prev[j]], color, { smooth: true }); }
+    prev = cur;
+  }
+}
+
+/** A flat outline (x, y pairs) extruded between two heights: ship hulls and decks. */
+function prism(m: Mesh, outline: [number, number][], z0: number, z1: number, color: RGB, top?: RGB) {
+  for (let i = 0; i < outline.length; i++) {
+    const [ax, ay] = outline[i], [bx, by] = outline[(i + 1) % outline.length];
+    m.add([[ax, ay, z0], [bx, by, z0], [bx, by, z1], [ax, ay, z1]], color);
+  }
+  m.add(outline.map(([x, y]) => [x, y, z1] as Vec3), top ?? color);
+}
+
+/** Pointed ship hull outline, bow toward +X. */
+function hullOutline(L: number, W: number): [number, number][] {
+  return [[-L, -W * 0.85], [L * 0.45, -W], [L, 0], [L * 0.45, W], [-L, W * 0.85]];
+}
+
 export function buildingMesh(shape: string, w: number, h: number, style: ArtStyle, team: RGB): Mesh {
   const p = PALETTES[style];
   const m = new Mesh();
   const dune = style === 'dune', soviet = style === 'soviet';
-  if (shape !== 'wall') foundation(m, w, h, p);
+  if (shape !== 'wall' && shape !== 'shipyard') foundation(m, w, h, p);
   switch (shape) {
     case 'conyard': {
       if (dune) {
@@ -235,12 +269,164 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       m.dome(0.5, 0.5, 1.55, 0.17, GLOW_BLUE, 3, 14, 0.2);
       for (const f of m.faces.slice(-3 * 14 - 1)) f.glow = true;
       break;
+    case 'hitech': {
+      // Dune High Tech Factory: a tall ribbed hangar with a round landing pad in front.
+      m.box(0.25, 0.25, 0.07, w - 0.25, 1.65, 0.6, p.body);
+      vault(m, 0.3, 0.3, w - 0.3, 1.6, 0.6, 0.55, p.trim, 6);
+      m.box(0.25, 1.62, 0.3, w - 0.25, 1.68, 0.5, team);
+      m.cylinder(w / 2, 2.3, 0.07, 0.12, 0.62, 0.62, p.dark, 22);
+      m.cylinder(w / 2, 2.3, 0.12, 0.13, 0.42, 0.42, team, 22);
+      m.cylinder(w / 2, 2.3, 0.13, 0.14, 0.3, 0.3, p.dark, 22);
+      break;
+    }
+    case 'repairpad': {
+      // Repair Pad / Service Depot: a ramped platform under a gantry crane.
+      m.box(0.2, 0.2, 0.07, w - 0.2, h - 0.2, 0.18, p.trim, { top: p.dark });
+      m.box(0.85, 0.85, 0.18, w - 0.85, h - 0.85, 0.2, p.metal);
+      for (const [x, y] of [[0.3, 0.3], [w - 0.5, 0.3], [0.3, h - 0.5], [w - 0.5, h - 0.5]]) m.box(x, y, 0.18, x + 0.2, y + 0.2, 0.24, team);
+      m.box(0.25, h / 2 - 0.1, 0.18, 0.45, h / 2 + 0.1, 1.05, p.metal);
+      m.box(w - 0.45, h / 2 - 0.1, 0.18, w - 0.25, h / 2 + 0.1, 1.05, p.metal);
+      m.box(0.25, h / 2 - 0.1, 0.95, w - 0.25, h / 2 + 0.1, 1.08, team);
+      m.box(w / 2 - 0.08, h / 2 - 0.08, 0.6, w / 2 + 0.08, h / 2 + 0.08, 0.95, p.dark);
+      break;
+    }
+    case 'starport': {
+      // Dune Starport: a great dome over the landing field with a control tower.
+      m.box(0.25, 0.25, 0.07, w - 0.25, h - 0.25, 0.35, p.body, { top: p.trim });
+      m.dome(w / 2, h / 2, 0.35, 1.05, p.body, 6, 26, 0.72);
+      m.cylinder(w / 2, h / 2, 0.3, 0.42, 1.07, 1.07, team, 26, { cap: false });
+      m.cylinder(w / 2, h / 2, 1.0, 1.08, 0.3, 0.3, p.glass, 16);
+      m.cylinder(w - 0.5, 0.5, 0.35, 1.35, 0.12, 0.1, p.metal, 10);
+      m.dome(w - 0.5, 0.5, 1.35, 0.17, p.glass, 3, 10);
+      break;
+    }
+    case 'shipyard': {
+      // Floating dock: two piers, a back wall and a gantry over the open berth.
+      const pier: RGB = tint(p.body, 0.95);
+      m.box(0.1, 0.12, 0, w - 0.1, 0.62, 0.32, pier, { top: p.trim });
+      m.box(0.1, h - 0.62, 0, w - 0.1, h - 0.12, 0.32, pier, { top: p.trim });
+      m.box(w - 0.6, 0.62, 0, w - 0.1, h - 0.62, 0.28, p.trim);
+      m.box(0.12, 0.6, 0.22, w - 0.12, 0.66, 0.3, team);
+      m.box(0.12, h - 0.66, 0.22, w - 0.12, h - 0.6, 0.3, team);
+      for (const x of [0.6, w - 1.1]) {
+        m.box(x, 0.28, 0.32, x + 0.14, 0.44, 1.35, p.metal);
+        m.box(x, h - 0.44, 0.32, x + 0.14, h - 0.28, 1.35, p.metal);
+        m.box(x, 0.28, 1.25, x + 0.14, h - 0.28, 1.38, soviet ? p.dark : team);
+      }
+      break;
+    }
+    case 'purifier': {
+      // Ore Purifier: processing hall, three tanks and a glowing filter window.
+      m.box(0.3, 0.3, 0.07, w - 0.3, 1.95, 0.62, p.body, { top: p.trim });
+      m.box(0.3, 1.92, 0.25, w - 0.3, 1.98, 0.5, team);
+      m.box(0.8, 1.94, 0.14, 2.2, 1.99, 0.24, GLOW_BLUE, { glow: true });
+      for (const cx of [0.75, 1.5, 2.25]) {
+        m.cylinder(cx, 2.4, 0.07, 0.95, 0.3, 0.3, p.metal, 16, { cap: false });
+        m.dome(cx, 2.4, 0.95, 0.3, p.body, 3, 16, 0.18);
+      }
+      m.cylinder(0.65, 0.65, 0.62, 1.7, 0.15, 0.12, p.trim, 10);
+      break;
+    }
+    case 'satellite': {
+      // Spy Satellite Uplink: a big dish on a pedestal.
+      m.box(0.3, 0.3, 0.07, w - 0.3, h - 0.3, 0.4, p.body, { top: p.trim });
+      m.box(0.3, h - 0.34, 0.15, w - 0.3, h - 0.28, 0.35, team);
+      m.cylinder(w / 2, h / 2, 0.4, 0.9, 0.12, 0.09, p.metal, 10);
+      m.cylinder(w / 2, h / 2, 0.88, 1.25, 0.14, 0.66, p.body, 22, { cap: false });
+      m.cylinder(w / 2, h / 2, 0.9, 0.93, 0.15, 0.15, p.dark, 12);
+      m.cylinder(w / 2, h / 2, 0.93, 1.5, 0.03, 0.02, p.metal, 6);
+      m.dome(w / 2, h / 2, 1.5, 0.05, GLOW_BLUE, 2, 8);
+      break;
+    }
+    case 'gap':
+      // Gap Generator: a pylon with an emitter ring.
+      m.box(0.2, 0.2, 0.07, 0.8, 0.8, 0.3, p.body, { top: p.trim });
+      m.box(0.2, 0.76, 0.12, 0.8, 0.82, 0.26, team);
+      m.cylinder(0.5, 0.5, 0.3, 1.45, 0.13, 0.08, p.metal, 10);
+      m.cylinder(0.5, 0.5, 1.05, 1.15, 0.34, 0.34, p.dark, 18, { cap: false });
+      m.cylinder(0.5, 0.5, 1.45, 1.62, 0.1, 0.02, GLOW_BLUE, 8, { glow: true });
+      break;
+    case 'nuclear': {
+      // Nuclear Reactor: twin cooling towers and a reactor hall with a green glow.
+      m.box(0.25, 1.65, 0.07, w - 0.25, h - 0.25, 0.6, p.body, { top: p.trim });
+      m.box(0.25, h - 0.29, 0.3, w - 0.25, h - 0.23, 0.5, team);
+      m.box(1.05, h - 0.26, 0.12, 1.95, h - 0.2, 0.26, GLOW_GREEN, { glow: true });
+      for (const cx of [0.85, 2.15]) {
+        m.cylinder(cx, 0.95, 0.07, 0.75, 0.64, 0.46, p.metal, 20, { cap: false });
+        m.cylinder(cx, 0.95, 0.75, 1.35, 0.46, 0.56, p.metal, 20, { cap: false });
+        m.cylinder(cx, 0.95, 1.33, 1.35, 0.52, 0.52, p.dark, 20);
+      }
+      break;
+    }
+    case 'industrial': {
+      // Industrial Plant: a long works hall with a saw-tooth roof and smokestacks.
+      m.box(0.2, 0.7, 0.07, w - 0.2, h - 0.2, 0.7, p.body);
+      for (let x = 0.2; x < w - 0.3; x += 0.65) m.roof(x, 0.7, Math.min(w - 0.2, x + 0.65), h - 0.2, 0.7, 1.0, k(p.trim, x), 'y');
+      m.box(0.2, h - 0.24, 0.3, w - 0.2, h - 0.18, 0.55, team);
+      for (const x of [0.6, 1.35, 2.1]) m.cylinder(x, 0.4, 0.07, 1.7, 0.16, 0.12, p.dark, 10);
+      break;
+    }
+    case 'cloning': {
+      // Cloning Vats: a row of glowing glass tubes.
+      m.box(0.2, 0.2, 0.07, w - 0.2, h - 0.2, 0.35, p.body, { top: p.trim });
+      m.box(0.2, h - 0.24, 0.12, w - 0.2, h - 0.18, 0.3, team);
+      for (let x = 0.6; x < w - 0.3; x += 0.6) {
+        m.cylinder(x, h / 2, 0.35, 1.05, 0.22, 0.22, [150, 230, 190], 14, { glow: true, cap: false });
+        m.cylinder(x, h / 2, 1.05, 1.15, 0.26, 0.26, p.metal, 14);
+      }
+      break;
+    }
+    case 'sensor':
+      // Psychic Sensor: a pyramid mast with a violet eye.
+      m.box(0.3, 0.3, 0.07, w - 0.3, h - 0.3, 0.35, p.body, { top: p.trim });
+      m.box(0.3, h - 0.34, 0.12, w - 0.3, h - 0.28, 0.3, team);
+      m.cylinder(w / 2, h / 2, 0.35, 1.25, 0.55, 0.06, p.dark, 4);
+      m.cylinder(w / 2, h / 2, 1.25, 1.7, 0.04, 0.03, p.metal, 6);
+      m.dome(w / 2, h / 2, 1.7, 0.12, GLOW_PURPLE, 3, 10);
+      for (const f of m.faces.slice(-3 * 10 - 1)) f.glow = true;
+      break;
+    case 'patriot':
+      m.box(0.15, 0.15, 0.07, 0.85, 0.85, 0.25, p.body, { top: p.trim });
+      m.box(0.15, 0.81, 0.1, 0.85, 0.87, 0.22, team);
+      break;
+    case 'flakcannon':
+      // Sandbagged emplacement.
+      m.cylinder(0.5, 0.5, 0.07, 0.3, 0.44, 0.4, [150, 136, 102], 10, { top: p.dark });
+      break;
+    case 'grandcannon':
+      m.box(0.15, 0.15, 0.07, w - 0.15, h - 0.15, 0.45, p.body, { top: p.trim });
+      m.box(0.15, h - 0.2, 0.12, w - 0.15, h - 0.14, 0.38, team);
+      break;
+    case 'chronosphere': {
+      // Chronosphere: a glass sphere cradled in a ring on four pylons.
+      m.box(0.25, 0.25, 0.07, w - 0.25, h - 0.25, 0.4, p.body, { top: p.trim });
+      m.box(0.25, h - 0.29, 0.15, w - 0.25, h - 0.23, 0.35, team);
+      for (const [x, y] of [[0.55, 0.55], [w - 0.55, 0.55], [0.55, h - 0.55], [w - 0.55, h - 0.55]]) m.box(x - 0.08, y - 0.08, 0.4, x + 0.08, y + 0.08, 1.0, p.metal);
+      m.cylinder(w / 2, h / 2, 0.92, 1.02, 1.12, 1.12, p.metal, 26, { cap: false });
+      m.cylinder(w / 2, h / 2, 0.4, 0.85, 0.3, 0.6, p.glass, 20, { cap: false });
+      m.dome(w / 2, h / 2, 0.85, 0.6, p.glass, 5, 20, 0.6);
+      m.dome(w / 2, h / 2, 0.85, 0.22, GLOW_CYAN, 3, 12, 0.22);
+      for (const f of m.faces.slice(-3 * 12 - 1)) f.glow = true;
+      break;
+    }
+    case 'curtain': {
+      // Iron Curtain: a slab frame with a red field between the uprights.
+      m.box(0.25, 0.25, 0.07, w - 0.25, h - 0.25, 0.4, p.body, { top: p.trim });
+      m.box(0.5, 0.8, 0.4, w - 0.5, h - 0.8, 0.6, p.dark);
+      for (const x of [0.45, w - 0.45]) m.box(x - 0.14, 1.25, 0.4, x + 0.14, 1.75, 1.7, p.metal);
+      m.box(0.31, 1.3, 1.5, w - 0.31, 1.7, 1.7, team);
+      m.box(0.6, 1.42, 0.6, w - 0.6, 1.58, 1.5, GLOW_RED, { glow: true });
+      break;
+    }
     default:
       m.box(0.2, 0.2, 0.07, w - 0.2, h - 0.2, 0.6, p.body);
       m.box(0.2, h - 0.24, 0.2, w - 0.2, h - 0.18, 0.45, team);
   }
   return m;
 }
+
+/** Alternate roof shades for saw-tooth roofs. */
+function k(c: RGB, x: number): RGB { return tint(c, Math.round(x / 0.65) % 2 ? 0.92 : 1); }
 
 /** Wall segment: a post plus connectors toward neighbouring wall cells (bitmask N,E,S,W). */
 export function wallMesh(mask: number, style: ArtStyle): Mesh {
@@ -258,7 +444,15 @@ export function wallMesh(mask: number, style: ArtStyle): Mesh {
 
 // ---------------------------------------------------------------- vehicles
 
-const HAS_TURRET = new Set(['tank-turret', 'siege-turret', 'launcher', 'sonic', 'devastator', 'prism']);
+const HAS_TURRET = new Set(['tank-turret', 'siege-turret', 'launcher', 'sonic', 'devastator', 'prism', 'mirage', 'tesla-tank', 'ship-destroyer', 'ship-patrol', 'ship-cruiser', 'ship-dreadnought']);
+/** Ships are modelled small and scaled up to RA2's big hulls. */
+const SHIP_SCALE: Record<string, number> = { 'ship-destroyer': 1.8, 'ship-cruiser': 1.8, 'ship-carrier': 1.9, 'ship-patrol': 1.5, 'ship-dreadnought': 1.9, sub: 1.7, dolphin: 1.3, squid: 1.5 };
+function scaled(m: Mesh, k = 1): Mesh {
+  if (k !== 1) for (const f of m.faces) f.pts = f.pts.map(([x, y, z]) => [x * k, y * k, z * k] as Vec3);
+  return m;
+}
+/** Units drawn in the air with a ground shadow. */
+export const FLYING = new Set(['kirov', 'jet', 'ornithopter', 'carryall']);
 export function hasTurret(shape: string) { return HAS_TURRET.has(shape); }
 
 /** Vehicle hull pointing +X, centred on the origin. Sizes are in cells. */
@@ -308,10 +502,111 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
     case 'siege-turret':
       tracked(0.42, 0.29, 0.2);
       break;
+    case 'destroyer-td':
+      // Tank Destroyer: low casemate with a long fixed gun.
+      tracked(0.42, 0.28, 0.16);
+      m.box(-0.32, -0.2, 0.16, 0.26, 0.2, 0.32, hull, { top: team });
+      m.box(0.2, -0.035, 0.22, 0.78, 0.035, 0.28, BARREL);
+      break;
+    case 'drone':
+      // Terror Drone: a little spider.
+      for (let k2 = 0; k2 < 8; k2++) {
+        const a = (k2 / 8) * Math.PI * 2 + 0.4;
+        m.box(Math.cos(a) * 0.12 - 0.02, Math.sin(a) * 0.12 - 0.02, 0, Math.cos(a) * 0.24 + 0.02, Math.sin(a) * 0.24 + 0.02, 0.06, p.dark);
+      }
+      m.dome(0, 0, 0.05, 0.13, p.metal, 3, 10, 0.1);
+      m.box(0.1, -0.03, 0.08, 0.15, 0.03, 0.12, GLOW_RED, { glow: true });
+      break;
+    case 'demotruck':
+      for (const [x, y] of [[-0.28, -0.17], [-0.28, 0.17], [0.25, -0.17], [0.25, 0.17]]) m.box(x - 0.07, y - 0.04, 0.0, x + 0.07, y + 0.04, 0.1, TRACK);
+      m.box(0.12, -0.15, 0.06, 0.38, 0.15, 0.32, hull, { top: p.glass });
+      m.box(-0.4, -0.17, 0.06, 0.1, 0.17, 0.18, p.dark);
+      for (const [x, y] of [[-0.28, -0.08], [-0.28, 0.08], [-0.08, -0.08], [-0.08, 0.08]]) m.cylinder(x, y, 0.18, 0.36, 0.07, 0.07, [210, 190, 60], 10, { top: team });
+      break;
+    case 'kirov':
+      // Kirov airship: the great blimp, tail fins and a gondola slung beneath.
+      lathe(m, -0.8, 0.8, 0, 0.42, t => 0.3 * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.05)), 0.55), tint(p.metal, 1.05), 12, 14);
+      m.box(-0.3, -0.12, 0.42, 0.3, 0.12, 0.44, team);
+      m.box(-0.2, -0.08, 0.02, 0.28, 0.08, 0.14, p.dark);
+      m.add([[-0.85, 0, 0.42], [-0.55, 0, 0.42], [-0.85, 0, 0.85]], team);
+      m.add([[-0.85, -0.32, 0.42], [-0.55, 0, 0.42], [-0.85, 0.32, 0.42]], team);
+      break;
+    case 'jet':
+      // Harrier / Black Eagle: fuselage, swept wings and a tail.
+      lathe(m, -0.38, 0.42, 0, 0.1, t => 0.07 * Math.pow(Math.sin(Math.PI * (0.15 + t * 0.85)), 0.6), p.metal, 8, 10);
+      m.add([[-0.1, -0.34, 0.1], [0.12, -0.05, 0.1], [0.12, 0.05, 0.1], [-0.1, 0.34, 0.1]], tint(p.metal, 0.92));
+      m.box(-0.12, -0.34, 0.09, -0.02, -0.28, 0.12, team);
+      m.box(-0.12, 0.28, 0.09, -0.02, 0.34, 0.12, team);
+      m.add([[-0.38, 0, 0.1], [-0.24, 0, 0.1], [-0.38, 0, 0.3]], tint(p.metal, 0.85));
+      m.add([[-0.38, -0.14, 0.1], [-0.26, 0, 0.1], [-0.38, 0.14, 0.1]], tint(p.metal, 0.85));
+      break;
+    case 'ornithopter':
+      // Dune Ornithopter: a slim cockpit body with four long wings.
+      lathe(m, -0.35, 0.35, 0, 0.12, t => 0.08 * Math.pow(Math.sin(Math.PI * t), 0.7), p.body, 8, 10);
+      for (const x of [-0.08, 0.1]) {
+        m.add([[x - 0.06, -0.46, 0.15], [x + 0.06, -0.06, 0.15], [x + 0.06, 0.06, 0.15], [x - 0.06, 0.46, 0.15]], tint(p.trim, 0.95));
+      }
+      m.box(0.22, -0.05, 0.12, 0.33, 0.05, 0.19, p.glass);
+      m.box(-0.3, -0.04, 0.12, -0.18, 0.04, 0.2, team);
+      break;
+    case 'carryall':
+      // Carryall: a long body with twin engine pods and a cargo clamp.
+      lathe(m, -0.5, 0.5, 0, 0.2, t => 0.11 * Math.pow(Math.sin(Math.PI * t), 0.5), p.body, 10, 10);
+      for (const y of [-0.24, 0.24]) lathe(m, -0.3, 0.2, y, 0.2, t => 0.06 * Math.pow(Math.sin(Math.PI * t), 0.5), p.trim, 6, 8);
+      m.box(-0.1, -0.26, 0.17, 0.1, 0.26, 0.22, p.metal);
+      m.box(-0.35, -0.06, 0.28, -0.1, 0.06, 0.32, team);
+      m.box(-0.2, -0.12, 0.02, 0.2, -0.09, 0.1, p.dark);
+      m.box(-0.2, 0.09, 0.02, 0.2, 0.12, 0.1, p.dark);
+      break;
+    case 'ship-destroyer':
+      prism(m, hullOutline(0.6, 0.17), -0.04, 0.14, tint(p.hull, 0.9), p.trim);
+      m.box(-0.35, -0.1, 0.14, -0.02, 0.1, 0.32, p.hull, { top: team });
+      m.box(-0.2, -0.02, 0.32, -0.14, 0.02, 0.55, p.metal);
+      break;
+    case 'ship-cruiser':
+      prism(m, hullOutline(0.7, 0.19), -0.04, 0.15, tint(p.hull, 0.9), p.trim);
+      m.box(-0.45, -0.12, 0.15, 0.05, 0.12, 0.36, p.hull, { top: team });
+      m.cylinder(-0.2, 0, 0.36, 0.62, 0.05, 0.03, p.metal, 8);
+      m.box(-0.28, -0.1, 0.55, -0.12, 0.1, 0.58, p.dark);
+      for (const x of [0.15, 0.3]) m.box(x, -0.09, 0.15, x + 0.1, 0.09, 0.2, p.dark);
+      break;
+    case 'ship-carrier':
+      prism(m, [[-0.85, -0.3], [0.65, -0.3], [0.9, -0.1], [0.9, 0.1], [0.65, 0.3], [-0.85, 0.3]], -0.04, 0.2, tint(p.hull, 0.88), [118, 122, 126]);
+      m.box(-0.8, -0.015, 0.2, 0.8, 0.015, 0.205, [225, 225, 205]);
+      for (const x of [-0.6, -0.2, 0.2]) m.box(x, -0.2, 0.2, x + 0.12, -0.17, 0.205, [225, 200, 90]);
+      m.box(-0.3, 0.2, 0.2, 0.15, 0.3, 0.5, p.hull, { top: team });
+      m.cylinder(-0.05, 0.25, 0.5, 0.7, 0.03, 0.02, p.metal, 6);
+      break;
+    case 'ship-patrol':
+      prism(m, hullOutline(0.42, 0.13), -0.03, 0.11, tint(p.hull, 0.9), p.trim);
+      m.box(-0.3, -0.08, 0.11, -0.05, 0.08, 0.24, p.hull, { top: team });
+      break;
+    case 'ship-dreadnought':
+      prism(m, hullOutline(0.85, 0.22), -0.04, 0.16, tint(p.hull, 0.88), p.trim);
+      m.box(-0.2, -0.13, 0.16, 0.15, 0.13, 0.42, p.hull, { top: team });
+      m.cylinder(-0.05, 0, 0.42, 0.7, 0.06, 0.04, p.metal, 8);
+      for (const x of [-0.6, -0.45, 0.3, 0.45]) m.cylinder(x, 0, 0.16, 0.22, 0.06, 0.06, p.dark, 10);
+      break;
+    case 'sub':
+      // Typhoon: a long dark hull riding low, with its sail.
+      lathe(m, -0.55, 0.55, 0, 0.0, t => 0.13 * Math.pow(Math.sin(Math.PI * t), 0.45), [62, 66, 70], 10, 12, 0.7);
+      m.box(-0.1, -0.04, 0.05, 0.12, 0.04, 0.25, [70, 74, 78], { top: team });
+      break;
+    case 'dolphin':
+      lathe(m, -0.3, 0.32, 0, 0.04, t => 0.08 * Math.pow(Math.sin(Math.PI * t), 0.6), [120, 140, 160], 8, 10, 0.8);
+      m.add([[-0.05, 0, 0.1], [0.08, 0, 0.1], [-0.08, 0, 0.22]], [100, 120, 140]);
+      break;
+    case 'squid':
+      m.dome(0.05, 0, 0.0, 0.18, [120, 70, 140], 3, 12, 0.16);
+      for (let k2 = 0; k2 < 6; k2++) {
+        const a = (k2 / 6) * Math.PI - Math.PI / 2;
+        m.box(-0.35, Math.sin(a) * 0.16 - 0.02, 0.0, 0.0, Math.sin(a) * 0.16 + 0.02, 0.04, [140, 80, 160]);
+      }
+      break;
     default:
       tracked(0.38, 0.26, 0.18);
   }
-  return m;
+  return scaled(m, SHIP_SCALE[shape]);
 }
 
 export function turretMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
@@ -340,20 +635,56 @@ export function turretMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       m.cylinder(0, 0, 0.18, 0.28, 0.17, 0.15, p.hull, 12, { top: team });
       m.cylinder(0.04, 0, 0.28, 0.48, 0.12, 0.0, GLOW_CYAN, 6, { glow: true });
       break;
+    case 'mirage':
+      m.cylinder(-0.02, 0, 0.18, 0.3, 0.17, 0.15, p.hull, 12, { top: team });
+      m.box(0.1, -0.025, 0.22, 0.5, 0.025, 0.26, BARREL);
+      m.cylinder(-0.05, 0, 0.3, 0.36, 0.04, 0.12, GLOW_CYAN, 10, { glow: true });
+      break;
+    case 'tesla-tank':
+      m.box(-0.18, -0.16, 0.18, 0.12, 0.16, 0.3, p.hull, { top: team });
+      for (const y of [-0.08, 0.08]) {
+        for (let z = 0.3, k2 = 0; k2 < 3; z += 0.07, k2++) m.cylinder(0.02, y, z, z + 0.07, 0.06, 0.06, k2 % 2 ? p.dark : p.metal, 10);
+        m.dome(0.02, y, 0.51, 0.05, GLOW_BLUE, 2, 8);
+      }
+      break;
+    case 'ship-destroyer': case 'ship-patrol':
+      m.cylinder(0.25, 0, 0.12, 0.22, 0.08, 0.07, p.hull, 10, { top: team });
+      m.box(0.3, -0.02, 0.15, 0.55, 0.02, 0.19, BARREL);
+      break;
+    case 'ship-cruiser':
+      m.box(0.32, -0.08, 0.15, 0.5, 0.08, 0.26, p.hull, { top: team });
+      for (const y of [-0.04, 0.04]) m.box(0.42, y - 0.02, 0.24, 0.52, y + 0.02, 0.3, p.dark);
+      break;
+    case 'ship-dreadnought':
+      m.box(0.4, -0.1, 0.16, 0.65, 0.1, 0.3, p.hull, { top: team });
+      for (const y of [-0.05, 0.05]) m.box(0.55, y - 0.025, 0.28, 0.72, y + 0.025, 0.36, p.dark);
+      break;
     default:
       m.cylinder(-0.02, 0, 0.18, 0.31, 0.17, 0.15, p.hull, 14, { top: team });
       m.box(0.1, -0.03, 0.22, 0.55, 0.03, 0.27, BARREL);
   }
-  return m;
+  return scaled(m, SHIP_SCALE[shape]);
 }
 
-/** Rotating gun on top of a defensive structure (1x1, centred at 0.5, 0.5). */
+/** Defences with a gun that tracks its target. */
+export const ROTATING_DEFENCES = new Set(['turret', 'rocketturret', 'patriot', 'flakcannon', 'grandcannon']);
+
+/** Rotating gun on top of a defensive structure, centred on the origin. */
 export function defenseTurretMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
   const p = PALETTES[style];
   const m = new Mesh();
   if (shape === 'rocketturret') {
     m.box(-0.18, -0.16, 0.36, 0.16, 0.16, 0.58, p.body, { top: team });
     for (const y of [-0.08, 0.08]) m.box(0.16, y - 0.04, 0.42, 0.26, y + 0.04, 0.52, p.dark);
+  } else if (shape === 'patriot') {
+    m.box(-0.12, -0.2, 0.25, 0.12, 0.2, 0.32, p.metal);
+    for (const y of [-0.12, 0.12]) m.box(-0.16, y - 0.08, 0.32, 0.24, y + 0.08, 0.52, p.body, { top: team });
+  } else if (shape === 'flakcannon') {
+    m.cylinder(0, 0, 0.3, 0.42, 0.18, 0.15, p.hull, 10, { top: team });
+    for (const y of [-0.06, 0.06]) m.box(0.08, y - 0.025, 0.4, 0.46, y + 0.025, 0.48, BARREL);
+  } else if (shape === 'grandcannon') {
+    m.box(-0.38, -0.36, 0.45, 0.36, 0.36, 0.78, p.body, { top: team });
+    m.box(0.3, -0.07, 0.56, 1.35, 0.07, 0.68, BARREL);
   } else {
     m.cylinder(0, 0, 0.32, 0.5, 0.2, 0.17, p.body, 12, { top: team });
     m.box(0.12, -0.035, 0.38, 0.58, 0.035, 0.45, BARREL);

@@ -105,3 +105,41 @@ back to half health over time even after repair, as in Dune 2000.
   animation: launch plume and climbing missile, target warning and falling warhead, then
   flash, fireball, shockwave and mushroom cloud; storm clouds, rain and branching
   lightning; an orbital focusing beam and a sky-column strike.
+
+## Full tech trees and capabilities (update 2026-10-23)
+
+Both styles now carry their complete build progression, expressed as rule-pack data on a
+wider engine schema:
+
+- **Movement classes**: infantry, vehicles, **aircraft** (fly straight over everything,
+  only weapons that list `aircraft` can hit them), **ships** (water only, built at
+  shipyards that must be placed on water) and **amphibious** units (SEALs, Tanya).
+- **Upgrades** (`heavyfactory@1` in a prerequisite) are bought from the Base tab, like
+  Dune 2000's factory, yard and Hi-Tech upgrades.
+- **Countries and houses**: a unit may list a faction (`germany`) or a whole side
+  (`allies`). RA2 now offers its nine countries, each with its special: American
+  Paratroopers, the Korean Black Eagle, the French Grand Cannon, the German Tank
+  Destroyer, the British Sniper, the Libyan Demolition Truck, the Iraqi Desolator, the
+  Cuban Terrorist and the Russian Tesla Tank.
+- **Veterancy**: kills earn experience worth the victim's cost; veterans and elites hit
+  harder and take less damage, and elites slowly heal.
+- **Abilities**: engineers capture or repair; spies steal credits, black out power, jam
+  radar, steal veteran tech or reset a superweapon; C4 (Tanya, SEAL, Crazy Ivan,
+  Saboteur); terror drones that ride inside a vehicle until a repair pad evicts them;
+  Yuri's permanent, one-at-a-time mind control; deployable stances (G.I. sandbags,
+  Desolator rad field, Thumper worm lure); Mirage Tank, submarine, Fremen and Saboteur
+  concealment; death explosions (Devastator, Demolition Truck, Kirov, Nuclear Reactor);
+  aircraft ammunition and rearming at airfields; Dune Carryalls ferrying harvesters.
+- **Support buildings**: Repair Pad / Service Depot, Starport with drifting CHOAM
+  prices, Cloning Vats, Ore Purifier, Industrial Plant, Gap Generator, Spy Satellite
+  Uplink and Psychic Sensor.
+- **More powers**: Paratroopers, Fremen and the Saboteur (reinforcements), the
+  Chronosphere (pick an area, then a destination; infantry do not survive the jump) and
+  the Iron Curtain (invulnerable vehicles and buildings, lethal to infantry). Dune
+  palaces give each house its own power.
+- The skirmish AI climbs the whole tree: it saves for its core buildings and upgrades,
+  keeps two harvesters per refinery, flies air strikes, sends saboteurs and fires every
+  power except the Chronosphere, which is left to human players.
+
+Everything new stays inside the deterministic simulation, so it works unchanged in
+lockstep multiplayer. `tests/unit/progression.test.ts` exercises each system.

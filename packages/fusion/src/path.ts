@@ -1,5 +1,5 @@
 import { MapData, passable } from './map';
-import { RulePack, UnitKind } from './rules';
+import { MoveClass, RulePack } from './rules';
 
 const DIRS = [[0, -1, 10], [1, 0, 10], [0, 1, 10], [-1, 0, 10], [1, -1, 14], [1, 1, 14], [-1, 1, 14], [-1, -1, 14]] as const;
 
@@ -57,8 +57,10 @@ export interface PathOptions {
  * A* over the cell grid. Returns the cells to walk through (start excluded, goal
  * included). If the goal cannot be reached, returns a path to the closest reachable cell.
  */
-export function findPath(pack: RulePack, map: MapData, kind: UnitKind, from: number, to: number, opts: PathOptions = {}): number[] {
+export function findPath(pack: RulePack, map: MapData, kind: MoveClass, from: number, to: number, opts: PathOptions = {}): number[] {
   if (from === to) return [];
+  // Aircraft fly straight to the goal.
+  if (kind === 'aircraft') return [to];
   const w = map.w, size = w * map.h;
   const g = new Int32Array(size).fill(-1);
   const f = new Int32Array(size);
