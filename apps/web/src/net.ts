@@ -14,7 +14,11 @@ export class RoomConnection {
   private ws?: WebSocket;
   private listeners = new Set<Listener>();
   private turnHandler?: (slot: number, packet: TurnPacket) => void;
-  private turnBuffer: { slot: number; packet: TurnPacket }[] = [];
+  /** Every turn received this match, replayed to a re-subscribing session so a remounted
+   *  battle view never misses its opponents' opening turns. */
+  private turnLog: { slot: number; packet: TurnPacket }[] = [];
+  /** Bumped whenever the socket drops: a lockstep match cannot be rejoined. */
+  drops = 0;
   private closed = false;
 
   constructor(private url = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`) { this.open(); }
@@ -25,6 +29,7 @@ export class RoomConnection {
     ws.onopen = () => { this.connected = true; this.emit({ version: 1, type: 'rooms', rooms: [] }); };
     ws.onclose = () => {
       this.connected = false;
+      this.drops++;
       this.emit({ version: 1, type: 'error', message: 'Connection lost — reconnecting…' });
       if (!this.closed) setTimeout(() => this.open(), 2000);
     };
@@ -34,8 +39,8 @@ export class RoomConnection {
       if (message.type === 'welcome') this.id = message.id;
       if (message.type === 'turn') {
         const packet: TurnPacket = { turn: message.turn, tick: message.tick, checksum: message.checksum, commands: message.commands as TurnPacket['commands'], final: message.final };
-        if (this.turnHandler) this.turnHandler(message.slot, packet);
-        else if (this.turnBuffer.length < 4000) this.turnBuffer.push({ slot: message.slot, packet });
+        if (this.turnLog.length < 50000) this.turnLog.push({ slot: message.slot, packet });
+        this.turnHandler?.(message.slot, packet);
         return;
       }
       this.emit(message);
@@ -56,15 +61,14 @@ export class RoomConnection {
       send: packet => this.send({ type: 'turn', turn: packet.turn, tick: packet.tick, checksum: packet.checksum, commands: packet.commands }),
       subscribe: handler => {
         this.turnHandler = handler;
-        const pending = this.turnBuffer; this.turnBuffer = [];
-        for (const { slot, packet } of pending) handler(slot, packet);
+        for (const { slot, packet } of this.turnLog) handler(slot, packet);
         return () => { if (this.turnHandler === handler) this.turnHandler = undefined; };
       },
     };
   }
 
   /** Forget buffered turns from a previous match. */
-  resetTurns() { this.turnBuffer = []; }
+  resetTurns() { this.turnLog = []; }
 
   close() { this.closed = true; this.ws?.close(); }
 }

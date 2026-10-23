@@ -161,6 +161,21 @@ describe('fusion lockstep multiplayer', () => {
     players: [{ name: 'Human A', faction: 'america', ai: false }, { name: 'Human B', faction: 'russia', ai: false }, { name: 'AI', faction: 'russia', ai: true }],
   });
 
+  it('names the commander a client is waiting for, and resumes when their turn arrives', () => {
+    const hub = makeHub([0, 1]);
+    const a = new LockstepSession(new Game(setup()), 0, [0, 1], hub.transport(0));
+    const b = new LockstepSession(new Game(setup()), 1, [0, 1], hub.transport(1));
+    // B's tab is in the background and has not run yet: A can play its input delay, then waits.
+    for (let i = 0; i < 20; i++) { hub.advance(50); a.update(50); }
+    expect(a.status()).toBe('waiting');
+    expect(a.waitingFor()).toEqual([1]);
+    // B catches up (its background ticker runs); A resumes and nobody is waited on.
+    for (let i = 0; i < 40; i++) { hub.advance(50); a.update(50); b.update(50); }
+    expect(a.status()).toBe('running');
+    expect(a.waitingFor()).toEqual([]);
+    expect(a.game.tick).toBeGreaterThan(20); // Stuck at 6 (its input delay) before B caught up.
+  });
+
   it('keeps every client in sync with different commands and network jitter', () => {
     const hub = makeHub([0, 1]);
     const a = new LockstepSession(new Game(setup()), 0, [0, 1], hub.transport(0));

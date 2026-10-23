@@ -13,6 +13,8 @@ export interface Session {
   /** Advance by elapsed wall time; returns render interpolation 0..1. */
   update(dtMs: number): number;
   status(): SessionStatus;
+  /** Slots holding up a lockstep match (empty when nothing is waited on). */
+  waitingFor?(): number[];
   dispose(): void;
 }
 
@@ -130,6 +132,12 @@ export class LockstepSession implements Session {
   }
 
   status(): SessionStatus { return this.desynced ? 'desync' : this.waiting ? 'waiting' : 'running'; }
+  /** Human slots whose turn this client is still waiting for. */
+  waitingFor(): number[] {
+    if (!this.waiting) return [];
+    const turn = this.game.tick / TURN_TICKS, bucket = this.turns.get(turn);
+    return this.humans.filter(s => s !== this.slot && !bucket?.has(s) && !(this.dropped.has(s) && turn > this.dropped.get(s)!));
+  }
   dispose() { this.unsubscribe(); }
 }
 

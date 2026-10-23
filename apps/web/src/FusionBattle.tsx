@@ -100,14 +100,28 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     observer.observe(stage.current!);
 
     let last = performance.now(), raf = 0, uiTimer = 0, mmTimer = 0;
+    const drops = conn.drops;
+    // Advance the simulation by wall time. Shared by the frame loop and the background
+    // ticker, so a hidden tab keeps playing (and keeps sending its lockstep turns).
+    const advance = (now: number) => {
+      const dt = Math.min(2000, now - last); last = now;
+      return session.update(dt);
+    };
+    // Browsers stop requestAnimationFrame in background tabs, which would freeze this
+    // player's turns and stall every other commander. A worker timer is not throttled.
+    let ticker: Worker | null = null;
+    try {
+      ticker = new Worker(URL.createObjectURL(new Blob(['setInterval(() => postMessage(0), 50);'], { type: 'text/javascript' })));
+      ticker.onmessage = () => { if (document.hidden) advance(performance.now()); };
+    } catch { ticker = null; }
     let prev: { ready: Record<string, boolean>; units: number; low: boolean; hp: number; over: boolean } | null = null;
     let lastAttackWarning = -1e9;
     const announced = new WeakSet<object>();
     const lastHp = new Map<number, number>();
     const readySupers = new Set<number>();
     const loop = (now: number) => {
-      const dt = Math.min(2000, now - last); last = now;
-      const alpha = session.update(dt);
+      const dt = Math.min(2000, now - last);
+      const alpha = advance(now);
       // Scrolling: arrow keys and screen edges.
       const speed = (Math.min(dt, 50) * 0.9) / renderer.camera.zoom;
       const p = pointer.current, c = canvas.current!;
@@ -185,7 +199,9 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         setUi({
           tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues,
           selection: first ? { name: (firstDef?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!(pack.units[e.type].deploysTo || pack.units[e.type].deployWeapon || pack.units[e.type].lure)), own: first.owner === slot, structure: first.kind === 'structure' } : null,
-          status: status === 'waiting' ? 'Waiting for other commanders…' : status === 'desync' ? 'Desynchronised — the match cannot continue' : '',
+          status: conn.drops !== drops && status !== 'running' ? 'Connection to the match was lost — it cannot be rejoined'
+            : status === 'waiting' ? `Waiting for ${(session.waitingFor?.() ?? []).map(s => game.players[s]?.name).filter(Boolean).join(', ') || 'other commanders'}…`
+            : status === 'desync' ? 'Desynchronised — the match cannot continue' : '',
           over: game.over, won: game.over && game.winnerTeam === me.team, defeated: me.defeated, stats: { ...me.stats }, supers, costs,
         });
       }
@@ -253,7 +269,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     window.addEventListener('keydown', keydown);
     window.addEventListener('keyup', keyup);
     return () => {
-      cancelAnimationFrame(raf); observer.disconnect(); session.dispose();
+      cancelAnimationFrame(raf); observer.disconnect(); session.dispose(); ticker?.terminate();
       window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup);
       delete window.comradeFusion;
     };
