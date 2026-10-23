@@ -4,7 +4,8 @@ import { readFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
 import { RoomCoordinator } from './rooms.js';
 
-const PORT = process.env.PORT || 3001;
+// COMRADE_PORT wins over PORT so dev launchers that set PORT for the web app cannot steal it.
+const PORT = process.env.COMRADE_PORT || process.env.PORT || 3001;
 
 const publicRoot = resolve(process.env.STATIC_ROOT || 'public');
 const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.wasm': 'application/wasm', '.json': 'application/json', '.txt': 'text/plain' };
