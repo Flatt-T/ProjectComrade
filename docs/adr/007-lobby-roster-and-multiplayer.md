@@ -82,17 +82,37 @@ multi-week effort, not a one-day task:
 The service transport (`/ws`, rate-limited, capacity-bounded) and the `PlayerOrder`
 contract are the foundation these build on.
 
-### Red Alert and Dune styles — engine built, not yet playable
-`vanillara.wasm` is compiled and served, but to make RA playable needs, in order:
-1. A hash-pinned **RA freeware content pack** (equivalent to the TD OpenRA/CnCNet pack)
-   and an RA `manifest.json`, added to `tools/prepare-content.py`.
-2. An **RA scenario-boot patch** in `tools/build-engine.py` mirroring the TD
-   `COMRADE.INI` auto-start, plus an RA build of `comrade_bridge.cpp` (the current
-   bridge is in `tiberiandawn/` and uses TD types).
-3. At least one authored RA skirmish map and RA entries in `STYLES`/the pack.
+### Red Alert — engine built and served; one well-defined blocker remains
+`vanillara.wasm` is compiled and served. Investigation on 2026-10-23 cleared most of
+the path:
 
-Dune 2000 and RA2 require separate gated engines (no GPL upstream equivalent is
-vendored) and remain out of scope until those are sourced.
+- **Content — done.** `tools/prepare-ra-content.py` fetches the freeware RA pack from
+  `openra.ppmsite.com/ra-packages.zip` (pinned
+  `sha256 de3697903497d3d40db2f17d9b1aabbb3ef0b3bfccd9097a0b93836dc7343ab1`), keeps the
+  nine gameplay MIX files (allies, conquer, general, interior, redalert, russian, snow,
+  sounds, temperat) and writes `apps/web/public/content/ra/manifest.json`.
+- **Bridge — ports cleanly.** `engines/redalert/` exposes every symbol the TD bridge
+  uses: `PlayerPtr`, `Units`/`Buildings`/`Infantry`, `BuildingTypeClass::From_Name`,
+  `InfantryTypeClass::From_Name`, `Player_Assign_Mission`, `Begin_Production`,
+  `Place_Object`, `Coord_Cell`, `Map.TacticalCoord`, `MAP_CELL_W`. A
+  `redalert/comrade_bridge.cpp` is a near-copy of the TD one (RA also has
+  `VesselClass`/`AircraftClass` to add to the snapshot).
+- **Boot patch — same hook.** `redalert/init.cpp` has the same `while (process)` /
+  `Start_Scenario(Scen.ScenarioName)` / `SEL_START_NEW_GAME` / `Whom = HOUSE_GOOD`
+  structure the TD autostart patch targets (RA's `Start_Scenario` is the 1-arg form).
+
+- **Blocker — the RA map format.** Unlike TD's plain `COMRADE.BIN`, RA scenarios encode
+  terrain and overlay in Format80 (LCW)-compressed, base64-packed `[MapPack]` and
+  `[OverlayPack]` sections (128×128 cells: templates then icons, chunked at 8192
+  uncompressed bytes with little-endian size headers). Authoring a bootable COMRADE RA
+  map therefore needs a small **Format80 encoder + map-pack writer** (an all-clear
+  `[MapPack]` with unit/structure placement via plain `[Units]`/`[Structures]`/
+  `[Infantry]` sections is the minimal first map). This codec, wiring the RA bridge and
+  boot patch into `tools/build-engine.py`, marking `ra1` `playable: true` in `STYLES`,
+  extending the client to mount the RA pack, and a `vanillara.wasm` rebuild are the
+  remaining steps. Estimate: one focused session with engine rebuild cycles.
+
+Dune 2000 and RA2 require separate sourced engines — see ADR 009.
 
 ### HD sprites — out of scope
 The product renders the authentic 640×400 framebuffer scaled 2×. Redrawn HD artwork is
