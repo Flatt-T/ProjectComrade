@@ -33,6 +33,8 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const mode = useRef<Mode>('normal');
   const placing = useRef<string | null>(null);
   const superId = useRef<number>(0);
+  /** Last place our forces took damage, for Space (jump to alert). */
+  const lastAlert = useRef<{ x: number; y: number } | null>(null);
   const groups = useRef(new Map<number, number[]>());
   const pointer = useRef({ x: 0, y: 0, inside: false, down: false, sx: 0, sy: 0, dragging: false });
   const keys = useRef(new Set<string>());
@@ -85,6 +87,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     let prev: { ready: Record<string, boolean>; units: number; low: boolean; hp: number; over: boolean } | null = null;
     let lastAttackWarning = -1e9;
     const announced = new WeakSet<object>();
+    const lastHp = new Map<number, number>();
     const readySupers = new Set<number>();
     const loop = (now: number) => {
       const dt = Math.min(2000, now - last); last = now;
@@ -128,6 +131,12 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           if (myHp < prev.hp - 40 && now - lastAttackWarning > 12000) { lastAttackWarning = now; say('Our base is under attack'); }
           if (me.credits === 0 && TABS.some(t => queues[t.id].items.length && !queues[t.id].ready)) { if (Math.floor(now / 4000) % 4 === 0) say('Insufficient funds'); }
         }
+        for (const e of game.entities.values()) {
+          if (e.owner !== slot) continue;
+          const before = lastHp.get(e.id);
+          if (before !== undefined && e.hp < before) lastAlert.current = { x: Math.floor(e.x / 256), y: Math.floor(e.y / 256) };
+          lastHp.set(e.id, e.hp);
+        }
         // Superweapon status and alerts (own launches, enemy launches, storms).
         const supers: SuperView[] = [];
         for (const e of game.entities.values()) {
@@ -158,20 +167,61 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     };
     raf = requestAnimationFrame(loop);
 
+    // Classic C&C / RA2 keyboard map.
+    let lastGroup = { n: 0, at: 0 }, lastT = 0, lastP = 0;
+    const ownUnits = () => [...game.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.hp > 0);
+    const onScreen = (e: Entity) => {
+      const s = renderer.toScreen(e.x, e.y), c = canvas.current!;
+      return s.x >= 0 && s.y >= 0 && s.x <= c.width && s.y <= c.height;
+    };
+    const centre = (ids: number[]) => {
+      const list = ids.map(id => game.entities.get(id)).filter((e): e is Entity => !!e);
+      if (!list.length) return;
+      const x = list.reduce((n, e) => n + e.x, 0) / list.length, y = list.reduce((n, e) => n + e.y, 0) / list.length;
+      renderer.centerOn(Math.floor(x / 256), Math.floor(y / 256));
+    };
     const keydown = (ev: KeyboardEvent) => {
       if ((ev.target as HTMLElement)?.tagName === 'INPUT') return;
       keys.current.add(ev.key);
+      const now = performance.now();
       const sel = () => [...renderer.selected].filter(id => game.entities.get(id)?.owner === slot && game.entities.get(id)?.kind === 'unit');
-      if (/^[1-9]$/.test(ev.key)) {
-        const n = Number(ev.key);
-        if (ev.ctrlKey || ev.metaKey) { groups.current.set(n, sel()); say(`Team ${n} assigned`); ev.preventDefault(); }
-        else { const ids = (groups.current.get(n) ?? []).filter(id => game.entities.get(id)?.hp); renderer.selected = new Set(ids); }
-      } else if (ev.key === 's' || ev.key === 'S') { const ids = sel(); if (ids.length) session.issue({ t: 'stop', ids }); }
-      else if (ev.key === 'd' || ev.key === 'D') { const ids = sel(); if (ids.length) session.issue({ t: 'deploy', ids }); }
-      else if (ev.key === 'a' || ev.key === 'A') { if (sel().length) setMode('attackMove'); }
-      else if (ev.key === 'h' || ev.key === 'H' || ev.key === 'Home') { const s = game.mapPreset.starts[slot]; renderer.centerOn(s.x, s.y); }
-      else if (ev.key === 'Escape') setMode('normal');
-      else if (ev.key === '?') setHelp(v => !v);
+      const digit = /^Digit([1-9])$/.exec(ev.code);
+      const key = ev.key.toLowerCase();
+      if (digit) {
+        const n = Number(digit[1]);
+        ev.preventDefault();
+        const team = (groups.current.get(n) ?? []).filter(id => (game.entities.get(id)?.hp ?? 0) > 0 && game.entities.get(id)?.owner === slot);
+        if (ev.ctrlKey || ev.metaKey) { groups.current.set(n, sel()); say(`Team ${n} created`); }
+        else if (ev.altKey) { groups.current.set(n, [...new Set([...team, ...sel()])]); say(`Added to team ${n}`); }
+        else if (ev.shiftKey) renderer.selected = new Set([...renderer.selected, ...team]);
+        else {
+          renderer.selected = new Set(team);
+          // Press a team number twice to centre the camera on it.
+          if (lastGroup.n === n && now - lastGroup.at < 450) centre(team);
+          lastGroup = { n, at: now };
+        }
+        return;
+      }
+      if (ev.key === 'Alt') { ev.preventDefault(); return; }
+      if (key === 't') {
+        // Same type: on screen, or across the map on a double tap.
+        const types = new Set(sel().map(id => game.entities.get(id)!.type));
+        if (types.size) renderer.selected = new Set(ownUnits().filter(e => types.has(e.type) && (now - lastT < 450 || onScreen(e))).map(e => e.id));
+        lastT = now;
+      } else if (key === 'p') {
+        // All combat units: on screen, or across the map on a double tap.
+        const combat = ownUnits().filter(e => { const d = pack.units[e.type]; return d.weapon && !d.harvester && !d.deploysTo; });
+        renderer.selected = new Set(combat.filter(e => now - lastP < 450 || onScreen(e)).map(e => e.id));
+        lastP = now;
+      } else if (key === 's') { const ids = sel(); if (ids.length) session.issue({ t: 'stop', ids }); }
+      else if (key === 'g') { const ids = sel(); if (ids.length) { session.issue({ t: 'guard', ids }); say('Guarding'); } }
+      else if (key === 'x') { const ids = sel(); if (ids.length) session.issue({ t: 'scatter', ids }); }
+      else if (key === 'd') { const ids = sel(); if (ids.length) session.issue({ t: 'deploy', ids }); }
+      else if (key === 'a') { if (sel().length) setMode('attackMove'); }
+      else if (key === 'h' || ev.key === 'Home') { const st = game.mapPreset.starts[slot]; renderer.centerOn(st.x, st.y); }
+      else if (ev.key === ' ') { ev.preventDefault(); if (lastAlert.current) renderer.centerOn(lastAlert.current.x, lastAlert.current.y); }
+      else if (ev.key === 'Escape') { setMode('normal'); renderer.selected = new Set(); }
+      else if (ev.key === '?' || ev.key === 'F1') { ev.preventDefault(); setHelp(v => !v); }
     };
     const keyup = (ev: KeyboardEvent) => keys.current.delete(ev.key);
     window.addEventListener('keydown', keydown);
@@ -211,7 +261,9 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     else if (mode.current === 'sell') cursor = 'alias';
     else if (mode.current === 'repair') cursor = 'help';
     else if (mode.current === 'attackMove' || mode.current === 'super') cursor = 'crosshair';
-    else if (target && target.owner === slot) cursor = 'pointer';
+    else if (target && target.owner === slot && !keys.current.has('Control') && !keys.current.has('Meta')) cursor = 'pointer';
+    else if (hasUnits && (keys.current.has('Control') || keys.current.has('Meta'))) cursor = 'crosshair';
+    else if (hasUnits && keys.current.has('Alt')) cursor = 'move';
     else if (target && hasUnits && r.game.isEnemy(slot, target.owner)) cursor = 'crosshair';
     else if (hasUnits) cursor = 'move';
     canvas.current!.style.cursor = cursor;
@@ -235,10 +287,11 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       renderer.selected = new Set(ev.shiftKey ? [...renderer.selected, ...picked] : picked);
       return;
     }
-    click(p.x, p.y, ev.shiftKey);
+    click(p.x, p.y, { shift: ev.shiftKey, ctrl: ev.ctrlKey || ev.metaKey, alt: ev.altKey });
   }
 
-  function click(x: number, y: number, shift: boolean) {
+  function click(x: number, y: number, mods: { shift: boolean; ctrl: boolean; alt: boolean }) {
+    const shift = mods.shift;
     const r = rig.current; if (!r) return;
     const { game, renderer, session } = r;
     const cell = renderer.screenToCell(x, y);
@@ -264,6 +317,17 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     const units = [...renderer.selected].map(id => game.entities.get(id)).filter((e): e is Entity => !!e && e.owner === slot && e.kind === 'unit');
     if (mode.current === 'attackMove' && units.length) {
       session.issue({ t: 'attackMove', ids: units.map(u => u.id), x: cell.x, y: cell.y }); mark('#ff5a4a'); setMode('normal'); return;
+    }
+    // Ctrl+click: force-fire at anything clicked (even friendly), or at open ground.
+    if (mods.ctrl && units.length) {
+      if (target && !(target.kind === 'unit' && renderer.selected.has(target.id))) session.issue({ t: 'attack', ids: units.map(u => u.id), target: target.id, force: true });
+      else session.issue({ t: 'fireAt', ids: units.map(u => u.id), x: Math.max(0, cell.x), y: Math.max(0, cell.y) });
+      mark('#ff5a4a'); return;
+    }
+    // Alt+click: force-move, even onto an enemy, without engaging.
+    if (mods.alt && units.length) {
+      session.issue({ t: 'move', ids: units.map(u => u.id), x: Math.max(0, cell.x), y: Math.max(0, cell.y) });
+      mark('#7dff7a'); return;
     }
     if (target && target.owner === slot) {
       // Clicking a selected MCV again deploys it (RA2 style).
@@ -360,10 +424,13 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? 'Choose the target — right-click cancels' : 'Attack-move — click a destination'}</div>}
       {help && <div className="fusion-help" onClick={() => setHelp(false)}>
         <h3>Controls</h3>
-        <p><b>Left click</b> select · order move / attack / harvest</p><p><b>Drag</b> box-select · <b>Double-click</b> select all of a type</p>
-        <p><b>Click a selected MCV</b> or <b>D</b> deploy · <b>S</b> stop · <b>A</b> attack-move</p>
-        <p><b>Ctrl+1–9</b> assign team · <b>1–9</b> select team · <b>H</b> home</p>
-        <p><b>Right click</b> deselect / cancel · <b>Wheel</b> zoom · <b>Arrows / screen edge</b> scroll</p>
+        <p><b>Left click</b> select · order move / attack / harvest · <b>Right click</b> deselect / cancel</p>
+        <p><b>Drag</b> box-select · <b>Shift</b>+click/drag add or remove · <b>Double-click</b> all of a type on screen</p>
+        <p><b>Ctrl</b>+click force-fire (any target, or ground) · <b>Alt</b>+click force-move</p>
+        <p><b>Ctrl+1–9</b> create team · <b>1–9</b> select (twice: centre) · <b>Shift+1–9</b> add team to selection · <b>Alt+1–9</b> add selection to team</p>
+        <p><b>T</b> same type (twice: whole map) · <b>P</b> all combat units · <b>G</b> guard · <b>X</b> scatter · <b>S</b> stop · <b>D</b> deploy · <b>A</b> attack-move</p>
+        <p><b>H</b> home · <b>Space</b> last alert · <b>Esc</b> cancel · <b>F1</b> this card</p>
+        <p><b>Click a selected MCV</b> to deploy · <b>Wheel</b> zoom · <b>Arrows / screen edge</b> scroll</p>
       </div>}
       {ui && (ui.over || ui.defeated) && <div className="fusion-over">
         <p className="eyebrow">{style.name.toUpperCase()}</p>

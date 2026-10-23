@@ -314,3 +314,47 @@ describe('fusion superweapons', () => {
     expect(a.checksum()).toBe(b.checksum());
   });
 });
+
+describe('fusion classic controls', () => {
+  const twoHumans = (): Game => new Game({ pack: ra2Pack, mapId: 'temperate-valley', seed: 12, players: [{ name: 'A', faction: 'allies', ai: false }, { name: 'S', faction: 'soviets', ai: false }] });
+  const mine = (g: Game, type: string) => [...g.entities.values()].filter(e => e.owner === 0 && e.type === type);
+
+  it('Ctrl force-fire attacks a friendly unit; a plain attack on a friend is refused', () => {
+    const g = twoHumans();
+    const [tank] = mine(g, 'grizzly');
+    const [gi] = mine(g, 'gi');
+    g.enqueue(0, { t: 'attack', ids: [tank.id], target: gi.id });
+    g.step();
+    expect(tank.order).not.toBe('attack');
+    const before = gi.hp;
+    g.enqueue(0, { t: 'attack', ids: [tank.id], target: gi.id, force: true });
+    for (let i = 0; i < 150 && gi.hp > 0; i++) g.step();
+    expect(gi.hp).toBeLessThan(before);
+  });
+
+  it('fires at open ground and damages whatever stands there', () => {
+    const g = twoHumans();
+    const [tank] = mine(g, 'grizzly');
+    const [gi] = mine(g, 'gi');
+    const before = gi.hp;
+    g.enqueue(0, { t: 'fireAt', ids: [tank.id], x: Math.floor(gi.x / 256), y: Math.floor(gi.y / 256) });
+    for (let i = 0; i < 150; i++) g.step();
+    expect(tank.order).toBe('attackGround');
+    expect(gi.hp).toBeLessThan(before);
+  });
+
+  it('guards in place and scatters deterministically', () => {
+    const run = () => {
+      const g = twoHumans();
+      const gis = mine(g, 'gi');
+      g.enqueue(0, { t: 'guard', ids: gis.map(e => e.id) });
+      g.step();
+      expect(gis.every(e => e.order === 'idle' && e.resume === g.cellOf(e))).toBe(true);
+      g.enqueue(0, { t: 'scatter', ids: gis.map(e => e.id) });
+      for (let i = 0; i < 60; i++) g.step();
+      return g;
+    };
+    const a = run(), b = run();
+    expect(a.checksum()).toBe(b.checksum());
+  });
+});

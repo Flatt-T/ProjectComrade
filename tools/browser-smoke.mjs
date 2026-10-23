@@ -132,6 +132,31 @@ try {
     await page.getByRole('button', { name: /START OPERATION/ }).click();
     await fusionDeploy(page);
     await page.locator('.fusion-item').first().waitFor({ timeout: 10000 }); // Deploying unlocks the build sidebar.
+    if (style === 'ra2') {
+      // Classic controls with real input: drag-select, teams, Ctrl force-fire, Alt force-move.
+      const box = await page.locator('.fusion-canvas').boundingBox();
+      const at = id => page.evaluate(id => { const { game, renderer } = window.comradeFusion; const e = game.entities.get(id); return renderer.toScreen(e.x, e.y); }, id);
+      const ids = await page.evaluate(() => {
+        const { game, slot } = window.comradeFusion;
+        const mine = t => [...game.entities.values()].find(e => e.owner === slot && e.type === t)?.id;
+        return { tank: mine('grizzly'), gi: mine('gi') };
+      });
+      const t = await at(ids.tank);
+      await page.mouse.move(box.x + t.x - 14, box.y + t.y - 14); await page.mouse.down();
+      await page.mouse.move(box.x + t.x + 14, box.y + t.y + 14, { steps: 6 }); await page.mouse.up();
+      await page.waitForFunction(id => window.comradeFusion.renderer.selected.has(id), ids.tank);
+      await page.keyboard.press('Control+Digit1');
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => window.comradeFusion.renderer.selected.size === 0);
+      await page.keyboard.press('Digit1');
+      await page.waitForFunction(id => window.comradeFusion.renderer.selected.has(id), ids.tank);
+      const g = await at(ids.gi);
+      await page.keyboard.down('Control'); await page.mouse.click(box.x + g.x, box.y + g.y); await page.keyboard.up('Control');
+      await page.waitForFunction(({ tank, gi }) => { const e = window.comradeFusion.game.entities.get(tank); return e.order === 'attack' && e.target === gi && e.force; }, ids, { timeout: 5000 });
+      await page.keyboard.down('Alt'); await page.mouse.click(box.x + t.x + 60, box.y + t.y + 40); await page.keyboard.up('Alt');
+      await page.waitForFunction(id => window.comradeFusion.game.entities.get(id).order === 'move', ids.tank, { timeout: 5000 });
+      console.log('ra2: drag-select, Ctrl+1 team recall, Ctrl force-fire and Alt force-move passed');
+    }
     await page.screenshot({ path: `build/evidence/${style}-battlefield.png` });
     assert.deepEqual(errors, [], `${style}: browser must not emit uncaught errors`);
     console.log(`${style}: Fusion Engine match launched, simulated and deployed`);

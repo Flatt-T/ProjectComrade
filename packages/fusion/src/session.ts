@@ -145,8 +145,10 @@ export function parseCommand(raw: unknown): Command | null {
     case 'move': case 'attackMove': case 'harvest':
       return ints(c.ids) && int(c.x) && int(c.y) ? { t: c.t, ids: c.ids, x: c.x, y: c.y } : null;
     case 'attack':
-      return ints(c.ids) && int(c.target) ? { t: 'attack', ids: c.ids, target: c.target } : null;
-    case 'stop': case 'deploy':
+      return ints(c.ids) && int(c.target) ? { t: 'attack', ids: c.ids, target: c.target, force: c.force === true } : null;
+    case 'fireAt':
+      return ints(c.ids) && int(c.x) && int(c.y) ? { t: 'fireAt', ids: c.ids, x: c.x, y: c.y } : null;
+    case 'stop': case 'deploy': case 'guard': case 'scatter':
       return ints(c.ids) ? { t: c.t, ids: c.ids } : null;
     case 'build': case 'cancel':
       return item(c.item) ? { t: c.t, item: c.item } : null;
