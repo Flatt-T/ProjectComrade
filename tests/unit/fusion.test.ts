@@ -208,3 +208,25 @@ describe('fusion lockstep multiplayer', () => {
     expect(parseCommand(null)).toBeNull();
   });
 });
+
+describe('fusion packs compose from existing games', () => {
+  it('runs RA2 armies on Dune terrain with sandworms and spice, as pure data', () => {
+    // A fusion game: Dune's desert, spice and sandworms; RA2's factions, arsenal and tech tree.
+    const fusion: GameSetup['pack'] = {
+      ...ra2Pack,
+      id: 'spice-war', name: 'Spice War', projection: 'ortho',
+      terrains: dunePack.terrains.map(t => t.id === 'rock' ? { ...t, buildable: true } : t),
+      resources: dunePack.resources,
+      maps: dunePack.maps,
+      mechanics: { buildOn: ['rock'], sandworm: dunePack.mechanics.sandworm, bloom: dunePack.mechanics.bloom },
+      fidelityNote: 'Original fusion game.',
+    };
+    const game = new Game({ pack: fusion, mapId: 'arrakis-basin', seed: 21, players: [{ name: 'A', faction: 'allies', ai: true }, { name: 'S', faction: 'soviets', ai: true }] });
+    run(game, 15 * 60 * 5);
+    for (const p of game.players) {
+      expect(p.stats.built).toBeGreaterThanOrEqual(4);
+      expect(p.stats.harvested).toBeGreaterThan(0);
+    }
+    expect(game.worms.length).toBe(1);
+  });
+});

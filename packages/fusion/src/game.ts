@@ -76,6 +76,8 @@ export interface Entity {
   convertedUntil: number;
   /** Tick the entity was created (placement/spawn animation). */
   born: number;
+  /** Dune: built off concrete, so the sand slowly wears it back down to half health. */
+  exposed: boolean;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -288,7 +290,7 @@ export class Game {
       id: this.nextId++, type, kind, owner, x, y, px: x, py: y, hp, maxHp: hp, facing: 128, turret: 128,
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, timer: 0, dock: 0,
-      cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick,
+      cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false,
     };
   }
 
@@ -500,7 +502,9 @@ export class Game {
       this.effect('build', (x + def.w / 2) * LEPTONS, (y + def.h / 2) * LEPTONS, 0, 0, 10);
       return;
     }
-    this.spawnStructure(item, p.slot, x, y, this.startHealth(def, x, y));
+    const start = this.startHealth(def, x, y);
+    const s = this.spawnStructure(item, p.slot, x, y, start);
+    s.exposed = start < 100;
   }
 
   /** Dune: buildings not fully on concrete start damaged. */
@@ -829,6 +833,12 @@ export class Game {
       const cost = Math.max(1, Math.floor((def.cost * heal) / (s.maxHp * 4)));
       if (p.credits >= cost) { p.credits -= cost; s.hp = Math.min(s.maxHp, s.hp + heal); } else s.repairing = false;
       if (s.hp >= s.maxHp) s.repairing = false;
+    }
+    // Sand erosion: exposed Dune buildings decay to their uncovered floor, even after repair.
+    const concrete = this.pack.mechanics.concrete;
+    if (s.exposed && concrete && this.tick % 60 === 0) {
+      const floor = Math.floor((s.maxHp * concrete.uncoveredStartPercent) / 100);
+      if (s.hp > floor) s.hp = Math.max(floor, s.hp - Math.max(1, Math.floor(s.maxHp / 200)));
     }
     if (s.cooldown > 0) s.cooldown--;
     const w = def.weapon ? this.pack.weapons[def.weapon] : undefined;

@@ -60,3 +60,29 @@ modelled directly:
   for Dune, RA2 and all future original games.
 - Exact parity with the originals is a tuning exercise against observations, not a
   property of the code. The ADR and the in-game credits say so.
+
+## Art direction (update 2026-10-23)
+
+The owner chose redrawn built-in art modelled on the originals rather than a
+bring-your-own-files loader. Public screenshots of Dune 2000 and Red Alert 2 were used
+only as visual reference; no original pixels, sprites or tiles are used or bundled.
+
+- **Sprite forge** (`packages/fusion/src/art/forge.ts`): buildings and vehicles are small
+  3D models (boxes, cylinders, domes, roofs) rendered with fixed north-west lighting,
+  vertical-face gradients and baked soft ground shadows into cached sprites. Vehicles are
+  pre-rendered at 32 facings with independently rotating turrets, echoing RA2's voxel
+  units; the same models produce the sidebar cameos.
+- **Models** (`art/models.ts`): Dune 2000's rounded cream-metal structures with house
+  accents (domed Windtraps, silo Refineries, crane Construction Yards); RA2's ribbed
+  silver Allied and brutal concrete Soviet buildings (twin-drum Power Plant, coil Tesla
+  Reactor, Prism and Tesla towers); light hulls with player markings.
+- **Terrain** (`art/terrain.ts`): painted per pixel from noise-perturbed terrain fields, so
+  edges erode organically instead of following the grid, with procedural material
+  textures and a height field providing relief lighting and cast shadows (raised
+  orange rock over cream sand; olive grass, red-brown dirt, navy water, orange cliffs).
+  Spice is drawn as dusty stains, ore and gems as glinting crystals, trees as
+  depth-sorted scenery, and the shroud as a smoothly scaled soft mask.
+
+Gameplay fidelity from the same review: RA2 costs and prerequisites were corrected
+against published structure tables, and Dune buildings placed off concrete now erode
+back to half health over time even after repair, as in Dune 2000.
