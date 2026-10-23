@@ -64,3 +64,5 @@ for p in sorted(out.glob('*.MIX')):
         raise RuntimeError(f"Resource is outside the pinned pack decision: {p.name}")
 # Authored scenarios and the manifest (with the lobby's map registry) come from pack-maps.
 subprocess.run([sys.executable, str(ROOT / 'tools/pack-maps.py')], check=True)
+# Fusion Engine sound banks from the freeware TD and RA packs (rights ledger 017 and 018).
+subprocess.run([sys.executable, str(ROOT / 'tools/prepare-audio.py')], check=True)

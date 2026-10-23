@@ -41,7 +41,7 @@ export default function App() {
     <footer>
       <span>VANILLA CONQUER · COMRADE FUSION ENGINE</span>
       <span>Classic C&amp;C runs the original GPL engine with freeware artwork. Dune and Red Alert 2 styles are independent gameplay replications with original procedural art.</span>
-      <a href="/content/td/manifest.json">Content credits ↗</a>
+      <a href="/content/td/manifest.json">Content credits ↗</a> <a href="/content/audio/manifest.json">Sound credits ↗</a>
       <a href="/engines/source.txt">Engine licence ↗</a>
     </footer>
   </main>;

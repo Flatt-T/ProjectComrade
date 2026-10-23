@@ -680,6 +680,7 @@ export class Game {
     }
     const start = this.startHealth(def, x, y);
     const s = this.spawnStructure(item, p.slot, x, y, start);
+    const fx = this.effect('place', s.x, s.y, 0, 0, 10); fx.item = item; fx.owner = p.slot;
     s.exposed = start < 100;
   }
 
@@ -1054,17 +1055,20 @@ export class Game {
         const px = a.x + ((tx - a.x) * along) / len, py = a.y + ((ty - a.y) * along) / len;
         if (dist(e.x, e.y, Math.round(px), Math.round(py)) < 160) this.hit(e, w, a.owner, 100, a.id);
       }
-      this.effect('sonic', a.x, a.y, tx, ty, 12);
+      this.tagWeapon(this.effect('sonic', a.x, a.y, tx, ty, 12), w, a);
       return;
     }
     if (w.speed === 0) {
-      this.effect(w.visual, a.x, a.y, tx, ty, w.visual === 'prism' || w.visual === 'tesla' ? 8 : 4);
+      this.tagWeapon(this.effect(w.visual, a.x, a.y, tx, ty, w.visual === 'prism' || w.visual === 'tesla' ? 8 : 4), w, a);
       this.impact(w, a.owner, t, tx, ty, a.id);
       return;
     }
     this.projectiles.push({ id: this.nextId++, owner: a.owner, weapon: w.id, x: a.x, y: a.y, sx: a.x, sy: a.y, tx: tx + shot * 40, ty, target: t?.id ?? 0, source: a.id });
-    this.effect('muzzle', a.x, a.y, tx, ty, 3);
+    this.tagWeapon(this.effect('muzzle', a.x, a.y, tx, ty, 3), w, a);
   }
+
+  /** Weapon effects carry the weapon and shooter so the sound player can pick the right report. */
+  private tagWeapon(fx: Effect, w: WeaponDef, a: Entity) { fx.item = w.id; fx.owner = a.owner; }
 
   private updateProjectiles() {
     for (let i = this.projectiles.length - 1; i >= 0; i--) {

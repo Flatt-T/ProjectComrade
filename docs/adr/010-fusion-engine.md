@@ -144,3 +144,16 @@ wider engine schema:
 
 Everything new stays inside the deterministic simulation, so it works unchanged in
 lockstep multiplayer. `tests/unit/progression.test.ts` exercises each system.
+
+## Sound (update 2026-10-23)
+
+Fusion Engine games now have sound. `tools/prepare-audio.py` (run by `prepare-content.py`)
+packs selected effects, unit replies and EVA speech from the pinned freeware packs into one
+bank per game: Tiberian Dawn audio for the Dune style, Red Alert audio for the RA2 style
+(rights ledger 017 and 018; Red Alert's MIX headers are decrypted with the public key from
+EA's Red Alert source release, see `tools/westwood.py`). Sounds stay in Westwood's IMA ADPCM
+form and are decoded in the browser (`packages/fusion/src/audio.ts`). Effects the classics
+never had (Prism, sonic, chrono, psychic, rad, sandworms, thunder) are synthesised with Web
+Audio. Sound is presentation only: it reads `Game.effects` and never affects the
+simulation, so lockstep is unaffected. Volume (master, effects, voices) and mute persist in
+the browser.

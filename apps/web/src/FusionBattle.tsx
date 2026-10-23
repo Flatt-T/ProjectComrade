@@ -4,6 +4,14 @@ import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, QueueKind,
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
 import TechTree from './TechTree';
+import { AudioSettings, FusionAudio, loadAudioSettings, saveAudioSettings } from '../../../packages/fusion/src/audio';
+
+/** Notices that have an EVA voice line (the meaning keys of the sound tables). */
+const EVA_FOR: Record<string, string> = {
+  'Construction complete': 'construction', 'Unit ready': 'unitReady', 'Low power': 'lowPower', 'Our base is under attack': 'baseAttack',
+  'Insufficient funds': 'funds', 'Cannot deploy here': 'cannotDeploy', 'Select the destination': 'selectTarget', 'Building in progress': 'inProgress',
+  'Building captured': 'captured', 'Building infiltrated': 'infiltrated',
+};
 
 type Mode = 'normal' | 'place' | 'sell' | 'repair' | 'attackMove' | 'super';
 interface SuperView { id: number; name: string; frac: number; ready: boolean; kind: string; paused: boolean }
@@ -34,7 +42,7 @@ interface UiState {
 }
 
 declare global {
-  interface Window { comradeFusion?: { game: Game; slot: number; renderer: FusionRenderer; issue(cmd: Command): void } }
+  interface Window { comradeFusion?: { game: Game; slot: number; renderer: FusionRenderer; issue(cmd: Command): void; audio?: FusionAudio } }
 }
 
 export default function FusionBattle({ launch, mapName, conn, onExit }: { launch: LaunchRequest; mapName: string; conn: RoomConnection; onExit: () => void }) {
@@ -80,7 +88,23 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   }, []);
   const slot = setup.slot;
 
-  const say = (text: string) => setMessages(m => [...m.filter(x => performance.now() - x.at < 6000).slice(-3), { text, at: performance.now() }]);
+  const audio = useRef<FusionAudio | null>(null);
+  const [sound, setSound] = useState<AudioSettings>(loadAudioSettings);
+  const [soundOpen, setSoundOpen] = useState(false);
+  const say = (text: string, meaning = EVA_FOR[text]) => {
+    setMessages(m => [...m.filter(x => performance.now() - x.at < 6000).slice(-3), { text, at: performance.now() }]);
+    if (meaning) audio.current?.eva(meaning);
+  };
+  const changeSound = (patch: Partial<AudioSettings>) => setSound(s => {
+    const next = { ...s, ...patch };
+    saveAudioSettings(next); audio.current?.apply(next);
+    return next;
+  });
+  /** Own units currently selected, for spoken replies. */
+  const selectedUnits = () => {
+    const r = rig.current; if (!r) return [];
+    return [...r.renderer.selected].map(id => r.game.entities.get(id)).filter((e): e is Entity => !!e && e.owner === slot && e.kind === 'unit');
+  };
 
   useEffect(() => {
     const game = new Game({ pack, mapId: setup.mapId, seed: setup.seed, players: setup.players, credits: launch.settings.credits, techLevel: launch.settings.techLevel });
@@ -88,7 +112,16 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     const session: Session = setup.humans > 1 ? new LockstepSession(game, slot, humans, conn.transport()) : new LocalSession(game, slot);
     const renderer = new FusionRenderer(canvas.current!, game, slot);
     rig.current = { game, session, renderer };
-    window.comradeFusion = { game, slot, renderer, issue: cmd => session.issue(cmd) };
+    const sfx = new FusionAudio(game, slot, loadAudioSettings());
+    audio.current = sfx;
+    void sfx.load();
+    // Browsers only start audio after the player interacts with the page.
+    const wake = () => sfx.resume();
+    window.addEventListener('pointerdown', wake);
+    window.addEventListener('keydown', wake);
+    sfx.resume();
+    window.comradeFusion = { game, slot, renderer, issue: cmd => session.issue(cmd), audio: sfx };
+
 
     const resize = () => {
       const el = stage.current!, c = canvas.current!;
@@ -116,7 +149,8 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       ticker = new Worker(URL.createObjectURL(new Blob(['setInterval(() => postMessage(0), 50);'], { type: 'text/javascript' })));
       ticker.onmessage = () => { if (document.hidden) advance(performance.now()); };
     } catch { ticker = null; }
-    let prev: { ready: Record<string, boolean>; units: number; low: boolean; hp: number; over: boolean } | null = null;
+    let prev: { ready: Record<string, boolean>; units: number; low: boolean; hp: number; over: boolean; lost: number; structures: number; options: number } | null = null;
+    let lastLossWarning = -1e9, lastSilos = -1e9;
     let lastAttackWarning = -1e9;
     const announced = new WeakSet<object>();
     const lastHp = new Map<number, number>();
@@ -140,6 +174,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       } else renderer.ghost = null;
       for (const id of [...renderer.selected]) { const e = game.entities.get(id); if (!e || e.hp <= 0) renderer.selected.delete(id); }
       renderer.draw(alpha);
+      sfx.update({ toScreen: (x, y) => renderer.toScreen(x, y), width: canvas.current!.width, height: canvas.current!.height });
       const me = game.players[slot];
       const radar = [...game.entities.values()].some(e => e.owner === slot && e.kind === 'structure' && pack.structures[e.type].radar) && !game.lowPower(slot);
       if (now - mmTimer > 200 && minimap.current) { mmTimer = now; renderer.drawMinimap(minimap.current, radar); }
@@ -182,22 +217,34 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           const sw = game.superweaponOf(e);
           if (!sw) continue;
           const ready = e.charge >= sw.charge;
-          if (ready && !readySupers.has(e.id) && game.tick > 30) say(`${sw.name} ready`);
+          if (ready && !readySupers.has(e.id) && game.tick > 30) say(`${sw.name} ready`, `ready:${sw.kind}`);
           if (ready) readySupers.add(e.id); else readySupers.delete(e.id);
           supers.push({ id: e.id, name: sw.name, frac: Math.min(1, e.charge / sw.charge), ready, kind: sw.kind, paused: !ready && low });
         }
         for (const fx of game.effects) {
           if (fx.kind === 'infiltrate' && fx.owner !== slot && !announced.has(fx) && game.tick - fx.tick < fx.dur && game.entities.get([...game.entities.values()].find(e => e.kind === 'structure' && e.x === fx.x && e.y === fx.y)?.id ?? 0)?.owner === slot) { announced.add(fx); say('Building infiltrated'); }
+          if (fx.kind === 'infiltrate' && fx.owner === slot && fx.color === 'steal' && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say('Credits stolen', 'stolen'); }
           if (fx.kind === 'capture' && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say(fx.owner === slot ? 'Building captured' : 'Our building has been captured'); }
           if (fx.kind === 'promote' && fx.owner === slot && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say('Unit promoted'); }
           if (fx.kind === 'upgrade' && fx.owner === slot && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say('Upgrade complete'); }
           if (announced.has(fx) || game.tick - fx.tick > fx.dur || !['superLaunch', 'ionCharge', 'stormClouds', 'paradrop', 'reinforce', 'chronoCharge', 'curtainCharge'].includes(fx.kind)) continue;
           announced.add(fx);
           const name = fx.color ?? 'Superweapon';
-          if (fx.owner === slot) say(fx.kind === 'stormClouds' ? `${name} unleashed` : `${name} launched`);
-          else say(fx.kind === 'stormClouds' ? `Warning: ${name} approaching` : `Warning: ${name} launched`);
+          const kind = fx.kind === 'superLaunch' ? 'missile' : fx.kind === 'ionCharge' ? 'ion' : '';
+          if (['paradrop', 'reinforce'].includes(fx.kind)) { if (fx.owner === slot) say(`${name} on the way`, 'reinforcements'); continue; }
+          if (['chronoCharge', 'curtainCharge'].includes(fx.kind)) { say(fx.owner === slot ? `${name} activated` : `Warning: ${name} activated`, ''); continue; }
+          if (fx.owner === slot) say(fx.kind === 'stormClouds' ? `${name} unleashed` : `${name} launched`, kind && `launch:${kind}`);
+          else say(fx.kind === 'stormClouds' ? `Warning: ${name} approaching` : `Warning: ${name} launched`, kind && `incoming:${kind}`);
         }
-        prev = { ready: { structure: queues.structure.ready, defense: queues.defense.ready }, units, low, hp: myHp, over: game.over };
+        const structures = [...game.entities.values()].filter(e => e.owner === slot && e.kind === 'structure').length;
+        const optionCount = tabs.reduce((n, t) => n + options[t.id].length, 0);
+        if (prev && sfx) {
+          if (me.stats.lost > prev.lost && now - lastLossWarning > 8000) { lastLossWarning = now; sfx.eva(structures < prev.structures ? 'structureLost' : 'unitLost'); }
+          if (optionCount > prev.options && game.tick > 60) sfx.eva('newOptions');
+          if (me.storage > 0 && me.credits >= me.storage * 0.95 && now - lastSilos > 20000) { lastSilos = now; sfx.eva('silos'); }
+          if (game.over && !prev.over) sfx.eva(game.winnerTeam === me.team ? 'won' : 'lost');
+        }
+        prev = { ready: { structure: queues.structure.ready, defense: queues.defense.ready }, units, low, hp: myHp, over: game.over, lost: me.stats.lost, structures, options: optionCount };
         setUi({
           tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues,
           selection: first ? { name: (firstDef?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!(pack.units[e.type].deploysTo || pack.units[e.type].deployWeapon || pack.units[e.type].lure)), own: first.owner === slot, structure: first.kind === 'structure' } : null,
@@ -267,12 +314,15 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       else if (ev.key === 'Escape') { setMode('normal'); renderer.selected = new Set(); }
       else if (ev.key === '?' || ev.key === 'F1') { ev.preventDefault(); setHelp(v => !v); }
       else if (ev.key === 'F2') { ev.preventDefault(); setTree(v => !v); }
+      else if (key === 'm') changeSound({ muted: !loadAudioSettings().muted });
     };
     const keyup = (ev: KeyboardEvent) => keys.current.delete(ev.key);
     window.addEventListener('keydown', keydown);
     window.addEventListener('keyup', keyup);
     return () => {
       cancelAnimationFrame(raf); observer.disconnect(); session.dispose(); ticker?.terminate();
+      window.removeEventListener('pointerdown', wake); window.removeEventListener('keydown', wake);
+      sfx.dispose(); audio.current = null;
       window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup);
       delete window.comradeFusion;
     };
@@ -331,6 +381,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         if (s.x >= x1 && s.x <= x2 && s.y >= y1 && s.y <= y2) picked.push(e.id);
       }
       renderer.selected = new Set(ev.shiftKey ? [...renderer.selected, ...picked] : picked);
+      audio.current?.reply(selectedUnits(), 'select');
       return;
     }
     click(p.x, p.y, { shift: ev.shiftKey, ctrl: ev.ctrlKey || ev.metaKey, alt: ev.altKey });
@@ -343,7 +394,10 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     const cell = renderer.screenToCell(x, y);
     const target = renderer.pick(x, y);
     const me = game.players[slot];
-    const mark = (color: string) => renderer.markers.push({ cx: cell.x, cy: cell.y, color, until: performance.now() + 450 });
+    const mark = (color: string) => {
+      renderer.markers.push({ cx: cell.x, cy: cell.y, color, until: performance.now() + 450 });
+      if (mode.current !== 'super') audio.current?.reply(selectedUnits(), 'order');
+    };
     if (mode.current === 'place' && placing.current) {
       const item = placing.current, def = pack.structures[item];
       const px = cell.x - ((def.w - 1) >> 1), py = cell.y - ((def.h - 1) >> 1);
@@ -362,7 +416,10 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       return;
     }
     if (mode.current === 'sell' || mode.current === 'repair') {
-      if (target && target.owner === slot && target.kind === 'structure') session.issue({ t: mode.current, id: target.id });
+      if (target && target.owner === slot && target.kind === 'structure') {
+        session.issue({ t: mode.current, id: target.id });
+        audio.current?.eva(mode.current === 'sell' ? 'sold' : 'repairing');
+      }
       return;
     }
     const units = [...renderer.selected].map(id => game.entities.get(id)).filter((e): e is Entity => !!e && e.owner === slot && e.kind === 'unit');
@@ -403,6 +460,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       }
       if (shift && target.kind === 'unit') { if (renderer.selected.has(target.id)) renderer.selected.delete(target.id); else renderer.selected.add(target.id); }
       else renderer.selected = new Set([target.id]);
+      if (target.kind === 'unit') audio.current?.reply([target], 'select');
       return;
     }
     if (!units.length) { renderer.selected = target ? new Set([target.id]) : new Set(); return; }
@@ -464,11 +522,14 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     if ((queue === 'structure' || queue === 'defense') && q.ready && q.items[0] === item) { placing.current = item; mode.current = 'place'; setModeView('place'); return; }
     if ((queue === 'structure' || queue === 'defense') && q.items.length && q.items[0] !== item) { say('Building in progress'); return; }
     r.session.issue({ t: 'build', item });
+    audio.current?.ui('click');
     if (r.game.players[slot].credits < r.game.costOf(item, r.game.players[slot])) say('Insufficient funds');
+    else if (!q.items.length) audio.current?.eva(queue === 'infantry' ? 'training' : 'building');
   }
   function cancelItem(ev: React.MouseEvent, item: string) {
     ev.preventDefault();
     rig.current?.session.issue({ t: 'cancel', item });
+    audio.current?.eva('cancelled');
   }
 
   const me = setup.players[slot];
@@ -497,7 +558,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <p><b>Ctrl</b>+click force-fire (any target, or ground) · <b>Alt</b>+click force-move</p>
         <p><b>Ctrl+1–9</b> create team · <b>1–9</b> select (twice: centre) · <b>Shift+1–9</b> add team to selection · <b>Alt+1–9</b> add selection to team</p>
         <p><b>T</b> same type (twice: whole map) · <b>P</b> all combat units · <b>G</b> guard · <b>X</b> scatter · <b>S</b> stop · <b>D</b> deploy · <b>A</b> attack-move</p>
-        <p><b>H</b> home · <b>Space</b> last alert · <b>Esc</b> cancel · <b>F1</b> this card · <b>F2</b> tech tree</p>
+        <p><b>H</b> home · <b>Space</b> last alert · <b>Esc</b> cancel · <b>F1</b> this card · <b>F2</b> tech tree · <b>M</b> mute</p>
         <p><b>Click a selected MCV</b> to deploy · <b>Wheel</b> zoom · <b>Arrows / screen edge</b> scroll</p>
         <p><b>Engineer</b> on a building: capture (enemy) or repair (own) · <b>Spy</b>: infiltrate · <b>Damaged vehicle</b> on a repair pad: repair · <b>Aircraft</b> on an airfield: rearm</p>
         <p><b>D</b> also digs in G.I.s, sets up Desolators and starts Thumpers · <b>Chronosphere</b>: pick the area, then the destination</p>
@@ -548,6 +609,14 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <button className={modeView === 'repair' ? 'on' : ''} onClick={() => setMode(modeView === 'repair' ? 'normal' : 'repair')}>REPAIR</button>
         <button onClick={() => setHelp(v => !v)}>KEYS</button>
         <button className={tree ? 'on' : ''} onClick={() => setTree(v => !v)}>TECH</button>
+      </div>
+      <div className="fusion-sound">
+        <button className={sound.muted ? 'on' : ''} onClick={() => changeSound({ muted: !sound.muted })} aria-pressed={sound.muted}>{sound.muted ? 'SOUND OFF' : 'SOUND ON'}</button>
+        <button className={soundOpen ? 'on' : ''} onClick={() => setSoundOpen(v => !v)} aria-expanded={soundOpen}>VOLUME</button>
+        {soundOpen && <div className="fusion-volume">
+          {(['master', 'effects', 'voices'] as const).map(k => <label key={k}><span>{k === 'master' ? 'Master' : k === 'effects' ? 'Effects' : 'Voices'}</span>
+            <input type="range" min={0} max={1} step={0.05} value={sound[k]} onChange={e => changeSound({ [k]: Number(e.target.value) })} /></label>)}
+        </div>}
       </div>
       {ui?.selection && <div className="fusion-selection">
         <b>{ui.selection.count > 1 ? `${ui.selection.count} selected` : ui.selection.name}</b>
