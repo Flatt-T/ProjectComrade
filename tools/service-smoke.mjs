@@ -29,6 +29,19 @@ try {
   const host = latestRoom(a).host;
   const hostClient = a.messages.find(m => m.type === 'welcome').id === host ? a : b;
   const other = hostClient === a ? b : a;
+  // Chat: messages to all reach everyone; allied messages only reach teammates.
+  send(a, { type: 'team', team: 1 }); send(b, { type: 'team', team: 2 });
+  await until(() => latestRoom(a).players.every(p => p.team > 0));
+  send(a, { type: 'chat', text: 'secret plan', to: 'allies' });
+  send(a, { type: 'chat', text: 'good luck\u0007 all', to: 'all' });
+  await until(() => b.messages.some(m => m.type === 'chat' && m.text.startsWith('good luck')));
+  assert.ok(a.messages.some(m => m.type === 'chat' && m.text === 'secret plan'), 'The sender sees its own allied message');
+  assert.ok(!b.messages.some(m => m.type === 'chat' && m.text === 'secret plan'), 'An opponent must never receive allied chat');
+  assert.equal(b.messages.find(m => m.type === 'chat').text, 'good luck all', 'Control characters are stripped');
+  send(b, { type: 'team', team: 1 });
+  await until(() => latestRoom(a).players.every(p => p.team === 1));
+  send(a, { type: 'chat', text: 'now together', to: 'allies' });
+  await until(() => b.messages.some(m => m.type === 'chat' && m.text === 'now together'));
   send(a, { type: 'ready', ready: true }); send(b, { type: 'ready', ready: true });
   await until(() => latestRoom(a).players.every(p => p.ready));
   const oversized = connect();
@@ -56,5 +69,5 @@ try {
   assert.notEqual(latestRoom(other).host, host);
   // A started match persists for the remaining players (lockstep finalises any drop).
   assert.equal(latestRoom(other).phase, 'started');
-  console.log('Health, rooms, host-only configuration, ready-gated start, oversized-peer isolation and host transfer passed');
+  console.log('Health, rooms, teams, all/allies chat, host-only configuration, ready-gated start, oversized-peer isolation and host transfer passed');
 } finally { for (const ws of clients) ws.close(); }

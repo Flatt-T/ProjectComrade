@@ -2,7 +2,7 @@ import { Hasher, LEPTONS, Rng, cellCenter, dist, facingDelta, facingTo, toCell }
 import { MapData, buildableTerrain, generateMap, inBounds, isWater, passable, resourceIndex, terrainPassable } from './map';
 import { findPath, nearestCell } from './path';
 import { InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules';
-import { runAI, AIState, createAIState } from './ai';
+import { runAI, AIState, AILevel, AI_LEVELS, createAIState } from './ai';
 
 export type Command =
   | { t: 'move'; ids: number[]; x: number; y: number }
@@ -25,7 +25,7 @@ export type Command =
   | { t: 'super'; id: number; x: number; y: number; x2?: number; y2?: number }
   | { t: 'surrender' };
 
-export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number }
+export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number; level?: AILevel }
 export type CreditsPreset = 'low' | 'standard' | 'high';
 export interface GameSetup {
   pack: RulePack;
@@ -38,7 +38,9 @@ export interface GameSetup {
 }
 
 export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy' | 'enter' | 'rearm' | 'ferry';
-export type HarvestState = 'seek' | 'gather' | 'toRefinery' | 'unload';
+export type HarvestState = 'seek' | 'gather' | 'toRefinery' | 'unload' | 'warp';
+/** Ticks a Chrono Miner spends charging before it jumps to the refinery. */
+export const WARP_TICKS = 18;
 
 export interface Entity {
   id: number;
@@ -112,6 +114,10 @@ export interface Entity {
   invulnUntil: number;
   /** Terror drone inside this vehicle. */
   drone: number;
+  /** Tick a Chrono Miner last arrived by teleport (for the fade-in). */
+  warp: number;
+  /** Units riding inside this transport. */
+  passengers: number[];
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -152,7 +158,7 @@ export interface Effect { kind: string; x: number; y: number; x2: number; y2: nu
 /** A scheduled superweapon impact, resolved deterministically on its tick. */
 export interface Strike {
   tick: number; x: number; y: number; owner: number; damage: number; radius: number;
-  kind: 'missile' | 'ion' | 'bolt' | 'drop' | 'chrono' | 'curtain';
+  kind: 'missile' | 'ion' | 'bolt' | 'drop' | 'chrono' | 'curtain' | 'reveal';
   name: string;
   /** Chronosphere destination. */
   x2?: number; y2?: number;
@@ -180,6 +186,8 @@ export class Game {
   worms: Worm[] = [];
   strikes: Strike[] = [];
   tick = 0;
+  /** Spy Plane sweeps: temporary sight for a player over an area. */
+  reveals: { owner: number; x: number; y: number; r: number; until: number }[] = [];
   /** Dune Starport: CHOAM price level in percent. */
   market = 100;
   over = false;
@@ -212,7 +220,7 @@ export class Game {
         stats: { built: 0, lost: 0, killed: 0, harvested: 0 },
         upgrades: {}, blackoutUntil: 0, veteranQueues: [], incomeBonus: 0, costReduction: 0,
       });
-      this.ai.push(p.ai ? createAIState(slot) : null);
+      this.ai.push(p.ai ? createAIState(slot, p.level) : null);
       // The MCV sits on the start cell; the escort forms up outside its deploy footprint.
       const start = preset.starts[slot];
       const startCell = start.y * this.map.w + start.x;
@@ -301,7 +309,12 @@ export class Game {
         break;
       case 'enter': {
         const target = this.entities.get(cmd.target);
-        if (!target || target.hp <= 0 || target.kind !== 'structure') break;
+        if (!target || target.hp <= 0) break;
+        if (target.kind === 'unit') {
+          // Board a friendly transport.
+          for (const u of own(cmd.ids)) if (u.id !== target.id && this.canBoard(u, target)) { u.deployed = false; u.order = 'enter'; u.target = target.id; u.path = []; u.repathTick = 0; }
+          break;
+        }
         for (const u of own(cmd.ids)) {
           const def = this.unitDef(u);
           const sdef = this.structDef(target);
@@ -354,7 +367,7 @@ export class Game {
     }
     for (const p of this.players) {
       const ai = this.ai[p.slot];
-      if (ai && !p.defeated && (this.tick + p.slot * 5) % 15 === 0) runAI(this, p, ai);
+      if (ai && !p.defeated && (this.tick + p.slot * 5) % AI_LEVELS[ai.level].thinkEvery === 0) runAI(this, p, ai);
     }
     for (const p of this.players) if (p.blackoutUntil && this.tick >= p.blackoutUntil) { p.blackoutUntil = 0; this.powerDirty = true; }
     const market = this.pack.mechanics.market;
@@ -415,7 +428,7 @@ export class Game {
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
-      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, drone: 0,
+      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, drone: 0, warp: -999, passengers: [],
     };
   }
 
@@ -589,6 +602,8 @@ export class Game {
       if (!factories.length) continue;
       const cost = this.costOf(item, p);
       let speed = 100 + (factories.length - 1) * this.pack.extraFactoryBonus;
+      const ai = this.ai[p.slot];
+      if (ai) speed = Math.floor((speed * AI_LEVELS[ai.level].buildPercent) / 100);
       if (p.powerUse > p.powerGen) speed = Math.floor((speed * this.pack.lowPowerProductionPercent) / 100);
       // Credits are charged as production progresses, like the originals.
       q.acc += Math.floor((100 * speed) / this.pack.buildTicksPer100);
@@ -654,7 +669,8 @@ export class Game {
       if (!def.floor && this.unitInCell(i, ignoreUnit)) return false;
     }
     if (ignoreRadius) return true;
-    const r = this.pack.buildRadius;
+    // Shipyards reach further: the coast is rarely right beside a base.
+    const r = this.pack.buildRadius + (def.onWater ? 6 : 0);
     for (const e of this.entities.values()) {
       if (e.owner !== p.slot || e.kind !== 'structure' || e.hp <= 0) continue;
       if (x <= e.cx + e.w - 1 + r && x + def.w - 1 >= e.cx - r && y <= e.cy + e.h - 1 + r && y + def.h - 1 >= e.cy - r) return true;
@@ -694,6 +710,7 @@ export class Game {
 
   private deploy(u: Entity) {
     const def = this.unitDef(u);
+    if (def.transport) { this.unload(u); return; }
     if (def.deployWeapon || def.lure) {
       // Toggle a deployed stance: dig in, set up, or start thumping.
       u.deployed = !u.deployed; u.path = []; u.order = 'idle'; u.target = 0;
@@ -741,6 +758,7 @@ export class Game {
       u.disguised = u.stillTicks > 45;
     }
     if (u.drone) this.droneBite(u);
+    for (const id of u.passengers) { const p = this.entities.get(id); if (p) { p.px = p.x; p.py = p.y; p.x = u.x; p.y = u.y; } }
     if (def.carrier && (u.order === 'idle' || u.order === 'ferry')) { this.ferry(u, def); return; }
     if (def.harvester && (u.order === 'harvest' || u.order === 'idle')) { u.order = 'harvest'; this.harvest(u, def); return; }
     if (def.ammo && u.ammo <= 0 && u.order !== 'rearm' && u.order !== 'move') { u.order = 'rearm'; u.dock = 0; u.path = []; }
@@ -936,13 +954,51 @@ export class Game {
   private enterThink(u: Entity, def: UnitDef) {
     const t = this.entities.get(u.target);
     if (!t || t.hp <= 0) { u.order = 'idle'; u.target = 0; u.path = []; return; }
-    if (this.distTo(u.x, u.y, t) <= REACH) { u.path = []; this.enterAct(u, def, t); return; }
+    if (this.distTo(u.x, u.y, t) <= (t.kind === 'unit' ? 200 : REACH)) { u.path = []; this.enterAct(u, def, t); return; }
     if (!u.path.length || this.tick >= u.repathTick) { u.path = this.pathFor(u, this.cellOf(t)); u.repathTick = this.tick + 20; }
     if (!u.path.length) { u.order = 'idle'; u.target = 0; return; }
     this.move(u, def);
   }
 
+  /** Set every passenger down on free ground around the transport; refused over open water. */
+  private unload(t: Entity) {
+    let left = 0;
+    for (const id of [...t.passengers]) {
+      const p = this.entities.get(id);
+      if (!p) continue;
+      const cls = this.moveClass(this.unitDef(p));
+      const cell = nearestCell(this.map, this.cellOf(t), 3, i => passable(this.pack, this.map, i, cls) && !this.unitInCell(i));
+      if (cell < 0) { left++; continue; }
+      p.carriedBy = 0; p.x = p.px = cellCenter(cell % this.map.w); p.y = p.py = cellCenter(Math.floor(cell / this.map.w));
+      p.order = 'idle'; p.path = [];
+      t.passengers = t.passengers.filter(x => x !== id);
+    }
+    const fx = this.effect(left && left === t.passengers.length ? 'denied' : 'unload', t.x, t.y, 0, 0, 10); fx.owner = t.owner;
+  }
+
+  /** Room left in a transport, and whether this unit may board it. */
+  private seats(t: Entity) {
+    const cap = this.unitDef(t).transport ?? 0;
+    return cap - t.passengers.reduce((n, id) => n + this.seatSize(this.entities.get(id)), 0);
+  }
+  private seatSize(e?: Entity) { return e && this.unitDef(e).kind === 'infantry' ? 1 : 3; }
+  canBoard(u: Entity, t: Entity): boolean {
+    const td = this.unitDef(t), ud = this.unitDef(u);
+    if (t.kind !== 'unit' || !td?.transport || t.owner !== u.owner || u.kind !== 'unit' || ud.transport) return false;
+    if (ud.kind === 'aircraft' || ud.kind === 'naval' || td.infantryOnly && ud.kind !== 'infantry') return false;
+    return this.seats(t) >= this.seatSize(u);
+  }
+
   private enterAct(u: Entity, def: UnitDef, t: Entity) {
+    if (t.kind === 'unit') {
+      // Climb aboard: the passenger rides hidden until unloaded.
+      if (this.canBoard(u, t)) {
+        t.passengers.push(u.id); u.carriedBy = t.id; u.path = []; u.x = t.x; u.y = t.y;
+        const fx = this.effect('board', t.x, t.y, 0, 0, 10); fx.owner = u.owner;
+      }
+      u.order = 'idle'; u.target = 0;
+      return;
+    }
     const enemy = this.isEnemy(u.owner, t.owner);
     if (def.engineer) {
       if (enemy) this.capture(t, u.owner);
@@ -1213,11 +1269,10 @@ export class Game {
       const r = this.pack.structures[ref.type].refinery!;
       const dockCell = this.cellIndex(ref.cx + r.dockX, ref.cy + r.dockY);
       if (h.teleport && this.cellOf(u) !== dockCell) {
-        // Chrono Miner: jump straight to the refinery pad.
-        this.effect('chrono', u.x, u.y, 0, 0, 12);
-        u.x = u.px = cellCenter(dockCell % this.map.w); u.y = u.py = cellCenter(Math.floor(dockCell / this.map.w));
-        u.path = [];
-        this.effect('chrono', u.x, u.y, 0, 0, 12);
+        // Chrono Miner: stop and charge up, then jump straight to the refinery pad.
+        u.hstate = 'warp'; u.timer = WARP_TICKS; u.path = [];
+        this.effect('minerWarp', u.x, u.y, 0, 0, WARP_TICKS);
+        return;
       }
       if (this.cellOf(u) === dockCell && u.x === cellCenter(dockCell % this.map.w) && u.y === cellCenter(Math.floor(dockCell / this.map.w))) {
         if (ref.dockedBy && ref.dockedBy !== u.id && this.entities.get(ref.dockedBy)?.hp) return; // Queue for the pad.
@@ -1227,6 +1282,20 @@ export class Game {
       if (!u.path.length) u.path = this.pathFor(u, dockCell, dockCell);
       if (!u.path.length) { u.dock = 0; return; }
       this.move(u, def);
+      return;
+    }
+    if (u.hstate === 'warp') {
+      if (--u.timer > 0) return;
+      const ref = this.nearestRefinery(u);
+      if (ref) {
+        const r = this.pack.structures[ref.type].refinery!;
+        const dockCell = this.cellIndex(ref.cx + r.dockX, ref.cy + r.dockY);
+        this.effect('chrono', u.x, u.y, 0, 0, 12);
+        u.x = u.px = cellCenter(dockCell % this.map.w); u.y = u.py = cellCenter(Math.floor(dockCell / this.map.w));
+        u.warp = this.tick;
+        this.effect('chrono', u.x, u.y, 0, 0, 12);
+      }
+      u.hstate = 'toRefinery';
       return;
     }
     // unload
@@ -1305,6 +1374,7 @@ export class Game {
   private mechanics() {
     const m = this.pack.mechanics;
     if (m.regrowth && this.tick % m.regrowth.everyTicks === 0) this.regrow(m.regrowth.amount, m.regrowth.spreadChance);
+    this.pack.resources.forEach((r, k) => { if (r.regrowEvery && this.tick % r.regrowEvery === 0) this.regrowFields(k + 1); });
     if (m.bloom && this.tick % m.bloom.everyTicks === 0) this.bloom(m.bloom.radius, m.bloom.resource);
     if (m.sandworm) this.sandworms(m.sandworm);
   }
@@ -1322,6 +1392,16 @@ export class Game {
           this.map.resKind[n] = kind; this.map.res[n] = 1;
         }
       }
+    }
+  }
+
+  /** Mined-out cells of the map's original fields slowly grow back to their starting amount. */
+  private regrowFields(kind: number) {
+    const { resHome, resCap, res, resKind, occupied } = this.map;
+    for (let i = 0; i < res.length; i++) {
+      if (resHome[i] !== kind || res[i] >= resCap[i] || occupied[i] || resKind[i] && resKind[i] !== kind) continue;
+      res[i]++;
+      resKind[i] = kind;
     }
   }
 
@@ -1431,6 +1511,11 @@ export class Game {
         p.visible[i] = 1; p.explored[i] = 1;
       });
     }
+    this.reveals = this.reveals.filter(r => r.until > this.tick);
+    for (const r of this.reveals) {
+      const p = this.players[r.owner];
+      if (p) this.disc(toCell(r.x), toCell(r.y), r.r, i => { p.visible[i] = 1; p.explored[i] = 1; });
+    }
     for (const e of this.entities.values()) {
       if (e.kind !== 'structure' || e.hp <= 0) continue;
       const def = this.structDef(e);
@@ -1473,10 +1558,11 @@ export class Game {
     }
     // Untangle riders: carried cargo falls with its carrier, drones hop out, minds are freed.
     if (e.carrying) { const c = this.entities.get(e.carrying); if (c) { c.carriedBy = 0; this.damage(c, c.hp, -1); } }
+    for (const id of e.passengers) { const c = this.entities.get(id); if (c) { c.carriedBy = 0; this.damage(c, c.hp, -1); } }
     if (e.drone) { const d = this.entities.get(e.drone); if (d) d.carriedBy = 0; }
     if (e.carriedBy) {
       const c = this.entities.get(e.carriedBy);
-      if (c) { if (c.drone === e.id) c.drone = 0; if (c.carrying === e.id) c.carrying = 0; }
+      if (c) { if (c.drone === e.id) c.drone = 0; if (c.carrying === e.id) c.carrying = 0; c.passengers = c.passengers.filter(id => id !== e.id); }
     }
     if (e.controls) {
       const v = this.entities.get(e.controls);
@@ -1565,6 +1651,10 @@ export class Game {
         this.strikes.push({ ...base, x: tx, y: ty, x2: ex, y2: ey, kind: 'chrono' });
         break;
       }
+      case 'reveal':
+        tag(this.effect('spyPlane', tx, ty, s.x, s.y, sw.delay));
+        this.strikes.push({ ...base, x: tx, y: ty, kind: 'reveal', duration: sw.duration ?? 450 });
+        break;
       case 'curtain':
         tag(this.effect('curtainCharge', tx, ty, sw.radius, 0, sw.delay));
         this.strikes.push({ ...base, x: tx, y: ty, kind: 'curtain', duration: sw.duration ?? 450 });
@@ -1581,6 +1671,7 @@ export class Game {
       if (s.kind === 'drop') { this.dropUnits(s); continue; }
       if (s.kind === 'chrono') { this.chronoShift(s); continue; }
       if (s.kind === 'curtain') { this.ironCurtain(s); continue; }
+      if (s.kind === 'reveal') { this.reveals.push({ owner: s.owner, x: s.x, y: s.y, r: Math.ceil(s.radius / LEPTONS), until: this.tick + (s.duration ?? 450) }); continue; }
       const fx = this.effect(s.kind === 'missile' ? 'nuke' : s.kind === 'ion' ? 'ionStrike' : 'lightning', s.x, s.y, s.radius, 0, s.kind === 'bolt' ? 12 : s.kind === 'ion' ? 45 : 90);
       fx.owner = s.owner; fx.color = s.name;
       for (const e of this.entities.values()) {
@@ -1642,7 +1733,7 @@ export class Game {
     const h = new Hasher().add(this.tick).add(this.rng.seed);
     for (const p of this.players) h.add(p.credits).add(p.defeated ? 1 : 0);
     h.add(this.market);
-    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0);
+    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0).add(e.passengers.length);
     for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
     for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden);

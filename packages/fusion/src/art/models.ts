@@ -446,13 +446,13 @@ export function wallMesh(mask: number, style: ArtStyle): Mesh {
 
 const HAS_TURRET = new Set(['tank-turret', 'siege-turret', 'launcher', 'sonic', 'devastator', 'prism', 'mirage', 'tesla-tank', 'ship-destroyer', 'ship-patrol', 'ship-cruiser', 'ship-dreadnought']);
 /** Ships are modelled small and scaled up to RA2's big hulls. */
-const SHIP_SCALE: Record<string, number> = { 'ship-destroyer': 1.8, 'ship-cruiser': 1.8, 'ship-carrier': 1.9, 'ship-patrol': 1.5, 'ship-dreadnought': 1.9, sub: 1.7, dolphin: 1.3, squid: 1.5 };
+const SHIP_SCALE: Record<string, number> = { hovercraft: 1.5, 'ship-destroyer': 1.8, 'ship-cruiser': 1.8, 'ship-carrier': 1.9, 'ship-patrol': 1.5, 'ship-dreadnought': 1.9, sub: 1.7, dolphin: 1.3, squid: 1.5 };
 function scaled(m: Mesh, k = 1): Mesh {
   if (k !== 1) for (const f of m.faces) f.pts = f.pts.map(([x, y, z]) => [x * k, y * k, z * k] as Vec3);
   return m;
 }
 /** Units drawn in the air with a ground shadow. */
-export const FLYING = new Set(['kirov', 'jet', 'ornithopter', 'carryall']);
+export const FLYING = new Set(['kirov', 'jet', 'ornithopter', 'carryall', 'helicopter']);
 export function hasTurret(shape: string) { return HAS_TURRET.has(shape); }
 
 /** Vehicle hull pointing +X, centred on the origin. Sizes are in cells. */
@@ -586,6 +586,22 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       m.box(-0.2, -0.13, 0.16, 0.15, 0.13, 0.42, p.hull, { top: team });
       m.cylinder(-0.05, 0, 0.42, 0.7, 0.06, 0.04, p.metal, 8);
       for (const x of [-0.6, -0.45, 0.3, 0.45]) m.cylinder(x, 0, 0.16, 0.22, 0.06, 0.06, p.dark, 10);
+      break;
+    case 'hovercraft':
+      // Amphibious Transport: a hull on an inflated skirt with a loading ramp.
+      prism(m, [[-0.5, -0.24], [0.45, -0.24], [0.55, -0.12], [0.55, 0.12], [0.45, 0.24], [-0.5, 0.24]], 0, 0.08, [56, 56, 58]);
+      prism(m, [[-0.42, -0.19], [0.4, -0.19], [0.48, 0], [0.4, 0.19], [-0.42, 0.19]], 0.08, 0.24, p.hull, p.trim);
+      m.box(-0.38, -0.12, 0.24, -0.1, 0.12, 0.36, p.hull, { top: team });
+      for (const y of [-0.12, 0.12]) m.cylinder(-0.45, y, 0.24, 0.42, 0.07, 0.07, p.dark, 10);
+      break;
+    case 'helicopter':
+      // Night Hawk: a tandem-rotor body; the blades are drawn spinning by the renderer.
+      lathe(m, -0.45, 0.42, 0, 0.18, t => 0.12 * Math.pow(Math.sin(Math.PI * (0.1 + t * 0.9)), 0.5), p.metal, 10, 12);
+      m.box(0.18, -0.07, 0.2, 0.36, 0.07, 0.28, p.glass);
+      m.box(-0.4, -0.04, 0.26, -0.3, 0.04, 0.4, p.metal);
+      m.box(0.25, -0.03, 0.28, 0.33, 0.03, 0.36, p.metal);
+      m.box(-0.2, -0.13, 0.15, 0.1, -0.12, 0.25, team);
+      m.box(-0.2, 0.12, 0.15, 0.1, 0.13, 0.25, team);
       break;
     case 'sub':
       // Typhoon: a long dark hull riding low, with its sail.

@@ -5,7 +5,6 @@ import { mirror, quad } from './mapkit';
 
 const W = 64, H = 64;
 const mirror2 = <T extends MapFeature | MapField>(items: T[]) => mirror(items, W, H);
-const quad4 = <T extends MapFeature | MapField>(items: T[]) => quad(items, W, H);
 
 const maps: MapPreset[] = [
   {
@@ -52,17 +51,71 @@ const maps: MapPreset[] = [
     ],
   },
   {
-    id: 'four-sietches', name: 'Four Sietches', width: W, height: H, maxPlayers: 4, base: 'sand', roughness: 2,
-    description: 'Four rock sietches around a central spice sea. Free-for-all.',
-    starts: [{ x: 9, y: 9 }, { x: 53, y: 53 }, { x: 53, y: 9 }, { x: 9, y: 53 }],
-    features: quad4<MapFeature>([
-      { terrain: 'rock', shape: 'circle', x: 10, y: 10, r: 8 },
-      { terrain: 'cliff', shape: 'ridge', x: 22, y: 26, x2: 26, y2: 22, r: 1 },
-      { terrain: 'dunes', shape: 'circle', x: 32, y: 12, r: 3 },
-    ]),
+    id: 'four-sietches', name: 'Four Sietches', width: 96, height: 96, maxPlayers: 4, base: 'sand', roughness: 2,
+    description: 'Four rock sietches around a great central spice sea. Free-for-all on a large map.',
+    starts: [{ x: 13, y: 13 }, { x: 82, y: 82 }, { x: 82, y: 13 }, { x: 13, y: 82 }],
+    features: quad<MapFeature>([
+      { terrain: 'rock', shape: 'circle', x: 14, y: 14, r: 11 },
+      { terrain: 'rock', shape: 'circle', x: 30, y: 9, r: 4 },
+      { terrain: 'rough', shape: 'circle', x: 8, y: 32, r: 3 },
+      { terrain: 'cliff', shape: 'ridge', x: 30, y: 37, x2: 37, y2: 30, r: 1 },
+      { terrain: 'dunes', shape: 'circle', x: 46, y: 18, r: 5 },
+      { terrain: 'rock', shape: 'circle', x: 34, y: 34, r: 3 },
+    ], 96, 96),
     fields: [
-      { x: 32, y: 32, r: 7, resource: 'spice' },
-      ...quad4<MapField>([{ x: 22, y: 12, r: 3, resource: 'spice' }]),
+      { x: 48, y: 48, r: 9, resource: 'spice' },
+      ...quad<MapField>([
+        { x: 33, y: 16, r: 4, resource: 'spice' },
+        { x: 16, y: 33, r: 4, resource: 'spice' },
+        { x: 47, y: 6, r: 3, resource: 'spice' },
+      ], 96, 96),
+    ],
+  },
+  {
+    id: 'deep-desert', name: 'Deep Desert', width: 96, height: 96, maxPlayers: 4, base: 'sand', roughness: 2,
+    description: 'Open dunes with four isolated plateaus and a wormy middle. Long harvester runs: Carryalls pay.',
+    starts: [{ x: 13, y: 48 }, { x: 82, y: 47 }, { x: 48, y: 13 }, { x: 47, y: 82 }],
+    features: [
+      ...[[13, 48], [82, 47], [48, 13], [47, 82]].map(([x, y]) => ({ terrain: 'rock', shape: 'circle', x, y, r: 10 }) as MapFeature),
+      ...quad<MapFeature>([
+        { terrain: 'dunes', shape: 'circle', x: 26, y: 26, r: 6 },
+        { terrain: 'rough', shape: 'circle', x: 36, y: 36, r: 2 },
+        { terrain: 'rock', shape: 'circle', x: 20, y: 20, r: 3 },
+        { terrain: 'cliff', shape: 'ridge', x: 28, y: 40, x2: 33, y2: 44, r: 1 },
+      ], 96, 96),
+      { terrain: 'dunes', shape: 'circle', x: 48, y: 48, r: 7 },
+    ],
+    fields: [
+      ...quad<MapField>([
+        { x: 30, y: 30, r: 4, resource: 'spice' },
+        { x: 24, y: 40, r: 3, resource: 'spice' },
+        { x: 40, y: 24, r: 3, resource: 'spice' },
+      ], 96, 96),
+      { x: 48, y: 48, r: 5, resource: 'spice' },
+    ],
+  },
+  {
+    id: 'carthag-pass', name: 'Carthag Pass', width: 80, height: 64, maxPlayers: 2, base: 'sand', roughness: 2,
+    description: 'A long cliff wall with two passes. Rich spice on your side, richer in the middle.',
+    starts: [{ x: 10, y: 32 }, { x: 69, y: 31 }],
+    features: [
+      ...mirror<MapFeature>([
+        { terrain: 'rock', shape: 'circle', x: 11, y: 32, r: 10 },
+        { terrain: 'rock', shape: 'circle', x: 24, y: 10, r: 4 },
+        { terrain: 'rough', shape: 'circle', x: 26, y: 52, r: 3 },
+        { terrain: 'dunes', shape: 'circle', x: 30, y: 30, r: 4 },
+      ], 80, 64),
+      { terrain: 'cliff', shape: 'ridge', x: 40, y: 0, x2: 40, y2: 20, r: 1 },
+      { terrain: 'cliff', shape: 'ridge', x: 40, y: 27, x2: 40, y2: 37, r: 1 },
+      { terrain: 'cliff', shape: 'ridge', x: 40, y: 44, x2: 40, y2: 63, r: 1 },
+    ],
+    fields: [
+      ...mirror<MapField>([
+        { x: 22, y: 20, r: 4, resource: 'spice' },
+        { x: 22, y: 45, r: 4, resource: 'spice' },
+      ], 80, 64),
+      { x: 40, y: 23, r: 2, resource: 'spice' },
+      { x: 40, y: 41, r: 2, resource: 'spice' },
     ],
   },
 ];
@@ -80,7 +133,7 @@ export const dunePack: RulePack = {
     { id: 'cliff', name: 'Cliff', foot: false, vehicle: false, buildable: false, speed: 100, color: '#3d3127', color2: '#30271e' },
   ],
   resources: [
-    { id: 'spice', name: 'Spice', value: 7, max: 40, color: '#e07a2e', color2: '#c4561c' },
+    { id: 'spice', name: 'Spice', value: 7, max: 40, regrowEvery: 450, color: '#e07a2e', color2: '#c4561c' },
   ],
   armors: ['none', 'light', 'medium', 'heavy', 'building'],
   warheads: {
@@ -100,6 +153,7 @@ export const dunePack: RulePack = {
     grenade: { id: 'grenade', damage: 34, range: 960, minRange: 192, rof: 40, warhead: 'artillery', speed: 24, splash: 96, visual: 'artillery' },
     trikegun: { id: 'trikegun', damage: 12, range: 768, rof: 8, warhead: 'bullet', speed: 0, visual: 'bullet' },
     quadrockets: { id: 'quadrockets', damage: 24, range: 1024, rof: 40, warhead: 'rocket', speed: 40, burst: 2, visual: 'missile', targets: ['infantry', 'vehicle', 'aircraft', 'structure'] },
+    'tankcannon-h': { id: 'tankcannon-h', damage: 50, range: 1088, rof: 50, warhead: 'shell', speed: 60, splash: 56, visual: 'cannon' },
     tankcannon: { id: 'tankcannon', damage: 42, range: 1088, rof: 46, warhead: 'shell', speed: 64, splash: 48, visual: 'cannon' },
     siegecannon: { id: 'siegecannon', damage: 70, range: 1536, minRange: 384, rof: 72, warhead: 'artillery', speed: 30, splash: 112, visual: 'artillery' },
     missiles: { id: 'missiles', damage: 48, range: 2048, minRange: 512, rof: 90, warhead: 'rocket', speed: 40, burst: 2, splash: 64, visual: 'missile', targets: ['infantry', 'vehicle', 'aircraft', 'structure'] },
@@ -125,7 +179,10 @@ export const dunePack: RulePack = {
     raider: { id: 'raider', name: 'Raider Trike', kind: 'vehicle', cost: 300, hp: 150, armor: 'light', speed: 54, turn: 18, sight: 5, weapon: 'trikegun', prereqs: ['lightfactory'], factions: ['ordos'], tech: 2, shape: 'trike', role: 'scout' },
     stealthraider: { id: 'stealthraider', name: 'Stealth Raider', kind: 'vehicle', cost: 400, hp: 150, armor: 'light', speed: 54, turn: 18, sight: 5, weapon: 'trikegun', prereqs: ['lightfactory@1', 'ix'], factions: ['ordos'], tech: 6, disguise: true, shape: 'trike', role: 'scout' },
     quad: { id: 'quad', name: 'Quad', kind: 'vehicle', cost: 400, hp: 200, armor: 'light', speed: 38, turn: 14, sight: 5, weapon: 'quadrockets', prereqs: ['lightfactory@1'], tech: 3, starport: true, shape: 'quad', role: 'antiair' },
-    combattank: { id: 'combattank', name: 'Combat Tank', kind: 'vehicle', cost: 700, hp: 380, armor: 'medium', speed: 26, turn: 8, sight: 4, weapon: 'tankcannon', prereqs: ['heavyfactory'], tech: 3, crusher: true, starport: true, shape: 'tank-turret', role: 'combat' },
+    // Each house fields its own Combat Tank: Atreides balanced, Harkonnen heavier, Ordos faster.
+    combattank: { id: 'combattank', name: 'Combat Tank', kind: 'vehicle', cost: 700, hp: 380, armor: 'medium', speed: 26, turn: 8, sight: 4, weapon: 'tankcannon', prereqs: ['heavyfactory'], factions: ['atreides'], tech: 3, crusher: true, starport: true, shape: 'tank-turret', role: 'combat' },
+    'combattank-h': { id: 'combattank-h', name: 'Harkonnen Combat Tank', kind: 'vehicle', cost: 750, hp: 440, armor: 'medium', speed: 22, turn: 7, sight: 4, weapon: 'tankcannon-h', prereqs: ['heavyfactory'], factions: ['harkonnen'], tech: 3, crusher: true, shape: 'tank-turret', role: 'combat' },
+    'combattank-o': { id: 'combattank-o', name: 'Ordos Combat Tank', kind: 'vehicle', cost: 700, hp: 330, armor: 'medium', speed: 31, turn: 10, sight: 5, weapon: 'tankcannon', prereqs: ['heavyfactory'], factions: ['ordos'], tech: 3, crusher: true, shape: 'tank-turret', role: 'combat' },
     siegetank: { id: 'siegetank', name: 'Siege Tank', kind: 'vehicle', cost: 850, hp: 340, armor: 'medium', speed: 18, turn: 6, sight: 5, weapon: 'siegecannon', prereqs: ['heavyfactory@1', 'outpost'], tech: 5, crusher: true, starport: true, shape: 'siege-turret', role: 'siege' },
     missiletank: { id: 'missiletank', name: 'Missile Tank', kind: 'vehicle', cost: 900, hp: 260, armor: 'medium', speed: 22, turn: 8, sight: 6, weapon: 'missiles', prereqs: ['heavyfactory@1', 'ix'], tech: 6, starport: true, shape: 'launcher', role: 'siege' },
     sonictank: { id: 'sonictank', name: 'Sonic Tank', kind: 'vehicle', cost: 1000, hp: 340, armor: 'medium', speed: 20, turn: 6, sight: 5, weapon: 'sonicwave', prereqs: ['heavyfactory', 'ix'], factions: ['atreides'], tech: 7, crusher: true, shape: 'sonic', role: 'combat' },

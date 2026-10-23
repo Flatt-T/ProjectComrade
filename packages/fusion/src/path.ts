@@ -77,7 +77,7 @@ export function findPath(pack: RulePack, map: MapData, kind: MoveClass, from: nu
   g[from] = 0; h[from] = heuristic(from); f[from] = h[from];
   heap.push(from);
   let best = from, bestH = h[from];
-  const maxNodes = opts.maxNodes ?? 6000;
+  const maxNodes = opts.maxNodes ?? 16000; // Room for cross-map routes on 96x96 maps.
   let expanded = 0;
   while (heap.size) {
     const cur = heap.pop();

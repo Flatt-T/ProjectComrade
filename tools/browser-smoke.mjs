@@ -97,11 +97,8 @@ try {
 
   // ---------------------------------------------------------------- Fusion Engine
   const base = process.env.COMRADE_URL || 'http://127.0.0.1:3001';
-  const setSelect = (page, index, value) => page.evaluate(({ index, value }) => {
-    const sel = document.querySelectorAll('select')[index];
-    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, value);
-    sel.dispatchEvent(new Event('change', { bubbles: true }));
-  }, { index, value });
+  // Selects are found by their label: the lobby's first select is now each player's team picker.
+  const setSelect = (page, label, value) => page.getByLabel(label).selectOption(value);
   const enter = async (page, name) => {
     await page.getByLabel('Your name').fill(name);
     await page.getByRole('button', { name: /ENTER THE WAR ROOM/ }).click();
@@ -127,7 +124,7 @@ try {
     await enter(page, `Smoke ${style}`);
     await page.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
     await page.getByRole('button', { name: /START OPERATION/ }).waitFor();
-    await setSelect(page, 0, style);
+    await setSelect(page, 'Game style', style);
     await page.waitForFunction(style => document.querySelector('.room-head .eyebrow')?.textContent.includes(style === 'ra2' ? 'RED ALERT 2' : 'DUNE'), style);
     await page.getByRole('button', { name: /START OPERATION/ }).click();
     await fusionDeploy(page);
@@ -173,7 +170,7 @@ try {
   await enter(a, 'Lockstep A');
   await a.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
   await a.getByRole('button', { name: /START OPERATION/ }).waitFor();
-  await setSelect(a, 0, 'dune2k');
+  await setSelect(a, 'Game style', 'dune2k');
   await a.waitForFunction(() => document.querySelector('.room-head .eyebrow')?.textContent.includes('DUNE'));
   const invite = await a.locator('.room-share code').innerText();
   await b.goto(invite);

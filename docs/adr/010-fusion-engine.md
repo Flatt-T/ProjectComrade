@@ -157,3 +157,21 @@ never had (Prism, sonic, chrono, psychic, rad, sandworms, thunder) are synthesis
 Audio. Sound is presentation only: it reads `Game.effects` and never affects the
 simulation, so lockstep is unaffected. Volume (master, effects, voices) and mute persist in
 the browser.
+
+## Teams, chat, difficulty, transports and regrowth (update 2026-10-24)
+
+- **Teams and chat**: players pick a team (or none) in the lobby; teammates are allies in
+  the match. Chat goes to everyone or to allies only; the service filters allied messages
+  so opponents never receive them, strips control characters and rate-limits senders.
+- **AI difficulty** (Easy / Normal / Hard): thinking rate, first attack, wave growth and a
+  build-speed handicap. Normal is gentler than the previous AI; Hard keeps it.
+- **Transports**: the Amphibious Transport (both sides, crosses land and water) and the
+  Allied Night Hawk (infantry only) carry units; passengers die with their transport.
+  The Soviet Radar Tower grants the Spy Plane (temporary sight over an area). Dune houses
+  field their own Combat Tanks.
+- **Resource regrowth**: every map remembers its original fields; mined-out cells grow
+  back slowly to their starting amount (spice every 30 s, ore 20 s, gems 40 s per unit).
+- **Chrono Miner** charges for just over a second (fading out in a blue shimmer) before
+  jumping to the refinery, instead of vanishing in a single frame.
+- **Maps**: four-player maps are 96x96; new Four Isles (mostly sea), Deep Desert, Carthag
+  Pass and Desert Crossing. Shipyards may be placed further from the base (+6 cells).

@@ -5,7 +5,6 @@ import { mirror, quad } from './mapkit';
 
 const W = 64, H = 64;
 const mirror2 = <T extends MapFeature | MapField>(items: T[]) => mirror(items, W, H);
-const quad4 = <T extends MapFeature | MapField>(items: T[]) => quad(items, W, H);
 
 const maps: MapPreset[] = [
   {
@@ -60,17 +59,74 @@ const maps: MapPreset[] = [
     ],
   },
   {
-    id: 'four-corners', name: 'Four Corners', width: W, height: H, maxPlayers: 4, base: 'clear', roughness: 2,
-    description: 'Four bases, one rich gem field in the middle. Free-for-all.',
-    starts: [{ x: 8, y: 8 }, { x: 54, y: 54 }, { x: 54, y: 8 }, { x: 8, y: 54 }],
-    features: quad4<MapFeature>([
-      { terrain: 'trees', shape: 'circle', x: 20, y: 6, r: 2 },
-      { terrain: 'cliff', shape: 'ridge', x: 22, y: 24, x2: 25, y2: 21, r: 1 },
-      { terrain: 'water', shape: 'circle', x: 32, y: 14, r: 2 },
-    ]),
+    id: 'four-corners', name: 'Four Corners', width: 96, height: 96, maxPlayers: 4, base: 'clear', roughness: 2,
+    description: 'Four bases joined by roads, one rich gem field in the middle. Free-for-all on a large map.',
+    starts: [{ x: 13, y: 13 }, { x: 82, y: 82 }, { x: 82, y: 13 }, { x: 13, y: 82 }],
+    features: quad<MapFeature>([
+      { terrain: 'trees', shape: 'circle', x: 30, y: 8, r: 3 },
+      { terrain: 'trees', shape: 'circle', x: 8, y: 31, r: 3 },
+      { terrain: 'cliff', shape: 'ridge', x: 33, y: 38, x2: 38, y2: 33, r: 1 },
+      { terrain: 'water', shape: 'circle', x: 48, y: 22, r: 3 },
+      { terrain: 'road', shape: 'ridge', x: 15, y: 15, x2: 42, y2: 42, r: 1 },
+      { terrain: 'rough', shape: 'circle', x: 24, y: 40, r: 2 },
+    ], 96, 96),
     fields: [
-      { x: 32, y: 32, r: 4, resource: 'gems' },
-      ...quad4<MapField>([{ x: 18, y: 14, r: 3, resource: 'ore' }]),
+      { x: 48, y: 48, r: 5, resource: 'gems' },
+      ...quad<MapField>([
+        { x: 28, y: 18, r: 3, resource: 'ore' },
+        { x: 18, y: 28, r: 3, resource: 'ore' },
+      ], 96, 96),
+    ],
+  },
+  {
+    id: 'four-isles', name: 'Four Isles', width: 96, height: 96, maxPlayers: 4, base: 'water', roughness: 2,
+    description: 'Four island bases in open sea and a gem islet in the middle. Win with ships, aircraft and amphibious troops.',
+    starts: [{ x: 16, y: 16 }, { x: 79, y: 79 }, { x: 79, y: 16 }, { x: 16, y: 79 }],
+    features: [
+      ...quad<MapFeature>([
+        { terrain: 'sand', shape: 'circle', x: 18, y: 18, r: 16 },
+        { terrain: 'clear', shape: 'circle', x: 18, y: 18, r: 14 },
+        { terrain: 'trees', shape: 'circle', x: 7, y: 25, r: 2 },
+        { terrain: 'trees', shape: 'circle', x: 27, y: 8, r: 2 },
+        { terrain: 'sand', shape: 'circle', x: 48, y: 14, r: 4 },
+        { terrain: 'sand', shape: 'circle', x: 14, y: 48, r: 4 },
+      ], 96, 96),
+      { terrain: 'sand', shape: 'circle', x: 48, y: 48, r: 8 },
+      { terrain: 'clear', shape: 'circle', x: 48, y: 48, r: 6 },
+    ],
+    fields: [
+      { x: 48, y: 48, r: 3, resource: 'gems' },
+      ...quad<MapField>([
+        { x: 26, y: 13, r: 3, resource: 'ore' },
+        { x: 13, y: 26, r: 3, resource: 'ore' },
+        { x: 48, y: 14, r: 2, resource: 'ore' },
+        { x: 14, y: 48, r: 2, resource: 'ore' },
+      ], 96, 96),
+    ],
+  },
+  {
+    id: 'desert-crossing', name: 'Desert Crossing', width: 80, height: 64, maxPlayers: 2, base: 'sand', roughness: 2,
+    description: 'Two oasis bases across open desert, split by a canyon with three crossings.',
+    starts: [{ x: 10, y: 32 }, { x: 69, y: 31 }],
+    features: [
+      ...mirror<MapFeature>([
+        { terrain: 'clear', shape: 'circle', x: 11, y: 32, r: 10 },
+        { terrain: 'trees', shape: 'circle', x: 6, y: 18, r: 2 },
+        { terrain: 'rough', shape: 'circle', x: 26, y: 12, r: 3 },
+        { terrain: 'water', shape: 'circle', x: 20, y: 48, r: 2 },
+        { terrain: 'road', shape: 'ridge', x: 16, y: 32, x2: 39, y2: 32, r: 1 },
+      ], 80, 64),
+      { terrain: 'cliff', shape: 'ridge', x: 40, y: 2, x2: 40, y2: 14, r: 1 },
+      { terrain: 'cliff', shape: 'ridge', x: 40, y: 21, x2: 40, y2: 28, r: 1 },
+      { terrain: 'cliff', shape: 'ridge', x: 40, y: 36, x2: 40, y2: 43, r: 1 },
+      { terrain: 'cliff', shape: 'ridge', x: 40, y: 50, x2: 40, y2: 61, r: 1 },
+    ],
+    fields: [
+      ...mirror<MapField>([
+        { x: 22, y: 20, r: 3, resource: 'ore' },
+        { x: 22, y: 44, r: 3, resource: 'ore' },
+      ], 80, 64),
+      { x: 40, y: 32, r: 2, resource: 'gems' },
     ],
   },
   {
@@ -118,8 +174,8 @@ export const ra2Pack: RulePack = {
     { id: 'water', name: 'Water', foot: false, vehicle: false, water: true, buildable: false, speed: 100, color: '#2d5d8c', color2: '#26527e' },
   ],
   resources: [
-    { id: 'ore', name: 'Ore', value: 25, max: 12, regrows: true, color: '#d6b24a', color2: '#b38c2c' },
-    { id: 'gems', name: 'Gems', value: 50, max: 12, color: '#57c4d8', color2: '#3a95b6' },
+    { id: 'ore', name: 'Ore', value: 25, max: 12, regrows: true, regrowEvery: 300, color: '#d6b24a', color2: '#b38c2c' },
+    { id: 'gems', name: 'Gems', value: 50, max: 12, regrowEvery: 600, color: '#57c4d8', color2: '#3a95b6' },
   ],
   armors: ['none', 'light', 'heavy', 'building'],
   warheads: {
@@ -181,6 +237,7 @@ export const ra2Pack: RulePack = {
     scorpion: { id: 'scorpion', damage: 30, range: 1536, rof: 15, warhead: 'flak', speed: 0, splash: 64, targets: ['aircraft', 'naval', 'infantry'], visual: 'bullet' },
     squidgrab: { id: 'squidgrab', damage: 60, range: 256, rof: 25, warhead: 'torpedo', speed: 0, targets: ['naval'], visual: 'bullet' },
     dreadnought: { id: 'dreadnought', damage: 220, range: 4096, minRange: 768, rof: 150, warhead: 'he', speed: 28, burst: 2, splash: 224, targets: ['infantry', 'vehicle', 'structure'], visual: 'missile' },
+    nighthawkgun: { id: 'nighthawkgun', damage: 14, range: 1152, rof: 12, warhead: 'smallarms', speed: 0, targets: ['infantry', 'vehicle', 'naval'], visual: 'bullet' },
     pillbox: { id: 'pillbox', damage: 22, range: 1408, rof: 14, warhead: 'smallarms', speed: 0, visual: 'bullet' },
     prismtower: { id: 'prismtower', damage: 140, range: 2048, rof: 100, warhead: 'prism', speed: 0, splash: 96, visual: 'prism' },
     patriot: { id: 'patriot', damage: 55, range: 2560, rof: 25, warhead: 'missile', speed: 64, burst: 2, targets: [...air], visual: 'missile' },
@@ -230,7 +287,9 @@ export const ra2Pack: RulePack = {
     // ---- Aircraft (Airforce Command)
     harrier: { id: 'harrier', name: 'Harrier', kind: 'aircraft', cost: 1200, hp: 150, armor: 'light', speed: 64, sight: 7, weapon: 'maverick', ammo: 2, prereqs: ['a-radar'], factions: ['allies'], tech: 4, altitude: 2, shape: 'jet', role: 'combat' },
     blackeagle: { id: 'blackeagle', name: 'Black Eagle', kind: 'aircraft', cost: 1200, hp: 200, armor: 'light', speed: 70, sight: 7, weapon: 'blackeagle', ammo: 2, prereqs: ['a-radar'], factions: ['korea'], tech: 4, altitude: 2, shape: 'jet', role: 'combat' },
+    nighthawk: { id: 'nighthawk', name: 'Night Hawk Transport', kind: 'aircraft', cost: 1000, hp: 175, armor: 'light', speed: 44, sight: 6, weapon: 'nighthawkgun', transport: 5, infantryOnly: true, prereqs: ['a-radar'], factions: ['allies'], tech: 4, altitude: 1.6, shape: 'helicopter', role: 'support' },
     // ---- Navies
+    amphib: { id: 'amphib', name: 'Amphibious Transport', kind: 'naval', amphibious: true, queue: 'naval', cost: 900, hp: 300, armor: 'heavy', speed: 30, turn: 8, sight: 6, transport: 12, prereqs: ['a-yard|s-yard'], factions: both, tech: 4, shape: 'hovercraft', role: 'support' },
     destroyer: { id: 'destroyer', name: 'Destroyer', kind: 'naval', cost: 1000, hp: 600, armor: 'heavy', speed: 26, turn: 6, sight: 7, weapon: 'destroyergun', prereqs: ['a-yard'], factions: ['allies'], tech: 4, shape: 'ship-destroyer', role: 'combat' },
     aegis: { id: 'aegis', name: 'Aegis Cruiser', kind: 'naval', cost: 1200, hp: 800, armor: 'heavy', speed: 22, turn: 5, sight: 8, weapon: 'aegis', prereqs: ['a-yard', 'a-radar'], factions: ['allies'], tech: 5, shape: 'ship-cruiser', role: 'antiair' },
     dolphin: { id: 'dolphin', name: 'Dolphin', kind: 'naval', cost: 500, hp: 200, armor: 'light', speed: 40, turn: 14, sight: 6, weapon: 'sonicpulse', prereqs: ['a-yard', 'a-lab'], factions: ['allies'], tech: 6, shape: 'dolphin', role: 'combat' },
@@ -261,7 +320,8 @@ export const ra2Pack: RulePack = {
     's-barracks': { id: 's-barracks', name: 'Soviet Barracks', cost: 500, hp: 500, armor: 'building', w: 2, h: 2, power: -10, sight: 4, prereqs: ['s-power'], factions: ['soviets'], tech: 1, queue: 'structure', produces: 'infantry', shape: 'barracks' },
     's-factory': { id: 's-factory', name: 'Soviet War Factory', cost: 2000, hp: 1000, armor: 'building', w: 3, h: 3, power: -25, sight: 4, prereqs: ['s-refinery', 's-barracks'], factions: ['soviets'], tech: 2, queue: 'structure', produces: 'vehicle', shape: 'heavyfactory' },
     's-yard': { id: 's-yard', name: 'Soviet Naval Shipyard', cost: 1000, hp: 1500, armor: 'building', w: 3, h: 3, power: -20, sight: 5, prereqs: ['s-refinery', 's-barracks'], factions: ['soviets'], tech: 3, queue: 'structure', produces: 'naval', onWater: true, repairPad: true, shape: 'shipyard' },
-    's-radar': { id: 's-radar', name: 'Radar Tower', cost: 1000, hp: 1000, armor: 'building', w: 2, h: 2, power: -50, sight: 10, prereqs: ['s-refinery'], factions: ['soviets'], tech: 3, queue: 'structure', radar: true, shape: 'radar' },
+    's-radar': { id: 's-radar', name: 'Radar Tower', cost: 1000, hp: 1000, armor: 'building', w: 2, h: 2, power: -50, sight: 10, prereqs: ['s-refinery'], factions: ['soviets'], tech: 3, queue: 'structure', radar: true, shape: 'radar',
+      superweapon: { id: 'spyplane', name: 'Spy Plane', kind: 'reveal', charge: 1800, damage: 0, radius: 2560, delay: 45, duration: 450 } },
     's-depot': { id: 's-depot', name: 'Service Depot', cost: 800, hp: 1200, armor: 'building', w: 3, h: 3, power: -25, sight: 4, prereqs: ['s-factory'], factions: ['soviets'], tech: 4, queue: 'structure', repairPad: true, shape: 'repairpad' },
     's-lab': { id: 's-lab', name: 'Soviet Battle Lab', cost: 2000, hp: 500, armor: 'building', w: 3, h: 3, power: -100, sight: 4, prereqs: ['s-factory', 's-radar'], factions: ['soviets'], tech: 6, queue: 'structure', shape: 'lab' },
     's-reactor': { id: 's-reactor', name: 'Nuclear Reactor', cost: 1000, hp: 1000, armor: 'building', w: 3, h: 3, power: 2000, sight: 4, prereqs: ['s-lab'], factions: ['soviets'], tech: 7, queue: 'structure', deathWeapon: 'reactorblast', shape: 'nuclear' },

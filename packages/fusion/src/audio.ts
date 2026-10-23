@@ -260,7 +260,8 @@ export class FusionAudio {
         case 'chronoFlash': pick(table.chrono); break;
         case 'curtain': pick(table.curtain); break;
         case 'parachute': pick(table.chute); break;
-        case 'paradrop': pick('~plane'); break;
+        case 'paradrop': case 'spyPlane': pick('~plane'); break;
+        case 'board': case 'unload': pick(table.deploy); break;
         case 'reinforce': case 'wormDive': pick('~rumble'); break;
         case 'wormEat': pick('~worm'); break;
         case 'bloom': case 'lift': case 'drop': case 'delivery': pick('~whoosh'); break;
@@ -272,6 +273,7 @@ export class FusionAudio {
         case 'dig': pick(table.sandbag); break;
         case 'c4': pick(table.c4); if (fx.owner === this.viewer) this.eva('charge'); break;
         case 'convert': pick('~psychic'); break;
+        case 'minerWarp': pick('~chrono'); break;
         case 'promote': case 'upgrade': pick('~chime'); break;
         case 'capture': pick('~chime'); break;
         case 'infiltrate': pick('~chime'); break; // The battle screen speaks the EVA line.

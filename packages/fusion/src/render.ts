@@ -3,6 +3,7 @@
 // relief lighting; buildings and vehicles are 3D-forged sprites (see ./art). All art is
 // original and procedural; sprites are chosen by `shape` key so they can be replaced.
 import { LEPTONS } from './core';
+import { WARP_TICKS } from './game';
 import type { Effect, Entity, Game, Projectile } from './game';
 import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
@@ -249,6 +250,7 @@ export class FusionRenderer {
         case 'delivery': case 'lift': case 'drop': case 'dig': case 'undig': case 'parachute': e.emit(p.x, p.y, 2, 8, 'dust', 0.9); break;
         case 'droneIn': case 'enter': case 'repairFx': e.emit(p.x, p.y - 4, 3, 5, 'spark', 0.6); break;
         case 'reinforce': e.emit(p.x, p.y, 4, 20, 'sand', 1.3); break;
+        case 'board': case 'unload': e.emit(p.x, p.y, 2, 6, 'dust', 0.7); break;
       }
       if (fx.kind === 'explosion' && fx.x2 >= 512) {
         // Demolition Truck, Kirov crash, reactor meltdown: a much bigger blast.
@@ -572,6 +574,13 @@ export class FusionRenderer {
       ctx.beginPath(); ctx.ellipse(ground.x, ground.y, size, size * (this.iso ? 0.45 : 0.6), 0, 0, Math.PI * 2); ctx.fill();
     }
     if (e.disguised) ctx.globalAlpha = 0.5; // Own hidden units show ghosted.
+    // Chrono Miner: fades out while charging, then fades back in at the refinery.
+    const warping = e.hstate === 'warp' ? e.timer / WARP_TICKS : game.tick - e.warp < 15 ? (game.tick - e.warp) / 15 : 1;
+    if (warping < 1) {
+      ctx.globalAlpha = Math.max(0.05, warping);
+      this.glow(p.x, p.y - 6, 26, '140,200,255', 1 - warping);
+      if (Math.random() < 0.5) this.fx.emit(p.x, p.y - 6, 8, 1, 'blue', 0.6);
+    }
     if (def.kind === 'infantry' || def.shape === 'rocketeer') {
       if (def.shape === 'rocketeer') {
         // Jetpack flame under a flying soldier.
@@ -597,6 +606,23 @@ export class FusionRenderer {
         ctx.beginPath(); ctx.ellipse(ground.x, ground.y + 1, def.shape === 'ship-carrier' || def.shape === 'ship-dreadnought' ? 40 : def.shape.startsWith('ship') || def.shape === 'sub' ? 30 : 18, this.iso ? 9 : 12, 0, 0, Math.PI * 2); ctx.stroke();
       }
       this.blit(hs, p.x, p.y);
+      if (def.shape === 'helicopter') {
+        // Tandem rotors, spinning.
+        ctx.strokeStyle = 'rgba(30,30,30,0.55)'; ctx.lineWidth = 1.6;
+        const dir = facingAngle(e.facing, this.iso);
+        for (const off of [-9, 8]) {
+          const cx = p.x + Math.cos(dir) * off, cy = p.y - 11 + Math.sin(dir) * off * (this.iso ? 0.5 : 0.7);
+          for (let k = 0; k < 3; k++) {
+            const a = this.frame * 0.9 + (k * Math.PI * 2) / 3 + off;
+            ctx.beginPath(); ctx.moveTo(cx - Math.cos(a) * 11, cy - Math.sin(a) * 5); ctx.lineTo(cx + Math.cos(a) * 11, cy + Math.sin(a) * 5); ctx.stroke();
+          }
+        }
+      }
+      if (e.passengers.length) {
+        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(p.x - 9, p.y - 26, 18, 8);
+        ctx.fillStyle = '#e2e8da'; ctx.font = '7px ui-monospace, monospace'; ctx.textAlign = 'center';
+        ctx.fillText(String(e.passengers.length), p.x, p.y - 20);
+      }
       if (hasTurret(def.shape)) {
         const tr = this.rot(e.turret);
         const ts = this.sprite(`t|${def.shape}|${style}|${color}|${tr.key}`, () => bake(turretMesh(def.shape, style, team).rotated(tr.angle), this.view, undefined, { shadow: false }));
@@ -970,7 +996,7 @@ export class FusionRenderer {
           ctx.stroke(); ctx.globalCompositeOperation = 'source-over';
           break;
         }
-        case 'paradrop': {
+        case 'paradrop': case 'spyPlane': {
           // The transport plane crosses toward the drop zone.
           const sx = a.x - 400 * (1 - t), sy = a.y - 70 - 150 * (1 - t);
           ctx.fillStyle = 'rgba(40,44,48,0.9)';

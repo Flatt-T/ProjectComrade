@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LaunchRequest, styleInfo } from '@comrade/contracts';
-import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, QueueKind, RulePack, Session } from '../../../packages/fusion/src/index';
+import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, PlayerSetup, QueueKind, RulePack, Session } from '../../../packages/fusion/src/index';
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
 import TechTree from './TechTree';
+import Chat from './Chat';
 import { AudioSettings, FusionAudio, loadAudioSettings, saveAudioSettings } from '../../../packages/fusion/src/audio';
 
 /** Notices that have an EVA voice line (the meaning keys of the sound tables). */
@@ -36,7 +37,7 @@ interface QueueView { items: string[]; paid: number; ready: boolean }
 interface UiState {
   tick: number; credits: number; storage: number; powerGen: number; powerUse: number; radar: boolean;
   options: Record<QueueKind, string[]>; queues: Record<QueueKind, QueueView>; costs: Record<string, number>; soundLocked: boolean;
-  selection: { name: string; hp: number; max: number; count: number; deploy: boolean; own: boolean; structure: boolean } | null;
+  selection: { name: string; hp: number; max: number; count: number; deploy: boolean; unload: boolean; own: boolean; structure: boolean } | null;
   status: string; over: boolean; won: boolean; defeated: boolean; stats: { built: number; lost: number; killed: number; harvested: number };
   supers: SuperView[];
 }
@@ -74,11 +75,12 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     const humans = launch.players?.length ? launch.players : [{ id: 'local', name: 'Commander', faction: launch.faction }];
     const preset = pack.maps.find(m => m.id === launch.map) ?? pack.maps[0];
     const aiCount = Math.max(0, Math.min(launch.settings.ai, preset.maxPlayers - humans.length));
-    const players = humans.slice(0, preset.maxPlayers).map(h => ({ name: h.name, faction: h.faction, ai: false }));
+    // Humans who picked the same team in the lobby are allies; everyone else fights alone.
+    const players: PlayerSetup[] = humans.slice(0, preset.maxPlayers).map((h, i) => ({ name: h.name, faction: h.faction, ai: false, team: h.team ? 100 + h.team : i }));
     for (let i = 0; i < aiCount; i++) {
       const used = new Set(players.map(p => p.faction));
       const faction = pack.factions.find(f => !used.has(f.id)) ?? pack.factions[players.length % pack.factions.length];
-      players.push({ name: `Computer ${i + 1}`, faction: faction.id, ai: true });
+      players.push({ name: `Computer ${i + 1}`, faction: faction.id, ai: true, level: launch.settings.aiLevel ?? 'normal', team: players.length });
     }
     return {
       players, humans: Math.min(humans.length, preset.maxPlayers), mapId: preset.id,
@@ -247,7 +249,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         prev = { ready: { structure: queues.structure.ready, defense: queues.defense.ready }, units, low, hp: myHp, over: game.over, lost: me.stats.lost, structures, options: optionCount };
         setUi({
           tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues, soundLocked: !sfx.unlocked,
-          selection: first ? { name: (firstDef?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!(pack.units[e.type].deploysTo || pack.units[e.type].deployWeapon || pack.units[e.type].lure)), own: first.owner === slot, structure: first.kind === 'structure' } : null,
+          selection: first ? { name: (firstDef?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!(pack.units[e.type].deploysTo || pack.units[e.type].deployWeapon || pack.units[e.type].lure || e.passengers.length)), unload: sel.some(e => e.passengers.length > 0), own: first.owner === slot, structure: first.kind === 'structure' } : null,
           status: conn.drops !== drops && status !== 'running' ? 'Connection to the match was lost — it cannot be rejoined'
             : status === 'waiting' ? `Waiting for ${(session.waitingFor?.() ?? []).map(s => game.players[s]?.name).filter(Boolean).join(', ') || 'other commanders'}…`
             : status === 'desync' ? 'Desynchronised — the match cannot continue' : '',
@@ -453,6 +455,11 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         mark(enemy ? '#ffd24a' : '#7dff7a'); return;
       }
     }
+    // Clicking your own transport with units selected loads them aboard.
+    if (target && target.kind === 'unit' && target.owner === slot && !renderer.selected.has(target.id) && pack.units[target.type].transport) {
+      const boarders = units.filter(u => game.canBoard(u, target));
+      if (boarders.length) { session.issue({ t: 'enter', ids: boarders.map(u => u.id), target: target.id }); mark('#7dff7a'); return; }
+    }
     if (target && target.owner === slot) {
       // Clicking a selected MCV again deploys it (RA2 style).
       if (target.kind === 'unit' && renderer.selected.has(target.id) && renderer.selected.size === 1 && pack.units[target.type].deploysTo) {
@@ -548,6 +555,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <span data-testid="fusion-tick">{ui ? `${Math.floor(ui.tick / 15 / 60)}:${String(Math.floor(ui.tick / 15) % 60).padStart(2, '0')}` : '0:00'}</span>
       </div>
       {ui?.soundLocked && !sound.muted && <button className="fusion-sound-unlock" onClick={() => audio.current?.resume()}>🔇 Click anywhere to enable sound</button>}
+      <Chat conn={conn} team={launch.players?.find(p => p.id === launch.you)?.team ?? 0} overlay onMessage={() => audio.current?.ui('click')} />
       <div className="fusion-messages">{messages.filter(m => performance.now() - m.at < 5000).map(m => <p key={m.at}>{m.text}</p>)}</div>
       {ui?.status && <div className="fusion-banner">{ui.status}</div>}
       {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? (superFrom.current ? 'Choose the destination — right-click cancels' : 'Choose the target — right-click cancels') : 'Attack-move — click a destination'}</div>}
@@ -561,7 +569,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <p><b>T</b> same type (twice: whole map) · <b>P</b> all combat units · <b>G</b> guard · <b>X</b> scatter · <b>S</b> stop · <b>D</b> deploy · <b>A</b> attack-move</p>
         <p><b>H</b> home · <b>Space</b> last alert · <b>Esc</b> cancel · <b>F1</b> this card · <b>F2</b> tech tree · <b>M</b> mute</p>
         <p><b>Click a selected MCV</b> to deploy · <b>Wheel</b> zoom · <b>Arrows / screen edge</b> scroll</p>
-        <p><b>Engineer</b> on a building: capture (enemy) or repair (own) · <b>Spy</b>: infiltrate · <b>Damaged vehicle</b> on a repair pad: repair · <b>Aircraft</b> on an airfield: rearm</p>
+        <p><b>Engineer</b> on a building: capture (enemy) or repair (own) · <b>Spy</b>: infiltrate · <b>Damaged vehicle</b> on a repair pad: repair · <b>Aircraft</b> on an airfield: rearm · <b>Units</b> on your transport: board (<b>D</b> unloads)</p>
         <p><b>D</b> also digs in G.I.s, sets up Desolators and starts Thumpers · <b>Chronosphere</b>: pick the area, then the destination</p>
       </div>}
       {ui && (ui.over || ui.defeated) && <div className="fusion-over">
@@ -622,7 +630,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       {ui?.selection && <div className="fusion-selection">
         <b>{ui.selection.count > 1 ? `${ui.selection.count} selected` : ui.selection.name}</b>
         <span className="hp"><i style={{ width: `${Math.round((ui.selection.hp / ui.selection.max) * 100)}%` }} /></span>
-        {ui.selection.own && ui.selection.deploy && <button onClick={() => { const r = rig.current; if (r) r.session.issue({ t: 'deploy', ids: [...r.renderer.selected] }); }}>DEPLOY</button>}
+        {ui.selection.own && ui.selection.deploy && <button onClick={() => { const r = rig.current; if (r) r.session.issue({ t: 'deploy', ids: [...r.renderer.selected] }); }}>{ui.selection.unload ? 'UNLOAD' : 'DEPLOY'}</button>}
       </div>}
       <p className="fusion-fidelity">{pack.fidelityNote}</p>
       <button className="fusion-leave" onClick={() => { rig.current?.session.issue({ t: 'surrender' }); onExit(); }}>LEAVE OPERATION</button>

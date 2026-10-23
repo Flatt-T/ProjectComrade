@@ -40,15 +40,17 @@ export function factionAllowed(style: GameStyle, faction: unknown): faction is F
 
 export type Visibility = 'public' | 'invite';
 export type CreditsPreset = 'low' | 'standard' | 'high';
-/** `ai` is the number of computer opponents added to Fusion Engine matches (0..3). */
-export interface MatchSettings { credits: CreditsPreset; techLevel: number; ai: number }
-export const DEFAULT_SETTINGS: MatchSettings = { credits: 'standard', techLevel: 15, ai: 1 };
+export type AILevel = 'easy' | 'normal' | 'hard';
+/** `ai` is the number of computer opponents added to Fusion Engine matches (0..3); `aiLevel` how hard they play. */
+export interface MatchSettings { credits: CreditsPreset; techLevel: number; ai: number; aiLevel: AILevel }
+export const DEFAULT_SETTINGS: MatchSettings = { credits: 'standard', techLevel: 15, ai: 1, aiLevel: 'normal' };
 export const CREDITS_VALUES: Record<CreditsPreset, number> = { low: 30, standard: 60, high: 120 };
 
 export interface RoomOptions { style: GameStyle; map: string; visibility: Visibility; maxPlayers: number; settings: MatchSettings }
 export const DEFAULT_OPTIONS: RoomOptions = { style: 'td-classic', map: MAP_ID, visibility: 'public', maxPlayers: 2, settings: DEFAULT_SETTINGS };
 
-export interface LaunchPlayer { id: string; name: string; faction: Faction }
+/** `team` 0 means no team (everyone else is an enemy); players sharing 1..4 are allies. */
+export interface LaunchPlayer { id: string; name: string; faction: Faction; team?: number }
 /** Fusion matches also carry the shared seed and every human in slot order. */
 export type LaunchRequest = {
   version: 1; type: 'launch'; map: string; faction: Faction; style: GameStyle; settings: MatchSettings;
@@ -60,6 +62,8 @@ export type ClientMessage =
   | { version: 1; type: 'configure'; options: RoomOptions }
   | { version: 1; type: 'faction'; faction: Faction }
   | { version: 1; type: 'ready'; ready: boolean }
+  | { version: 1; type: 'team'; team: number }
+  | { version: 1; type: 'chat'; text: string; to: ChatAudience }
   | { version: 1; type: 'start' }
   | { version: 1; type: 'list' }
   | { version: 1; type: 'leave' }
@@ -68,7 +72,9 @@ export type ClientMessage =
 /** One lockstep turn of Fusion Engine commands; the service relays it untouched. */
 export interface TurnMessage { version: 1; type: 'turn'; turn: number; tick: number; checksum: number; commands: unknown[] }
 
-export interface RoomPlayer { id: string; name: string; faction: Faction; ready: boolean; host: boolean }
+export type ChatAudience = 'all' | 'allies';
+export const CHAT_MAX = 200;
+export interface RoomPlayer { id: string; name: string; faction: Faction; ready: boolean; host: boolean; team?: number }
 export interface RoomState {
   version: 1; type: 'room'; room: string; host: string; phase: 'lobby' | 'started'; options: RoomOptions; players: RoomPlayer[];
   /** Set when the match starts: shared random seed and player ids in slot order. */
@@ -84,6 +90,7 @@ export type ServerMessage = RoomState
   | { version: 1; type: 'welcome'; id: string; capabilities: string[]; gameplay: 'lobby-presence' }
   | { version: 1; type: 'rooms'; rooms: RoomSummary[] }
   | { version: 1; type: 'error'; message: string }
+  | { version: 1; type: 'chat'; from: string; name: string; text: string; to: ChatAudience; at: number }
   | { version: 1; type: 'turn'; slot: number; turn: number; tick: number; checksum: number; commands: unknown[]; final?: boolean };
 export type PlayerOrder = { version: 1; type: 'order'; sequence: number; tick: number; action: 'move' | 'attack' | 'harvest' | 'build' | 'train' | 'place'; entities: number[]; cell?: number; target?: number; item?: string };
 
@@ -100,7 +107,8 @@ export function parseSettings(value: unknown): MatchSettings {
   const credits = ['low', 'standard', 'high'].includes(String(v.credits)) ? v.credits as CreditsPreset : 'standard';
   const techLevel = typeof v.techLevel === 'number' && Number.isInteger(v.techLevel) && v.techLevel >= 1 && v.techLevel <= 15 ? v.techLevel : 15;
   const ai = typeof v.ai === 'number' && Number.isInteger(v.ai) && v.ai >= 0 && v.ai <= 3 ? v.ai : DEFAULT_SETTINGS.ai;
-  return { credits, techLevel, ai };
+  const aiLevel = ['easy', 'normal', 'hard'].includes(String(v.aiLevel)) ? v.aiLevel as AILevel : DEFAULT_SETTINGS.aiLevel;
+  return { credits, techLevel, ai, aiLevel };
 }
 export function parseOptions(value: unknown): RoomOptions {
   const v = object(value);
@@ -140,6 +148,12 @@ export function parseClientMessage(value: unknown): ClientMessage {
   if (v.type === 'configure') return { version: 1, type: 'configure', options: parseOptions(v.options) };
   if (v.type === 'faction' && isFaction(v.faction)) return { version: 1, type: 'faction', faction: v.faction };
   if (v.type === 'ready' && typeof v.ready === 'boolean') return { version: 1, type: 'ready', ready: v.ready };
+  if (v.type === 'team' && Number.isInteger(v.team) && (v.team as number) >= 0 && (v.team as number) <= 4) return { version: 1, type: 'team', team: v.team as number };
+  if (v.type === 'chat' && typeof v.text === 'string' && (v.to === 'all' || v.to === 'allies')) {
+    // Plain text only: control characters are dropped and length capped.
+    const text = [...v.text].filter(c => c >= ' ' && c !== String.fromCharCode(127)).join('').trim().slice(0, CHAT_MAX);
+    if (text) return { version: 1, type: 'chat', text, to: v.to };
+  }
   if (v.type === 'start' || v.type === 'leave' || v.type === 'list') return { version: 1, type: v.type };
   if (v.type === 'turn') {
     const int = (x: unknown) => Number.isSafeInteger(x) && (x as number) >= 0;

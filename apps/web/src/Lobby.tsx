@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  CreditsPreset, GameStyle, LaunchRequest, MapInfo, RoomOptions, RoomState, RoomSummary, STYLES, styleInfo,
+  AILevel, CreditsPreset, GameStyle, LaunchRequest, MapInfo, RoomOptions, RoomState, RoomSummary, STYLES, styleInfo,
 } from '@comrade/contracts';
 import { PACKS } from '../../../packages/fusion/src/index';
 import type { RoomConnection } from './net';
+import Chat from './Chat';
 
 interface LobbyMap { id: string; name: string; description: string; maxPlayers: number; detail: string }
 
@@ -73,7 +74,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     const map = mapsFor(room.options.style).find(m => m.id === room.options.map) ?? mapsFor(room.options.style)[0];
     const players = (room.slots ?? room.players.map(p => p.id)).map(id => {
       const p = room.players.find(x => x.id === id);
-      return { id, name: p?.name ?? 'Commander', faction: p?.faction ?? style.factions[0].id };
+      return { id, name: p?.name ?? 'Commander', faction: p?.faction ?? style.factions[0].id, team: p?.team ?? 0 };
     });
     onLaunch({
       version: 1, type: 'launch', map: map?.id ?? room.options.map, faction: me.faction, style: room.options.style,
@@ -135,6 +136,11 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
           {room.players.map(p => <div key={p.id} className={`player ${p.faction}`} style={{ borderLeftColor: factionColor(room.options.style, p.faction) }}>
             <span className="pname">{p.name}{p.host && <em> · HOST</em>}{p.id === conn.id && <em> · YOU</em>}</span>
             <span className="pfaction">{style.factions.find(f => f.id === p.faction)?.name.toUpperCase() ?? p.faction}</span>
+            {p.id === conn.id
+              ? <select className="pteam" aria-label="Your team" value={p.team ?? 0} onChange={e => conn.send({ type: 'team', team: Number(e.target.value) })}>
+                  <option value={0}>No team</option>{[1, 2, 3, 4].map(t => <option key={t} value={t}>Team {t}</option>)}
+                </select>
+              : <span className="pteam">{p.team ? `TEAM ${p.team}` : ''}</span>}
             <span className={p.ready ? 'pready on' : 'pready'}>{p.id === room.host ? 'HOST' : p.ready ? 'READY' : 'NOT READY'}</span>
           </div>)}
           {fusion && Array.from({ length: Math.min(aiMax, room.options.settings.ai) }).map((_, i) =>
@@ -159,6 +165,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
             {fusion ? 'Fusion Engine matches are fully synchronized: everyone fights on the same battlefield.' : 'Classic C&C runs the original engine; each commander fights the built-in enemy on the configured map.'}</small>
         </div>
         {error && <small className="lobby-error">{error}</small>}
+        <Chat conn={conn} team={me?.team ?? 0} />
       </div>
 
       <aside className="room-config">
@@ -183,6 +190,9 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
         </select></label>
         {fusion && <label>AI opponents<select disabled={!isHost} value={Math.min(room.options.settings.ai, aiMax)} onChange={e => configureSettings({ ai: Number(e.target.value) })}>
           {Array.from({ length: aiMax + 1 }, (_, n) => <option key={n} value={n}>{n === 0 ? 'None' : `${n} computer${n > 1 ? 's' : ''}`}</option>)}
+        </select></label>}
+        {fusion && <label>AI difficulty<select disabled={!isHost} value={room.options.settings.aiLevel} onChange={e => configureSettings({ aiLevel: e.target.value as AILevel })}>
+          <option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option>
         </select></label>}
         <label>Starting credits<select disabled={!isHost} value={room.options.settings.credits} onChange={e => configureSettings({ credits: e.target.value as CreditsPreset })}>
           {(['low', 'standard', 'high'] as CreditsPreset[]).map(c => <option key={c} value={c}>{creditLabels(room.options.style)[c]}</option>)}

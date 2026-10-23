@@ -35,8 +35,10 @@ export interface ResourceDef {
   value: number;
   /** Maximum units a cell can hold. */
   max: number;
-  /** Regrows over time (RA2 ore). */
+  /** Spreads into neighbouring cells over time (RA2 ore). */
   regrows?: boolean;
+  /** Mined-out cells of an original field grow back one unit every this many ticks. */
+  regrowEvery?: number;
   color: string;
   color2: string;
 }
@@ -127,6 +129,10 @@ export interface UnitDef {
   altitude?: number;
   /** Dune Carryall: automatically airlifts harvesters. */
   carrier?: boolean;
+  /** Carries this many passenger slots (infantry take 1, vehicles 3). */
+  transport?: number;
+  /** Only infantry may board (Night Hawk). */
+  infantryOnly?: boolean;
   // ---- abilities
   /** Captures enemy buildings or fully repairs friendly ones, and is used up. */
   engineer?: boolean;
@@ -222,7 +228,7 @@ export interface StructureDef {
   shape: string;
 }
 
-export type SuperweaponKind = 'missile' | 'storm' | 'ion' | 'reinforce' | 'paradrop' | 'chrono' | 'curtain';
+export type SuperweaponKind = 'missile' | 'storm' | 'ion' | 'reinforce' | 'paradrop' | 'chrono' | 'curtain' | 'reveal';
 
 export interface SuperweaponDef {
   id: string;

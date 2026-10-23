@@ -1,7 +1,7 @@
 import { randomInt, randomUUID } from 'node:crypto';
 import { DEFAULT_OPTIONS, factionAllowed, parseClientMessage, RoomOptions, RoomPlayer, RoomState, RoomSummary, styleInfo } from '@comrade/contracts';
 
-interface Peer { send(message: string): void; room?: string; player: RoomPlayer }
+interface Peer { send(message: string): void; room?: string; player: RoomPlayer; chat: number[] }
 interface Room {
   host: string;
   phase: 'lobby' | 'started';
@@ -20,7 +20,7 @@ export class RoomCoordinator {
 
   connect(send: (message: string) => void) {
     const id = randomUUID();
-    this.peers.set(id, { send, player: { id, name: 'Commander', faction: 'gdi', ready: false, host: false } });
+    this.peers.set(id, { send, player: { id, name: 'Commander', faction: 'gdi', ready: false, host: false, team: 0 }, chat: [] });
     send(JSON.stringify({ version: 1, type: 'welcome', id, capabilities: ['rooms', 'public-list', 'configure', 'lockstep'], gameplay: 'lobby-presence' }));
     this.sendLobbyList(id);
     return id;
@@ -103,7 +103,7 @@ export class RoomCoordinator {
         if (!room) { room = { host: id, phase: 'lobby', options: { ...DEFAULT_OPTIONS }, members: new Set(), lastTurn: new Map() }; this.rooms.set(message.room, room); }
         const style = styleInfo(room.options.style);
         const faction = factionAllowed(style.id, message.faction) ? message.faction : style.factions[room.members.size % style.factions.length].id;
-        peer.player = { id, name: message.name, faction, ready: false, host };
+        peer.player = { id, name: message.name, faction, ready: false, host, team: 0 };
         peer.room = message.room; room.members.add(id);
         this.broadcast(message.room); this.broadcastLobbyList(); return;
       }
@@ -135,6 +135,27 @@ export class RoomCoordinator {
       if (message.type === 'faction') {
         if (!factionAllowed(room.options.style, message.faction)) throw new Error('That side is not part of this game style');
         peer.player.faction = message.faction; peer.player.ready = false; this.broadcast(peer.room); return;
+      }
+      if (message.type === 'team') {
+        if (room.phase !== 'lobby') throw new Error('Teams are fixed once the match starts');
+        peer.player.team = message.team; peer.player.ready = false; this.broadcast(peer.room); return;
+      }
+      if (message.type === 'chat') {
+        // At most five messages in five seconds per player.
+        const now = Date.now();
+        peer.chat = peer.chat.filter(t => now - t < 5000);
+        if (peer.chat.length >= 5) throw new Error('Slow down: too many messages');
+        peer.chat.push(now);
+        const team = peer.player.team ?? 0;
+        const out = JSON.stringify({ version: 1, type: 'chat', from: id, name: peer.player.name, text: message.text, to: message.to, at: now });
+        // Allied messages go only to teammates (and the sender), never to opponents.
+        for (const member of room.members) {
+          const other = this.peers.get(member);
+          if (!other) continue;
+          if (message.to === 'allies' && member !== id && (team === 0 || other.player.team !== team)) continue;
+          other.send(out);
+        }
+        return;
       }
       if (message.type === 'ready' && room.phase === 'lobby') { peer.player.ready = message.ready; this.broadcast(peer.room); return; }
       if (message.type === 'start') {

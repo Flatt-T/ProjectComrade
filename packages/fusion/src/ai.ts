@@ -4,15 +4,29 @@ import type { Entity, Game, Player } from './game';
 import { LEPTONS, toCell } from './core';
 import { buildableTerrain, terrainPassable } from './map';
 
+export type AILevel = 'easy' | 'normal' | 'hard';
+
+/** How each difficulty plays: thinking rate, first attack, wave growth and build speed. */
+export const AI_LEVELS: Record<AILevel, { thinkEvery: number; firstAttack: number; attackEvery: number; waveStart: number; waveStep: number; waveMax: number; buildPercent: number }> = {
+  easy: { thinkEvery: 30, firstAttack: 15 * 60 * 7, attackEvery: 15 * 60 * 3, waveStart: 4, waveStep: 2, waveMax: 12, buildPercent: 70 },
+  normal: { thinkEvery: 20, firstAttack: 15 * 60 * 5, attackEvery: 15 * 60 * 2 + 450, waveStart: 5, waveStep: 2, waveMax: 18, buildPercent: 85 },
+  hard: { thinkEvery: 15, firstAttack: 15 * 60 * 3, attackEvery: 15 * 60 * 2, waveStart: 6, waveStep: 3, waveMax: 24, buildPercent: 100 },
+};
+
 export interface AIState {
   slot: number;
+  level: AILevel;
   nextAttack: number;
   waveSize: number;
   rallySet: boolean;
+  /** Tick of the last search for a shipyard site, and whether one was found. */
+  waterCheck: number;
+  waterNear: boolean;
 }
 
-export function createAIState(slot: number): AIState {
-  return { slot, nextAttack: 2700, waveSize: 6, rallySet: false };
+export function createAIState(slot: number, level: AILevel = 'normal'): AIState {
+  const l = AI_LEVELS[level];
+  return { slot, level, nextAttack: l.firstAttack, waveSize: l.waveStart, rallySet: false, waterCheck: -1e9, waterNear: false };
 }
 
 export function runAI(game: Game, p: Player, s: AIState) {
@@ -47,13 +61,16 @@ export function runAI(game: Game, p: Player, s: AIState) {
   let saving = sq.items.length > 0 && !sq.ready;
   if (sq.ready) {
     const item = sq.items[0];
-    const spot = findSite(game, p, item, base.x, base.y, 14);
+    const spot = findSite(game, p, item, base.x, base.y, game.pack.structures[item]?.onWater ? 20 : 14);
     if (spot) game.enqueue(p.slot, { t: 'place', item, x: spot.x, y: spot.y });
     else game.enqueue(p.slot, { t: 'cancel', item });
   } else if (!sq.items.length) {
     const all = game.buildOptions(p, 'structure');
     // Shipyards need a coastline next to the base; the skirmish AI fights on land.
-    const options = all.filter(id => !id.includes(':') && !sdef(id).floor && !sdef(id).wall && !sdef(id).onWater);
+    // Shipyards only when there is open water within reach of the base (checked once a minute).
+    const yardType = all.find(id => !id.includes(':') && sdef(id).onWater && !owned.has(id));
+    if (yardType && game.tick - s.waterCheck > 900) { s.waterCheck = game.tick; s.waterNear = !!findSite(game, p, yardType, base.x, base.y, 20); }
+    const options = all.filter(id => !id.includes(':') && !sdef(id).floor && !sdef(id).wall && (!sdef(id).onWater || s.waterNear));
     const upgrades = all.filter(id => id.startsWith('upgrade:'));
     // A construction yard may supply a little power (Dune); still build real power first.
     const hasPowerPlant = structures.some(e => sdef(e.type).power > 0 && !sdef(e.type).constructionYard);
@@ -116,6 +133,13 @@ export function runAI(game: Game, p: Player, s: AIState) {
     }
   }
   // Air power: a few aircraft when the treasury allows.
+  // A small navy once a shipyard stands.
+  const nq = p.queues.naval;
+  const ships = units.filter(u => game.pack.units[u.type].kind === 'naval').length;
+  if (!nq.items.length && !saving && p.credits > 1500 && ships < 5) {
+    const options = game.buildOptions(p, 'naval').filter(id => game.pack.units[id].weapon);
+    if (options.length) game.enqueue(p.slot, { t: 'build', item: options[game.rng.int(options.length)] });
+  }
   const aq = p.queues.aircraft;
   const fliers = units.filter(u => game.pack.units[u.type].kind === 'aircraft').length;
   if (!aq.items.length && !saving && p.credits > 1500 && fliers < 4) {
@@ -177,8 +201,9 @@ export function runAI(game: Game, p: Player, s: AIState) {
     const target = nearestEnemyBase(game, p, base);
     if (target) {
       game.enqueue(p.slot, { t: 'attackMove', ids: idle.map(u => u.id), x: target.x, y: target.y });
-      s.waveSize = Math.min(24, s.waveSize + 3);
-      s.nextAttack = game.tick + 1800;
+      const l = AI_LEVELS[s.level];
+      s.waveSize = Math.min(l.waveMax, s.waveSize + l.waveStep);
+      s.nextAttack = game.tick + l.attackEvery;
     }
   }
 }
@@ -199,7 +224,7 @@ function findSite(game: Game, p: Player, item: string, ox: number, oy: number, r
       if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
       const x = ox + dx, y = oy + dy;
       if (!game.canPlace(p, item, x, y, ignoreRadius, ignoreUnit)) continue;
-      if (!def.wall && !lanesClear(game, x, y, def.w, def.h)) continue;
+      if (!def.wall && !def.onWater && !lanesClear(game, x, y, def.w, def.h)) continue;
       return { x, y };
     }
   }

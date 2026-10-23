@@ -8,6 +8,8 @@ type Listener = (message: ServerMessage) => void;
  * match keeps its connection when the lobby view unmounts. Turn packets that arrive
  * before the battle subscribes are buffered rather than lost.
  */
+export interface ChatLine { from: string; name: string; text: string; to: 'all' | 'allies'; at: number }
+
 export class RoomConnection {
   id = '';
   connected = false;
@@ -17,6 +19,8 @@ export class RoomConnection {
   /** Every turn received this match, replayed to a re-subscribing session so a remounted
    *  battle view never misses its opponents' opening turns. */
   private turnLog: { slot: number; packet: TurnPacket }[] = [];
+  /** Chat this visit (lobby and match), newest last; capped. */
+  chatLog: ChatLine[] = [];
   /** Bumped whenever the socket drops: a lockstep match cannot be rejoined. */
   drops = 0;
   private closed = false;
@@ -37,6 +41,7 @@ export class RoomConnection {
       let message: ServerMessage;
       try { message = JSON.parse(event.data) as ServerMessage; } catch { return; }
       if (message.type === 'welcome') this.id = message.id;
+      if (message.type === 'chat') this.chatLog = [...this.chatLog.slice(-99), { from: message.from, name: message.name, text: message.text, to: message.to, at: message.at }];
       if (message.type === 'turn') {
         const packet: TurnPacket = { turn: message.turn, tick: message.tick, checksum: message.checksum, commands: message.commands as TurnPacket['commands'], final: message.final };
         if (this.turnLog.length < 50000) this.turnLog.push({ slot: message.slot, packet });

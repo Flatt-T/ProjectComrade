@@ -291,3 +291,101 @@ describe('progression: the AI climbs the tech tree', () => {
     expect(d.players.some(p => Object.keys(p.upgrades).length > 0)).toBe(true);
   });
 });
+
+describe('progression: resource fields regrow', () => {
+  for (const [pack, resource] of [[dunePack, 'spice'], [ra2Pack, 'gems']] as const) {
+    it(`${pack.id}: a mined-out ${resource} cell slowly grows back to its starting amount`, () => {
+      const g = new Game({ pack, mapId: pack.maps[0].id, seed: 9, players: pack.factions.slice(0, 2).map((f, i) => ({ name: `P${i}`, faction: f.id, ai: false })) });
+      const kind = pack.resources.findIndex(r => r.id === resource) + 1;
+      const every = pack.resources[kind - 1].regrowEvery!;
+      const cell = g.map.resHome.findIndex((k, i) => k === kind && !g.map.occupied[i]);
+      expect(cell).toBeGreaterThanOrEqual(0);
+      const full = g.map.resCap[cell];
+      g.map.res[cell] = 0; g.map.resKind[cell] = 0; // Harvested dry.
+      run(g, every * 2 + 1);
+      expect(g.map.res[cell]).toBe(2);
+      expect(g.map.resKind[cell]).toBe(kind);
+      run(g, every * full);
+      expect(g.map.res[cell]).toBe(full); // Never beyond what the field started with.
+    });
+  }
+});
+
+describe('progression: transports, spy plane, chrono miner, difficulty and maps', () => {
+  it('infantry board an Amphibious Transport, ride across water and unload', () => {
+    const g = ra(['america', 'russia'], 'cold-strait');
+    const boat = unit(g, 'amphib', 0, 18, 31);
+    const gis = [unit(g, 'gi', 0, 16, 31), unit(g, 'gi', 0, 16, 32)];
+    g.enqueue(0, { t: 'enter', ids: gis.map(e => e.id), target: boat.id });
+    run(g, 200, () => boat.passengers.length === 2);
+    expect(boat.passengers.length).toBe(2);
+    expect(gis.every(e => e.carriedBy === boat.id)).toBe(true);
+    // Cross the strait (water) to the far shore.
+    g.enqueue(0, { t: 'move', ids: [boat.id], x: 30, y: 12 });
+    run(g, 120);
+    g.enqueue(0, { t: 'deploy', ids: [boat.id] }); // Unloading over open water is refused.
+    g.step();
+    expect(boat.passengers.length).toBe(2);
+    g.enqueue(0, { t: 'move', ids: [boat.id], x: 46, y: 31 });
+    run(g, 900, () => !boat.path.length && Math.abs(boat.x / 256 - 46) < 2);
+    g.enqueue(0, { t: 'deploy', ids: [boat.id] });
+    g.step();
+    expect(boat.passengers.length).toBe(0);
+    expect(gis.every(e => e.carriedBy === 0 && e.x / 256 > 43)).toBe(true);
+  });
+
+  it('passengers are lost with their transport; the Night Hawk takes infantry only', () => {
+    const g = ra();
+    const hawk = unit(g, 'nighthawk', 0, 30, 30);
+    const gi = unit(g, 'gi', 0, 30, 31), tank = unit(g, 'grizzly', 0, 31, 30);
+    expect(g.canBoard(tank, hawk)).toBe(false);
+    g.enqueue(0, { t: 'enter', ids: [gi.id], target: hawk.id });
+    run(g, 100, () => gi.carriedBy === hawk.id);
+    expect(gi.carriedBy).toBe(hawk.id);
+    g.damage(hawk, hawk.hp, 1);
+    run(g, 3);
+    expect(gi.hp).toBe(0);
+  });
+
+  it('the Spy Plane reveals an area for a while', () => {
+    const g = ra(['russia', 'america']);
+    const radar = g.spawnStructure('s-radar', 0, 10, 10);
+    radar.charge = g.superweaponOf(radar)!.charge;
+    const i = g.cellIndex(50, 50);
+    expect(g.players[0].visible[i]).toBe(0);
+    g.enqueue(0, { t: 'super', id: radar.id, x: 50, y: 50 });
+    run(g, 60);
+    expect(g.players[0].visible[i]).toBe(1);
+    run(g, 500);
+    expect(g.players[0].visible[i]).toBe(0);
+    expect(g.players[0].explored[i]).toBe(1);
+  });
+
+  it('the Chrono Miner charges up before it jumps to the refinery', () => {
+    const g = ra();
+    g.spawnStructure('a-refinery', 0, 10, 10);
+    const miner = unit(g, 'chronominer', 0, 40, 40);
+    miner.cargo = 20; miner.cargoValue = 500; miner.hstate = 'toRefinery';
+    const start = { x: miner.x, y: miner.y };
+    run(g, 5);
+    expect(miner.hstate).toBe('warp');
+    expect({ x: miner.x, y: miner.y }).toEqual(start); // Still here while charging.
+    run(g, 20);
+    expect(Math.hypot(miner.x - start.x, miner.y - start.y)).toBeGreaterThan(2000);
+    expect(g.tick - miner.warp).toBeLessThan(20);
+  });
+
+  it('easier AI builds more slowly than hard AI', () => {
+    const credits = (level: 'easy' | 'hard') => {
+      const g = new Game({ pack: ra2Pack, mapId: 'temperate-valley', seed: 3, players: [{ name: 'A', faction: 'america', ai: true, level }, { name: 'B', faction: 'russia', ai: false }] });
+      run(g, 15 * 60 * 3);
+      return g.players[0].stats.built;
+    };
+    expect(credits('easy')).toBeLessThan(credits('hard'));
+  });
+
+  it('four-player maps are large', () => {
+    for (const pack of [dunePack, ra2Pack]) for (const m of pack.maps.filter(m => m.maxPlayers === 4)) expect(m.width * m.height, m.id).toBeGreaterThanOrEqual(96 * 96);
+    expect(ra2Pack.maps.some(m => m.id === 'four-isles')).toBe(true);
+  });
+});

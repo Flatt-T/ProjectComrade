@@ -9,6 +9,9 @@ export interface MapData {
   res: Uint16Array;
   /** 0 = none, otherwise index + 1 into pack.resources. */
   resKind: Uint8Array;
+  /** The resource a cell held when the map was made (0 = none), and how much: fields grow back to this. */
+  resHome: Uint8Array;
+  resCap: Uint16Array;
   /** Dune concrete under the cell. */
   concrete: Uint8Array;
   /** Id of the blocking structure occupying the cell, 0 if none. */
@@ -46,6 +49,8 @@ export function generateMap(pack: RulePack, preset: MapPreset, seed: number): Ma
     terrain: new Uint8Array(size).fill(terrainIndex(pack, preset.base)),
     res: new Uint16Array(size),
     resKind: new Uint8Array(size),
+    resHome: new Uint8Array(size),
+    resCap: new Uint16Array(size),
     concrete: new Uint8Array(size),
     occupied: new Int32Array(size),
     decor: new Uint8Array(size),
@@ -104,6 +109,8 @@ export function generateMap(pack: RulePack, preset: MapPreset, seed: number): Ma
   for (const s of map.starts) for (let y = s.y - 2; y <= s.y + 4; y++) for (let x = s.x - 2; x <= s.x + 4; x++) {
     if (x >= 0 && y >= 0 && x < w && y < h) { map.res[y * w + x] = 0; map.resKind[y * w + x] = 0; }
   }
+  map.resHome.set(map.resKind);
+  map.resCap.set(map.res);
   for (let i = 0; i < size; i++) map.decor[i] = noise(i % w, Math.floor(i / w), seed + 13);
   return map;
 }
