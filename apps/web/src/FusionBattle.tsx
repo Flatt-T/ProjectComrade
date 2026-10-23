@@ -35,7 +35,7 @@ const RANKS = ['', ' · Veteran', ' · Elite'];
 interface QueueView { items: string[]; paid: number; ready: boolean }
 interface UiState {
   tick: number; credits: number; storage: number; powerGen: number; powerUse: number; radar: boolean;
-  options: Record<QueueKind, string[]>; queues: Record<QueueKind, QueueView>; costs: Record<string, number>;
+  options: Record<QueueKind, string[]>; queues: Record<QueueKind, QueueView>; costs: Record<string, number>; soundLocked: boolean;
   selection: { name: string; hp: number; max: number; count: number; deploy: boolean; own: boolean; structure: boolean } | null;
   status: string; over: boolean; won: boolean; defeated: boolean; stats: { built: number; lost: number; killed: number; harvested: number };
   supers: SuperView[];
@@ -246,7 +246,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         }
         prev = { ready: { structure: queues.structure.ready, defense: queues.defense.ready }, units, low, hp: myHp, over: game.over, lost: me.stats.lost, structures, options: optionCount };
         setUi({
-          tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues,
+          tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues, soundLocked: !sfx.unlocked,
           selection: first ? { name: (firstDef?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!(pack.units[e.type].deploysTo || pack.units[e.type].deployWeapon || pack.units[e.type].lure)), own: first.owner === slot, structure: first.kind === 'structure' } : null,
           status: conn.drops !== drops && status !== 'running' ? 'Connection to the match was lost — it cannot be rejoined'
             : status === 'waiting' ? `Waiting for ${(session.waitingFor?.() ?? []).map(s => game.players[s]?.name).filter(Boolean).join(', ') || 'other commanders'}…`
@@ -547,6 +547,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <span>{faction.name.toUpperCase()} · {mapName.toUpperCase()}</span>
         <span data-testid="fusion-tick">{ui ? `${Math.floor(ui.tick / 15 / 60)}:${String(Math.floor(ui.tick / 15) % 60).padStart(2, '0')}` : '0:00'}</span>
       </div>
+      {ui?.soundLocked && !sound.muted && <button className="fusion-sound-unlock" onClick={() => audio.current?.resume()}>🔇 Click anywhere to enable sound</button>}
       <div className="fusion-messages">{messages.filter(m => performance.now() - m.at < 5000).map(m => <p key={m.at}>{m.text}</p>)}</div>
       {ui?.status && <div className="fusion-banner">{ui.status}</div>}
       {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? (superFrom.current ? 'Choose the destination — right-click cancels' : 'Choose the target — right-click cancels') : 'Attack-move — click a destination'}</div>}
@@ -611,7 +612,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <button className={tree ? 'on' : ''} onClick={() => setTree(v => !v)}>TECH</button>
       </div>
       <div className="fusion-sound">
-        <button className={sound.muted ? 'on' : ''} onClick={() => changeSound({ muted: !sound.muted })} aria-pressed={sound.muted}>{sound.muted ? 'SOUND OFF' : 'SOUND ON'}</button>
+        <button className={sound.muted ? 'on' : ''} onClick={() => { changeSound({ muted: !sound.muted }); audio.current?.resume(); if (sound.muted) setTimeout(() => audio.current?.ui('click'), 60); }} aria-pressed={sound.muted}>{sound.muted ? 'SOUND OFF' : ui?.soundLocked ? 'SOUND: CLICK' : 'SOUND ON'}</button>
         <button className={soundOpen ? 'on' : ''} onClick={() => setSoundOpen(v => !v)} aria-expanded={soundOpen}>VOLUME</button>
         {soundOpen && <div className="fusion-volume">
           {(['master', 'effects', 'voices'] as const).map(k => <label key={k}><span>{k === 'master' ? 'Master' : k === 'effects' ? 'Effects' : 'Voices'}</span>

@@ -175,7 +175,7 @@ export class FusionAudio {
   private active = 0;
   private evaQueue: string[] = [];
   private evaBusy = false;
-  private lastReply = 0;
+  private lastReply = { select: 0, order: 0 };
   private noise: AudioBuffer;
   readonly bank: Bank;
   notice = '';
@@ -214,7 +214,16 @@ export class FusionAudio {
   }
 
   /** Browsers start audio suspended until the player interacts with the page. */
-  resume() { if (this.ctx.state === 'suspended') void this.ctx.resume(); }
+  resume() {
+    if (this.ctx.state !== 'suspended') return;
+    void this.ctx.resume().then(() => {
+      // A click confirms sound is on, then any EVA lines queued while locked are spoken.
+      this.ui('click');
+      this.pumpEva();
+    });
+  }
+  /** True once the browser lets this page make sound. */
+  get unlocked() { return this.ctx.state === 'running'; }
   dispose() { void this.ctx.close(); }
 
   // -------------------------------------------------------------- game events
@@ -308,8 +317,9 @@ export class FusionAudio {
   /** A unit acknowledges selection or an order, in its own voice where the original had one. */
   reply(units: Entity[], kind: 'select' | 'order') {
     const now = performance.now();
-    if (!units.length || now - this.lastReply < 700) return;
-    this.lastReply = now;
+    // Selection and order replies are throttled separately, so "Reporting" never swallows "Acknowledged".
+    if (!units.length || now - this.lastReply[kind] < 600) return;
+    this.lastReply[kind] = now;
     const table = TABLES[this.bank];
     const lead = units[0];
     const def = this.game.pack.units[lead.type];
