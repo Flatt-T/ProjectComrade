@@ -4,9 +4,11 @@ A browser RTS platform beginning with a self-contained C&C Tiberian Dawn slice: 
 
 ## Status
 
-**Playable slice:** [Launch Project Comrade](https://projectcomrade.thunderchildcreativetechnologies.com). Choose GDI or Nod, deploy, harvest Tiberium, construct buildings, train infantry and fight the opposing base on Tiberium Crossing. Content loads automatically into verified MEMFS. Vanilla Conquer supplies the original simulation; OpenRA is a content source only. Main-branch releases deploy to Proxmox through the [existing pipeline](docs/runbooks/deployment.md).
+**Playable slice:** [Launch Project Comrade](https://projectcomrade.thunderchildcreativetechnologies.com). Enter a callsign (no account, no install), create or join a game, share the invite link, pick your side and deploy. Harvest Tiberium, construct buildings, train infantry and fight the opposing base. Content loads automatically into verified MEMFS. Vanilla Conquer supplies the original simulation; OpenRA is a content source only. Main-branch releases deploy to Proxmox through the [existing pipeline](docs/runbooks/deployment.md).
 
-The responsive/fullscreen view scales the classic 640×400 framebuffer. It is **not redrawn HD artwork**. Higher-detail sprites, terrain and a larger native viewport are subsequent work. Contracts and room coordination are implemented; synchronized online matches are not enabled. See [ADR 006](docs/adr/006-playable-td-slice.md) for scope and provenance.
+**War room:** registration-free lobby with a live public-games list, shareable `?room=CODE` invite links, public/invite-only rooms, host-controlled match setup (game style, battlefield, max players, starting credits, tech level) and per-player side selection. Four authored battlefields ship — Tiberium Crossing, Canyon Clash, Tiberium Isles and Desert Standoff — across temperate, winter and desert theatres.
+
+The responsive/fullscreen view scales the classic 640×400 framebuffer. It is **not redrawn HD artwork**. Higher-detail sprites are subsequent work. Today the lobby is **presence + configuration**: players share a room and all launch the configured scenario, but each runs an independent local simulation — synchronized online matches (deterministic lockstep) are the next milestone. Red Alert's engine is compiled and served but not yet playable (content pack pending); Dune and RA2 are planned. See [ADR 007](docs/adr/007-lobby-roster-and-multiplayer.md) for the lobby/roster design and the staged multiplayer plan, and [ADR 006](docs/adr/006-playable-td-slice.md) for the engine slice provenance.
 
 **Milestone M0 (Foundational Gates):**
 - [x] C01: Code, asset and brand rights ledger
