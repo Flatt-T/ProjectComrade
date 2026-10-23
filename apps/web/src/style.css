@@ -49,3 +49,8 @@ input{font:600 13px ui-monospace,monospace;color:#dde3d2;background:#121a12;bord
 .fusion-fidelity{font:8px/1.5 ui-monospace,monospace;color:#6c766e;margin:0}
 .fusion-leave{margin-top:auto;padding:9px;font-size:9px}
 @media(max-width:900px){.fusion-battle{grid-template-columns:1fr;height:auto}.fusion-stage{height:62vh}.fusion-sidebar{border-left:0;border-top:2px solid var(--house)}}
+
+.fusion-super{display:grid;gap:4px;text-align:left;padding:8px;background:#1b1210;border:1px solid #5a2a20;font:9px ui-monospace,monospace;letter-spacing:.5px}
+.fusion-super .name{color:#ffb4a0;font-weight:700}.fusion-super .bar{height:5px;background:#000;border:1px solid #3a2420}.fusion-super .bar i{display:block;height:100%;background:linear-gradient(90deg,#b8321e,#ff7a3c)}
+.fusion-super .state{color:#c9a59a}.fusion-super.ready{border-color:#ff7a3c;animation:superPulse 1s infinite}.fusion-super.ready .state{color:#ffd27a}
+@keyframes superPulse{50%{box-shadow:inset 0 0 14px #ff5a2c88}}

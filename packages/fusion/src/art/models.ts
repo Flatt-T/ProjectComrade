@@ -196,6 +196,30 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       m.cylinder(0.5, 0.5, 0.07, 0.34, 0.42, 0.38, p.body, 8, { top: p.trim });
       m.cylinder(0.5, 0.5, 0.3, 0.36, 0.43, 0.43, team, 8, { cap: false });
       break;
+    case 'missilesilo': {
+      // Soviet silo: armoured pad, blast doors and a control block with red markings.
+      m.box(0.25, 0.25, 0.07, 2.75, 2.75, 0.35, p.body, { top: p.trim });
+      m.box(0.6, 0.6, 0.35, 1.48, 2.4, 0.42, p.dark);
+      m.box(1.52, 0.6, 0.35, 2.4, 2.4, 0.42, p.dark);
+      m.box(0.55, 0.55, 0.35, 2.45, 0.62, 0.45, team);
+      m.box(0.55, 2.38, 0.35, 2.45, 2.45, 0.45, team);
+      m.box(2.3, 2.3, 0.35, 2.75, 2.75, 0.85, p.body, { top: team });
+      break;
+    }
+    case 'weather': {
+      // Allied weather device: plinth, tall spire and a ring of emitter dishes.
+      m.box(0.25, 0.25, 0.07, 2.75, 2.75, 0.45, p.body, { top: p.trim });
+      m.box(0.25, 2.69, 0.15, 2.75, 2.75, 0.4, team);
+      m.cylinder(1.5, 1.5, 0.45, 2.2, 0.3, 0.12, p.metal, 14);
+      for (let k = 0; k < 4; k++) {
+        const a = (k / 4) * Math.PI * 2 + 0.4;
+        m.cylinder(1.5 + Math.cos(a) * 0.85, 1.5 + Math.sin(a) * 0.85, 0.45, 0.9, 0.08, 0.06, p.metal, 8);
+        m.cylinder(1.5 + Math.cos(a) * 0.85, 1.5 + Math.sin(a) * 0.85, 0.9, 1.05, 0.05, 0.24, p.body, 12, { top: p.glass });
+      }
+      m.dome(1.5, 1.5, 2.2, 0.2, GLOW_BLUE, 3, 14, 0.25);
+      for (const f of m.faces.slice(-3 * 14 - 1)) f.glow = true;
+      break;
+    }
     case 'prismtower':
       m.box(0.18, 0.18, 0.07, 0.82, 0.82, 0.3, p.body, { top: p.trim });
       m.cylinder(0.5, 0.5, 0.3, 1.45, 0.16, 0.1, p.metal, 10);

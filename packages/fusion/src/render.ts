@@ -3,7 +3,8 @@
 // relief lighting; buildings and vehicles are 3D-forged sprites (see ./art). All art is
 // original and procedural; sprites are chosen by `shape` key so they can be replaced.
 import { LEPTONS } from './core';
-import type { Entity, Game } from './game';
+import type { Effect, Entity, Game, Projectile } from './game';
+import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
 import { ArtStyle, buildingMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
 import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
@@ -32,6 +33,10 @@ export class FusionRenderer {
   private frame = 0;
   private sprites = new Map<string, Sprite>();
   private tiles = new Map<string, HTMLCanvasElement>();
+  private fx = new FxLayer();
+  private seen = new WeakSet<Effect>();
+  private shake = 0;
+  private lastTime = 0;
 
   constructor(private canvas: HTMLCanvasElement, private game: Game, public viewer: number) {
     this.iso = game.pack.projection === 'iso';
@@ -138,16 +143,25 @@ export class FusionRenderer {
   draw(alpha: number) {
     const { ctx, canvas } = this;
     this.frame++;
+    const now = performance.now();
+    const dt = this.lastTime ? Math.min(0.1, (now - this.lastTime) / 1000) : 1 / 60;
+    this.lastTime = now;
     if (!this.terrainReady) { paintTerrain(this.terrain, this.game.map, this.game.pack, this.view, this.originX); this.terrainReady = true; }
+    this.spawnFromEffects();
+    this.emitContinuous();
+    this.fx.step(dt);
+    this.shake = Math.max(0, this.shake - dt * 28);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const z = this.camera.zoom;
-    ctx.setTransform(z, 0, 0, z, -this.camera.x * z, -this.camera.y * z);
+    const jx = this.shake ? (Math.random() - 0.5) * this.shake : 0, jy = this.shake ? (Math.random() - 0.5) * this.shake : 0;
+    ctx.setTransform(z, 0, 0, z, (-this.camera.x + jx) * z, (-this.camera.y + jy) * z);
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(this.terrain, 0, 0);
     const view = this.visibleCells();
     this.drawConcrete(view);
+    this.fx.drawDecals(ctx, this.iso);
     this.drawResources(view);
     this.drawRubble();
     this.drawGhost();
@@ -155,10 +169,105 @@ export class FusionRenderer {
     this.drawWorms(alpha);
     this.drawProjectiles();
     this.drawEffects();
+    this.fx.draw(ctx);
     this.drawMarkers();
     this.drawShroud();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.drawOverlays();
+  }
+
+  /** Pixels per cell for sizing radial effects in either projection. */
+  private get cellPx() { return this.iso ? this.view.tileW * 0.72 : this.view.tileW; }
+
+  private decal(x: number, y: number, r: number, kind: 'scorch' | 'crater' | 'wreck', ms: number) {
+    const now = performance.now();
+    this.fx.decals.push({ x, y, r, kind, born: now, until: now + ms });
+    if (this.fx.decals.length > 260) this.fx.decals.shift();
+  }
+
+  /** Turn new simulation events into particles, decals and screen shake (once each). */
+  private spawnFromEffects() {
+    const { game } = this;
+    const cell = this.cellPx;
+    for (const fx of game.effects) {
+      if (this.seen.has(fx)) continue;
+      this.seen.add(fx);
+      if (game.tick - fx.tick > fx.dur) continue;
+      const p = this.project(fx.x / LEPTONS, fx.y / LEPTONS);
+      const e = this.fx;
+      switch (fx.kind) {
+        case 'explosion':
+          e.emit(p.x, p.y, 4, 6, 'fire'); e.emit(p.x, p.y, 4, 5, 'smoke'); e.emit(p.x, p.y, 4, 6, 'spark');
+          this.decal(p.x, p.y, cell * 0.45, 'scorch', 14000); this.shake = Math.max(this.shake, 2); break;
+        case 'vehicleDeath':
+          e.emit(p.x, p.y, 4, 12, 'fire', 1.2); e.emit(p.x, p.y, 6, 8, 'smoke', 1.2); e.emit(p.x, p.y, 4, 10, 'spark'); e.emit(p.x, p.y, 4, 8, 'debris');
+          this.decal(p.x, p.y, cell * 0.6, 'scorch', 20000); this.decal(p.x, p.y, cell * 0.32, 'wreck', 14000); this.shake = Math.max(this.shake, 4); break;
+        case 'bigExplosion':
+          e.emit(p.x, p.y, 6, 26, 'fire', 1.7); e.emit(p.x, p.y, 8, 18, 'smoke', 1.7); e.emit(p.x, p.y, 6, 18, 'debris', 1.4); e.emit(p.x, p.y, 6, 16, 'spark', 1.3);
+          this.decal(p.x, p.y, cell * 1.3, 'scorch', 30000); this.shake = Math.max(this.shake, 7); break;
+        case 'death': e.emit(p.x, p.y, 2, 4, 'dust', 0.5); break;
+        case 'crush': e.emit(p.x, p.y, 2, 5, 'dust', 0.6); break;
+        case 'hit': e.emit(p.x, p.y, 6, 3, 'spark', 0.6); break;
+        case 'muzzle': {
+          const b = this.project(fx.x2 / LEPTONS, fx.y2 / LEPTONS);
+          const a = Math.atan2(b.y - p.y, b.x - p.x);
+          e.emit(p.x + Math.cos(a) * 11, p.y + Math.sin(a) * 6, 7, 1, 'smoke', 0.45); break;
+        }
+        case 'deploy': e.emit(p.x, p.y, 2, 18, 'dust', 1.4); break;
+        case 'sell': e.emit(p.x, p.y, 4, 16, 'dust', 1.4); break;
+        case 'build': e.emit(p.x, p.y, 2, 8, 'dust'); break;
+        case 'nuke':
+          e.emit(p.x, p.y, 10, 70, 'fire', 3); e.emit(p.x, p.y, 20, 50, 'smoke', 3); e.emit(p.x, p.y, 8, 40, 'debris', 2.2); e.emit(p.x, p.y, 8, 40, 'spark', 2.2);
+          this.decal(p.x, p.y, (fx.x2 / LEPTONS) * cell * 0.85, 'crater', 70000); this.shake = Math.max(this.shake, 24); break;
+        case 'ionStrike':
+          e.emit(p.x, p.y, 6, 60, 'blue', 2); e.emit(p.x, p.y, 10, 12, 'smoke', 1.5);
+          this.decal(p.x, p.y, (fx.x2 / LEPTONS) * cell * 0.7, 'scorch', 50000); this.shake = Math.max(this.shake, 12); break;
+        case 'lightning':
+          e.emit(p.x, p.y, 4, 12, 'blue'); e.emit(p.x, p.y, 4, 6, 'spark');
+          this.decal(p.x, p.y, cell * 0.4, 'scorch', 20000); this.shake = Math.max(this.shake, 3); break;
+        case 'bloom': e.emit(p.x, p.y, 2, 26, 'sand', 1.5); break;
+        case 'wormEat': e.emit(p.x, p.y, 2, 30, 'sand', 1.6); break;
+        case 'wormDive': e.emit(p.x, p.y, 2, 14, 'sand', 1.2); break;
+        case 'chrono': e.emit(p.x, p.y, 6, 14, 'blue', 0.8); break;
+      }
+    }
+  }
+
+  /** Emitters that run every frame: rocket trails, harvester dust, burning wrecks, launches. */
+  private emitContinuous() {
+    const { game } = this;
+    for (const pr of game.projectiles) {
+      const w = game.pack.weapons[pr.weapon];
+      if (w.visual !== 'missile' && w.visual !== 'artillery') continue;
+      const f = this.flight(pr);
+      if (w.visual === 'missile') this.fx.emit(f.x - Math.cos(f.angle) * 4, f.y, f.z, 1, 'smoke', 0.5);
+      else if (this.frame % 2 === 0) this.fx.emit(f.x, f.y, f.z, 1, 'steam');
+    }
+    if (this.frame % 3 === 0) for (const e of game.entities.values()) {
+      if (e.kind !== 'unit' || e.hp <= 0 || e.hstate !== 'gather' || e.order !== 'harvest' || !game.pack.units[e.type]?.harvester) continue;
+      const p = this.project(e.x / LEPTONS, e.y / LEPTONS);
+      this.fx.emit(p.x, p.y, 2, 1, game.pack.id === 'dune' ? 'sand' : 'dust', 0.6);
+    }
+    const now = performance.now();
+    for (const d of this.fx.decals) if (d.kind === 'wreck' && now - d.born < 9000 && Math.random() < 0.3) this.fx.emit(d.x, d.y, 4, 1, 'smoke', 0.7);
+    for (const fx of game.effects) {
+      if (fx.kind !== 'superLaunch') continue;
+      const age = game.tick - fx.tick;
+      if (age >= 0 && age < fx.dur * 0.45) { const p = this.project(fx.x / LEPTONS, fx.y / LEPTONS); this.fx.emit(p.x, p.y, 12, 2, 'smoke', 1.8); }
+    }
+  }
+
+  /** Screen position, height and heading of a projectile in flight. */
+  private flight(pr: Projectile) {
+    const w = this.game.pack.weapons[pr.weapon];
+    const p = this.project(pr.x / LEPTONS, pr.y / LEPTONS);
+    const s = this.project(pr.sx / LEPTONS, pr.sy / LEPTONS), e = this.project(pr.tx / LEPTONS, pr.ty / LEPTONS);
+    const total = Math.hypot(e.x - s.x, e.y - s.y) || 1;
+    const t = Math.min(1, Math.hypot(p.x - s.x, p.y - s.y) / total);
+    const angle = Math.atan2(e.y - p.y, e.x - p.x);
+    const z = w.visual === 'artillery' ? 6 + 4 * t * (1 - t) * Math.min(120, total * 0.55)
+      : w.visual === 'missile' ? 8 + Math.sin(t * Math.PI) * Math.min(36, total * 0.12) : 7;
+    return { x: p.x, y: p.y, z, t, angle };
   }
 
   private visibleCells() {
@@ -281,7 +390,7 @@ export class FusionRenderer {
     const style = this.style(e.owner), team = this.teamColor(e.owner);
     const color = game.players[e.owner]?.color ?? '';
     const origin = this.project(e.cx, e.cy);
-    const grow = Math.min(1, (game.tick - e.born + 1) / 14);
+    const grow = Math.min(1, (game.tick - e.born + 1) / (def.wall ? 8 : 36));
     const off = !!def.needsPower && game.lowPower(e.owner);
     if (def.wall) {
       const map = game.map;
@@ -295,8 +404,8 @@ export class FusionRenderer {
       this.blit(s, origin.x, origin.y, grow);
     } else {
       const s = this.sprite(`b|${def.shape}|${def.w}x${def.h}|${style}|${color}`, () => bake(buildingMesh(def.shape, def.w, def.h, style, team), this.view));
-      this.blit(s, origin.x, origin.y, grow);
-      this.structureDetail(e, def.shape, style, team, color, off);
+      if (grow < 1) this.construct(s, origin.x, origin.y, grow, e.cx, e.cy, e.w, e.h);
+      else { this.blit(s, origin.x, origin.y); this.structureDetail(e, def.shape, style, team, color, off); }
     }
     if (off) {
       ctx.fillStyle = 'rgba(0,0,0,0.28)';
@@ -368,6 +477,23 @@ export class FusionRenderer {
       g.addColorStop(0, `rgba(200,250,255,${0.45 + 0.3 * Math.sin(t * 4)})`); g.addColorStop(1, 'rgba(150,230,255,0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(c.x, c.y - 1.8 * zs, 14, 0, Math.PI * 2); ctx.fill();
     }
+  }
+
+  /** Building rising behind scaffolding with a welding seam (also played in reverse when sold). */
+  private construct(s: Sprite, wx: number, wy: number, p: number, cx: number, cy: number, w: number, h: number) {
+    const { ctx } = this;
+    const left = Math.round(wx - s.ox), top = Math.round(wy - s.oy), H = s.canvas.height;
+    const cut = top + H * (1 - p);
+    ctx.save(); ctx.beginPath(); ctx.rect(left, cut, s.canvas.width, H * p + 1); ctx.clip();
+    ctx.drawImage(s.canvas, left, top); ctx.restore();
+    const corners = [this.project(cx, cy), this.project(cx + w, cy), this.project(cx + w, cy + h), this.project(cx, cy + h)];
+    ctx.strokeStyle = 'rgba(64,58,50,0.9)'; ctx.lineWidth = 1.4;
+    for (const c of corners) { ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(c.x, Math.min(c.y, cut + 2)); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(corners[3].x, Math.min(corners[3].y, cut + 2)); ctx.lineTo(corners[2].x, Math.min(corners[2].y, cut + 2)); ctx.lineTo(corners[1].x, Math.min(corners[1].y, cut + 2)); ctx.stroke();
+    ctx.strokeStyle = `rgba(255,${200 + Math.floor(Math.random() * 40)},120,0.9)`; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(left + 6, cut); ctx.lineTo(left + s.canvas.width - 6, cut); ctx.stroke();
+    if (Math.random() < 0.7) this.fx.emit(left + 6 + Math.random() * (s.canvas.width - 12), cut + 2, 0, 1, 'spark', 0.45);
+    if (p < 0.2 && Math.random() < 0.5) this.fx.emit((corners[0].x + corners[2].x) / 2, (corners[0].y + corners[2].y) / 2, 0, 2, 'dust', 1.2);
   }
 
   private brackets(e: Entity) {
@@ -491,20 +617,24 @@ export class FusionRenderer {
     const { ctx, game } = this;
     for (const pr of game.projectiles) {
       const w = game.pack.weapons[pr.weapon];
-      const p = this.project(pr.x / LEPTONS, pr.y / LEPTONS);
-      if (w.visual === 'missile') {
-        ctx.fillStyle = 'rgba(255,170,60,0.5)'; ctx.beginPath(); ctx.arc(p.x, p.y - 8, 4, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#f2f2f2'; ctx.fillRect(p.x - 1.5, p.y - 9.5, 3, 3);
-      } else if (w.visual === 'artillery') {
-        ctx.fillStyle = '#1b1b1b'; ctx.beginPath(); ctx.arc(p.x, p.y - 12, 2.6, 0, Math.PI * 2); ctx.fill();
+      const f = this.flight(pr);
+      if (w.visual === 'missile') missile(ctx, f.x, f.y - f.z, f.angle, 3.2, Math.random() * 0.6);
+      else if (w.visual === 'artillery') {
+        // Shell on a ballistic arc, its shadow racing along the ground.
+        ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(f.x, f.y, 3, this.iso ? 1.5 : 2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#26221e'; ctx.beginPath(); ctx.arc(f.x, f.y - f.z, 2.7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,180,80,0.7)'; ctx.beginPath(); ctx.arc(f.x - Math.cos(f.angle) * 2.5, f.y - f.z - Math.sin(f.angle) * 2.5, 1.4, 0, Math.PI * 2); ctx.fill();
       } else {
-        ctx.fillStyle = '#ffe9a0'; ctx.beginPath(); ctx.arc(p.x, p.y - 6, 1.8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,236,170,0.95)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(f.x - Math.cos(f.angle) * 10, f.y - f.z - Math.sin(f.angle) * 10); ctx.lineTo(f.x, f.y - f.z); ctx.stroke();
       }
     }
   }
 
   private drawEffects() {
     const { ctx, game } = this;
+    const cell = this.cellPx;
+    const squash = this.iso ? 0.5 : 0.75;
     for (const fx of game.effects) {
       const age = game.tick - fx.tick;
       if (age > fx.dur || fx.kind === 'rubble') continue;
@@ -512,26 +642,25 @@ export class FusionRenderer {
       const a = this.project(fx.x / LEPTONS, fx.y / LEPTONS);
       const b = this.project(fx.x2 / LEPTONS, fx.y2 / LEPTONS);
       switch (fx.kind) {
-        case 'bullet': case 'muzzle':
-          ctx.strokeStyle = `rgba(255,240,170,${1 - t})`; ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(a.x, a.y - 6); ctx.lineTo(b.x, b.y - 5); ctx.stroke();
-          break;
-        case 'prism':
-          ctx.strokeStyle = `rgba(170,240,255,${1 - t})`; ctx.lineWidth = 5 * (1 - t) + 1;
-          ctx.beginPath(); ctx.moveTo(a.x, a.y - 30); ctx.lineTo(b.x, b.y - 5); ctx.stroke();
-          ctx.strokeStyle = `rgba(255,255,255,${1 - t})`; ctx.lineWidth = 1.5; ctx.stroke();
-          break;
-        case 'tesla': {
-          ctx.strokeStyle = `rgba(150,220,255,${1 - t})`; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(a.x, a.y - 22);
-          const steps = 7;
-          for (let k = 1; k <= steps; k++) {
-            const jx = k === steps ? 0 : (Math.sin(fx.tick * 13 + k * 7 + this.frame) * 7);
-            ctx.lineTo(a.x + ((b.x - a.x) * k) / steps + jx, a.y - 22 + ((b.y - 5 - (a.y - 22)) * k) / steps + jx * 0.5);
-          }
-          ctx.stroke();
+        case 'bullet': {
+          ctx.strokeStyle = `rgba(255,240,170,${1 - t})`; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 7); ctx.lineTo(b.x, b.y - 5); ctx.stroke();
+          this.flash(a.x, a.y - 7, Math.atan2(b.y - a.y, b.x - a.x), 4 * (1 - t));
           break;
         }
+        case 'muzzle': case 'cannon':
+          this.flash(a.x, a.y - 8, Math.atan2(b.y - a.y, b.x - a.x), 7 * (1 - t));
+          break;
+        case 'prism':
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.strokeStyle = `rgba(170,240,255,${1 - t})`; ctx.lineWidth = 6 * (1 - t) + 1;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 30); ctx.lineTo(b.x, b.y - 5); ctx.stroke();
+          ctx.strokeStyle = `rgba(255,255,255,${1 - t})`; ctx.lineWidth = 1.5; ctx.stroke();
+          ctx.globalCompositeOperation = 'source-over';
+          break;
+        case 'tesla':
+          bolt(ctx, a.x, a.y - 22, b.x, b.y - 5, 7, 1 - t);
+          break;
         case 'sonic':
           for (let k = 0; k < 4; k++) {
             const f = (t + k / 4) % 1;
@@ -540,33 +669,180 @@ export class FusionRenderer {
             ctx.beginPath(); ctx.arc(x, y, 6 + f * 6, 0, Math.PI * 2); ctx.stroke();
           }
           break;
-        case 'hit': case 'cannon':
+        case 'hit':
           ctx.fillStyle = `rgba(255,220,120,${1 - t})`; ctx.beginPath(); ctx.arc(a.x, a.y - 5, 3 + t * 4, 0, Math.PI * 2); ctx.fill();
           break;
-        case 'explosion': case 'bigExplosion': case 'death': case 'crush': case 'wormEat': {
+        case 'explosion': case 'bigExplosion': case 'vehicleDeath': case 'death': case 'crush': case 'wormEat': {
           const big = fx.kind === 'bigExplosion';
-          const r = (big ? 30 : fx.kind === 'wormEat' ? 22 : fx.kind === 'death' || fx.kind === 'crush' ? 6 : 15) * (0.35 + t);
-          if (fx.kind === 'wormEat') {
-            ctx.fillStyle = `rgba(170,120,64,${1 - t})`; ctx.beginPath(); ctx.arc(a.x, a.y - 4, r, 0, Math.PI * 2); ctx.fill();
-            break;
-          }
-          // Fireball with a bright core, then rolling smoke.
+          const r = (big ? 30 : fx.kind === 'wormEat' ? 22 : fx.kind === 'death' || fx.kind === 'crush' ? 6 : fx.kind === 'vehicleDeath' ? 18 : 15) * (0.35 + t);
+          if (fx.kind === 'wormEat') { ctx.fillStyle = `rgba(170,120,64,${1 - t})`; ctx.beginPath(); ctx.arc(a.x, a.y - 4, r, 0, Math.PI * 2); ctx.fill(); break; }
           const g = ctx.createRadialGradient(a.x, a.y - 6, 0, a.x, a.y - 6, r);
           g.addColorStop(0, `rgba(255,250,210,${1 - t})`); g.addColorStop(0.35, `rgba(255,180,60,${0.95 * (1 - t)})`);
           g.addColorStop(0.75, `rgba(210,80,20,${0.7 * (1 - t)})`); g.addColorStop(1, 'rgba(120,40,10,0)');
           ctx.fillStyle = g; ctx.beginPath(); ctx.arc(a.x, a.y - 6, r, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = `rgba(45,40,36,${0.45 * t * (1 - t) * 3})`;
-          ctx.beginPath(); ctx.arc(a.x + 3, a.y - 10 - t * 16, r * 0.8, 0, Math.PI * 2); ctx.fill();
           break;
         }
-        case 'chrono': case 'convert': case 'bloom': case 'build': case 'sell': case 'denied': case 'wormDive': {
+        case 'deploy': {
+          // The MCV folds away as the Construction Yard unfolds out of it.
+          const def = fx.item ? game.pack.units[fx.item] : undefined;
+          if (!def) break;
+          const owner = fx.owner ?? 0, style = this.style(owner), team = this.teamColor(owner), color = game.players[owner]?.color ?? '';
+          const r = this.rot(96);
+          const s = this.sprite(`h|${def.shape}|${style}|${color}|${r.key}`, () => bake(hullMesh(def.shape, style, team).rotated(r.angle), this.view));
+          const k = Math.max(0, 1 - t * 1.8);
+          if (k > 0) {
+            ctx.save(); ctx.globalAlpha = k; ctx.translate(a.x, a.y); ctx.scale(0.55 + 0.45 * k, 0.55 + 0.45 * k);
+            ctx.drawImage(s.canvas, -s.ox, -s.oy); ctx.restore();
+          }
+          break;
+        }
+        case 'sell': {
+          const def = fx.item ? game.pack.structures[fx.item] : undefined;
+          if (!def || def.floor || def.wall) break;
+          const owner = fx.owner ?? 0, style = this.style(owner), team = this.teamColor(owner), color = game.players[owner]?.color ?? '';
+          const s = this.sprite(`b|${def.shape}|${def.w}x${def.h}|${style}|${color}`, () => bake(buildingMesh(def.shape, def.w, def.h, style, team), this.view));
+          const o = this.project(fx.x2, fx.y2);
+          this.construct(s, o.x, o.y, Math.max(0, 1 - t), fx.x2, fx.y2, def.w, def.h);
+          break;
+        }
+        case 'superLaunch': {
+          // The missile climbs out of its silo and leaves the screen.
+          const q = t / 0.35;
+          if (q < 1) {
+            if (q < 0.18) this.glow(a.x, a.y - 18, 40 * (1 - q / 0.18), '255,230,170');
+            missile(ctx, a.x, a.y - 26 - q * q * 520, -Math.PI / 2, 5, Math.random());
+          }
+          break;
+        }
+        case 'superIncoming': {
+          // Target warning, then the missile screams down.
+          const pulse = 0.5 + 0.5 * Math.sin(this.frame / 4);
+          const R = cell * 1.8 * (1 + 0.08 * pulse);
+          ctx.strokeStyle = `rgba(255,60,40,${0.45 + 0.4 * pulse})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.ellipse(a.x, a.y, R, R * squash, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(a.x - R * 1.2, a.y); ctx.lineTo(a.x + R * 1.2, a.y); ctx.moveTo(a.x, a.y - R * squash * 1.2); ctx.lineTo(a.x, a.y + R * squash * 1.2); ctx.stroke();
+          if (t > 0.6) {
+            const q = (t - 0.6) / 0.4;
+            missile(ctx, a.x + (1 - q) * 70, a.y - (1 - q) * (1 - q) * 640, Math.PI / 2 - 0.11, 5, Math.random());
+          }
+          break;
+        }
+        case 'nuke': {
+          const R = (fx.x2 / LEPTONS) * cell;
+          if (t < 0.22) this.glow(a.x, a.y - 10, R * 2.4 * (0.5 + t * 3), `255,255,240`, 1 - t / 0.22);
+          // Fireball.
+          const fr = R * (0.35 + 0.55 * Math.min(1, t * 3));
+          const g = ctx.createRadialGradient(a.x, a.y - 12, 0, a.x, a.y - 12, fr);
+          g.addColorStop(0, `rgba(255,250,220,${1 - t})`); g.addColorStop(0.4, `rgba(255,170,60,${0.9 * (1 - t)})`); g.addColorStop(1, 'rgba(160,50,10,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(a.x, a.y - 12, fr, fr * (0.4 + squash * 0.6), 0, 0, Math.PI * 2); ctx.fill();
+          // Shockwave across the ground.
+          ctx.strokeStyle = `rgba(255,240,210,${0.8 * (1 - t)})`; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.ellipse(a.x, a.y, R * 2.1 * t + 4, (R * 2.1 * t + 4) * squash, 0, 0, Math.PI * 2); ctx.stroke();
+          // Mushroom cloud: rising stem and rolling cap.
+          const rise = Math.min(1, t * 1.6);
+          const stemTop = a.y - 30 - 120 * rise;
+          const sg = ctx.createLinearGradient(0, a.y, 0, stemTop);
+          sg.addColorStop(0, `rgba(255,150,60,${0.85 * (1 - t)})`); sg.addColorStop(1, `rgba(90,80,72,${0.8 * (1 - t * 0.7)})`);
+          ctx.fillStyle = sg; ctx.fillRect(a.x - (9 - 3 * t), stemTop, 18 - 6 * t, a.y - stemTop);
+          const cr = 22 + 46 * Math.min(1, t * 1.4);
+          const cg = ctx.createRadialGradient(a.x, stemTop, 0, a.x, stemTop, cr);
+          cg.addColorStop(0, `rgba(255,${190 - t * 120},90,${0.95 * (1 - t * 0.6)})`); cg.addColorStop(0.6, `rgba(120,96,80,${0.85 * (1 - t * 0.5)})`); cg.addColorStop(1, 'rgba(70,64,60,0)');
+          ctx.fillStyle = cg; ctx.beginPath(); ctx.ellipse(a.x, stemTop, cr, cr * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+          break;
+        }
+        case 'ionCharge': {
+          // Orbital lock: a thin beam focusing on the target.
+          ctx.globalCompositeOperation = 'lighter';
+          const w = 1.5 + t * 5;
+          ctx.strokeStyle = `rgba(150,210,255,${0.35 + 0.35 * Math.random()})`; ctx.lineWidth = w;
+          ctx.beginPath(); ctx.moveTo(b.x, b.y - 800); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.strokeStyle = `rgba(255,255,255,${0.6 + 0.3 * Math.random()})`; ctx.lineWidth = w * 0.3; ctx.stroke();
+          const rr = cell * 2.2 * (1 - t) + 4;
+          ctx.strokeStyle = `rgba(150,220,255,${0.4 + 0.5 * t})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.ellipse(b.x, b.y, rr, rr * squash, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalCompositeOperation = 'source-over';
+          break;
+        }
+        case 'ionStrike': {
+          const R = (fx.x2 / LEPTONS) * cell;
+          ctx.globalCompositeOperation = 'lighter';
+          const W = 36 * (1 - t) + 6;
+          const g = ctx.createLinearGradient(a.x - W, 0, a.x + W, 0);
+          g.addColorStop(0, 'rgba(90,160,255,0)'); g.addColorStop(0.5, `rgba(235,248,255,${1 - t})`); g.addColorStop(1, 'rgba(90,160,255,0)');
+          ctx.fillStyle = g; ctx.fillRect(a.x - W, a.y - 900, W * 2, 900);
+          const gb = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, R * (0.4 + t));
+          gb.addColorStop(0, `rgba(230,245,255,${1 - t})`); gb.addColorStop(1, 'rgba(80,150,255,0)');
+          ctx.fillStyle = gb; ctx.beginPath(); ctx.ellipse(a.x, a.y, R * (0.4 + t), R * (0.4 + t) * squash, 0, 0, Math.PI * 2); ctx.fill();
+          for (const k of [1, 1.6]) {
+            ctx.strokeStyle = `rgba(170,220,255,${0.8 * (1 - t)})`; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.ellipse(a.x, a.y, R * k * t + 3, (R * k * t + 3) * squash, 0, 0, Math.PI * 2); ctx.stroke();
+          }
+          ctx.globalCompositeOperation = 'source-over';
+          break;
+        }
+        case 'stormClouds': {
+          // Gathering storm: darkened ground, churning clouds, rain.
+          const R = (fx.x2 / LEPTONS) * cell;
+          const fade = Math.max(0, Math.min(1, t / 0.15, (1 - t) / 0.15));
+          const dg = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, R * 1.5);
+          dg.addColorStop(0, `rgba(10,14,24,${0.45 * fade})`); dg.addColorStop(1, 'rgba(10,14,24,0)');
+          ctx.fillStyle = dg; ctx.beginPath(); ctx.ellipse(a.x, a.y, R * 1.5, R * 1.5 * squash, 0, 0, Math.PI * 2); ctx.fill();
+          for (let k = 0; k < 9; k++) {
+            const ang = (k / 9) * Math.PI * 2 + this.frame * 0.004;
+            const cx = a.x + Math.cos(ang) * R * 0.7, cy = a.y + Math.sin(ang) * R * 0.7 * squash - 80;
+            const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.5);
+            cg.addColorStop(0, `rgba(40,44,52,${0.6 * fade})`); cg.addColorStop(1, 'rgba(40,44,52,0)');
+            ctx.fillStyle = cg; ctx.beginPath(); ctx.ellipse(cx, cy, R * 0.5, R * 0.32, 0, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.strokeStyle = `rgba(170,190,220,${0.35 * fade})`; ctx.lineWidth = 1;
+          ctx.beginPath();
+          for (let k = 0; k < 40; k++) {
+            const rx = a.x + (Math.random() - 0.5) * R * 2, ry = a.y + (Math.random() - 0.5) * R * squash * 2 - 30;
+            ctx.moveTo(rx, ry); ctx.lineTo(rx - 3, ry + 10);
+          }
+          ctx.stroke();
+          if (fade > 0.5 && Math.random() < 0.04) this.glow(a.x, a.y - 60, R * 1.4, '210,225,255', 0.25);
+          break;
+        }
+        case 'lightning':
+          bolt(ctx, a.x + (Math.random() - 0.5) * 60, a.y - 300, a.x, a.y - 4, 18, 1 - t);
+          this.glow(a.x, a.y, cell * 1.2, '200,220,255', 1 - t);
+          break;
+        case 'chrono': case 'convert': case 'bloom': case 'build': case 'denied': case 'wormDive': {
           const color = fx.kind === 'chrono' ? '120,190,255' : fx.kind === 'convert' ? '130,255,120' : fx.kind === 'bloom' ? '240,140,60' : fx.kind === 'denied' ? '255,80,60' : '230,220,200';
           ctx.strokeStyle = `rgba(${color},${1 - t})`; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.ellipse(a.x, a.y - 4, 6 + t * 18, (6 + t * 18) * (this.iso ? 0.5 : 1), 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.ellipse(a.x, a.y - 4, 6 + t * 18, (6 + t * 18) * squash, 0, 0, Math.PI * 2); ctx.stroke();
           break;
         }
       }
     }
+  }
+
+  private glow(x: number, y: number, r: number, rgb: string, alpha = 1) {
+    const { ctx } = this;
+    if (r <= 0 || alpha <= 0) return;
+    ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${rgb},${0.9 * alpha})`); g.addColorStop(1, `rgba(${rgb},0)`);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /** Star-shaped muzzle flash pointing along `angle`. */
+  private flash(x: number, y: number, angle: number, size: number) {
+    if (size <= 0.5) return;
+    const { ctx } = this;
+    const fx = x + Math.cos(angle) * 10, fy = y + Math.sin(angle) * (this.iso ? 5 : 7);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = 'rgba(255,230,150,0.95)';
+    ctx.beginPath();
+    for (let k = 0; k < 10; k++) {
+      const a = angle + (k / 10) * Math.PI * 2, r = k % 2 ? size * 0.35 : (k === 0 ? size * 1.6 : size);
+      const px = fx + Math.cos(a) * r, py = fy + Math.sin(a) * r;
+      if (k) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
   }
 
   private drawMarkers() {

@@ -154,6 +154,8 @@ export function parseCommand(raw: unknown): Command | null {
       return item(c.item) && int(c.x) && int(c.y) ? { t: 'place', item: c.item, x: c.x, y: c.y } : null;
     case 'sell': case 'repair':
       return int(c.id) ? { t: c.t, id: c.id } : null;
+    case 'super':
+      return int(c.id) && int(c.x) && int(c.y) ? { t: 'super', id: c.id, x: c.x, y: c.y } : null;
     case 'rally':
       return int(c.x) && int(c.y) ? { t: 'rally', x: c.x, y: c.y } : null;
     case 'surrender':

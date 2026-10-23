@@ -4,7 +4,8 @@ import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, QueueKind,
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
 
-type Mode = 'normal' | 'place' | 'sell' | 'repair' | 'attackMove';
+type Mode = 'normal' | 'place' | 'sell' | 'repair' | 'attackMove' | 'super';
+interface SuperView { id: number; name: string; frac: number; ready: boolean }
 const TABS: { id: QueueKind; label: string }[] = [
   { id: 'structure', label: 'Base' }, { id: 'defense', label: 'Defence' }, { id: 'infantry', label: 'Infantry' }, { id: 'vehicle', label: 'Vehicles' },
 ];
@@ -15,6 +16,7 @@ interface UiState {
   options: Record<QueueKind, string[]>; queues: Record<QueueKind, QueueView>;
   selection: { name: string; hp: number; max: number; count: number; deploy: boolean; own: boolean; structure: boolean } | null;
   status: string; over: boolean; won: boolean; defeated: boolean; stats: { built: number; lost: number; killed: number; harvested: number };
+  supers: SuperView[];
 }
 
 declare global {
@@ -30,6 +32,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const rig = useRef<{ game: Game; session: Session; renderer: FusionRenderer } | null>(null);
   const mode = useRef<Mode>('normal');
   const placing = useRef<string | null>(null);
+  const superId = useRef<number>(0);
   const groups = useRef(new Map<number, number[]>());
   const pointer = useRef({ x: 0, y: 0, inside: false, down: false, sx: 0, sy: 0, dragging: false });
   const keys = useRef(new Set<string>());
@@ -81,6 +84,8 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     let last = performance.now(), raf = 0, uiTimer = 0, mmTimer = 0;
     let prev: { ready: Record<string, boolean>; units: number; low: boolean; hp: number; over: boolean } | null = null;
     let lastAttackWarning = -1e9;
+    const announced = new WeakSet<object>();
+    const readySupers = new Set<number>();
     const loop = (now: number) => {
       const dt = Math.min(2000, now - last); last = now;
       const alpha = session.update(dt);
@@ -123,12 +128,30 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           if (myHp < prev.hp - 40 && now - lastAttackWarning > 12000) { lastAttackWarning = now; say('Our base is under attack'); }
           if (me.credits === 0 && TABS.some(t => queues[t.id].items.length && !queues[t.id].ready)) { if (Math.floor(now / 4000) % 4 === 0) say('Insufficient funds'); }
         }
+        // Superweapon status and alerts (own launches, enemy launches, storms).
+        const supers: SuperView[] = [];
+        for (const e of game.entities.values()) {
+          if (e.owner !== slot || e.hp <= 0) continue;
+          const sw = game.superweaponOf(e);
+          if (!sw) continue;
+          const ready = e.charge >= sw.charge;
+          if (ready && !readySupers.has(e.id) && game.tick > 30) say(`${sw.name} ready`);
+          if (ready) readySupers.add(e.id); else readySupers.delete(e.id);
+          supers.push({ id: e.id, name: sw.name, frac: Math.min(1, e.charge / sw.charge), ready });
+        }
+        for (const fx of game.effects) {
+          if (announced.has(fx) || game.tick - fx.tick > fx.dur || !['superLaunch', 'ionCharge', 'stormClouds'].includes(fx.kind)) continue;
+          announced.add(fx);
+          const name = fx.color ?? 'Superweapon';
+          if (fx.owner === slot) say(fx.kind === 'stormClouds' ? `${name} unleashed` : `${name} launched`);
+          else say(fx.kind === 'stormClouds' ? `Warning: ${name} approaching` : `Warning: ${name} launched`);
+        }
         prev = { ready: { structure: queues.structure.ready, defense: queues.defense.ready }, units, low, hp: myHp, over: game.over };
         setUi({
           tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues,
           selection: first ? { name: firstDef?.name ?? first.type, hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!pack.units[e.type].deploysTo), own: first.owner === slot, structure: first.kind === 'structure' } : null,
           status: status === 'waiting' ? 'Waiting for other commanders…' : status === 'desync' ? 'Desynchronised — the match cannot continue' : '',
-          over: game.over, won: game.over && game.winnerTeam === me.team, defeated: me.defeated, stats: { ...me.stats },
+          over: game.over, won: game.over && game.winnerTeam === me.team, defeated: me.defeated, stats: { ...me.stats }, supers,
         });
       }
       raf = requestAnimationFrame(loop);
@@ -187,7 +210,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     if (mode.current === 'place') cursor = 'cell';
     else if (mode.current === 'sell') cursor = 'alias';
     else if (mode.current === 'repair') cursor = 'help';
-    else if (mode.current === 'attackMove') cursor = 'crosshair';
+    else if (mode.current === 'attackMove' || mode.current === 'super') cursor = 'crosshair';
     else if (target && target.owner === slot) cursor = 'pointer';
     else if (target && hasUnits && r.game.isEnemy(slot, target.owner)) cursor = 'crosshair';
     else if (hasUnits) cursor = 'move';
@@ -227,6 +250,11 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       const px = cell.x - ((def.w - 1) >> 1), py = cell.y - ((def.h - 1) >> 1);
       if (game.canPlace(me, item, px, py)) { session.issue({ t: 'place', item, x: px, y: py }); setMode('normal'); }
       else say('Cannot deploy here');
+      return;
+    }
+    if (mode.current === 'super' && superId.current) {
+      session.issue({ t: 'super', id: superId.current, x: Math.max(0, cell.x), y: Math.max(0, cell.y) });
+      mark('#ff5a4a'); superId.current = 0; setMode('normal');
       return;
     }
     if (mode.current === 'sell' || mode.current === 'repair') {
@@ -329,7 +357,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       </div>
       <div className="fusion-messages">{messages.filter(m => performance.now() - m.at < 5000).map(m => <p key={m.at}>{m.text}</p>)}</div>
       {ui?.status && <div className="fusion-banner">{ui.status}</div>}
-      {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : 'Attack-move — click a destination'}</div>}
+      {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? 'Choose the target — right-click cancels' : 'Attack-move — click a destination'}</div>}
       {help && <div className="fusion-help" onClick={() => setHelp(false)}>
         <h3>Controls</h3>
         <p><b>Left click</b> select · order move / attack / harvest</p><p><b>Drag</b> box-select · <b>Double-click</b> select all of a type</p>
@@ -372,6 +400,12 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         })}
         {ui && !ui.options[tab].length && <p className="fusion-empty">{tab === 'structure' || tab === 'defense' ? 'Deploy your MCV to build.' : 'Build the right factory to unlock.'}</p>}
       </div>
+      {ui?.supers.map(sp => <button key={sp.id} className={`fusion-super ${sp.ready ? 'ready' : ''}`} disabled={!sp.ready}
+        onClick={() => { superId.current = sp.id; setMode('super'); }}>
+        <span className="name">{sp.name}</span>
+        <span className="bar"><i style={{ width: `${Math.round(sp.frac * 100)}%` }} /></span>
+        <span className="state">{sp.ready ? 'READY — CLICK TO TARGET' : `${Math.round(sp.frac * 100)}%`}</span>
+      </button>)}
       <div className="fusion-actions">
         <button className={modeView === 'sell' ? 'on' : ''} onClick={() => setMode(modeView === 'sell' ? 'normal' : 'sell')}>SELL</button>
         <button className={modeView === 'repair' ? 'on' : ''} onClick={() => setMode(modeView === 'repair' ? 'normal' : 'repair')}>REPAIR</button>

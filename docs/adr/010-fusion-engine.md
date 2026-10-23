@@ -86,3 +86,22 @@ only as visual reference; no original pixels, sprites or tiles are used or bundl
 Gameplay fidelity from the same review: RA2 costs and prerequisites were corrected
 against published structure tables, and Dune buildings placed off concrete now erode
 back to half health over time even after repair, as in Dune 2000.
+
+## Animation and superweapons (update 2026-10-23)
+
+- **Construction**: buildings rise from the ground behind scaffolding with a welding seam
+  and sparks; selling plays the same animation in reverse. An MCV folds away while its
+  Construction Yard unfolds.
+- **Weapons**: oriented rockets with flame and smoke trails, artillery on ballistic arcs
+  with ground shadows, cannon tracers and star muzzle flashes, Tesla arcs and Prism beams.
+- **Aftermath**: particles (smoke, fire, sparks, debris, sand), persistent scorch marks,
+  craters and burning wrecks, and screen shake scaled to the blast. Harvesters kick up
+  dust or sand while gathering.
+- **Superweapons** are real, deterministic gameplay (charge needs power; impacts are
+  scheduled strikes inside the simulation, so they work in lockstep and for the AI):
+  the Harkonnen Palace's **Death Hand**, the Soviet **Nuclear Missile Silo** and the
+  Allied **Weather Control Device**. The engine also supports an **Ion Cannon** strike
+  type that any fusion pack can grant with one structure entry. Each has its own
+  animation: launch plume and climbing missile, target warning and falling warhead, then
+  flash, fireball, shockwave and mushroom cloud; storm clouds, rain and branching
+  lightning; an orbital focusing beam and a sky-column strike.

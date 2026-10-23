@@ -230,3 +230,87 @@ describe('fusion packs compose from existing games', () => {
     expect(game.worms.length).toBe(1);
   });
 });
+
+describe('fusion superweapons', () => {
+  const setup = (seed = 8): GameSetup => ({ pack: ra2Pack, mapId: 'temperate-valley', seed, players: [{ name: 'S', faction: 'soviets', ai: false }, { name: 'A', faction: 'allies', ai: false }] });
+  const enemyHp = (g: Game) => [...g.entities.values()].filter(e => e.owner === 1).reduce((n, e) => n + e.hp, 0);
+
+  function armed(type: string, seed = 8) {
+    const g = new Game(setup(seed));
+    // Deploy both MCVs, then grant player 0 a charged superweapon structure.
+    for (const p of g.players) {
+      const mcv = [...g.entities.values()].find(e => e.owner === p.slot && e.type === 'mcv')!;
+      g.enqueue(p.slot, { t: 'deploy', ids: [mcv.id] });
+    }
+    g.step();
+    const start = g.mapPreset.starts[0];
+    const s = g.spawnStructure(type, 0, start.x + 3, start.y + 4);
+    const sw = g.superweaponOf(s)!;
+    s.charge = sw.charge;
+    return { g, s, sw };
+  }
+
+  it('charges only while powered and fires a nuclear missile that lands after its flight', () => {
+    const { g, s, sw } = armed('s-nuke');
+    expect(sw.kind).toBe('missile');
+    const yard = [...g.entities.values()].find(e => e.owner === 1 && e.type === 'conyard')!;
+    const before = enemyHp(g);
+    g.enqueue(0, { t: 'super', id: s.id, x: yard.cx + 2, y: yard.cy + 2 });
+    g.step();
+    expect(s.charge).toBe(0);
+    expect(g.effects.some(e => e.kind === 'superLaunch')).toBe(true);
+    expect(enemyHp(g)).toBe(before);
+    for (let i = 0; i < sw.delay + 2; i++) g.step();
+    expect(g.effects.some(e => e.kind === 'nuke')).toBe(true);
+    expect(enemyHp(g)).toBeLessThan(before - 1000);
+    // A spent weapon cannot fire again until it recharges.
+    g.enqueue(0, { t: 'super', id: s.id, x: yard.cx, y: yard.cy });
+    g.step();
+    expect(g.strikes.length).toBe(0);
+  });
+
+  it('calls down a lightning storm as a series of scheduled strikes', () => {
+    const g = new Game({ ...setup(), players: [{ name: 'A', faction: 'allies', ai: false }, { name: 'S', faction: 'soviets', ai: false }] });
+    const start = g.mapPreset.starts[0];
+    const s = g.spawnStructure('a-weather', 0, start.x + 3, start.y + 4);
+    const sw = g.superweaponOf(s)!;
+    s.charge = sw.charge;
+    g.enqueue(0, { t: 'super', id: s.id, x: 50, y: 50 });
+    g.step();
+    expect(g.strikes.length).toBe(sw.strikes);
+    for (let i = 0; i < sw.delay + (sw.duration ?? 0) + 5; i++) g.step();
+    expect(g.strikes.length).toBe(0);
+    expect(g.effects.filter(e => e.kind === 'lightning').length).toBeGreaterThan(5);
+  });
+
+  it('gives the Death Hand only to the Harkonnen palace', () => {
+    const g = new Game({ pack: dunePack, mapId: 'arrakis-basin', seed: 2, players: [{ name: 'A', faction: 'atreides', ai: false }, { name: 'H', faction: 'harkonnen', ai: false }] });
+    const a = g.spawnStructure('palace', 0, 10, 10), h = g.spawnStructure('palace', 1, 50, 50);
+    expect(g.superweaponOf(a)).toBeUndefined();
+    expect(g.superweaponOf(h)?.name).toBe('Death Hand');
+    // Charging pauses on low power: a lone palace has no windtraps.
+    for (let i = 0; i < 30; i++) g.step();
+    expect(h.charge).toBe(0);
+  });
+
+  it('supports an Ion Cannon in any fusion pack as data, deterministically', () => {
+    const pack: GameSetup['pack'] = {
+      ...ra2Pack, id: 'ion-test',
+      structures: { ...ra2Pack.structures, uplink: { id: 'uplink', name: 'Ion Cannon Uplink', cost: 3000, hp: 900, armor: 'building', w: 2, h: 2, power: 0, sight: 4, prereqs: [], tech: 10, queue: 'defense', shape: 'radar',
+        superweapon: { id: 'ion', name: 'Ion Cannon', kind: 'ion', charge: 100, damage: 1500, radius: 640, delay: 30 } } },
+    };
+    const run = () => {
+      const g = new Game({ pack, mapId: 'temperate-valley', seed: 4, players: [{ name: 'A', faction: 'allies', ai: false }, { name: 'S', faction: 'soviets', ai: false }] });
+      const s = g.spawnStructure('uplink', 0, 12, 14);
+      for (let i = 0; i < 110; i++) g.step();
+      const target = [...g.entities.values()].find(e => e.owner === 1)!;
+      g.enqueue(0, { t: 'super', id: s.id, x: Math.floor(target.x / 256), y: Math.floor(target.y / 256) });
+      for (let i = 0; i < 40; i++) g.step();
+      return g;
+    };
+    const a = run(), b = run();
+    expect(a.effects.some(e => e.kind === 'ionCharge')).toBe(true);
+    expect(a.effects.some(e => e.kind === 'ionStrike')).toBe(true);
+    expect(a.checksum()).toBe(b.checksum());
+  });
+});

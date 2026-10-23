@@ -110,6 +110,14 @@ export function runAI(game: Game, p: Player, s: AIState) {
     if (enemy) { game.enqueue(p.slot, { t: 'rally', x: base.x + Math.sign(enemy.x - base.x) * 6, y: base.y + Math.sign(enemy.y - base.y) * 6 }); s.rallySet = true; }
   }
 
+  // Superweapons fire at the enemy base as soon as they are charged.
+  for (const e of structures) {
+    const sw = game.superweaponOf(e);
+    if (!sw || e.charge < sw.charge) continue;
+    const target = nearestEnemyBase(game, p, base);
+    if (target) game.enqueue(p.slot, { t: 'super', id: e.id, x: target.x + 1, y: target.y + 1 });
+  }
+
   // 5. Army: defend the base, then attack in growing waves.
   const army = units.filter(u => {
     const d = game.pack.units[u.type];

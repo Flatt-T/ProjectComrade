@@ -17,6 +17,7 @@ export type Command =
   | { t: 'sell'; id: number }
   | { t: 'repair'; id: number }
   | { t: 'rally'; x: number; y: number }
+  | { t: 'super'; id: number; x: number; y: number }
   | { t: 'surrender' };
 
 export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number }
@@ -78,6 +79,8 @@ export interface Entity {
   born: number;
   /** Dune: built off concrete, so the sand slowly wears it back down to half health. */
   exposed: boolean;
+  /** Superweapon charge in ticks. */
+  charge: number;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -103,8 +106,11 @@ export interface Player {
   stats: { built: number; lost: number; killed: number; harvested: number };
 }
 
-export interface Projectile { id: number; owner: number; weapon: string; x: number; y: number; tx: number; ty: number; target: number; source: number }
-export interface Effect { kind: string; x: number; y: number; x2: number; y2: number; tick: number; dur: number; color?: string }
+export interface Projectile { id: number; owner: number; weapon: string; x: number; y: number; sx: number; sy: number; tx: number; ty: number; target: number; source: number }
+/** Visual-only event for the renderer. `item`/`owner` let it draw the right sprite. */
+export interface Effect { kind: string; x: number; y: number; x2: number; y2: number; tick: number; dur: number; color?: string; item?: string; owner?: number }
+/** A scheduled superweapon impact, resolved deterministically on its tick. */
+export interface Strike { tick: number; x: number; y: number; owner: number; damage: number; radius: number; kind: 'missile' | 'ion' | 'bolt'; name: string }
 export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number }
 
 const QUEUES: QueueKind[] = ['structure', 'defense', 'infantry', 'vehicle'];
@@ -119,6 +125,7 @@ export class Game {
   /** Visual-only events for the renderer; never read by the simulation. */
   effects: Effect[] = [];
   worms: Worm[] = [];
+  strikes: Strike[] = [];
   tick = 0;
   over = false;
   winnerTeam = -1;
@@ -222,7 +229,7 @@ export class Game {
         if (s && s.owner === slot && s.kind === 'structure' && s.hp > 0) {
           const def = this.pack.structures[s.type];
           player.credits += Math.floor((def.cost * this.pack.sellRefundPercent * s.hp) / (100 * s.maxHp));
-          this.effect('sell', s.x, s.y, 0, 0, 15);
+          const fx = this.effect('sell', s.x, s.y, s.cx, s.cy, 24); fx.item = s.type; fx.owner = s.owner;
           s.hp = 0;
           this.removeEntity(s, false);
         }
@@ -234,6 +241,7 @@ export class Game {
         break;
       }
       case 'rally': player.rally = this.cellIndex(cmd.x, cmd.y); break;
+      case 'super': this.launchSuper(player, cmd.id, cmd.x, cmd.y); break;
       case 'surrender': this.defeat(player); break;
     }
   }
@@ -262,6 +270,7 @@ export class Game {
       if (e.kind === 'unit') this.unitThink(e); else this.structureThink(e);
     }
     this.updateProjectiles();
+    this.resolveStrikes();
     this.mechanics();
     if (this.tick % 4 === 0) this.updateFog();
     this.cleanup();
@@ -290,7 +299,7 @@ export class Game {
       id: this.nextId++, type, kind, owner, x, y, px: x, py: y, hp, maxHp: hp, facing: 128, turret: 128,
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, timer: 0, dock: 0,
-      cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false,
+      cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0,
     };
   }
 
@@ -343,8 +352,10 @@ export class Game {
     return this.players[a]?.team !== this.players[b]?.team;
   }
 
-  private effect(kind: string, x: number, y: number, x2: number, y2: number, dur: number, color?: string) {
-    this.effects.push({ kind, x, y, x2, y2, tick: this.tick, dur, color });
+  private effect(kind: string, x: number, y: number, x2: number, y2: number, dur: number, color?: string): Effect {
+    const fx: Effect = { kind, x, y, x2, y2, tick: this.tick, dur, color };
+    this.effects.push(fx);
+    return fx;
   }
 
   /** Assign each unit in a group its own destination cell around the target. */
@@ -523,6 +534,7 @@ export class Game {
     if (!this.canPlace(this.players[u.owner], def.deploysTo, cx, cy, true, u.id)) { this.effect('denied', u.x, u.y, 0, 0, 10); return; }
     u.hp = 0;
     this.entities.delete(u.id);
+    const fx = this.effect('deploy', u.x, u.y, 0, 0, 30); fx.item = u.type; fx.owner = u.owner;
     this.spawnStructure(def.deploysTo, u.owner, cx, cy, 100);
   }
 
@@ -675,7 +687,7 @@ export class Game {
       this.impact(w, a.owner, t, tx, ty, a.id);
       return;
     }
-    this.projectiles.push({ id: this.nextId++, owner: a.owner, weapon: w.id, x: a.x, y: a.y, tx: tx + shot * 40, ty, target: t.id, source: a.id });
+    this.projectiles.push({ id: this.nextId++, owner: a.owner, weapon: w.id, x: a.x, y: a.y, sx: a.x, sy: a.y, tx: tx + shot * 40, ty, target: t.id, source: a.id });
     this.effect('muzzle', a.x, a.y, tx, ty, 3);
   }
 
@@ -738,7 +750,7 @@ export class Game {
       if (killer && by !== e.owner) killer.stats.killed++;
       const victim = this.players[e.owner];
       if (victim) victim.stats.lost++;
-      this.effect(e.kind === 'structure' ? 'bigExplosion' : this.unitDef(e).kind === 'infantry' ? 'death' : 'explosion', e.x, e.y, 0, 0, e.kind === 'structure' ? 30 : 16);
+      this.effect(e.kind === 'structure' ? 'bigExplosion' : this.unitDef(e).kind === 'infantry' ? 'death' : 'vehicleDeath', e.x, e.y, 0, 0, e.kind === 'structure' ? 30 : 18);
     }
   }
 
@@ -840,6 +852,8 @@ export class Game {
       const floor = Math.floor((s.maxHp * concrete.uncoveredStartPercent) / 100);
       if (s.hp > floor) s.hp = Math.max(floor, s.hp - Math.max(1, Math.floor(s.maxHp / 200)));
     }
+    const sw = this.superweaponOf(s);
+    if (sw && s.charge < sw.charge && !this.lowPower(s.owner)) s.charge++;
     if (s.cooldown > 0) s.cooldown--;
     const w = def.weapon ? this.pack.weapons[def.weapon] : undefined;
     if (!w || def.needsPower && this.lowPower(s.owner)) return;
@@ -1017,11 +1031,65 @@ export class Game {
     if (teams.size <= 1 && this.players.length > 1) { this.over = true; this.winnerTeam = teams.size ? [...teams][0] : -1; }
   }
 
+  // ---------------------------------------------------------------- superweapons
+
+  /** The superweapon a structure carries for its owner's faction, if any. */
+  superweaponOf(e: Entity) {
+    if (e.kind !== 'structure') return undefined;
+    const sw = this.pack.structures[e.type]?.superweapon;
+    if (!sw) return undefined;
+    const faction = this.players[e.owner]?.faction;
+    return !sw.factions || (faction && sw.factions.includes(faction)) ? sw : undefined;
+  }
+
+  private launchSuper(p: Player, id: number, x: number, y: number) {
+    const s = this.entities.get(id);
+    if (!s || s.owner !== p.slot || s.hp <= 0) return;
+    const sw = this.superweaponOf(s);
+    if (!sw || s.charge < sw.charge) return;
+    s.charge = 0;
+    const tx = cellCenter(Math.max(0, Math.min(this.map.w - 1, x))), ty = cellCenter(Math.max(0, Math.min(this.map.h - 1, y)));
+    const tag = (fx: Effect) => { fx.owner = p.slot; fx.item = sw.id; fx.color = sw.name; return fx; };
+    if (sw.kind === 'storm') {
+      const duration = sw.duration ?? 200, count = sw.strikes ?? 20;
+      tag(this.effect('stormClouds', tx, ty, sw.radius, 0, sw.delay + duration));
+      for (let k = 0; k < count; k++) {
+        // Integer scatter inside the storm's square (deterministic, no trigonometry).
+        const bx = tx + this.rng.int(sw.radius * 2) - sw.radius, by = ty + this.rng.int(sw.radius * 2) - sw.radius;
+        this.strikes.push({ tick: this.tick + sw.delay + Math.floor((k * duration) / count), x: bx, y: by, owner: p.slot, damage: sw.damage, radius: sw.boltRadius ?? 384, kind: 'bolt', name: sw.name });
+      }
+    } else {
+      tag(this.effect(sw.kind === 'missile' ? 'superLaunch' : 'ionCharge', s.x, s.y, tx, ty, sw.delay));
+      if (sw.kind === 'missile') tag(this.effect('superIncoming', tx, ty, s.x, s.y, sw.delay));
+      this.strikes.push({ tick: this.tick + sw.delay, x: tx, y: ty, owner: p.slot, damage: sw.damage, radius: sw.radius, kind: sw.kind, name: sw.name });
+    }
+  }
+
+  private resolveStrikes() {
+    if (!this.strikes.length) return;
+    const due = this.strikes.filter(s => s.tick <= this.tick);
+    if (!due.length) return;
+    this.strikes = this.strikes.filter(s => s.tick > this.tick);
+    for (const s of due) {
+      const fx = this.effect(s.kind === 'missile' ? 'nuke' : s.kind === 'ion' ? 'ionStrike' : 'lightning', s.x, s.y, s.radius, 0, s.kind === 'bolt' ? 12 : s.kind === 'ion' ? 45 : 90);
+      fx.owner = s.owner; fx.color = s.name;
+      for (const e of this.entities.values()) {
+        if (e.hp <= 0) continue;
+        const d = this.distTo(s.x, s.y, e);
+        if (d >= s.radius) continue;
+        // Full damage at the centre, a quarter at the edge.
+        this.damage(e, Math.max(1, Math.floor((s.damage * (s.radius - Math.floor((d * 3) / 4))) / s.radius)), s.owner);
+      }
+      for (const worm of this.worms) if (!worm.hidden && dist(s.x, s.y, worm.x, worm.y) < s.radius) worm.hp -= s.damage;
+    }
+  }
+
   /** Desync detector: identical on every client running the same commands. */
   checksum(): number {
     const h = new Hasher().add(this.tick).add(this.rng.seed);
     for (const p of this.players) h.add(p.credits).add(p.defeated ? 1 : 0);
-    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing);
+    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge);
+    for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
     for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden);
     return h.value;

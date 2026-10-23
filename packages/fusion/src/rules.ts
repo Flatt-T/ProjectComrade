@@ -146,7 +146,30 @@ export interface StructureDef {
   /** Floor tile (Dune concrete); occupies no blocking footprint once placed. */
   floor?: boolean;
   wall?: boolean;
+  /** Superweapon this building charges and fires. */
+  superweapon?: SuperweaponDef;
   shape: string;
+}
+
+export type SuperweaponKind = 'missile' | 'storm' | 'ion';
+
+export interface SuperweaponDef {
+  id: string;
+  name: string;
+  kind: SuperweaponKind;
+  /** Ticks to charge; charging pauses while the owner is low on power. */
+  charge: number;
+  damage: number;
+  /** Blast radius in leptons. */
+  radius: number;
+  /** Ticks from launch to impact (missile flight, ion focusing, storm gathering). */
+  delay: number;
+  /** Storms: lightning strikes spread over `duration` ticks, each hitting `boltRadius`. */
+  strikes?: number;
+  duration?: number;
+  boltRadius?: number;
+  /** Only these factions get it from a shared building (e.g. the Harkonnen Palace). */
+  factions?: string[];
 }
 
 export interface FactionDef {
