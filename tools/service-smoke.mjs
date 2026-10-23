@@ -54,7 +54,7 @@ try {
   hostClient.ws.close();
   await until(() => latestRoom(other).players.length === 1);
   assert.notEqual(latestRoom(other).host, host);
-  assert.equal(latestRoom(other).phase, 'lobby');
-  assert.equal(latestRoom(other).players[0].ready, false);
+  // A started match persists for the remaining players (lockstep finalises any drop).
+  assert.equal(latestRoom(other).phase, 'started');
   console.log('Health, rooms, host-only configuration, ready-gated start, oversized-peer isolation and host transfer passed');
 } finally { for (const ws of clients) ws.close(); }

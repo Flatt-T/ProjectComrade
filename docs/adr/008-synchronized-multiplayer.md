@@ -1,8 +1,29 @@
 # ADR 008 — Synchronized multiplayer via a WebSocket connection manager
 
-Status: Accepted (design); implementation pending
+Status: Implemented for Fusion Engine styles (Dune, RA2); Vanilla Conquer path below remains the plan for Classic C&C
 Date: 2026-10-23
 Builds on ADR 007 (lobby presence + configuration)
+
+## Update — 2026-10-23: shipped for the Fusion Engine
+
+Dune Style and Red Alert 2 Style run on the Comrade Fusion Engine (ADR 010), which was
+built deterministic and command-driven from the start, so lockstep needed no engine
+surgery:
+
+- `LockstepSession` (`packages/fusion/src/session.ts`) groups ticks into 3-tick turns and
+  schedules each human's commands two turns ahead. The simulation advances a turn only when
+  every human's packet for it has arrived. AI opponents run inside the simulation, so they
+  are identical on every client.
+- Every packet carries a state checksum; a mismatch at the same tick flags a desync.
+- The service relays `turn` messages in order to the other room members and records each
+  player's last turn. If a player leaves mid-match it sends one final `surrender` turn, so
+  every client removes that player on the same tick.
+- The browser connection buffers turn packets until the battle subscribes, closing the
+  start-up race between clients.
+- Verified by unit tests (jitter, drops, malformed commands) and by the release smoke test,
+  which plays two real browsers in one match and compares checksums.
+
+The rest of this ADR is the plan for bringing the same to Classic C&C on Vanilla Conquer.
 
 ## Why the naive approach does not work
 

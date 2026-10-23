@@ -13,3 +13,39 @@ input{font:600 13px ui-monospace,monospace;color:#dde3d2;background:#121a12;bord
 .faction-pick{margin-bottom:22px}.faction-pick .factions{margin:10px 0 0}.room-launch{display:flex;flex-direction:column;gap:10px}.room-launch .deploy{text-align:center}.room-launch small{font:10px monospace;color:#819471;line-height:1.6}
 @media(max-width:1100px){.lobby-browser,.lobby-room{grid-template-columns:1fr}.lobby-right,.room-config{border-left:0;border-top:1px solid #425039}}
 @media(max-width:650px){.lobby-gate{padding:24px;margin:16px auto}.lobby-left,.lobby-right,.room-main,.room-config{padding:18px}.room-row{grid-template-columns:1fr auto}.rr-host,.rr-meta{grid-area:auto}}
+
+/* Faction pickers for every game style */
+.factions.n3{grid-template-columns:repeat(3,1fr)}.factions button b{color:var(--house,#d5bc68)}.factions button.selected{border-color:var(--house,#b8dc6f);background:color-mix(in srgb,var(--house,#28351e) 22%,#162217)}
+.factions button small{display:block;font:10px monospace;color:#839078;line-height:1.6}.player.ai{opacity:.85;border-left-color:#888}
+
+/* Fusion Engine battle (Dune and RA2 styles) */
+.battle-shell.wide{max-width:none}
+.fusion-battle{display:grid;grid-template-columns:minmax(0,1fr) 232px;border:1px solid #425039;background:#0b0f0c;height:calc(100vh - 150px);min-height:540px}
+.fusion-stage{position:relative;overflow:hidden;min-width:0;background:#000}
+.fusion-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;outline:none}
+.fusion-hud-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:8px 12px;font:10px ui-monospace,monospace;color:#d6dfcb;background:linear-gradient(#000a,#0000);pointer-events:none;letter-spacing:1px}
+.fusion-messages{position:absolute;top:34px;left:12px;pointer-events:none}.fusion-messages p{margin:0 0 4px;font:600 12px ui-monospace,monospace;color:#9be26a;text-shadow:0 1px 2px #000;letter-spacing:1px}
+.fusion-banner{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);background:#000c;border:1px solid #b4d96b;color:#e6f0d8;padding:14px 20px;font:12px ui-monospace,monospace}
+.fusion-mode{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#000b;color:#f0e6a0;padding:6px 12px;font:11px ui-monospace,monospace;pointer-events:none}
+.fusion-help{position:absolute;top:50px;right:12px;background:#000d;border:1px solid #526044;padding:14px 18px;font:11px/1.7 ui-monospace,monospace;color:#cdd8c0;max-width:360px;cursor:pointer}.fusion-help h3{margin:0 0 6px;font-size:12px;color:#b4d96b}.fusion-help p{margin:0}
+.fusion-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000b;text-align:center}.fusion-over h2{font:800 40px Arial;margin:10px 0 16px}.fusion-stats{display:flex;gap:22px;margin-bottom:22px;font:11px ui-monospace,monospace;color:#9fb08f}.fusion-stats b{display:block;font-size:20px;color:#e3ecd6}
+.fusion-sidebar{display:flex;flex-direction:column;gap:8px;padding:10px;border-left:2px solid var(--house);background:linear-gradient(180deg,#1a1f22,#101315);overflow-y:auto;min-height:0}
+.fusion-credits{font:700 22px ui-monospace,monospace;color:#f2d35c;text-align:center;background:#000;border:1px solid #3a3f44;padding:6px;letter-spacing:2px}.fusion-credits small{display:block;font:9px ui-monospace,monospace;color:#8a929a;letter-spacing:1px}
+.fusion-radar{display:grid;grid-template-columns:1fr 14px;gap:6px}.fusion-radar canvas{width:100%;aspect-ratio:1;background:#000;border:1px solid #3a3f44;image-rendering:pixelated;cursor:pointer}
+.fusion-power{position:relative;background:#000;border:1px solid #3a3f44}.fusion-power i{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(#7be05a,#3f9e2c)}.fusion-power.low i{background:linear-gradient(#ff6b55,#b22a1c)}
+.fusion-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}.fusion-tabs button{padding:7px 2px;font-size:8px;letter-spacing:.5px;background:#20262a;border-color:#3a4248}.fusion-tabs button.on{background:var(--house);color:#fff;border-color:var(--house-accent)}
+.fusion-items{display:grid;grid-template-columns:1fr 1fr;gap:4px;align-content:start;min-height:120px}
+.fusion-item{position:relative;padding:0;background:#000;border:1px solid #3a4248;overflow:hidden;height:62px}.fusion-item:hover{border-color:var(--house-accent)}
+.fusion-item .cameo{display:block;width:100%;height:48px}
+.fusion-item .label{position:absolute;left:0;right:0;bottom:0;font:8px ui-monospace,monospace;background:#000c;color:#dfe6d6;padding:2px;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fusion-item .cost{position:absolute;top:2px;right:3px;font:8px ui-monospace,monospace;color:#f2d35c;text-shadow:0 1px 1px #000}
+.fusion-item .count{position:absolute;top:2px;left:3px;font:700 10px ui-monospace,monospace;color:#fff;background:var(--house);padding:0 4px}
+.fusion-item .sweep{position:absolute;left:0;right:0;top:0;background:#000a;pointer-events:none}
+.fusion-item.ready{border-color:#7be05a;animation:readyPulse 1s infinite}.fusion-item.ready .label{color:#7be05a;font-weight:700}
+@keyframes readyPulse{50%{box-shadow:inset 0 0 12px #7be05a88}}
+.fusion-empty{grid-column:1/-1;font:10px/1.5 ui-monospace,monospace;color:#7f8a92;text-align:center;padding:10px}
+.fusion-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}.fusion-actions button{padding:8px 2px;font-size:9px}.fusion-actions button.on{background:#5b4a14;border-color:#f2d35c}
+.fusion-selection{background:#000;border:1px solid #3a3f44;padding:8px;font:10px ui-monospace,monospace;color:#dfe6d6;display:grid;gap:6px}.fusion-selection .hp{height:5px;background:#300}.fusion-selection .hp i{display:block;height:100%;background:#3ed43e}.fusion-selection button{padding:6px;font-size:9px}
+.fusion-fidelity{font:8px/1.5 ui-monospace,monospace;color:#6c766e;margin:0}
+.fusion-leave{margin-top:auto;padding:9px;font-size:9px}
+@media(max-width:900px){.fusion-battle{grid-template-columns:1fr;height:auto}.fusion-stage{height:62vh}.fusion-sidebar{border-left:0;border-top:2px solid var(--house)}}

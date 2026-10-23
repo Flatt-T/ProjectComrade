@@ -1,6 +1,6 @@
 # ADR 009 — Dune 2000 and Red Alert 2 engine roadmap
 
-Status: Accepted (roadmap); not implemented
+Status: Superseded by ADR 010 — the owner chose independent gameplay replication on the Comrade Fusion Engine instead of porting separate engines
 Date: 2026-10-23
 
 ## Context

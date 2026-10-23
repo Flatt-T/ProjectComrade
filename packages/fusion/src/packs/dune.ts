@@ -1,0 +1,162 @@
+// Dune-style rule pack: an independent replication of Dune 2000's gameplay.
+// Values approximate the classic game from public knowledge and are labelled for tuning.
+import { MapFeature, MapField, MapPreset, RulePack } from '../rules';
+import { mirror, quad } from './mapkit';
+
+const W = 64, H = 64;
+const mirror2 = <T extends MapFeature | MapField>(items: T[]) => mirror(items, W, H);
+const quad4 = <T extends MapFeature | MapField>(items: T[]) => quad(items, W, H);
+
+const maps: MapPreset[] = [
+  {
+    id: 'arrakis-basin', name: 'Arrakis Basin', width: W, height: H, maxPlayers: 2, base: 'sand', roughness: 2,
+    description: 'Two rock plateaus across an open spice basin. Watch the deep sand.',
+    starts: [{ x: 10, y: 10 }, { x: 52, y: 52 }],
+    features: mirror2<MapFeature>([
+      { terrain: 'rock', shape: 'circle', x: 11, y: 11, r: 9 },
+      { terrain: 'rock', shape: 'circle', x: 24, y: 6, r: 3 },
+      { terrain: 'rough', shape: 'circle', x: 4, y: 22, r: 3 },
+      { terrain: 'cliff', shape: 'ridge', x: 20, y: 20, x2: 26, y2: 16, r: 1 },
+      { terrain: 'dunes', shape: 'circle', x: 30, y: 12, r: 4 },
+      { terrain: 'dunes', shape: 'circle', x: 14, y: 34, r: 4 },
+      { terrain: 'rock', shape: 'circle', x: 28, y: 30, r: 2 },
+    ]),
+    fields: mirror2<MapField>([
+      { x: 26, y: 13, r: 4, resource: 'spice' },
+      { x: 12, y: 27, r: 4, resource: 'spice' },
+      { x: 36, y: 22, r: 3, resource: 'spice' },
+      { x: 32, y: 34, r: 4, resource: 'spice' },
+    ]),
+  },
+  {
+    id: 'shield-wall', name: 'Shield Wall', width: W, height: H, maxPlayers: 2, base: 'sand', roughness: 2,
+    description: 'A cliff wall splits the desert. One pass in the middle, rich spice on both flanks.',
+    starts: [{ x: 8, y: 31 }, { x: 54, y: 31 }],
+    features: [
+      ...mirror2<MapFeature>([
+        { terrain: 'rock', shape: 'circle', x: 9, y: 32, r: 9 },
+        { terrain: 'rough', shape: 'circle', x: 18, y: 10, r: 3 },
+        { terrain: 'dunes', shape: 'circle', x: 20, y: 48, r: 5 },
+      ]),
+      { terrain: 'cliff', shape: 'ridge', x: 32, y: 2, x2: 32, y2: 26, r: 1 },
+      { terrain: 'cliff', shape: 'ridge', x: 31, y: 38, x2: 31, y2: 62, r: 1 },
+      { terrain: 'rough', shape: 'rect', x: 29, y: 27, w: 6, h: 2 },
+    ],
+    fields: [
+      ...mirror2<MapField>([
+        { x: 20, y: 22, r: 4, resource: 'spice' },
+        { x: 20, y: 42, r: 4, resource: 'spice' },
+        { x: 10, y: 52, r: 3, resource: 'spice' },
+      ]),
+      { x: 32, y: 32, r: 3, resource: 'spice' },
+    ],
+  },
+  {
+    id: 'four-sietches', name: 'Four Sietches', width: W, height: H, maxPlayers: 4, base: 'sand', roughness: 2,
+    description: 'Four rock sietches around a central spice sea. Free-for-all.',
+    starts: [{ x: 9, y: 9 }, { x: 53, y: 53 }, { x: 53, y: 9 }, { x: 9, y: 53 }],
+    features: quad4<MapFeature>([
+      { terrain: 'rock', shape: 'circle', x: 10, y: 10, r: 8 },
+      { terrain: 'cliff', shape: 'ridge', x: 22, y: 26, x2: 26, y2: 22, r: 1 },
+      { terrain: 'dunes', shape: 'circle', x: 32, y: 12, r: 3 },
+    ]),
+    fields: [
+      { x: 32, y: 32, r: 7, resource: 'spice' },
+      ...quad4<MapField>([{ x: 22, y: 12, r: 3, resource: 'spice' }]),
+    ],
+  },
+];
+
+export const dunePack: RulePack = {
+  id: 'dune',
+  name: 'Dune Style',
+  projection: 'ortho',
+  fidelityNote: 'Independent replication of Dune 2000 gameplay. Values approximate the classic and are tuned over time.',
+  terrains: [
+    { id: 'sand', name: 'Sand', foot: true, vehicle: true, buildable: false, speed: 100, sand: true, color: '#c99d5f', color2: '#bb8d50' },
+    { id: 'dunes', name: 'Dunes', foot: true, vehicle: true, buildable: false, speed: 70, sand: true, color: '#d8af6e', color2: '#c39652' },
+    { id: 'rock', name: 'Rock', foot: true, vehicle: true, buildable: true, speed: 100, color: '#7c6b55', color2: '#6c5c48' },
+    { id: 'rough', name: 'Rough rock', foot: true, vehicle: false, buildable: false, speed: 60, color: '#5d4d3c', color2: '#4f4133' },
+    { id: 'cliff', name: 'Cliff', foot: false, vehicle: false, buildable: false, speed: 100, color: '#3d3127', color2: '#30271e' },
+  ],
+  resources: [
+    { id: 'spice', name: 'Spice', value: 7, max: 40, color: '#e07a2e', color2: '#c4561c' },
+  ],
+  armors: ['none', 'light', 'medium', 'heavy', 'building'],
+  warheads: {
+    bullet: { id: 'bullet', vs: { none: 100, light: 50, medium: 25, heavy: 15, building: 15 } },
+    rocket: { id: 'rocket', vs: { none: 35, light: 100, medium: 90, heavy: 75, building: 60 } },
+    shell: { id: 'shell', vs: { none: 40, light: 70, medium: 100, heavy: 90, building: 80 } },
+    artillery: { id: 'artillery', vs: { none: 100, light: 70, medium: 75, heavy: 60, building: 100 } },
+    sonic: { id: 'sonic', vs: { none: 100, light: 100, medium: 100, heavy: 100, building: 50 } },
+    plasma: { id: 'plasma', vs: { none: 70, light: 100, medium: 100, heavy: 100, building: 90 } },
+    gas: { id: 'gas', vs: { none: 100, light: 100, medium: 100, heavy: 100, building: 0 } },
+  },
+  weapons: {
+    rifle: { id: 'rifle', damage: 9, range: 704, rof: 14, warhead: 'bullet', speed: 0, visual: 'bullet' },
+    fremenrifle: { id: 'fremenrifle', damage: 22, range: 1280, rof: 18, warhead: 'bullet', speed: 0, visual: 'bullet' },
+    sardaukargun: { id: 'sardaukargun', damage: 16, range: 896, rof: 10, warhead: 'bullet', speed: 0, visual: 'bullet' },
+    rocket: { id: 'rocket', damage: 38, range: 1152, rof: 48, warhead: 'rocket', speed: 44, splash: 64, visual: 'missile' },
+    trikegun: { id: 'trikegun', damage: 12, range: 768, rof: 8, warhead: 'bullet', speed: 0, visual: 'bullet' },
+    quadrockets: { id: 'quadrockets', damage: 24, range: 1024, rof: 40, warhead: 'rocket', speed: 40, burst: 2, visual: 'missile' },
+    tankcannon: { id: 'tankcannon', damage: 42, range: 1088, rof: 46, warhead: 'shell', speed: 64, splash: 48, visual: 'cannon' },
+    siegecannon: { id: 'siegecannon', damage: 70, range: 1536, minRange: 384, rof: 72, warhead: 'artillery', speed: 30, splash: 112, visual: 'artillery' },
+    missiles: { id: 'missiles', damage: 48, range: 2048, minRange: 512, rof: 90, warhead: 'rocket', speed: 40, burst: 2, splash: 64, visual: 'missile' },
+    sonicwave: { id: 'sonicwave', damage: 95, range: 1536, rof: 80, warhead: 'sonic', speed: 0, line: true, visual: 'sonic' },
+    plasma: { id: 'plasma', damage: 85, range: 1152, rof: 52, warhead: 'plasma', speed: 30, splash: 72, burst: 2, visual: 'cannon' },
+    deviatorgas: { id: 'deviatorgas', damage: 10, range: 1536, rof: 110, warhead: 'gas', speed: 36, converts: 600, targets: ['vehicle', 'infantry'], visual: 'missile' },
+    gunturret: { id: 'gunturret', damage: 48, range: 1280, rof: 42, warhead: 'shell', speed: 72, splash: 32, visual: 'cannon' },
+    rocketturret: { id: 'rocketturret', damage: 42, range: 1920, rof: 60, warhead: 'rocket', speed: 44, burst: 2, visual: 'missile' },
+  },
+  units: {
+    lightinf: { id: 'lightinf', name: 'Light Infantry', kind: 'infantry', cost: 50, hp: 60, armor: 'none', speed: 14, sight: 3, weapon: 'rifle', prereqs: ['barracks'], tech: 1, crushable: true, shape: 'infantry', role: 'combat' },
+    trooper: { id: 'trooper', name: 'Trooper', kind: 'infantry', cost: 90, hp: 70, armor: 'none', speed: 12, sight: 3, weapon: 'rocket', prereqs: ['barracks'], tech: 2, crushable: true, shape: 'infantry-rocket', role: 'combat' },
+    fremen: { id: 'fremen', name: 'Fremen', kind: 'infantry', cost: 200, hp: 110, armor: 'none', speed: 18, sight: 5, weapon: 'fremenrifle', prereqs: ['barracks', 'palace'], factions: ['atreides'], tech: 8, crushable: true, shape: 'infantry-elite', role: 'combat', regen: 2 },
+    sardaukar: { id: 'sardaukar', name: 'Sardaukar', kind: 'infantry', cost: 220, hp: 160, armor: 'none', speed: 13, sight: 4, weapon: 'sardaukargun', prereqs: ['barracks', 'palace'], factions: ['harkonnen'], tech: 8, crushable: true, shape: 'infantry-elite', role: 'combat' },
+    trike: { id: 'trike', name: 'Trike', kind: 'vehicle', cost: 300, hp: 160, armor: 'light', speed: 48, turn: 16, sight: 5, weapon: 'trikegun', prereqs: ['lightfactory'], factions: ['atreides', 'harkonnen'], tech: 2, crusher: false, shape: 'trike', role: 'scout' },
+    raider: { id: 'raider', name: 'Raider Trike', kind: 'vehicle', cost: 300, hp: 150, armor: 'light', speed: 54, turn: 18, sight: 5, weapon: 'trikegun', prereqs: ['lightfactory'], factions: ['ordos'], tech: 2, shape: 'trike', role: 'scout' },
+    quad: { id: 'quad', name: 'Quad', kind: 'vehicle', cost: 400, hp: 200, armor: 'light', speed: 38, turn: 14, sight: 5, weapon: 'quadrockets', prereqs: ['lightfactory'], tech: 3, shape: 'quad', role: 'combat' },
+    combattank: { id: 'combattank', name: 'Combat Tank', kind: 'vehicle', cost: 700, hp: 380, armor: 'medium', speed: 26, turn: 8, sight: 4, weapon: 'tankcannon', prereqs: ['heavyfactory'], tech: 3, crusher: true, shape: 'tank-turret', role: 'combat' },
+    siegetank: { id: 'siegetank', name: 'Siege Tank', kind: 'vehicle', cost: 850, hp: 340, armor: 'medium', speed: 18, turn: 6, sight: 5, weapon: 'siegecannon', prereqs: ['heavyfactory', 'outpost'], tech: 5, crusher: true, shape: 'siege-turret', role: 'siege' },
+    missiletank: { id: 'missiletank', name: 'Missile Tank', kind: 'vehicle', cost: 900, hp: 260, armor: 'medium', speed: 22, turn: 8, sight: 6, weapon: 'missiles', prereqs: ['heavyfactory', 'ix'], tech: 6, shape: 'launcher', role: 'siege' },
+    sonictank: { id: 'sonictank', name: 'Sonic Tank', kind: 'vehicle', cost: 1000, hp: 340, armor: 'medium', speed: 20, turn: 6, sight: 5, weapon: 'sonicwave', prereqs: ['heavyfactory', 'ix'], factions: ['atreides'], tech: 7, crusher: true, shape: 'sonic', role: 'combat' },
+    devastator: { id: 'devastator', name: 'Devastator', kind: 'vehicle', cost: 1050, hp: 750, armor: 'heavy', speed: 12, turn: 4, sight: 4, weapon: 'plasma', prereqs: ['heavyfactory', 'ix'], factions: ['harkonnen'], tech: 7, crusher: true, shape: 'devastator', role: 'combat' },
+    deviator: { id: 'deviator', name: 'Deviator', kind: 'vehicle', cost: 1000, hp: 280, armor: 'medium', speed: 22, turn: 8, sight: 5, weapon: 'deviatorgas', prereqs: ['heavyfactory', 'ix'], factions: ['ordos'], tech: 7, shape: 'launcher', role: 'support' },
+    harvester: { id: 'harvester', name: 'Harvester', kind: 'vehicle', cost: 1000, hp: 650, armor: 'heavy', speed: 16, turn: 6, sight: 3, prereqs: ['heavyfactory'], tech: 2, crusher: true, shape: 'harvester', harvester: { capacity: 100, gather: 2, unload: 1 } },
+    mcv: { id: 'mcv', name: 'MCV', kind: 'vehicle', cost: 2000, hp: 800, armor: 'heavy', speed: 14, turn: 4, sight: 3, prereqs: ['heavyfactory'], tech: 4, deploysTo: 'conyard', crusher: true, shape: 'mcv' },
+  },
+  structures: {
+    conyard: { id: 'conyard', name: 'Construction Yard', cost: 2000, hp: 1600, armor: 'building', w: 3, h: 3, power: 20, sight: 5, prereqs: [], tech: 99, queue: 'structure', constructionYard: true, shape: 'conyard' },
+    concrete: { id: 'concrete', name: 'Concrete Slab', cost: 20, hp: 1, armor: 'building', w: 2, h: 2, power: 0, sight: 0, prereqs: [], tech: 1, queue: 'structure', floor: true, shape: 'concrete' },
+    windtrap: { id: 'windtrap', name: 'Windtrap', cost: 300, hp: 700, armor: 'building', w: 2, h: 2, power: 100, sight: 3, prereqs: [], tech: 1, queue: 'structure', shape: 'windtrap' },
+    refinery: { id: 'refinery', name: 'Spice Refinery', cost: 1500, hp: 1000, armor: 'building', w: 3, h: 2, power: -30, sight: 4, prereqs: ['windtrap'], tech: 1, queue: 'structure', storage: 2000, refinery: { dockX: 1, dockY: 2, freeUnit: 'harvester' }, shape: 'refinery' },
+    barracks: { id: 'barracks', name: 'Barracks', cost: 300, hp: 700, armor: 'building', w: 2, h: 2, power: -20, sight: 3, prereqs: ['windtrap'], tech: 1, queue: 'structure', produces: 'infantry', shape: 'barracks' },
+    silo: { id: 'silo', name: 'Spice Silo', cost: 150, hp: 450, armor: 'building', w: 1, h: 1, power: -5, sight: 2, prereqs: ['refinery'], tech: 2, queue: 'structure', storage: 1500, shape: 'silo' },
+    lightfactory: { id: 'lightfactory', name: 'Light Factory', cost: 500, hp: 800, armor: 'building', w: 3, h: 2, power: -20, sight: 3, prereqs: ['refinery'], tech: 2, queue: 'structure', produces: 'vehicle', shape: 'factory' },
+    heavyfactory: { id: 'heavyfactory', name: 'Heavy Factory', cost: 1000, hp: 1100, armor: 'building', w: 3, h: 3, power: -35, sight: 3, prereqs: ['lightfactory'], tech: 3, queue: 'structure', produces: 'vehicle', shape: 'heavyfactory' },
+    outpost: { id: 'outpost', name: 'Outpost', cost: 750, hp: 800, armor: 'building', w: 2, h: 2, power: -30, sight: 8, prereqs: ['barracks'], tech: 3, queue: 'structure', radar: true, shape: 'radar' },
+    ix: { id: 'ix', name: 'IX Research Centre', cost: 1000, hp: 900, armor: 'building', w: 2, h: 2, power: -40, sight: 3, prereqs: ['heavyfactory', 'outpost'], tech: 6, queue: 'structure', shape: 'lab' },
+    palace: { id: 'palace', name: 'Palace', cost: 1600, hp: 1800, armor: 'building', w: 3, h: 3, power: -50, sight: 5, prereqs: ['ix'], tech: 8, queue: 'structure', shape: 'palace' },
+    gunturret: { id: 'gunturret', name: 'Gun Turret', cost: 550, hp: 750, armor: 'building', w: 1, h: 1, power: -10, sight: 6, prereqs: ['barracks'], tech: 2, queue: 'defense', weapon: 'gunturret', shape: 'turret' },
+    rocketturret: { id: 'rocketturret', name: 'Rocket Turret', cost: 750, hp: 700, armor: 'building', w: 1, h: 1, power: -20, sight: 8, prereqs: ['outpost'], tech: 4, queue: 'defense', weapon: 'rocketturret', needsPower: true, shape: 'rocketturret' },
+    wall: { id: 'wall', name: 'Wall', cost: 50, hp: 500, armor: 'building', w: 1, h: 1, power: 0, sight: 0, prereqs: ['barracks'], tech: 1, queue: 'defense', wall: true, shape: 'wall' },
+  },
+  factions: [
+    { id: 'atreides', name: 'Atreides', side: 'atreides', color: '#3a72d6', accent: '#a9c8ff', blurb: 'Honour and loyalty. Fremen allies and the Sonic Tank.', startUnits: ['mcv', 'lightinf', 'lightinf', 'trooper', 'quad'] },
+    { id: 'harkonnen', name: 'Harkonnen', side: 'harkonnen', color: '#c8362c', accent: '#ffab9e', blurb: 'Brute force. Sardaukar and the Devastator.', startUnits: ['mcv', 'lightinf', 'lightinf', 'trooper', 'quad'] },
+    { id: 'ordos', name: 'Ordos', side: 'ordos', color: '#3c9b44', accent: '#b2e8a9', blurb: 'Cunning and wealth. Raiders and the Deviator.', startUnits: ['mcv', 'lightinf', 'lightinf', 'trooper', 'quad'] },
+  ],
+  maps,
+  startCredits: { low: 3000, standard: 7000, high: 12000 },
+  buildTicksPer100: 60,
+  lowPowerProductionPercent: 50,
+  extraFactoryBonus: 0,
+  buildRadius: 2,
+  sellRefundPercent: 50,
+  mechanics: {
+    buildOn: ['rock'],
+    concrete: { structure: 'concrete', uncoveredStartPercent: 50 },
+    sandworm: { count: 1, speed: 22, sight: 10, damage: 400, appearAfter: 1800, eatChance: 70 },
+    bloom: { everyTicks: 1350, radius: 3, resource: 'spice' },
+  },
+};

@@ -1,28 +1,48 @@
 export const PROTOCOL_VERSION = 1 as const;
 export const MAP_ID = 'tiberium-crossing' as const;
-export type Faction = 'gdi' | 'nod';
+/** Faction ids are per game style (gdi/nod, atreides/harkonnen/ordos, allies/soviets...). */
+export type Faction = string;
 
-// Game styles the platform can offer. Only playable styles boot an engine today;
-// the rest are declared so the lobby can present the full roster and gate launches.
+// Game styles the platform offers. 'vanilla-*' styles run the original GPL engines;
+// 'fusion' styles run the Comrade Fusion Engine with the named rule pack, which also
+// supports lockstep multiplayer. Unplayable styles are declared so the roster is visible.
 export type GameStyle = 'td-classic' | 'ra1' | 'ra2' | 'dune2k';
-export interface StyleInfo { id: GameStyle; name: string; engine: 'vanilla-td' | 'vanilla-ra' | 'none'; playable: boolean; blurb: string }
+export interface FactionInfo { id: Faction; name: string; full: string; blurb: string }
+export interface StyleInfo {
+  id: GameStyle; name: string; engine: 'vanilla-td' | 'vanilla-ra' | 'fusion'; pack?: string;
+  playable: boolean; lockstep: boolean; blurb: string; factions: FactionInfo[];
+}
 export const STYLES: StyleInfo[] = [
-  { id: 'td-classic', name: 'Classic C&C', engine: 'vanilla-td', playable: true, blurb: 'Tiberian Dawn. GDI versus the Brotherhood of Nod.' },
-  { id: 'ra1', name: 'Red Alert', engine: 'vanilla-ra', playable: false, blurb: 'Allies versus Soviets. Engine built; content pack pending.' },
-  { id: 'ra2', name: 'Red Alert 2', engine: 'none', playable: false, blurb: 'Planned. Requires a separate gated engine.' },
-  { id: 'dune2k', name: 'Dune Style', engine: 'none', playable: false, blurb: 'Planned. Atreides, Harkonnen and Ordos.' },
+  { id: 'td-classic', name: 'Classic C&C', engine: 'vanilla-td', playable: true, lockstep: false, blurb: 'Tiberian Dawn on the original engine. GDI versus the Brotherhood of Nod.',
+    factions: [{ id: 'gdi', name: 'GDI', full: 'Global Defense Initiative', blurb: 'Heavy armour. Superior firepower.' }, { id: 'nod', name: 'Nod', full: 'Brotherhood of Nod', blurb: 'Speed. Subterfuge. Strength through unity.' }] },
+  { id: 'dune2k', name: 'Dune Style', engine: 'fusion', pack: 'dune', playable: true, lockstep: true, blurb: 'Spice, sandworms and three Great Houses. Replicated on the Fusion Engine.',
+    factions: [{ id: 'atreides', name: 'Atreides', full: 'House Atreides', blurb: 'Fremen allies and the Sonic Tank.' }, { id: 'harkonnen', name: 'Harkonnen', full: 'House Harkonnen', blurb: 'Sardaukar and the Devastator.' }, { id: 'ordos', name: 'Ordos', full: 'House Ordos', blurb: 'Raiders and the Deviator.' }] },
+  { id: 'ra2', name: 'Red Alert 2 Style', engine: 'fusion', pack: 'ra2', playable: true, lockstep: true, blurb: 'Allies versus Soviets in isometric 3/4 view. Replicated on the Fusion Engine.',
+    factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: 'Prism tech, Chrono Miners, the Grizzly.' }, { id: 'soviets', name: 'Soviets', full: 'Soviet Union', blurb: 'Tesla power, Rhino armour, the Apocalypse.' }] },
+  { id: 'ra1', name: 'Red Alert', engine: 'vanilla-ra', playable: false, lockstep: false, blurb: 'Original engine built; content pack and map pending (ADR 007).',
+    factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: '' }, { id: 'soviet', name: 'Soviet', full: 'Soviet Union', blurb: '' }] },
 ];
+export function styleInfo(id: GameStyle): StyleInfo { return STYLES.find(s => s.id === id) ?? STYLES[0]; }
+export function factionAllowed(style: GameStyle, faction: unknown): faction is Faction {
+  return typeof faction === 'string' && styleInfo(style).factions.some(f => f.id === faction);
+}
 
 export type Visibility = 'public' | 'invite';
 export type CreditsPreset = 'low' | 'standard' | 'high';
-export interface MatchSettings { credits: CreditsPreset; techLevel: number }
-export const DEFAULT_SETTINGS: MatchSettings = { credits: 'standard', techLevel: 15 };
+/** `ai` is the number of computer opponents added to Fusion Engine matches (0..3). */
+export interface MatchSettings { credits: CreditsPreset; techLevel: number; ai: number }
+export const DEFAULT_SETTINGS: MatchSettings = { credits: 'standard', techLevel: 15, ai: 1 };
 export const CREDITS_VALUES: Record<CreditsPreset, number> = { low: 30, standard: 60, high: 120 };
 
 export interface RoomOptions { style: GameStyle; map: string; visibility: Visibility; maxPlayers: number; settings: MatchSettings }
 export const DEFAULT_OPTIONS: RoomOptions = { style: 'td-classic', map: MAP_ID, visibility: 'public', maxPlayers: 2, settings: DEFAULT_SETTINGS };
 
-export type LaunchRequest = { version: 1; type: 'launch'; map: string; faction: Faction; style: GameStyle; settings: MatchSettings };
+export interface LaunchPlayer { id: string; name: string; faction: Faction }
+/** Fusion matches also carry the shared seed and every human in slot order. */
+export type LaunchRequest = {
+  version: 1; type: 'launch'; map: string; faction: Faction; style: GameStyle; settings: MatchSettings;
+  seed?: number; players?: LaunchPlayer[]; you?: string;
+};
 
 export type ClientMessage =
   | { version: 1; type: 'join'; room: string; name: string; faction: Faction }
@@ -31,10 +51,18 @@ export type ClientMessage =
   | { version: 1; type: 'ready'; ready: boolean }
   | { version: 1; type: 'start' }
   | { version: 1; type: 'list' }
-  | { version: 1; type: 'leave' };
+  | { version: 1; type: 'leave' }
+  | TurnMessage;
+
+/** One lockstep turn of Fusion Engine commands; the service relays it untouched. */
+export interface TurnMessage { version: 1; type: 'turn'; turn: number; tick: number; checksum: number; commands: unknown[] }
 
 export interface RoomPlayer { id: string; name: string; faction: Faction; ready: boolean; host: boolean }
-export interface RoomState { version: 1; type: 'room'; room: string; host: string; phase: 'lobby' | 'started'; options: RoomOptions; players: RoomPlayer[] }
+export interface RoomState {
+  version: 1; type: 'room'; room: string; host: string; phase: 'lobby' | 'started'; options: RoomOptions; players: RoomPlayer[];
+  /** Set when the match starts: shared random seed and player ids in slot order. */
+  seed?: number; slots?: string[];
+}
 export interface RoomSummary { room: string; hostName: string; style: GameStyle; map: string; players: number; maxPlayers: number; phase: 'lobby' | 'started' }
 
 export interface MapInfo { id: string; name: string; theater: string; maxPlayers: number; description: string; ini: string; bin: string }
@@ -44,14 +72,15 @@ export interface EngineSnapshot { frame: number; audioRunning?: boolean; camera?
 export type ServerMessage = RoomState
   | { version: 1; type: 'welcome'; id: string; capabilities: string[]; gameplay: 'lobby-presence' }
   | { version: 1; type: 'rooms'; rooms: RoomSummary[] }
-  | { version: 1; type: 'error'; message: string };
+  | { version: 1; type: 'error'; message: string }
+  | { version: 1; type: 'turn'; slot: number; turn: number; tick: number; checksum: number; commands: unknown[]; final?: boolean };
 export type PlayerOrder = { version: 1; type: 'order'; sequence: number; tick: number; action: 'move' | 'attack' | 'harvest' | 'build' | 'train' | 'place'; entities: number[]; cell?: number; target?: number; item?: string };
 
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected an object');
   return value as Record<string, unknown>;
 }
-const isFaction = (x: unknown): x is Faction => x === 'gdi' || x === 'nod';
+const isFaction = (x: unknown): x is Faction => typeof x === 'string' && /^[a-z0-9-]{2,24}$/.test(x);
 const isStyle = (x: unknown): x is GameStyle => STYLES.some(s => s.id === x);
 
 export function parseSettings(value: unknown): MatchSettings {
@@ -59,7 +88,8 @@ export function parseSettings(value: unknown): MatchSettings {
   const v = object(value);
   const credits = ['low', 'standard', 'high'].includes(String(v.credits)) ? v.credits as CreditsPreset : 'standard';
   const techLevel = typeof v.techLevel === 'number' && Number.isInteger(v.techLevel) && v.techLevel >= 1 && v.techLevel <= 15 ? v.techLevel : 15;
-  return { credits, techLevel };
+  const ai = typeof v.ai === 'number' && Number.isInteger(v.ai) && v.ai >= 0 && v.ai <= 3 ? v.ai : DEFAULT_SETTINGS.ai;
+  return { credits, techLevel, ai };
 }
 export function parseOptions(value: unknown): RoomOptions {
   const v = object(value);
@@ -71,7 +101,7 @@ export function parseOptions(value: unknown): RoomOptions {
 }
 export function parseLaunch(value: unknown): LaunchRequest {
   const v = object(value);
-  if (v.version !== 1 || v.type !== 'launch' || typeof v.map !== 'string' || !/^[a-z0-9-]{3,40}$/.test(v.map) || !isFaction(v.faction) || !isStyle(v.style)) throw new Error('Invalid launch contract');
+  if (v.version !== 1 || v.type !== 'launch' || typeof v.map !== 'string' || !/^[a-z0-9-]{3,40}$/.test(v.map) || !isStyle(v.style) || !factionAllowed(v.style, v.faction)) throw new Error('Invalid launch contract');
   return { version: 1, type: 'launch', map: v.map, faction: v.faction, style: v.style, settings: parseSettings(v.settings) };
 }
 export function parseOrder(value: unknown): PlayerOrder {
@@ -100,6 +130,12 @@ export function parseClientMessage(value: unknown): ClientMessage {
   if (v.type === 'faction' && isFaction(v.faction)) return { version: 1, type: 'faction', faction: v.faction };
   if (v.type === 'ready' && typeof v.ready === 'boolean') return { version: 1, type: 'ready', ready: v.ready };
   if (v.type === 'start' || v.type === 'leave' || v.type === 'list') return { version: 1, type: v.type };
+  if (v.type === 'turn') {
+    const int = (x: unknown) => Number.isSafeInteger(x) && (x as number) >= 0;
+    if (!int(v.turn) || !int(v.tick) || !Number.isSafeInteger(v.checksum) || !Array.isArray(v.commands) || v.commands.length > 64
+      || !v.commands.every(c => c && typeof c === 'object' && !Array.isArray(c))) throw new Error('Invalid turn');
+    return { version: 1, type: 'turn', turn: v.turn as number, tick: v.tick as number, checksum: v.checksum as number, commands: v.commands };
+  }
   throw new Error('Invalid room message');
 }
 export function parseContentManifest(value: unknown): ContentManifest {

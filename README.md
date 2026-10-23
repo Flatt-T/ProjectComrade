@@ -4,11 +4,19 @@ A browser RTS platform beginning with a self-contained C&C Tiberian Dawn slice: 
 
 ## Status
 
-**Playable slice:** [Launch Project Comrade](https://projectcomrade.thunderchildcreativetechnologies.com). Enter a callsign (no account, no install), create or join a game, share the invite link, pick your side and deploy. Harvest Tiberium, construct buildings, train infantry and fight the opposing base. Content loads automatically into verified MEMFS. Vanilla Conquer supplies the original simulation; OpenRA is a content source only. Main-branch releases deploy to Proxmox through the [existing pipeline](docs/runbooks/deployment.md).
+**Live:** [Launch Project Comrade](https://projectcomrade.thunderchildcreativetechnologies.com). Enter a callsign (no account, no install), create or join a game, share the invite link, pick a game style and your side, and deploy.
 
-**War room:** registration-free lobby with a live public-games list, shareable `?room=CODE` invite links, public/invite-only rooms, host-controlled match setup (game style, battlefield, max players, starting credits, tech level) and per-player side selection. Four authored battlefields ship — Tiberium Crossing, Canyon Clash, Tiberium Isles and Desert Standoff — across temperate, winter and desert theatres.
+| Game style | Engine | Multiplayer |
+|---|---|---|
+| **Classic C&C** (Tiberian Dawn) | Original GPL engine (Vanilla Conquer → WASM), freeware art, 4 authored maps | Lobby presence; each commander fights the built-in enemy |
+| **Dune Style** | Comrade Fusion Engine, `dune` rule pack: rock-only building, concrete, spice blooms, sandworms, Atreides / Harkonnen / Ordos | **Synchronized lockstep** with optional AI opponents |
+| **Red Alert 2 Style** | Comrade Fusion Engine, `ra2` rule pack, isometric: MCV deploy, ore regrowth and gems, Chrono Miners, Prism and Tesla tech | **Synchronized lockstep** with optional AI opponents |
 
-The responsive/fullscreen view scales the classic 640×400 framebuffer. An optional **Enhanced view** applies a WebGL sharp-bilinear upscaler for a smoother, higher-resolution look (toggle in-match; the engine is untouched and input passes through). This is a render filter, **not redrawn HD artwork** — redrawn sprites remain a separate asset pipeline. Today the lobby is **presence + configuration**: players share a room and all launch the configured scenario, but each runs an independent local simulation — synchronized online matches (deterministic lockstep) are the next milestone. Red Alert's engine is compiled and served but not yet playable (content pack pending); Dune and RA2 require separate engines. See the ADRs for the design and honest roadmap: [006](docs/adr/006-playable-td-slice.md) engine slice, [007](docs/adr/007-lobby-roster-and-multiplayer.md) lobby/roster, [008](docs/adr/008-synchronized-multiplayer.md) multiplayer, [009](docs/adr/009-dune-and-ra2-engine-roadmap.md) Dune/RA2.
+The **Comrade Fusion Engine** (`packages/fusion`) is one deterministic, data-driven engine: integer simulation, seeded RNG, command-only lockstep with desync checksums, and rule packs that describe a whole game as data. Dune and RA2 are two packs; future original "fusion" games are further packs mixing their parts ([ADR 010](docs/adr/010-fusion-engine.md)). These styles are independent gameplay replications with original procedural art; unit values approximate the classics and are tuned over time.
+
+**War room:** registration-free lobby with a live public-games list, shareable `?room=CODE` invite links, public/invite-only rooms, host-controlled match setup (game style, battlefield, human players, AI opponents, starting credits, tech level) and per-player side selection.
+
+Classic C&C renders the authentic 640×400 framebuffer with an optional WebGL **Enhanced view**; that is a render filter, not redrawn HD art. Red Alert 1 on the original engine is compiled with its freeware content staged; a bootable map is pending ([ADR 007](docs/adr/007-lobby-roster-and-multiplayer.md)). Design records: [006](docs/adr/006-playable-td-slice.md) engine slice, [007](docs/adr/007-lobby-roster-and-multiplayer.md) lobby/roster, [008](docs/adr/008-synchronized-multiplayer.md) multiplayer, [010](docs/adr/010-fusion-engine.md) Fusion Engine.
 
 **Milestone M0 (Foundational Gates):**
 - [x] C01: Code, asset and brand rights ledger
@@ -24,6 +32,7 @@ apps/
   service/          # HTTPS API, WSS, room coordinator
 packages/
   contracts/        # API, pack, match, command schemas
+  fusion/           # Comrade Fusion Engine: deterministic sim, rule packs, renderer, lockstep
   client-runtime/   # Worker bridge, rendering, input, audio
   pack-sdk/         # Adapter registry and conformance runner
 engines/

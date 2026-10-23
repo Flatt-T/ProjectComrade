@@ -94,4 +94,87 @@ try {
     console.log(`${faction}: bundled content, native simulation and audio passed`);
     await page.close();
   }
+
+  // ---------------------------------------------------------------- Fusion Engine
+  const base = process.env.COMRADE_URL || 'http://127.0.0.1:3001';
+  const setSelect = (page, index, value) => page.evaluate(({ index, value }) => {
+    const sel = document.querySelectorAll('select')[index];
+    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, value);
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }, { index, value });
+  const enter = async (page, name) => {
+    await page.getByLabel('Your name').fill(name);
+    await page.getByRole('button', { name: /ENTER THE WAR ROOM/ }).click();
+  };
+  const fusionDeploy = async page => {
+    await page.waitForFunction(() => window.comradeFusion?.game.tick > 30, null, { timeout: 30000 });
+    await page.evaluate(() => {
+      const { game, slot, issue } = window.comradeFusion;
+      const mcv = [...game.entities.values()].find(e => e.owner === slot && game.pack.units[e.type]?.deploysTo);
+      issue({ t: 'deploy', ids: [mcv.id] });
+    });
+    await page.waitForFunction(() => {
+      const { game, slot } = window.comradeFusion;
+      return [...game.entities.values()].some(e => e.owner === slot && game.pack.structures[e.type]?.constructionYard);
+    }, null, { timeout: 30000 });
+  };
+
+  for (const style of ['dune2k', 'ra2']) {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(base);
+    await enter(page, `Smoke ${style}`);
+    await page.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
+    await page.getByRole('button', { name: /START OPERATION/ }).waitFor();
+    await setSelect(page, 0, style);
+    await page.waitForFunction(style => document.querySelector('.room-head .eyebrow')?.textContent.includes(style === 'ra2' ? 'RED ALERT 2' : 'DUNE'), style);
+    await page.getByRole('button', { name: /START OPERATION/ }).click();
+    await fusionDeploy(page);
+    await page.locator('.fusion-item').first().waitFor({ timeout: 10000 }); // Deploying unlocks the build sidebar.
+    await page.screenshot({ path: `build/evidence/${style}-battlefield.png` });
+    assert.deepEqual(errors, [], `${style}: browser must not emit uncaught errors`);
+    console.log(`${style}: Fusion Engine match launched, simulated and deployed`);
+    await page.close();
+  }
+
+  // Two real browsers in one lockstep match.
+  const contextA = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+  const contextB = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+  const a = await contextA.newPage(), b = await contextB.newPage();
+  const errors = [];
+  for (const page of [a, b]) page.on('pageerror', error => errors.push(error.message));
+  await a.goto(base);
+  await enter(a, 'Lockstep A');
+  await a.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
+  await a.getByRole('button', { name: /START OPERATION/ }).waitFor();
+  await setSelect(a, 0, 'dune2k');
+  await a.waitForFunction(() => document.querySelector('.room-head .eyebrow')?.textContent.includes('DUNE'));
+  const invite = await a.locator('.room-share code').innerText();
+  await b.goto(invite);
+  await enter(b, 'Lockstep B');
+  await b.getByRole('button', { name: /READY UP/ }).click();
+  await a.waitForFunction(() => [...document.querySelectorAll('.player')].some(p => p.textContent.includes('Lockstep B') && p.querySelector('.pready.on')));
+  const record = page => page.evaluate(() => {
+    window.__sums = {};
+    const g = window.comradeFusion.game, step = g.step.bind(g);
+    g.step = () => { step(); if (g.tick % 30 === 0) window.__sums[g.tick] = g.checksum(); };
+  });
+  await a.getByRole('button', { name: /START OPERATION/ }).click();
+  for (const page of [a, b]) await page.waitForFunction(() => !!window.comradeFusion, null, { timeout: 30000 });
+  await record(a); await record(b);
+  await fusionDeploy(a);
+  // B's copy of the world must contain A's construction yard: commands crossed the relay.
+  await b.waitForFunction(() => {
+    const { game } = window.comradeFusion;
+    return [...game.entities.values()].some(e => e.owner === 0 && game.pack.structures[e.type]?.constructionYard);
+  }, null, { timeout: 30000 });
+  for (const page of [a, b]) await page.waitForFunction(() => window.comradeFusion.game.tick > 450, null, { timeout: 90000 });
+  const [sa, sb] = await Promise.all([a, b].map(page => page.evaluate(() => window.__sums)));
+  const common = Object.keys(sa).filter(t => t in sb);
+  assert.ok(common.length >= 5, 'Both clients must reach shared checkpoints');
+  for (const t of common) assert.equal(sa[t], sb[t], `Lockstep checksum mismatch at tick ${t}`);
+  assert.deepEqual(errors, [], 'Lockstep clients must not emit uncaught errors');
+  console.log(`Two-browser lockstep match stayed in sync across ${common.length} checkpoints`);
+  await contextA.close(); await contextB.close();
 } finally { await browser.close(); }
