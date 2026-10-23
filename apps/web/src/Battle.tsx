@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EngineModule, loadEngine, mountBundledContent } from '../../../packages/client-runtime/src/engine';
 import { EngineSnapshot, LaunchRequest, parseOrder, STYLES } from '@comrade/contracts';
+import { createUpscaler, Upscaler } from './upscale';
 
 declare global {
   interface Window { comrade?: { snapshot(): EngineSnapshot; order(value: unknown): number } }
@@ -8,9 +9,14 @@ declare global {
 
 export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequest; mapName: string; onExit: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const display = useRef<HTMLCanvasElement>(null);
+  const stack = useRef<HTMLDivElement>(null);
   const engine = useRef<EngineModule>();
+  const upscaler = useRef<Upscaler | null>(null);
   const started = useRef(false);
   const [phase, setPhase] = useState<'loading' | 'playing' | 'error'>('loading');
+  const [enhanced, setEnhanced] = useState(() => localStorage.getItem('comrade-enhanced') === '1');
+  const [enhancedOk, setEnhancedOk] = useState(true);
   const [status, setStatus] = useState('Starting Vanilla Conquer…');
   const [snapshot, setSnapshot] = useState<EngineSnapshot>({ frame: 0 });
   const [logs, setLogs] = useState<string[]>([]);
@@ -55,12 +61,28 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
     })();
   }, [launch]);
 
+  // Enhanced render overlay: sample the engine canvas and upscale it with WebGL.
+  useEffect(() => {
+    upscaler.current?.stop();
+    upscaler.current = null;
+    if (phase === 'playing' && enhanced && canvas.current && display.current) {
+      const up = createUpscaler(canvas.current, display.current);
+      if (up) upscaler.current = up;
+      else setEnhancedOk(false);
+    }
+    return () => { upscaler.current?.stop(); upscaler.current = null; };
+  }, [phase, enhanced]);
+
   const running = phase === 'playing';
   const faction = launch.faction;
+  const useEnhanced = enhanced && enhancedOk;
   return <section className="game-layout">
     <div className="battlefield">
       <div className="screen-top"><span>{faction.toUpperCase()} COMMAND · {mapName.toUpperCase()}</span><span data-testid="engine-status">{status}</span></div>
-      <canvas id="canvas" ref={canvas} width={640} height={400} tabIndex={0} aria-label="Command and Conquer battlefield" onContextMenu={e => e.preventDefault()} />
+      <div className={useEnhanced ? 'canvas-stack enhanced' : 'canvas-stack'} ref={stack}>
+        <canvas id="canvas" ref={canvas} width={640} height={400} tabIndex={0} aria-label="Command and Conquer battlefield" onContextMenu={e => e.preventDefault()} />
+        <canvas className="upscale-display" ref={display} style={{ display: useEnhanced ? 'block' : 'none' }} aria-hidden="true" />
+      </div>
       {phase === 'loading' && <div className="loading" role="status"><span className="loader" /><h2>Establishing battlefield link</h2><p>{status}</p><small>Preparing engine and verifying bundled game files.</small></div>}
       {phase === 'error' && <div className="loading"><h2>Deployment interrupted</h2><p>{status}</p><button onClick={onExit}>Return to lobby</button></div>}
     </div>
@@ -70,7 +92,8 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
       <div className="live-stats" data-testid="telemetry" data-frame={snapshot.frame}><span>CREDITS <b>{snapshot.credits ?? '—'}</b></span><span>POWER <b>{snapshot.power ?? '—'} / {snapshot.drain ?? '—'}</b></span><span>BUILDINGS <b>{snapshot.buildings ?? '—'}</b></span><span>HARVESTED <b>{snapshot.harvested ?? '—'}</b></span><span>SIMULATION <b>{snapshot.frame} ticks</b></span></div>
       {snapshot.won && <p className="victory">MISSION ACCOMPLISHED</p>}{snapshot.defeated && <p className="defeat">MISSION FAILED</p>}
       <button disabled={!running} onClick={() => engine.current?._comrade_audio?.()}>{snapshot.audioRunning ? 'SOUND ENABLED' : 'ENABLE GAME AUDIO'}</button>
-      <button disabled={!running} onClick={() => canvas.current?.requestFullscreen()}>FULLSCREEN BATTLEFIELD ↗</button>
+      <button disabled={!enhancedOk} onClick={() => setEnhanced(v => { try { localStorage.setItem('comrade-enhanced', v ? '0' : '1'); } catch { /* ignore */ } return !v; })} title={enhancedOk ? 'Toggle WebGL smoothing over the classic framebuffer' : 'WebGL is unavailable in this browser'}>{!enhancedOk ? 'ENHANCED VIEW UNAVAILABLE' : useEnhanced ? 'VIEW · ENHANCED (SMOOTH)' : 'VIEW · CLASSIC (SHARP)'}</button>
+      <button disabled={!running} onClick={() => stack.current?.requestFullscreen()}>FULLSCREEN BATTLEFIELD ↗</button>
       <button onClick={onExit}>LEAVE OPERATION</button>
     </aside>
     <details><summary>Engine diagnostics</summary><pre>{logs.join('\n')}</pre></details>
