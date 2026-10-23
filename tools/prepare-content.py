@@ -5,6 +5,7 @@ import json
 import shutil
 import os
 import subprocess
+import sys
 import tarfile
 import urllib.request
 import zipfile
@@ -56,16 +57,10 @@ interface = extracted / 'app/update.mix'
 if hashlib.sha256(interface.read_bytes()).hexdigest() != '15176e03bc6475bf1d65be6d80bc7b53181f034fd36f7959c5e2cd9371f2dc73':
     raise RuntimeError('Gold interface archive checksum mismatch')
 shutil.copyfile(interface, out / 'UPDATE.MIX')
-for name in ('COMRADE.INI', 'COMRADE.BIN'):
-    shutil.copyfile(ROOT / 'packs/td/comrade' / name, out / name)
-files = [{'name': p.name, 'bytes': p.stat().st_size, 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()}
-         for p in sorted(out.iterdir()) if p.suffix in ('.MIX', '.INI', '.BIN')]
 ledger = [json.loads(line) for line in (ROOT / 'rights/ledger.jsonl').read_text().splitlines() if line.strip()]
 approved = next(entry['assetHashes'] for entry in ledger if entry['id'] == 'ledger-017')
-for file in files:
-    if file['name'].endswith('.MIX') and approved.get(file['name']) != file['sha256']:
-        raise RuntimeError(f"Resource is outside the pinned pack decision: {file['name']}")
-(out / 'manifest.json').write_text(json.dumps({'version': 1, 'id': 'comrade-river-crossing-v1',
-    'engine': 'vanilla-td', 'source': url, 'interfaceSource': 'https://cncnet.org/command-and-conquer', 'upstreamManifest': 'https://github.com/OpenRA/OpenRA/blob/bleed/mods/cnc-content/installer/downloads.yaml',
-    'notice': 'Classic game content: Electronic Arts / Westwood freeware content; not GPL artwork. Map: Project Comrade.', 'files': files}, indent=2))
-print(f'Packaged {len(files)} verified content files ({sum(f["bytes"] for f in files):,} bytes)')
+for p in sorted(out.glob('*.MIX')):
+    if approved.get(p.name) != hashlib.sha256(p.read_bytes()).hexdigest():
+        raise RuntimeError(f"Resource is outside the pinned pack decision: {p.name}")
+# Authored scenarios and the manifest (with the lobby's map registry) come from pack-maps.
+subprocess.run([sys.executable, str(ROOT / 'tools/pack-maps.py')], check=True)

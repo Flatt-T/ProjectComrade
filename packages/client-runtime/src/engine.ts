@@ -87,6 +87,9 @@ function applyScenario(ini: string, faction: Faction, settings: MatchSettings): 
       .replace('LOSE=All Destr.,Lose,0,GoodGuy', 'LOSE=All Destr.,Lose,0,BadGuy')
       .replace('RAID=Time,Reinforce.,10,BadGuy', 'RAID=Time,Reinforce.,10,GoodGuy')
       .replace('RAID=BadGuy,', 'RAID=GoodGuy,');
+    // Open the camera on the Nod base rather than the GDI one.
+    const nodHome = /^NodHome=(\d+)$/m.exec(text)?.[1];
+    if (nodHome) text = text.replace(/^26=\d+$/m, `26=${nodHome}`);
   }
   const credits = CREDITS_VALUES[settings.credits];
   text = text.replace(/^Credits=60$/gm, `Credits=${credits}`);

@@ -38,11 +38,23 @@ try {
   oversized.ws.send('x'.repeat(70000));
   await until(() => rejected);
   assert.equal((await (await fetch(`${base}/health`)).json()).status, 'ok', 'An oversized peer must not crash the service');
+  // Only the host may configure; a guest's attempt is rejected.
+  const options = { style: 'td-classic', map: 'canyon-clash', visibility: 'invite', maxPlayers: 4, settings: { credits: 'high', techLevel: 10 } };
+  send(other, { type: 'configure', options });
+  await until(() => other.messages.some(m => m.type === 'error' && /host/.test(m.message)));
+  send(hostClient, { type: 'configure', options });
+  await until(() => latestRoom(other)?.options.map === 'canyon-clash' && latestRoom(other).options.visibility === 'invite');
+  // Configuration resets readiness; start is refused until everyone is ready again.
   send(hostClient, { type: 'start' });
-  await until(() => hostClient.messages.some(m => m.type === 'error' && /not enabled/.test(m.message)));
+  await until(() => hostClient.messages.some(m => m.type === 'error' && /ready/.test(m.message)));
+  send(other, { type: 'ready', ready: true });
+  await until(() => latestRoom(hostClient).players.find(p => !p.host)?.ready === true);
+  send(hostClient, { type: 'start' });
+  await until(() => latestRoom(other).phase === 'started');
   hostClient.ws.close();
   await until(() => latestRoom(other).players.length === 1);
   assert.notEqual(latestRoom(other).host, host);
+  assert.equal(latestRoom(other).phase, 'lobby');
   assert.equal(latestRoom(other).players[0].ready, false);
-  console.log('Health, room membership/readiness, oversized-peer isolation, guarded match start and host transfer passed');
+  console.log('Health, rooms, host-only configuration, ready-gated start, oversized-peer isolation and host transfer passed');
 } finally { for (const ws of clients) ws.close(); }

@@ -19,8 +19,17 @@ try {
     page.on('request', request => { if (/\/content\/td\/[^/]+\.(MIX|INI|BIN)(\?|$)/.test(request.url())) contentRequests.push(request.url()); });
     await page.goto(process.env.COMRADE_URL || 'http://127.0.0.1:3001');
     assert.equal(await page.locator('input[type=file]').count(), 0);
-    if (faction === 'nod') await page.getByRole('button', { name: 'NOD Brotherhood of Nod' }).click();
-    await page.getByRole('button', { name: `DEPLOY ${faction.toUpperCase()} FORCES` }).click();
+    // Registration-free war room: callsign, create a game, pick a side, launch.
+    await page.getByLabel('Your name').fill(`Smoke ${faction}`);
+    await page.getByRole('button', { name: /ENTER THE WAR ROOM/ }).click();
+    await page.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
+    await page.getByRole('button', { name: /START OPERATION/ }).waitFor();
+    assert.match(await page.locator('.room-share code').innerText(), /\?room=[a-z]+-\d{4}$/, 'Rooms must expose a shareable invite link');
+    if (faction === 'nod') {
+      await page.getByRole('button', { name: 'NOD Brotherhood of Nod' }).click();
+      await page.locator('.player.nod').waitFor();
+    }
+    await page.getByRole('button', { name: /START OPERATION/ }).click();
     await page.waitForFunction(() => window.comrade?.snapshot().frame > 30, null, { timeout: 120000 });
     const release = await page.evaluate(async () => (await (await fetch('/health', { cache: 'no-store' })).json()).commit);
     assert.equal(engineRequests.length, 2);
@@ -36,7 +45,7 @@ try {
     console.log(`${faction}: simulation and OpenAL context running`);
     if (faction === 'gdi') {
       await page.getByTestId('engine-status').filter({ hasText: 'Battlefield active' }).waitFor();
-      const box = await page.locator('canvas').boundingBox();
+      const box = await page.locator('#canvas').boundingBox();
       const click = async (x, y) => {
         await page.mouse.move(box.x + x * box.width / 640, box.y + y * box.height / 400);
         await page.waitForTimeout(200);
