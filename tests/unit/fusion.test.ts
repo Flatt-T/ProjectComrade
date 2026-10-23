@@ -96,6 +96,10 @@ describe('fusion gameplay', () => {
     const trap = [...game.entities.values()].find(e => e.owner === 0 && e.type === 'windtrap')!;
     expect(trap.hp).toBe(Math.floor(trap.maxHp / 2));
     expect(p.powerGen).toBe(120);
+    // Nothing attacks it, so it keeps that health: there is no slow erosion.
+    const hp = trap.hp;
+    for (let i = 0; i < 1800; i++) game.step();
+    expect(trap.hp).toBe(hp);
   });
 
   it('ra2: chrono miners teleport home and ore regrows', () => {

@@ -3,9 +3,10 @@ import { LaunchRequest, styleInfo } from '@comrade/contracts';
 import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, QueueKind, RulePack, Session } from '../../../packages/fusion/src/index';
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
+import TechTree from './TechTree';
 
 type Mode = 'normal' | 'place' | 'sell' | 'repair' | 'attackMove' | 'super';
-interface SuperView { id: number; name: string; frac: number; ready: boolean; kind: string }
+interface SuperView { id: number; name: string; frac: number; ready: boolean; kind: string; paused: boolean }
 const ALL_TABS: { id: QueueKind; label: string }[] = [
   { id: 'structure', label: 'Base' }, { id: 'defense', label: 'Defence' }, { id: 'infantry', label: 'Infantry' }, { id: 'vehicle', label: 'Vehicles' },
   { id: 'aircraft', label: 'Air' }, { id: 'naval', label: 'Navy' }, { id: 'starport', label: 'Starport' },
@@ -59,6 +60,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const [messages, setMessages] = useState<{ text: string; at: number }[]>([]);
   const [modeView, setModeView] = useState<Mode>('normal');
   const [help, setHelp] = useState(false);
+  const [tree, setTree] = useState(false);
 
   const setup = useMemo(() => {
     const humans = launch.players?.length ? launch.players : [{ id: 'local', name: 'Commander', faction: launch.faction }];
@@ -182,7 +184,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           const ready = e.charge >= sw.charge;
           if (ready && !readySupers.has(e.id) && game.tick > 30) say(`${sw.name} ready`);
           if (ready) readySupers.add(e.id); else readySupers.delete(e.id);
-          supers.push({ id: e.id, name: sw.name, frac: Math.min(1, e.charge / sw.charge), ready, kind: sw.kind });
+          supers.push({ id: e.id, name: sw.name, frac: Math.min(1, e.charge / sw.charge), ready, kind: sw.kind, paused: !ready && low });
         }
         for (const fx of game.effects) {
           if (fx.kind === 'infiltrate' && fx.owner !== slot && !announced.has(fx) && game.tick - fx.tick < fx.dur && game.entities.get([...game.entities.values()].find(e => e.kind === 'structure' && e.x === fx.x && e.y === fx.y)?.id ?? 0)?.owner === slot) { announced.add(fx); say('Building infiltrated'); }
@@ -264,6 +266,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       else if (ev.key === ' ') { ev.preventDefault(); if (lastAlert.current) renderer.centerOn(lastAlert.current.x, lastAlert.current.y); }
       else if (ev.key === 'Escape') { setMode('normal'); renderer.selected = new Set(); }
       else if (ev.key === '?' || ev.key === 'F1') { ev.preventDefault(); setHelp(v => !v); }
+      else if (ev.key === 'F2') { ev.preventDefault(); setTree(v => !v); }
     };
     const keyup = (ev: KeyboardEvent) => keys.current.delete(ev.key);
     window.addEventListener('keydown', keydown);
@@ -486,6 +489,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       <div className="fusion-messages">{messages.filter(m => performance.now() - m.at < 5000).map(m => <p key={m.at}>{m.text}</p>)}</div>
       {ui?.status && <div className="fusion-banner">{ui.status}</div>}
       {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? (superFrom.current ? 'Choose the destination — right-click cancels' : 'Choose the target — right-click cancels') : 'Attack-move — click a destination'}</div>}
+      {tree && rig.current && <TechTree game={rig.current.game} slot={slot} color={faction.color} accent={faction.accent} onClose={() => setTree(false)} />}
       {help && <div className="fusion-help" onClick={() => setHelp(false)}>
         <h3>Controls</h3>
         <p><b>Left click</b> select · order move / attack / harvest · <b>Right click</b> deselect / cancel</p>
@@ -493,7 +497,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <p><b>Ctrl</b>+click force-fire (any target, or ground) · <b>Alt</b>+click force-move</p>
         <p><b>Ctrl+1–9</b> create team · <b>1–9</b> select (twice: centre) · <b>Shift+1–9</b> add team to selection · <b>Alt+1–9</b> add selection to team</p>
         <p><b>T</b> same type (twice: whole map) · <b>P</b> all combat units · <b>G</b> guard · <b>X</b> scatter · <b>S</b> stop · <b>D</b> deploy · <b>A</b> attack-move</p>
-        <p><b>H</b> home · <b>Space</b> last alert · <b>Esc</b> cancel · <b>F1</b> this card</p>
+        <p><b>H</b> home · <b>Space</b> last alert · <b>Esc</b> cancel · <b>F1</b> this card · <b>F2</b> tech tree</p>
         <p><b>Click a selected MCV</b> to deploy · <b>Wheel</b> zoom · <b>Arrows / screen edge</b> scroll</p>
         <p><b>Engineer</b> on a building: capture (enemy) or repair (own) · <b>Spy</b>: infiltrate · <b>Damaged vehicle</b> on a repair pad: repair · <b>Aircraft</b> on an airfield: rearm</p>
         <p><b>D</b> also digs in G.I.s, sets up Desolators and starts Thumpers · <b>Chronosphere</b>: pick the area, then the destination</p>
@@ -537,12 +541,13 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         onClick={() => { superId.current = sp.id; setMode('super'); }}>
         <span className="name">{sp.name}</span>
         <span className="bar"><i style={{ width: `${Math.round(sp.frac * 100)}%` }} /></span>
-        <span className="state">{sp.ready ? (sp.kind === 'reinforce' || sp.kind === 'paradrop' ? 'READY — CLICK TO CALL IN' : 'READY — CLICK TO TARGET') : `${Math.round(sp.frac * 100)}%`}</span>
+        <span className="state">{sp.ready ? (sp.kind === 'reinforce' || sp.kind === 'paradrop' ? 'READY — CLICK TO CALL IN' : 'READY — CLICK TO TARGET') : sp.paused ? `${Math.round(sp.frac * 100)}% — PAUSED, LOW POWER` : `${Math.round(sp.frac * 100)}%`}</span>
       </button>)}
       <div className="fusion-actions">
         <button className={modeView === 'sell' ? 'on' : ''} onClick={() => setMode(modeView === 'sell' ? 'normal' : 'sell')}>SELL</button>
         <button className={modeView === 'repair' ? 'on' : ''} onClick={() => setMode(modeView === 'repair' ? 'normal' : 'repair')}>REPAIR</button>
         <button onClick={() => setHelp(v => !v)}>KEYS</button>
+        <button className={tree ? 'on' : ''} onClick={() => setTree(v => !v)}>TECH</button>
       </div>
       {ui?.selection && <div className="fusion-selection">
         <b>{ui.selection.count > 1 ? `${ui.selection.count} selected` : ui.selection.name}</b>

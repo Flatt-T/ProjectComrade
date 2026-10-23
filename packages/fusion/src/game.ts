@@ -187,7 +187,8 @@ export class Game {
   private nextId = 1;
   private pending = new Map<number, { slot: number; cmd: Command }[]>();
   private powerDirty = true;
-  private techCap: number;
+  /** Highest tech level buildable in this match (the lobby setting mapped to 1..10). */
+  readonly techCap: number;
   private ai: (AIState | null)[] = [];
   readonly mapPreset: MapPreset;
 
@@ -1264,12 +1265,6 @@ export class Game {
       const cost = Math.max(1, Math.floor((def.cost * heal) / (s.maxHp * 4)));
       if (p.credits >= cost) { p.credits -= cost; s.hp = Math.min(s.maxHp, s.hp + heal); } else s.repairing = false;
       if (s.hp >= s.maxHp) s.repairing = false;
-    }
-    // Sand erosion: exposed Dune buildings decay to their uncovered floor, even after repair.
-    const concrete = this.pack.mechanics.concrete;
-    if (s.exposed && concrete && this.tick % 60 === 0) {
-      const floor = Math.floor((s.maxHp * concrete.uncoveredStartPercent) / 100);
-      if (s.hp > floor) s.hp = Math.max(floor, s.hp - Math.max(1, Math.floor(s.maxHp / 200)));
     }
     if (def.repairPad && p && this.tick % 6 === 0) this.servicePad(s, p);
     const sw = this.superweaponOf(s);

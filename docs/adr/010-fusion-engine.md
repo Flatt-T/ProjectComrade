@@ -84,8 +84,9 @@ only as visual reference; no original pixels, sprites or tiles are used or bundl
   depth-sorted scenery, and the shroud as a smoothly scaled soft mask.
 
 Gameplay fidelity from the same review: RA2 costs and prerequisites were corrected
-against published structure tables, and Dune buildings placed off concrete now erode
-back to half health over time even after repair, as in Dune 2000.
+against published structure tables, and Dune buildings placed off concrete start at half
+health (repairable). An earlier ongoing erosion rule was removed: buildings losing health
+with nothing attacking them read as a bug in play.
 
 ## Animation and superweapons (update 2026-10-23)
 

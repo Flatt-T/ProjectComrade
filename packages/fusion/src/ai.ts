@@ -81,8 +81,7 @@ export function runAI(game: Game, p: Player, s: AIState) {
   }
 
   // Keep damaged buildings repaired while the treasury allows it.
-  // Dune buildings off concrete erode back to half health anyway, so only mend those badly hurt.
-  if (p.credits > 800) for (const e of structures) if (!e.repairing && e.hp < e.maxHp * (e.exposed ? 0.4 : 0.75)) { game.enqueue(p.slot, { t: 'repair', id: e.id }); break; }
+  if (p.credits > 800) for (const e of structures) if (!e.repairing && e.hp < e.maxHp * 0.75) { game.enqueue(p.slot, { t: 'repair', id: e.id }); break; }
 
   // 3. Defences once the economy is running.
   const dq = p.queues.defense;
