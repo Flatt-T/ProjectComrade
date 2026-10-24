@@ -46,9 +46,13 @@ export function factionAllowed(style: GameStyle, faction: unknown): faction is F
 export type Visibility = 'public' | 'invite';
 export type CreditsPreset = 'low' | 'standard' | 'high';
 export type AILevel = 'easy' | 'normal' | 'hard';
-/** `ai` is the number of computer opponents added to Fusion Engine matches (0..3); `aiLevel` how hard they play. */
-export interface MatchSettings { credits: CreditsPreset; techLevel: number; ai: number; aiLevel: AILevel }
-export const DEFAULT_SETTINGS: MatchSettings = { credits: 'standard', techLevel: 15, ai: 1, aiLevel: 'normal' };
+/**
+ * `ai` is the number of computer opponents added to Fusion Engine matches (0..3); `aiLevel` how hard they play.
+ * `worms` is sandworm activity as a percent of the rule pack's base rate (0 = no worms, 100 = pack default).
+ */
+export interface MatchSettings { credits: CreditsPreset; techLevel: number; ai: number; aiLevel: AILevel; worms: number }
+export const WORMS_MAX = 200;
+export const DEFAULT_SETTINGS: MatchSettings = { credits: 'standard', techLevel: 15, ai: 1, aiLevel: 'normal', worms: 50 };
 export const CREDITS_VALUES: Record<CreditsPreset, number> = { low: 30, standard: 60, high: 120 };
 
 export interface RoomOptions { style: GameStyle; map: string; visibility: Visibility; maxPlayers: number; settings: MatchSettings }
@@ -113,7 +117,8 @@ export function parseSettings(value: unknown): MatchSettings {
   const techLevel = typeof v.techLevel === 'number' && Number.isInteger(v.techLevel) && v.techLevel >= 1 && v.techLevel <= 15 ? v.techLevel : 15;
   const ai = typeof v.ai === 'number' && Number.isInteger(v.ai) && v.ai >= 0 && v.ai <= 3 ? v.ai : DEFAULT_SETTINGS.ai;
   const aiLevel = ['easy', 'normal', 'hard'].includes(String(v.aiLevel)) ? v.aiLevel as AILevel : DEFAULT_SETTINGS.aiLevel;
-  return { credits, techLevel, ai, aiLevel };
+  const worms = typeof v.worms === 'number' && Number.isInteger(v.worms) && v.worms >= 0 && v.worms <= WORMS_MAX ? v.worms : DEFAULT_SETTINGS.worms;
+  return { credits, techLevel, ai, aiLevel, worms };
 }
 export function parseOptions(value: unknown): RoomOptions {
   const v = object(value);

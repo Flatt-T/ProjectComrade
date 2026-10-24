@@ -250,6 +250,32 @@ describe('fusion packs compose from existing games', () => {
   });
 });
 
+describe('sandworm activity setting', () => {
+  const appear = dunePack.mechanics.sandworm!.appearAfter;
+  const dune = (worms?: number) => new Game({ ...ai2(dunePack, 5), worms });
+
+  it('0 turns worms off; lower rates delay their arrival and lengthen their dives', () => {
+    const off = dune(0);
+    run(off, appear * 3);
+    expect(off.worms.length).toBe(0);
+
+    const classic = dune(100), half = dune(50);
+    run(classic, appear + 2); run(half, appear + 2);
+    expect(classic.worms.length).toBe(1);
+    expect(half.worms.length).toBe(0); // at 50% the first worm waits twice as long
+    run(half, appear);
+    expect(half.worms.length).toBe(1);
+  });
+
+  it('defaults to classic behaviour when the setup omits it, and parses from the lobby', async () => {
+    const { parseSettings, DEFAULT_SETTINGS } = await import('../../packages/contracts/src/index');
+    expect(dune().wormRate).toBe(100);
+    expect(parseSettings({ worms: 125 }).worms).toBe(125);
+    expect(parseSettings({ worms: 999 }).worms).toBe(DEFAULT_SETTINGS.worms);
+    expect(parseSettings({}).worms).toBe(DEFAULT_SETTINGS.worms);
+  });
+});
+
 describe('fusion superweapons', () => {
   const setup = (seed = 8): GameSetup => ({ pack: ra2Pack, mapId: 'temperate-valley', seed, players: [{ name: 'S', faction: 'russia', ai: false }, { name: 'A', faction: 'america', ai: false }] });
   const enemyHp = (g: Game) => [...g.entities.values()].filter(e => e.owner === 1).reduce((n, e) => n + e.hp, 0);

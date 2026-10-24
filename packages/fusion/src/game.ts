@@ -35,6 +35,8 @@ export interface GameSetup {
   credits?: CreditsPreset;
   /** 1..15, matching the lobby setting; 15 unlocks everything. */
   techLevel?: number;
+  /** Sandworm activity, percent of the pack's base rate (0 = none, default 100). */
+  worms?: number;
 }
 
 export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy' | 'enter' | 'rearm' | 'ferry';
@@ -197,6 +199,8 @@ export class Game {
   private powerDirty = true;
   /** Highest tech level buildable in this match (the lobby setting mapped to 1..10). */
   readonly techCap: number;
+  /** Sandworm activity percent (0 = none): scales how long worms stay under between attacks. */
+  readonly wormRate: number;
   private ai: (AIState | null)[] = [];
   readonly mapPreset: MapPreset;
 
@@ -207,6 +211,7 @@ export class Game {
     this.map = generateMap(setup.pack, preset, setup.seed);
     this.rng = new Rng(setup.seed);
     this.techCap = Math.ceil(((setup.techLevel ?? 15) * 10) / 15);
+    this.wormRate = Math.max(0, Math.min(200, Math.trunc(setup.worms ?? 100)));
     const credits = setup.pack.startCredits[setup.credits ?? 'standard'];
     const size = this.map.w * this.map.h;
     setup.players.slice(0, preset.starts.length).forEach((p, slot) => {
@@ -1376,7 +1381,7 @@ export class Game {
     if (m.regrowth && this.tick % m.regrowth.everyTicks === 0) this.regrow(m.regrowth.amount, m.regrowth.spreadChance);
     this.pack.resources.forEach((r, k) => { if (r.regrowEvery && this.tick % r.regrowEvery === 0) this.regrowFields(k + 1); });
     if (m.bloom && this.tick % m.bloom.everyTicks === 0) this.bloom(m.bloom.radius, m.bloom.resource);
-    if (m.sandworm) this.sandworms(m.sandworm);
+    if (m.sandworm && this.wormRate > 0) this.sandworms(m.sandworm);
   }
 
   private regrow(amount: number, spreadChance: number) {
@@ -1427,8 +1432,11 @@ export class Game {
     }
   }
 
+  /** Stretch (or shrink) a worm's time underground by the match's activity setting. */
+  private wormDelay(ticks: number) { return Math.max(1, Math.trunc((ticks * 100) / this.wormRate)); }
+
   private sandworms(cfg: NonNullable<RulePack['mechanics']['sandworm']>) {
-    if (this.tick < cfg.appearAfter) return;
+    if (this.tick < this.wormDelay(cfg.appearAfter)) return;
     // Where worms can go: sand by default; fusions can let them swim (habitat includes water).
     const habitat = cfg.habitat ? new Set(cfg.habitat.map(id => this.pack.terrains.findIndex(t => t.id === id))) : null;
     const isSand = (x: number, y: number) => {
@@ -1464,7 +1472,7 @@ export class Game {
         if (worm.hp <= 0) worm.hidden = 30;
         continue;
       }
-      if (worm.hp <= 0) { worm.hidden = 600; this.effect('wormDive', worm.x, worm.y, 0, 0, 20); continue; }
+      if (worm.hp <= 0) { worm.hidden = this.wormDelay(600); this.effect('wormDive', worm.x, worm.y, 0, 0, 20); continue; }
       let prey = this.entities.get(worm.target);
       if (!prey || prey.hp <= 0 || prey.kind !== 'unit' || prey.carriedBy || !isSand(prey.x, prey.y)) {
         prey = undefined; worm.target = 0;
@@ -1500,7 +1508,7 @@ export class Game {
       if (prey && d < LEPTONS) {
         if (this.rng.chance(cfg.eatChance)) this.damage(prey, prey.hp, -1); else this.damage(prey, cfg.damage, -1);
         this.effect('wormEat', prey.x, prey.y, 0, 0, 30);
-        worm.hidden = 450 + this.rng.int(300);
+        worm.hidden = this.wormDelay(450 + this.rng.int(300));
         continue;
       }
       if (d > 0) {

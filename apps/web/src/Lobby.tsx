@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  AILevel, CreditsPreset, GameStyle, LaunchRequest, MapInfo, RoomOptions, RoomState, RoomSummary, STYLES, styleInfo,
+  AILevel, CreditsPreset, DEFAULT_SETTINGS, GameStyle, LaunchRequest, MapInfo, RoomOptions, RoomState, RoomSummary, STYLES, styleInfo, WORMS_MAX,
 } from '@comrade/contracts';
 import { PACKS } from '../../../packages/fusion/src/index';
 import type { RoomConnection } from './net';
@@ -126,6 +126,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     const mapMax = chosenMap?.maxPlayers ?? 2;
     const aiMax = Math.max(0, mapMax - room.players.length);
     const fusion = style.engine === 'fusion';
+    const hasWorms = fusion && !!style.pack && !!PACKS[style.pack]?.mechanics.sandworm;
+    const worms = room.options.settings.worms ?? DEFAULT_SETTINGS.worms;
     return <div className="lobby-room">
       <div className="room-main">
         <div className="room-head"><div><p className="eyebrow">WAR ROOM · {style.name.toUpperCase()}</p><h2>{room.room}</h2></div>
@@ -200,6 +202,11 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
         <label>Tech level<select disabled={!isHost} value={room.options.settings.techLevel} onChange={e => configureSettings({ techLevel: Number(e.target.value) })}>
           {[3, 6, 10, 15].map(n => <option key={n} value={n}>Level {n}{n === 15 ? ' (full)' : ''}</option>)}
         </select></label>
+        {hasWorms && <label>Sandworm activity · {worms === 0 ? 'Off' : `${worms}%`}
+          <input type="range" min={0} max={WORMS_MAX} step={25} disabled={!isHost} value={worms} aria-label="Sandworm activity"
+            onChange={e => configureSettings({ worms: Number(e.target.value) })} />
+          <small>{worms === 0 ? 'No sandworms this match.' : worms < 100 ? 'Worms surface less often.' : worms > 100 ? 'Worms surface more often.' : 'Classic worm frequency.'}</small>
+        </label>}
         {!isHost && <small>Only the host can change these.</small>}
       </aside>
     </div>;

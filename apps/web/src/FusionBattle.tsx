@@ -121,7 +121,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   };
 
   useEffect(() => {
-    const game = new Game({ pack, mapId: setup.mapId, seed: setup.seed, players: setup.players, credits: launch.settings.credits, techLevel: launch.settings.techLevel });
+    const game = new Game({ pack, mapId: setup.mapId, seed: setup.seed, players: setup.players, credits: launch.settings.credits, techLevel: launch.settings.techLevel, worms: launch.settings.worms ?? 100 });
     const humans = Array.from({ length: setup.humans }, (_, i) => i);
     const session: Session = setup.humans > 1 ? new LockstepSession(game, slot, humans, conn.transport()) : new LocalSession(game, slot);
     const renderer = new FusionRenderer(canvas.current!, game, slot);

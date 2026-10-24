@@ -129,3 +129,21 @@ body.touch-battle{overflow:hidden;overscroll-behavior:none}
 .fusion-battle.touch .fusion-sidebar>*,.game-layout.touch .command-panel>*{flex-shrink:0}
 .fusion-battle.touch .fusion-sidebar{padding-bottom:max(28px,calc(env(safe-area-inset-bottom) + 20px))}
 .fusion-battle.touch .fusion-leave{margin-top:6px}
+
+/*
+ * Short screens: keep every battle's build controls on screen.
+ * Classic: size the battlefield to the window height (so the original in-game build sidebar is
+ * never cut off at the bottom) and let the command panel scroll. Fusion: the sidebar scrolls
+ * instead of squashing its sections.
+ */
+@media(min-width:1101px){
+  .game-layout:not(.touch){align-items:start}
+  .game-layout:not(.touch) .canvas-stack{width:min(100%,calc((100vh - 200px)*1.6));margin:0 auto}
+  .game-layout:not(.touch) .canvas-stack:fullscreen{width:100vw;height:100vh;margin:0}
+  .game-layout:not(.touch) .command-panel{max-height:calc(100vh - 150px);overflow-y:auto;overscroll-behavior:contain}
+}
+.command-panel,.fusion-sidebar{scrollbar-width:thin;scrollbar-color:#4a545c #111}
+.fusion-battle{grid-template-rows:minmax(0,1fr)}
+.fusion-sidebar>*{flex-shrink:0}
+@media(max-width:900px){.fusion-battle{grid-template-rows:auto}}
+.room-config input[type=range]{accent-color:#b4d96b;width:100%;margin:4px 0 0}
