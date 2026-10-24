@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { EngineModule, loadEngine, mountBundledContent } from '../../../packages/client-runtime/src/engine';
 import { EngineSnapshot, LaunchRequest, parseOrder, STYLES } from '@comrade/contracts';
 import { createUpscaler, Upscaler } from './upscale';
-import { attachTouchGestures, goLandscape, isTouchDevice } from './touch';
+import { attachTouchGestures, goLandscape, isTouchDevice, trackVisibleHeight } from './touch';
 import { enterBattleHelp, toggleHelp } from './help';
 
 /** Send a mouse event to the engine canvas, which SDL reads as the pointer. */
@@ -47,6 +47,7 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
     const c = canvas.current;
     void goLandscape();
     document.body.classList.add('touch-battle');
+    const untrack = trackVisibleHeight();
     const inside = (on: boolean) => { if (engine.current) engine.current.comradePointerInside = on; };
     let idle = 0;
     const stopScroll = () => { clearTimeout(idle); inside(false); };
@@ -73,7 +74,7 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
     window.addEventListener('touchend', once, { once: true });
     return () => {
       off(); stopScroll(); window.removeEventListener('touchend', once);
-      document.body.classList.remove('touch-battle');
+      document.body.classList.remove('touch-battle'); untrack();
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
     };
   }, [touch]);

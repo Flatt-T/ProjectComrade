@@ -128,6 +128,36 @@ export function isTouchDevice() {
   return matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints > 0 && matchMedia('(hover: none)').matches);
 }
 
+/**
+ * Keep `--app-h` on the page equal to the height the player can actually see. Mobile
+ * browsers' address and tool bars make 100vh (and on some browsers 100dvh) taller than
+ * the visible area, which pushed the bottom of the build drawer off screen.
+ */
+export function trackVisibleHeight() {
+  const root = document.documentElement;
+  const vv = window.visualViewport;
+  const update = () => {
+    const h = Math.round(Math.min(window.innerHeight, vv?.height ?? Infinity));
+    if (h > 0) root.style.setProperty('--app-h', `${h}px`);
+  };
+  update();
+  // Bars slide in and out after rotation and full-screen changes; measure again once settled.
+  const later = () => { update(); setTimeout(update, 250); setTimeout(update, 800); };
+  window.addEventListener('resize', later);
+  window.addEventListener('orientationchange', later);
+  document.addEventListener('fullscreenchange', later);
+  vv?.addEventListener('resize', update);
+  vv?.addEventListener('scroll', update);
+  return () => {
+    window.removeEventListener('resize', later);
+    window.removeEventListener('orientationchange', later);
+    document.removeEventListener('fullscreenchange', later);
+    vv?.removeEventListener('resize', update);
+    vv?.removeEventListener('scroll', update);
+    root.style.removeProperty('--app-h');
+  };
+}
+
 /** Go full screen and turn to landscape where the browser allows it (needs a user gesture). */
 export async function goLandscape() {
   try {

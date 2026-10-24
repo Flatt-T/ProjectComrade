@@ -7,7 +7,7 @@ import TechTree from './TechTree';
 import { enterBattleHelp, helpAvailable, helpOpen, toggleHelp, typingIn } from './help';
 import { recordAction, recordEvent, recordNotice, setMatchSnapshot } from './diagnostics';
 import Chat from './Chat';
-import { attachTouchGestures, goLandscape, isTouchDevice } from './touch';
+import { attachTouchGestures, goLandscape, isTouchDevice, trackVisibleHeight } from './touch';
 import { AudioSettings, FusionAudio, loadAudioSettings, saveAudioSettings } from '../../../packages/fusion/src/audio';
 
 /** Notices that have an EVA voice line (the meaning keys of the sound tables). */
@@ -441,6 +441,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     if (!touch) return;
     void goLandscape();
     document.body.classList.add('touch-battle');
+    const untrack = trackVisibleHeight();
     const box = { x: 0, y: 0 };
     const off = attachTouchGestures(canvas.current!, {
       tap: (x, y) => gestures.current.touchTap(x, y),
@@ -473,7 +474,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     window.addEventListener('touchend', once, { once: true });
     return () => {
       off(); window.removeEventListener('touchend', once);
-      document.body.classList.remove('touch-battle');
+      document.body.classList.remove('touch-battle'); untrack();
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
     };
   }, []);

@@ -147,3 +147,8 @@ body.touch-battle{overflow:hidden;overscroll-behavior:none}
 .fusion-sidebar>*{flex-shrink:0}
 @media(max-width:900px){.fusion-battle{grid-template-rows:auto}}
 .room-config input[type=range]{accent-color:#b4d96b;width:100%;margin:4px 0 0}
+/* Size the battle to the measured visible height (set from script), not 100vh/100dvh,
+   and leave clear room under the last row of the drawer. */
+.fusion-battle.touch,.game-layout.touch{top:0;bottom:0;height:auto;max-height:var(--app-h,none)}
+.fusion-battle.touch .fusion-sidebar,.game-layout.touch .command-panel{padding-bottom:max(64px,calc(env(safe-area-inset-bottom) + 48px))}
+.game-layout.touch .canvas-stack{width:min(100vw,calc(var(--app-h,100dvh) * 1.6),160dvh)}
