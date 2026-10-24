@@ -6,6 +6,7 @@ import type { RoomConnection } from './net';
 import TechTree from './TechTree';
 import { recordAction, recordEvent, recordNotice, setMatchSnapshot } from './diagnostics';
 import Chat from './Chat';
+import { attachTouchGestures, goLandscape, isTouchDevice } from './touch';
 import { AudioSettings, FusionAudio, loadAudioSettings, saveAudioSettings } from '../../../packages/fusion/src/audio';
 
 /** Notices that have an EVA voice line (the meaning keys of the sound tables). */
@@ -71,6 +72,14 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const [modeView, setModeView] = useState<Mode>('normal');
   const [help, setHelp] = useState(false);
   const [tree, setTree] = useState(false);
+  /** Phones and tablets: full-screen landscape, gestures, and the sidebar in a drawer. */
+  const [touch] = useState(isTouchDevice);
+  const touchRef = useRef(touch);
+  const [drawer, setDrawer] = useState(() => !touch || window.innerWidth >= 1000);
+  const [rotateOk, setRotateOk] = useState(false);
+  /** Touch placement: the first tap moves the outline, a tap on the outline builds. */
+  const touchGhost = useRef(false);
+  const boxing = useRef(false);
 
   const setup = useMemo(() => {
     const humans = launch.players?.length ? launch.players : [{ id: 'local', name: 'Commander', faction: launch.faction }];
@@ -352,7 +361,120 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     if (m !== 'super') superFrom.current = null;
     mode.current = m; setModeView(m);
     if (m !== 'place') placing.current = null;
+    if (touchRef.current && m !== 'normal') {
+      // Show the map for targeting; start a building's outline in the middle of it.
+      if (window.innerWidth < 1000) setDrawer(false);
+      if (m === 'place' && canvas.current) { Object.assign(pointer.current, { x: canvas.current.width / 2, y: canvas.current.height / 2 }); touchGhost.current = true; }
+    }
   }
+
+  /** Classic hotkeys, for the on-screen touch buttons. */
+  const press = (key: string, code = '') => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key, code }));
+    window.dispatchEvent(new KeyboardEvent('keyup', { key, code }));
+  };
+
+  function zoomAt(x: number, y: number, factor: number) {
+    const r = rig.current; if (!r) return;
+    const cam = r.renderer.camera;
+    const before = { x: x / cam.zoom + cam.x, y: y / cam.zoom + cam.y };
+    cam.zoom = Math.max(0.6, Math.min(2.2, cam.zoom * factor));
+    cam.x = before.x - x / cam.zoom; cam.y = before.y - y / cam.zoom;
+    r.renderer.clampCamera();
+  }
+
+  function boxSelect(sx: number, sy: number, ex: number, ey: number, add: boolean) {
+    const r = rig.current; if (!r) return;
+    const { game, renderer } = r;
+    const x1 = Math.min(sx, ex), x2 = Math.max(sx, ex), y1 = Math.min(sy, ey), y2 = Math.max(sy, ey);
+    const picked: number[] = [];
+    for (const e of game.entities.values()) {
+      if (e.owner !== slot || e.kind !== 'unit' || e.hp <= 0) continue;
+      const s = renderer.toScreen(e.x, e.y);
+      if (s.x >= x1 && s.x <= x2 && s.y >= y1 && s.y <= y2) picked.push(e.id);
+    }
+    renderer.selected = new Set(add ? [...renderer.selected, ...picked] : picked);
+    audio.current?.reply(selectedUnits(), 'select');
+  }
+
+  function selectSameType(x: number, y: number) {
+    const r = rig.current; if (!r) return;
+    const target = r.renderer.pick(x, y);
+    if (!target || target.owner !== slot || target.kind !== 'unit') return;
+    const c = canvas.current!;
+    const same = [...r.game.entities.values()].filter(e => {
+      if (e.owner !== slot || e.type !== target.type || e.hp <= 0) return false;
+      const s = r.renderer.toScreen(e.x, e.y);
+      return s.x >= 0 && s.y >= 0 && s.x <= c.width && s.y <= c.height;
+    });
+    r.renderer.selected = new Set(same.map(e => e.id));
+  }
+
+  /** Right click: leave the current mode, or clear the selection. */
+  function cancelOrDeselect() {
+    const r = rig.current; if (!r) return;
+    if (mode.current !== 'normal') { setMode('normal'); return; }
+    r.renderer.selected = new Set();
+  }
+
+  function touchTap(x: number, y: number) {
+    const r = rig.current; if (!r) return;
+    const pt = pointer.current;
+    if (mode.current === 'place' && placing.current) {
+      const def = pack.structures[placing.current], at = r.renderer.screenToCell(pt.x, pt.y), cell = r.renderer.screenToCell(x, y);
+      const g = { x: at.x - ((def.w - 1) >> 1), y: at.y - ((def.h - 1) >> 1) };
+      const onGhost = touchGhost.current && cell.x >= g.x && cell.x < g.x + def.w && cell.y >= g.y && cell.y < g.y + def.h;
+      if (!onGhost) { Object.assign(pt, { x, y }); touchGhost.current = true; return; }
+      click(pt.x, pt.y, { shift: false, ctrl: false, alt: false });
+      return;
+    }
+    Object.assign(pt, { x, y });
+    click(x, y, { shift: false, ctrl: false, alt: false });
+  }
+
+  // Latest handlers for the gesture listener, which is attached once.
+  const gestures = useRef({ touchTap, zoomAt, boxSelect, selectSameType, cancelOrDeselect });
+  gestures.current = { touchTap, zoomAt, boxSelect, selectSameType, cancelOrDeselect };
+  useEffect(() => {
+    if (!touch) return;
+    void goLandscape();
+    document.body.classList.add('touch-battle');
+    const box = { x: 0, y: 0 };
+    const off = attachTouchGestures(canvas.current!, {
+      tap: (x, y) => gestures.current.touchTap(x, y),
+      doubleTap: (x, y) => { if (mode.current === 'normal') gestures.current.selectSameType(x, y); },
+      pan: (dx, dy) => {
+        const r = rig.current; if (!r) return;
+        r.renderer.camera.x -= dx / r.renderer.camera.zoom; r.renderer.camera.y -= dy / r.renderer.camera.zoom;
+        r.renderer.clampCamera();
+      },
+      pinch: (f, x, y) => gestures.current.zoomAt(x, y, f),
+      boxStart: (x, y) => {
+        Object.assign(box, { x, y });
+        boxing.current = mode.current === 'normal';
+        if (boxing.current && rig.current) rig.current.renderer.dragBox = { x1: x, y1: y, x2: x, y2: y };
+      },
+      boxMove: (x, y) => { if (boxing.current && rig.current) rig.current.renderer.dragBox = { x1: box.x, y1: box.y, x2: x, y2: y }; },
+      boxEnd: (x, y) => {
+        if (rig.current) rig.current.renderer.dragBox = null;
+        if (!boxing.current) { gestures.current.touchTap(x, y); return; }
+        boxing.current = false;
+        // A long press that never moved selects everything of that type on screen.
+        if (Math.hypot(x - box.x, y - box.y) < 12) gestures.current.selectSameType(x, y);
+        else gestures.current.boxSelect(box.x, box.y, x, y, false);
+      },
+      boxCancel: () => { boxing.current = false; if (rig.current) rig.current.renderer.dragBox = null; },
+      twoFingerTap: () => gestures.current.cancelOrDeselect(),
+    });
+    // Fallback: some browsers only allow full screen from inside a tap.
+    const once = () => { void goLandscape(); };
+    window.addEventListener('touchend', once, { once: true });
+    return () => {
+      off(); window.removeEventListener('touchend', once);
+      document.body.classList.remove('touch-battle');
+      if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+    };
+  }, []);
 
   const local = (ev: React.MouseEvent) => { const r = canvas.current!.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
 
@@ -390,18 +512,9 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     const pt = pointer.current;
     const p = local(ev);
     pt.down = false;
-    const { game, renderer } = r;
     if (pt.dragging) {
-      pt.dragging = false; renderer.dragBox = null;
-      const x1 = Math.min(pt.sx, p.x), x2 = Math.max(pt.sx, p.x), y1 = Math.min(pt.sy, p.y), y2 = Math.max(pt.sy, p.y);
-      const picked: number[] = [];
-      for (const e of game.entities.values()) {
-        if (e.owner !== slot || e.kind !== 'unit' || e.hp <= 0) continue;
-        const s = renderer.toScreen(e.x, e.y);
-        if (s.x >= x1 && s.x <= x2 && s.y >= y1 && s.y <= y2) picked.push(e.id);
-      }
-      renderer.selected = new Set(ev.shiftKey ? [...renderer.selected, ...picked] : picked);
-      audio.current?.reply(selectedUnits(), 'select');
+      pt.dragging = false; r.renderer.dragBox = null;
+      boxSelect(pt.sx, pt.sy, p.x, p.y, ev.shiftKey);
       return;
     }
     click(p.x, p.y, { shift: ev.shiftKey, ctrl: ev.ctrlKey || ev.metaKey, alt: ev.altKey });
@@ -505,46 +618,33 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   }
 
   function onDoubleClick(ev: React.MouseEvent) {
-    const r = rig.current; if (!r) return;
     const p = local(ev);
-    const target = r.renderer.pick(p.x, p.y);
-    if (!target || target.owner !== slot || target.kind !== 'unit') return;
-    const c = canvas.current!;
-    const same = [...r.game.entities.values()].filter(e => {
-      if (e.owner !== slot || e.type !== target.type || e.hp <= 0) return false;
-      const s = r.renderer.toScreen(e.x, e.y);
-      return s.x >= 0 && s.y >= 0 && s.x <= c.width && s.y <= c.height;
-    });
-    r.renderer.selected = new Set(same.map(e => e.id));
+    selectSameType(p.x, p.y);
   }
 
   function onContextMenu(ev: React.MouseEvent) {
     ev.preventDefault();
-    const r = rig.current; if (!r) return;
-    if (mode.current !== 'normal') { setMode('normal'); return; }
-    r.renderer.selected = new Set();
+    cancelOrDeselect();
   }
 
   function onWheel(ev: React.WheelEvent) {
-    const r = rig.current; if (!r) return;
     const p = local(ev);
-    const cam = r.renderer.camera;
-    const before = { x: p.x / cam.zoom + cam.x, y: p.y / cam.zoom + cam.y };
-    cam.zoom = Math.max(0.6, Math.min(2.2, cam.zoom * (ev.deltaY > 0 ? 0.9 : 1.1)));
-    cam.x = before.x - p.x / cam.zoom; cam.y = before.y - p.y / cam.zoom;
-    r.renderer.clampCamera();
+    zoomAt(p.x, p.y, ev.deltaY > 0 ? 0.9 : 1.1);
   }
 
-  function onMinimap(ev: React.MouseEvent) {
+  /** Radar: click, or press and drag, to move the view. */
+  function onMinimap(ev: React.PointerEvent) {
     const r = rig.current; if (!r || !ui?.radar) return;
+    if (ev.type === 'pointermove' && !ev.buttons) return;
+    if (ev.type === 'pointerdown') minimap.current!.setPointerCapture?.(ev.pointerId);
     const rect = minimap.current!.getBoundingClientRect();
-    r.renderer.minimapJump((ev.clientX - rect.left) / rect.width, (ev.clientY - rect.top) / rect.height);
+    r.renderer.minimapJump(Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width)), Math.max(0, Math.min(1, (ev.clientY - rect.top) / rect.height)));
   }
 
   function clickItem(item: string, queue: QueueKind) {
     const r = rig.current; if (!r) return;
     const q = r.game.players[slot].queues[queue];
-    if ((queue === 'structure' || queue === 'defense') && q.ready && q.items[0] === item) { placing.current = item; mode.current = 'place'; setModeView('place'); return; }
+    if ((queue === 'structure' || queue === 'defense') && q.ready && q.items[0] === item) { placing.current = item; setMode('place'); return; }
     if ((queue === 'structure' || queue === 'defense') && q.items.length && q.items[0] !== item) { say('Building in progress'); return; }
     r.session.issue({ t: 'build', item });
     audio.current?.ui('click');
@@ -562,7 +662,8 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const powerFrac = ui ? (ui.powerGen === 0 ? 0 : Math.min(1, ui.powerUse / Math.max(1, ui.powerGen))) : 0;
   const lowPower = !!ui && ui.powerUse > ui.powerGen;
 
-  return <section className={`fusion-battle ${pack.projection}`} style={{ ['--house' as string]: faction.color, ['--house-accent' as string]: faction.accent }}>
+  const ownUnitsSelected = !!ui?.selection?.own && !ui.selection.structure;
+  return <section className={`fusion-battle ${pack.projection}${touch ? ' touch' : ''}${drawer ? ' drawer-open' : ''}`} style={{ ['--house' as string]: faction.color, ['--house-accent' as string]: faction.accent }}>
     <div className="fusion-stage" ref={stage}>
       <canvas ref={canvas} className="fusion-canvas" tabIndex={0} aria-label={`${style.name} battlefield`}
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onDoubleClick={onDoubleClick}
@@ -576,9 +677,46 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       <Chat conn={conn} team={launch.players?.find(p => p.id === launch.you)?.team ?? 0} overlay onMessage={() => audio.current?.ui('click')} />
       <div className="fusion-messages">{messages.filter(m => performance.now() - m.at < 5000).map(m => <p key={m.at}>{m.text}</p>)}</div>
       {ui?.status && <div className="fusion-banner">{ui.status}</div>}
-      {modeView !== 'normal' && <div className="fusion-mode">{modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? (superFrom.current ? 'Choose the destination — right-click cancels' : 'Choose the target — right-click cancels') : 'Attack-move — click a destination'}</div>}
+      {touch && <div className="fusion-touch-hud" aria-hidden={drawer}>
+        <b>{ui?.credits ?? 0}</b><span className={lowPower ? 'low' : ''}>⚡ {ui?.powerGen ?? 0}/{ui?.powerUse ?? 0}</span>
+      </div>}
+      {touch && <div className="fusion-touch-bar">
+        {modeView !== 'normal' && <button className="cancel" onClick={() => setMode('normal')}>✕ CANCEL</button>}
+        {modeView === 'normal' && ownUnitsSelected && <>
+          <button onClick={() => setMode('attackMove')}>ATTACK-MOVE</button>
+          <button onClick={() => press('s')}>STOP</button>
+          <button onClick={() => press('g')}>GUARD</button>
+          <button onClick={() => press('x')}>SCATTER</button>
+          {ui?.selection?.deploy && <button onClick={() => press('d')}>{ui.selection.unload ? 'UNLOAD' : 'DEPLOY'}</button>}
+          <button onClick={cancelOrDeselect}>CLEAR</button>
+        </>}
+        {modeView === 'normal' && !ownUnitsSelected && <>
+          <button onClick={() => { press('p'); press('p'); }}>ALL ARMY</button>
+          <button onClick={() => press('h')}>BASE</button>
+          <button onClick={() => press(' ')}>ALERT</button>
+        </>}
+      </div>}
+      {touch && <div className="fusion-rotate" hidden={rotateOk}>
+        <p>Turn your device sideways to command the battlefield.</p>
+        <button onClick={() => void goLandscape()}>GO FULL SCREEN</button>
+        <button onClick={() => setRotateOk(true)}>PLAY UPRIGHT</button>
+      </div>}
+      {modeView !== 'normal' && <div className="fusion-mode">{touch && modeView === 'place' ? 'Tap to move the outline — tap it again to build'
+        : touch && modeView === 'super' ? (superFrom.current ? 'Tap the destination' : 'Tap the target')
+        : touch && modeView === 'attackMove' ? 'Attack-move — tap a destination'
+        : touch && (modeView === 'sell' || modeView === 'repair') ? `${modeView === 'sell' ? 'Sell' : 'Repair'} mode — tap a structure`
+        : modeView === 'place' ? 'Click to place — right-click cancels' : modeView === 'sell' ? 'Sell mode — click a structure' : modeView === 'repair' ? 'Repair mode — click a structure' : modeView === 'super' ? (superFrom.current ? 'Choose the destination — right-click cancels' : 'Choose the target — right-click cancels') : 'Attack-move — click a destination'}</div>}
       {tree && rig.current && <TechTree game={rig.current.game} slot={slot} color={faction.color} accent={faction.accent} onClose={() => setTree(false)} />}
-      {help && <div className="fusion-help" onClick={() => setHelp(false)}>
+      {help && touch && <div className="fusion-help" onClick={() => setHelp(false)}>
+        <h3>Touch controls</h3>
+        <p><b>Tap</b> select · tap again to order move / attack / harvest</p>
+        <p><b>Drag</b> move the map · <b>Pinch</b> zoom · <b>Radar</b> tap or drag to jump</p>
+        <p><b>Hold, then drag</b> box-select · <b>Hold</b> or <b>double-tap</b> a unit: all of that type on screen</p>
+        <p><b>Two-finger tap</b> deselect / cancel</p>
+        <p><b>Buildings</b>: tap a ready one in the drawer, tap the map to move the outline, tap the outline to build</p>
+        <p><b>Tap a selected MCV</b> to deploy · the bar at the bottom has stop, guard, scatter and deploy</p>
+      </div>}
+      {help && !touch && <div className="fusion-help" onClick={() => setHelp(false)}>
         <h3>Controls</h3>
         <p><b>Left click</b> select · order move / attack / harvest · <b>Right click</b> deselect / cancel</p>
         <p><b>Drag</b> box-select · <b>Shift</b>+click/drag add or remove · <b>Double-click</b> all of a type on screen</p>
@@ -597,10 +735,13 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <button className="deploy" onClick={onExit}>RETURN TO THE WAR ROOM →</button>
       </div>}
     </div>
+    {touch && <button className="fusion-drawer-toggle" onClick={() => setDrawer(v => !v)} aria-expanded={drawer} aria-label={drawer ? 'Hide the build panel' : 'Show the build panel'}>
+      {drawer ? '▶' : '◀'}<span>{drawer ? 'HIDE' : 'BUILD'}</span>{!drawer && tabs.some(t => ui?.queues[t.id].ready) && <i className="dot" />}
+    </button>}
     <aside className="fusion-sidebar">
       <div className="fusion-credits" data-testid="fusion-credits">{ui?.credits ?? 0}<small>{pack.resources[0].name}{ui && ui.storage > 0 ? ` · cap ${ui.storage}` : ''}</small></div>
       <div className="fusion-radar">
-        <canvas ref={minimap} width={176} height={176} onClick={onMinimap} />
+        <canvas ref={minimap} width={176} height={176} onPointerDown={onMinimap} onPointerMove={onMinimap} />
         <div className={`fusion-power ${lowPower ? 'low' : ''}`} title={`Power ${ui?.powerGen ?? 0} / drain ${ui?.powerUse ?? 0}`}>
           <i style={{ height: `${Math.round(powerFrac * 100)}%` }} />
         </div>
