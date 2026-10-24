@@ -1,0 +1,12 @@
+[
+  { "name": "type:issue", "color": "d73a4a", "description": "Problem report (daily review)" },
+  { "name": "type:feature", "color": "1d76db", "description": "New feature request (weekly review, monthly vote)" },
+  { "name": "type:fusion", "color": "8a3ffc", "description": "Fusion level request (weekly vote)" },
+  { "name": "needs-triage", "color": "fbca04", "description": "Not yet reviewed" },
+  { "name": "triaged", "color": "c2e0c6", "description": "Reviewed in a daily or weekly pass" },
+  { "name": "remediation-proposed", "color": "0e8a16", "description": "A remediation PR is open for review" },
+  { "name": "shortlisted", "color": "5319e7", "description": "In this cycle's top picks" },
+  { "name": "vote", "color": "f9d0c4", "description": "Community vote issue" },
+  { "name": "selected", "color": "0e8a16", "description": "Won a community vote; being built" },
+  { "name": "beta", "color": "bfd4f2", "description": "Live on the BETA instance for public testing" }
+]

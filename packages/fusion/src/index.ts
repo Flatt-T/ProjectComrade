@@ -8,8 +8,9 @@ export * from './session';
 import { RulePack } from './rules';
 import { dunePack } from './packs/dune';
 import { ra2Pack } from './packs/ra2';
+import { FUSIONS, leviathanPack } from './fusions';
 
-export { dunePack, ra2Pack };
+export { dunePack, ra2Pack, leviathanPack, FUSIONS };
 
 /** Rule packs by id. A fusion game is registered here like any other pack. */
-export const PACKS: Record<string, RulePack> = { dune: dunePack, ra2: ra2Pack };
+export const PACKS: Record<string, RulePack> = { dune: dunePack, ra2: ra2Pack, ...Object.fromEntries(FUSIONS.map(f => [f.id, f])) };

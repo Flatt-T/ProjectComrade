@@ -3,6 +3,7 @@ import { LaunchRequest, styleInfo } from '@comrade/contracts';
 import Lobby from './Lobby';
 import Battle from './Battle';
 import FusionBattle from './FusionBattle';
+import FusionRequests from './FusionRequests';
 import { RoomConnection } from './net';
 import './style.css';
 
@@ -10,6 +11,8 @@ export default function App() {
   // One connection for the whole visit: lockstep matches outlive the lobby view.
   const conn = useMemo(() => new RoomConnection(), []);
   const [session, setSession] = useState<{ launch: LaunchRequest; mapName: string } | null>(null);
+  const [requests, setRequests] = useState(() => new URLSearchParams(location.search).get('view') === 'fusion-requests');
+  const showRequests = (on: boolean) => { setRequests(on); history.replaceState(null, '', on ? '?view=fusion-requests' : location.pathname); };
   const fusion = session && styleInfo(session.launch.style).engine === 'fusion';
 
   function exit() {
@@ -24,6 +27,7 @@ export default function App() {
       <b className="mark">C</b>
       <div><strong>PROJECT COMRADE</strong><small>BROWSER RTS CLASSICS · CLASSIC C&amp;C · DUNE · RED ALERT 2</small></div>
       <span className="badge">{session ? 'OPERATION LIVE' : 'WAR ROOM'}</span>
+      {!session && <a href="?view=fusion-requests" onClick={e => { e.preventDefault(); showRequests(!requests); }}>{requests ? 'War room' : 'Fusion requests'}</a>}
       <a href="https://github.com/Flatt-T/ProjectComrade">Source ↗</a>
     </header>
 
@@ -36,6 +40,7 @@ export default function App() {
       ? fusion
         ? <FusionBattle launch={session.launch} mapName={session.mapName} conn={conn} onExit={exit} />
         : <Battle launch={session.launch} mapName={session.mapName} onExit={exit} />
+      : requests ? <FusionRequests onBack={() => showRequests(false)} />
       : <Lobby conn={conn} onLaunch={(launch, mapName) => setSession({ launch, mapName })} />}
 
     <footer>

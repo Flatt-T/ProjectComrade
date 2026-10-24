@@ -1,4 +1,5 @@
 import { randomInt, randomUUID } from 'node:crypto';
+import { log } from './ops.js';
 import { DEFAULT_OPTIONS, factionAllowed, parseClientMessage, RoomOptions, RoomPlayer, RoomState, RoomSummary, styleInfo } from '@comrade/contracts';
 
 interface Peer { send(message: string): void; room?: string; player: RoomPlayer; chat: number[] }
@@ -65,6 +66,7 @@ export class RoomCoordinator {
     peer.room = undefined;
     peer.player.host = false;
     const room = this.rooms.get(name)!;
+    log('room-leave', { room: name, peer: id.slice(0, 8), phase: room.phase, remaining: room.members.size - 1 });
     room.members.delete(id);
     if (!room.members.size) this.rooms.delete(name);
     else {
@@ -105,6 +107,7 @@ export class RoomCoordinator {
         const faction = factionAllowed(style.id, message.faction) ? message.faction : style.factions[room.members.size % style.factions.length].id;
         peer.player = { id, name: message.name, faction, ready: false, host, team: 0 };
         peer.room = message.room; room.members.add(id);
+        log(host ? 'room-create' : 'room-join', { room: message.room, peer: id.slice(0, 8), players: room.members.size, style: room.options.style });
         this.broadcast(message.room); this.broadcastLobbyList(); return;
       }
       if (!peer.room) throw new Error('Join a room first');
@@ -165,6 +168,7 @@ export class RoomCoordinator {
         const others = [...room.members].filter(m => m !== id);
         if (others.some(m => !this.peers.get(m)!.player.ready)) throw new Error('All players must be ready');
         room.phase = 'started';
+        log('match-start', { room: peer.room, style: room.options.style, map: room.options.map, players: room.members.size, ai: room.options.settings.ai, aiLevel: room.options.settings.aiLevel });
         room.seed = randomInt(1, 0x7fffffff);
         room.slots = [...room.members];
         room.lastTurn = new Map();
@@ -172,7 +176,9 @@ export class RoomCoordinator {
       }
       throw new Error('Invalid room transition');
     } catch (error) {
-      peer.send(JSON.stringify({ version: 1, type: 'error', message: error instanceof Error ? error.message : 'Invalid message' }));
+      const message = error instanceof Error ? error.message : 'Invalid message';
+      log('rejected', { peer: id.slice(0, 8), room: peer.room, message });
+      peer.send(JSON.stringify({ version: 1, type: 'error', message }));
     }
   }
 }

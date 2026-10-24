@@ -765,11 +765,13 @@ export class FusionRenderer {
       if (viewer && !viewer.visible[game.cellIndex(Math.floor(lx / LEPTONS), Math.floor(ly / LEPTONS))]) continue;
       const p = this.project(lx / LEPTONS, ly / LEPTONS);
       const a = facingAngle(w.facing, this.iso);
+      const t = game.pack.terrains[game.map.terrain[game.cellIndex(Math.floor(lx / LEPTONS), Math.floor(ly / LEPTONS))]];
+      const wet = !!t?.water;
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(a);
-      // Churned sand trail and the worm's ridged back breaking the surface.
+      // Churned sand (or white water) trail and the worm's ridged back breaking the surface.
       for (let k = 7; k >= 0; k--) {
         const wob = Math.sin(this.frame / 6 + k) * 2.2;
-        ctx.fillStyle = `rgba(150,108,62,${0.18 + k * 0.03})`;
+        ctx.fillStyle = wet ? `rgba(225,240,250,${0.12 + k * 0.035})` : `rgba(150,108,62,${0.18 + k * 0.03})`;
         ctx.beginPath(); ctx.ellipse(-k * 8, wob, 12 - k * 0.8, 7 - k * 0.6, 0, 0, Math.PI * 2); ctx.fill();
       }
       for (let k = 0; k < 5; k++) {

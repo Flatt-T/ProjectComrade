@@ -167,7 +167,7 @@ export interface Strike {
   /** Iron Curtain length. */
   duration?: number;
 }
-export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number }
+export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number; /** Prowl destination (cell index), or -1. */ goal: number }
 
 const QUEUES: QueueKind[] = ['structure', 'defense', 'infantry', 'vehicle', 'aircraft', 'naval', 'starport'];
 const UPGRADE = 'upgrade:', STARPORT = 'starport:';
@@ -1429,20 +1429,34 @@ export class Game {
 
   private sandworms(cfg: NonNullable<RulePack['mechanics']['sandworm']>) {
     if (this.tick < cfg.appearAfter) return;
+    // Where worms can go: sand by default; fusions can let them swim (habitat includes water).
+    const habitat = cfg.habitat ? new Set(cfg.habitat.map(id => this.pack.terrains.findIndex(t => t.id === id))) : null;
     const isSand = (x: number, y: number) => {
       const cx = toCell(x), cy = toCell(y);
-      return inBounds(this.map, cx, cy) && !!this.pack.terrains[this.map.terrain[cy * this.map.w + cx]].sand;
+      if (!inBounds(this.map, cx, cy)) return false;
+      const t = this.map.terrain[cy * this.map.w + cx];
+      return habitat ? habitat.has(t) : !!this.pack.terrains[t].sand;
+    };
+    // Resource cells worms are drawn to (fields as they were made, so worms keep circling mined-out ground).
+    const lure = cfg.nearResources ? this.wormLures() : [];
+    const nearLure = () => {
+      // Pick a field (an 8x8 block of resource cells) first, so small fields get as many visits
+      // as the big one, then a cell in it.
+      const block = lure[this.rng.int(lure.length)];
+      const c = block[this.rng.int(block.length)], r = cfg.nearResources!;
+      return { x: cellCenter((c % this.map.w) + this.rng.int(r * 2 + 1) - r), y: cellCenter(Math.floor(c / this.map.w) + this.rng.int(r * 2 + 1) - r) };
     };
     while (this.worms.length < cfg.count) {
-      this.worms.push({ id: this.nextId++, x: 0, y: 0, px: 0, py: 0, target: 0, hidden: 1, hp: 0, facing: 0, wander: 0 });
+      this.worms.push({ id: this.nextId++, x: 0, y: 0, px: 0, py: 0, target: 0, hidden: 1 + this.worms.length * 45, hp: 0, facing: 0, wander: 0, goal: -1 });
     }
     for (const worm of this.worms) {
       worm.px = worm.x; worm.py = worm.y;
       if (worm.hidden) {
         if (--worm.hidden > 0) continue;
-        // Surface somewhere on open sand.
-        for (let attempt = 0; attempt < 40; attempt++) {
-          const x = cellCenter(this.rng.int(this.map.w)), y = cellCenter(this.rng.int(this.map.h));
+        // Surface somewhere in the worm's habitat (near a resource field if it is drawn to them).
+        for (let attempt = 0; attempt < 60; attempt++) {
+          const spot = lure.length ? nearLure() : { x: cellCenter(this.rng.int(this.map.w)), y: cellCenter(this.rng.int(this.map.h)) };
+          const { x, y } = spot;
           if (isSand(x, y) && !this.map.starts.some(s => dist(cellCenter(s.x), cellCenter(s.y), x, y) < 10 * LEPTONS)) {
             worm.x = worm.px = x; worm.y = worm.py = y; worm.hp = 1000; worm.target = 0; worm.wander = 0; break;
           }
@@ -1466,7 +1480,19 @@ export class Game {
         }
       }
       let tx: number, ty: number;
-      if (prey) { tx = prey.x; ty = prey.y; } else {
+      if (prey) { tx = prey.x; ty = prey.y; } else if (lure.length) {
+        // Prowl from field to field.
+        if (worm.goal < 0 || dist(worm.x, worm.y, cellCenter(worm.goal % this.map.w), cellCenter(Math.floor(worm.goal / this.map.w))) < LEPTONS * 2 || this.tick % 450 === worm.id % 450) {
+          // Mostly field to field; a third of the time, out across open habitat (the sea).
+          let g = nearLure();
+          if (this.rng.int(3) === 0) for (let k = 0; k < 20; k++) {
+            const x = cellCenter(this.rng.int(this.map.w)), y = cellCenter(this.rng.int(this.map.h));
+            if (isSand(x, y)) { g = { x, y }; break; }
+          }
+          worm.goal = this.cellIndex(toCell(g.x), toCell(g.y));
+        }
+        tx = cellCenter(worm.goal % this.map.w); ty = cellCenter(Math.floor(worm.goal / this.map.w));
+      } else {
         if (!worm.wander || this.tick % 90 === 0) worm.wander = this.rng.int(256);
         tx = worm.x + (((worm.wander & 15) - 8) * LEPTONS); ty = worm.y + (((worm.wander >> 4) - 8) * LEPTONS);
       }
@@ -1480,9 +1506,24 @@ export class Game {
       if (d > 0) {
         const nx = worm.x + Math.trunc(((tx - worm.x) * Math.min(cfg.speed, d)) / d);
         const ny = worm.y + Math.trunc(((ty - worm.y) * Math.min(cfg.speed, d)) / d);
-        if (isSand(nx, ny)) { worm.facing = facingTo(nx - worm.x, ny - worm.y); worm.x = nx; worm.y = ny; } else worm.wander = this.rng.int(256);
+        if (isSand(nx, ny)) { worm.facing = facingTo(nx - worm.x, ny - worm.y); worm.x = nx; worm.y = ny; } else { worm.wander = this.rng.int(256); worm.goal = -1; }
       }
     }
+  }
+
+  private lures: number[][] | null = null;
+  /** The map's original resource fields as 8x8 blocks of cells (computed once). */
+  private wormLures(): number[][] {
+    if (!this.lures) {
+      const blocks = new Map<number, number[]>();
+      this.map.resHome.forEach((k, i) => {
+        if (!k) return;
+        const key = ((i % this.map.w) >> 3) * 1024 + (Math.floor(i / this.map.w) >> 3);
+        blocks.set(key, [...(blocks.get(key) ?? []), i]);
+      });
+      this.lures = [...blocks.keys()].sort((a, b) => a - b).map(k => blocks.get(k)!);
+    }
+    return this.lures;
   }
 
   // ---------------------------------------------------------------- fog, cleanup, victory
@@ -1736,7 +1777,7 @@ export class Game {
     for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0).add(e.passengers.length);
     for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
-    for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden);
+    for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden).add(worm.goal);
     return h.value;
   }
 }

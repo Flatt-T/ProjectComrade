@@ -1,9 +1,9 @@
 name: Build and deploy Comrade
 on:
   push:
-    branches: [main]
+    branches: [main, beta]
   pull_request:
-    branches: [main]
+    branches: [main, beta]
   workflow_dispatch:
 permissions:
   contents: read
@@ -153,3 +153,33 @@ jobs:
           else:
               raise SystemExit('Public deployment did not reach the expected commit')
           PY
+  deploy-beta:
+    # Merges into `beta` publish a pre-release; the BETA server (a second pull-deployer on the
+    # Project Comrade guest, COMRADE_CHANNEL=beta) deploys it for public testing.
+    needs: image
+    if: github.ref == 'refs/heads/beta' && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: deployment-bundle
+          path: deployment-bundle
+      - name: Publish beta pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create beta-${{ github.sha }} deployment-bundle/* --repo ${{ github.repository }} --target ${{ github.sha }} --prerelease --latest=false --title 'Project Comrade BETA ${{ github.sha }}' --notes 'Public test build from the beta branch. Deployed to the BETA server only.'
+      - name: Verify the BETA server picked it up
+        if: vars.COMRADE_BETA_URL != ''
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+          BETA_URL: ${{ vars.COMRADE_BETA_URL }}
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS "$BETA_URL/health" | grep -q "$EXPECTED_COMMIT"; then echo "BETA is on $EXPECTED_COMMIT"; exit 0; fi
+            sleep 15
+          done
+          echo "BETA did not reach $EXPECTED_COMMIT"; exit 1

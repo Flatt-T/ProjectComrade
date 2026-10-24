@@ -296,7 +296,13 @@ export interface Mechanics {
   buildOn?: string[];
   /** Concrete slabs: placements not fully on concrete start at this HP percent. */
   concrete?: { structure: string; uncoveredStartPercent: number };
-  sandworm?: { count: number; speed: number; sight: number; damage: number; appearAfter: number; eatChance: number };
+  sandworm?: {
+    count: number; speed: number; sight: number; damage: number; appearAfter: number; eatChance: number;
+    /** Terrain ids worms move through (default: terrains marked `sand`). Fusions may add 'water'. */
+    habitat?: string[];
+    /** Worms surface and prowl within this many cells of resource fields. */
+    nearResources?: number;
+  };
   /** Spice blooms seed new fields over time. */
   bloom?: { everyTicks: number; radius: number; resource: string };
   /** Resource regrowth on existing cells (RA2 ore). */

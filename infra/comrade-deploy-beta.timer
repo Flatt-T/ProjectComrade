@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for Project Comrade BETA pre-releases
+
+[Timer]
+OnBootSec=40s
+OnUnitActiveSec=2min
+Unit=comrade-deploy-beta.service
+
+[Install]
+WantedBy=timers.target

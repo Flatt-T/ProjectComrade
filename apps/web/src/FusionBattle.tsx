@@ -4,6 +4,7 @@ import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, PlayerSetu
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
 import TechTree from './TechTree';
+import { recordAction, recordEvent, recordNotice, setMatchSnapshot } from './diagnostics';
 import Chat from './Chat';
 import { AudioSettings, FusionAudio, loadAudioSettings, saveAudioSettings } from '../../../packages/fusion/src/audio';
 
@@ -95,6 +96,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const [soundOpen, setSoundOpen] = useState(false);
   const say = (text: string, meaning = EVA_FOR[text]) => {
     setMessages(m => [...m.filter(x => performance.now() - x.at < 6000).slice(-3), { text, at: performance.now() }]);
+    recordNotice(text);
     if (meaning) audio.current?.eva(meaning);
   };
   const changeSound = (patch: Partial<AudioSettings>) => setSound(s => {
@@ -123,6 +125,21 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     window.addEventListener('keydown', wake);
     sfx.resume();
     window.comradeFusion = { game, slot, renderer, issue: cmd => session.issue(cmd), audio: sfx };
+    // Every command the player issues goes into the report diagnostics, with the game tick.
+    const send = session.issue.bind(session);
+    session.issue = cmd => { recordAction({ tick: game.tick, ...cmd }); send(cmd); };
+    recordEvent('match-start', { style: launch.style, map: setup.mapId, players: setup.players.length, humans: setup.humans, slot });
+    setMatchSnapshot(() => {
+      const me = game.players[slot];
+      const mine = [...game.entities.values()].filter(e => e.owner === slot && e.hp > 0);
+      return {
+        style: launch.style, map: setup.mapId, seed: setup.seed, tick: game.tick, slot, status: session.status(),
+        waitingFor: session.waitingFor?.() ?? [], over: game.over, sound: sfx.unlocked,
+        me: me && { faction: me.faction, credits: me.credits, power: `${me.powerGen}/${me.powerUse}`, units: mine.filter(e => e.kind === 'unit').length, structures: mine.filter(e => e.kind === 'structure').length, defeated: me.defeated },
+        players: game.players.map(p => ({ faction: p.faction, ai: !!p.ai, team: p.team, defeated: p.defeated })),
+        checksum: game.checksum(),
+      };
+    });
 
 
     const resize = () => {
@@ -325,6 +342,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       cancelAnimationFrame(raf); observer.disconnect(); session.dispose(); ticker?.terminate();
       window.removeEventListener('pointerdown', wake); window.removeEventListener('keydown', wake);
       sfx.dispose(); audio.current = null;
+      setMatchSnapshot(null); recordEvent('match-end', { tick: game.tick });
       window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup);
       delete window.comradeFusion;
     };

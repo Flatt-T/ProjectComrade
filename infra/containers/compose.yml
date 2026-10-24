@@ -4,10 +4,12 @@ services:
     restart: unless-stopped
     init: true
     ports:
-      - "${COMRADE_BIND_ADDRESS:-127.0.0.1}:3001:3001"
+      - "${COMRADE_BIND_ADDRESS:-127.0.0.1}:${COMRADE_HOST_PORT:-3001}:3001"
     environment:
       NODE_ENV: production
       PORT: "3001"
+      # Enables the internal /ops/logs export used by n8n (blank disables it).
+      COMRADE_OPS_TOKEN: ${COMRADE_OPS_TOKEN:-}
     read_only: true
     tmpfs:
       - /tmp

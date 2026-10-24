@@ -1,5 +1,6 @@
 import type { ServerMessage } from '@comrade/contracts';
 import type { TurnPacket, TurnTransport } from '../../../packages/fusion/src/session';
+import { recordEvent } from './diagnostics';
 
 type Listener = (message: ServerMessage) => void;
 
@@ -30,9 +31,10 @@ export class RoomConnection {
   private open() {
     const ws = new WebSocket(this.url);
     this.ws = ws;
-    ws.onopen = () => { this.connected = true; this.emit({ version: 1, type: 'rooms', rooms: [] }); };
+    ws.onopen = () => { this.connected = true; recordEvent('connected'); this.emit({ version: 1, type: 'rooms', rooms: [] }); };
     ws.onclose = () => {
       this.connected = false;
+      recordEvent('disconnected');
       this.drops++;
       this.emit({ version: 1, type: 'error', message: 'Connection lost — reconnecting…' });
       if (!this.closed) setTimeout(() => this.open(), 2000);
@@ -41,6 +43,7 @@ export class RoomConnection {
       let message: ServerMessage;
       try { message = JSON.parse(event.data) as ServerMessage; } catch { return; }
       if (message.type === 'welcome') this.id = message.id;
+      if (message.type === 'error') recordEvent('server-error', { message: message.message });
       if (message.type === 'chat') this.chatLog = [...this.chatLog.slice(-99), { from: message.from, name: message.name, text: message.text, to: message.to, at: message.at }];
       if (message.type === 'turn') {
         const packet: TurnPacket = { turn: message.turn, tick: message.tick, checksum: message.checksum, commands: message.commands as TurnPacket['commands'], final: message.final };

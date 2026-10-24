@@ -1,0 +1,41 @@
+# Authoring a fusion
+
+A fusion is a playable level for the Comrade Fusion Engine built from the classic rule packs
+(`packages/fusion/src/packs/dune.ts`, `ra2.ts`) plus its own map and mechanics. Community
+fusion requests (GitHub issues labelled `type:fusion`) are voted on weekly; the winner is built
+by following this guide. The reference example is
+[`packages/fusion/src/fusions/leviathan.ts`](../../packages/fusion/src/fusions/leviathan.ts).
+
+## 1. Map the request to the engine
+
+| Request field | Where it goes |
+| --- | --- |
+| Sides and factions | Spread the base pack: `...ra2Pack` (countries, teams) or `...dunePack` (houses). |
+| Map, type, size | A `MapPreset` (64, 80, 96 or 128 square). Features paint terrain (`circle`, `rect`, `ridge`); use `quad()` / `mirror()` from `packs/mapkit.ts` so starts are fair. |
+| Characteristics, resources | `fields` with `resource`, radius `r` and optional `amount` (scarce fields: lower `amount`). |
+| Dangers | `mechanics`: `sandworm` (`count`, `speed`, `sight`, `damage`, `appearAfter`, `eatChance`, `habitat` terrain ids such as `['sand', 'water']`, `nearResources` radius); `bloom`; `regrowth`. Resources regrow via `regrowEvery`. |
+| Tech level | Players pick it in the lobby; "full" needs nothing. To cap a fusion, filter `units`/`structures` by `tech`. |
+| Infantry, vehicles, aircraft, naval | Keep the base pack's units, remove with object rest, or add units copied from the other pack (bring their `weapons` and `warheads`). Units need a `shape` the art knows (see `art/models.ts`). |
+| Buildings and upgrades | `structures`; upgrades are `upgrades`/`upgradeCost` plus `name@1` prerequisites. |
+| Superweapons | A structure's `superweapon` (`missile`, `storm`, `ion`, `reinforce`, `paradrop`, `chrono`, `curtain`, `reveal`). |
+| Bonus objects | Not in the engine yet: say so in the PR and suggest the closest substitute. |
+
+Where the engine cannot do something exactly, choose the closest option that stays true to the
+classics and write the difference in the PR description.
+
+## 2. Files to add or change
+
+1. `packages/fusion/src/fusions/<id>.ts` exporting `<id>Pack: RulePack` with a unique `id`,
+   `name`, `fidelityNote` (one sentence, credits the community fusion) and `maps`.
+2. Add the pack to `FUSIONS` in `packages/fusion/src/fusions/index.ts`.
+3. In `packages/contracts/src/index.ts` add `'fusion-<id>'` to `GameStyle` and a `STYLES` entry:
+   `engine: 'fusion', pack: '<id>', playable: true, lockstep: true`, a one-line `blurb`, and the
+   factions (reuse `RA2_COUNTRIES` or list the houses).
+4. Tests in `tests/unit/fusions.test.ts`: the map generates and every start can deploy its MCV;
+   the request's key promises hold (for example "resources are scarce at home"); dangers behave
+   as described; two identical games stay identical (lockstep).
+
+## 3. Check it
+
+`pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm exec vitest run tests/unit` must pass. The
+`fusions are registered and playable` test checks that the pack and lobby style agree.

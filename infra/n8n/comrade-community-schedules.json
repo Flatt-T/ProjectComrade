@@ -1,0 +1,112 @@
+{
+  "name": "Comrade community schedules",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "cronExpression", "expression": "30 6 * * *" }] } },
+      "name": "Daily 06:30 close votes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/Flatt-T/ProjectComrade/actions/workflows/community-votes.yml/dispatches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Accept", "value": "application/vnd.github+json" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"ref\": \"main\", \"inputs\": { \"action\": \"close\" } }",
+        "options": {}
+      },
+      "name": "Close finished votes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 0]
+    },
+    {
+      "parameters": { "rule": { "interval": [{ "field": "cronExpression", "expression": "0 7 * * 1" }] } },
+      "name": "Monday 07:00 feature review",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/Flatt-T/ProjectComrade/actions/workflows/community-weekly-features.yml/dispatches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Accept", "value": "application/vnd.github+json" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"ref\": \"main\" }",
+        "options": {}
+      },
+      "name": "Run weekly feature review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 200]
+    },
+    {
+      "parameters": { "rule": { "interval": [{ "field": "cronExpression", "expression": "30 7 * * 1" }] } },
+      "name": "Monday 07:30 fusion vote",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/Flatt-T/ProjectComrade/actions/workflows/community-votes.yml/dispatches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Accept", "value": "application/vnd.github+json" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"ref\": \"main\", \"inputs\": { \"action\": \"open\", \"kind\": \"fusion\" } }",
+        "options": {}
+      },
+      "name": "Open weekly fusion vote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 400]
+    },
+    {
+      "parameters": { "rule": { "interval": [{ "field": "cronExpression", "expression": "0 8 1 * *" }] } },
+      "name": "1st of month 08:00 feature vote",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 600]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/Flatt-T/ProjectComrade/actions/workflows/community-votes.yml/dispatches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Accept", "value": "application/vnd.github+json" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"ref\": \"main\", \"inputs\": { \"action\": \"open\", \"kind\": \"feature\" } }",
+        "options": {}
+      },
+      "name": "Open monthly feature vote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 600]
+    }
+  ],
+  "connections": {
+    "Daily 06:30 close votes": { "main": [[{ "node": "Close finished votes", "type": "main", "index": 0 }]] },
+    "Monday 07:00 feature review": { "main": [[{ "node": "Run weekly feature review", "type": "main", "index": 0 }]] },
+    "Monday 07:30 fusion vote": { "main": [[{ "node": "Open weekly fusion vote", "type": "main", "index": 0 }]] },
+    "1st of month 08:00 feature vote": { "main": [[{ "node": "Open monthly feature vote", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "timezone": "Europe/London" }
+}

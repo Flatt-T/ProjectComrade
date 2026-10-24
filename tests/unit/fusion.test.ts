@@ -124,7 +124,7 @@ describe('fusion gameplay', () => {
   });
 
   it('registers both packs', () => {
-    expect(Object.keys(PACKS).sort()).toEqual(['dune', 'ra2']);
+    expect(Object.keys(PACKS)).toEqual(expect.arrayContaining(['dune', 'ra2'])); // Plus community fusions.
   });
 });
 

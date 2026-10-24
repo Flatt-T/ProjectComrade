@@ -1,0 +1,48 @@
+name: Community - votes
+# n8n triggers:
+#   open feature  - monthly: the five shortlisted features go to a 7-day vote
+#   open fusion   - weekly: the ten most upvoted fusion requests go to a 4-day vote
+#   close         - daily: closes votes whose time is up and starts building each winner
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'open or close'
+        required: true
+        type: choice
+        options: [open, close]
+      kind:
+        description: 'feature or fusion (for open)'
+        required: false
+        type: choice
+        options: [feature, fusion]
+        default: feature
+permissions:
+  contents: read
+  issues: write
+  actions: write
+concurrency: community-votes
+jobs:
+  vote:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Open a vote
+        if: inputs.action == 'open'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/community/open_vote.py ${{ inputs.kind }}
+      - name: Close finished votes
+        if: inputs.action == 'close'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/community/close_votes.py
+      - name: Start building each winner
+        if: inputs.action == 'close'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          while read -r issue kind; do
+            [ -n "$issue" ] || continue
+            gh workflow run community-build-selected.yml -f issue="$issue" -f kind="$kind"
+          done < build/community/winners.txt
