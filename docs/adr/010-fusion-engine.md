@@ -175,3 +175,46 @@ the browser.
   jumping to the refinery, instead of vanishing in a single frame.
 - **Maps**: four-player maps are 96x96; new Four Isles (mostly sea), Deep Desert, Carthag
   Pass and Desert Crossing. Shipyards may be placed further from the base (+6 cells).
+
+## The classics on the Fusion Engine (update 2026-10-24)
+
+The engine now carries **all four classics as rule packs**: `td` (Tiberian Dawn) and
+`ra1` (Red Alert) join `dune` and `ra2`. The reason is the second half of the original
+direction — future fusion games. A fusion pack can only mix what the engine holds as
+data, so GDI, Nod, the Allies and the Soviets of 1995 had to exist here too, not only
+inside the original binaries. `CLASSIC_PACKS` in `packages/fusion/src/index.ts` is that
+set, and every pack test runs over it.
+
+- **Tiberian Dawn** (`packs/td.ts`): GDI and Nod, Tiberium that spreads from its fields,
+  the full two-sided tech tree (Weapons Factory against Airstrip, Hand of Nod, Guard and
+  Advanced Guard Towers, Gun Turret, SAM Site, Obelisk of Light, Repair Facility,
+  Helipad, Shipyard), the Ion Cannon from the Advanced Communications Center and the
+  Nuclear Strike from the Temple of Nod. No veterancy: Tiberian Dawn has no unit ranks.
+- **Red Alert** (`packs/ra1.ts`): Allies and Soviets, ore and gems, a real navy
+  (Shipyard and Sub Pen on water, Destroyer, Cruiser, Submarine, Transport), Tanya, the
+  spy and the thief, attack dogs, Tesla coils and flame towers, the Chronosphere, the
+  Iron Curtain, the Soviet Missile Silo and paratroopers from the Airfield. Also no
+  ranks. The original engine still has no bootable Red Alert battlefield (ADR 007), so
+  this is where Red Alert is playable today.
+- **The same ground, both engines.** Tiberian Dawn's four two-player battlefields are
+  converted from the authored scenarios the original-engine slice ships
+  (`tools/create-map.py`): same 60x60 size, same theatre, same base anchors, same
+  Tiberium field centres and the same tree cells. `tests/unit/packs.test.ts` checks the
+  Fusion maps against `packs/td/comrade/maps.json`, so the two engines cannot drift
+  apart silently. Two further battlefields (Tiberium Gardens, River Crossing) exist only
+  on the Fusion Engine, where four players and lockstep are possible.
+- **Art**: two more art styles, `gdi` and `nod` — GDI's pale concrete and steel with gold
+  trim, Nod's dark slabs and red glow — plus new models for the Power Plant, Advanced
+  Power Plant, Hand of Nod, Airstrip, Helipad, Advanced Communications Center, Temple of
+  Nod, Guard and Advanced Guard Towers, Obelisk, SAM Site, Flame Tower and AA Gun, and
+  for the Hum-vee, Buggy, Recon Bike, APC, Mammoth Tank, Flame Tank, Minelayer, Mobile
+  Gap Generator, Orca and Apache. Red Alert uses the existing Allied and Soviet styles,
+  which are that war's own visual language a generation later. Temperate and snow
+  theatres were added to the terrain painter. All geometry is original; nothing is
+  traced from the originals.
+- **Lobby**: `Tiberian Dawn Style` and `Red Alert Style` are two more game styles, both
+  lockstep, alongside `Classic C&C` on the original engine. The classic TD entry is
+  unchanged: it remains the authentic Vanilla Conquer slice.
+
+Fidelity is the same contract as before: values approximate the classics from public
+knowledge, are labelled in-game, and are tuned against observations over time.

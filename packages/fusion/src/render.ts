@@ -606,11 +606,11 @@ export class FusionRenderer {
         ctx.beginPath(); ctx.ellipse(ground.x, ground.y + 1, def.shape === 'ship-carrier' || def.shape === 'ship-dreadnought' ? 40 : def.shape.startsWith('ship') || def.shape === 'sub' ? 30 : 18, this.iso ? 9 : 12, 0, 0, Math.PI * 2); ctx.stroke();
       }
       this.blit(hs, p.x, p.y);
-      if (def.shape === 'helicopter') {
-        // Tandem rotors, spinning.
+      if (def.shape === 'helicopter' || def.shape === 'apache') {
+        // Rotors, spinning: tandem on the transport, one over the gunship.
         ctx.strokeStyle = 'rgba(30,30,30,0.55)'; ctx.lineWidth = 1.6;
         const dir = facingAngle(e.facing, this.iso);
-        for (const off of [-9, 8]) {
+        for (const off of def.shape === 'apache' ? [0] : [-9, 8]) {
           const cx = p.x + Math.cos(dir) * off, cy = p.y - 11 + Math.sin(dir) * off * (this.iso ? 0.5 : 0.7);
           for (let k = 0; k < 3; k++) {
             const a = this.frame * 0.9 + (k * Math.PI * 2) / 3 + off;

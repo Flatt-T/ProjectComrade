@@ -4,12 +4,14 @@
 // All geometry is original; only the visual language follows the references.
 import { Mesh, RGB, Vec3, tint } from './forge';
 
-export type ArtStyle = 'dune' | 'allied' | 'soviet';
+export type ArtStyle = 'dune' | 'allied' | 'soviet' | 'gdi' | 'nod';
 
 export function styleFor(packId: string, side: string): ArtStyle {
+  if (side === 'gdi') return 'gdi';
+  if (side === 'nod') return 'nod';
   if (side === 'allies') return 'allied';
   if (side === 'soviets' || side === 'soviet') return 'soviet';
-  return packId === 'ra2' ? 'allied' : 'dune';
+  return packId === 'ra2' || packId === 'ra1' ? 'allied' : 'dune';
 }
 
 interface Palette { body: RGB; trim: RGB; dark: RGB; pad: RGB; glass: RGB; metal: RGB; hull: RGB }
@@ -17,6 +19,9 @@ const PALETTES: Record<ArtStyle, Palette> = {
   dune: { body: [234, 224, 202], trim: [190, 176, 150], dark: [86, 76, 64], pad: [201, 160, 112], glass: [128, 174, 196], metal: [162, 154, 138], hull: [214, 202, 178] },
   allied: { body: [200, 205, 211], trim: [148, 155, 163], dark: [66, 72, 80], pad: [146, 144, 138], glass: [140, 198, 236], metal: [176, 181, 188], hull: [196, 200, 205] },
   soviet: { body: [156, 151, 136], trim: [116, 111, 100], dark: [60, 57, 51], pad: [126, 122, 112], glass: [214, 132, 96], metal: [128, 125, 116], hull: [170, 166, 154] },
+  // Tiberian Dawn: GDI's pale concrete and steel with gold trim, Nod's dark grey slabs and red glow.
+  gdi: { body: [188, 190, 176], trim: [148, 150, 136], dark: [62, 64, 60], pad: [140, 142, 132], glass: [146, 196, 224], metal: [170, 172, 160], hull: [172, 166, 134] },
+  nod: { body: [126, 122, 120], trim: [96, 92, 90], dark: [46, 44, 44], pad: [110, 106, 104], glass: [226, 116, 92], metal: [118, 114, 112], hull: [136, 130, 126] },
 };
 const GLOW_BLUE: RGB = [150, 225, 255];
 const GLOW_CYAN: RGB = [170, 245, 255];
@@ -418,6 +423,140 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       m.box(0.6, 1.42, 0.6, w - 0.6, 1.58, 1.5, GLOW_RED, { glow: true });
       break;
     }
+    // ------------------------------------------------ Tiberian Dawn and Red Alert
+    case 'tdpower': {
+      // Power Plant: a turbine hall with two stacks and louvred vents.
+      m.box(0.2, 0.5, 0.07, 1.8, 1.8, 0.5, p.body, { top: p.trim });
+      m.box(0.2, 1.76, 0.18, 1.8, 1.82, 0.44, team);
+      for (const cx of [0.62, 1.22]) {
+        m.cylinder(cx, 0.4, 0.07, 1.05, 0.2, 0.17, p.metal, 14, { cap: false });
+        m.cylinder(cx, 0.4, 1.03, 1.1, 0.19, 0.19, p.dark, 14);
+      }
+      for (let x = 0.32; x < 1.7; x += 0.3) m.box(x, 1.82, 0.12, x + 0.2, 1.88, 0.4, p.dark);
+      break;
+    }
+    case 'advpower': {
+      // Advanced Power Plant: the same hall grown, with four stacks and a hot core.
+      m.box(0.2, 0.55, 0.07, w - 0.2, h - 0.2, 0.62, p.body, { top: p.trim });
+      m.box(0.2, h - 0.24, 0.2, w - 0.2, h - 0.18, 0.52, team);
+      for (let k2 = 0; k2 < 4; k2++) {
+        const cx = 0.45 + k2 * ((w - 0.9) / 3);
+        m.cylinder(cx, 0.42, 0.07, 1.25, 0.17, 0.14, p.metal, 12, { cap: false });
+        m.cylinder(cx, 0.42, 1.23, 1.3, 0.16, 0.16, p.dark, 12);
+      }
+      m.box(w / 2 - 0.35, h - 0.22, 0.14, w / 2 + 0.35, h - 0.16, 0.34, GLOW_BLUE, { glow: true });
+      break;
+    }
+    case 'handofnod': {
+      // Hand of Nod: a domed muster hall behind a stepped entry tower.
+      m.box(0.2, 0.9, 0.07, 1.8, 2.8, 0.52, p.body, { top: p.trim });
+      m.dome(1, 1.85, 0.52, 0.78, p.body, 5, 20, 0.5);
+      m.cylinder(1, 1.85, 0.46, 0.56, 0.8, 0.8, team, 20, { cap: false });
+      m.box(0.45, 0.2, 0.07, 1.55, 0.95, 0.72, tint(p.body, 0.95), { top: p.trim });
+      m.box(0.6, 0.2, 0.72, 1.4, 0.9, 0.95, p.trim);
+      m.box(0.72, 0.16, 0.18, 1.28, 0.22, 0.5, p.dark);
+      m.box(0.86, 0.14, 0.26, 1.14, 0.2, 0.42, GLOW_RED, { glow: true });
+      break;
+    }
+    case 'airstrip': {
+      // Airstrip: tarmac with a centre line, touchdown chevrons and a control hut.
+      m.box(0.1, 0.25, 0.07, w - 0.1, h - 0.25, 0.1, p.pad, { top: tint(p.dark, 1.5) });
+      for (let x = 0.4; x < w - 0.5; x += 0.8) m.box(x, h / 2 - 0.05, 0.1, x + 0.45, h / 2 + 0.05, 0.105, [226, 222, 196]);
+      for (const x of [0.25, w - 0.5]) for (const dy of [-0.45, 0.45]) m.box(x, h / 2 + dy - 0.06, 0.1, x + 0.25, h / 2 + dy + 0.06, 0.105, team);
+      m.box(w - 0.95, 0.12, 0.07, w - 0.3, 0.62, 0.45, p.body, { top: p.trim });
+      m.box(w - 0.85, 0.16, 0.45, w - 0.4, 0.58, 0.7, p.glass);
+      m.box(w - 0.95, 0.58, 0.2, w - 0.3, 0.64, 0.4, team);
+      m.cylinder(0.45, 0.35, 0.07, 0.75, 0.06, 0.05, p.metal, 8);
+      m.box(0.45, 0.32, 0.6, 0.72, 0.38, 0.72, team);
+      break;
+    }
+    case 'helipad': {
+      // Helipad: a concrete pad with a landing circle and corner lights.
+      m.box(0.12, 0.12, 0.07, w - 0.12, h - 0.12, 0.12, p.pad, { top: tint(p.dark, 1.4) });
+      m.cylinder(w / 2, h / 2, 0.12, 0.125, 0.62, 0.62, tint(p.trim, 1.1), 24);
+      m.cylinder(w / 2, h / 2, 0.125, 0.13, 0.5, 0.5, p.dark, 24);
+      m.box(w / 2 - 0.3, h / 2 - 0.06, 0.13, w / 2 + 0.3, h / 2 + 0.06, 0.135, team);
+      m.box(w / 2 - 0.3, h / 2 - 0.3, 0.13, w / 2 - 0.18, h / 2 + 0.3, 0.135, team);
+      m.box(w / 2 + 0.18, h / 2 - 0.3, 0.13, w / 2 + 0.3, h / 2 + 0.3, 0.135, team);
+      for (const [x, y] of [[0.22, 0.22], [w - 0.22, 0.22], [0.22, h - 0.22], [w - 0.22, h - 0.22]]) m.cylinder(x, y, 0.12, 0.2, 0.05, 0.04, GLOW_BLUE, 6, { glow: true });
+      break;
+    }
+    case 'ioncannon': {
+      // Advanced Communications Center: an uplink block under a steerable dish.
+      m.box(0.22, 0.22, 0.07, w - 0.22, h - 0.22, 0.5, p.body, { top: p.trim });
+      m.box(0.22, h - 0.26, 0.2, w - 0.22, h - 0.2, 0.44, team);
+      m.cylinder(w / 2, h / 2, 0.5, 1.15, 0.14, 0.1, p.metal, 12);
+      m.cylinder(w / 2, h / 2, 1.1, 1.52, 0.16, 0.72, p.body, 24, { cap: false });
+      m.cylinder(w / 2, h / 2, 1.12, 1.16, 0.18, 0.18, p.dark, 12);
+      m.cylinder(w / 2, h / 2, 1.16, 1.78, 0.035, 0.025, p.metal, 6);
+      m.dome(w / 2, h / 2, 1.78, 0.09, GLOW_CYAN, 2, 10);
+      for (const f of m.faces.slice(-2 * 10 - 1)) f.glow = true;
+      break;
+    }
+    case 'temple': {
+      // Temple of Nod: a stepped black pyramid with a glowing apex.
+      for (let k2 = 0; k2 < 5; k2++) {
+        const inset = 0.25 + k2 * 0.22, z = 0.07 + k2 * 0.26;
+        m.box(inset, inset, z, w - inset, h - inset, z + 0.26, tint(p.dark, 1.15 + k2 * 0.12), { top: tint(p.dark, 1.35 + k2 * 0.1) });
+      }
+      m.box(0.25, 0.19, 0.2, w - 0.25, 0.25, 0.44, team);
+      m.cylinder(w / 2, h / 2, 1.37, 1.62, 0.16, 0.1, p.metal, 8);
+      m.dome(w / 2, h / 2, 1.62, 0.16, GLOW_RED, 3, 12, 0.22);
+      for (const f of m.faces.slice(-3 * 12 - 1)) f.glow = true;
+      break;
+    }
+    case 'gtower': {
+      // Guard Tower: a concrete post with a firing slit under a flat cap.
+      m.cylinder(0.5, 0.5, 0.07, 0.78, 0.36, 0.3, p.body, 8, { top: p.trim });
+      m.cylinder(0.5, 0.5, 0.78, 0.88, 0.4, 0.4, p.trim, 8);
+      m.cylinder(0.5, 0.5, 0.56, 0.64, 0.33, 0.33, p.dark, 8, { cap: false });
+      m.box(0.3, 0.46, 0.3, 0.7, 0.54, 0.4, team);
+      break;
+    }
+    case 'atower': {
+      // Advanced Guard Tower: a tall mast with twin rocket pods.
+      m.box(0.2, h - 0.8, 0.07, 0.8, h - 0.2, 0.35, p.body, { top: p.trim });
+      m.cylinder(0.5, h - 0.5, 0.35, 1.45, 0.2, 0.16, p.body, 10);
+      m.cylinder(0.5, h - 0.5, 0.95, 1.05, 0.21, 0.21, team, 10, { cap: false });
+      for (const dy of [-0.18, 0.18]) m.box(0.3, h - 0.5 + dy - 0.07, 1.45, 0.7, h - 0.5 + dy + 0.07, 1.66, p.trim, { top: p.dark });
+      break;
+    }
+    case 'obelisk': {
+      // Obelisk of Light: a tapered spire with a crystal lens at the tip.
+      m.box(0.26, h - 0.76, 0.07, 0.74, h - 0.24, 0.26, p.trim, { top: p.dark });
+      m.cylinder(0.5, h - 0.5, 0.26, 1.85, 0.26, 0.09, tint(p.dark, 1.1), 4);
+      m.cylinder(0.5, h - 0.5, 0.5, 0.58, 0.24, 0.22, team, 4, { cap: false });
+      m.cylinder(0.5, h - 0.5, 1.85, 2.05, 0.09, 0.0, GLOW_RED, 4, { glow: true });
+      break;
+    }
+    case 'samsite': {
+      // SAM Site: a low bunker whose roof opens onto twin launch rails.
+      m.box(0.15, 0.12, 0.07, w - 0.15, h - 0.12, 0.3, p.body, { top: p.trim });
+      m.box(0.15, h - 0.16, 0.12, w - 0.15, h - 0.1, 0.26, team);
+      for (const dx of [-0.3, 0.3]) {
+        const cx = w / 2 + dx;
+        m.box(cx - 0.12, h / 2 - 0.14, 0.3, cx + 0.12, h / 2 + 0.14, 0.38, p.dark);
+        m.cylinder(cx, h / 2, 0.38, 0.72, 0.08, 0.05, p.metal, 8);
+      }
+      break;
+    }
+    case 'flametower': {
+      // Flame Tower: a squat turret with a burner nozzle and a pilot flame.
+      m.cylinder(0.5, 0.5, 0.07, 0.42, 0.38, 0.34, p.body, 10, { top: p.trim });
+      m.cylinder(0.5, 0.5, 0.42, 0.62, 0.3, 0.26, p.trim, 10, { top: p.dark });
+      m.box(0.44, 0.5, 0.48, 0.92, 0.56, 0.56, p.dark);
+      m.cylinder(0.5, 0.5, 0.3, 0.38, 0.39, 0.39, team, 10, { cap: false });
+      m.dome(0.95, 0.53, 0.5, 0.06, [255, 150, 60], 2, 8);
+      for (const f of m.faces.slice(-2 * 8 - 1)) f.glow = true;
+      break;
+    }
+    case 'aagun': {
+      // AA Gun: a sandbagged ring on a concrete apron; the gun itself tracks its target.
+      m.box(0.18, h - 0.82, 0.07, 0.82, h - 0.18, 0.2, p.pad, { top: p.trim });
+      m.cylinder(0.5, h - 0.5, 0.2, 0.34, 0.36, 0.33, [150, 136, 102], 10, { top: p.dark });
+      m.box(0.2, h - 0.2, 0.12, 0.8, h - 0.14, 0.26, team);
+      break;
+    }
     default:
       m.box(0.2, 0.2, 0.07, w - 0.2, h - 0.2, 0.6, p.body);
       m.box(0.2, h - 0.24, 0.2, w - 0.2, h - 0.18, 0.45, team);
@@ -444,7 +583,7 @@ export function wallMesh(mask: number, style: ArtStyle): Mesh {
 
 // ---------------------------------------------------------------- vehicles
 
-const HAS_TURRET = new Set(['tank-turret', 'siege-turret', 'launcher', 'sonic', 'devastator', 'prism', 'mirage', 'tesla-tank', 'ship-destroyer', 'ship-patrol', 'ship-cruiser', 'ship-dreadnought']);
+const HAS_TURRET = new Set(['tank-turret', 'siege-turret', 'mammoth-turret', 'launcher', 'sonic', 'devastator', 'prism', 'mirage', 'tesla-tank', 'ship-destroyer', 'ship-patrol', 'ship-cruiser', 'ship-dreadnought']);
 /** Ships are modelled small and scaled up to RA2's big hulls. */
 const SHIP_SCALE: Record<string, number> = { hovercraft: 1.5, 'ship-destroyer': 1.8, 'ship-cruiser': 1.8, 'ship-carrier': 1.9, 'ship-patrol': 1.5, 'ship-dreadnought': 1.9, sub: 1.7, dolphin: 1.3, squid: 1.5 };
 function scaled(m: Mesh, k = 1): Mesh {
@@ -452,7 +591,7 @@ function scaled(m: Mesh, k = 1): Mesh {
   return m;
 }
 /** Units drawn in the air with a ground shadow. */
-export const FLYING = new Set(['kirov', 'jet', 'ornithopter', 'carryall', 'helicopter']);
+export const FLYING = new Set(['kirov', 'jet', 'ornithopter', 'carryall', 'helicopter', 'orca', 'apache']);
 export function hasTurret(shape: string) { return HAS_TURRET.has(shape); }
 
 /** Vehicle hull pointing +X, centred on the origin. Sizes are in cells. */
@@ -619,6 +758,100 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
         m.box(-0.35, Math.sin(a) * 0.16 - 0.02, 0.0, 0.0, Math.sin(a) * 0.16 + 0.02, 0.04, [140, 80, 160]);
       }
       break;
+    case 'humvee':
+      // Hum-vee / Ranger: four wheels, a slab body and a roof gun.
+      for (const [x, y] of [[-0.2, -0.16], [-0.2, 0.16], [0.2, -0.16], [0.2, 0.16]]) m.box(x - 0.08, y - 0.05, 0.0, x + 0.08, y + 0.05, 0.12, TRACK);
+      m.box(-0.28, -0.14, 0.08, 0.3, 0.14, 0.2, hull);
+      m.box(0.02, -0.12, 0.2, 0.26, 0.12, 0.3, hull, { top: p.glass });
+      m.box(-0.26, -0.13, 0.2, 0.0, 0.13, 0.26, tint(hull, 0.95), { top: team });
+      m.cylinder(-0.12, 0, 0.3, 0.37, 0.05, 0.05, p.dark, 8);
+      m.box(-0.12, -0.025, 0.33, 0.14, 0.025, 0.37, BARREL);
+      break;
+    case 'buggy':
+      // Nod Buggy: an open frame, a roll cage and a pintle gun.
+      for (const [x, y] of [[-0.18, -0.15], [-0.18, 0.15], [0.2, -0.13], [0.2, 0.13]]) m.box(x - 0.08, y - 0.05, 0.0, x + 0.08, y + 0.05, 0.12, TRACK);
+      m.box(-0.24, -0.11, 0.08, 0.3, 0.11, 0.17, hull);
+      m.box(-0.06, -0.1, 0.17, 0.12, 0.1, 0.22, team);
+      for (const y of [-0.1, 0.1]) m.box(-0.08, y - 0.02, 0.22, 0.1, y + 0.02, 0.32, p.metal);
+      m.box(-0.08, -0.1, 0.3, 0.1, 0.1, 0.33, p.metal);
+      m.box(0.08, -0.02, 0.2, 0.34, 0.02, 0.24, BARREL);
+      break;
+    case 'bike':
+      // Recon Bike: three wheels, a rider and twin rocket tubes.
+      for (const [x, y] of [[-0.16, -0.1], [-0.16, 0.1], [0.18, 0]]) m.box(x - 0.06, y - 0.035, 0.0, x + 0.06, y + 0.035, 0.1, TRACK);
+      m.box(-0.16, -0.07, 0.07, 0.2, 0.07, 0.14, hull);
+      m.box(-0.04, -0.05, 0.14, 0.06, 0.05, 0.22, team);
+      for (const y of [-0.09, 0.09]) m.cylinder(0.0, y, 0.15, 0.17, 0.035, 0.035, p.dark, 8, { cap: false });
+      break;
+    case 'apc':
+      // APC: a sloped armoured box on tracks with a cupola gun.
+      tracked(0.4, 0.28, 0.18);
+      m.box(-0.34, -0.22, 0.18, 0.18, 0.22, 0.4, hull, { top: tint(hull, 1.04) });
+      m.add([[0.18, -0.22, 0.18], [0.4, -0.18, 0.18], [0.4, 0.18, 0.18], [0.18, 0.22, 0.18]], tint(hull, 0.98));
+      m.add([[0.18, -0.22, 0.4], [0.4, -0.18, 0.22], [0.4, 0.18, 0.22], [0.18, 0.22, 0.4]], tint(hull, 1.06));
+      m.box(-0.34, -0.23, 0.26, -0.02, -0.21, 0.34, team);
+      m.box(-0.34, 0.21, 0.26, -0.02, 0.23, 0.34, team);
+      m.cylinder(-0.08, 0, 0.4, 0.48, 0.1, 0.09, hull, 10, { top: team });
+      m.box(-0.02, -0.025, 0.43, 0.26, 0.025, 0.47, BARREL);
+      break;
+    case 'mammoth-turret':
+      // Mammoth Tank: a long double-tracked hull; the twin turret is drawn separately.
+      m.box(-0.58, -0.4, 0, 0.58, -0.24, 0.26, TRACK);
+      m.box(-0.58, 0.24, 0, 0.58, 0.4, 0.26, TRACK);
+      m.box(-0.54, -0.3, 0.06, 0.56, 0.3, 0.32, hull, { top: tint(hull, 1.03) });
+      m.box(-0.5, -0.33, 0.3, 0.2, 0.33, 0.34, tint(hull, 0.96));
+      m.box(-0.5, -0.41, 0.2, 0.0, -0.38, 0.3, team);
+      m.box(-0.5, 0.38, 0.2, 0.0, 0.41, 0.3, team);
+      break;
+    case 'flametank':
+      // Flame Tank: a tracked tank with paired nozzles and pressure drums, no turret.
+      tracked(0.44, 0.3, 0.2);
+      m.box(-0.36, -0.24, 0.2, 0.26, 0.24, 0.34, hull, { top: tint(hull, 1.04) });
+      for (const y of [-0.12, 0.12]) m.cylinder(-0.1, y, 0.34, 0.46, 0.1, 0.1, p.metal, 12);
+      for (const y of [-0.08, 0.08]) m.cylinder(0.26, y, 0.24, 0.26, 0.045, 0.045, p.dark, 8, { cap: false });
+      for (const y of [-0.08, 0.08]) m.box(0.26, y - 0.035, 0.22, 0.5, y + 0.035, 0.28, BARREL);
+      m.box(-0.36, -0.25, 0.26, 0.0, -0.23, 0.32, team);
+      m.box(-0.36, 0.23, 0.26, 0.0, 0.25, 0.32, team);
+      break;
+    case 'minelayer':
+      // Minelayer / Supply Truck: a small tracked carrier with a rear dispenser.
+      tracked(0.34, 0.24, 0.16);
+      m.box(-0.2, -0.19, 0.16, 0.28, 0.19, 0.34, hull, { top: p.glass });
+      m.box(-0.36, -0.17, 0.16, -0.2, 0.17, 0.26, p.dark);
+      m.box(-0.2, -0.2, 0.22, 0.1, -0.18, 0.3, team);
+      break;
+    case 'mgg':
+      // Mobile Gap Generator: a wheeled van carrying an emitter dish.
+      for (const [x, y] of [[-0.2, -0.15], [-0.2, 0.15], [0.2, -0.15], [0.2, 0.15]]) m.box(x - 0.07, y - 0.05, 0.0, x + 0.07, y + 0.05, 0.11, TRACK);
+      m.box(-0.28, -0.16, 0.08, 0.3, 0.16, 0.34, hull, { top: tint(hull, 1.03) });
+      m.box(0.14, -0.13, 0.2, 0.3, 0.13, 0.32, p.glass);
+      m.box(-0.28, -0.17, 0.16, 0.0, -0.15, 0.26, team);
+      m.cylinder(-0.1, 0, 0.34, 0.44, 0.04, 0.03, p.metal, 8);
+      m.cylinder(-0.1, 0, 0.42, 0.56, 0.06, 0.2, p.body, 14, { cap: false });
+      break;
+    case 'orca':
+      // Orca: a VTOL with twin lift pods and rocket pods under stub wings.
+      lathe(m, -0.3, 0.36, 0, 0.14, t => 0.09 * Math.pow(Math.sin(Math.PI * (0.18 + t * 0.82)), 0.55), p.metal, 8, 10);
+      m.box(0.16, -0.06, 0.16, 0.3, 0.06, 0.22, p.glass);
+      for (const y of [-0.2, 0.2]) {
+        m.box(-0.12, y - 0.07, 0.12, 0.08, y + 0.07, 0.2, tint(p.metal, 0.95), { top: team });
+        m.cylinder(-0.02, y, 0.08, 0.12, 0.06, 0.06, p.dark, 10);
+      }
+      m.add([[-0.08, -0.22, 0.15], [0.06, -0.08, 0.15], [0.06, 0.08, 0.15], [-0.08, 0.22, 0.15]], tint(p.metal, 0.92));
+      m.add([[-0.3, 0, 0.14], [-0.18, 0, 0.14], [-0.3, 0, 0.3]], team);
+      break;
+    case 'apache':
+      // Apache / Longbow / Hind: a gunship with stub wings, chin gun and rotor mast.
+      lathe(m, -0.42, 0.38, 0, 0.17, t => 0.1 * Math.pow(Math.sin(Math.PI * (0.12 + t * 0.88)), 0.5), p.metal, 10, 12);
+      m.box(0.2, -0.05, 0.17, 0.34, 0.05, 0.24, p.glass);
+      m.box(0.26, -0.03, 0.1, 0.38, 0.03, 0.15, p.dark);
+      for (const y of [-0.17, 0.17]) {
+        m.box(-0.06, y - 0.05, 0.13, 0.1, y + 0.05, 0.18, tint(p.metal, 0.95), { top: team });
+        m.cylinder(0.02, y, 0.09, 0.13, 0.05, 0.05, p.dark, 8);
+      }
+      m.box(-0.04, -0.03, 0.26, 0.04, 0.03, 0.34, p.metal);
+      m.box(-0.42, -0.02, 0.2, -0.3, 0.02, 0.36, p.metal);
+      break;
     default:
       tracked(0.38, 0.26, 0.18);
   }
@@ -675,6 +908,15 @@ export function turretMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       m.box(0.4, -0.1, 0.16, 0.65, 0.1, 0.3, p.hull, { top: team });
       for (const y of [-0.05, 0.05]) m.box(0.55, y - 0.025, 0.28, 0.72, y + 0.025, 0.36, p.dark);
       break;
+    case 'mammoth-turret':
+      // Twin cannon with a rocket pod either side.
+      m.box(-0.3, -0.26, 0.34, 0.16, 0.26, 0.52, p.hull, { top: team });
+      for (const y of [-0.1, 0.1]) m.box(0.12, y - 0.045, 0.4, 0.78, y + 0.045, 0.48, BARREL);
+      for (const y of [-0.26, 0.26]) {
+        m.box(-0.22, y - 0.06, 0.4, 0.02, y + 0.06, 0.54, tint(p.hull, 0.95));
+        for (const dz of [0.42, 0.48]) m.cylinder(0.02, y, dz, dz + 0.04, 0.03, 0.03, p.dark, 6, { cap: false });
+      }
+      break;
     default:
       m.cylinder(-0.02, 0, 0.18, 0.31, 0.17, 0.15, p.hull, 14, { top: team });
       m.box(0.1, -0.03, 0.22, 0.55, 0.03, 0.27, BARREL);
@@ -683,7 +925,7 @@ export function turretMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
 }
 
 /** Defences with a gun that tracks its target. */
-export const ROTATING_DEFENCES = new Set(['turret', 'rocketturret', 'patriot', 'flakcannon', 'grandcannon']);
+export const ROTATING_DEFENCES = new Set(['turret', 'rocketturret', 'patriot', 'flakcannon', 'grandcannon', 'aagun']);
 
 /** Rotating gun on top of a defensive structure, centred on the origin. */
 export function defenseTurretMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
@@ -698,6 +940,9 @@ export function defenseTurretMesh(shape: string, style: ArtStyle, team: RGB): Me
   } else if (shape === 'flakcannon') {
     m.cylinder(0, 0, 0.3, 0.42, 0.18, 0.15, p.hull, 10, { top: team });
     for (const y of [-0.06, 0.06]) m.box(0.08, y - 0.025, 0.4, 0.46, y + 0.025, 0.48, BARREL);
+  } else if (shape === 'aagun') {
+    m.cylinder(0, 0, 0.34, 0.44, 0.17, 0.14, p.hull, 10, { top: team });
+    for (const y of [-0.07, 0.07]) m.box(0.0, y - 0.03, 0.42, 0.52, y + 0.03, 0.48, BARREL);
   } else if (shape === 'grandcannon') {
     m.box(-0.38, -0.36, 0.45, 0.36, 0.36, 0.78, p.body, { top: team });
     m.box(0.3, -0.07, 0.56, 1.35, 0.07, 0.68, BARREL);

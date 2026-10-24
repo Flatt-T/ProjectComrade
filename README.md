@@ -1,6 +1,6 @@
 # COMRADE - Browser RTS Classics
 
-A browser RTS platform beginning with a self-contained C&C Tiberian Dawn slice: original GDI/Nod teams, themes and rules, bundled freeware content, and an authored map. This unofficial community project requires no player file uploads.
+A browser RTS platform built on a self-contained C&C Tiberian Dawn slice: original GDI/Nod teams, themes and rules, bundled freeware content, and an authored map. This unofficial community project requires no player file uploads.
 
 ## Status
 
@@ -9,10 +9,12 @@ A browser RTS platform beginning with a self-contained C&C Tiberian Dawn slice: 
 | Game style | Engine | Multiplayer |
 |---|---|---|
 | **Classic C&C** (Tiberian Dawn) | Original GPL engine (Vanilla Conquer → WASM), freeware art, 4 authored maps | Lobby presence; each commander fights the built-in enemy |
+| **Tiberian Dawn Style** | Comrade Fusion Engine, `td` rule pack: GDI and Nod, spreading Tiberium, Obelisk and Temple, Ion Cannon — on the same four battlefields as the original-engine slice | **Synchronized lockstep** with optional AI opponents |
+| **Red Alert Style** | Comrade Fusion Engine, `ra1` rule pack: Allies and Soviets, ore and gems, navies, Tanya, Tesla coils, Chronosphere and Iron Curtain | **Synchronized lockstep** with optional AI opponents |
 | **Dune Style** | Comrade Fusion Engine, `dune` rule pack: rock-only building, concrete, spice blooms, sandworms, Atreides / Harkonnen / Ordos | **Synchronized lockstep** with optional AI opponents |
 | **Red Alert 2 Style** | Comrade Fusion Engine, `ra2` rule pack, isometric: MCV deploy, ore regrowth and gems, Chrono Miners, Prism and Tesla tech | **Synchronized lockstep** with optional AI opponents |
 
-The **Comrade Fusion Engine** (`packages/fusion`) is one deterministic, data-driven engine: integer simulation, seeded RNG, command-only lockstep with desync checksums, and rule packs that describe a whole game as data. Dune and RA2 are two packs; future original "fusion" games are further packs mixing their parts ([ADR 010](docs/adr/010-fusion-engine.md)). These styles are independent gameplay replications with original procedural art; unit values approximate the classics and are tuned over time.
+The **Comrade Fusion Engine** (`packages/fusion`) is one deterministic, data-driven engine: integer simulation, seeded RNG, command-only lockstep with desync checksums, and rule packs that describe a whole game as data. All four classics are packs — `td`, `ra1`, `dune`, `ra2` — so a future original "fusion" game is a further pack mixing any of their units, structures, weapons and mechanics ([ADR 010](docs/adr/010-fusion-engine.md)). These styles are independent gameplay replications with original procedural art; unit values approximate the classics and are tuned over time.
 
 **War room:** registration-free lobby with a live public-games list, shareable `?room=CODE` invite links, public/invite-only rooms, host-controlled match setup (game style, battlefield, human players, AI opponents, starting credits, tech level) and per-player side selection.
 

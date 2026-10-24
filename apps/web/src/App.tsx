@@ -25,7 +25,7 @@ export default function App() {
   return <main className={`battle-shell ${fusion ? 'wide' : ''}`}>
     <header>
       <b className="mark">C</b>
-      <div><strong>PROJECT COMRADE</strong><small>BROWSER RTS CLASSICS · CLASSIC C&amp;C · DUNE · RED ALERT 2</small></div>
+      <div><strong>PROJECT COMRADE</strong><small>BROWSER RTS CLASSICS · TIBERIAN DAWN · RED ALERT · DUNE · RED ALERT 2</small></div>
       <span className="badge">{session ? 'OPERATION LIVE' : 'WAR ROOM'}</span>
       {!session && <a href="?view=fusion-requests" onClick={e => { e.preventDefault(); showRequests(!requests); }}>{requests ? 'War room' : 'Fusion requests'}</a>}
       <a href="https://github.com/Flatt-T/ProjectComrade">Source ↗</a>
@@ -45,7 +45,7 @@ export default function App() {
 
     <footer>
       <span>VANILLA CONQUER · COMRADE FUSION ENGINE</span>
-      <span>Classic C&amp;C runs the original GPL engine with freeware artwork. Dune and Red Alert 2 styles are independent gameplay replications with original procedural art.</span>
+      <span>Classic C&amp;C runs the original GPL engine with freeware artwork. The Fusion Engine styles — Tiberian Dawn, Red Alert, Dune and Red Alert 2 — are independent gameplay replications with original procedural art.</span>
       <a href="/content/td/manifest.json">Content credits ↗</a> <a href="/content/audio/manifest.json">Sound credits ↗</a>
       <a href="/engines/source.txt">Engine licence ↗</a>
     </footer>

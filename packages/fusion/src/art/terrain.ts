@@ -6,7 +6,7 @@ import type { MapData } from '../map';
 import type { RulePack } from '../rules';
 import { RGB, View } from './forge';
 
-type Kind = 'sand' | 'dunes' | 'rock' | 'rough' | 'cliff' | 'grass' | 'road' | 'beach' | 'woods' | 'water';
+type Kind = 'sand' | 'dunes' | 'rock' | 'rough' | 'cliff' | 'grass' | 'road' | 'beach' | 'woods' | 'water' | 'snow';
 interface Material { base: RGB; alt: RGB; height: number; kind: Kind; edge: number }
 
 const DUNE: Record<string, Material> = {
@@ -16,7 +16,8 @@ const DUNE: Record<string, Material> = {
   rough: { base: [160, 88, 50], alt: [124, 64, 36], height: 0.62, kind: 'rough', edge: 0.75 },
   cliff: { base: [118, 58, 32], alt: [82, 38, 22], height: 1.15, kind: 'cliff', edge: 0.45 },
 };
-const RA2: Record<string, Material> = {
+/** Temperate theatres: Red Alert 2, and the ortho classics (Tiberian Dawn, Red Alert). */
+const TEMPERATE: Record<string, Material> = {
   clear: { base: [122, 134, 60], alt: [98, 112, 46], height: 0, kind: 'grass', edge: 0.35 },
   road: { base: [152, 120, 82], alt: [128, 100, 66], height: 0, kind: 'road', edge: 0.2 },
   sand: { base: [206, 180, 122], alt: [186, 160, 104], height: 0, kind: 'beach', edge: 0.35 },
@@ -24,12 +25,14 @@ const RA2: Record<string, Material> = {
   trees: { base: [88, 104, 42], alt: [70, 86, 34], height: 0, kind: 'woods', edge: 0.4 },
   cliff: { base: [172, 104, 60], alt: [122, 70, 40], height: 1.15, kind: 'cliff', edge: 0.45 },
   water: { base: [40, 64, 94], alt: [32, 52, 78], height: -0.35, kind: 'water', edge: 0.35 },
+  snow: { base: [220, 228, 234], alt: [198, 210, 220], height: 0, kind: 'snow', edge: 0.3 },
 };
 
 function hex(c: string): RGB { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 
 export function materials(pack: RulePack): Material[] {
-  const table = pack.projection === 'iso' ? RA2 : DUNE;
+  // Desert theatre for the Dune-style packs, temperate for everything with open ground.
+  const table = pack.terrains.some(t => t.id === 'clear') ? TEMPERATE : DUNE;
   return pack.terrains.map(t => table[t.id] ?? {
     base: hex(t.color), alt: hex(t.color2), height: t.vehicle ? 0 : 0.8,
     kind: t.sand ? 'sand' : t.foot ? 'grass' : 'cliff', edge: 0.35,
@@ -160,6 +163,8 @@ export function paintTerrain(canvas: HTMLCanvasElement, map: MapData, pack: Rule
       }
       case 'road': k += (grain - 0.5) * 0.1; break;
       case 'beach': k += (grain - 0.5) * 0.08; break;
+      // Snow: soft drifts with a sparkle of wind-packed crust.
+      case 'snow': k += (grain - 0.5) * 0.05 + Math.sin((x * 0.2 + y * 0.3 + patch * 28) * 0.4) * 0.012 + (grain > 0.93 ? 0.06 : 0); break;
       case 'water': k += Math.sin(x * 0.22 + y * 0.12 + med * 14) * 0.04 + (grain - 0.5) * 0.05; break;
     }
     out[0] = (m.base[0] + (m.alt[0] - m.base[0]) * f) * k;

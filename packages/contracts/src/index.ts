@@ -7,7 +7,7 @@ export type Faction = string;
 // 'fusion' styles run the Comrade Fusion Engine with the named rule pack, which also
 // supports lockstep multiplayer. Unplayable styles are declared so the roster is visible.
 /** Classic styles, then community fusions (`fusion-<pack id>`). */
-export type GameStyle = 'td-classic' | 'ra1' | 'ra2' | 'dune2k' | 'fusion-leviathan';
+export type GameStyle = 'td-classic' | 'td-fusion' | 'ra1' | 'ra1-fusion' | 'ra2' | 'dune2k' | 'fusion-leviathan';
 export interface FactionInfo { id: Faction; name: string; full: string; blurb: string }
 export interface StyleInfo {
   id: GameStyle; name: string; engine: 'vanilla-td' | 'vanilla-ra' | 'fusion'; pack?: string;
@@ -27,6 +27,12 @@ const RA2_COUNTRIES: FactionInfo[] = [
 export const STYLES: StyleInfo[] = [
   { id: 'td-classic', name: 'Classic C&C', engine: 'vanilla-td', playable: true, lockstep: false, blurb: 'Tiberian Dawn on the original engine. GDI versus the Brotherhood of Nod.',
     factions: [{ id: 'gdi', name: 'GDI', full: 'Global Defense Initiative', blurb: 'Heavy armour. Superior firepower.' }, { id: 'nod', name: 'Nod', full: 'Brotherhood of Nod', blurb: 'Speed. Subterfuge. Strength through unity.' }] },
+  { id: 'td-fusion', name: 'Tiberian Dawn Style', engine: 'fusion', pack: 'td', playable: true, lockstep: true,
+    blurb: 'GDI versus Nod on the Fusion Engine: the same four battlefields as the original-engine slice, with synchronized multiplayer.',
+    factions: [{ id: 'gdi', name: 'GDI', full: 'Global Defense Initiative', blurb: 'Heavy armour. Superior firepower.' }, { id: 'nod', name: 'Nod', full: 'Brotherhood of Nod', blurb: 'Speed. Subterfuge. Strength through unity.' }] },
+  { id: 'ra1-fusion', name: 'Red Alert Style', engine: 'fusion', pack: 'ra1', playable: true, lockstep: true,
+    blurb: 'Allies versus Soviets on the Fusion Engine: ore and gems, navies, the Chronosphere and the Iron Curtain.',
+    factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: 'Rangers, Tanya, the Chronosphere and a real navy.' }, { id: 'soviet', name: 'Soviets', full: 'Soviet Union', blurb: 'Heavy tanks, Tesla coils and the bomb.' }] },
   { id: 'dune2k', name: 'Dune Style', engine: 'fusion', pack: 'dune', playable: true, lockstep: true, blurb: 'Spice, sandworms and three Great Houses. Replicated on the Fusion Engine.',
     factions: [{ id: 'atreides', name: 'Atreides', full: 'House Atreides', blurb: 'Fremen allies and the Sonic Tank.' }, { id: 'harkonnen', name: 'Harkonnen', full: 'House Harkonnen', blurb: 'Sardaukar and the Devastator.' }, { id: 'ordos', name: 'Ordos', full: 'House Ordos', blurb: 'Raiders and the Deviator.' }] },
   { id: 'ra2', name: 'Red Alert 2 Style', engine: 'fusion', pack: 'ra2', playable: true, lockstep: true, blurb: 'Allies versus Soviets in isometric 3/4 view. Replicated on the Fusion Engine.',

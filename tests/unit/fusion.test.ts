@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Game, LockstepSession, PACKS, dunePack, parseCommand, ra2Pack, facingTo, isqrt, Rng } from '../../packages/fusion/src/index';
+import { CLASSIC_PACKS, Game, LockstepSession, PACKS, dunePack, parseCommand, ra2Pack, facingTo, isqrt, Rng } from '../../packages/fusion/src/index';
 import type { Command, GameSetup, TurnPacket, TurnTransport } from '../../packages/fusion/src/index';
 
 const ai2 = (pack: GameSetup['pack'], seed = 7, mapId = pack.maps[0].id): GameSetup => ({
@@ -27,7 +27,7 @@ describe('fusion core maths', () => {
 });
 
 describe('fusion determinism', () => {
-  for (const pack of [dunePack, ra2Pack]) {
+  for (const pack of CLASSIC_PACKS) {
     it(`${pack.id}: same seed and commands give the same game`, () => {
       const a = new Game(ai2(pack, 99)), b = new Game(ai2(pack, 99));
       for (let t = 0; t < 2400; t++) {
@@ -43,7 +43,7 @@ describe('fusion determinism', () => {
 });
 
 describe('fusion gameplay', () => {
-  for (const pack of [dunePack, ra2Pack]) {
+  for (const pack of CLASSIC_PACKS) {
     it(`${pack.id}: AI deploys, builds an economy, harvests and fights`, () => {
       const game = new Game(ai2(pack, 3));
       run(game, 15 * 60 * 6);
@@ -123,8 +123,8 @@ describe('fusion gameplay', () => {
     expect({ x: enemyUnit.x, y: enemyUnit.y }).toEqual(before);
   });
 
-  it('registers both packs', () => {
-    expect(Object.keys(PACKS)).toEqual(expect.arrayContaining(['dune', 'ra2'])); // Plus community fusions.
+  it('registers every classic pack', () => {
+    expect(Object.keys(PACKS)).toEqual(expect.arrayContaining(['td', 'dune', 'ra1', 'ra2'])); // Plus community fusions.
   });
 });
 
