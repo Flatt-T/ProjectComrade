@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for validated Project Comrade releases
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=2min
+Unit=comrade-deploy.service
+
+[Install]
+WantedBy=timers.target

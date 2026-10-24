@@ -1,0 +1,82 @@
+{
+  "name": "Comrade daily issue review",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "cronExpression", "expression": "0 6 * * *" }] } },
+      "name": "Daily 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/Flatt-T/ProjectComrade/issues?labels=type:issue,needs-triage&state=open&per_page=100",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Accept", "value": "application/vnd.github+json" }] },
+        "options": {}
+      },
+      "name": "Open problem reports",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// One item per report: the log window is the 20 minutes before the reported time.\nconst section = (body, heading) => {\n  const m = (body || '').match(new RegExp('###\\\\s+' + heading + '[^\\\\n]*\\\\n+([^#]*)', 'i'));\n  const v = m ? m[1].trim() : '';\n  return v === '_No response_' ? '' : v;\n};\nconst out = [];\nfor (const item of $input.all()) {\n  const issue = item.json;\n  if (issue.pull_request) continue;\n  const stamp = Date.parse(section(issue.body, 'Timestamp')) || Date.parse(issue.created_at);\n  const report = (section(issue.body, 'Report ID').match(/r-[0-9a-f]{8}/) || [''])[0];\n  const from = new Date(stamp - 20 * 60000).toISOString();\n  const to = new Date(stamp + 2 * 60000).toISOString();\n  out.push({ json: { number: issue.number, url: `http://10.1.0.60:3001/ops/logs?from=${from}&to=${to}${report ? '&report=' + report : ''}` } });\n}\nreturn out;"
+      },
+      "name": "Log windows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": { "response": { "response": { "neverError": true } } }
+      },
+      "name": "Fetch server logs (internal)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Keyed by issue number; trimmed so the dispatch payload stays under GitHub's limit.\nconst windows = $('Log windows').all();\nconst logs = {};\n$input.all().forEach((item, i) => {\n  const n = windows[i].json.number;\n  const body = item.json || {};\n  logs[n] = { report: body.report ?? null, entries: (body.entries || []).slice(-300) };\n});\nlet text = JSON.stringify(logs);\nwhile (text.length > 60000) {\n  for (const k of Object.keys(logs)) logs[k].entries = logs[k].entries.slice(Math.ceil(logs[k].entries.length / 3));\n  text = JSON.stringify(logs);\n}\nreturn [{ json: { logs: text } }];"
+      },
+      "name": "Bundle logs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/Flatt-T/ProjectComrade/actions/workflows/community-daily-issues.yml/dispatches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Accept", "value": "application/vnd.github+json" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ref: 'main', inputs: { logs: $json.logs } }) }}",
+        "options": {}
+      },
+      "name": "Start daily remediation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 0]
+    }
+  ],
+  "connections": {
+    "Daily 06:00": { "main": [[{ "node": "Open problem reports", "type": "main", "index": 0 }]] },
+    "Open problem reports": { "main": [[{ "node": "Log windows", "type": "main", "index": 0 }]] },
+    "Log windows": { "main": [[{ "node": "Fetch server logs (internal)", "type": "main", "index": 0 }]] },
+    "Fetch server logs (internal)": { "main": [[{ "node": "Bundle logs", "type": "main", "index": 0 }]] },
+    "Bundle logs": { "main": [[{ "node": "Start daily remediation", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "timezone": "Europe/London" }
+}

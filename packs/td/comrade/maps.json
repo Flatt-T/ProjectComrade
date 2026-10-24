@@ -1,0 +1,34 @@
+[
+  {
+    "id": "tiberium-crossing",
+    "name": "Tiberium Crossing",
+    "file": "COMRADE",
+    "theater": "TEMPERATE",
+    "maxPlayers": 2,
+    "description": "The classic foundation. Twin bases, a contested central Tiberium field."
+  },
+  {
+    "id": "canyon-clash",
+    "name": "Canyon Clash",
+    "file": "CANYON",
+    "theater": "TEMPERATE",
+    "maxPlayers": 2,
+    "description": "Bases pressed into opposite corners with rich flanking Tiberium."
+  },
+  {
+    "id": "tiberium-isles",
+    "name": "Tiberium Isles",
+    "file": "ISLES",
+    "theater": "WINTER",
+    "maxPlayers": 2,
+    "description": "A winter theatre with scattered Tiberium pockets across broken ground."
+  },
+  {
+    "id": "desert-standoff",
+    "name": "Desert Standoff",
+    "file": "STANDOFF",
+    "theater": "DESERT",
+    "maxPlayers": 2,
+    "description": "A wide desert expanse. Long sightlines reward armour and early expansion."
+  }
+]

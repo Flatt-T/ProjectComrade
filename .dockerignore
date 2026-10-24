@@ -1,0 +1,11 @@
+.git
+node_modules
+**/node_modules
+**/dist
+build
+*.log
+.env*
+references/actual-binaries
+references/recordings
+rights/actual-licences
+engines/vendor

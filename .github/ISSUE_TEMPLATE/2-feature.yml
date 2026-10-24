@@ -1,0 +1,32 @@
+name: New feature
+description: An idea for the platform. Reviewed weekly; the top five go to a community vote each month.
+title: "[Feature] "
+labels: ["type:feature", "needs-triage"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: The idea
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Why it matters
+      description: What it lets you do, or what problem it solves.
+  - type: textarea
+    id: heritage
+    attributes:
+      label: Heritage
+      description: How it fits the classics (C&C, Red Alert, Dune). Ideas true to the originals score higher.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Gameplay
+        - Multiplayer and lobby
+        - Interface and controls
+        - Graphics and sound
+        - Maps
+        - Other

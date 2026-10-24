@@ -1,0 +1,104 @@
+name: Fusion request
+description: Design a fusion level. Upvote requests with a thumbs up; the top ten go to a weekly vote and the winner gets built.
+title: "[Fusion] "
+labels: ["type:fusion", "needs-triage"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Fusion name
+    validations:
+      required: true
+  - type: textarea
+    id: pitch
+    attributes:
+      label: The pitch
+      description: One or two sentences on what makes it fun.
+    validations:
+      required: true
+  - type: dropdown
+    id: sides
+    attributes:
+      label: Sides and factions
+      options:
+        - Red Alert 2 countries
+        - Dune houses
+        - Mixed
+  - type: input
+    id: map
+    attributes:
+      label: Map
+      description: An existing map name, or "new".
+  - type: dropdown
+    id: map-type
+    attributes:
+      label: Map type
+      options:
+        - Islands
+        - Desert
+        - Continents
+        - Rivers and lakes
+        - Canyons
+        - Open plains
+        - Other
+  - type: dropdown
+    id: map-size
+    attributes:
+      label: Map size
+      options:
+        - Small (64)
+        - Medium (80)
+        - Large (96)
+        - Huge (128)
+  - type: textarea
+    id: characteristics
+    attributes:
+      label: Map characteristics
+      description: Layout, resources (where and how much), chokepoints, number of players.
+  - type: textarea
+    id: dangers
+    attributes:
+      label: Dangers
+      description: "For example sandworms (on sand, in water, near resource fields) or storms."
+  - type: textarea
+    id: bonus
+    attributes:
+      label: Bonus objects
+      description: Crates, neutral buildings, oil derricks...
+  - type: dropdown
+    id: tech
+    attributes:
+      label: Tech level
+      options:
+        - Full
+        - High
+        - Medium
+        - Low
+  - type: textarea
+    id: infantry
+    attributes:
+      label: Infantry
+  - type: textarea
+    id: vehicles
+    attributes:
+      label: Vehicles
+  - type: textarea
+    id: aircraft
+    attributes:
+      label: Aircraft
+  - type: textarea
+    id: naval
+    attributes:
+      label: Naval
+  - type: textarea
+    id: buildings
+    attributes:
+      label: Buildings and upgrade progression
+  - type: textarea
+    id: superweapons
+    attributes:
+      label: Superweapons
+  - type: textarea
+    id: other
+    attributes:
+      label: Anything else

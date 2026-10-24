@@ -1,14 +1,28 @@
 # COMRADE - Browser RTS Classics
 
-Faithful four-player browser platform for classic RTS games: Command & Conquer, Red Alert 1, Dune 2000, and optionally Red Alert 2.
+A browser RTS platform beginning with a self-contained C&C Tiberian Dawn slice: original GDI/Nod teams, themes and rules, bundled freeware content, and an authored map. This unofficial community project requires no player file uploads.
 
 ## Status
 
+**Live:** [Launch Project Comrade](https://projectcomrade.thunderchildcreativetechnologies.com). Enter a callsign (no account, no install), create or join a game, share the invite link, pick a game style and your side, and deploy.
+
+| Game style | Engine | Multiplayer |
+|---|---|---|
+| **Classic C&C** (Tiberian Dawn) | Original GPL engine (Vanilla Conquer → WASM), freeware art, 4 authored maps | Lobby presence; each commander fights the built-in enemy |
+| **Dune Style** | Comrade Fusion Engine, `dune` rule pack: rock-only building, concrete, spice blooms, sandworms, Atreides / Harkonnen / Ordos | **Synchronized lockstep** with optional AI opponents |
+| **Red Alert 2 Style** | Comrade Fusion Engine, `ra2` rule pack, isometric: MCV deploy, ore regrowth and gems, Chrono Miners, Prism and Tesla tech | **Synchronized lockstep** with optional AI opponents |
+
+The **Comrade Fusion Engine** (`packages/fusion`) is one deterministic, data-driven engine: integer simulation, seeded RNG, command-only lockstep with desync checksums, and rule packs that describe a whole game as data. Dune and RA2 are two packs; future original "fusion" games are further packs mixing their parts ([ADR 010](docs/adr/010-fusion-engine.md)). These styles are independent gameplay replications with original procedural art; unit values approximate the classics and are tuned over time.
+
+**War room:** registration-free lobby with a live public-games list, shareable `?room=CODE` invite links, public/invite-only rooms, host-controlled match setup (game style, battlefield, human players, AI opponents, starting credits, tech level) and per-player side selection.
+
+Classic C&C renders the authentic 640×400 framebuffer with an optional WebGL **Enhanced view**; that is a render filter, not redrawn HD art. Red Alert 1 on the original engine is compiled with its freeware content staged; a bootable map is pending ([ADR 007](docs/adr/007-lobby-roster-and-multiplayer.md)). Design records: [006](docs/adr/006-playable-td-slice.md) engine slice, [007](docs/adr/007-lobby-roster-and-multiplayer.md) lobby/roster, [008](docs/adr/008-synchronized-multiplayer.md) multiplayer, [010](docs/adr/010-fusion-engine.md) Fusion Engine.
+
 **Milestone M0 (Foundational Gates):**
 - [x] C01: Code, asset and brand rights ledger
-- [x] C02: Reference builds and parity fixtures (structure complete, actual values blocked awaiting owner-provided reference)
-- [ ] C03: Reproducible monorepo, engine toolchain and CI (in progress)
-- [ ] C04: Vanilla Conquer native, WebAssembly and headless execution (blocked pending C03 completion)
+- [ ] C02 full reference parity: fixture structure exists; independent reference measurements remain future work
+- [x] C03: Reproducible monorepo, engine toolchain and CI
+- [x] C04 foundation: WASM gameplay, bundled content, native orders, OpenAL audio and MSVC compilation; full reference parity remains future work
 
 ## Project Structure
 
@@ -18,6 +32,7 @@ apps/
   service/          # HTTPS API, WSS, room coordinator
 packages/
   contracts/        # API, pack, match, command schemas
+  fusion/           # Comrade Fusion Engine: deterministic sim, rule packs, renderer, lockstep
   client-runtime/   # Worker bridge, rendering, input, audio
   pack-sdk/         # Adapter registry and conformance runner
 engines/
@@ -66,10 +81,9 @@ infra/
 
 ### Prerequisites
 
-- Node.js >= 20.10.0
-- pnpm >= 8.10.0
-- TypeScript >= 5.3.2
-- Emscripten (for WASM builds - see engine toolchain setup)
+- Node.js 24.13.0 and pnpm 9.15.0
+- Python 3.11+, CMake >=3.25, Ninja
+- Emscripten 6.0.12 for WASM builds; MSVC C++ workload and Windows SDK for Windows native builds
 
 ### Installation
 
@@ -100,7 +114,7 @@ pnpm test:performance
 
 ### Engine Builds
 
-Engine build scripts will be implemented after C04 completes the Vanilla Conquer spike (THU-1335). Currently blocked pending engine proof.
+With the toolchain on PATH, run `python tools/prepare-content.py` and `python tools/build-engine.py wasm` before `pnpm build`. These prepare pinned freeware content and patched browser engines. Run `python tools/build-engine.py native` for null video/audio/input binaries. See the deployment runbook for browser gameplay checks and hosted evidence.
 
 ## Documentation
 
@@ -131,6 +145,6 @@ All third-party licences are recorded in `rights/ledger.jsonl` and must be retai
 
 ## Rights and Permissions
 
-Classic game assets (artwork, sound, music, maps, fonts) are proprietary to Electronic Arts and related rights holders. Public distribution of these assets is **blocked** until explicit approval is obtained. The project supports a local-import mode where users provide their own original game media; this mode requires hash verification and does not transmit asset bytes to external servers.
+Classic artwork and sound remain EA / Westwood content, separate from GPL engine code and the Comrade-authored map and UI. The TD slice automatically bundles an explicitly selected, hash-pinned freeware pack from OpenRA and CnCNet sources. This is not a blanket approval for other games or unknown retail assets. No player import is required.
 
-See `rights/ledger.jsonl` and `docs/adr/005-assets-and-distribution.md` for complete rights information.
+See `rights/ledger.jsonl` and [ADR 006](docs/adr/006-playable-td-slice.md) for current provenance and scope.

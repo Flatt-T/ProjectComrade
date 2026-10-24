@@ -5,7 +5,8 @@
  */
 
 import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { createHash } from 'crypto';
+import { join, basename } from 'path';
 
 export interface LedgerEntry {
   id: string;
@@ -16,6 +17,7 @@ export interface LedgerEntry {
   status: string;
   licenceSnapshot?: string;
   licenceHash?: string;
+  assetHashes?: Record<string, string>;
 }
 
 export interface ValidationResult {
@@ -58,8 +60,18 @@ export function loadLedger(): Map<string, LedgerEntry> {
   return ledger;
 }
 
-export function validateAsset(filename: string, ledger: Map<string, LedgerEntry>, _fileHash?: string): ValidationResult {
+export function validateAsset(filename: string, ledger: Map<string, LedgerEntry>, fileHash?: string): ValidationResult {
   const lowerName = filename.toLowerCase();
+  // The bundled TD freeware slice is an explicit, hash-scoped project decision.
+  // It grants no blanket permission to retail media or other game packs.
+  if (fileHash) {
+    for (const [id, entry] of ledger) {
+      if (entry.category === 'pinned-freeware-pack' && entry.status === 'project-authorized-pinned-freeware'
+        && entry.assetHashes?.[basename(filename).toUpperCase()] === fileHash.toLowerCase()) {
+        return { valid: true, entryId: id };
+      }
+    }
+  }
   
   // Check if file appears to be classic game asset
   const assetPatterns = [
@@ -155,7 +167,7 @@ export function validatePackageManifest(manifestPath: string, ledger: Map<string
     // Validate each file in the manifest
     if (manifest.files && Array.isArray(manifest.files)) {
       for (const file of manifest.files) {
-        const result = validateAsset(file, ledger);
+        const result = typeof file === 'string' ? validateAsset(file, ledger) : validateAsset(file.name, ledger, file.sha256);
         if (!result.valid) {
           errors.push(`File ${file}: ${result.reason}`);
         }
@@ -221,7 +233,7 @@ function main() {
           continue;
         }
 
-        const result = validateAsset(filePath, ledger);
+        const result = validateAsset(filePath, ledger, createHash('sha256').update(readFileSync(filePath)).digest('hex'));
         if (result.valid) {
           console.log(`  ✓ ${filePath}`);
         } else {

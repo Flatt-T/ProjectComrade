@@ -1,0 +1,20 @@
+services:
+  comrade:
+    image: ${COMRADE_IMAGE:?Set COMRADE_IMAGE to the published image digest}
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${COMRADE_BIND_ADDRESS:-127.0.0.1}:${COMRADE_HOST_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      # Enables the internal /ops/logs export used by n8n (blank disables it).
+      COMRADE_OPS_TOKEN: ${COMRADE_OPS_TOKEN:-}
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m

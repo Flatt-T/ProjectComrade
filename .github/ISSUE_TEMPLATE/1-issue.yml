@@ -1,0 +1,44 @@
+name: Problem report
+description: Something went wrong. Reports are reviewed together once a day.
+title: "[Issue] "
+labels: ["type:issue", "needs-triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+  - type: dropdown
+    id: style
+    attributes:
+      label: Game style
+      options:
+        - Classic C&C
+        - Dune Style
+        - Red Alert 2 Style
+        - Fusion
+        - Lobby / website
+  - type: input
+    id: report-id
+    attributes:
+      label: Report ID
+      description: Shown by the in-game help widget (looks like r-1a2b3c4d).
+  - type: input
+    id: timestamp
+    attributes:
+      label: Timestamp (UTC)
+      description: "When it happened, for example 2026-10-24T18:05:00Z"
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Paste the diagnostics from the help widget if you have them.
+      render: json

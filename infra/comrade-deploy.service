@@ -1,0 +1,16 @@
+[Unit]
+Description=Deploy verified Project Comrade release
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+Environment=DOCKER_CONFIG=/opt/comrade/.docker
+ExecStart=/usr/bin/python3 /usr/local/lib/comrade-pull-deploy.py
+TimeoutStartSec=15min
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/comrade

@@ -2,3 +2,4 @@ deviation_id,category,description,source,evidence_date,impact_level,notes
 DEV-D2K-001,source-availability,No EA public source for Dune 2000,COMRADE01,2026-10-18,high,Must rely on controlled observations of approved reference; engine approach unproven
 DEV-D2K-002,game-identity,This is Dune 2000 NOT Dune II,COMRADE01 S10,2026-10-18,critical,OpenDUNE is Dune II and cannot be used as Dune 2000 shortcut
 DEV-D2K-003,engine-approach,Lawful reference binaries/data and permitted engine approach not established,COMRADE03,2026-10-18,critical,Blocker for M3; requires reviewed compatible implementation or independent adaptation
+DEV-D2K-004,resolution,Engine approach chosen: independent replication of Dune 2000 gameplay on the Comrade Fusion Engine (dune rule pack); no EA code or art,ADR 010,2026-10-23,informational,Resolves DEV-D2K-003; unit values approximate the classic and need observation-based tuning

@@ -1,0 +1,185 @@
+name: Build and deploy Comrade
+on:
+  push:
+    branches: [main, beta]
+  pull_request:
+    branches: [main, beta]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: comrade-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  wasm:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '6.0.12'
+      - run: python3 tools/build-engine.py wasm
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wasm-engines
+          path: apps/web/public/engines
+          if-no-files-found: error
+  native:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: python tools/build-engine.py native
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-headless
+          path: build/engine-native/Release/*.exe
+          if-no-files-found: error
+  image:
+    needs: [wasm, native]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/download-artifact@v4
+        with:
+          name: wasm-engines
+          path: apps/web/public/engines
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.13.0'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: python3 tools/prepare-content.py
+      - run: pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Playable GDI and Nod browser validation
+        run: |
+          STATIC_ROOT=apps/web/dist node apps/service/dist/index.js > /tmp/comrade.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3001/health && break || sleep 1; done
+          node tools/browser-smoke.mjs
+          node tools/service-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence
+          path: build/evidence
+          if-no-files-found: ignore
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/containers/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ghcr.io/flatt-t/projectcomrade:${{ github.sha }}
+          build-args: COMRADE_COMMIT=${{ github.sha }}
+      - name: Prepare deployment bundle
+        if: github.event_name != 'pull_request'
+        env:
+          COMMIT: ${{ github.sha }}
+        run: |
+          mkdir -p deployment-bundle
+          docker pull ghcr.io/flatt-t/projectcomrade:$COMMIT
+          docker save ghcr.io/flatt-t/projectcomrade:$COMMIT | gzip > deployment-bundle/comrade-image.tar.gz
+          export IMAGE_ID=$(docker image inspect ghcr.io/flatt-t/projectcomrade:$COMMIT --format '{{.Id}}')
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          p = pathlib.Path('deployment-bundle/comrade-image.tar.gz')
+          manifest = {'commit': os.environ['COMMIT'], 'image_id': os.environ['IMAGE_ID'], 'archive_sha256': hashlib.file_digest(p.open('rb'), 'sha256').hexdigest()}
+          pathlib.Path('deployment-bundle/deploy.json').write_text(json.dumps(manifest))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: deployment-bundle
+          path: deployment-bundle
+          retention-days: 3
+  deploy:
+    needs: image
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.COMRADE_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    environment: production
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: deployment-bundle
+          path: deployment-bundle
+      - name: Publish verified deployment release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create main-${{ github.sha }} deployment-bundle/* --target ${{ github.sha }} --title 'Project Comrade ${{ github.sha }}' --notes 'Validated WASM, MSVC and browser build. The Proxmox service verifies and deploys this bundle automatically.' --latest
+      - name: Verify public deployment matches this commit
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.request
+          deadline = time.monotonic() + 900
+          while time.monotonic() < deadline:
+              try:
+                  request = urllib.request.Request('https://projectcomrade.thunderchildcreativetechnologies.com/health', headers={'User-Agent': 'ProjectComrade-deployment'})
+                  with urllib.request.urlopen(request, timeout=15) as response:
+                      health = json.load(response)
+                  if health.get('status') == 'ok' and health.get('commit') == os.environ['EXPECTED_COMMIT']:
+                      print('Public deployment verified:', health['commit'])
+                      break
+              except Exception:
+                  pass
+              time.sleep(15)
+          else:
+              raise SystemExit('Public deployment did not reach the expected commit')
+          PY
+  deploy-beta:
+    # Merges into `beta` publish a pre-release; the BETA server (a second pull-deployer on the
+    # Project Comrade guest, COMRADE_CHANNEL=beta) deploys it for public testing.
+    needs: image
+    if: github.ref == 'refs/heads/beta' && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: deployment-bundle
+          path: deployment-bundle
+      - name: Publish beta pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create beta-${{ github.sha }} deployment-bundle/* --repo ${{ github.repository }} --target ${{ github.sha }} --prerelease --latest=false --title 'Project Comrade BETA ${{ github.sha }}' --notes 'Public test build from the beta branch. Deployed to the BETA server only.'
+      - name: Verify the BETA server picked it up
+        if: vars.COMRADE_BETA_URL != ''
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+          BETA_URL: ${{ vars.COMRADE_BETA_URL }}
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS "$BETA_URL/health" | grep -q "$EXPECTED_COMMIT"; then echo "BETA is on $EXPECTED_COMMIT"; exit 0; fi
+            sleep 15
+          done
+          echo "BETA did not reach $EXPECTED_COMMIT"; exit 1

@@ -1,0 +1,150 @@
+/*
+ * Project Comrade skin for the helpdot.me support widget.
+ *
+ * The widget injects its own stylesheet at runtime (after this one) using single-ID selectors,
+ * so every rule here uses two IDs to win without !important. !important is only used where the
+ * widget sets inline styles (the chat input) or where we hide the launcher in battle.
+ */
+#sh-widget-container#sh-widget-container { color: #dadfd4; }
+
+/* Launcher: a square command badge instead of a round bubble. */
+#sh-widget-container #sh-widget-toggle {
+  border-radius: 0;
+  background: #263021;
+  border: 1px solid #b4d96b;
+  color: #b4d96b;
+  box-shadow: 0 0 0 3px rgba(180, 217, 107, 0.12), 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+#sh-widget-container #sh-widget-toggle:hover { background: #2f3b27; box-shadow: 0 0 0 3px rgba(180, 217, 107, 0.25), 0 6px 18px rgba(0, 0, 0, 0.55); }
+#sh-widget-container #sh-widget-toggle img { border-radius: 0; filter: grayscale(1) sepia(1) hue-rotate(40deg) saturate(2.6) brightness(1.15); }
+
+/* Window. */
+#sh-widget-container #sh-widget-panel {
+  background: #0f150f;
+  border: 1px solid #526044;
+  border-radius: 0;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+}
+#sh-widget-container #sh-widget-header { background: #1a2416; color: #b4d96b; border-bottom: 1px solid #526044; padding: 12px 14px; }
+#sh-widget-container #sh-widget-header h3 { font: 700 12px ui-monospace, monospace; letter-spacing: 2px; text-transform: uppercase; }
+#sh-widget-container #sh-widget-header button {
+  background: #263021; border: 1px solid #526044; border-radius: 0; color: #d4dbc9;
+  font: 600 10px ui-monospace, monospace; letter-spacing: 1px; text-transform: uppercase; padding: 5px 8px;
+}
+#sh-widget-container #sh-widget-header button:hover { border-color: #b4d96b; background: #2f3b27; }
+#sh-widget-container #sh-widget-ai-disclosure { background: #141c14; color: #8b9c7e; border-bottom: 1px solid #34402e; font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.3px; }
+#sh-widget-container #sh-escalation-menu { background: #141c14; border: 1px solid #526044; border-radius: 0; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6); }
+#sh-widget-container #sh-escalation-menu button { background: #141c14; color: #d4dbc9; border-bottom: 1px solid #263021; font-family: ui-monospace, monospace; font-size: 11px; }
+#sh-widget-container #sh-escalation-menu button:hover { background: #263021; color: #b4d96b; }
+
+/* Conversation. */
+#sh-widget-container #sh-widget-messages { background: #0f150f; scrollbar-width: thin; scrollbar-color: #4a545c #0b100c; }
+#sh-widget-container .sh-msg { border-radius: 0; }
+#sh-widget-container .sh-msg-user { background: #b4d96b; color: #17210d; }
+#sh-widget-container .sh-msg-assistant { background: #1a2318; color: #dadfd4; border-left: 2px solid #b4d96b; }
+#sh-widget-container .sh-msg-system { background: #2b2410; color: #f2d35c; border: 1px solid #5b4a14; border-radius: 0; }
+#sh-widget-container .sh-msg a { color: #b4d96b; }
+#sh-widget-container .sh-typing span { background: #b4d96b; }
+
+/* Input row (the widget sets the input's colours inline). */
+#sh-widget-container #sh-widget-input-area { background: #0b100c; border-top: 1px solid #34402e; }
+#sh-widget-container #sh-widget-input {
+  background: #0b100c !important; color: #e2e8da !important;
+  border: 1px solid #526044; border-radius: 0;
+}
+#sh-widget-container #sh-widget-input::placeholder { color: #6d7d62; }
+#sh-widget-container #sh-widget-input:focus { border-color: #b4d96b; box-shadow: 0 0 0 2px rgba(180, 217, 107, 0.2); }
+#sh-widget-container #sh-widget-send,
+#sh-widget-container #sh-report-submit {
+  background: #b4d96b; color: #1b2811; border-radius: 0;
+  font: 700 11px ui-monospace, monospace; letter-spacing: 1px; text-transform: uppercase;
+}
+#sh-widget-container #sh-widget-send:hover,
+#sh-widget-container #sh-report-submit:hover { background: #c6e785; }
+
+/* Report form. */
+#sh-widget-container #sh-report-panel { background: #0f150f; }
+#sh-widget-container #sh-report-panel label { color: #b3c3a4; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.5px; }
+#sh-widget-container #sh-report-panel input,
+#sh-widget-container #sh-report-panel textarea,
+#sh-widget-container #sh-report-panel select { background: #0b100c; color: #e2e8da; border: 1px solid #526044; border-radius: 0; }
+#sh-widget-container #sh-report-panel input:focus,
+#sh-widget-container #sh-report-panel textarea:focus,
+#sh-widget-container #sh-report-panel select:focus { border-color: #b4d96b; box-shadow: 0 0 0 2px rgba(180, 217, 107, 0.2); }
+#sh-widget-container #sh-report-cancel { background: #263021; color: #d4dbc9; border: 1px solid #526044; border-radius: 0; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 1px; }
+#sh-widget-container #sh-report-notice.sh-error { background: #391e1a; color: #ff9c8a; border: 1px solid #6b2a22; border-radius: 0; }
+#sh-widget-container .sh-report-field-options { background: #0b100c; border: 1px solid #34402e; border-radius: 0; }
+#sh-widget-container .sh-report-field-option { color: #c3cdba; }
+#sh-widget-container .sh-report-field-option input { accent-color: #b4d96b; }
+
+/* Rating and footer. */
+#sh-widget-container #sh-rating-panel h4 { color: #e2e8da; font-family: ui-monospace, monospace; letter-spacing: 1px; }
+#sh-widget-container #sh-rating-panel p { color: #8b9c7e; }
+#sh-widget-container .sh-star { color: #3a4248; }
+#sh-widget-container .sh-star:hover,
+#sh-widget-container .sh-star.sh-active { color: #f2d35c; }
+#sh-widget-container #sh-widget-branding { background: #0b100c; color: #6d7d62; border-top: 1px solid #34402e; font-family: ui-monospace, monospace; font-size: 10px; }
+#sh-widget-container #sh-widget-branding a { color: #6d7d62; }
+#sh-widget-container #sh-widget-branding a:hover { color: #b4d96b; }
+
+/*
+ * In battle the helper lives in the tools panel (the HELP button), so the floating launcher is
+ * hidden, and the chat window opens over the battlefield's bottom-right corner, clear of the
+ * sidebar.
+ */
+body.comrade-in-battle #sh-widget-container #sh-widget-toggle { display: none !important; }
+body.comrade-in-battle #sh-widget-container #sh-widget-panel { right: 312px; bottom: 28px; top: auto; left: auto; }
+@media (max-width: 1100px) {
+  body.comrade-in-battle #sh-widget-container #sh-widget-panel { right: 16px; bottom: 16px; }
+}
+
+/*
+ * Conversation styled like the team chat box: one lines box, "NAME: text" rows, the
+ * same input row. Doubled IDs beat the widget's own injected rules.
+ */
+#sh-widget-container#sh-widget-container #sh-widget-messages {
+  margin: 10px 12px 0; padding: 8px 10px; gap: 3px;
+  background: #0b100c; border: 1px solid #34402e;
+}
+#sh-widget-container#sh-widget-container .sh-msg {
+  max-width: none; align-self: stretch; margin: 0; padding: 0;
+  background: transparent; border: 0; border-radius: 0;
+  font: 12px/1.5 Inter, Arial, sans-serif; color: #cdd8c0; text-align: left; word-break: break-word;
+}
+#sh-widget-container#sh-widget-container .sh-msg::before { font-weight: 700; margin-right: 5px; }
+#sh-widget-container#sh-widget-container .sh-msg-user::before { content: 'YOU:'; color: #b4d96b; }
+#sh-widget-container#sh-widget-container .sh-msg-assistant::before { content: 'HELP DESK:'; color: #7fd0ff; }
+#sh-widget-container#sh-widget-container .sh-msg-system { color: #f2d35c; font-size: 11px; }
+#sh-widget-container#sh-widget-container .sh-msg-system::before { content: 'NOTICE:'; color: #f2d35c; }
+#sh-widget-container#sh-widget-container .sh-msg p { margin: 0 0 4px; }
+#sh-widget-container#sh-widget-container .sh-msg ul,
+#sh-widget-container#sh-widget-container .sh-msg ol { margin: 2px 0 4px 18px; }
+#sh-widget-container#sh-widget-container .sh-typing { display: inline-flex; padding: 4px 0; }
+
+#sh-widget-container#sh-widget-container #sh-widget-input-area { display: flex; gap: 4px; padding: 6px 12px 10px; background: transparent; border-top: 0; }
+#sh-widget-container#sh-widget-container #sh-widget-input {
+  flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid #526044; border-radius: 0;
+  background: #0b100c !important; color: #e2e8da !important; font: 12px Inter, Arial, sans-serif;
+}
+#sh-widget-container#sh-widget-container #sh-widget-input:focus { border-color: #b4d96b; box-shadow: none; }
+#sh-widget-container#sh-widget-container #sh-widget-send {
+  padding: 6px 10px; border: 1px solid #526044; border-radius: 0; background: #263021; color: #d4dbc9;
+  font: 600 10px ui-monospace, monospace; letter-spacing: 1px; text-transform: uppercase;
+}
+#sh-widget-container#sh-widget-container #sh-widget-send:hover { border-color: #b4d96b; background: #263021; }
+#sh-widget-container#sh-widget-container #sh-widget-header { padding: 10px 12px; }
+#sh-widget-container#sh-widget-container #sh-widget-header h3 { color: #b4d96b; font: 10px ui-monospace, monospace; letter-spacing: 2px; }
+
+/* Docked in the page (home, game browser, war room): an inline panel, no floating bubble. */
+.help-dock { margin-top: 18px; display: flex; flex-direction: column; gap: 6px; }
+.help-dock-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.help-dock-head button { padding: 6px 10px; font-size: 10px; }
+.help-dock.open .help-dock-head button { border-color: #b4d96b; color: #b4d96b; }
+.help-dock-blurb { margin: 0; font: 12px/1.6 Inter, Arial, sans-serif; color: #89997d; }
+body.comrade-help-docked #sh-widget-container#sh-widget-container #sh-widget-toggle { display: none !important; }
+body.comrade-help-docked #sh-widget-container#sh-widget-container #sh-widget-panel {
+  position: static; inset: auto; width: 100%; max-width: none; height: 380px; max-height: 70vh;
+  border: 1px solid #34402e; background: #101610; box-shadow: none; z-index: auto;
+}
+body.comrade-help-docked #sh-widget-container#sh-widget-container #sh-widget-header { background: #141c14; border-bottom: 1px solid #34402e; }
+body.comrade-help-docked #sh-widget-container#sh-widget-container #sh-widget-branding { background: transparent; border-top: 0; padding: 0 12px 8px; }

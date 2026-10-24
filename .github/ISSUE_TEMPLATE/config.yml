@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a problem or request something in the game
+    url: https://projectcomrade.thunderchildcreativetechnologies.com
+    about: The in-game help widget attaches diagnostics automatically, which makes reports much faster to fix.
