@@ -124,3 +124,8 @@ body.touch-battle{overflow:hidden;overscroll-behavior:none}
 .fusion-battle.touch .fusion-sidebar{gap:6px}
 .fusion-battle.touch .fusion-credits{font-size:17px;padding:3px}
 .fusion-battle.touch .fusion-radar{grid-template-columns:min(100%,calc(42vh - 20px),190px) 12px;justify-content:center}
+/* In the drawer every section keeps its full height and the drawer scrolls, so the
+   build grid cannot be squashed under the buttons below it. */
+.fusion-battle.touch .fusion-sidebar>*,.game-layout.touch .command-panel>*{flex-shrink:0}
+.fusion-battle.touch .fusion-sidebar{padding-bottom:max(28px,calc(env(safe-area-inset-bottom) + 20px))}
+.fusion-battle.touch .fusion-leave{margin-top:6px}
