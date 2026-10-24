@@ -97,3 +97,54 @@ body.comrade-in-battle #sh-widget-container #sh-widget-panel { right: 312px; bot
 @media (max-width: 1100px) {
   body.comrade-in-battle #sh-widget-container #sh-widget-panel { right: 16px; bottom: 16px; }
 }
+
+/*
+ * Conversation styled like the team chat box: one lines box, "NAME: text" rows, the
+ * same input row. Doubled IDs beat the widget's own injected rules.
+ */
+#sh-widget-container#sh-widget-container #sh-widget-messages {
+  margin: 10px 12px 0; padding: 8px 10px; gap: 3px;
+  background: #0b100c; border: 1px solid #34402e;
+}
+#sh-widget-container#sh-widget-container .sh-msg {
+  max-width: none; align-self: stretch; margin: 0; padding: 0;
+  background: transparent; border: 0; border-radius: 0;
+  font: 12px/1.5 Inter, Arial, sans-serif; color: #cdd8c0; text-align: left; word-break: break-word;
+}
+#sh-widget-container#sh-widget-container .sh-msg::before { font-weight: 700; margin-right: 5px; }
+#sh-widget-container#sh-widget-container .sh-msg-user::before { content: 'YOU:'; color: #b4d96b; }
+#sh-widget-container#sh-widget-container .sh-msg-assistant::before { content: 'HELP DESK:'; color: #7fd0ff; }
+#sh-widget-container#sh-widget-container .sh-msg-system { color: #f2d35c; font-size: 11px; }
+#sh-widget-container#sh-widget-container .sh-msg-system::before { content: 'NOTICE:'; color: #f2d35c; }
+#sh-widget-container#sh-widget-container .sh-msg p { margin: 0 0 4px; }
+#sh-widget-container#sh-widget-container .sh-msg ul,
+#sh-widget-container#sh-widget-container .sh-msg ol { margin: 2px 0 4px 18px; }
+#sh-widget-container#sh-widget-container .sh-typing { display: inline-flex; padding: 4px 0; }
+
+#sh-widget-container#sh-widget-container #sh-widget-input-area { display: flex; gap: 4px; padding: 6px 12px 10px; background: transparent; border-top: 0; }
+#sh-widget-container#sh-widget-container #sh-widget-input {
+  flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid #526044; border-radius: 0;
+  background: #0b100c !important; color: #e2e8da !important; font: 12px Inter, Arial, sans-serif;
+}
+#sh-widget-container#sh-widget-container #sh-widget-input:focus { border-color: #b4d96b; box-shadow: none; }
+#sh-widget-container#sh-widget-container #sh-widget-send {
+  padding: 6px 10px; border: 1px solid #526044; border-radius: 0; background: #263021; color: #d4dbc9;
+  font: 600 10px ui-monospace, monospace; letter-spacing: 1px; text-transform: uppercase;
+}
+#sh-widget-container#sh-widget-container #sh-widget-send:hover { border-color: #b4d96b; background: #263021; }
+#sh-widget-container#sh-widget-container #sh-widget-header { padding: 10px 12px; }
+#sh-widget-container#sh-widget-container #sh-widget-header h3 { color: #b4d96b; font: 10px ui-monospace, monospace; letter-spacing: 2px; }
+
+/* Docked in the page (home, game browser, war room): an inline panel, no floating bubble. */
+.help-dock { margin-top: 18px; display: flex; flex-direction: column; gap: 6px; }
+.help-dock-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.help-dock-head button { padding: 6px 10px; font-size: 10px; }
+.help-dock.open .help-dock-head button { border-color: #b4d96b; color: #b4d96b; }
+.help-dock-blurb { margin: 0; font: 12px/1.6 Inter, Arial, sans-serif; color: #89997d; }
+body.comrade-help-docked #sh-widget-container#sh-widget-container #sh-widget-toggle { display: none !important; }
+body.comrade-help-docked #sh-widget-container#sh-widget-container #sh-widget-panel {
+  position: static; inset: auto; width: 100%; max-width: none; height: 380px; max-height: 70vh;
+  border: 1px solid #34402e; background: #101610; box-shadow: none; z-index: auto;
+}
+body.comrade-help-docked #sh-widget-container#sh-widget-container #sh-widget-header { background: #141c14; border-bottom: 1px solid #34402e; }
+body.comrade-help-docked #sh-widget-container#sh-widget-container #sh-widget-branding { background: transparent; border-top: 0; padding: 0 12px 8px; }

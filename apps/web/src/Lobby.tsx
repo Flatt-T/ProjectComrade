@@ -5,6 +5,7 @@ import {
 import { PACKS } from '../../../packages/fusion/src/index';
 import type { RoomConnection } from './net';
 import Chat from './Chat';
+import HelpDock from './HelpDock';
 
 interface LobbyMap { id: string; name: string; description: string; maxPlayers: number; detail: string }
 
@@ -116,6 +117,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     <input value={name} maxLength={24} placeholder="Commander" onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && enter()} aria-label="Your name" />
     <button className="deploy" onClick={enter}>ENTER THE WAR ROOM →</button>
     {error && <small className="lobby-error">{error}</small>}
+    <HelpDock />
   </div>;
 
   if (room) {
@@ -168,6 +170,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
         </div>
         {error && <small className="lobby-error">{error}</small>}
         <Chat conn={conn} team={me?.team ?? 0} />
+        <HelpDock />
       </div>
 
       <aside className="room-config">
@@ -238,6 +241,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
       </div>
       <small>Share a game's link and your friends drop straight into the same war room — no sign-up.</small>
       {error && <small className="lobby-error">{error}</small>}
+      <HelpDock />
     </aside>
   </div>;
 }
