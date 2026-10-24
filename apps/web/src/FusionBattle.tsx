@@ -4,6 +4,7 @@ import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, PlayerSetu
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
 import TechTree from './TechTree';
+import { enterBattleHelp, helpAvailable, helpOpen, toggleHelp, typingIn } from './help';
 import { recordAction, recordEvent, recordNotice, setMatchSnapshot } from './diagnostics';
 import Chat from './Chat';
 import { attachTouchGestures, goLandscape, isTouchDevice } from './touch';
@@ -38,7 +39,7 @@ const RANKS = ['', ' · Veteran', ' · Elite'];
 interface QueueView { items: string[]; paid: number; ready: boolean }
 interface UiState {
   tick: number; credits: number; storage: number; powerGen: number; powerUse: number; radar: boolean;
-  options: Record<QueueKind, string[]>; queues: Record<QueueKind, QueueView>; costs: Record<string, number>; soundLocked: boolean;
+  options: Record<QueueKind, string[]>; queues: Record<QueueKind, QueueView>; costs: Record<string, number>; soundLocked: boolean; help: { available: boolean; open: boolean };
   selection: { name: string; hp: number; max: number; count: number; deploy: boolean; unload: boolean; own: boolean; structure: boolean } | null;
   status: string; over: boolean; won: boolean; defeated: boolean; stats: { built: number; lost: number; killed: number; harvested: number };
   supers: SuperView[];
@@ -125,6 +126,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     const session: Session = setup.humans > 1 ? new LockstepSession(game, slot, humans, conn.transport()) : new LocalSession(game, slot);
     const renderer = new FusionRenderer(canvas.current!, game, slot);
     rig.current = { game, session, renderer };
+    const leaveHelp = enterBattleHelp();
     const sfx = new FusionAudio(game, slot, loadAudioSettings());
     audio.current = sfx;
     void sfx.load();
@@ -274,7 +276,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         }
         prev = { ready: { structure: queues.structure.ready, defense: queues.defense.ready }, units, low, hp: myHp, over: game.over, lost: me.stats.lost, structures, options: optionCount };
         setUi({
-          tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues, soundLocked: !sfx.unlocked,
+          tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues, soundLocked: !sfx.unlocked, help: { available: helpAvailable(), open: helpOpen() },
           selection: first ? { name: (firstDef?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!(pack.units[e.type].deploysTo || pack.units[e.type].deployWeapon || pack.units[e.type].lure || e.passengers.length)), unload: sel.some(e => e.passengers.length > 0), own: first.owner === slot, structure: first.kind === 'structure' } : null,
           status: conn.drops !== drops && status !== 'running' ? 'Connection to the match was lost — it cannot be rejoined'
             : status === 'waiting' ? `Waiting for ${(session.waitingFor?.() ?? []).map(s => game.players[s]?.name).filter(Boolean).join(', ') || 'other commanders'}…`
@@ -300,7 +302,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       renderer.centerOn(Math.floor(x / 256), Math.floor(y / 256));
     };
     const keydown = (ev: KeyboardEvent) => {
-      if ((ev.target as HTMLElement)?.tagName === 'INPUT') return;
+      if (typingIn(ev.target)) return;
       keys.current.add(ev.key);
       const now = performance.now();
       const sel = () => [...renderer.selected].filter(id => game.entities.get(id)?.owner === slot && game.entities.get(id)?.kind === 'unit');
@@ -350,7 +352,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     return () => {
       cancelAnimationFrame(raf); observer.disconnect(); session.dispose(); ticker?.terminate();
       window.removeEventListener('pointerdown', wake); window.removeEventListener('keydown', wake);
-      sfx.dispose(); audio.current = null;
+      sfx.dispose(); audio.current = null; leaveHelp();
       setMatchSnapshot(null); recordEvent('match-end', { tick: game.tick });
       window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup);
       delete window.comradeFusion;
@@ -781,6 +783,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       <div className="fusion-sound">
         <button className={sound.muted ? 'on' : ''} onClick={() => { changeSound({ muted: !sound.muted }); audio.current?.resume(); if (sound.muted) setTimeout(() => audio.current?.ui('click'), 60); }} aria-pressed={sound.muted}>{sound.muted ? 'SOUND OFF' : ui?.soundLocked ? 'SOUND: CLICK' : 'SOUND ON'}</button>
         <button className={soundOpen ? 'on' : ''} onClick={() => setSoundOpen(v => !v)} aria-expanded={soundOpen}>VOLUME</button>
+        <button className={ui?.help.open ? 'on' : ''} disabled={!ui?.help.available} onClick={() => toggleHelp()} aria-pressed={!!ui?.help.open} title={ui?.help.available ? 'Help, problem reports and requests' : 'Help is loading'}>HELP</button>
         {soundOpen && <div className="fusion-volume">
           {(['master', 'effects', 'voices'] as const).map(k => <label key={k}><span>{k === 'master' ? 'Master' : k === 'effects' ? 'Effects' : 'Voices'}</span>
             <input type="range" min={0} max={1} step={0.05} value={sound[k]} onChange={e => changeSound({ [k]: Number(e.target.value) })} /></label>)}

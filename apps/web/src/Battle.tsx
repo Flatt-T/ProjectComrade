@@ -3,6 +3,7 @@ import { EngineModule, loadEngine, mountBundledContent } from '../../../packages
 import { EngineSnapshot, LaunchRequest, parseOrder, STYLES } from '@comrade/contracts';
 import { createUpscaler, Upscaler } from './upscale';
 import { attachTouchGestures, goLandscape, isTouchDevice } from './touch';
+import { enterBattleHelp, toggleHelp } from './help';
 
 /** Send a mouse event to the engine canvas, which SDL reads as the pointer. */
 function mouse(el: HTMLElement, type: string, x: number, y: number, button = 0) {
@@ -39,6 +40,8 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
   // Touch: the original engine only knows a mouse. Taps become clicks, a drag scrolls
   // the map by holding the pointer at the screen edge (as the original game scrolls),
   // hold-then-drag is a box select and a two-finger tap is the right click.
+  // The help widget moves into this command panel while the battle runs.
+  useEffect(() => enterBattleHelp(), []);
   useEffect(() => {
     if (!touch || !stack.current || !canvas.current) return;
     const c = canvas.current;
@@ -156,6 +159,7 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
       <button disabled={!running} onClick={() => engine.current?._comrade_audio?.()}>{snapshot.audioRunning ? 'SOUND ENABLED' : 'ENABLE GAME AUDIO'}</button>
       <button disabled={!enhancedOk} onClick={() => setEnhanced(v => { try { localStorage.setItem('comrade-enhanced', v ? '0' : '1'); } catch { /* ignore */ } return !v; })} title={enhancedOk ? 'Toggle WebGL smoothing over the classic framebuffer' : 'WebGL is unavailable in this browser'}>{!enhancedOk ? 'ENHANCED VIEW UNAVAILABLE' : useEnhanced ? 'VIEW · ENHANCED (SMOOTH)' : 'VIEW · CLASSIC (SHARP)'}</button>
       <button disabled={!running} onClick={() => stack.current?.requestFullscreen()}>FULLSCREEN BATTLEFIELD ↗</button>
+      <button onClick={() => toggleHelp()}>HELP &amp; REPORTS</button>
       <button onClick={onExit}>LEAVE OPERATION</button>
     </aside>
     <details><summary>Engine diagnostics</summary><pre>{logs.join('\n')}</pre></details>

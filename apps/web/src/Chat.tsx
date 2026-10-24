@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CHAT_MAX, ChatAudience } from '@comrade/contracts';
 import type { ChatLine, RoomConnection } from './net';
+import { typingIn } from './help';
 
 /**
  * Room chat to everyone or to your allies (players on your team). Allied messages are
@@ -30,7 +31,7 @@ export default function Chat({ conn, team, overlay = false, onMessage }: { conn:
   useEffect(() => {
     if (!overlay) return;
     const key = (ev: KeyboardEvent) => {
-      if (ev.key === 'Enter' && document.activeElement?.tagName !== 'INPUT') { ev.preventDefault(); setOpen(true); }
+      if (ev.key === 'Enter' && !typingIn(document.activeElement)) { ev.preventDefault(); setOpen(true); }
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
