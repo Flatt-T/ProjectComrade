@@ -4,6 +4,11 @@ export interface EngineModule {
   _comrade_snapshot?(): number;
   _comrade_audio?(): void;
   ccall?(name: string, result: string, types: string[], values: (number | string)[]): number;
+  /** Emscripten's loop control, exported by engine builds from 2026-10-25 onward. */
+  pauseMainLoop?(): void;
+  /** Audio contexts the engine holds, if its build exposes them. */
+  SDL2?: { audioContext?: { close(): Promise<void>; state: string } };
+  AL?: { currentCtx?: { audioCtx?: { close(): Promise<void>; state: string } } };
   FS: {
     mkdirTree(path: string): void;
     writeFile(path: string, bytes: Uint8Array): void;
@@ -11,6 +16,21 @@ export interface EngineModule {
     chdir(path: string): void;
   };
   callMain(args: string[]): void;
+}
+
+/**
+ * Stop a running classic engine: pause its main loop and silence it. Returns false when the
+ * loaded build exports no way to stop, in which case the caller has to reload the page -
+ * an Emscripten module started with callMain owns the main loop until the document goes.
+ */
+export function stopEngine(engine: EngineModule | null | undefined): boolean {
+  if (!engine) return true;
+  let stopped = false;
+  try { if (typeof engine.pauseMainLoop === 'function') { engine.pauseMainLoop(); stopped = true; } } catch { /* already gone */ }
+  for (const ctx of [engine.SDL2?.audioContext, engine.AL?.currentCtx?.audioCtx]) {
+    try { if (ctx && ctx.state !== 'closed') void ctx.close(); } catch { /* already closed */ }
+  }
+  return stopped;
 }
 
 export interface LocalGameFile {

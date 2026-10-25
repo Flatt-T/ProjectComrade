@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { EngineModule, loadEngine, mountBundledContent } from '../../../packages/client-runtime/src/engine';
+import { EngineModule, loadEngine, mountBundledContent, stopEngine } from '../../../packages/client-runtime/src/engine';
 import { EngineSnapshot, LaunchRequest, parseOrder, STYLES } from '@comrade/contracts';
 import { createUpscaler, Upscaler } from './upscale';
 import { attachTouchGestures, goLandscape, isTouchDevice, trackVisibleHeight } from './touch';
@@ -93,6 +93,18 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
     return () => clearInterval(timer);
   }, []);
 
+  // Leaving has to take the engine with it: an Emscripten module keeps its main loop (and
+  // its audio) running even once this component and its canvas are gone.
+  function leave() {
+    const stopped = stopEngine(engine.current);
+    engine.current = undefined;
+    delete window.comrade;
+    onExit();
+    // Older engine builds export no way to stop; starting the page over is the only
+    // thing that silences them.
+    if (!stopped) location.reload();
+  }
+
   useEffect(() => {
     if (started.current) return;
     started.current = true;
@@ -141,7 +153,7 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
         <canvas className="upscale-display" ref={display} style={{ display: useEnhanced ? 'block' : 'none' }} aria-hidden="true" />
       </div>
       {phase === 'loading' && <div className="loading" role="status"><span className="loader" /><h2>Establishing battlefield link</h2><p>{status}</p><small>Preparing engine and verifying bundled game files.</small></div>}
-      {phase === 'error' && <div className="loading"><h2>Deployment interrupted</h2><p>{status}</p><button onClick={onExit}>Return to lobby</button></div>}
+      {phase === 'error' && <div className="loading"><h2>Deployment interrupted</h2><p>{status}</p><button onClick={leave}>Return to lobby</button></div>}
       {touch && <div className="fusion-rotate" hidden={rotateOk}>
         <p>Turn your device sideways to command the battlefield.</p>
         <button onClick={() => void goLandscape()}>GO FULL SCREEN</button>
@@ -161,7 +173,7 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
       <button disabled={!enhancedOk} onClick={() => setEnhanced(v => { try { localStorage.setItem('comrade-enhanced', v ? '0' : '1'); } catch { /* ignore */ } return !v; })} title={enhancedOk ? 'Toggle WebGL smoothing over the classic framebuffer' : 'WebGL is unavailable in this browser'}>{!enhancedOk ? 'ENHANCED VIEW UNAVAILABLE' : useEnhanced ? 'VIEW · ENHANCED (SMOOTH)' : 'VIEW · CLASSIC (SHARP)'}</button>
       <button disabled={!running} onClick={() => stack.current?.requestFullscreen()}>FULLSCREEN BATTLEFIELD ↗</button>
       <button onClick={() => toggleHelp()}>HELP &amp; REPORTS</button>
-      <button onClick={onExit}>LEAVE OPERATION</button>
+      <button onClick={leave}>LEAVE OPERATION</button>
     </aside>
     <details><summary>Engine diagnostics</summary><pre>{logs.join('\n')}</pre></details>
   </section>;

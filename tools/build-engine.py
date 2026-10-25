@@ -106,7 +106,9 @@ replace("CMakeLists.txt", "add_subdirectory(common)", """if(EMSCRIPTEN)
     add_link_options(-sUSE_SDL=2 -sMODULARIZE=1 -sEXPORT_ES6=1
         -sINVOKE_RUN=0 -sFORCE_FILESYSTEM=1 -sALLOW_MEMORY_GROWTH=1
         -sASYNCIFY=1 -sASYNCIFY_STACK_SIZE=131072
-        \"-sEXPORTED_RUNTIME_METHODS=['FS','callMain','UTF8ToString','ccall']\")
+        # pauseMainLoop lets the page stop a match: without it, leaving an operation can
+        # only be done by reloading, because the module owns the main loop.
+        \"-sEXPORTED_RUNTIME_METHODS=['FS','callMain','UTF8ToString','ccall','pauseMainLoop']\")
 endif()
 add_subdirectory(common)""")
 

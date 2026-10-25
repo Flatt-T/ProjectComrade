@@ -376,3 +376,24 @@ unlocks something it can build now.
   every house can field). That is ten rungs a house, against five before.
 - The Allied War Factory upgrade in Red Alert was worth only a Mobile Gap Generator, so
   Allied **artillery** now sits behind it too.
+
+## Leaving an operation actually ends it (update 2026-10-25)
+
+Reported from play: after leaving a Classic C&C match the sound effects carried on, and
+the match with them. The Fusion battle tears itself down properly (its loop, worker
+ticker, session and audio context all go when the view unmounts, which a browser check
+confirms by `window.comradeFusion` disappearing the moment you leave). The original
+engine does not: it is an Emscripten module started with `callMain`, so it owns the main
+loop and its OpenAL audio for the life of the document, and removing its canvas changes
+nothing.
+
+Engines were built exporting only `FS`, `callMain`, `UTF8ToString` and `ccall`, so a
+loaded build has no way to be stopped at all. Two changes:
+
+- `stopEngine` in the client runtime pauses the main loop and closes any audio context
+  the module exposes, and reports whether it managed anything. Leaving a classic match
+  calls it, drops the module and clears `window.comrade`; when the build cannot be
+  stopped, the page reloads, which is the only thing that silences it. The callsign is
+  remembered, so the way back into the war room is one click.
+- `tools/build-engine.py` now exports `pauseMainLoop`, so engines built from here on stop
+  cleanly and leaving them needs no reload.
