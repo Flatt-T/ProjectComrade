@@ -4,7 +4,7 @@ export interface EngineModule {
   _comrade_snapshot?(): number;
   _comrade_audio?(): void;
   ccall?(name: string, result: string, types: string[], values: (number | string)[]): number;
-  /** Emscripten's loop control, exported by engine builds from 2026-10-25 onward. */
+  /** Emscripten loop control, if a future build ever exposes it (none does today). */
   pauseMainLoop?(): void;
   /** Audio contexts the engine holds, if its build exposes them. */
   SDL2?: { audioContext?: { close(): Promise<void>; state: string } };

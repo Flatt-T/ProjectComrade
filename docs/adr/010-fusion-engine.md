@@ -395,5 +395,7 @@ loaded build has no way to be stopped at all. Two changes:
   calls it, drops the module and clears `window.comrade`; when the build cannot be
   stopped, the page reloads, which is the only thing that silences it. The callsign is
   remembered, so the way back into the war room is one click.
-- `tools/build-engine.py` now exports `pauseMainLoop`, so engines built from here on stop
-  cleanly and leaving them needs no reload.
+- An attempt to export `pauseMainLoop` from the engine build failed: Emscripten has no
+  runtime method by that name, and asking for it stops both engines linking (it broke a
+  deploy, caught in CI and reverted the same day). A module started with `callMain` owns
+  the main loop until the document goes, so the reload is the fix, not a stopgap.
