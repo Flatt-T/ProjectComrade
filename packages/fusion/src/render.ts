@@ -8,7 +8,7 @@ import type { Effect, Entity, Game, Projectile } from './game';
 import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
 import { ArtStyle, FLYING, ROTATING_DEFENCES, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
-import { ClassicArt, artPackFor } from './art/classic';
+import { ClassicArt, artPackFor, paintClassicTerrain } from './art/classic';
 import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
 
 export interface Camera { x: number; y: number; zoom: number }
@@ -39,6 +39,8 @@ export class FusionRenderer {
   private classic: ClassicArt | null = null;
   /** Baked art is drawn at 24 pixels a cell; scale it onto this view's grid. */
   private classicScale = 1;
+  /** The ground is repainted from the theatre tiles once the art has loaded. */
+  private classicGround = false;
   private fx = new FxLayer();
   private seen = new WeakSet<Effect>();
   private shake = 0;
@@ -172,6 +174,12 @@ export class FusionRenderer {
     const dt = this.lastTime ? Math.min(0.1, (now - this.lastTime) / 1000) : 1 / 60;
     this.lastTime = now;
     if (!this.terrainReady) { paintTerrain(this.terrain, this.game.map, this.game.pack, this.view, this.originX); this.terrainReady = true; }
+    // Once the original tiles arrive, lay the ground again with them.
+    if (!this.classicGround && this.classic?.ready && !this.iso) {
+      this.classicGround = paintClassicTerrain(this.classic, this.terrain, this.game.map,
+        this.game.pack.terrains.map(t => t.id), this.view.tileW, this.view.tileH);
+      if (!this.classicGround) this.classicGround = true; // Asked once; keep the painted ground.
+    }
     this.spawnFromEffects();
     this.emitContinuous();
     this.fx.step(dt);

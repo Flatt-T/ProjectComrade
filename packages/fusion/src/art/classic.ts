@@ -147,6 +147,38 @@ export class ClassicArt {
   }
 }
 
+/**
+ * Paint a whole battlefield from the theatre's own tiles, one 24x24 tile a cell, choosing
+ * between a terrain's tiles by the map's decoration noise so the ground varies as the
+ * originals' did. Returns false when the art has no tiles for this map's terrain.
+ */
+export function paintClassicTerrain(
+  art: ClassicArt,
+  canvas: HTMLCanvasElement,
+  map: { w: number; h: number; terrain: Uint8Array; decor: Uint8Array },
+  terrainIds: string[],
+  tileW: number,
+  tileH: number,
+): boolean {
+  const atlas = art.tileAtlas;
+  if (!atlas || !art.ready) return false;
+  const lists = terrainIds.map(id => art.tilesFor(id));
+  if (!lists.some(list => list && list.length)) return false;
+  const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingEnabled = false;
+  const cell = art.cell;
+  for (let y = 0; y < map.h; y++) {
+    for (let x = 0; x < map.w; x++) {
+      const i = y * map.w + x;
+      const list = lists[map.terrain[i]] ?? lists[0];
+      if (!list || !list.length) continue;
+      const [sx, sy] = list[map.decor[i] % list.length];
+      ctx.drawImage(atlas, sx, sy, cell, cell, x * tileW, y * tileH, tileW, tileH);
+    }
+  }
+  return true;
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();

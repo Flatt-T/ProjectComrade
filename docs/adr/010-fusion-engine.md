@@ -399,3 +399,29 @@ loaded build has no way to be stopped at all. Two changes:
   runtime method by that name, and asking for it stops both engines linking (it broke a
   deploy, caught in CI and reverted the same day). A module started with `callMain` owns
   the main loop until the document goes, so the reload is the fix, not a stopgap.
+
+## The classics drawn with their own art (update 2026-10-25)
+
+The art direction above says the engine ships procedurally drawn artwork because Dune 2000
+and RA2 assets are not freeware. That holds for those two. Tiberian Dawn and Red Alert are
+different: their content *is* freeware and the project already bundles it, checksum-pinned,
+for the original engines. So the `td` and `ra1` packs are now drawn with the originals.
+
+- `tools/prepare-art.py` bakes, per pack, a sprite atlas, a greyscale remap mask and an
+  index of frames, theatre tiles and trees, out of the same pinned packs the rest of the
+  content pipeline uses (rights ledger `ledger-019`). `tools/westwood.py` gained the SHP,
+  PAL, template and PNG readers for it, beside the MIX and Format80 code already there.
+- `packages/fusion/src/art/classic.ts` loads that atlas and rebuilds Westwood house
+  colouring the way the originals did it: the sprites carry a sixteen-step ramp, kept out
+  of the base image and repainted in each player's colour, so a Fusion faction colour still
+  reads as that faction. It serves frames by facing, with infantry walk cycles and turrets
+  that rotate apart from the hull.
+- The renderer takes a sprite where the pack has one and falls back to its baked 3D model
+  otherwise. Dune, RA2 and the fusion packs are untouched, the pieces invented for the late
+  tech tiers keep their procedural models, and a missing atlas costs nothing but the old
+  look. The ground is likewise laid from the theatre's own tiles once the art has loaded.
+- The deploy builds the atlases with the rest of the content.
+
+Still procedural for these two packs, and worth finishing: resource overlays (the index
+carries the Tiberium and ore tiles), scenery, and drawing the Fusion maps from the authored
+scenarios cell by cell rather than from map features.
