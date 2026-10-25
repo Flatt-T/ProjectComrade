@@ -42,7 +42,7 @@ input{font:600 13px ui-monospace,monospace;color:#dde3d2;background:#121a12;bord
 .fusion-item .count{position:absolute;top:2px;left:3px;font:700 10px ui-monospace,monospace;color:#fff;background:var(--house);padding:0 4px}
 .fusion-item .sweep{position:absolute;left:0;right:0;top:0;background:#070b08b3;pointer-events:none}
 .fusion-item .fill{position:absolute;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--house) 42%,transparent);border-top:1px solid var(--house-accent);pointer-events:none}
-.fusion-item .pct{position:absolute;left:0;right:0;top:14px;text-align:center;font:700 12px ui-monospace,monospace;color:#fff;text-shadow:0 1px 2px #000,0 0 6px #000;pointer-events:none}
+.fusion-item .pct{position:absolute;left:50%;top:24px;transform:translate(-50%,-50%);min-width:38px;padding:2px 6px;background:#000d;border:1px solid var(--house-accent);text-align:center;font:700 14px ui-monospace,monospace;color:#fff;line-height:1;pointer-events:none}
 .fusion-item.ready{border-color:#7be05a;animation:readyPulse 1s infinite}.fusion-item.ready .label{color:#7be05a;font-weight:700}
 @keyframes readyPulse{50%{box-shadow:inset 0 0 12px #7be05a88}}
 .fusion-empty{grid-column:1/-1;font:10px/1.5 ui-monospace,monospace;color:#7f8a92;text-align:center;padding:10px}
