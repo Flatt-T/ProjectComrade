@@ -278,3 +278,37 @@ tier of their own rather than one power and a flat tree.
 Every side in every pack now holds to the same rule, checked in `tests/unit/packs.test.ts`:
 more than one superweapon, more than one building worth upgrading, aircraft of some kind,
 and a price on every upgrade.
+
+## Balance, upgrades that pay and clearer production (update 2026-10-25)
+
+Play-testing found the Ion Cannon feeble beside a Nuclear Missile, upgrades that bought
+nothing, and a build queue that hid what it was doing. All four packs were brought onto
+one scale.
+
+- **Superweapons are balanced by class, across packs.** A class is a shape of attack, and
+  every pack's version of it now lands about the same blow for about the same wait:
+  *missile* 1500 damage over a 1024-lepton radius on a 6300-tick charge; *ion* the same
+  damage focused into 512 leptons, sooner (4500); *storm* 24 bolts of 260 across 1152;
+  *reinforce* and *paradrop* about 2200 credits of units. Deliberate variants stay
+  distinct by shape rather than by being weaker — Nod's Chemical Missile trades blast for
+  a far wider cloud, and keeps a comparable total. `tests/unit/packs.test.ts` measures
+  damage across area, charge time and credits delivered, and holds each class inside a
+  1.5x (1.8x for squads) spread, so a future pack cannot quietly ship a weak Ion Cannon.
+- **Every upgrade opens something.** A test now walks each pack, each side and each
+  upgrade level and requires at least one unit or structure that side can build to hang
+  off it. It found a real hole: the Harkonnen bought the High Tech Factory upgrade and
+  got nothing, since Ornithopters are Atreides and Ordos. Every house now also gets the
+  **Heavy Carryall** from that upgrade.
+- **A second factory doubles production.** `extraFactoryBonus` is 100 in every pack, so
+  two War Factories build at twice the rate, three at three times, as the sidebar
+  arithmetic always implied. A behavioural test times a tank with one factory and with
+  two.
+- **Production reads as production.** An upgrade left the sidebar the moment it was
+  queued, because it is no longer buildable while it is being built; the tile now stays,
+  and anything under construction shows a bar filling in the player's own colour with the
+  percentage on it, instead of a black shadow creeping down the cameo.
+- **Dune's Fremen come as a war party.** The Atreides Palace power now delivers a team —
+  four Fremen and two **Worm Riders**, a new unit that is exactly what it sounds like: a
+  ridden sandworm, fast, armoured, crushing, with a maw that hits everything around it.
+  Worm Riders cannot be built; they answer the call or not at all. The Ordos power
+  likewise became a Saboteur Cell rather than a single saboteur.

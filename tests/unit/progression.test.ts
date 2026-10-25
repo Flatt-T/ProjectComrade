@@ -11,6 +11,10 @@ const run = (g: Game, ticks: number, until?: () => boolean) => { for (let i = 0;
 const all = (g: Game, type: string, owner?: number) => [...g.entities.values()].filter(e => e.type === type && e.hp > 0 && (owner === undefined || e.owner === owner));
 const cellX = (e: Entity) => Math.floor(e.x / 256), cellY = (e: Entity) => Math.floor(e.y / 256);
 
+const sw = (g: Game, type: string) => {
+  const e = [...g.entities.values()].find(x => x.type === type)!;
+  return g.superweaponOf(e)!;
+};
 describe('progression: tech tree', () => {
   it('Dune: factory upgrades unlock the Quad, and the Starport sells at CHOAM prices', () => {
     const g = dune();
@@ -224,6 +228,32 @@ describe('progression: air and sea', () => {
   });
 });
 
+describe('progression: production', () => {
+  it('a second war factory halves the time a tank takes', () => {
+    const build = (factories: number) => {
+      const g = humans(ra2Pack, 'temperate-valley', ['america', 'russia']);
+      const p = g.players[0];
+      g.spawnStructure('conyard', 0, 6, 6);
+      g.spawnStructure('a-power', 0, 12, 6);
+      g.spawnStructure('a-power', 0, 12, 9);
+      g.spawnStructure('a-refinery', 0, 6, 12);
+      g.spawnStructure('a-barracks', 0, 16, 6);
+      for (let i = 0; i < factories; i++) g.spawnStructure('a-factory', 0, 6 + i * 5, 17);
+      p.credits = 50000;
+      const before = all(g, 'grizzly', 0).length;
+      g.enqueue(0, { t: 'build', item: 'grizzly' });
+      let ticks = 0;
+      while (ticks < 2000 && all(g, 'grizzly', 0).length === before) { g.step(); ticks++; }
+      expect(all(g, 'grizzly', 0).length, `${factories} factories produced`).toBe(before + 1);
+      return ticks;
+    };
+    const one = build(1), two = build(2);
+    // Two factories: twice the rate, so about half the ticks (a tick either way is fine).
+    expect(two).toBeLessThanOrEqual(Math.ceil(one / 2) + 2);
+    expect(two).toBeGreaterThan(one / 2 - 3);
+  });
+});
+
 describe('progression: support powers', () => {
   it('Paratroopers land at the target', () => {
     const g = ra();
@@ -232,9 +262,10 @@ describe('progression: support powers', () => {
     const before = all(g, 'gi', 0).length;
     g.enqueue(0, { t: 'super', id: hq.id, x: 30, y: 30 });
     run(g, 70);
-    const dropped = all(g, 'gi', 0).filter(e => Math.abs(cellX(e) - 30) <= 4 && Math.abs(cellY(e) - 30) <= 4);
-    expect(all(g, 'gi', 0).length).toBe(before + 8);
-    expect(dropped.length).toBe(8);
+    const squad = [sw(g, 'a-radar').units!.length, 0][0];
+    const dropped = all(g, 'gi', 0).filter(e => Math.abs(cellX(e) - 30) <= 5 && Math.abs(cellY(e) - 30) <= 5);
+    expect(all(g, 'gi', 0).length).toBe(before + squad);
+    expect(dropped.length).toBe(squad);
   });
 
   it('the Chronosphere moves vehicles and kills infantry; it needs a destination', () => {

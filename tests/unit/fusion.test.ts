@@ -331,7 +331,10 @@ describe('fusion superweapons', () => {
   it('gives each Great House its own palace power', () => {
     const g = new Game({ pack: dunePack, mapId: 'arrakis-basin', seed: 2, players: [{ name: 'A', faction: 'atreides', ai: false }, { name: 'H', faction: 'harkonnen', ai: false }] });
     const a = g.spawnStructure('palace', 0, 10, 10), h = g.spawnStructure('palace', 1, 50, 50);
-    expect(g.superweaponOf(a)?.name).toBe('Fremen Warriors');
+    expect(g.superweaponOf(a)?.name).toBe('Fremen War Party');
+    // The war party is a team: fighters on foot and the worm riders they call up.
+    expect(g.superweaponOf(a)?.units).toContain('fremen');
+    expect(g.superweaponOf(a)?.units).toContain('wormrider');
     expect(g.superweaponOf(h)?.name).toBe('Death Hand');
     // Charging pauses on low power: a lone palace has no windtraps.
     for (let i = 0; i < 30; i++) g.step();

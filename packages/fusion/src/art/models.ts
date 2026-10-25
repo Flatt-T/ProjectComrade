@@ -685,6 +685,26 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       m.box(-0.12, -0.11, 0.2, 0.12, 0.11, 0.27, team);
       m.box(0.0, -0.09, 0.27, 0.18, 0.09, 0.33, p.trim);
       break;
+    case 'wormrider': {
+      // Worm Rider: a ridden sandworm, back arched out of the sand, with maker hooks.
+      const sand: RGB = [196, 150, 96], gut: RGB = [164, 112, 70];
+      for (let k2 = 0; k2 < 7; k2++) {
+        const t = k2 / 6, x = -0.55 + t * 1.1;
+        const r = 0.1 + Math.sin(Math.PI * (0.12 + t * 0.88)) * 0.17;
+        const z = Math.sin(Math.PI * t) * 0.12;
+        m.cylinder(x, 0, z, z + r * 1.25, r, r * 0.86, k2 % 2 ? sand : tint(sand, 0.93), 10);
+      }
+      // Mouth rings at the head.
+      m.cylinder(0.58, 0, 0.04, 0.16, 0.17, 0.12, gut, 10, { cap: false });
+      m.cylinder(0.62, 0, 0.06, 0.12, 0.1, 0.04, [92, 52, 38], 8);
+      // Two riders with their hooks.
+      for (const [x, y] of [[-0.06, -0.06], [-0.26, 0.07]]) {
+        m.box(x - 0.04, y - 0.04, 0.3, x + 0.04, y + 0.04, 0.44, team);
+        m.dome(x, y, 0.44, 0.045, [214, 190, 150], 2, 8);
+        m.box(x + 0.04, y - 0.01, 0.36, x + 0.22, y + 0.01, 0.38, p.metal);
+      }
+      break;
+    }
     case 'harvester':
       tracked(0.5, 0.33, 0.26);
       m.box(0.18, -0.24, 0.26, 0.46, 0.24, 0.52, hull, { top: p.glass });

@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { STYLES } from '../../packages/contracts/src/index';
 import { CLASSIC_PACKS, Game, PACKS, factionCanUse, prereqsMet, tdPack } from '../../packages/fusion/src/index';
+import { buildingMesh, hasTurret, hullMesh, turretMesh } from '../../packages/fusion/src/art/models';
 import type { RulePack } from '../../packages/fusion/src/index';
 
 const packs = Object.values(PACKS);
@@ -118,6 +119,20 @@ describe('rule pack integrity', () => {
       }
     });
 
+    it(`${pack.id}: every upgrade opens something new for the side that buys it`, () => {
+      const defs = [...Object.values(pack.units), ...Object.values(pack.structures)];
+      for (const faction of pack.factions) {
+        const mine = (def: { factions?: string[] }) => factionCanUse(def, faction.id, faction.side);
+        for (const st of Object.values(pack.structures)) {
+          if (!st.upgrades || !mine(st)) continue;
+          for (let level = 1; level <= st.upgrades; level++) {
+            const unlocked = defs.filter(d => mine(d) && d.prereqs.some(entry => entry.split('|').some(alt => alt === `${st.id}@${level}`)));
+            expect(unlocked.length, `${faction.id}: ${st.id} upgrade ${level} unlocks something`).toBeGreaterThan(0);
+          }
+        }
+      }
+    });
+
     it(`${pack.id}: every side has building upgrades and more than one superweapon`, () => {
       for (const faction of pack.factions) {
         const mine = (def: { factions?: string[] }) => factionCanUse(def, faction.id, faction.side);
@@ -138,6 +153,65 @@ describe('rule pack integrity', () => {
       const p = game.players[0];
       game.spawnStructure(yard.id, 0, 6, 6);
       expect(game.buildOptions(p, 'structure'), `${pack.id} offers the yard upgrade`).toContain(`upgrade:${yard.id}`);
+    }
+  });
+
+  describe('superweapons are balanced by class', () => {
+    interface Power { pack: string; id: string; kind: string; charge: number; punch: number; value: number }
+    const powers: Power[] = [];
+    for (const pack of CLASSIC_PACKS) {
+      const cost = (type: string) => pack.units[type]?.cost ?? 0;
+      for (const st of Object.values(pack.structures)) {
+        for (const sw of st.superweapon ? [st.superweapon].flat() : []) {
+          powers.push({
+            pack: pack.id, id: sw.id, kind: sw.kind, charge: sw.charge,
+            // What the strike delivers: damage, spread over however many strikes, across its area.
+            punch: sw.damage * (sw.strikes ?? 1) * Math.max(1, sw.radius),
+            value: (sw.units ?? []).reduce((n, u) => n + cost(u), 0),
+          });
+        }
+      }
+    }
+    const spread = (ns: number[]) => Math.max(...ns) / Math.max(1, Math.min(...ns));
+
+    for (const kind of ['missile', 'ion', 'storm']) {
+      it(`${kind}: every pack's version lands about the same blow, for about the same wait`, () => {
+        const of = powers.filter(p => p.kind === kind);
+        expect(of.length, `${kind} exists`).toBeGreaterThan(0);
+        expect(spread(of.map(p => p.punch)), `${kind} damage across its area: ${of.map(p => `${p.pack}/${p.id}=${p.punch}`).join(' ')}`).toBeLessThanOrEqual(1.5);
+        expect(spread(of.map(p => p.charge)), `${kind} charge time`).toBeLessThanOrEqual(1.5);
+      });
+    }
+
+    for (const kind of ['reinforce', 'paradrop']) {
+      it(`${kind}: every pack delivers a squad of about the same worth`, () => {
+        const of = powers.filter(p => p.kind === kind);
+        expect(of.length, `${kind} exists`).toBeGreaterThan(0);
+        expect(spread(of.map(p => p.value)), `${kind} credits delivered: ${of.map(p => `${p.pack}/${p.id}=${p.value}`).join(' ')}`).toBeLessThanOrEqual(1.8);
+      });
+    }
+  });
+
+  it('builds twice as fast with a second factory', () => {
+    for (const pack of CLASSIC_PACKS) {
+      expect(pack.extraFactoryBonus, `${pack.id} doubles on a second factory`).toBe(100);
+    }
+  });
+
+  it('has a model for every shape any pack names', () => {
+    // The meshes are pure geometry, so a typo or a broken shape shows up here rather than
+    // as an empty square in the sidebar.
+    for (const pack of CLASSIC_PACKS) {
+      for (const style of ['dune', 'allied', 'soviet', 'gdi', 'nod'] as const) {
+        for (const u of Object.values(pack.units)) {
+          if (u.kind === 'infantry') continue; // Infantry are drawn by the renderer, not modelled.
+          expect(hullMesh(u.shape, style, [200, 200, 200]).faces.length, `${pack.id}/${u.id} (${u.shape}) has a hull`).toBeGreaterThan(0);
+          if (hasTurret(u.shape)) expect(turretMesh(u.shape, style, [200, 200, 200]).faces.length, `${u.shape} turret`).toBeGreaterThan(0);
+        }
+        for (const st of Object.values(pack.structures)) {
+          expect(buildingMesh(st.shape, st.w, st.h, style, [200, 200, 200]).faces.length, `${pack.id}/${st.id} (${st.shape}) has a model`).toBeGreaterThan(0);
+        }
+      }
     }
   });
 
@@ -268,7 +342,7 @@ describe('Red Alert 2 pack', () => {
     expect(power('a-prismarray').kind).toBe('ion');
     expect(ra2.structures['a-prismarray'].factions).toEqual(['allies']);
     expect(power('s-airlift').kind).toBe('reinforce');
-    expect(power('s-airlift').units).toEqual(['apocalypse', 'apocalypse']);
+    expect(power('s-airlift').units).toEqual(['apocalypse', 'rhino']);
     expect(ra2.structures['s-airlift'].factions).toEqual(['soviets']);
     // The improved yard carries the advanced defences; the labs carry what ends a game.
     expect(ra2.structures['a-prism'].prereqs).toContain('conyard@1');

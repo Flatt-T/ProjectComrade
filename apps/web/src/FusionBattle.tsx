@@ -214,10 +214,11 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         const queues = {} as Record<QueueKind, QueueView>;
         const costs: Record<string, number> = {};
         for (const t of tabs) {
-          options[t.id] = game.buildOptions(me, t.id);
+          const q = me.queues[t.id];
+          const building = q.items.filter(i => !game.canBuild(me, i));
+          options[t.id] = [...building, ...game.buildOptions(me, t.id)];
           for (const item of options[t.id]) costs[item] = game.costOf(item, me);
-          const q = me.queues[t.id]; queues[t.id] = { items: [...q.items], paid: q.paid, ready: q.ready };
-          for (const item of q.items) costs[item] ??= game.costOf(item, me);
+          queues[t.id] = { items: [...q.items], paid: q.paid, ready: q.ready };
         }
         const sel = [...renderer.selected].map(id => game.entities.get(id)).filter((e): e is Entity => !!e);
         const first = sel[0];
@@ -761,7 +762,11 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           return <button key={item} className={`fusion-item ${active && q.ready ? 'ready' : ''} ${item.startsWith('upgrade:') ? 'upgrade' : ''}`} title={`${name} — ${cost}`} data-item={item}
             onClick={() => clickItem(item, tab)} onContextMenu={e => cancelItem(e, item)}>
             <Icon game={rig.current?.game} item={item} color={faction.color} accent={faction.accent} />
-            {active && !q.ready && <span className="sweep" style={{ height: `${Math.round((1 - progress) * 100)}%` }} />}
+            {active && !q.ready && <>
+              <span className="sweep" style={{ height: `${Math.round((1 - progress) * 100)}%` }} />
+              <span className="fill" style={{ height: `${Math.round(progress * 100)}%` }} />
+              <span className="pct">{Math.round(progress * 100)}%</span>
+            </>}
             <span className="label">{active && q.ready ? 'READY' : name}</span>
             <span className="cost">{cost}</span>
             {count > 1 && <span className="count">{count}</span>}

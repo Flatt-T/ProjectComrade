@@ -162,6 +162,7 @@ export const dunePack: RulePack = {
     deviatorgas: { id: 'deviatorgas', damage: 10, range: 1536, rof: 110, warhead: 'gas', speed: 36, converts: 600, targets: ['vehicle', 'infantry'], visual: 'missile' },
     orniguns: { id: 'orniguns', damage: 40, range: 1024, rof: 30, warhead: 'rocket', speed: 48, burst: 2, visual: 'missile' },
     devastatorblast: { id: 'devastatorblast', damage: 400, range: 0, rof: 1, warhead: 'shell', speed: 0, splash: 448, visual: 'cannon' },
+    wormmaw: { id: 'wormmaw', damage: 140, range: 320, rof: 24, warhead: 'shell', speed: 0, splash: 192, visual: 'sonic' },
     gunturret: { id: 'gunturret', damage: 48, range: 1280, rof: 42, warhead: 'shell', speed: 72, splash: 32, visual: 'cannon' },
     rocketturret: { id: 'rocketturret', damage: 42, range: 1920, rof: 60, warhead: 'rocket', speed: 44, burst: 2, visual: 'missile', targets: ['infantry', 'vehicle', 'aircraft', 'structure'] },
   },
@@ -175,6 +176,8 @@ export const dunePack: RulePack = {
     // Palace powers only: Fremen answer the Atreides call, the Saboteur leaves the Ordos palace.
     fremen: { id: 'fremen', name: 'Fremen', kind: 'infantry', cost: 200, hp: 110, armor: 'none', speed: 18, sight: 5, weapon: 'fremenrifle', prereqs: ['palace'], factions: ['atreides'], tech: 99, crushable: true, shape: 'infantry-elite', role: 'combat', regen: 2, disguise: true },
     saboteur: { id: 'saboteur', name: 'Saboteur', kind: 'infantry', cost: 400, hp: 90, armor: 'none', speed: 20, sight: 4, prereqs: ['palace'], factions: ['ordos'], tech: 99, crushable: true, c4: 15, expendable: true, disguise: true, shape: 'saboteur', role: 'support' },
+    // Called up by the Fremen war party, never built: a worm with riders on its back.
+    wormrider: { id: 'wormrider', name: 'Worm Rider', kind: 'vehicle', cost: 900, hp: 900, armor: 'heavy', speed: 34, turn: 10, sight: 5, weapon: 'wormmaw', prereqs: ['palace'], factions: ['atreides'], tech: 99, crusher: true, regen: 2, shape: 'wormrider', role: 'combat' },
     trike: { id: 'trike', name: 'Trike', kind: 'vehicle', cost: 300, hp: 160, armor: 'light', speed: 48, turn: 16, sight: 5, weapon: 'trikegun', prereqs: ['lightfactory'], factions: ['atreides', 'harkonnen'], tech: 2, starport: true, shape: 'trike', role: 'scout' },
     raider: { id: 'raider', name: 'Raider Trike', kind: 'vehicle', cost: 300, hp: 150, armor: 'light', speed: 54, turn: 18, sight: 5, weapon: 'trikegun', prereqs: ['lightfactory'], factions: ['ordos'], tech: 2, shape: 'trike', role: 'scout' },
     stealthraider: { id: 'stealthraider', name: 'Stealth Raider', kind: 'vehicle', cost: 400, hp: 150, armor: 'light', speed: 54, turn: 18, sight: 5, weapon: 'trikegun', prereqs: ['lightfactory@1', 'ix'], factions: ['ordos'], tech: 6, disguise: true, shape: 'trike', role: 'scout' },
@@ -191,6 +194,7 @@ export const dunePack: RulePack = {
     harvester: { id: 'harvester', name: 'Harvester', kind: 'vehicle', cost: 1000, hp: 650, armor: 'heavy', speed: 16, turn: 6, sight: 3, prereqs: ['heavyfactory'], tech: 2, crusher: true, starport: true, shape: 'harvester', harvester: { capacity: 100, gather: 2, unload: 1 } },
     mcv: { id: 'mcv', name: 'MCV', kind: 'vehicle', cost: 2000, hp: 800, armor: 'heavy', speed: 14, turn: 4, sight: 3, prereqs: ['heavyfactory'], tech: 3, deploysTo: 'conyard', crusher: true, starport: true, shape: 'mcv' },
     carryall: { id: 'carryall', name: 'Carryall', kind: 'aircraft', cost: 800, hp: 400, armor: 'light', speed: 40, sight: 4, prereqs: ['hitech'], tech: 5, carrier: true, altitude: 2, starport: true, shape: 'carryall', role: 'support' },
+    heavycarryall: { id: 'heavycarryall', name: 'Heavy Carryall', kind: 'aircraft', cost: 1100, hp: 650, armor: 'heavy', speed: 52, sight: 5, prereqs: ['hitech@1'], tech: 7, carrier: true, altitude: 2, starport: true, shape: 'carryall', role: 'support' },
     ornithopter: { id: 'ornithopter', name: 'Ornithopter', kind: 'aircraft', cost: 600, hp: 120, armor: 'light', speed: 70, sight: 5, weapon: 'orniguns', ammo: 3, prereqs: ['hitech@1'], factions: ['atreides', 'ordos'], tech: 7, altitude: 2, shape: 'ornithopter', role: 'combat' },
   },
   structures: {
@@ -209,15 +213,16 @@ export const dunePack: RulePack = {
     ix: { id: 'ix', name: 'IX Research Centre', cost: 1000, hp: 900, armor: 'building', w: 2, h: 2, power: -40, sight: 3, prereqs: ['heavyfactory', 'outpost'], tech: 6, queue: 'structure', shape: 'lab' },
     palace: { id: 'palace', name: 'Palace', cost: 1600, hp: 1800, armor: 'building', w: 3, h: 3, power: -50, sight: 5, prereqs: ['ix'], tech: 8, queue: 'structure', upgrades: 1, upgradeCost: 1200, shape: 'palace',
       superweapon: [
-        { id: 'deathhand', name: 'Death Hand', kind: 'missile', charge: 3600, damage: 1300, radius: 768, delay: 80, factions: ['harkonnen'] },
-        { id: 'fremen', name: 'Fremen Warriors', kind: 'reinforce', charge: 2700, damage: 0, radius: 0, delay: 30, units: ['fremen', 'fremen', 'fremen', 'fremen', 'fremen'], factions: ['atreides'] },
-        { id: 'saboteur', name: 'Saboteur', kind: 'reinforce', charge: 2250, damage: 0, radius: 0, delay: 15, units: ['saboteur'], atBase: true, factions: ['ordos'] },
+        { id: 'deathhand', name: 'Death Hand', kind: 'missile', charge: 6300, damage: 1500, radius: 1024, delay: 80, factions: ['harkonnen'] },
+        // A Fremen war party: fighters on foot and the worm riders they call up with them.
+        { id: 'fremen', name: 'Fremen War Party', kind: 'reinforce', charge: 4500, damage: 0, radius: 0, delay: 30, units: ['fremen', 'fremen', 'fremen', 'fremen', 'wormrider', 'wormrider'], factions: ['atreides'] },
+        { id: 'saboteur', name: 'Saboteur Cell', kind: 'reinforce', charge: 4500, damage: 0, radius: 0, delay: 15, units: ['saboteur', 'saboteur', 'stealthraider', 'stealthraider', 'stealthraider'], atBase: true, factions: ['ordos'] },
       ] },
     // A tier past the Palace: each house answers in its own way.
     sonicarray: { id: 'sonicarray', name: 'Sonic Array', cost: 2200, hp: 900, armor: 'building', w: 3, h: 3, power: -120, sight: 5, prereqs: ['palace@1', 'ix'], factions: ['atreides'], tech: 10, queue: 'structure', needsPower: true, shape: 'sonicarray',
-      superweapon: { id: 'sonicbarrage', name: 'Sonic Barrage', kind: 'storm', charge: 4500, damage: 190, radius: 1024, delay: 60, strikes: 18, duration: 180, boltRadius: 320 } },
+      superweapon: { id: 'sonicbarrage', name: 'Sonic Barrage', kind: 'storm', charge: 5400, damage: 260, radius: 1152, delay: 60, strikes: 24, duration: 180, boltRadius: 384 } },
     droppad: { id: 'droppad', name: 'Drop Platform', cost: 2500, hp: 1000, armor: 'building', w: 3, h: 3, power: -80, sight: 5, prereqs: ['palace@1', 'hitech'], factions: ['harkonnen'], tech: 10, queue: 'structure', shape: 'dropship',
-      superweapon: { id: 'devastatordrop', name: 'Devastator Drop', kind: 'reinforce', charge: 5400, damage: 0, radius: 0, delay: 45, atBase: true, units: ['devastator', 'devastator'] } },
+      superweapon: { id: 'devastatordrop', name: 'Devastator Drop', kind: 'reinforce', charge: 4500, damage: 0, radius: 0, delay: 45, atBase: true, units: ['devastator', 'devastator'] } },
     choam: { id: 'choam', name: 'CHOAM Observation Post', cost: 2000, hp: 700, armor: 'building', w: 2, h: 2, power: -100, sight: 10, prereqs: ['palace@1', 'outpost'], factions: ['ordos'], tech: 9, queue: 'structure', needsPower: true, shape: 'satellite',
       superweapon: { id: 'choamsweep', name: 'CHOAM Surveillance', kind: 'reveal', charge: 2700, damage: 0, radius: 4608, delay: 15, duration: 900 } },
     scrambler: { id: 'scrambler', name: 'Scrambler Field', cost: 1500, hp: 600, armor: 'building', w: 2, h: 2, power: -100, sight: 4, prereqs: ['ix'], factions: ['ordos'], tech: 8, queue: 'structure', gap: 6, needsPower: true, shape: 'gap' },
@@ -234,7 +239,7 @@ export const dunePack: RulePack = {
   startCredits: { low: 3000, standard: 7000, high: 12000 },
   buildTicksPer100: 60,
   lowPowerProductionPercent: 50,
-  extraFactoryBonus: 0,
+  extraFactoryBonus: 100,
   buildRadius: 2,
   sellRefundPercent: 50,
   mechanics: {
