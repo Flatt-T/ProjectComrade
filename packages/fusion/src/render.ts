@@ -8,6 +8,7 @@ import type { Effect, Entity, Game, Projectile } from './game';
 import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
 import { ArtStyle, FLYING, ROTATING_DEFENCES, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
+import { ClassicArt, artPackFor } from './art/classic';
 import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
 
 export interface Camera { x: number; y: number; zoom: number }
@@ -34,6 +35,10 @@ export class FusionRenderer {
   private frame = 0;
   private sprites = new Map<string, Sprite>();
   private tiles = new Map<string, HTMLCanvasElement>();
+  /** Original artwork for the Tiberian Dawn and Red Alert packs; null for the rest. */
+  private classic: ClassicArt | null = null;
+  /** Baked art is drawn at 24 pixels a cell; scale it onto this view's grid. */
+  private classicScale = 1;
   private fx = new FxLayer();
   private seen = new WeakSet<Effect>();
   private shake = 0;
@@ -42,6 +47,10 @@ export class FusionRenderer {
   constructor(private canvas: HTMLCanvasElement, private game: Game, public viewer: number) {
     this.iso = game.pack.projection === 'iso';
     this.view = this.iso ? ISO_VIEW : ORTHO_VIEW;
+    const art = artPackFor(game.pack.id);
+    // Loads in the background: until it arrives, the procedural models are drawn.
+    if (art) this.classic = new ClassicArt(art);
+    this.classicScale = this.view.tileW / 24;
     this.ctx = canvas.getContext('2d')!;
     this.originX = this.iso ? game.map.h * (this.view.tileW / 2) : 0;
     this.terrain = document.createElement('canvas');
@@ -461,9 +470,18 @@ export class FusionRenderer {
       const s = this.sprite(`wall|${style}|${mask}`, () => bake(wallMesh(mask, style), this.view));
       this.blit(s, origin.x, origin.y, grow);
     } else {
-      const s = this.sprite(`b|${def.shape}|${def.w}x${def.h}|${style}|${color}`, () => bake(buildingMesh(def.shape, def.w, def.h, style, team), this.view));
-      if (grow < 1) this.construct(s, origin.x, origin.y, grow, e.cx, e.cy, e.w, e.h);
-      else { this.blit(s, origin.x, origin.y); this.structureDetail(e, def.shape, style, team, color, off); }
+      const art = this.classic?.ready ? this.classic.entry('structure', e.type) : undefined;
+      const frame = art && this.classic ? this.classic.frame(art, 0) : undefined;
+      if (frame && this.classic && grow >= 1) {
+        // The original building sprite sits on its footprint, feet at the bottom edge.
+        const foot = this.project(e.cx + def.w / 2, e.cy + def.h);
+        this.classic.draw(ctx, color, frame, foot.x, foot.y, this.classicScale);
+        this.structureDetail(e, def.shape, style, team, color, off);
+      } else {
+        const s = this.sprite(`b|${def.shape}|${def.w}x${def.h}|${style}|${color}`, () => bake(buildingMesh(def.shape, def.w, def.h, style, team), this.view));
+        if (grow < 1) this.construct(s, origin.x, origin.y, grow, e.cx, e.cy, e.w, e.h);
+        else { this.blit(s, origin.x, origin.y); this.structureDetail(e, def.shape, style, team, color, off); }
+      }
     }
     if (off) {
       ctx.fillStyle = 'rgba(0,0,0,0.28)';
@@ -599,6 +617,37 @@ export class FusionRenderer {
       ctx.globalAlpha = Math.max(0.05, warping);
       this.glow(p.x, p.y - 6, 26, '140,200,255', 1 - warping);
       if (Math.random() < 0.5) this.fx.emit(p.x, p.y - 6, 8, 1, 'blue', 0.6);
+    }
+    const art = this.classic?.ready ? this.classic.entry('unit', e.type) : undefined;
+    if (art && this.classic) {
+      // The original sprite: infantry walk while they move, vehicles turn their hull and
+      // turret separately, exactly as the sheets are laid out.
+      const moving = e.px !== e.x || e.py !== e.y;
+      const body = def.kind === 'infantry' && moving
+        ? this.classic.walkFrame(art, e.facing, Math.floor(this.frame / 4))
+        : this.classic.frame(art, e.facing);
+      if (body) {
+        this.classic.draw(ctx, color, body, p.x, p.y, this.classicScale);
+        if (art.turret) {
+          const turret = this.classic.frame(art, e.turret, 'turret');
+          if (turret) this.classic.draw(ctx, color, turret, p.x, p.y, this.classicScale);
+        }
+        if (def.harvester && e.cargo > 0) {
+          ctx.fillStyle = game.pack.resources[0].color;
+          ctx.fillRect(p.x - 6, p.y - 14, Math.round((12 * e.cargo) / (def.harvester.capacity || 1)), 2);
+        }
+        if (e.deployed) this.deployedLook(e, def.shape, ground.x, ground.y);
+        ctx.globalAlpha = 1;
+        this.statusMarks(e, p, def.kind === 'infantry' ? 8 : 16);
+        if (e.rank) this.chevrons(p.x + (def.kind === 'infantry' ? 6 : 12), p.y - (def.kind === 'infantry' ? 16 : 20), e.rank);
+        if (this.selected.has(e.id) || this.hover === e.id) {
+          this.healthBar(p.x, p.y - (def.kind === 'infantry' ? 18 : 24), def.kind === 'infantry' ? 14 : 26, e.hp / e.maxHp, this.selected.has(e.id));
+          const r = def.kind === 'infantry' ? 7 : 15;
+          ctx.strokeStyle = this.selected.has(e.id) ? '#9bf06a' : 'rgba(190,230,170,0.5)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.ellipse(p.x, p.y + 1, r, this.iso ? r * 0.5 : r * 0.6, 0, 0, Math.PI * 2); ctx.stroke();
+        }
+        return;
+      }
     }
     if (def.kind === 'infantry' || def.shape === 'rocketeer') {
       if (def.shape === 'rocketeer') {

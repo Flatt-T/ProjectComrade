@@ -271,3 +271,138 @@ def overlay_pack(overlays: dict[int, int]) -> str:
     for cell, value in overlays.items():
         raw[cell] = value
     return pack_section(bytes(raw))
+
+
+# ---------------------------------------------------------------------------- art
+
+def read_pal(data: bytes) -> list[tuple[int, int, int]]:
+    """A Westwood PAL: 256 VGA triples of 6-bit components, widened to 8 bits."""
+    if len(data) < 768:
+        raise ValueError('Palette is shorter than 256 triples')
+    return [(data[i * 3] * 255 // 63, data[i * 3 + 1] * 255 // 63, data[i * 3 + 2] * 255 // 63) for i in range(256)]
+
+
+def format40_apply(src: bytes, base: bytearray) -> bytearray:
+    """Format40 (XOR delta): patch `base` in place with the differences in `src`."""
+    out = bytearray(base)
+    pos = i = 0
+    while i < len(src):
+        cmd = src[i]
+        i += 1
+        if cmd == 0:  # 0, count, value: XOR a run with one value.
+            count, value = src[i], src[i + 1]
+            i += 2
+            for _ in range(count):
+                out[pos] ^= value
+                pos += 1
+        elif cmd & 0x80 == 0:  # Short XOR against the following bytes.
+            for _ in range(cmd):
+                out[pos] ^= src[i]
+                i += 1
+                pos += 1
+        elif cmd == 0x80:  # Long form in the next word.
+            word = int.from_bytes(src[i:i + 2], 'little')
+            i += 2
+            if word == 0:
+                break
+            if word & 0x8000 == 0:
+                pos += word
+            elif word & 0x4000:
+                count, value = word & 0x3FFF, src[i]
+                i += 1
+                for _ in range(count):
+                    out[pos] ^= value
+                    pos += 1
+            else:
+                count = word & 0x3FFF
+                for _ in range(count):
+                    out[pos] ^= src[i]
+                    i += 1
+                    pos += 1
+        else:  # Skip.
+            pos += cmd & 0x7F
+    return out
+
+
+def read_shp(data: bytes) -> tuple[int, int, list[bytes]]:
+    """A Tiberian Dawn / Red Alert SHP: returns (width, height, frames of palette indices).
+
+    Frames are stored either whole (Format80) or as an XOR delta (Format40) against an
+    earlier frame, named by the offset in the frame's second word.
+    """
+    count, _a, _b, width, height, _c = struct.unpack('<HHHHHI', data[:14])
+    offsets = []
+    for i in range(count + 2):
+        value, ref = struct.unpack('<II', data[14 + i * 8:22 + i * 8])
+        offsets.append((value & 0xFFFFFF, value >> 24, ref & 0xFFFFFF))
+    size = width * height
+    frames: list[bytes] = []
+    by_offset: dict[int, bytes] = {}
+    for i in range(count):
+        start, fmt, ref = offsets[i]
+        end = offsets[i + 1][0] or len(data)
+        chunk = data[start:end]
+        if fmt == 0x80:
+            frame = format80_decompress(chunk)[:size]
+        elif fmt in (0x40, 0x20):
+            # Format40 names its reference by file offset; Format20 by frame number.
+            base = by_offset.get(ref) if fmt == 0x40 else (frames[ref] if ref < len(frames) else None)
+            if base is None and ref < len(frames):
+                base = frames[ref]
+            if base is None:
+                raise ValueError(f'Frame {i} references an unknown frame at {ref}')
+            frame = bytes(format40_apply(chunk, bytearray(base)))[:size]
+        else:
+            raise ValueError(f'Frame {i} uses unknown format {fmt:#x}')
+        frame = frame.ljust(size, b'\0')
+        by_offset[start] = frame
+        frames.append(frame)
+    return width, height, frames
+
+
+def read_tmp(data: bytes, red_alert: bool) -> tuple[int, int, list[bytes | None]]:
+    """A theatre template (terrain tile set): returns (width, height, tiles).
+
+    Tiles are plain palette indices; an entry is None where the template leaves that cell
+    of its rectangle empty. Red Alert moved the index table further down the header.
+    """
+    width, height, _count = struct.unpack('<HHH', data[:6])
+    # Red Alert added two words to the header, pushing everything after the size down.
+    img_start = struct.unpack('<I', data[16:20] if red_alert else data[12:16])[0]
+    if red_alert:
+        index_start = struct.unpack('<i', data[28:32])[0]
+        index_end = struct.unpack('<i', data[32:36])[0]
+    else:
+        index_end = struct.unpack('<i', data[24:28])[0]
+        index_start = struct.unpack('<i', data[28:32])[0]
+    size = width * height
+    tiles: list[bytes | None] = []
+    for i in range(max(0, index_end - index_start)):
+        slot = data[index_start + i]
+        if slot == 0xFF:
+            tiles.append(None)
+        else:
+            tiles.append(data[img_start + slot * size:img_start + (slot + 1) * size])
+    return width, height, tiles
+
+
+# ---------------------------------------------------------------------------- PNG
+
+def write_png(path, width: int, height: int, pixels: bytes, grey: bool = False):
+    """Minimal PNG writer, so the art pipeline needs nothing outside the standard library.
+
+    `pixels` is RGBA rows (or one byte per pixel when `grey`), top to bottom.
+    """
+    import zlib
+    stride = width * (1 if grey else 4)
+    raw = bytearray()
+    for y in range(height):
+        raw.append(0)  # filter: none
+        raw += pixels[y * stride:(y + 1) * stride]
+
+    def chunk(kind: bytes, payload: bytes) -> bytes:
+        return struct.pack('>I', len(payload)) + kind + payload + struct.pack('>I', zlib.crc32(kind + payload) & 0xFFFFFFFF)
+
+    header = struct.pack('>IIBBBBB', width, height, 8, 0 if grey else 6, 0, 0, 0)
+    blob = b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', header) + chunk(b'IDAT', zlib.compress(bytes(raw), 9)) + chunk(b'IEND', b'')
+    path.write_bytes(blob)

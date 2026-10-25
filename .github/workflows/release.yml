@@ -63,6 +63,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: python3 tools/prepare-content.py
+      - run: python3 tools/prepare-ra-content.py
+      # The classic sprites and tiles the Fusion td and ra1 packs draw with.
+      - run: python3 tools/prepare-art.py
       - run: pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - name: Playable GDI and Nod browser validation
