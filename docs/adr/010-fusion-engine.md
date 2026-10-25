@@ -218,3 +218,37 @@ set, and every pack test runs over it.
 
 Fidelity is the same contract as before: values approximate the classics from public
 knowledge, are labelled in-game, and are tuned against observations over time.
+
+## Late tech for the 1995 classics (update 2026-10-25)
+
+Play-testing Tiberian Dawn showed the two new packs stopped short: no building upgrades
+at all, one superweapon a side, and nothing in the air for the Allies beyond the Helipad.
+Three things were done about it.
+
+- **An engine fix.** `canBuild` applied the lobby's tech-level cap to upgrade items as
+  well as to buildings. Construction Yards sit at tech 99 so they can never be queued
+  directly, which silently made their upgrade unbuildable — in Dune too, where it quietly
+  locked the Rocket Turret behind a `conyard@1` that could not be bought. The cap now
+  applies to what is built, not to the improvement of a building already standing.
+- **Building upgrades, as gates for the late tree.** Both packs upgrade the Construction
+  Yard (advanced defences: Advanced Guard Tower, Obelisk, Tesla Coil, Camo Pillbox), the
+  vehicle factory (Mammoth Tank, Mobile Gap Generator, Stealth Tank and SSM Launcher) and
+  each side's top technology building (its superweapons).
+- **Superweapons to the original scope and one tier beyond, per side's theme.**
+  - *GDI* — the Ion Cannon, then the **Dropship Bay** (airborne reinforcements: two
+    Medium Tanks and two Rocket Soldiers at the base) and the **GDI Uplink Center**
+    (a Satellite Sweep that reveals the map for a minute). Orbital and airborne, which is
+    how GDI fights.
+  - *Nod* — the Nuclear Strike, then the **Chemical Missile Silo** (less blast than the
+    nuke, a far wider cloud) and the **Stealth Field Generator**, which hides the ground
+    around it from the enemy. Chemicals and concealment, which is how Nod fights.
+  - *Allies* — the Chronosphere, plus an **Allied Airbase** of their own (helicopters fly
+    from it or the Helipad, and it calls in paratroopers), the **GPS Satellite Uplink**
+    and the **Weather Control Device**, the Allied storm tier.
+  - *Soviets* — the Nuclear Missile, Iron Curtain and Badger paratroopers, plus the
+    **Tesla Storm Array**: a rolling electrical storm over the target.
+
+Dune 2000 and RA2 keep the upgrades and powers their originals had; the rule is per pack,
+not global. `tests/unit/packs.test.ts` holds each side to a superweapon, an air option and
+priced upgrades, requires more than one power and several upgradable buildings in the two
+1995 packs, and covers the yard-upgrade regression.

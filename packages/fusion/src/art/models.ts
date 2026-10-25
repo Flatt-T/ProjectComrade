@@ -550,6 +550,38 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       for (const f of m.faces.slice(-2 * 8 - 1)) f.glow = true;
       break;
     }
+    case 'dropship': {
+      // Dropship Bay: a cleared landing apron with guide lights, a cradle and a control block.
+      m.box(0.12, 0.12, 0.07, w - 0.12, h - 0.12, 0.14, p.pad, { top: tint(p.dark, 1.45) });
+      m.cylinder(w / 2, h / 2, 0.14, 0.15, 0.95, 0.95, tint(p.trim, 1.08), 26);
+      m.cylinder(w / 2, h / 2, 0.15, 0.16, 0.74, 0.74, p.dark, 26);
+      for (let k2 = 0; k2 < 8; k2++) {
+        const a = (k2 / 8) * Math.PI * 2 + 0.2;
+        m.cylinder(w / 2 + Math.cos(a) * 1.15, h / 2 + Math.sin(a) * 1.15, 0.14, 0.24, 0.05, 0.04, k2 % 2 ? GLOW_BLUE : team, 6, { glow: k2 % 2 === 0 });
+      }
+      for (const dx of [-0.5, 0.5]) m.box(w / 2 + dx - 0.07, h / 2 - 0.5, 0.16, w / 2 + dx + 0.07, h / 2 + 0.5, 0.3, p.metal);
+      m.box(0.2, h - 0.72, 0.07, 0.86, h - 0.2, 0.52, p.body, { top: p.trim });
+      m.box(0.26, h - 0.66, 0.52, 0.8, h - 0.26, 0.74, p.glass);
+      m.box(0.2, h - 0.24, 0.2, 0.86, h - 0.18, 0.44, team);
+      break;
+    }
+    case 'teslaarray': {
+      // Tesla Storm Array: a ring of coils around a charged central mast.
+      m.box(0.25, 0.25, 0.07, w - 0.25, h - 0.25, 0.4, p.body, { top: p.trim });
+      m.box(0.25, h - 0.29, 0.14, w - 0.25, h - 0.23, 0.34, team);
+      for (let k2 = 0; k2 < 4; k2++) {
+        const a = (k2 / 4) * Math.PI * 2 + Math.PI / 4;
+        const cx = w / 2 + Math.cos(a) * 0.95, cy = h / 2 + Math.sin(a) * 0.95;
+        for (let z = 0.4, j = 0; j < 5; z += 0.13, j++) m.cylinder(cx, cy, z, z + 0.13, 0.17 - j * 0.02, 0.17 - j * 0.02, j % 2 ? p.dark : p.metal, 12);
+        m.dome(cx, cy, 1.05, 0.11, GLOW_BLUE, 2, 10);
+        for (const f of m.faces.slice(-2 * 10 - 1)) f.glow = true;
+      }
+      m.cylinder(w / 2, h / 2, 0.4, 1.5, 0.22, 0.14, p.metal, 14);
+      m.cylinder(w / 2, h / 2, 0.85, 0.95, 0.26, 0.26, team, 14, { cap: false });
+      m.dome(w / 2, h / 2, 1.5, 0.26, GLOW_CYAN, 4, 16, 0.3);
+      for (const f of m.faces.slice(-4 * 16 - 1)) f.glow = true;
+      break;
+    }
     case 'aagun': {
       // AA Gun: a sandbagged ring on a concrete apron; the gun itself tracks its target.
       m.box(0.18, h - 0.82, 0.07, 0.82, h - 0.18, 0.2, p.pad, { top: p.trim });

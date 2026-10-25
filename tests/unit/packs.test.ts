@@ -101,6 +101,48 @@ describe('rule pack integrity', () => {
     });
   }
 
+  for (const pack of CLASSIC_PACKS) {
+    it(`${pack.id}: every side has a superweapon, an air facility and a priced upgrade path`, () => {
+      // Dune 2000 and RA2 carry the upgrades their originals had (factory levels, none);
+      // the 1995 packs add their own, so only the pricing rule is shared.
+      for (const st of Object.values(pack.structures)) if (st.upgrades) expect(st.upgradeCost, `${st.id} upgrade is priced`).toBeGreaterThan(0);
+      for (const faction of pack.factions) {
+        const mine = (def: { factions?: string[] }) => factionCanUse(def, faction.id, faction.side);
+        const powers = Object.values(pack.structures).filter(mine)
+          .flatMap(st => (st.superweapon ? [st.superweapon].flat() : []).filter(sw => factionCanUse(sw, faction.id, faction.side)));
+        expect(powers.length, `${faction.id} has a superweapon`).toBeGreaterThan(0);
+        for (const sw of powers) expect(sw.charge, `${sw.id} charges`).toBeGreaterThan(0);
+        // Air is not one side's privilege: everyone can get something into the sky,
+        // whether from an air facility or, like the Kirov, straight out of the factory.
+        expect(Object.values(pack.units).some(u => mine(u) && u.kind === 'aircraft'), `${faction.id} can field aircraft`).toBe(true);
+      }
+    });
+
+    if (pack.id === 'td' || pack.id === 'ra1') {
+      it(`${pack.id}: every side has building upgrades and more than one superweapon`, () => {
+        for (const faction of pack.factions) {
+          const mine = (def: { factions?: string[] }) => factionCanUse(def, faction.id, faction.side);
+          const powers = Object.values(pack.structures).filter(mine)
+            .flatMap(st => (st.superweapon ? [st.superweapon].flat() : []).filter(sw => factionCanUse(sw, faction.id, faction.side)));
+          expect(powers.length, `${faction.id} has more than one superweapon`).toBeGreaterThan(1);
+          expect(Object.values(pack.structures).filter(st => st.upgrades && mine(st)).length, `${faction.id} has buildings to upgrade`).toBeGreaterThan(1);
+        }
+      });
+    }
+  }
+
+  it('lets a Construction Yard be upgraded although it is never built directly', () => {
+    // Yards sit above every tech level so they cannot be queued; their upgrade still must be.
+    for (const pack of CLASSIC_PACKS) {
+      const yard = Object.values(pack.structures).find(st => st.constructionYard)!;
+      if (!yard.upgrades) continue;
+      const game = new Game({ pack, mapId: pack.maps[0].id, seed: 2, techLevel: 15, players: [{ name: 'A', faction: pack.factions[0].id, ai: false }, { name: 'B', faction: pack.factions[1].id, ai: true }] });
+      const p = game.players[0];
+      game.spawnStructure(yard.id, 0, 6, 6);
+      expect(game.buildOptions(p, 'structure'), `${pack.id} offers the yard upgrade`).toContain(`upgrade:${yard.id}`);
+    }
+  });
+
   it('registers the four classics and the fusions', () => {
     expect(CLASSIC_PACKS.map(p => p.id)).toEqual(['td', 'dune', 'ra1', 'ra2']);
     expect(Object.keys(PACKS)).toEqual(expect.arrayContaining(['td', 'dune', 'ra1', 'ra2', 'leviathan']));
@@ -128,6 +170,49 @@ describe('Tiberian Dawn pack', () => {
     expect(only('nod')).toContain('flametank');
     // Minigunners, engineers and harvesters are built by both.
     for (const shared of ['minigunner', 'engineer', 'harvester', 'mcv']) expect(tdPack.units[shared].factions).toBeUndefined();
+  });
+
+  it('gives each side its own powers and upgrade path', () => {
+    const power = (id: string) => [tdPack.structures[id].superweapon].flat()[0]!;
+    // GDI: orbital fire, then airborne armour and a satellite sweep.
+    expect(power('eye').kind).toBe('ion');
+    expect(power('drop').kind).toBe('reinforce');
+    expect(power('drop').units).toContain('mediumtank');
+    expect(power('uplink').kind).toBe('reveal');
+    for (const id of ['eye', 'drop', 'uplink']) expect(tdPack.structures[id].factions).toEqual(['gdi']);
+    // Nod: the nuclear strike, then chemicals and a stealth field over the base.
+    expect(power('tmpl').kind).toBe('missile');
+    expect(power('chem').kind).toBe('missile');
+    expect(power('chem').radius).toBeGreaterThan(power('tmpl').radius);
+    expect(power('chem').damage).toBeLessThan(power('tmpl').damage);
+    expect(tdPack.structures.stlth.gap).toBeGreaterThan(0);
+    for (const id of ['tmpl', 'chem', 'stlth']) expect(tdPack.structures[id].factions).toEqual(['nod']);
+    // The late tree hangs off upgraded buildings.
+    expect(tdPack.units.mammoth.prereqs).toContain('weap@1');
+    expect(tdPack.units.stealthtank.prereqs).toContain('afld@1');
+    expect(tdPack.structures.atwr.prereqs).toContain('fact@1');
+    expect(tdPack.structures.obli.prereqs).toContain('fact@1');
+  });
+
+  it('lets GDI buy an upgrade and then build what it unlocks', () => {
+    const game = new Game({ pack: tdPack, mapId: 'tiberium-crossing', seed: 7, techLevel: 15, players: [{ name: 'A', faction: 'gdi', ai: false }, { name: 'B', faction: 'nod', ai: true }] });
+    const p = game.players[0];
+    for (const [id, x, y] of [['fact', 6, 6], ['nuke', 11, 6], ['nuke', 11, 9], ['proc', 6, 11], ['pyle', 11, 12], ['weap', 15, 6], ['hq', 15, 11]] as [string, number, number][]) game.spawnStructure(id, 0, x, y);
+    expect(game.canBuild(p, 'mammoth')).toBe(false);
+    expect(game.buildOptions(p, 'defense')).not.toContain('atwr');
+    p.credits = 20000;
+    game.enqueue(0, { t: 'build', item: 'upgrade:weap' });
+    for (let i = 0; i < 1800 && p.upgrades.weap !== 1; i++) game.step();
+    expect(p.upgrades.weap).toBe(1);
+    game.enqueue(0, { t: 'build', item: 'upgrade:fact' });
+    for (let i = 0; i < 1800 && p.upgrades.fact !== 1; i++) game.step();
+    expect(p.upgrades.fact).toBe(1);
+    expect(game.buildOptions(p, 'defense')).toContain('atwr');
+    // The Mammoth still waits on the Advanced Communications Center.
+    expect(game.canBuild(p, 'mammoth')).toBe(false);
+    game.spawnStructure('eye', 0, 20, 6);
+    expect(game.canBuild(p, 'mammoth')).toBe(true);
+    expect(game.buildOptions(p, 'structure')).toContain('drop');
   });
 
   it('spreads Tiberium and pays for it', () => {
@@ -176,6 +261,22 @@ describe('Red Alert pack', () => {
     const game = new Game({ pack: ra1Pack, mapId: 'ra1-north-sea', seed: 4, players: [{ name: 'A', faction: 'allies', ai: true }, { name: 'B', faction: 'soviet', ai: true }] });
     const water = game.map.terrain.filter(t => ra1Pack.terrains[t].water).length;
     expect(water / game.map.terrain.length).toBeGreaterThan(0.05);
+  });
+
+  it('gives the Allies their own air base and late powers, not just the Soviets', () => {
+    const power = (id: string) => [ra1Pack.structures[id].superweapon].flat()[0]!;
+    expect(ra1Pack.structures.abase.factions).toEqual(['allies']);
+    expect(ra1Pack.structures.abase.produces).toBe('aircraft');
+    expect(power('abase').kind).toBe('paradrop');
+    expect(power('gps').kind).toBe('reveal');
+    expect(power('wthr').kind).toBe('storm');
+    expect(power('tstorm').kind).toBe('storm');
+    expect(ra1Pack.structures.tstorm.factions).toEqual(['soviet']);
+    // Allied helicopters fly from either air facility.
+    expect(ra1Pack.units.longbow.prereqs).toContain('hpad|abase');
+    // Both top tiers hang off the upgraded tech centre.
+    for (const id of ['pdox', 'gps', 'wthr']) expect(ra1Pack.structures[id].prereqs).toContain('atek@1');
+    for (const id of ['iron', 'mslo', 'tstorm']) expect(ra1Pack.structures[id].prereqs).toContain('stek@1');
   });
 
   it('runs two sides to a working economy on every battlefield', () => {

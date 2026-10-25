@@ -9,8 +9,8 @@ A browser RTS platform built on a self-contained C&C Tiberian Dawn slice: origin
 | Game style | Engine | Multiplayer |
 |---|---|---|
 | **Classic C&C** (Tiberian Dawn) | Original GPL engine (Vanilla Conquer → WASM), freeware art, 4 authored maps | Lobby presence; each commander fights the built-in enemy |
-| **Tiberian Dawn Style** | Comrade Fusion Engine, `td` rule pack: GDI and Nod, spreading Tiberium, Obelisk and Temple, Ion Cannon — on the same four battlefields as the original-engine slice | **Synchronized lockstep** with optional AI opponents |
-| **Red Alert Style** | Comrade Fusion Engine, `ra1` rule pack: Allies and Soviets, ore and gems, navies, Tanya, Tesla coils, Chronosphere and Iron Curtain | **Synchronized lockstep** with optional AI opponents |
+| **Tiberian Dawn Style** | Comrade Fusion Engine, `td` rule pack: GDI and Nod, spreading Tiberium, building upgrades, Obelisk and Temple, Ion Cannon, Dropship Bay, Satellite Sweep, Chemical Missile and Stealth Field — on the same four battlefields as the original-engine slice | **Synchronized lockstep** with optional AI opponents |
+| **Red Alert Style** | Comrade Fusion Engine, `ra1` rule pack: Allies and Soviets, ore and gems, navies, Tanya, Tesla coils, building upgrades, Chronosphere, GPS and weather control against the Iron Curtain, nuke and Tesla storm | **Synchronized lockstep** with optional AI opponents |
 | **Dune Style** | Comrade Fusion Engine, `dune` rule pack: rock-only building, concrete, spice blooms, sandworms, Atreides / Harkonnen / Ordos | **Synchronized lockstep** with optional AI opponents |
 | **Red Alert 2 Style** | Comrade Fusion Engine, `ra2` rule pack, isometric: MCV deploy, ore regrowth and gems, Chrono Miners, Prism and Tesla tech | **Synchronized lockstep** with optional AI opponents |
 

@@ -548,7 +548,10 @@ export class Game {
     if (!queue) return false;
     const base = this.baseItem(item);
     const def: UnitDef | StructureDef | undefined = this.pack.structures[base] ?? this.pack.units[base];
-    if (!def || def.tech > this.techCap || !factionCanUse(def, p.faction, p.side)) return false;
+    if (!def || !factionCanUse(def, p.faction, p.side)) return false;
+    // The tech level caps what may be built, but not the improvement of a building already
+    // standing: Construction Yards are never built directly (tech 99) yet can be upgraded.
+    if (!item.startsWith(UPGRADE) && def.tech > this.techCap) return false;
     if (item.startsWith(UPGRADE)) {
       // Upgrades are bought once the building stands, up to its number of levels.
       const level = owned.get(base);
