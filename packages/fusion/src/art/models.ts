@@ -565,6 +565,39 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       m.box(0.2, h - 0.24, 0.2, 0.86, h - 0.18, 0.44, team);
       break;
     }
+    case 'sonicarray': {
+      // Sonic Array: a ring of resonator horns around a tuned central bell.
+      m.box(0.25, 0.25, 0.07, w - 0.25, h - 0.25, 0.42, p.body, { top: p.trim });
+      m.box(0.25, h - 0.29, 0.16, w - 0.25, h - 0.23, 0.36, team);
+      for (let k2 = 0; k2 < 6; k2++) {
+        const a = (k2 / 6) * Math.PI * 2 + 0.25;
+        const cx = w / 2 + Math.cos(a) * 0.92, cy = h / 2 + Math.sin(a) * 0.92;
+        m.cylinder(cx, cy, 0.42, 0.72, 0.1, 0.09, p.metal, 10);
+        m.cylinder(cx, cy, 0.72, 0.98, 0.09, 0.24, p.body, 14, { cap: false });
+        m.cylinder(cx, cy, 0.96, 0.99, 0.2, 0.2, p.glass, 14);
+      }
+      m.cylinder(w / 2, h / 2, 0.42, 1.15, 0.34, 0.28, p.body, 18, { top: p.trim });
+      m.cylinder(w / 2, h / 2, 0.78, 0.88, 0.36, 0.36, team, 18, { cap: false });
+      m.dome(w / 2, h / 2, 1.15, 0.3, p.glass, 5, 18, 0.34);
+      m.dome(w / 2, h / 2, 1.2, 0.12, GLOW_CYAN, 3, 12, 0.14);
+      for (const f of m.faces.slice(-3 * 12 - 1)) f.glow = true;
+      break;
+    }
+    case 'prismarray': {
+      // Prism Array: a focusing crystal on a stepped plinth, fed by satellite prisms.
+      m.box(0.25, 0.25, 0.07, w - 0.25, h - 0.25, 0.4, p.body, { top: p.trim });
+      m.box(0.25, h - 0.29, 0.14, w - 0.25, h - 0.23, 0.34, team);
+      m.box(0.75, 0.75, 0.4, w - 0.75, h - 0.75, 0.62, p.trim, { top: p.metal });
+      for (let k2 = 0; k2 < 4; k2++) {
+        const a = (k2 / 4) * Math.PI * 2 + Math.PI / 4;
+        const cx = w / 2 + Math.cos(a) * 1.0, cy = h / 2 + Math.sin(a) * 1.0;
+        m.cylinder(cx, cy, 0.4, 0.78, 0.11, 0.08, p.metal, 8);
+        m.cylinder(cx, cy, 0.78, 1.02, 0.1, 0.0, GLOW_CYAN, 6, { glow: true });
+      }
+      m.cylinder(w / 2, h / 2, 0.62, 1.05, 0.26, 0.2, p.metal, 12);
+      m.cylinder(w / 2, h / 2, 1.05, 1.95, 0.24, 0.0, GLOW_CYAN, 6, { glow: true });
+      break;
+    }
     case 'teslaarray': {
       // Tesla Storm Array: a ring of coils around a charged central mast.
       m.box(0.25, 0.25, 0.07, w - 0.25, h - 0.25, 0.4, p.body, { top: p.trim });

@@ -252,3 +252,29 @@ Dune 2000 and RA2 keep the upgrades and powers their originals had; the rule is 
 not global. `tests/unit/packs.test.ts` holds each side to a superweapon, an air option and
 priced upgrades, requires more than one power and several upgradable buildings in the two
 1995 packs, and covers the yard-upgrade regression.
+
+## The same tier for Dune and RA2 (update 2026-10-25)
+
+The late-tech pass was extended to the other two packs, so all four classics now end in a
+tier of their own rather than one power and a flat tree.
+
+- **Dune**: the Palace can be improved once, and each house gets a building past it —
+  the Atreides **Sonic Array** (a sonic barrage walked across the target area), the
+  Harkonnen **Drop Platform** (two Devastators delivered to the base) and the Ordos
+  **CHOAM Observation Post** (a bought look at the whole map), with an Ordos **Scrambler
+  Field** that hides the ground around it. The factory and yard upgrades the original had
+  are unchanged.
+- **RA2**: building upgrades are new to this style and are the tier beyond it. The
+  Construction Yard upgrade carries the Prism Tower and the Tesla Coil, the War Factory
+  upgrade the Prism Tank, Mirage Tank and Apocalypse, and each Battle Lab upgrade carries
+  everything that ends a game — including the Allied **Prism Array** (an orbital prism
+  strike) and the Soviet **Airlift Command** (two Apocalypse tanks at the base).
+- **AI**: upgrades now gate real tech in every pack, so the skirmish AI no longer buys
+  them blindly in alphabetical order. It buys an upgrade when that upgrade unlocks
+  something it could build immediately (Dune's factory levels, which open most of its
+  arsenal), and otherwise leaves the late ones until the rest of the base stands — which
+  is what kept an RA2 AI from reaching its Battle Lab once upgrades existed there.
+
+Every side in every pack now holds to the same rule, checked in `tests/unit/packs.test.ts`:
+more than one superweapon, more than one building worth upgrading, aircraft of some kind,
+and a price on every upgrade.

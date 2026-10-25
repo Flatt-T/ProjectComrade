@@ -118,17 +118,15 @@ describe('rule pack integrity', () => {
       }
     });
 
-    if (pack.id === 'td' || pack.id === 'ra1') {
-      it(`${pack.id}: every side has building upgrades and more than one superweapon`, () => {
-        for (const faction of pack.factions) {
-          const mine = (def: { factions?: string[] }) => factionCanUse(def, faction.id, faction.side);
-          const powers = Object.values(pack.structures).filter(mine)
-            .flatMap(st => (st.superweapon ? [st.superweapon].flat() : []).filter(sw => factionCanUse(sw, faction.id, faction.side)));
-          expect(powers.length, `${faction.id} has more than one superweapon`).toBeGreaterThan(1);
-          expect(Object.values(pack.structures).filter(st => st.upgrades && mine(st)).length, `${faction.id} has buildings to upgrade`).toBeGreaterThan(1);
-        }
-      });
-    }
+    it(`${pack.id}: every side has building upgrades and more than one superweapon`, () => {
+      for (const faction of pack.factions) {
+        const mine = (def: { factions?: string[] }) => factionCanUse(def, faction.id, faction.side);
+        const powers = Object.values(pack.structures).filter(mine)
+          .flatMap(st => (st.superweapon ? [st.superweapon].flat() : []).filter(sw => factionCanUse(sw, faction.id, faction.side)));
+        expect(powers.length, `${faction.id} has more than one superweapon`).toBeGreaterThan(1);
+        expect(Object.values(pack.structures).filter(st => st.upgrades && mine(st)).length, `${faction.id} has buildings to upgrade`).toBeGreaterThan(1);
+      }
+    });
   }
 
   it('lets a Construction Yard be upgraded although it is never built directly', () => {
@@ -239,6 +237,46 @@ describe('Tiberian Dawn pack', () => {
     game.spawnStructure('nuke', 0, 24, 26);
     for (let i = 0; i < 120; i++) game.step();
     expect(eye!.charge).toBeGreaterThan(0);
+  });
+});
+
+describe('Dune pack', () => {
+  const dune = PACKS.dune;
+
+  it('gives each house a tier past the Palace, in its own voice', () => {
+    const power = (id: string) => [dune.structures[id].superweapon].flat()[0]!;
+    expect(dune.structures.palace.upgrades).toBe(1);
+    // Atreides sonics, Harkonnen armour, Ordos eyes everywhere and a scrambled field.
+    expect(power('sonicarray').kind).toBe('storm');
+    expect(dune.structures.sonicarray.factions).toEqual(['atreides']);
+    expect(power('droppad').kind).toBe('reinforce');
+    expect(power('droppad').units).toEqual(['devastator', 'devastator']);
+    expect(dune.structures.droppad.factions).toEqual(['harkonnen']);
+    expect(power('choam').kind).toBe('reveal');
+    expect(dune.structures.scrambler.gap).toBeGreaterThan(0);
+    for (const id of ['choam', 'scrambler']) expect(dune.structures[id].factions).toEqual(['ordos']);
+    for (const id of ['sonicarray', 'droppad', 'choam']) expect(dune.structures[id].prereqs).toContain('palace@1');
+  });
+});
+
+describe('Red Alert 2 pack', () => {
+  const ra2 = PACKS.ra2;
+
+  it('adds upgrades the original never had, and one power beyond each side', () => {
+    const power = (id: string) => [ra2.structures[id].superweapon].flat()[0]!;
+    for (const id of ['conyard', 'a-factory', 'a-lab', 's-factory', 's-lab']) expect(ra2.structures[id].upgrades, `${id} upgrades`).toBe(1);
+    expect(power('a-prismarray').kind).toBe('ion');
+    expect(ra2.structures['a-prismarray'].factions).toEqual(['allies']);
+    expect(power('s-airlift').kind).toBe('reinforce');
+    expect(power('s-airlift').units).toEqual(['apocalypse', 'apocalypse']);
+    expect(ra2.structures['s-airlift'].factions).toEqual(['soviets']);
+    // The improved yard carries the advanced defences; the labs carry what ends a game.
+    expect(ra2.structures['a-prism'].prereqs).toContain('conyard@1');
+    expect(ra2.structures['s-tesla'].prereqs).toContain('conyard@1');
+    for (const id of ['a-chrono', 'a-weather', 'a-prismarray']) expect(ra2.structures[id].prereqs).toContain('a-lab@1');
+    for (const id of ['s-curtain', 's-nuke', 's-airlift']) expect(ra2.structures[id].prereqs).toContain('s-lab@1');
+    expect(ra2.units.apocalypse.prereqs).toContain('s-factory@1');
+    expect(ra2.units.prismtank.prereqs).toContain('a-factory@1');
   });
 });
 

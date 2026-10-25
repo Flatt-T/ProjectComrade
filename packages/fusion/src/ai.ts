@@ -3,6 +3,7 @@
 import type { Entity, Game, Player } from './game';
 import { LEPTONS, toCell } from './core';
 import { buildableTerrain, terrainPassable } from './map';
+import { factionCanUse, prereqsMet } from './rules';
 
 export type AILevel = 'easy' | 'normal' | 'hard';
 
@@ -22,6 +23,19 @@ export interface AIState {
   /** Tick of the last search for a shipyard site, and whether one was found. */
   waterCheck: number;
   waterNear: boolean;
+}
+
+/**
+ * Does buying this upgrade open something the player could build right away? Dune's factory
+ * levels unlock most of its arsenal and are worth buying early; an upgrade that only gates
+ * a superweapon the base is nowhere near can wait for the rest of the tree.
+ */
+function upgradeUnlocksSomething(game: Game, p: Player, base: string, owned: Map<string, number>): boolean {
+  const next = new Map(owned);
+  next.set(base, (owned.get(base) ?? 0) + 1);
+  const defs = [...Object.values(game.pack.units), ...Object.values(game.pack.structures)];
+  return defs.some(d => d.tech <= game.techCap && factionCanUse(d, p.faction, p.side)
+    && !prereqsMet(d.prereqs, owned) && prereqsMet(d.prereqs, next));
 }
 
 export function createAIState(slot: number, level: AILevel = 'normal'): AIState {
@@ -81,7 +95,10 @@ export function runAI(game: Game, p: Player, s: AIState) {
       id => sdef(id).produces === 'infantry' && !owned.has(id),
       id => sdef(id).produces === 'vehicle' && !owned.has(id),
     ]);
-    const upgrade = !core ? upgrades.sort()[0] : undefined;
+    // An upgrade that unlocks something buildable now is worth having at once; one that only
+    // gates the far end of the tree waits until the rest of the base stands.
+    const ready = upgrades.filter(id => upgradeUnlocksSomething(game, p, id.slice('upgrade:'.length), owned)).sort();
+    const upgrade = !core ? ready[0] : undefined;
     const core2 = !core && !upgrade ? choose(options, [
       id => !!sdef(id).refinery && count(t => !!sdef(t).refinery) < 2,
       id => !!sdef(id).radar && !owned.has(id),
@@ -90,7 +107,7 @@ export function runAI(game: Game, p: Player, s: AIState) {
       id => !!sdef(id).storage && !sdef(id).refinery && p.storage > 0 && p.credits > p.storage * 0.8,
       id => !owned.has(id) && sdef(id).power <= 0,
       id => sdef(id).produces === 'vehicle' && count(t => sdef(t).produces === 'vehicle') < 2 && p.credits > 3000,
-    ]);
+    ]) ?? (p.credits > 3000 ? upgrades.sort()[0] : undefined);
     // The structure tab is paid first every tick, so core buildings and upgrades are queued at
     // once and the army waits; extras wait for the money.
     const essential = !!(core || upgrade || core2);
