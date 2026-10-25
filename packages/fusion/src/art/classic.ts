@@ -23,7 +23,11 @@ interface ArtIndex {
   cell: number;
   units: Record<string, ShapeEntry>;
   structures: Record<string, ShapeEntry>;
-  tiles: Record<string, [number, number][]>;
+  /**
+   * Ground tiles as [x, y] pairs per terrain, and the resource overlays as one list of
+   * frames per density step. Both live in the tile atlas.
+   */
+  tiles: Record<string, [number, number][] | Frame[][]>;
   trees: Frame[];
   /** Luminance of each step of the house colour ramp, brightest first. */
   remapLuma: number[];
@@ -84,7 +88,18 @@ export class ClassicArt {
     return kind === 'unit' ? this.index.units[id] : this.index.structures[id];
   }
 
-  tilesFor(terrain: string): [number, number][] | undefined { return this.index?.tiles[terrain]; }
+  tilesFor(terrain: string): [number, number][] | undefined {
+    const tiles = this.index?.tiles[terrain];
+    return Array.isArray(tiles) && Array.isArray(tiles[0]) && tiles[0].length === 2 ? tiles as [number, number][] : undefined;
+  }
+
+  /** Overlay frames for a resource, one list per density step (sparse to rich). */
+  resourceSteps(id: string): Frame[][] | undefined {
+    const tiles = this.index?.tiles[id];
+    if (!Array.isArray(tiles) || !Array.isArray(tiles[0]) || tiles[0].length === 2) return undefined;
+    return tiles as Frame[][];
+  }
+
   get treeFrames(): Frame[] { return this.index?.trees ?? []; }
 
   /**
@@ -177,6 +192,24 @@ export function paintClassicTerrain(
     }
   }
   return true;
+}
+
+/** Draw a tile-atlas frame (scenery and overlays, which carry no house colour). */
+export function drawTileFrame(
+  art: ClassicArt,
+  ctx: CanvasRenderingContext2D,
+  frame: Frame,
+  x: number,
+  y: number,
+  scale = 1,
+) {
+  const atlas = art.tileAtlas;
+  if (!atlas) return;
+  const [sx, sy, w, h, ox, oy] = frame;
+  const smooth = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(atlas, sx, sy, w, h, Math.round(x - ox * scale), Math.round(y - oy * scale), Math.round(w * scale), Math.round(h * scale));
+  ctx.imageSmoothingEnabled = smooth;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {

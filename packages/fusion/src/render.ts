@@ -8,7 +8,7 @@ import type { Effect, Entity, Game, Projectile } from './game';
 import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
 import { ArtStyle, FLYING, ROTATING_DEFENCES, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
-import { ClassicArt, artPackFor, paintClassicTerrain } from './art/classic';
+import { ClassicArt, artPackFor, drawTileFrame, paintClassicTerrain } from './art/classic';
 import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
 
 export interface Camera { x: number; y: number; zoom: number }
@@ -366,6 +366,14 @@ export class FusionRenderer {
       const level = Math.min(3, Math.floor((res[i] * 4) / (def.max + 1)));
       const variant = decor[i] & 3;
       const c = this.project(x + 0.5, y + 0.5);
+      const steps = this.classic?.ready ? this.classic.resourceSteps(def.id) : undefined;
+      if (steps?.length) {
+        const frames = steps[Math.min(steps.length - 1, level)] ?? steps[0];
+        if (frames?.length) {
+          drawTileFrame(this.classic!, ctx, frames[decor[i] % frames.length], c.x, c.y, this.classicScale);
+          continue;
+        }
+      }
       if (def.id === 'spice') {
         const key = `spice|${level}|${variant}`;
         let t = this.tiles.get(key);
@@ -449,8 +457,13 @@ export class FusionRenderer {
         if (game.map.terrain[i] !== treeT || viewer && !viewer.explored[i]) continue;
         const v = game.map.decor[i];
         items.push({ depth: depthOf(x + 0.5, y + 0.5), draw: () => {
-          const s = this.sprite(`tree|${v % 4}`, () => bake(treeMesh(v % 4), this.view));
           const p = this.project(x + ((v >> 2) & 3) * 0.05 - 0.05, y + ((v >> 4) & 3) * 0.05 - 0.05);
+          const classic = this.classic?.ready ? this.classic.treeFrames : undefined;
+          if (classic?.length) {
+            drawTileFrame(this.classic!, this.ctx, classic[v % classic.length], p.x + this.view.tileW / 2, p.y + this.view.tileH, this.classicScale);
+            return;
+          }
+          const s = this.sprite(`tree|${v % 4}`, () => bake(treeMesh(v % 4), this.view));
           this.blit(s, p.x, p.y);
         } });
       }
