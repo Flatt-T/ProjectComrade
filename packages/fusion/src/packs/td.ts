@@ -175,7 +175,7 @@ export const tdPack: RulePack = {
   structures: {
     fact: { id: 'fact', name: 'Construction Yard', cost: 5000, hp: 1000, armor: 'building', w: 3, h: 3, power: 0, sight: 5, prereqs: [], tech: 99, queue: 'structure', constructionYard: true, upgrades: 1, upgradeCost: 1500, shape: 'conyard' },
     nuke: { id: 'nuke', name: 'Power Plant', cost: 300, hp: 400, armor: 'building', w: 2, h: 2, power: 100, sight: 3, prereqs: [], tech: 1, queue: 'structure', shape: 'tdpower' },
-    nuk2: { id: 'nuk2', name: 'Advanced Power Plant', cost: 700, hp: 400, armor: 'building', w: 2, h: 2, power: 200, sight: 3, prereqs: ['nuke', 'hq'], tech: 6, queue: 'structure', shape: 'advpower' },
+    nuk2: { id: 'nuk2', name: 'Advanced Power Plant', cost: 700, hp: 400, armor: 'building', w: 2, h: 2, power: 200, sight: 3, prereqs: ['nuke', 'fact@1'], tech: 4, queue: 'structure', shape: 'advpower' },
     proc: { id: 'proc', name: 'Tiberium Refinery', cost: 2000, hp: 900, armor: 'building', w: 3, h: 3, power: -40, sight: 4, prereqs: ['nuke'], tech: 1, queue: 'structure', storage: 1000, refinery: { dockX: 1, dockY: 3, freeUnit: 'harvester' }, shape: 'refinery' },
     silo: { id: 'silo', name: 'Tiberium Silo', cost: 150, hp: 300, armor: 'building', w: 2, h: 1, power: -10, sight: 2, prereqs: ['proc'], tech: 2, queue: 'structure', storage: 1500, shape: 'silo' },
     pyle: { id: 'pyle', name: 'Barracks', cost: 300, hp: 400, armor: 'building', w: 2, h: 2, power: -20, sight: 3, prereqs: ['nuke'], factions: ['gdi'], tech: 1, queue: 'structure', produces: 'infantry', shape: 'barracks' },

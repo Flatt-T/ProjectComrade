@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { STYLES } from '../../packages/contracts/src/index';
 import { CLASSIC_PACKS, Game, PACKS, factionCanUse, prereqsMet, tdPack } from '../../packages/fusion/src/index';
-import { buildingMesh, hasTurret, hullMesh, turretMesh } from '../../packages/fusion/src/art/models';
+import { buildingMesh, crateMesh, hasTurret, hullMesh, turretMesh } from '../../packages/fusion/src/art/models';
 import type { RulePack } from '../../packages/fusion/src/index';
 
 const packs = Object.values(PACKS);
@@ -195,6 +195,12 @@ describe('rule pack integrity', () => {
   it('builds twice as fast with a second factory', () => {
     for (const pack of CLASSIC_PACKS) {
       expect(pack.extraFactoryBonus, `${pack.id} doubles on a second factory`).toBe(100);
+    }
+  });
+
+  it('has a model for every crate kind', () => {
+    for (const kind of ['money', 'heal', 'veteran', 'reveal', 'unit']) {
+      expect(crateMesh(kind).faces.length, `${kind} crate`).toBeGreaterThan(0);
     }
   });
 

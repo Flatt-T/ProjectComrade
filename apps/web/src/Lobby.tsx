@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  AILevel, CreditsPreset, DEFAULT_SETTINGS, GameStyle, LaunchRequest, MapInfo, RoomOptions, RoomState, RoomSummary, STYLES, styleInfo, WORMS_MAX,
+  AILevel, CRATES_MAX, CreditsPreset, DEFAULT_SETTINGS, GameStyle, LaunchRequest, MapInfo, RENEWAL_CLASSIC, RENEWAL_MAX, RoomOptions, RoomState, RoomSummary,
+  SPEED_MAX, SPEED_MIN, SPEED_STEP, STYLES, SUPER_CHARGE_MAX, SUPER_CHARGE_MIN, SUPER_CHARGE_STEP, styleInfo, WORMS_MAX,
 } from '@comrade/contracts';
 import { PACKS } from '../../../packages/fusion/src/index';
 import type { RoomConnection } from './net';
@@ -129,7 +130,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     const aiMax = Math.max(0, mapMax - room.players.length);
     const fusion = style.engine === 'fusion';
     const hasWorms = fusion && !!style.pack && !!PACKS[style.pack]?.mechanics.sandworm;
-    const worms = room.options.settings.worms ?? DEFAULT_SETTINGS.worms;
+    const set = { ...DEFAULT_SETTINGS, ...room.options.settings };
+    const worms = set.worms, renewal = set.renewal, superCharge = set.superCharge, crates = set.crates, speed = set.speed;
     return <div className="lobby-room">
       <div className="room-main">
         <div className="room-head"><div><p className="eyebrow">WAR ROOM · {style.name.toUpperCase()}</p><h2>{room.room}</h2></div>
@@ -208,7 +210,27 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
         {hasWorms && <label>Sandworm activity · {worms === 0 ? 'Off' : `${worms}%`}
           <input type="range" min={0} max={WORMS_MAX} step={25} disabled={!isHost} value={worms} aria-label="Sandworm activity"
             onChange={e => configureSettings({ worms: Number(e.target.value) })} />
-          <small>{worms === 0 ? 'No sandworms this match.' : worms < 100 ? 'Worms surface less often.' : worms > 100 ? 'Worms surface more often.' : 'Classic worm frequency.'}</small>
+          <small>{worms === 0 ? 'No sandworms this match.' : worms < 100 ? 'Fewer worms, and longer between attacks.' : worms > 100 ? 'More worms, and less time under the sand.' : 'Classic worm frequency.'}</small>
+        </label>}
+        {fusion && <label>Resource renewal · {renewal === 0 ? 'Off' : `${renewal}%`}
+          <input type="range" min={0} max={RENEWAL_MAX} step={5} disabled={!isHost} value={renewal} aria-label="Resource renewal"
+            onChange={e => configureSettings({ renewal: Number(e.target.value) })} />
+          <small>{renewal === 0 ? 'Mined-out ground stays bare.' : renewal < RENEWAL_CLASSIC ? 'Fields grow back slowly.' : renewal > RENEWAL_CLASSIC ? 'Fields grow back quickly.' : 'Classic renewal rate.'}</small>
+        </label>}
+        {fusion && <label>Superweapon recharge · {(superCharge / 100).toFixed(2)}x
+          <input type="range" min={SUPER_CHARGE_MIN} max={SUPER_CHARGE_MAX} step={SUPER_CHARGE_STEP} disabled={!isHost} value={superCharge} aria-label="Superweapon recharge"
+            onChange={e => configureSettings({ superCharge: Number(e.target.value) })} />
+          <small>{superCharge === 100 ? 'Classic charge times.' : `Every superweapon charges ${(superCharge / 100).toFixed(2)} times as fast.`}</small>
+        </label>}
+        {fusion && <label>Bonus crates · {crates === 0 ? 'Off' : `${crates}%`}
+          <input type="range" min={0} max={CRATES_MAX} step={25} disabled={!isHost} value={crates} aria-label="Bonus crates"
+            onChange={e => configureSettings({ crates: Number(e.target.value) })} />
+          <small>{crates === 0 ? 'No crates on the battlefield.' : `Crates of money, repairs, veterancy, intel or a free unit, about every ${Math.round(6000 / crates)}s.`}</small>
+        </label>}
+        {fusion && <label>Game speed · {speed}%
+          <input type="range" min={SPEED_MIN} max={SPEED_MAX} step={SPEED_STEP} disabled={!isHost} value={speed} aria-label="Game speed"
+            onChange={e => configureSettings({ speed: Number(e.target.value) })} />
+          <small>{speed === 100 ? 'Classic pace.' : `Everything happens ${(speed / 100).toFixed(2)} times as fast.`}</small>
         </label>}
         {!isHost && <small>Only the host can change these.</small>}
       </aside>

@@ -30,10 +30,11 @@ export class LocalSession implements Session {
   issue(cmd: Command) { this.game.enqueue(this.slot, cmd); }
   update(dtMs: number): number {
     const step = (STEP_MS * 100) / this.speedPercent;
+    const most = Math.ceil((MAX_STEPS_PER_FRAME * this.speedPercent) / 100);
     this.acc += dtMs;
     let n = 0;
-    while (this.acc >= step && n < MAX_STEPS_PER_FRAME) { this.game.step(); this.acc -= step; n++; }
-    if (n === MAX_STEPS_PER_FRAME) this.acc = 0; // Never spiral after a stall (e.g. tab hidden).
+    while (this.acc >= step && n < most) { this.game.step(); this.acc -= step; n++; }
+    if (n === most) this.acc = 0; // Never spiral after a stall (e.g. tab hidden).
     return Math.min(1, this.acc / step);
   }
   status(): SessionStatus { return 'running'; }
@@ -64,7 +65,7 @@ export class LockstepSession implements Session {
   private unsubscribe: () => void;
 
   /** `humans` lists the slots driven by people; AI slots run inside the simulation. */
-  constructor(readonly game: Game, readonly slot: number, private humans: number[], private transport: TurnTransport) {
+  constructor(readonly game: Game, readonly slot: number, private humans: number[], private transport: TurnTransport, private speedPercent = 100) {
     this.unsubscribe = transport.subscribe((from, packet) => this.receive(from, packet));
     // Prime the pipeline: the first turns carry no commands.
     for (let t = 0; t < INPUT_DELAY_TURNS; t++) this.sendTurn(t);
@@ -108,12 +109,16 @@ export class LockstepSession implements Session {
 
   update(dtMs: number): number {
     if (this.desynced) return 0;
+    // Game speed is wall-clock pacing, not simulation: every client runs the same setting
+    // from the launch, and turns are exchanged per tick, so lockstep is unaffected.
+    const step = (STEP_MS * 100) / this.speedPercent;
+    const most = Math.ceil((MAX_STEPS_PER_FRAME * this.speedPercent) / 100);
     this.acc += dtMs;
     let n = 0;
-    while (this.acc >= STEP_MS && n < MAX_STEPS_PER_FRAME) {
+    while (this.acc >= step && n < most) {
       if (this.game.tick % TURN_TICKS === 0) {
         const turn = this.game.tick / TURN_TICKS;
-        if (!this.ready(turn)) { this.waiting = true; this.acc = Math.min(this.acc, STEP_MS); break; }
+        if (!this.ready(turn)) { this.waiting = true; this.acc = Math.min(this.acc, step); break; }
         this.waiting = false;
         const bucket = this.turns.get(turn);
         // Same order on every client: by slot, then as issued.
@@ -124,11 +129,11 @@ export class LockstepSession implements Session {
         for (const tick of this.peerSums.keys()) if (tick < this.game.tick - 600) this.peerSums.delete(tick);
       }
       this.game.step();
-      this.acc -= STEP_MS;
+      this.acc -= step;
       n++;
     }
-    if (n === MAX_STEPS_PER_FRAME) this.acc = 0;
-    return Math.min(1, this.acc / STEP_MS);
+    if (n === most) this.acc = 0;
+    return Math.min(1, this.acc / step);
   }
 
   status(): SessionStatus { return this.desynced ? 'desync' : this.waiting ? 'waiting' : 'running'; }

@@ -54,11 +54,28 @@ export type CreditsPreset = 'low' | 'standard' | 'high';
 export type AILevel = 'easy' | 'normal' | 'hard';
 /**
  * `ai` is the number of computer opponents added to Fusion Engine matches (0..3); `aiLevel` how hard they play.
- * `worms` is sandworm activity as a percent of the rule pack's base rate (0 = no worms, 100 = pack default).
+ * `worms` is sandworm activity as a percent of the rule pack's base rate (0 = no worms, 100 = pack default):
+ * it sets how many worms roam and how long they stay under between attacks.
+ * `renewal` is how fast mined-out resource cells grow back, 0 (never) to 50; 25 is the pack's own rate.
+ * `superCharge` is superweapon recharge speed in percent, 100 (classic) to 200 (twice as fast).
+ * `crates` is bonus-crate frequency, 0 (none) to 200; 100 drops one about every minute.
+ * `speed` is how fast the clock runs, 100 (classic 15 ticks a second) to 300.
  */
-export interface MatchSettings { credits: CreditsPreset; techLevel: number; ai: number; aiLevel: AILevel; worms: number }
+export interface MatchSettings {
+  credits: CreditsPreset; techLevel: number; ai: number; aiLevel: AILevel;
+  worms: number; renewal: number; superCharge: number; crates: number; speed: number;
+}
 export const WORMS_MAX = 200;
-export const DEFAULT_SETTINGS: MatchSettings = { credits: 'standard', techLevel: 15, ai: 1, aiLevel: 'normal', worms: 50 };
+export const RENEWAL_MAX = 50;
+/** The renewal setting at which fields grow back at the rule pack's own rate. */
+export const RENEWAL_CLASSIC = 25;
+export const SUPER_CHARGE_MIN = 100, SUPER_CHARGE_MAX = 200, SUPER_CHARGE_STEP = 25;
+export const CRATES_MAX = 200;
+export const SPEED_MIN = 100, SPEED_MAX = 300, SPEED_STEP = 25;
+export const DEFAULT_SETTINGS: MatchSettings = {
+  credits: 'standard', techLevel: 15, ai: 1, aiLevel: 'normal',
+  worms: 50, renewal: RENEWAL_CLASSIC, superCharge: 100, crates: 0, speed: 100,
+};
 export const CREDITS_VALUES: Record<CreditsPreset, number> = { low: 30, standard: 60, high: 120 };
 
 export interface RoomOptions { style: GameStyle; map: string; visibility: Visibility; maxPlayers: number; settings: MatchSettings }
@@ -123,8 +140,14 @@ export function parseSettings(value: unknown): MatchSettings {
   const techLevel = typeof v.techLevel === 'number' && Number.isInteger(v.techLevel) && v.techLevel >= 1 && v.techLevel <= 15 ? v.techLevel : 15;
   const ai = typeof v.ai === 'number' && Number.isInteger(v.ai) && v.ai >= 0 && v.ai <= 3 ? v.ai : DEFAULT_SETTINGS.ai;
   const aiLevel = ['easy', 'normal', 'hard'].includes(String(v.aiLevel)) ? v.aiLevel as AILevel : DEFAULT_SETTINGS.aiLevel;
-  const worms = typeof v.worms === 'number' && Number.isInteger(v.worms) && v.worms >= 0 && v.worms <= WORMS_MAX ? v.worms : DEFAULT_SETTINGS.worms;
-  return { credits, techLevel, ai, aiLevel, worms };
+  const whole = (value: unknown, min: number, max: number, fallback: number) =>
+    typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max ? value : fallback;
+  const worms = whole(v.worms, 0, WORMS_MAX, DEFAULT_SETTINGS.worms);
+  const renewal = whole(v.renewal, 0, RENEWAL_MAX, DEFAULT_SETTINGS.renewal);
+  const superCharge = whole(v.superCharge, SUPER_CHARGE_MIN, SUPER_CHARGE_MAX, DEFAULT_SETTINGS.superCharge);
+  const crates = whole(v.crates, 0, CRATES_MAX, DEFAULT_SETTINGS.crates);
+  const speed = whole(v.speed, SPEED_MIN, SPEED_MAX, DEFAULT_SETTINGS.speed);
+  return { credits, techLevel, ai, aiLevel, worms, renewal, superCharge, crates, speed };
 }
 export function parseOptions(value: unknown): RoomOptions {
   const v = object(value);

@@ -121,9 +121,14 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   };
 
   useEffect(() => {
-    const game = new Game({ pack, mapId: setup.mapId, seed: setup.seed, players: setup.players, credits: launch.settings.credits, techLevel: launch.settings.techLevel, worms: launch.settings.worms ?? 100 });
+    const s = launch.settings;
+    const game = new Game({
+      pack, mapId: setup.mapId, seed: setup.seed, players: setup.players,
+      credits: s.credits, techLevel: s.techLevel, worms: s.worms ?? 100,
+      renewal: s.renewal, superCharge: s.superCharge, crates: s.crates,
+    });
     const humans = Array.from({ length: setup.humans }, (_, i) => i);
-    const session: Session = setup.humans > 1 ? new LockstepSession(game, slot, humans, conn.transport()) : new LocalSession(game, slot);
+    const session: Session = setup.humans > 1 ? new LockstepSession(game, slot, humans, conn.transport(), s.speed) : new LocalSession(game, slot, s.speed);
     const renderer = new FusionRenderer(canvas.current!, game, slot);
     rig.current = { game, session, renderer };
     const leaveHelp = enterBattleHelp();
@@ -247,10 +252,11 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           if (e.owner !== slot || e.hp <= 0) continue;
           const sw = game.superweaponOf(e);
           if (!sw) continue;
-          const ready = e.charge >= sw.charge;
+          const need = game.chargeFor(sw);
+          const ready = e.charge >= need;
           if (ready && !readySupers.has(e.id) && game.tick > 30) say(`${sw.name} ready`, `ready:${sw.kind}`);
           if (ready) readySupers.add(e.id); else readySupers.delete(e.id);
-          supers.push({ id: e.id, name: sw.name, frac: Math.min(1, e.charge / sw.charge), ready, kind: sw.kind, paused: !ready && low });
+          supers.push({ id: e.id, name: sw.name, frac: Math.min(1, e.charge / need), ready, kind: sw.kind, paused: !ready && low });
         }
         for (const fx of game.effects) {
           if (fx.kind === 'infiltrate' && fx.owner !== slot && !announced.has(fx) && game.tick - fx.tick < fx.dur && game.entities.get([...game.entities.values()].find(e => e.kind === 'structure' && e.x === fx.x && e.y === fx.y)?.id ?? 0)?.owner === slot) { announced.add(fx); say('Building infiltrated'); }

@@ -312,3 +312,38 @@ one scale.
   ridden sandworm, fast, armoured, crushing, with a maw that hits everything around it.
   Worm Riders cannot be built; they answer the call or not at all. The Ordos power
   likewise became a Saboteur Cell rather than a single saboteur.
+
+## Match settings, and worms that answer their slider (update 2026-10-25)
+
+The lobby now carries five Fusion Engine settings, all fixed at launch and shared by every
+client, so lockstep is unaffected:
+
+- **Sandworm activity (0-200%)** — this one was reported as doing nothing, and the report
+  was right. The setting only moved the first worm's arrival and the delay after one was
+  killed; the worm *count* came straight from the rule pack, and Dune's count is 1. So a
+  match at 25% and a match at 200% both ended up with one worm roaming for ever. Activity
+  now scales the number of worms as well (200% doubles the fleet), and a worm that is not
+  hunting anything dives after a stint on the surface, with the time underground stretched
+  or shortened by the same setting. Quiet settings mean fewer worms, out less often.
+- **Resource renewal (0-50%)** — how fast mined-out cells grow back. 25% is the rule
+  pack's own rate, 0 leaves the ground bare for the rest of the match, 50% fills it twice
+  as fast. It scales both kinds of regrowth the engine has (spreading ore and refilling
+  fields).
+- **Superweapon recharge (1x-2x, in quarters)** — one number scales every power's charge
+  time together, so the balance between classes holds whatever the setting. `chargeFor`
+  is the single place that knows it, and the sidebar, the AI and the launch check all read
+  it.
+- **Bonus crates (off, or 25-200%)** — crates of money, field repairs, a promotion, a
+  sweep of intel or a free unit, dropped on open ground away from the start positions and
+  opened by the first ground unit to walk onto one. Frequency sets how often they drop and
+  how many may be out at once. Off by default, since the classics did not all have them.
+- **Game speed (100-300%)** — wall-clock pacing only: the simulation is untouched, both
+  session kinds step the same ticks, and the per-frame catch-up ceiling scales with the
+  setting so a fast match can still make up a stall.
+
+Two things found while testing these. The Construction Yard upgrade bought nothing for a
+base that had only a power plant, so every pack now puts a better power plant behind it
+(an Advanced Power Plant, Advanced Tesla Reactor or Advanced Windtrap). And the AI picked
+its upgrades alphabetically, which had it saving for a 1000-credit yard upgrade while its
+harvesters were being shot out from under it; it now takes the cheapest upgrade that
+unlocks something it can build now.

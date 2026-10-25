@@ -97,7 +97,10 @@ export function runAI(game: Game, p: Player, s: AIState) {
     ]);
     // An upgrade that unlocks something buildable now is worth having at once; one that only
     // gates the far end of the tree waits until the rest of the base stands.
-    const ready = upgrades.filter(id => upgradeUnlocksSomething(game, p, id.slice('upgrade:'.length), owned)).sort();
+    // Cheapest first: a small upgrade that opens something now beats saving for a big one
+    // while the war goes on around it.
+    const ready = upgrades.filter(id => upgradeUnlocksSomething(game, p, id.slice('upgrade:'.length), owned))
+      .sort((a, b) => game.costOf(a, p) - game.costOf(b, p) || (a < b ? -1 : 1));
     const upgrade = !core ? ready[0] : undefined;
     const core2 = !core && !upgrade ? choose(options, [
       id => !!sdef(id).refinery && count(t => !!sdef(t).refinery) < 2,
@@ -178,7 +181,7 @@ export function runAI(game: Game, p: Player, s: AIState) {
   // shields the army, and the Chronosphere is left to human hands.
   for (const e of structures) {
     const sw = game.superweaponOf(e);
-    if (!sw || e.charge < sw.charge || sw.kind === 'chrono') continue;
+    if (!sw || e.charge < game.chargeFor(sw) || sw.kind === 'chrono') continue;
     if (sw.kind === 'curtain') {
       const lead = units.find(u => game.pack.units[u.type].weapon && game.pack.units[u.type].kind === 'vehicle' && u.order === 'attackMove');
       if (lead) game.enqueue(p.slot, { t: 'super', id: e.id, x: toCell(lead.x), y: toCell(lead.y) });

@@ -1061,6 +1061,27 @@ export function treeMesh(variant: number): Mesh {
   return m;
 }
 
+/** Bonus crate: a banded box with a coloured lid saying what is inside. */
+export function crateMesh(kind: string): Mesh {
+  const m = new Mesh();
+  const wood: RGB = [146, 116, 74], band: RGB = [96, 88, 78];
+  const lid: Record<string, RGB> = {
+    money: [226, 190, 72], heal: [236, 240, 244], veteran: [236, 196, 92],
+    reveal: [150, 205, 240], unit: [170, 178, 186],
+  };
+  m.box(0.28, 0.28, 0, 0.72, 0.72, 0.3, wood, { top: lid[kind] ?? wood });
+  m.box(0.26, 0.42, 0.06, 0.74, 0.5, 0.24, band);
+  m.box(0.42, 0.26, 0.06, 0.5, 0.74, 0.24, band);
+  if (kind === 'heal') {
+    m.box(0.44, 0.34, 0.3, 0.56, 0.66, 0.32, [208, 60, 60]);
+    m.box(0.34, 0.44, 0.3, 0.66, 0.56, 0.32, [208, 60, 60]);
+  } else if (kind === 'reveal') {
+    m.dome(0.5, 0.5, 0.3, 0.12, [150, 225, 255], 3, 10, 0.12);
+    for (const f of m.faces.slice(-3 * 10 - 1)) f.glow = true;
+  }
+  return m;
+}
+
 /** Ore / gem crystal cluster within one cell. */
 export function crystalMesh(color: RGB, count: number, seed: number): Mesh {
   const m = new Mesh();

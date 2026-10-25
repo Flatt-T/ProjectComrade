@@ -37,6 +37,12 @@ export interface GameSetup {
   techLevel?: number;
   /** Sandworm activity, percent of the pack's base rate (0 = none, default 100). */
   worms?: number;
+  /** Resource renewal, 0 (never) to 50; 25 is the rule pack's own rate. */
+  renewal?: number;
+  /** Superweapon recharge speed in percent: 100 classic, 200 twice as fast. */
+  superCharge?: number;
+  /** Bonus-crate frequency, 0 (none) to 200; 100 drops about one a minute. */
+  crates?: number;
 }
 
 export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy' | 'enter' | 'rearm' | 'ferry';
@@ -169,7 +175,15 @@ export interface Strike {
   /** Iron Curtain length. */
   duration?: number;
 }
-export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number; /** Prowl destination (cell index), or -1. */ goal: number }
+export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number; /** Prowl destination (cell index), or -1. */ goal: number; /** Ticks spent on the surface this stint. */ up: number }
+
+/** A bonus crate waiting on the map. */
+export type CrateKind = 'money' | 'heal' | 'veteran' | 'reveal' | 'unit';
+export interface Crate { id: number; cell: number; kind: CrateKind }
+/** The renewal setting at which fields grow back at the pack's own rate (mirrors the lobby's). */
+export const RENEWAL_CLASSIC = 25;
+/** How often crates drop at 100%, and what each kind is worth. */
+const CRATE_EVERY = 900, CRATE_KINDS: CrateKind[] = ['money', 'money', 'heal', 'veteran', 'reveal', 'unit'];
 
 const QUEUES: QueueKind[] = ['structure', 'defense', 'infantry', 'vehicle', 'aircraft', 'naval', 'starport'];
 const UPGRADE = 'upgrade:', STARPORT = 'starport:';
@@ -199,8 +213,15 @@ export class Game {
   private powerDirty = true;
   /** Highest tech level buildable in this match (the lobby setting mapped to 1..10). */
   readonly techCap: number;
-  /** Sandworm activity percent (0 = none): scales how long worms stay under between attacks. */
+  /** Sandworm activity percent (0 = none): how many worms roam, and how long they stay under. */
   readonly wormRate: number;
+  /** Resource renewal setting; RENEWAL_CLASSIC (25) is the pack's own rate, 0 turns it off. */
+  readonly renewal: number;
+  /** Superweapon recharge percent: 100 classic, 200 twice as fast. */
+  readonly superCharge: number;
+  /** Bonus-crate frequency percent; 0 means no crates. */
+  readonly crateRate: number;
+  crates: Crate[] = [];
   private ai: (AIState | null)[] = [];
   readonly mapPreset: MapPreset;
 
@@ -212,6 +233,9 @@ export class Game {
     this.rng = new Rng(setup.seed);
     this.techCap = Math.ceil(((setup.techLevel ?? 15) * 10) / 15);
     this.wormRate = Math.max(0, Math.min(200, Math.trunc(setup.worms ?? 100)));
+    this.renewal = Math.max(0, Math.min(50, Math.trunc(setup.renewal ?? RENEWAL_CLASSIC)));
+    this.superCharge = Math.max(100, Math.min(200, Math.trunc(setup.superCharge ?? 100)));
+    this.crateRate = Math.max(0, Math.min(200, Math.trunc(setup.crates ?? 0)));
     const credits = setup.pack.startCredits[setup.credits ?? 'standard'];
     const size = this.map.w * this.map.h;
     setup.players.slice(0, preset.starts.length).forEach((p, slot) => {
@@ -394,6 +418,7 @@ export class Game {
     this.updateProjectiles();
     this.resolveStrikes();
     this.mechanics();
+    this.collectCrates();
     if (this.tick % 4 === 0) this.updateFog();
     this.cleanup();
     if (this.tick % 15 === 0) this.checkVictory();
@@ -1349,7 +1374,7 @@ export class Game {
     }
     if (def.repairPad && p && this.tick % 6 === 0) this.servicePad(s, p);
     const sw = this.superweaponOf(s);
-    if (sw && s.charge < sw.charge && !this.lowPower(s.owner)) s.charge++;
+    if (sw && s.charge < this.chargeFor(sw) && !this.lowPower(s.owner)) s.charge++;
     if (s.cooldown > 0) s.cooldown--;
     const w = def.weapon ? this.pack.weapons[def.weapon] : undefined;
     if (!w || def.needsPower && this.lowPower(s.owner)) return;
@@ -1381,10 +1406,86 @@ export class Game {
 
   private mechanics() {
     const m = this.pack.mechanics;
-    if (m.regrowth && this.tick % m.regrowth.everyTicks === 0) this.regrow(m.regrowth.amount, m.regrowth.spreadChance);
-    this.pack.resources.forEach((r, k) => { if (r.regrowEvery && this.tick % r.regrowEvery === 0) this.regrowFields(k + 1); });
+    // Renewal scales both kinds of regrowth: the setting is a rate, so a higher number is a
+    // shorter wait between units growing back. 0 stops renewal entirely.
+    if (this.renewal > 0) {
+      if (m.regrowth && this.tick % this.renewEvery(m.regrowth.everyTicks) === 0) this.regrow(m.regrowth.amount, m.regrowth.spreadChance);
+      this.pack.resources.forEach((r, k) => { if (r.regrowEvery && this.tick % this.renewEvery(r.regrowEvery) === 0) this.regrowFields(k + 1); });
+    }
     if (m.bloom && this.tick % m.bloom.everyTicks === 0) this.bloom(m.bloom.radius, m.bloom.resource);
     if (m.sandworm && this.wormRate > 0) this.sandworms(m.sandworm);
+    this.crateTick();
+  }
+
+  /** Ticks between one unit of a resource growing back, at this match's renewal setting. */
+  private renewEvery(base: number) { return Math.max(15, Math.trunc((base * RENEWAL_CLASSIC) / this.renewal)); }
+
+  /** Ticks a superweapon needs to charge here: the setting speeds every power up together. */
+  chargeFor(sw: SuperweaponDef) { return Math.max(1, Math.trunc((sw.charge * 100) / this.superCharge)); }
+
+  // ---------------------------------------------------------------- bonus crates
+
+  private crateTick() {
+    if (!this.crateRate) return;
+    const every = Math.max(60, Math.trunc((CRATE_EVERY * 100) / this.crateRate));
+    const most = Math.max(1, Math.trunc((this.players.length * this.crateRate) / 100));
+    if (this.tick === 0 || this.tick % every !== 0 || this.crates.length >= most) return;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const cell = this.rng.int(this.map.w * this.map.h);
+      if (!passable(this.pack, this.map, cell, 'vehicle') || this.map.resKind[cell]) continue;
+      if (this.crates.some(c => c.cell === cell) || this.unitInCell(cell)) continue;
+      const x = cell % this.map.w, y = Math.floor(cell / this.map.w);
+      if (this.map.starts.some(st => Math.abs(st.x - x) < 6 && Math.abs(st.y - y) < 6)) continue;
+      this.crates.push({ id: this.nextId++, cell, kind: CRATE_KINDS[this.rng.int(CRATE_KINDS.length)] });
+      return;
+    }
+  }
+
+  /** A ground unit standing on a crate opens it. */
+  private collectCrates() {
+    if (!this.crates.length) return;
+    for (const e of this.entities.values()) {
+      if (e.kind !== 'unit' || e.hp <= 0 || e.carriedBy || this.isAircraft(e) || e.owner < 0) continue;
+      const at = this.crates.findIndex(c => c.cell === this.cellOf(e));
+      if (at < 0) continue;
+      const [crate] = this.crates.splice(at, 1);
+      this.openCrate(crate, e);
+    }
+  }
+
+  private openCrate(crate: Crate, finder: Entity) {
+    const p = this.players[finder.owner];
+    if (!p) return;
+    const x = cellCenter(crate.cell % this.map.w), y = cellCenter(Math.floor(crate.cell / this.map.w));
+    const fx = this.effect('delivery', x, y, 0, 0, 30);
+    fx.owner = finder.owner; fx.item = crate.kind;
+    switch (crate.kind) {
+      case 'money':
+        p.credits += 1000;
+        break;
+      case 'heal':
+        // Patches up everything the finder has nearby, and the finder itself.
+        for (const e of this.entities.values()) {
+          if (e.owner !== finder.owner || e.hp <= 0 || dist(e.x, e.y, x, y) > LEPTONS * 5) continue;
+          e.hp = e.maxHp;
+        }
+        break;
+      case 'veteran':
+        if (finder.rank < 2) { finder.rank++; finder.xp = this.unitDef(finder).cost * (this.pack.veterancy?.elite ?? 4); }
+        else p.credits += 500;
+        break;
+      case 'reveal':
+        this.reveals.push({ owner: finder.owner, x, y, r: Math.max(this.map.w, this.map.h), until: this.tick + 450 });
+        break;
+      case 'unit': {
+        // A crew is already aboard: the free unit is whatever this side rolls out first.
+        const faction = this.pack.factions.find(f => f.id === p.faction);
+        const type = faction?.startUnits.find(t => !this.pack.units[t]?.deploysTo) ?? Object.keys(this.pack.units)[0];
+        const spot = nearestCell(this.map, crate.cell, 4, i => passable(this.pack, this.map, i, this.moveClass(this.pack.units[type])) && !this.unitInCell(i));
+        if (spot >= 0) this.spawnUnit(type, finder.owner, spot);
+        break;
+      }
+    }
   }
 
   private regrow(amount: number, spreadChance: number) {
@@ -1438,6 +1539,14 @@ export class Game {
   /** Stretch (or shrink) a worm's time underground by the match's activity setting. */
   private wormDelay(ticks: number) { return Math.max(1, Math.trunc((ticks * 100) / this.wormRate)); }
 
+  /** How many worms roam at this match's activity setting (always at least one while worms are on). */
+  private wormCount(cfg: NonNullable<RulePack['mechanics']['sandworm']>) {
+    return Math.max(1, Math.round((cfg.count * this.wormRate) / 100));
+  }
+
+  /** How long a worm prowls before diving again: busier settings keep it up for longer. */
+  private wormStint() { return Math.max(150, Math.trunc((600 * this.wormRate) / 100) + 300); }
+
   private sandworms(cfg: NonNullable<RulePack['mechanics']['sandworm']>) {
     if (this.tick < this.wormDelay(cfg.appearAfter)) return;
     // Where worms can go: sand by default; fusions can let them swim (habitat includes water).
@@ -1457,8 +1566,8 @@ export class Game {
       const c = block[this.rng.int(block.length)], r = cfg.nearResources!;
       return { x: cellCenter((c % this.map.w) + this.rng.int(r * 2 + 1) - r), y: cellCenter(Math.floor(c / this.map.w) + this.rng.int(r * 2 + 1) - r) };
     };
-    while (this.worms.length < cfg.count) {
-      this.worms.push({ id: this.nextId++, x: 0, y: 0, px: 0, py: 0, target: 0, hidden: 1 + this.worms.length * 45, hp: 0, facing: 0, wander: 0, goal: -1 });
+    while (this.worms.length < this.wormCount(cfg)) {
+      this.worms.push({ id: this.nextId++, x: 0, y: 0, px: 0, py: 0, target: 0, hidden: 1 + this.worms.length * 45, hp: 0, facing: 0, wander: 0, goal: -1, up: 0 });
     }
     for (const worm of this.worms) {
       worm.px = worm.x; worm.py = worm.y;
@@ -1469,7 +1578,7 @@ export class Game {
           const spot = lure.length ? nearLure() : { x: cellCenter(this.rng.int(this.map.w)), y: cellCenter(this.rng.int(this.map.h)) };
           const { x, y } = spot;
           if (isSand(x, y) && !this.map.starts.some(s => dist(cellCenter(s.x), cellCenter(s.y), x, y) < 10 * LEPTONS)) {
-            worm.x = worm.px = x; worm.y = worm.py = y; worm.hp = 1000; worm.target = 0; worm.wander = 0; break;
+            worm.x = worm.px = x; worm.y = worm.py = y; worm.hp = 1000; worm.target = 0; worm.wander = 0; worm.up = 0; break;
           }
         }
         if (worm.hp <= 0) worm.hidden = 30;
@@ -1477,6 +1586,14 @@ export class Game {
       }
       if (worm.hp <= 0) { worm.hidden = this.wormDelay(600); this.effect('wormDive', worm.x, worm.y, 0, 0, 20); continue; }
       let prey = this.entities.get(worm.target);
+      // Worms do not prowl for ever: a stint on the surface ends in a dive, and the time
+      // spent under is what the activity setting stretches or shortens.
+      if (!prey && ++worm.up > this.wormStint()) {
+        worm.hidden = this.wormDelay(600 + this.rng.int(600));
+        worm.up = 0; worm.target = 0; worm.goal = -1;
+        this.effect('wormDive', worm.x, worm.y, 0, 0, 20);
+        continue;
+      }
       if (!prey || prey.hp <= 0 || prey.kind !== 'unit' || prey.carriedBy || !isSand(prey.x, prey.y)) {
         prey = undefined; worm.target = 0;
         if ((this.tick + worm.id) % 10 === 0) {
@@ -1665,7 +1782,7 @@ export class Game {
     const s = this.entities.get(id);
     if (!s || s.owner !== p.slot || s.hp <= 0) return;
     const sw = this.superweaponOf(s);
-    if (!sw || s.charge < sw.charge) return;
+    if (!sw || s.charge < this.chargeFor(sw)) return;
     if (sw.kind === 'chrono' && (x2 === undefined || y2 === undefined)) return;
     s.charge = 0;
     const cx = (v: number) => cellCenter(Math.max(0, Math.min(this.map.w - 1, v)));
@@ -1788,7 +1905,8 @@ export class Game {
     for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0).add(e.passengers.length);
     for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
-    for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden).add(worm.goal);
+    for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden).add(worm.goal).add(worm.up);
+    for (const crate of this.crates) h.add(crate.cell).add(CRATE_KINDS.indexOf(crate.kind));
     return h.value;
   }
 }

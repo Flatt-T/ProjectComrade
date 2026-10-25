@@ -7,7 +7,7 @@ import { WARP_TICKS } from './game';
 import type { Effect, Entity, Game, Projectile } from './game';
 import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
-import { ArtStyle, FLYING, ROTATING_DEFENCES, buildingMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
+import { ArtStyle, FLYING, ROTATING_DEFENCES, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
 import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
 
 export interface Camera { x: number; y: number; zoom: number }
@@ -179,6 +179,7 @@ export class FusionRenderer {
     this.drawConcrete(view);
     this.fx.drawDecals(ctx, this.iso);
     this.drawResources(view);
+    this.drawCrates(view);
     this.drawRubble();
     this.drawGhost();
     this.drawScene(alpha, view);
@@ -358,6 +359,24 @@ export class FusionRenderer {
         const o = this.project(x, y);
         this.blit(s, o.x, o.y);
       }
+    }
+  }
+
+  /** Bonus crates sitting on explored ground. */
+  private drawCrates(view: { minX: number; maxX: number; minY: number; maxY: number }) {
+    const { game } = this;
+    if (!game.crates.length) return;
+    const viewer = game.players[this.viewer];
+    for (const crate of game.crates) {
+      const x = crate.cell % game.map.w, y = Math.floor(crate.cell / game.map.w);
+      if (x < view.minX || x > view.maxX || y < view.minY || y > view.maxY) continue;
+      if (viewer && !viewer.explored[crate.cell]) continue;
+      const s = this.sprite(`crate|${crate.kind}`, () => bake(crateMesh(crate.kind), this.view, undefined, { shadow: true }));
+      const o = this.project(x, y);
+      this.blit(s, o.x, o.y);
+      // A soft glint so a crate is findable on busy ground.
+      const c = this.project(x + 0.5, y + 0.5);
+      this.glow(c.x, c.y - 6, 7 + 2 * Math.sin(this.frame / 7 + crate.id), '255,235,170', 0.35);
     }
   }
 

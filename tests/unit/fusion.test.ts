@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CLASSIC_PACKS, Game, LockstepSession, PACKS, dunePack, parseCommand, ra2Pack, facingTo, isqrt, Rng } from '../../packages/fusion/src/index';
+import { CLASSIC_PACKS, Game, LocalSession, LockstepSession, PACKS, dunePack, parseCommand, ra2Pack, facingTo, isqrt, Rng } from '../../packages/fusion/src/index';
 import type { Command, GameSetup, TurnPacket, TurnTransport } from '../../packages/fusion/src/index';
 
 const ai2 = (pack: GameSetup['pack'], seed = 7, mapId = pack.maps[0].id): GameSetup => ({
@@ -267,12 +267,131 @@ describe('sandworm activity setting', () => {
     expect(half.worms.length).toBe(1);
   });
 
+  it('puts more worms on the sand at higher activity, and fewer at lower', () => {
+    // The setting is about how much worm there is, not only when the first one arrives.
+    const busy = dune(200), quiet = dune(100);
+    run(busy, appear * 2); run(quiet, appear * 2);
+    expect(busy.worms.length).toBeGreaterThan(quiet.worms.length);
+    expect(busy.worms.length).toBe(dunePack.mechanics.sandworm!.count * 2);
+  });
+
+  it('sends worms back under after a stint on the surface, for longer at low activity', () => {
+    const dive = (rate: number) => {
+      const g = dune(rate);
+      let under = 0;
+      for (let i = 0; i < appear * 2 + 15 * 60 * 6; i++) {
+        g.step();
+        if (g.worms.length && g.worms.every(w => w.hidden)) under++;
+      }
+      return under;
+    };
+    // Nothing is hunting them, so any time spent hidden is the dive cycle doing its work.
+    const quiet = dive(50), busy = dive(200);
+    expect(quiet).toBeGreaterThan(0);
+    expect(quiet).toBeGreaterThan(busy);
+  });
+
   it('defaults to classic behaviour when the setup omits it, and parses from the lobby', async () => {
     const { parseSettings, DEFAULT_SETTINGS } = await import('../../packages/contracts/src/index');
     expect(dune().wormRate).toBe(100);
     expect(parseSettings({ worms: 125 }).worms).toBe(125);
     expect(parseSettings({ worms: 999 }).worms).toBe(DEFAULT_SETTINGS.worms);
     expect(parseSettings({}).worms).toBe(DEFAULT_SETTINGS.worms);
+  });
+});
+
+describe('match settings', () => {
+  const dune = (extra: Partial<GameSetup>) => new Game({ ...ai2(dunePack, 5), ...extra });
+  const td = (extra: Partial<GameSetup>) => new Game({ ...ai2(PACKS.td, 5), ...extra });
+
+  it('renewal: 0 leaves mined ground bare, and higher settings fill it faster', () => {
+    const mined = (g: Game, cells: number[]) => cells.reduce((n, i) => n + g.map.res[i], 0);
+    const sample = (renewal: number) => {
+      const g = dune({ renewal });
+      // Strip a patch of field and see how much comes back.
+      const cells: number[] = [];
+      for (let i = 0; i < g.map.res.length && cells.length < 40; i++) if (g.map.resKind[i] && g.map.res[i] > 2) cells.push(i);
+      for (const i of cells) g.map.res[i] = 0;
+      run(g, 15 * 60 * 4);
+      return mined(g, cells);
+    };
+    const none = sample(0), classic = sample(25), lush = sample(50);
+    expect(none).toBe(0);
+    expect(classic).toBeGreaterThan(0);
+    expect(lush).toBeGreaterThan(classic);
+  });
+
+  it('superweapon recharge: 2x halves every charge time, and the AI and sidebar agree', () => {
+    const classic = td({}), fast = td({ superCharge: 200 });
+    const sw = PACKS.td.structures.eye.superweapon as { charge: number };
+    expect(classic.chargeFor(sw as never)).toBe(sw.charge);
+    expect(fast.chargeFor(sw as never)).toBe(Math.trunc(sw.charge / 2));
+    // A powered Ion Cannon is ready in half the time. Human players, so nothing else
+    // spends the power the uplink needs.
+    const powered = (superCharge: number) => {
+      const g = new Game({ pack: PACKS.td, mapId: PACKS.td.maps[0].id, seed: 5, superCharge,
+        players: [{ name: 'A', faction: 'gdi', ai: false }, { name: 'B', faction: 'nod', ai: false }] });
+      const eye = g.spawnStructure('eye', 0, 20, 20)!;
+      for (let i = 0; i < 4; i++) g.spawnStructure('nuke', 0, 25, 18 + i * 3);
+      let ticks = 0;
+      while (ticks < sw.charge + 200 && eye.charge < g.chargeFor(sw as never)) { g.step(); ticks++; }
+      expect(eye.charge, `${superCharge}% charged`).toBeGreaterThanOrEqual(g.chargeFor(sw as never));
+      return ticks;
+    };
+    expect(powered(200)).toBeLessThan(powered(100) * 0.6);
+  });
+
+  it('crates: off by default, and a unit that walks onto one opens it', () => {
+    expect(td({}).crates.length).toBe(0);
+    const g = td({ crates: 200 });
+    run(g, 15 * 60 * 3);
+    expect(g.crates.length, 'crates appear when they are switched on').toBeGreaterThan(0);
+    const crate = g.crates[0];
+    const before = { credits: g.players[0].credits, units: [...g.entities.values()].filter(e => e.owner === 0 && e.kind === 'unit').length };
+    const finder = g.spawnUnit('minigunner', 0, crate.cell);
+    expect(finder).toBeTruthy();
+    g.step();
+    expect(g.crates.some(c => c.id === crate.id), 'the crate is taken').toBe(false);
+    const after = { credits: g.players[0].credits, units: [...g.entities.values()].filter(e => e.owner === 0 && e.kind === 'unit').length };
+    const better = after.credits > before.credits || after.units > before.units + 1 || finder.rank > 0 || finder.hp === finder.maxHp || g.reveals.length > 0;
+    expect(better, `crate ${crate.kind} did something`).toBe(true);
+  });
+
+  it('crates: frequency decides how many are out, and none appear when off', () => {
+    const count = (crates: number) => { const g = td({ crates }); run(g, 15 * 60 * 8); return g.crates.length; };
+    expect(count(0)).toBe(0);
+    expect(count(200)).toBeGreaterThan(0);
+  });
+
+  it('game speed: the clock runs faster without touching the simulation', () => {
+    const steps = (speed: number) => {
+      const g = td({});
+      const session = new LocalSession(g, 0, speed);
+      // A second of real time, in the 50 ms slices a browser actually delivers.
+      for (let i = 0; i < 20; i++) session.update(50);
+      return g.tick;
+    };
+    // A second of wall time, in ticks: 15 at classic, twice that at 200%, three times at 300%
+    // (a tick either way, since the accumulator works in fractions of a millisecond).
+    expect(Math.abs(steps(100) - 15)).toBeLessThanOrEqual(1);
+    expect(Math.abs(steps(200) - 30)).toBeLessThanOrEqual(1);
+    expect(Math.abs(steps(300) - 45)).toBeLessThanOrEqual(1);
+    // Same seed, same number of ticks: speed is pacing, not a different game.
+    const a = td({}), b = td({});
+    run(a, 300); run(b, 300);
+    expect(a.checksum()).toBe(b.checksum());
+  });
+
+  it('parses every new setting from the lobby, and clamps nonsense', async () => {
+    const { parseSettings, DEFAULT_SETTINGS } = await import('../../packages/contracts/src/index');
+    expect(parseSettings({ renewal: 40 }).renewal).toBe(40);
+    expect(parseSettings({ renewal: 90 }).renewal).toBe(DEFAULT_SETTINGS.renewal);
+    expect(parseSettings({ superCharge: 175 }).superCharge).toBe(175);
+    expect(parseSettings({ superCharge: 50 }).superCharge).toBe(DEFAULT_SETTINGS.superCharge);
+    expect(parseSettings({ crates: 150 }).crates).toBe(150);
+    expect(parseSettings({ crates: -5 }).crates).toBe(DEFAULT_SETTINGS.crates);
+    expect(parseSettings({ speed: 250 }).speed).toBe(250);
+    expect(parseSettings({ speed: 1000 }).speed).toBe(DEFAULT_SETTINGS.speed);
   });
 });
 
