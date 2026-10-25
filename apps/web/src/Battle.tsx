@@ -113,7 +113,7 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
         const engineKind = STYLES.find(s => s.id === launch.style)?.engine === 'vanilla-ra' ? 'ra' : 'td';
         const current = await loadEngine(engineKind, canvas.current!, log, launch.faction);
         engine.current = current;
-        await mountBundledContent(current, { faction: launch.faction, mapId: launch.map, settings: launch.settings }, setStatus);
+        await mountBundledContent(current, { faction: launch.faction, mapId: launch.map, settings: launch.settings, engine: engineKind }, setStatus);
         window.comrade = {
           snapshot: () => JSON.parse(current.UTF8ToString(current._comrade_snapshot!())),
           order: value => {

@@ -125,3 +125,40 @@ a large, separate art pipeline, not an engine change.
   staged plan to reach synchronized play.
 - Adding a game style is a declarative change to `STYLES` plus its content/bridge work;
   adding a map is a `create-map.py` entry plus `pack-maps.py`.
+
+
+## Red Alert — blocker cleared (update 2026-10-25)
+
+The one well-defined blocker above was the map format. It is done, and `ra1` is
+`playable: true` in `STYLES` as **Classic Red Alert**.
+
+- **Map-pack codec** (`tools/westwood.py`): a Format80 (LCW) encoder and decoder, and the
+  `[MapPack]` / `[OverlayPack]` writers. The encoder emits literal runs only, which is a
+  valid Format80 stream — a decoder cannot tell how it was produced — so the format is
+  exact without a match finder that would save little on map data. `pack_section` chunks
+  the payload at 8192 uncompressed bytes, prefixes each block with its little-endian
+  compressed/uncompressed sizes and base64s the result into numbered 70-character lines.
+  `map_pack` writes the 128x128 grid (two template bytes a cell, then one icon byte) and
+  `overlay_pack` the ore (one byte a cell, 0xFF for none; OVERLAY_GOLD1 is 5).
+- **Authored scenarios** (`tools/create-ra-map.py`): Ore Crossing (temperate) and Winter
+  Line (snow), each a single INI carrying its own terrain, with Greece and USSR bases,
+  starting armies, patrols, elliptical ore fields and home waypoints (98 for the player,
+  99 for the Soviet view the client swaps in). `tools/pack-ra-maps.py` copies them into
+  the web content pack and writes the manifest; `prepare-ra-content.py` now runs both.
+- **Boot patch** (`tools/build-engine.py`): Red Alert gets the same autostart as Tiberian
+  Dawn — when the browser has mounted a COMRADE.INI, skip the menus, set the side from
+  `Module.comradeFaction`, and `Scen.Set_Scenario_Name("COMRADE.INI")`. RA's
+  `Start_Scenario` takes one argument and its session type is `Session.Type`, which is
+  the only difference from the TD patch. The patch phase was run against the vendored
+  source to prove every anchor still applies.
+- **Client**: `mountBundledContent` takes the engine kind, fetches `/content/<td|ra>/`,
+  mounts the scenario (Red Alert has no `.BIN`) and writes REDALERT.INI instead of
+  CONQUER.INI. `parseContentManifest` accepts both packs and only demands a `.BIN` from
+  Tiberian Dawn. The lobby reads the RA manifest for that style's battlefields.
+- **Not yet verified in play**: the engine binary is built in CI, so the first real boot
+  of this scenario happens on the next deploy. `tests/unit/ra-pack.test.ts` checks the
+  scenario structure and that both packed sections decode to exactly 128x128 cells.
+
+The bridge (`comrade_snapshot` / `comrade_order`) is still Tiberian Dawn only, so the
+Red Alert view has no snapshot HUD; the match itself is played in the engine's own
+interface, as the classic slice is.

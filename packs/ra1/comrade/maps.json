@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ore-crossing",
+    "name": "Ore Crossing",
+    "file": "COMRADE",
+    "theater": "TEMPERATE",
+    "maxPlayers": 2,
+    "description": "Twin bases either side of a contested central ore field."
+  },
+  {
+    "id": "winter-line",
+    "name": "Winter Line",
+    "file": "WINTER",
+    "theater": "SNOW",
+    "maxPlayers": 2,
+    "description": "A frozen corridor. Rich ore on the flanks, nothing in the middle."
+  }
+]

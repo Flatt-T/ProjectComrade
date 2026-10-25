@@ -9,6 +9,7 @@ A browser RTS platform built on a self-contained C&C Tiberian Dawn slice: origin
 | Game style | Engine | Multiplayer |
 |---|---|---|
 | **Classic C&C** (Tiberian Dawn) | Original GPL engine (Vanilla Conquer → WASM), freeware art, 4 authored maps | Lobby presence; each commander fights the built-in enemy |
+| **Classic Red Alert** | Original GPL engine (Vanilla Conquer → WASM), freeware art, 2 authored maps | Lobby presence; each commander fights the built-in enemy |
 | **Tiberian Dawn Style** | Comrade Fusion Engine, `td` rule pack: GDI and Nod, spreading Tiberium, building upgrades, Obelisk and Temple, Ion Cannon, Dropship Bay, Satellite Sweep, Chemical Missile and Stealth Field — on the same four battlefields as the original-engine slice | **Synchronized lockstep** with optional AI opponents |
 | **Red Alert Style** | Comrade Fusion Engine, `ra1` rule pack: Allies and Soviets, ore and gems, navies, Tanya, Tesla coils, building upgrades, Chronosphere, GPS and weather control against the Iron Curtain, nuke and Tesla storm | **Synchronized lockstep** with optional AI opponents |
 | **Dune Style** | Comrade Fusion Engine, `dune` rule pack: rock-only building, concrete, spice blooms, sandworms, factory and Palace upgrades, Fremen war parties with worm riders, Atreides / Harkonnen / Ordos with a power each past the Palace | **Synchronized lockstep** with optional AI opponents |
@@ -20,7 +21,7 @@ The **Comrade Fusion Engine** (`packages/fusion`) is one deterministic, data-dri
 
 **War room:** registration-free lobby with a live public-games list, shareable `?room=CODE` invite links, public/invite-only rooms, host-controlled match setup (game style, battlefield, human players, AI opponents, starting credits, tech level, sandworm activity, resource renewal, superweapon recharge, bonus crates and game speed) and per-player side selection.
 
-Classic C&C renders the authentic 640×400 framebuffer with an optional WebGL **Enhanced view**; that is a render filter, not redrawn HD art. Red Alert 1 on the original engine is compiled with its freeware content staged; a bootable map is pending ([ADR 007](docs/adr/007-lobby-roster-and-multiplayer.md)). Design records: [006](docs/adr/006-playable-td-slice.md) engine slice, [007](docs/adr/007-lobby-roster-and-multiplayer.md) lobby/roster, [008](docs/adr/008-synchronized-multiplayer.md) multiplayer, [010](docs/adr/010-fusion-engine.md) Fusion Engine.
+Classic C&C renders the authentic 640×400 framebuffer with an optional WebGL **Enhanced view**; that is a render filter, not redrawn HD art. **Classic Red Alert** now runs on the original engine too, with its freeware content and two authored battlefields (Ore Crossing, Winter Line) carrying their own Format80-packed terrain ([ADR 007](docs/adr/007-lobby-roster-and-multiplayer.md)). Design records: [006](docs/adr/006-playable-td-slice.md) engine slice, [007](docs/adr/007-lobby-roster-and-multiplayer.md) lobby/roster, [008](docs/adr/008-synchronized-multiplayer.md) multiplayer, [010](docs/adr/010-fusion-engine.md) Fusion Engine.
 
 **Milestone M0 (Foundational Gates):**
 - [x] C01: Code, asset and brand rights ledger

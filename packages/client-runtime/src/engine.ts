@@ -96,6 +96,21 @@ async function loadNamedEngine(name: 'vanillatd' | 'vanillara', canvas: HTMLCanv
 }
 import { CREDITS_VALUES, Faction, MatchSettings, MAP_ID, parseContentManifest, DEFAULT_SETTINGS } from '@comrade/contracts';
 
+/** Put the human on the Soviet side of an authored Red Alert scenario. */
+function applyRaScenario(ini: string, faction: Faction, settings: MatchSettings): string {
+  let text = ini;
+  if (faction === 'soviet') {
+    text = text.replace('Player=Greece', 'Player=USSR');
+    // Open the camera on the Soviet base instead of the Allied one.
+    const home = /^SovietHome=(\d+)$/m.exec(text)?.[1];
+    if (home) text = text.replace(/^98=\d+$/m, `98=${home}`);
+  }
+  const credits = CREDITS_VALUES[settings.credits];
+  text = text.replace(/^Credits=60$/gm, `Credits=${credits}`);
+  text = text.replace(/^BuildLevel=\d+$/m, `BuildLevel=${settings.techLevel}`);
+  return text;
+}
+
 // Flip the authored scenario so the human commands Nod, and apply the lobby's
 // economy/tech settings. Every authored map shares this structure, so the swap is generic.
 function applyScenario(ini: string, faction: Faction, settings: MatchSettings): string {
@@ -117,19 +132,20 @@ function applyScenario(ini: string, faction: Faction, settings: MatchSettings): 
   return text;
 }
 
-export interface ContentSelection { faction: Faction; mapId?: string; settings?: MatchSettings }
+export interface ContentSelection { faction: Faction; mapId?: string; settings?: MatchSettings; engine?: 'td' | 'ra' }
 
 export async function mountBundledContent(engine: EngineModule, selection: ContentSelection, progress: (message: string) => void) {
   const faction = selection.faction;
   const settings = selection.settings ?? DEFAULT_SETTINGS;
-  const response = await fetch('/content/td/manifest.json', { cache: 'no-store' });
+  const pack = selection.engine ?? 'td';
+  const response = await fetch(`/content/${pack}/manifest.json`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Content pack unavailable');
   const manifest = parseContentManifest(await response.json());
   const chosen = manifest.maps.find(m => m.id === (selection.mapId ?? MAP_ID)) ?? manifest.maps[0];
   const bytesByName = new Map<string, ArrayBuffer>();
   for (const file of manifest.files) {
     progress(`Preparing ${file.name}`);
-    const fileResponse = await fetch(`/content/td/${file.name}?sha256=${file.sha256}`);
+    const fileResponse = await fetch(`/content/${pack}/${file.name}?sha256=${file.sha256}`);
     if (!fileResponse.ok) throw new Error(`Cannot load ${file.name}`);
     const buffer = await fileResponse.arrayBuffer();
     const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', buffer)), n => n.toString(16).padStart(2, '0')).join('');
@@ -142,11 +158,16 @@ export async function mountBundledContent(engine: EngineModule, selection: Conte
     if (name.endsWith('.INI') || name.endsWith('.BIN')) continue;
     files.push({ name, size: buffer.byteLength, arrayBuffer: async () => buffer });
   }
-  const scenarioIni = new TextEncoder().encode(applyScenario(new TextDecoder().decode(bytesByName.get(chosen.ini)!), faction, settings)).buffer as ArrayBuffer;
-  const scenarioBin = bytesByName.get(chosen.bin)!;
+  const apply = pack === 'ra' ? applyRaScenario : applyScenario;
+  const scenarioIni = new TextEncoder().encode(apply(new TextDecoder().decode(bytesByName.get(chosen.ini)!), faction, settings)).buffer as ArrayBuffer;
   files.push({ name: 'COMRADE.INI', size: scenarioIni.byteLength, arrayBuffer: async () => scenarioIni });
-  files.push({ name: 'COMRADE.BIN', size: scenarioBin.byteLength, arrayBuffer: async () => scenarioBin });
+  // Red Alert carries its terrain inside the scenario; Tiberian Dawn needs the .BIN beside it.
+  if (chosen.bin) {
+    const scenarioBin = bytesByName.get(chosen.bin)!;
+    files.push({ name: 'COMRADE.BIN', size: scenarioBin.byteLength, arrayBuffer: async () => scenarioBin });
+  }
   await mountGameFiles(engine, files);
-  engine.FS.writeFile('/comrade/data/CONQUER.INI', new TextEncoder().encode('[Paths]\nDataPath=/comrade/data\nUserPath=/comrade/data\n[Intro]\nPlayIntro=no\n[Video]\nWindowed=yes\nWindowWidth=640\nWindowHeight=400\nFrameLimit=60\nHardwareCursor=no\n[Mouse]\nRawInput=no\n[Options]\nGameSpeed=3\nScoreVolume=0\nVolume=220\n'));
+  const options = '[Paths]\nDataPath=/comrade/data\nUserPath=/comrade/data\n[Intro]\nPlayIntro=no\n[Video]\nWindowed=yes\nWindowWidth=640\nWindowHeight=400\nFrameLimit=60\nHardwareCursor=no\n[Mouse]\nRawInput=no\n[Options]\nGameSpeed=3\nScoreVolume=0\nVolume=220\n';
+  engine.FS.writeFile(`/comrade/data/${pack === 'ra' ? 'REDALERT' : 'CONQUER'}.INI`, new TextEncoder().encode(options));
   return { manifest, map: chosen };
 }

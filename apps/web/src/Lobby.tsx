@@ -37,6 +37,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
   const [rooms, setRooms] = useState<RoomSummary[]>([]);
   const [room, setRoom] = useState<RoomState | null>(null);
   const [tdMaps, setTdMaps] = useState<MapInfo[]>([]);
+  const [raMaps, setRaMaps] = useState<MapInfo[]>([]);
   const [error, setError] = useState('');
   const [joinCode, setJoinCode] = useState(() => new URLSearchParams(location.search).get('room') || '');
   const [copied, setCopied] = useState(false);
@@ -45,6 +46,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
   useEffect(() => {
     fetch('/content/td/manifest.json', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null).then(m => m?.maps && setTdMaps(m.maps)).catch(() => undefined);
+    fetch('/content/ra/manifest.json', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null).then(m => m?.maps && setRaMaps(m.maps)).catch(() => undefined);
   }, []);
 
   useEffect(() => conn.on(message => {
@@ -62,7 +65,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     if (info.engine === 'fusion' && info.pack) {
       return PACKS[info.pack].maps.map(m => ({ id: m.id, name: m.name, description: m.description, maxPlayers: m.maxPlayers, detail: `${m.maxPlayers} players` }));
     }
-    return tdMaps.map(m => ({ id: m.id, name: m.name, description: m.description, maxPlayers: m.maxPlayers, detail: m.theater.toLowerCase() }));
+    const classic = info.engine === 'vanilla-ra' ? raMaps : tdMaps;
+    return classic.map(m => ({ id: m.id, name: m.name, description: m.description, maxPlayers: m.maxPlayers, detail: m.theater.toLowerCase() }));
   };
 
   const me = room?.players.find(p => p.id === conn.id);

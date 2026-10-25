@@ -6,6 +6,7 @@ Westwood's public key, published in the Red Alert source release (redalert/const
 Blowfish's initial tables are the hexadecimal digits of pi, so they are computed here.
 """
 import base64
+import base64
 import struct
 
 PUBLIC_KEY = 'AihRvNoIbTn85FZRYNZRcT+i6KpU+maCsEqr3Q5q+LDB5tH7Tz2qQ38V'
@@ -149,3 +150,124 @@ def aud_info(data: bytes) -> dict:
     """Header of a Westwood AUD sound: rate, sizes, flags and codec (1 = WS ADPCM, 99 = IMA)."""
     rate, size, out_size, flags, codec = struct.unpack('<HIIBB', data[:12])
     return {'rate': rate, 'size': size, 'outSize': out_size, 'stereo': bool(flags & 1), 'bits16': bool(flags & 2), 'codec': codec}
+
+
+# ---------------------------------------------------------------------------- map packs
+
+def format80_compress(data: bytes) -> bytes:
+    """Westwood's Format80 (LCW), written with literal runs only.
+
+    A decompressor cannot tell how the stream was produced, so a literal-only encoder is a
+    valid Format80 stream: command 0b10000000 | count copies `count` (1..63) bytes that
+    follow it, and 0x80 ends the stream. Red Alert's map packs are mostly runs of distinct
+    cells, so the saving from a full matcher would be small and the format is what matters.
+    """
+    out = bytearray()
+    i = 0
+    while i < len(data):
+        run = min(63, len(data) - i)
+        out.append(0x80 | run)
+        out += data[i:i + run]
+        i += run
+    out.append(0x80)
+    return bytes(out)
+
+
+def format80_decompress(data: bytes) -> bytes:
+    """The matching decoder, used by the tests to prove a pack round-trips."""
+    out = bytearray()
+    i = 0
+    while i < len(data):
+        cmd = data[i]
+        i += 1
+        if cmd == 0x80:
+            break
+        if cmd & 0x80 == 0:
+            # 0cccpppp pppppppp: copy (cmd >> 4) + 3 bytes from back pointer.
+            count = (cmd >> 4) + 3
+            pos = ((cmd & 0x0F) << 8) | data[i]
+            i += 1
+            start = len(out) - pos
+            for k in range(count):
+                out.append(out[start + k])
+        elif cmd & 0x40 == 0:
+            count = cmd & 0x3F
+            out += data[i:i + count]
+            i += count
+        elif cmd == 0xFE:
+            count = int.from_bytes(data[i:i + 2], 'little')
+            value = data[i + 2]
+            i += 3
+            out += bytes([value]) * count
+        elif cmd == 0xFF:
+            count = int.from_bytes(data[i:i + 2], 'little')
+            start = int.from_bytes(data[i + 2:i + 4], 'little')
+            i += 4
+            for k in range(count):
+                out.append(out[start + k])
+        else:
+            count = (cmd & 0x3F) + 3
+            start = int.from_bytes(data[i:i + 2], 'little')
+            i += 2
+            for k in range(count):
+                out.append(out[start + k])
+    return bytes(out)
+
+
+def pack_section(raw: bytes, chunk: int = 8192) -> str:
+    """Red Alert's [MapPack] / [OverlayPack] encoding.
+
+    The payload is split into `chunk`-byte blocks, each Format80-compressed and prefixed
+    with a little-endian 32-bit header (low 16 bits compressed size, high 16 bits
+    uncompressed size), then the whole thing is base64'd into 70-character INI lines
+    numbered from 1.
+    """
+    blob = bytearray()
+    for start in range(0, len(raw), chunk):
+        block = raw[start:start + chunk]
+        packed = format80_compress(block)
+        blob += struct.pack('<HH', len(packed), len(block))
+        blob += packed
+    text = base64.b64encode(bytes(blob)).decode('ascii')
+    return '\n'.join(f'{n + 1}={text[i:i + 70]}' for n, i in enumerate(range(0, len(text), 70)))
+
+
+def unpack_section(lines: str) -> bytes:
+    """Decode a packed section back to its payload (used by the tests)."""
+    text = ''.join(line.split('=', 1)[1] for line in lines.splitlines() if '=' in line)
+    blob = base64.b64decode(text)
+    out = bytearray()
+    i = 0
+    while i + 4 <= len(blob):
+        packed_size, raw_size = struct.unpack('<HH', blob[i:i + 4])
+        i += 4
+        block = format80_decompress(blob[i:i + packed_size])
+        if len(block) != raw_size:
+            raise ValueError('Block size mismatch')
+        out += block
+        i += packed_size
+    return bytes(out)
+
+
+# Red Alert maps are always 128x128 cells; a scenario works a window inside that.
+RA_MAP_W = RA_MAP_H = 128
+CLEAR_TEMPLATE = 0xFFFF
+
+
+def map_pack(templates: dict[int, int] | None = None, icons: dict[int, int] | None = None) -> str:
+    """[MapPack] for a 128x128 map: 2-byte template per cell, then 1-byte icon per cell."""
+    cells = RA_MAP_W * RA_MAP_H
+    raw = bytearray()
+    for cell in range(cells):
+        raw += struct.pack('<H', (templates or {}).get(cell, CLEAR_TEMPLATE))
+    for cell in range(cells):
+        raw.append((icons or {}).get(cell, 0))
+    return pack_section(bytes(raw))
+
+
+def overlay_pack(overlays: dict[int, int]) -> str:
+    """[OverlayPack]: one byte per cell, 0xFF meaning no overlay."""
+    raw = bytearray([0xFF]) * (RA_MAP_W * RA_MAP_H)
+    for cell, value in overlays.items():
+        raw[cell] = value
+    return pack_section(bytes(raw))

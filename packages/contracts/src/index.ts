@@ -41,8 +41,9 @@ export const STYLES: StyleInfo[] = [
   { id: 'fusion-leviathan', name: 'Fusion: Leviathan Isles', engine: 'fusion', pack: 'leviathan', playable: true, lockstep: true,
     blurb: 'Red Alert 2 armies on a worm-infested archipelago: thin ore at home, riches on the central island, sandworms in the sea.',
     factions: RA2_COUNTRIES },
-  { id: 'ra1', name: 'Red Alert', engine: 'vanilla-ra', playable: false, lockstep: false, blurb: 'Original engine built; content pack and map pending (ADR 007).',
-    factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: '' }, { id: 'soviet', name: 'Soviet', full: 'Soviet Union', blurb: '' }] },
+  { id: 'ra1', name: 'Classic Red Alert', engine: 'vanilla-ra', playable: true, lockstep: false,
+    blurb: 'Red Alert on the original engine, with freeware content and authored battlefields. Each commander fights the built-in enemy.',
+    factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: 'Greece. Mobility and the navy.' }, { id: 'soviet', name: 'Soviet', full: 'Soviet Union', blurb: 'USSR. Heavy armour and numbers.' }] },
 ];
 export function styleInfo(id: GameStyle): StyleInfo { return STYLES.find(s => s.id === id) ?? STYLES[0]; }
 export function factionAllowed(style: GameStyle, faction: unknown): faction is Faction {
@@ -114,9 +115,10 @@ export interface RoomState {
 }
 export interface RoomSummary { room: string; hostName: string; style: GameStyle; map: string; players: number; maxPlayers: number; phase: 'lobby' | 'started' }
 
-export interface MapInfo { id: string; name: string; theater: string; maxPlayers: number; description: string; ini: string; bin: string }
+/** `bin` is Tiberian Dawn's separate terrain file; Red Alert keeps terrain inside the INI. */
+export interface MapInfo { id: string; name: string; theater: string; maxPlayers: number; description: string; ini: string; bin?: string }
 export interface ContentFile { name: string; bytes: number; sha256: string }
-export interface ContentManifest { version: 1; id: string; engine: 'vanilla-td'; notice: string; source: string; maps: MapInfo[]; files: ContentFile[] }
+export interface ContentManifest { version: 1; id: string; engine: 'vanilla-td' | 'vanilla-ra'; notice: string; source: string; maps: MapInfo[]; files: ContentFile[] }
 export interface EngineSnapshot { frame: number; audioRunning?: boolean; camera?: number; mouseX?: number; mouseY?: number; selected?: number; credits?: number; harvested?: number; spent?: number; units?: number; buildings?: number; power?: number; drain?: number; lost?: number; won?: boolean; defeated?: boolean; entities?: { id: number; owner: number; cell: number; hp: number; name: string }[] }
 export type ServerMessage = RoomState
   | { version: 1; type: 'welcome'; id: string; capabilities: string[]; gameplay: 'lobby-presence' }
@@ -204,7 +206,10 @@ export function parseClientMessage(value: unknown): ClientMessage {
 }
 export function parseContentManifest(value: unknown): ContentManifest {
   const v = object(value);
-  if (v.version !== 1 || v.engine !== 'vanilla-td' || typeof v.id !== 'string' || !Array.isArray(v.files) || v.files.length > 64) throw new Error('Invalid content manifest');
+  // Red Alert keeps its terrain inside the scenario INI, so its maps carry no .BIN.
+  const engine = v.engine === 'vanilla-ra' ? 'vanilla-ra' : 'vanilla-td';
+  const needsBin = engine === 'vanilla-td';
+  if (v.version !== 1 || (v.engine !== 'vanilla-td' && v.engine !== 'vanilla-ra') || typeof v.id !== 'string' || !Array.isArray(v.files) || v.files.length > 64) throw new Error('Invalid content manifest');
   const names = new Set<string>();
   let bytes = 0;
   for (const raw of v.files) {
@@ -214,14 +219,15 @@ export function parseContentManifest(value: unknown): ContentManifest {
       || typeof f.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(f.sha256)) throw new Error('Invalid content file');
     names.add(f.name); bytes += f.bytes;
   }
-  if (bytes > 96 * 1024 * 1024 || !names.has('CONQUER.MIX') || !names.has('COMRADE.INI') || !names.has('COMRADE.BIN')) throw new Error('Incomplete or oversized content pack');
+  if (bytes > 96 * 1024 * 1024 || !names.has('CONQUER.MIX') || !names.has('COMRADE.INI')
+    || needsBin && !names.has('COMRADE.BIN')) throw new Error('Incomplete or oversized content pack');
   if (!Array.isArray(v.maps) || v.maps.length < 1 || v.maps.length > 32) throw new Error('Content pack is missing maps');
   const mapIds = new Set<string>();
   for (const raw of v.maps) {
     const m = object(raw);
     if (typeof m.id !== 'string' || !/^[a-z0-9-]{3,40}$/.test(m.id) || mapIds.has(m.id)
-      || typeof m.name !== 'string' || typeof m.ini !== 'string' || typeof m.bin !== 'string'
-      || !names.has(m.ini) || !names.has(m.bin)) throw new Error('Invalid map entry');
+      || typeof m.name !== 'string' || typeof m.ini !== 'string' || !names.has(m.ini)
+      || needsBin && (typeof m.bin !== 'string' || !names.has(m.bin))) throw new Error('Invalid map entry');
     mapIds.add(m.id);
   }
   return v as unknown as ContentManifest;

@@ -78,6 +78,27 @@ replace('tiberiandawn/init.cpp', '        if (!Start_Scenario(Scen.ScenarioName)
         if (CCFileClass("COMRADE.INI").Is_Available()) strcpy(Scen.ScenarioName, "COMRADE");
 #endif
         if (!Start_Scenario(Scen.ScenarioName, false)) {''')
+# Red Alert boots the authored scenario the same way Tiberian Dawn does: if the browser
+# mounted a COMRADE.INI, skip the menus and start it. RA keeps its terrain inside the
+# scenario file, so there is no .BIN to look for, and its Start_Scenario takes one argument.
+replace('redalert/init.cpp', '#include "function.h"', '#include "function.h"\n#ifdef __EMSCRIPTEN__\n#include <emscripten.h>\n#endif')
+replace('redalert/init.cpp', '        while (process) {', '''#ifdef __EMSCRIPTEN__
+        if (CCFileClass("COMRADE.INI").Is_Available()) {
+            process = false;
+            selection = SEL_START_NEW_GAME;
+            display = false;
+            Scen.Scenario = 20;
+            BuildLevel = 15;
+            Whom = EM_ASM_INT({ return Module.comradeFaction === 'soviet' ? 1 : 0; }) ? HOUSE_BAD : HOUSE_GOOD;
+            Session.Type = GAME_NORMAL;
+        }
+#endif
+        while (process) {''')
+replace('redalert/init.cpp', '        if (!Start_Scenario(Scen.ScenarioName)) {', '''#ifdef __EMSCRIPTEN__
+        if (CCFileClass("COMRADE.INI").Is_Available()) Scen.Set_Scenario_Name("COMRADE.INI");
+#endif
+        if (!Start_Scenario(Scen.ScenarioName)) {''')
+
 replace('tiberiandawn/scenario.cpp', '                Restate_Mission(Scen.ScenarioName, TXT_OK, TXT_NONE);', '''#ifndef __EMSCRIPTEN__
                 Restate_Mission(Scen.ScenarioName, TXT_OK, TXT_NONE);
 #endif''')
