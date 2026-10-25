@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Game, dunePack, ra2Pack } from '../../packages/fusion/src/index';
+import { Game, PACKS, dunePack, ra2Pack } from '../../packages/fusion/src/index';
 import type { Entity, GameSetup } from '../../packages/fusion/src/index';
 
 const humans = (pack: GameSetup['pack'], mapId: string, factions: string[], seed = 5) =>
@@ -225,6 +225,70 @@ describe('progression: air and sea', () => {
     g.enqueue(0, { t: 'move', ids: [ship.id], x: 10, y: 10 });
     run(g, 200);
     expect(g.pack.terrains[g.map.terrain[g.cellOf(ship)]].water).toBe(true);
+  });
+});
+
+describe('progression: harvester orders', () => {
+  const field = (g: Game, from: number, min: number) => {
+    // A resource cell at least `min` cells away from `from`, for the far-field tests.
+    const fx = from % g.map.w, fy = Math.floor(from / g.map.w);
+    for (let i = 0; i < g.map.res.length; i++) {
+      if (!g.map.res[i]) continue;
+      const x = i % g.map.w, y = Math.floor(i / g.map.w);
+      if (Math.abs(x - fx) + Math.abs(y - fy) >= min) return i;
+    }
+    return -1;
+  };
+
+  it('sends a harvester to the refinery it was clicked on, and keeps it going back', () => {
+    const g = humans(PACKS.td, 'tiberium-crossing', ['gdi', 'nod']);
+    const p = g.players[0];
+    const near = g.spawnStructure('proc', 0, 10, 10)!;
+    const far = g.spawnStructure('proc', 0, 34, 30)!;
+    const h = g.spawnUnit('harvester', 0, g.cellIndex(12, 14));
+    const cap = PACKS.td.units.harvester.harvester!.capacity;
+    h.cargo = cap; h.cargoValue = cap * 25;
+    // Click the far refinery: that one, not the near one.
+    g.enqueue(0, { t: 'enter', ids: [h.id], target: far.id });
+    g.step();
+    expect(h.dock).toBe(far.id);
+    // Credits can be capped by storage, so measure what was actually delivered. The
+    // refineries each come with a free harvester, so watch this one in particular.
+    let dockedAtFar = false;
+    for (let i = 0; i < 15 * 60 * 3 && !(p.stats.harvested > 0 && h.cargo === 0); i++) {
+      g.step();
+      if (far.dockedBy === h.id) dockedAtFar = true;
+      expect(near.dockedBy, 'it never queued at the near refinery').not.toBe(h.id);
+    }
+    expect(p.stats.harvested, 'it delivered').toBeGreaterThan(0);
+    expect(dockedAtFar, 'at the refinery it was sent to').toBe(true);
+    expect(h.dock, 'and it still belongs to that refinery').toBe(far.id);
+  });
+
+  it('ctrl-click ties a harvester to a field: it comes back after unloading', () => {
+    const g = humans(PACKS.td, 'tiberium-crossing', ['gdi', 'nod']);
+    g.spawnStructure('proc', 0, 10, 10);
+    const h = g.spawnUnit('harvester', 0, g.cellIndex(12, 14));
+    const far = field(g, g.cellOf(h), 18);
+    expect(far, 'the map has a distant field').toBeGreaterThanOrEqual(0);
+    const fx = far % g.map.w, fy = Math.floor(far / g.map.w);
+    g.enqueue(0, { t: 'harvest', ids: [h.id], x: fx, y: fy, lock: true });
+    run(g, 15 * 60 * 6, () => h.hstate === 'unload');
+    expect(h.hstate, 'it filled up and docked').toBe('unload');
+    // Once empty it goes back out: to the field it was given, not the nearest one.
+    run(g, 15 * 60 * 2, () => h.cargo === 0 && h.hstate === 'seek');
+    expect(h.homeField, 'the field is still its own').toBe(far);
+    const target = h.harvestCell;
+    const d = Math.abs((target % g.map.w) - fx) + Math.abs(Math.floor(target / g.map.w) - fy);
+    expect(d, 'and the cell it is heading for is in that field').toBeLessThanOrEqual(12);
+  });
+
+  it('an unlocked harvester is free to take the nearest field instead', () => {
+    const g = humans(PACKS.td, 'tiberium-crossing', ['gdi', 'nod']);
+    const h = g.spawnUnit('harvester', 0, g.cellIndex(12, 14));
+    g.enqueue(0, { t: 'harvest', ids: [h.id], x: 20, y: 24 });
+    g.step();
+    expect(h.homeField).toBe(-1);
   });
 });
 

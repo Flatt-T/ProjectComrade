@@ -347,3 +347,32 @@ base that had only a power plant, so every pack now puts a better power plant be
 its upgrades alphabetically, which had it saving for a 1000-credit yard upgrade while its
 harvesters were being shot out from under it; it now takes the cheapest upgrade that
 unlocks something it can build now.
+
+## Airstrips, silos, harvester orders and a deeper Dune (update 2026-10-25)
+
+- **Airstrips fly bombers.** Nod's Airstrip rearms aircraft and its upgrade opens a
+  **Bomber Flight**, which builds a bomber that makes one heavy pass and returns to
+  rearm. Red Alert's Soviet Airfield and the Allied Airbase both build the **Badger
+  Bomber** on the same terms. A test requires every airstrip in every pack to put a
+  bomb-carrying aircraft in the air for the side that owns it.
+- **Silos hold four times as much** (1500 to 6000 a silo), and Red Alert 2 finally has
+  Ore Silos of its own. This matters more than it sounds: income above a player's storage
+  is thrown away on delivery, so a base without silos was quietly losing most of a
+  harvester run.
+- **Harvester orders.** Clicking your own refinery with harvesters selected sends them to
+  *that* refinery and keeps them returning to it, instead of the nearest one. Ctrl-click
+  on a resource field ties them to that field: after every delivery they go back to it,
+  and only when it is worked out do they take the nearest again. Both are covered by
+  tests that watch a full gather-deliver-return cycle.
+- **A queued item shows `[1]` at once**, rather than staying blank until a second one is
+  queued, so a click on a unit is visibly a click.
+- **Dune's ladder no longer stops at the Heavy Factory.** The Construction Yard now
+  improves three times, as the classic's did, and each level opens the next part of the
+  base: Advanced Windtrap and Rocket Turret, then Repair Pad and Starport, then the IX
+  Research Centre and the Palace. The Barracks improves once (Engineers for every house,
+  Grenadiers for the Atreides, Sardaukar for the Harkonnen), the Heavy Factory twice
+  (Siege and Missile Tanks, then the **Heavy Harvester**), and the High Tech Factory
+  twice (Heavy Carryall and Ornithopter, then the **Assault Ornithopter**, the gunship
+  every house can field). That is ten rungs a house, against five before.
+- The Allied War Factory upgrade in Red Alert was worth only a Mobile Gap Generator, so
+  Allied **artillery** now sits behind it too.

@@ -11,7 +11,8 @@ export type Command =
   | { t: 'fireAt'; ids: number[]; x: number; y: number }
   | { t: 'guard'; ids: number[] }
   | { t: 'scatter'; ids: number[] }
-  | { t: 'harvest'; ids: number[]; x: number; y: number }
+  /** `lock` ties the harvester to that field: it comes back to it after every delivery. */
+  | { t: 'harvest'; ids: number[]; x: number; y: number; lock?: boolean }
   | { t: 'stop'; ids: number[] }
   | { t: 'deploy'; ids: number[] }
   /** Engineers capture or repair, spies infiltrate, damaged vehicles visit a repair pad, aircraft land to rearm. */
@@ -77,6 +78,8 @@ export interface Entity {
   cargo: number;
   cargoValue: number;
   harvestCell: number;
+  /** Field this harvester was ordered to work (cell index), or -1 to take the nearest. */
+  homeField: number;
   timer: number;
   dock: number;
   // Structures
@@ -327,7 +330,12 @@ export class Game {
         break;
       case 'harvest': {
         const cell = this.cellIndex(cmd.x, cmd.y);
-        for (const u of own(cmd.ids)) if (this.unitDef(u).harvester) { u.order = 'harvest'; u.hstate = 'seek'; u.harvestCell = cell; u.path = []; }
+        for (const u of own(cmd.ids)) {
+          if (!this.unitDef(u).harvester) continue;
+          u.order = 'harvest'; u.hstate = u.cargo > 0 && cmd.lock ? u.hstate : 'seek'; u.harvestCell = cell; u.path = [];
+          // A locked order means this field and no other, until the player says otherwise.
+          u.homeField = cmd.lock ? cell : -1;
+        }
         break;
       }
       case 'stop':
@@ -350,9 +358,16 @@ export class Game {
           const enemy = this.isEnemy(slot, target.owner);
           const ok = def.engineer ? enemy || target.owner === slot && target.hp < target.maxHp
             : def.spy ? enemy
-            : target.owner === slot && (sdef.repairPad && def.kind !== 'infantry' && def.kind !== 'aircraft' || sdef.airfield && def.kind === 'aircraft');
+            : target.owner === slot && (sdef.repairPad && def.kind !== 'infantry' && def.kind !== 'aircraft'
+              || sdef.airfield && def.kind === 'aircraft' || !!sdef.refinery && !!def.harvester);
           if (!ok) continue;
           u.deployed = false;
+          if (sdef.refinery && def.harvester) {
+            // This is my refinery now: unload here, and come back here from now on.
+            u.dock = target.id; u.order = 'harvest'; u.path = [];
+            u.hstate = u.cargo > 0 ? 'toRefinery' : u.hstate === 'unload' ? u.hstate : 'seek';
+            continue;
+          }
           if (sdef.airfield && def.kind === 'aircraft') { u.order = 'rearm'; u.dock = target.id; u.path = [this.cellOf(target)]; continue; }
           u.order = 'enter'; u.target = target.id; u.path = []; u.repathTick = 0;
         }
@@ -456,7 +471,7 @@ export class Game {
     return {
       id: this.nextId++, type, kind, owner, x, y, px: x, py: y, hp, maxHp: hp, facing: 128, turret: 128,
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
-      hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, timer: 0, dock: 0,
+      hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
       xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, drone: 0, warp: -999, passengers: [],
     };
@@ -1272,8 +1287,15 @@ export class Game {
       const here = this.cellOf(u);
       if (this.map.res[here] > 0 && (u.harvestCell < 0 || here === u.harvestCell || !u.path.length)) { u.hstate = 'gather'; u.timer = h.gather; return; }
       if (!u.path.length) {
-        const origin = u.harvestCell >= 0 ? u.harvestCell : here;
-        const cell = nearestCell(this.map, origin, 30, i => this.map.res[i] > 0 && terrainPassable(this.pack, this.map, i, 'vehicle') && !this.map.occupied[i]);
+        const origin = u.homeField >= 0 ? u.homeField : u.harvestCell >= 0 ? u.harvestCell : here;
+        // A locked field is searched close in; an unlocked one may wander outward.
+        const reach = u.homeField >= 0 ? 12 : 30;
+        let cell = nearestCell(this.map, origin, reach, i => this.map.res[i] > 0 && terrainPassable(this.pack, this.map, i, 'vehicle') && !this.map.occupied[i]);
+        // The ordered field is worked out: go back to taking the nearest.
+        if (cell < 0 && u.homeField >= 0) {
+          u.homeField = -1;
+          cell = nearestCell(this.map, here, 30, i => this.map.res[i] > 0 && terrainPassable(this.pack, this.map, i, 'vehicle') && !this.map.occupied[i]);
+        }
         if (cell < 0) { if (u.cargo > 0) u.hstate = 'toRefinery'; return; }
         u.harvestCell = cell;
         u.path = this.pathFor(u, cell);

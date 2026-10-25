@@ -570,6 +570,16 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       session.issue({ t: 'attackMove', ids: units.map(u => u.id), x: cell.x, y: cell.y }); mark('#ff5a4a'); setMode('normal'); return;
     }
     // Ctrl+click: force-fire at anything clicked (even friendly), or at open ground.
+    const onField = cell.x >= 0 && cell.y >= 0 && cell.x < game.map.w && cell.y < game.map.h && game.map.res[cell.y * game.map.w + cell.x] > 0;
+    if (mods.ctrl && onField) {
+      // Ctrl: work this field and come back to it after every delivery.
+      const diggers = units.filter(u => pack.units[u.type].harvester);
+      if (diggers.length) {
+        session.issue({ t: 'harvest', ids: diggers.map(u => u.id), x: cell.x, y: cell.y, lock: true });
+        say('Harvesting');
+        mark('#f2c14e'); return;
+      }
+    }
     if (mods.ctrl && units.length) {
       if (target && !(target.kind === 'unit' && renderer.selected.has(target.id))) session.issue({ t: 'attack', ids: units.map(u => u.id), target: target.id, force: true });
       else session.issue({ t: 'fireAt', ids: units.map(u => u.id), x: Math.max(0, cell.x), y: Math.max(0, cell.y) });
@@ -587,6 +597,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         const d = pack.units[u.type];
         if (d.engineer) return enemy || target.owner === slot && target.hp < target.maxHp;
         if (d.spy) return enemy;
+        if (d.harvester && sdef.refinery && target.owner === slot) return true;
         return target.owner === slot && (sdef.repairPad && d.kind !== 'infantry' && d.kind !== 'aircraft' || sdef.airfield && d.kind === 'aircraft');
       });
       if (enter.length) {
@@ -775,7 +786,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
             </>}
             <span className="label">{active && q.ready ? 'READY' : name}</span>
             <span className="cost">{cost}</span>
-            {count > 1 && <span className="count">{count}</span>}
+            {count > 0 && <span className="count">[{count}]</span>}
           </button>;
         })}
         {ui && !ui.options[tab]?.length && <p className="fusion-empty">{tab === 'structure' || tab === 'defense' ? 'Deploy your MCV to build.' : tab === 'starport' ? 'Build a Starport to order from CHOAM.' : 'Build the right factory to unlock.'}</p>}

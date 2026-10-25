@@ -155,8 +155,10 @@ export function parseCommand(raw: unknown): Command | null {
   if (!raw || typeof raw !== 'object') return null;
   const c = raw as Record<string, unknown>;
   switch (c.t) {
-    case 'move': case 'attackMove': case 'harvest':
+    case 'move': case 'attackMove':
       return ints(c.ids) && int(c.x) && int(c.y) ? { t: c.t, ids: c.ids, x: c.x, y: c.y } : null;
+    case 'harvest':
+      return ints(c.ids) && int(c.x) && int(c.y) ? { t: 'harvest', ids: c.ids, x: c.x, y: c.y, lock: c.lock === true } : null;
     case 'attack':
       return ints(c.ids) && int(c.target) ? { t: 'attack', ids: c.ids, target: c.target, force: c.force === true } : null;
     case 'fireAt':

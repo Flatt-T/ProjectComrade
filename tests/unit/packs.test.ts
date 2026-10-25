@@ -221,6 +221,24 @@ describe('rule pack integrity', () => {
     }
   });
 
+  it('every airstrip flies bombers, and every silo holds a proper reserve', () => {
+    for (const pack of CLASSIC_PACKS) {
+      const strips = Object.values(pack.structures).filter(st => st.shape === 'airstrip');
+      for (const strip of strips) {
+        // The strip itself, or the flight it unlocks, puts a bomber in the air.
+        const fliers = Object.values(pack.units).filter(u => u.kind === 'aircraft' && pack.weapons[u.weapon ?? '']?.visual === 'bomb');
+        const theirs = fliers.filter(u => !strip.factions || !u.factions || u.factions.some(f => strip.factions!.includes(f)));
+        expect(theirs.length, `${pack.id}/${strip.id} has a bomber`).toBeGreaterThan(0);
+      }
+      for (const st of Object.values(pack.structures)) {
+        if (!st.storage || st.refinery) continue;
+        expect(st.storage, `${pack.id}/${st.id} silo capacity`).toBeGreaterThanOrEqual(6000);
+      }
+      // Every pack has somewhere to put the overflow.
+      expect(Object.values(pack.structures).some(st => st.storage && !st.refinery), `${pack.id} has a silo`).toBe(true);
+    }
+  });
+
   it('registers the four classics and the fusions', () => {
     expect(CLASSIC_PACKS.map(p => p.id)).toEqual(['td', 'dune', 'ra1', 'ra2']);
     expect(Object.keys(PACKS)).toEqual(expect.arrayContaining(['td', 'dune', 'ra1', 'ra2', 'leviathan']));

@@ -140,6 +140,7 @@ export const tdPack: RulePack = {
     towerrockets: { id: 'towerrockets', damage: 40, range: 1792, rof: 50, warhead: 'ap', speed: 44, burst: 2, visual: 'missile', targets: ['infantry', 'vehicle', 'aircraft', 'structure'] },
     obelisklaser: { id: 'obelisklaser', damage: 200, range: 1792, rof: 90, warhead: 'laser', speed: 0, visual: 'laser' },
     samsite: { id: 'samsite', damage: 50, range: 1792, rof: 40, warhead: 'sam', speed: 56, burst: 2, visual: 'missile', targets: ['aircraft'] },
+    bombs: { id: 'bombs', damage: 120, range: 256, rof: 70, warhead: 'he', speed: 0, splash: 288, visual: 'bomb' },
     boatgun: { id: 'boatgun', damage: 50, range: 1536, rof: 60, warhead: 'he', speed: 48, splash: 64, burst: 2, visual: 'missile' },
   },
   units: {
@@ -169,6 +170,7 @@ export const tdPack: RulePack = {
     // ---- aircraft and naval
     orca: { id: 'orca', name: 'Orca', kind: 'aircraft', cost: 1200, hp: 125, armor: 'light', speed: 64, sight: 5, weapon: 'orcarockets', ammo: 3, prereqs: ['hpad'], factions: ['gdi'], tech: 7, altitude: 2, shape: 'orca', role: 'combat' },
     apache: { id: 'apache', name: 'Apache', kind: 'aircraft', cost: 1200, hp: 125, armor: 'light', speed: 56, sight: 5, weapon: 'apachegun', ammo: 6, prereqs: ['hpad'], factions: ['nod'], tech: 7, altitude: 2, shape: 'apache', role: 'combat' },
+    bomber: { id: 'bomber', name: 'Bomber', kind: 'aircraft', cost: 1400, hp: 150, armor: 'light', speed: 70, sight: 5, weapon: 'bombs', ammo: 1, prereqs: ['aflight'], factions: ['nod'], tech: 6, altitude: 3, shape: 'jet', role: 'siege' },
     chinook: { id: 'chinook', name: 'Transport Helicopter', kind: 'aircraft', cost: 1500, hp: 90, armor: 'light', speed: 50, sight: 4, prereqs: ['hpad'], tech: 7, altitude: 2, transport: 5, infantryOnly: true, shape: 'helicopter', role: 'support' },
     gunboat: { id: 'gunboat', name: 'Gunboat', kind: 'naval', cost: 500, hp: 400, armor: 'heavy', speed: 30, turn: 6, sight: 6, weapon: 'boatgun', prereqs: ['syrd'], tech: 5, shape: 'ship-patrol', role: 'siege' },
   },
@@ -177,11 +179,13 @@ export const tdPack: RulePack = {
     nuke: { id: 'nuke', name: 'Power Plant', cost: 300, hp: 400, armor: 'building', w: 2, h: 2, power: 100, sight: 3, prereqs: [], tech: 1, queue: 'structure', shape: 'tdpower' },
     nuk2: { id: 'nuk2', name: 'Advanced Power Plant', cost: 700, hp: 400, armor: 'building', w: 2, h: 2, power: 200, sight: 3, prereqs: ['nuke', 'fact@1'], tech: 4, queue: 'structure', shape: 'advpower' },
     proc: { id: 'proc', name: 'Tiberium Refinery', cost: 2000, hp: 900, armor: 'building', w: 3, h: 3, power: -40, sight: 4, prereqs: ['nuke'], tech: 1, queue: 'structure', storage: 1000, refinery: { dockX: 1, dockY: 3, freeUnit: 'harvester' }, shape: 'refinery' },
-    silo: { id: 'silo', name: 'Tiberium Silo', cost: 150, hp: 300, armor: 'building', w: 2, h: 1, power: -10, sight: 2, prereqs: ['proc'], tech: 2, queue: 'structure', storage: 1500, shape: 'silo' },
+    silo: { id: 'silo', name: 'Tiberium Silo', cost: 150, hp: 300, armor: 'building', w: 2, h: 1, power: -10, sight: 2, prereqs: ['proc'], tech: 2, queue: 'structure', storage: 6000, shape: 'silo' },
     pyle: { id: 'pyle', name: 'Barracks', cost: 300, hp: 400, armor: 'building', w: 2, h: 2, power: -20, sight: 3, prereqs: ['nuke'], factions: ['gdi'], tech: 1, queue: 'structure', produces: 'infantry', shape: 'barracks' },
     hand: { id: 'hand', name: 'Hand of Nod', cost: 300, hp: 400, armor: 'building', w: 2, h: 3, power: -20, sight: 3, prereqs: ['nuke'], factions: ['nod'], tech: 1, queue: 'structure', produces: 'infantry', shape: 'handofnod' },
     weap: { id: 'weap', name: 'Weapons Factory', cost: 2000, hp: 800, armor: 'building', w: 3, h: 3, power: -30, sight: 3, prereqs: ['proc'], factions: ['gdi'], tech: 2, queue: 'structure', produces: 'vehicle', upgrades: 1, upgradeCost: 1000, shape: 'heavyfactory' },
-    afld: { id: 'afld', name: 'Airstrip', cost: 2000, hp: 800, armor: 'building', w: 4, h: 2, power: -30, sight: 4, prereqs: ['proc'], factions: ['nod'], tech: 2, queue: 'structure', produces: 'vehicle', upgrades: 1, upgradeCost: 1000, shape: 'airstrip' },
+    afld: { id: 'afld', name: 'Airstrip', cost: 2000, hp: 800, armor: 'building', w: 4, h: 2, power: -30, sight: 4, prereqs: ['proc'], factions: ['nod'], tech: 2, queue: 'structure', produces: 'vehicle', airfield: true, upgrades: 1, upgradeCost: 1000, shape: 'airstrip' },
+    // The strip's second role: bombers rearm here, and the upgrade is what opens them.
+    aflight: { id: 'aflight', name: 'Bomber Flight', cost: 1200, hp: 600, armor: 'building', w: 3, h: 2, power: -30, sight: 4, prereqs: ['afld@1'], factions: ['nod'], tech: 6, queue: 'structure', produces: 'aircraft', airfield: true, shape: 'airstrip' },
     hq: { id: 'hq', name: 'Communications Center', cost: 1000, hp: 500, armor: 'building', w: 2, h: 2, power: -40, sight: 10, prereqs: ['proc'], tech: 4, queue: 'structure', radar: true, shape: 'radar' },
     fix: { id: 'fix', name: 'Repair Facility', cost: 1200, hp: 800, armor: 'building', w: 3, h: 3, power: -30, sight: 3, prereqs: ['weap|afld'], tech: 5, queue: 'structure', repairPad: true, shape: 'repairpad' },
     hpad: { id: 'hpad', name: 'Helipad', cost: 1500, hp: 400, armor: 'building', w: 2, h: 2, power: -10, sight: 3, prereqs: ['hq'], tech: 7, queue: 'structure', produces: 'aircraft', airfield: true, shape: 'helipad' },
