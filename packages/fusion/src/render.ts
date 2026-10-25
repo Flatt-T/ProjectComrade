@@ -491,18 +491,11 @@ export class FusionRenderer {
       const s = this.sprite(`wall|${style}|${mask}`, () => bake(wallMesh(mask, style), this.view));
       this.blit(s, origin.x, origin.y, grow);
     } else {
-      const art = this.classic?.ready ? this.classic.entry('structure', e.type) : undefined;
-      const frame = art && this.classic ? this.classic.frame(art, 0) : undefined;
-      if (frame && this.classic && grow >= 1) {
-        // The original building sprite sits on its footprint, feet at the bottom edge.
-        const foot = this.project(e.cx + def.w / 2, e.cy + def.h);
-        this.classic.draw(ctx, color, frame, foot.x, foot.y, this.classicScale);
-        this.structureDetail(e, def.shape, style, team, color, off);
-      } else {
-        const s = this.sprite(`b|${def.shape}|${def.w}x${def.h}|${style}|${color}`, () => bake(buildingMesh(def.shape, def.w, def.h, style, team), this.view));
-        if (grow < 1) this.construct(s, origin.x, origin.y, grow, e.cx, e.cy, e.w, e.h);
-        else { this.blit(s, origin.x, origin.y); this.structureDetail(e, def.shape, style, team, color, off); }
-      }
+      // Buildings stay modelled: a model sits on its footprint exactly where the
+      // placement outline put it, and it is the same shape going up as standing.
+      const s = this.sprite(`b|${def.shape}|${def.w}x${def.h}|${style}|${color}`, () => bake(buildingMesh(def.shape, def.w, def.h, style, team), this.view));
+      if (grow < 1) this.construct(s, origin.x, origin.y, grow, e.cx, e.cy, e.w, e.h);
+      else { this.blit(s, origin.x, origin.y); this.structureDetail(e, def.shape, style, team, color, off); }
     }
     if (off) {
       ctx.fillStyle = 'rgba(0,0,0,0.28)';

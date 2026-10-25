@@ -1321,21 +1321,27 @@ export class Game {
       const ref = this.nearestRefinery(u);
       if (!ref) return; // No refinery: wait loaded until one is built.
       u.dock = ref.id;
-      const r = this.pack.structures[ref.type].refinery!;
-      const dockCell = this.cellIndex(ref.cx + r.dockX, ref.cy + r.dockY);
+      const dockCell = this.dockCell(ref, def);
+      if (dockCell < 0) return; // Hemmed in: hold the load until something frees up.
       if (h.teleport && this.cellOf(u) !== dockCell) {
         // Chrono Miner: stop and charge up, then jump straight to the refinery pad.
         u.hstate = 'warp'; u.timer = WARP_TICKS; u.path = [];
         this.effect('minerWarp', u.x, u.y, 0, 0, WARP_TICKS);
         return;
       }
-      if (this.cellOf(u) === dockCell && u.x === cellCenter(dockCell % this.map.w) && u.y === cellCenter(Math.floor(dockCell / this.map.w))) {
+      if (this.cellOf(u) === dockCell) {
         if (ref.dockedBy && ref.dockedBy !== u.id && this.entities.get(ref.dockedBy)?.hp) return; // Queue for the pad.
+        // Settle on the pad: arriving within the cell is enough, so a lepton of
+        // overshoot cannot leave a full harvester idling beside the refinery.
+        u.x = u.px = cellCenter(dockCell % this.map.w);
+        u.y = u.py = cellCenter(Math.floor(dockCell / this.map.w));
         ref.dockedBy = u.id; u.hstate = 'unload'; u.timer = h.unload; u.facing = 64;
         return;
       }
       if (!u.path.length) u.path = this.pathFor(u, dockCell, dockCell);
-      if (!u.path.length) { u.dock = 0; return; }
+      // No way through this tick (traffic, or a pad walled in): keep the refinery and
+      // try again rather than dropping the load and standing still for ever.
+      if (!u.path.length) return;
       this.move(u, def);
       return;
     }
@@ -1368,6 +1374,18 @@ export class Game {
       p.stats.harvested += each;
     }
     if (u.cargo === 0) { u.cargoValue = 0; ref.dockedBy = 0; u.hstate = 'seek'; u.path = []; }
+  }
+
+  /**
+   * Where a harvester stands to unload: the refinery's own pad, or the closest clear cell
+   * to it when the pad is built over, walled in or otherwise unreachable.
+   */
+  private dockCell(ref: Entity, def: UnitDef): number {
+    const r = this.pack.structures[ref.type].refinery!;
+    const pad = this.cellIndex(ref.cx + r.dockX, ref.cy + r.dockY);
+    const cls = this.moveClass(def);
+    if (passable(this.pack, this.map, pad, cls)) return pad;
+    return nearestCell(this.map, pad, 4, i => passable(this.pack, this.map, i, cls));
   }
 
   /** The refinery a harvester is using, or the nearest one its owner has. */

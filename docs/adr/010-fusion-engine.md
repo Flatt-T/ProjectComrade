@@ -425,3 +425,21 @@ for the original engines. So the `td` and `ra1` packs are now drawn with the ori
 Still procedural for these two packs, and worth finishing: resource overlays (the index
 carries the Tiberium and ore tiles), scenery, and drawing the Fusion maps from the authored
 scenarios cell by cell rather than from map features.
+
+## Buildings stay modelled, and look the part (update 2026-10-25)
+
+Drawing buildings from the original sprites was reported as wrong in play, and it was: a
+sprite is sized to its own artwork, not to a footprint, so a placed building no longer sat
+where the placement outline had been, and a building still going up (drawn from the model)
+changed shape when it finished. Buildings are modelled again, which keeps them on the grid
+and the same shape throughout; units, ground tiles, resources and scenery keep the original
+artwork, which is where it reads best.
+
+The models themselves now follow the originals rather than Red Alert 2's look. Their
+colours are measured from the sprites instead of guessed - Tiberian Dawn is light grey
+concrete with darker roof panels, sand-coloured tanks and a gold trim for GDI, near-black
+slabs for Nod; Red Alert's Soviets took the red-brown roofs their buildings wear. The
+Construction Yard, refinery, barracks and weapons factory have Tiberian Dawn silhouettes
+of their own: a walled compound under a gantry crane, a processing tower beside a holding
+tank and an unloading bay, a flat-roofed hut, and a hangar that is mostly its dark open
+mouth.

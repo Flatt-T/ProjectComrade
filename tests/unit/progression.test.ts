@@ -265,6 +265,21 @@ describe('progression: harvester orders', () => {
     expect(h.dock, 'and it still belongs to that refinery').toBe(far.id);
   });
 
+  it('unloads even when the refinery pad itself is blocked', () => {
+    const g = humans(PACKS.td, 'tiberium-crossing', ['gdi', 'nod']);
+    const p = g.players[0];
+    const ref = g.spawnStructure('proc', 0, 10, 10)!;
+    // The pad is one row below the refinery: wall it off, as a tight base can.
+    const pad = PACKS.td.structures.proc.refinery!;
+    g.spawnStructure('brik', 0, ref.cx + pad.dockX, ref.cy + pad.dockY);
+    const h = g.spawnUnit('harvester', 0, g.cellIndex(14, 14));
+    const cap = PACKS.td.units.harvester.harvester!.capacity;
+    h.cargo = cap; h.cargoValue = cap * 25;
+    h.order = 'harvest'; h.hstate = 'toRefinery'; h.dock = ref.id;
+    run(g, 15 * 60 * 2, () => p.stats.harvested > 0);
+    expect(p.stats.harvested, 'it found another way in').toBeGreaterThan(0);
+  });
+
   it('ctrl-click ties a harvester to a field: it comes back after unloading', () => {
     const g = humans(PACKS.td, 'tiberium-crossing', ['gdi', 'nod']);
     g.spawnStructure('proc', 0, 10, 10);

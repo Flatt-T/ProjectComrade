@@ -18,10 +18,11 @@ interface Palette { body: RGB; trim: RGB; dark: RGB; pad: RGB; glass: RGB; metal
 const PALETTES: Record<ArtStyle, Palette> = {
   dune: { body: [234, 224, 202], trim: [190, 176, 150], dark: [86, 76, 64], pad: [201, 160, 112], glass: [128, 174, 196], metal: [162, 154, 138], hull: [214, 202, 178] },
   allied: { body: [200, 205, 211], trim: [148, 155, 163], dark: [66, 72, 80], pad: [146, 144, 138], glass: [140, 198, 236], metal: [176, 181, 188], hull: [196, 200, 205] },
-  soviet: { body: [156, 151, 136], trim: [116, 111, 100], dark: [60, 57, 51], pad: [126, 122, 112], glass: [214, 132, 96], metal: [128, 125, 116], hull: [170, 166, 154] },
-  // Tiberian Dawn: GDI's pale concrete and steel with gold trim, Nod's dark grey slabs and red glow.
-  gdi: { body: [188, 190, 176], trim: [148, 150, 136], dark: [62, 64, 60], pad: [140, 142, 132], glass: [146, 196, 224], metal: [170, 172, 160], hull: [172, 166, 134] },
-  nod: { body: [126, 122, 120], trim: [96, 92, 90], dark: [46, 44, 44], pad: [110, 106, 104], glass: [226, 116, 92], metal: [118, 114, 112], hull: [136, 130, 126] },
+  soviet: { body: [112, 112, 112], trim: [80, 48, 48], dark: [48, 32, 32], pad: [104, 100, 96], glass: [214, 132, 96], metal: [128, 125, 116], hull: [150, 146, 136] },
+  // Tiberian Dawn, measured off the original building sprites: GDI's light grey concrete
+  // with darker roof panels and sand-coloured tanks; Nod's near-black slabs and red glow.
+  gdi: { body: [160, 160, 160], trim: [96, 96, 96], dark: [48, 48, 48], pad: [128, 128, 128], glass: [150, 198, 226], metal: [176, 176, 176], hull: [160, 144, 112] },
+  nod: { body: [80, 80, 80], trim: [48, 48, 56], dark: [24, 24, 32], pad: [64, 64, 64], glass: [226, 96, 72], metal: [96, 96, 96], hull: [96, 96, 96] },
 };
 const GLOW_BLUE: RGB = [150, 225, 255];
 const GLOW_CYAN: RGB = [170, 245, 255];
@@ -86,9 +87,25 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
   const p = PALETTES[style];
   const m = new Mesh();
   const dune = style === 'dune', soviet = style === 'soviet';
+  // Tiberian Dawn's buildings are squatter and blockier than Red Alert 2's, with flat
+  // panelled roofs: where the silhouette differs that much, they get their own shape.
+  const td = style === 'gdi' || style === 'nod';
   if (shape !== 'wall' && shape !== 'shipyard') foundation(m, w, h, p);
   switch (shape) {
     case 'conyard': {
+      if (td) {
+        // A low walled compound: panelled roof, a service bay at the front, and the
+        // gantry crane that sits over one corner of the original.
+        m.box(0.18, 0.18, 0.07, w - 0.18, h - 0.55, 0.62, p.body, { top: p.trim });
+        for (let x = 0.3; x < w - 0.35; x += 0.62) m.box(x, 0.3, 0.62, x + 0.44, h - 0.68, 0.66, tint(p.trim, 0.88));
+        m.box(0.3, h - 0.58, 0.07, w - 0.3, h - 0.2, 0.3, p.pad, { top: p.dark });
+        m.box(0.3, h - 0.3, 0.1, w - 0.3, h - 0.22, 0.26, team);
+        // Crane: two legs, a boom across the roof and the hook line.
+        for (const x of [0.42, w - 0.52]) m.box(x, 0.36, 0.62, x + 0.1, 0.46, 1.5, p.metal);
+        m.box(0.42, 0.34, 1.42, w - 0.42, 0.48, 1.56, team);
+        m.box(w / 2 - 0.03, 0.38, 0.9, w / 2 + 0.03, 0.44, 1.42, p.dark);
+        break;
+      }
       if (dune) {
         m.box(0.3, 0.9, 0.07, 2.05, 2.65, 0.5, p.body);
         m.dome(1.15, 1.75, 0.5, 0.62, p.body, 5, 20, 0.55);
@@ -142,6 +159,18 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'refinery': {
+      if (td) {
+        // The Tiberium refinery: a tall processing tower, a sand-coloured holding tank,
+        // and the dark unloading bay the harvester backs into.
+        m.box(0.2, 0.2, 0.07, 1.5, h - 0.2, 1.15, p.body, { top: p.trim });
+        for (let z = 0.35; z < 1.1; z += 0.3) m.box(0.16, 0.3, z, 1.54, h - 0.3, z + 0.06, tint(p.trim, 0.9));
+        m.cylinder(2.2, h / 2, 0.07, 0.95, 0.6, 0.6, p.hull, 20, { cap: false });
+        m.dome(2.2, h / 2, 0.95, 0.6, tint(p.hull, 1.08), 4, 20, 0.3);
+        m.box(1.5, h - 1.1, 0.07, w - 0.25, h - 0.25, 0.12, p.pad, { top: p.dark });
+        m.box(0.2, 0.16, 0.5, 1.5, 0.24, 0.8, team);
+        m.box(1.62, h / 2 - 0.1, 0.9, 2.2, h / 2 + 0.1, 1.0, p.metal);
+        break;
+      }
       if (dune) {
         for (const cx of [0.62, 1.48]) {
           m.cylinder(cx, 0.78, 0.07, 0.72, 0.42, 0.42, p.body, 20, { cap: false });
@@ -164,6 +193,15 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'barracks': {
+      if (td) {
+        // GDI's barracks: a pale flat-roofed hut with a dark doorway and a vent stack.
+        m.box(0.18, 0.3, 0.07, 1.82, 1.78, 0.56, p.body, { top: p.trim });
+        m.box(0.26, 0.38, 0.56, 1.74, 1.7, 0.6, tint(p.trim, 0.9));
+        m.box(0.62, 1.74, 0.07, 1.24, 1.82, 0.42, p.dark);
+        m.box(0.26, 1.72, 0.46, 1.74, 1.78, 0.54, team);
+        m.cylinder(1.56, 0.56, 0.56, 0.86, 0.1, 0.09, p.metal, 10);
+        break;
+      }
       m.box(0.22, 0.4, 0.07, 1.78, 1.72, dune ? 0.48 : 0.55, p.body);
       if (soviet) m.box(0.15, 0.33, 0.55, 1.85, 1.79, 0.68, team);
       else m.roof(0.15, 0.33, 1.85, 1.79, dune ? 0.48 : 0.55, dune ? 0.82 : 0.95, dune ? p.trim : team, 'x');
@@ -180,6 +218,16 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'factory': case 'heavyfactory': {
+      if (td) {
+        // The weapons factory is mostly its dark open hangar mouth, under a pale shell.
+        m.box(0.2, 0.2, 0.07, w - 0.2, h - 0.5, 0.8, p.body, { top: p.trim });
+        m.box(0.34, 0.3, 0.8, w - 0.34, h - 0.6, 0.86, tint(p.trim, 0.9));
+        m.box(0.45, h - 0.52, 0.07, w - 0.45, h - 0.18, 0.62, p.dark);
+        m.box(0.45, h - 0.2, 0.07, w - 0.45, h - 0.12, 0.08, tint(p.dark, 1.4));
+        m.box(0.2, h - 0.54, 0.62, w - 0.2, h - 0.46, 0.7, team);
+        for (const x of [0.3, w - 0.42]) m.box(x, h - 0.5, 0.07, x + 0.12, h - 0.2, 0.66, p.body);
+        break;
+      }
       const big = shape === 'heavyfactory';
       m.box(0.2, 0.3, 0.07, w - 0.2, h - 0.2, big ? 0.62 : 0.5, p.body);
       vault(m, 0.25, 0.35, w - 0.25, h - 0.25, big ? 0.62 : 0.5, big ? 0.55 : 0.4, dune ? p.trim : p.metal, 6);
