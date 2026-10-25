@@ -3,7 +3,8 @@
 // A near-copy of the Tiberian Dawn bridge next to it, with Red Alert's differences:
 // its map is 128 cells wide (so cells are reported in the engine's own indexing rather
 // than Tiberian Dawn's 64-wide grid), it has ships and aircraft to report as well as
-// units, buildings and infantry, and Can_Build takes an RTTI type with the id.
+// units, buildings and infantry, and only Can_Build's object-type overload is defined
+// (the RTTI/id one is declared but never built).
 #include "function.h"
 #include "video.h"
 #ifdef __EMSCRIPTEN__
@@ -161,13 +162,13 @@ extern "C" EMSCRIPTEN_KEEPALIVE int comrade_order(int action, int entity, int ta
     HousesType house = PlayerPtr->Class->House;
     if (action == 3) {
         StructType type = BuildingTypeClass::From_Name(item);
-        if (type < 0 || type >= STRUCT_COUNT || !PlayerPtr->Can_Build(RTTI_BUILDINGTYPE, (int)type, house))
+        if (type < 0 || type >= STRUCT_COUNT || !PlayerPtr->Can_Build(&BuildingTypeClass::As_Reference(type), house))
             return 0;
         return PlayerPtr->Begin_Production(RTTI_BUILDINGTYPE, (int)type) == PROD_OK;
     }
     if (action == 4) {
         InfantryType type = InfantryTypeClass::From_Name(item);
-        if (type < 0 || type >= INFANTRY_COUNT || !PlayerPtr->Can_Build(RTTI_INFANTRYTYPE, (int)type, house))
+        if (type < 0 || type >= INFANTRY_COUNT || !PlayerPtr->Can_Build(&InfantryTypeClass::As_Reference(type), house))
             return 0;
         return PlayerPtr->Begin_Production(RTTI_INFANTRYTYPE, (int)type) == PROD_OK;
     }
