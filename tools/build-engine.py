@@ -38,6 +38,7 @@ for game in ('tiberiandawn', 'redalert'):
             'LRESULT CALLBACK Windows_Procedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)')
 shutil.copyfile(ROOT / "engines/adapters/td-ra/wwkeyboard_null.cpp", source / "common/wwkeyboard_null.cpp")
 shutil.copyfile(ROOT / "engines/adapters/td-ra/comrade_bridge.cpp", source / "tiberiandawn/comrade_bridge.cpp")
+shutil.copyfile(ROOT / "engines/adapters/td-ra/comrade_bridge_ra.cpp", source / "redalert/comrade_bridge.cpp")
 for path in (source / 'common').iterdir():
     if path.suffix in ('.cpp', '.h'):
         text = path.read_text(encoding='latin-1')
@@ -53,6 +54,10 @@ replace('CMakeLists.txt', '    find_package(OpenAL REQUIRED)', '''    if(EMSCRIP
 replace('tiberiandawn/CMakeLists.txt', '    target_link_libraries(VanillaTD commonv ${VANILLA_LIBS} ${STATIC_LIBS})', '''    target_link_libraries(VanillaTD commonv ${VANILLA_LIBS} ${STATIC_LIBS})
     if(EMSCRIPTEN)
         target_sources(VanillaTD PRIVATE comrade_bridge.cpp)
+    endif()''')
+replace('redalert/CMakeLists.txt', '    target_link_libraries(VanillaRA commonv ${VANILLA_LIBS} ${STATIC_LIBS})', '''    target_link_libraries(VanillaRA commonv ${VANILLA_LIBS} ${STATIC_LIBS})
+    if(EMSCRIPTEN)
+        target_sources(VanillaRA PRIVATE comrade_bridge.cpp)
     endif()''')
 replace('common/mssleep.h', '#include <time.h>', '#include <time.h>\n#ifdef __EMSCRIPTEN__\n#include <emscripten.h>\n#endif')
 replace('common/mssleep.h', '    nanosleep(&ts, NULL);', '''#ifdef __EMSCRIPTEN__
@@ -164,4 +169,4 @@ if args.mode == "wasm":
     shutil.copyfile(source / "License.txt", output / "License.txt")
     revision = subprocess.check_output(['git', '-C', str(ROOT / 'engines/vendor/Vanilla-Conquer'), 'rev-parse', 'HEAD'], text=True).strip()
     project_revision = os.environ.get('GITHUB_SHA') or subprocess.check_output(['git', '-C', str(ROOT), 'rev-parse', 'HEAD'], text=True).strip()
-    (output / 'source.txt').write_text(f'Corresponding source: https://github.com/Flatt-T/ProjectComrade/tree/{project_revision}\nUpstream revision: {revision}\nBuild and modifications: tools/build-engine.py and engines/adapters/td-ra/ (comrade_bridge.cpp, wwkeyboard_null.cpp)\nLicence: /engines/License.txt\n')
+    (output / 'source.txt').write_text(f'Corresponding source: https://github.com/Flatt-T/ProjectComrade/tree/{project_revision}\nUpstream revision: {revision}\nBuild and modifications: tools/build-engine.py and engines/adapters/td-ra/ (comrade_bridge.cpp, comrade_bridge_ra.cpp, wwkeyboard_null.cpp)\nLicence: /engines/License.txt\n')
