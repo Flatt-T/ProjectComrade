@@ -1,4 +1,4 @@
-import type { ServerMessage } from '@comrade/contracts';
+import type { AdBreak, ServerMessage } from '@comrade/contracts';
 import type { TurnPacket, TurnTransport } from '../../../packages/fusion/src/session';
 import { recordEvent } from './diagnostics';
 
@@ -24,6 +24,14 @@ export class RoomConnection {
   chatLog: ChatLine[] = [];
   /** Bumped whenever the socket drops: a lockstep match cannot be rejoined. */
   drops = 0;
+  /**
+   * This player's private kick-off, sent as the match starts: the token that lets it report
+   * its own result, and the advertisement it must watch (absent on the subscriber tiers).
+   * Kept on the connection because the lobby unmounts before the battle view mounts.
+   */
+  match?: { matchId: string; reportToken: string; slot: number; ad?: AdBreak };
+  /** The access token last sent to the service, so a reconnect re-identifies itself. */
+  private token = '';
   private closed = false;
 
   constructor(private url = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`) { this.open(); }
@@ -31,7 +39,13 @@ export class RoomConnection {
   private open() {
     const ws = new WebSocket(this.url);
     this.ws = ws;
-    ws.onopen = () => { this.connected = true; recordEvent('connected'); this.emit({ version: 1, type: 'rooms', rooms: [] }); };
+    ws.onopen = () => {
+      this.connected = true;
+      recordEvent('connected');
+      // A reconnect has to say who it is again before anything else.
+      if (this.token) this.send({ type: 'identify', token: this.token });
+      this.emit({ version: 1, type: 'rooms', rooms: [] });
+    };
     ws.onclose = () => {
       this.connected = false;
       recordEvent('disconnected');
@@ -45,6 +59,9 @@ export class RoomConnection {
       if (message.type === 'welcome') this.id = message.id;
       if (message.type === 'error') recordEvent('server-error', { message: message.message });
       if (message.type === 'chat') this.chatLog = [...this.chatLog.slice(-99), { from: message.from, name: message.name, text: message.text, to: message.to, at: message.at }];
+      if (message.type === 'match') {
+        this.match = { matchId: message.matchId, reportToken: message.reportToken, slot: message.slot, ad: message.ad };
+      }
       if (message.type === 'turn') {
         const packet: TurnPacket = { turn: message.turn, tick: message.tick, checksum: message.checksum, commands: message.commands as TurnPacket['commands'], final: message.final };
         if (this.turnLog.length < 50000) this.turnLog.push({ slot: message.slot, packet });
@@ -75,8 +92,18 @@ export class RoomConnection {
     };
   }
 
-  /** Forget buffered turns from a previous match. */
-  resetTurns() { this.turnLog = []; }
+  /** Tell the service who we are, or that we have signed out. */
+  identify(token: string) {
+    if (token === this.token) return;
+    this.token = token;
+    this.send({ type: 'identify', ...(token ? { token } : {}) });
+  }
+
+  /** The token to put on a join, so the room knows the account from the first message. */
+  get identity(): string { return this.token; }
+
+  /** Forget buffered turns and the previous match's kick-off. */
+  resetTurns() { this.turnLog = []; this.match = undefined; }
 
   close() { this.closed = true; this.ws?.close(); }
 }

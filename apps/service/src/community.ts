@@ -5,7 +5,7 @@ import { log } from './ops.js';
 
 const REPO = process.env.COMRADE_REPO || 'Flatt-T/ProjectComrade';
 const TTL = 10 * 60_000;
-let cache: { at: number; body: string } | null = null;
+let cache: { at: number; body: string; rows: FusionRequestRow[] } | null = null;
 
 export interface FusionRequestRow {
   number: number; url: string; title: string; votes: number; comments: number; created: string;
@@ -26,7 +26,7 @@ export function sections(body: string | null | undefined): Record<string, string
   return out;
 }
 
-async function load(): Promise<string> {
+async function load(): Promise<{ body: string; rows: FusionRequestRow[] }> {
   const headers: Record<string, string> = { Accept: 'application/vnd.github+json', 'User-Agent': 'comrade-community' };
   if (process.env.COMRADE_GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.COMRADE_GITHUB_TOKEN}`;
   const res = await fetch(`https://api.github.com/repos/${REPO}/issues?labels=type:fusion&state=open&per_page=100`, { headers });
@@ -38,12 +38,22 @@ async function load(): Promise<string> {
     const fields = Object.fromEntries(Object.entries(sections(i.body)).map(([k, v]) => [k, v.slice(0, 600)]));
     return { number: i.number, url: i.html_url, title: i.title.replace(/^\[Fusion\]\s*/i, ''), votes: i.reactions?.['+1'] ?? 0, comments: i.comments, created: i.created_at, status, fields };
   }).filter(r => r.status !== 'in vote').sort((a, b) => b.votes - a.votes || a.number - b.number);
-  return JSON.stringify({ updated: new Date().toISOString(), repo: REPO, rows });
+  return { body: JSON.stringify({ updated: new Date().toISOString(), repo: REPO, rows }), rows };
+}
+
+/** The cached request rows, for the in-app voting list. Empty when GitHub is unreachable. */
+export async function fusionRequestRows(): Promise<FusionRequestRow[]> {
+  if (!cache || Date.now() - cache.at > TTL) {
+    try { cache = { at: Date.now(), ...(await load()) }; } catch (error) {
+      log('error', { where: 'fusion-requests', message: String(error).slice(0, 200) });
+    }
+  }
+  return cache?.rows ?? [];
 }
 
 export async function fusionRequests(res: ServerResponse) {
   if (!cache || Date.now() - cache.at > TTL) {
-    try { cache = { at: Date.now(), body: await load() }; } catch (error) {
+    try { cache = { at: Date.now(), ...(await load()) }; } catch (error) {
       log('error', { where: 'fusion-requests', message: String(error).slice(0, 200) });
       if (!cache) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Fusion requests are unavailable right now' })); return; }
     }

@@ -1,0 +1,234 @@
+/* Accounts, tiers, billing, records, voting, consent and the advertisement slot.
+   Kept beside style.css rather than inside it, the way helpdot.css is, so the war room's
+   styling and the site's stay separable. Same palette and the same compact house style. */
+
+.brand{display:flex;align-items:center;gap:16px;color:inherit}
+.site-nav{display:flex;gap:4px;margin-left:8px}
+.site-nav a{font:11px ui-monospace,monospace;letter-spacing:1px;padding:10px;margin:0;border:1px solid transparent}
+.site-nav a.on{border-color:#526039;color:#dceab8}
+.account-menu{display:flex;align-items:center;gap:10px;margin-left:auto;position:relative}
+.account-menu a{margin-left:0;font:11px ui-monospace,monospace;letter-spacing:1px}
+.account-menu .register-link{border:1px solid #526039;padding:9px 12px}
+.account-menu.signed-in>button{display:flex;align-items:center;gap:9px;padding:7px 11px;background:#1a2418;letter-spacing:0}
+.account-menu.signed-in>button b{font:600 12px Inter,Arial,sans-serif}
+.account-dropdown{position:absolute;top:calc(100% + 8px);right:0;z-index:40;display:flex;flex-direction:column;min-width:230px;background:#141c14;border:1px solid #425039;box-shadow:0 18px 40px #000a}
+.account-dropdown a,.account-dropdown button{text-align:left;padding:13px 16px;border:0;border-bottom:1px solid #26301f;background:none;font:12px Inter,Arial,sans-serif;letter-spacing:0;color:#cad5bc;text-decoration:none}
+.account-dropdown a:hover,.account-dropdown button:hover{background:#1d2a1b;color:#dceab8}
+
+.battle-shell.site{min-height:100vh}
+.page{padding:34px 0 60px;max-width:1100px}
+/* style.css styles <header> for the site banner (flex row, rule, wide tracking). The headers
+   inside pages and cards are ordinary blocks, so they opt out of all of it. */
+.page-head,.tier-card>header{display:block;border-bottom:0;padding-bottom:0;letter-spacing:normal;gap:0;align-items:initial}
+.page-head{margin-bottom:26px}
+.page-head p:not(.eyebrow){color:#9aa98f;line-height:1.8;font-size:13px;max-width:68ch;margin-top:12px}
+.page h2{font:700 18px Arial,sans-serif;letter-spacing:.4px;text-transform:uppercase;margin:30px 0 14px}
+.page p{line-height:1.8}
+.card{background:#141c14;border:1px solid #425039;padding:22px}
+.card h2{margin-top:0;font-size:14px}
+.card h3{font:700 12px ui-monospace,monospace;letter-spacing:1px;text-transform:uppercase;color:#b4d96b;margin:20px 0 8px}
+.card-note{font-size:12px;color:#8b9b80;line-height:1.75}
+.card hr{border:0;border-top:1px solid #2e3a28;margin:20px 0}
+.notice{border-left:3px solid #526039;background:#18231699;padding:13px 16px;font-size:12.5px;line-height:1.75;color:#c3cdba}
+.notice.good{border-left-color:#8fce4f}
+.notice.bad{border-left-color:#d4794f;color:#e8cbb8}
+.spinner{font:11px ui-monospace,monospace;letter-spacing:1px;color:#8b9b80}
+.link-button{background:none;border:0;padding:8px 0;color:#b2d777;font:12px Inter,Arial,sans-serif;letter-spacing:0;text-decoration:underline}
+.danger{border-color:#7a4030;color:#e8b8a4}
+.danger:hover{border-color:#d4794f}
+.danger-confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.danger-card{border-color:#5c3a2c}
+
+.field{display:block;margin:0 0 18px}
+.field-label{display:block;font:10px ui-monospace,monospace;letter-spacing:2px;color:#b4d96b;margin-bottom:8px;text-transform:uppercase}
+.field input,.field select{width:100%;padding:13px;background:#101a11;border:1px solid #425039;color:#dadfd4;font:13px Inter,Arial,sans-serif}
+.field input:focus,.field select:focus{outline:none;border-color:#b4d96b}
+.field.has-error input{border-color:#d4794f}
+.field-hint,.field-error{display:block;margin-top:7px;font-size:11.5px;line-height:1.6;color:#7d8b73}
+.field-error{color:#e0a183}
+.field-good{font:11px ui-monospace,monospace;color:#8fce4f;margin:-8px 0 16px}
+.check{display:flex;gap:11px;align-items:flex-start;margin:0 0 15px;font-size:12.5px;line-height:1.7;color:#c3cdba}
+.check input{margin-top:3px;accent-color:#8fce4f;width:16px;height:16px;flex:0 0 auto}
+
+.tier-badge{display:inline-block;font:700 9px ui-monospace,monospace;letter-spacing:1.5px;padding:5px 9px;border:1px solid;text-transform:uppercase}
+.tier-badge.small{font-size:8px;padding:4px 7px}
+.tier-badge.guest{color:#8b9b80;border-color:#49553f}
+.tier-badge.free{color:#9fb88a;border-color:#55663f}
+.tier-badge.bronze{color:#d49a6a;border-color:#8a5a33;background:#2a1d11}
+.tier-badge.silver{color:#c5d2d8;border-color:#7c8a93;background:#1b2225}
+.tier-badge.gold{color:#e7c75a;border-color:#9a8028;background:#2a2410}
+
+.tier-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.tier-card{display:flex;flex-direction:column;gap:16px;background:#141c14;border:1px solid #425039;padding:24px}
+.tier-card.current{border-color:#b4d96b}
+.tier-card.gold{border-color:#6e5c22}
+.tier-price{font:13px ui-monospace,monospace;color:#8b9b80;margin:14px 0 0}
+.tier-price b{font:800 30px Arial,sans-serif;color:#dceab8;letter-spacing:-1px}
+.tier-price small{display:block;margin-top:6px;font-size:10px;color:#7d8b73}
+.tier-price-missing{color:#d4794f;font-size:12px}
+.tier-blurb{font-size:12.5px;color:#9aa98f;line-height:1.7;margin:12px 0 0}
+.tier-perks{list-style:none;padding:0;margin:0;flex:1;display:flex;flex-direction:column;gap:9px}
+.tier-perks li{font-size:12.5px;color:#c3cdba;padding-left:20px;position:relative;line-height:1.6}
+.tier-perks li::before{content:"\2713";position:absolute;left:0;color:#8fce4f}
+.tier-perks li.minus::before{content:"\2022";color:#9a8f6a}
+.tier-current{font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#b4d96b;text-align:center;border:1px dashed #526039;padding:14px}
+.tiers-foot{margin-top:34px;font-size:12px;color:#8b9b80;line-height:1.8}
+
+.quota{display:grid;grid-template-columns:72px 1fr;gap:4px 12px;margin:0 0 14px;align-items:center}
+.quota-label{font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#b4d96b;text-transform:uppercase}
+.quota-bar{height:6px;background:#1d2619;border:1px solid #35412e;overflow:hidden}
+.quota-bar i{display:block;height:100%;background:#8fce4f}
+.quota-state{grid-column:2;font-size:11px;color:#8b9b80}
+.quota.spent .quota-bar i{background:#d4794f}
+.quota.unlimited .quota-bar i{background:linear-gradient(90deg,#8fce4f,#e7c75a)}
+.allowances{margin:16px 0}
+.lobby-allowance{border-top:1px solid #2e3a28;padding-top:18px;margin-top:4px}
+.lobby-allowance small{display:block;font-size:11.5px;color:#8b9b80;line-height:1.7}
+.quota-block{background:#2a1d1199;border-left:3px solid #d4794f;padding:13px 15px;font-size:12.5px;line-height:1.7;color:#e8cbb8}
+.ad-warning{display:block;color:#9a8f6a !important;line-height:1.7}
+.map-early{font-size:11.5px;line-height:1.65;padding:9px 11px;border-left:2px solid}
+.map-early.yours{border-color:#e7c75a;color:#ddc98a;background:#2a241055}
+.map-early.locked{border-color:#7c6a2a;color:#9a8f6a}
+
+.avatar{border:1px solid #425039;object-fit:cover;background:#101a11;display:inline-block;vertical-align:middle}
+.avatar.placeholder{display:inline-flex;align-items:center;justify-content:center;font:700 14px ui-monospace,monospace;color:#8fa872;background:#1d2619;letter-spacing:1px}
+.avatar-row{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.avatar-row small{display:block;margin-top:10px;font-size:11px;color:#7d8b73;line-height:1.6;max-width:36ch}
+
+.auth-page{max-width:520px}
+.auth-page form{margin-top:26px}
+.auth-page .deploy{width:100%}
+.auth-alt{margin-top:22px;font-size:12.5px;color:#8b9b80}
+.signin-wall{max-width:560px;border:1px solid #425039;background:#141c14;padding:34px}
+.signin-wall p{font-size:13px;color:#9aa98f}
+.wall-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:22px}
+
+.account-grid,.billing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
+.account-sub{font-size:12.5px;color:#8b9b80;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.account-foot{margin-top:30px;font-size:12px;color:#8b9b80}
+.billing-tier{margin:0 0 16px}
+.billing-facts{display:grid;grid-template-columns:auto 1fr;gap:9px 18px;margin:0 0 18px;font-size:12.5px}
+.billing-facts dt{font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#b4d96b;text-transform:uppercase}
+.billing-facts dd{margin:0;color:#dadfd4}
+.tier-switch{display:flex;flex-direction:column;gap:11px;margin:14px 0}
+.tier-switch-row{display:grid;grid-template-columns:auto 1fr auto;gap:13px;align-items:center;font-size:12px;color:#9aa98f}
+.tier-switch-row button{padding:9px 13px}
+.tier-current-row{display:flex;gap:9px;align-items:center;font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#8b9b80;margin:0}
+.tier-quote{border:1px solid #526039;background:#18231699;padding:18px;margin-top:16px}
+.tier-quote h3{margin-top:0}
+.invoices-card{grid-column:1/-1}
+.invoices,.matches,.rivals,.scoreboard{width:100%;border-collapse:collapse;font-size:12.5px}
+.invoices th,.matches th,.rivals th,.scoreboard th{text-align:left;font:9px ui-monospace,monospace;letter-spacing:1.5px;color:#7d8b73;text-transform:uppercase;padding:10px 12px;border-bottom:1px solid #35412e}
+.invoices td,.matches td,.rivals td,.scoreboard td{padding:12px;border-bottom:1px solid #222c1e;vertical-align:middle}
+.inv-status{font:10px ui-monospace,monospace;letter-spacing:1px;text-transform:uppercase;color:#8b9b80}
+.inv-status.paid{color:#8fce4f}
+.inv-status.open,.inv-status.draft{color:#e7c75a}
+.inv-status.uncollectible,.inv-status.void{color:#d4794f}
+.inv-links{white-space:nowrap}
+.inv-links a{margin-right:12px;font:10px ui-monospace,monospace;letter-spacing:1px}
+.billing-foot,.vote-foot{margin-top:30px;font-size:12px;color:#8b9b80}
+
+.record-page .m-when{color:#8b9b80;white-space:nowrap}
+.record-page .m-style small{display:block;color:#7d8b73;margin-top:4px}
+.record-page .m-outcome{font:700 10px ui-monospace,monospace;letter-spacing:1.5px;text-transform:uppercase}
+.match-row.won .m-outcome{color:#8fce4f}
+.match-row.lost .m-outcome,.match-row.surrendered .m-outcome{color:#d4794f}
+.m-score,.m-length{text-align:right;font-variant-numeric:tabular-nums}
+.commander-head{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-bottom:26px;border-bottom:0;padding-bottom:0;letter-spacing:normal}
+.commander-head h1{margin:10px 0 8px}
+.commander-head p{font-size:12.5px;color:#8b9b80;margin:0}
+.stat-row{display:flex;gap:2px;flex-wrap:wrap;border:1px solid #425039;background:#141c14}
+.stat-row span{flex:1 1 120px;padding:18px;font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#7d8b73;text-transform:uppercase;border-right:1px solid #222c1e}
+.stat-row span b{display:block;font:800 26px Arial,sans-serif;letter-spacing:-1px;color:#dceab8;margin-bottom:7px}
+.stat-row span.hot b{color:#e7c75a}
+.rivals td.won{color:#8fce4f}
+.rivals td.lost{color:#d4794f}
+.scoreboard tr.won td{color:#dceab8}
+.scoreboard tr.won td:first-child{border-left:2px solid #8fce4f}
+.match-page .scoreboard td:nth-child(n+4){text-align:right;font-variant-numeric:tabular-nums}
+
+.proposals{display:flex;flex-direction:column;gap:12px}
+.proposal{display:grid;grid-template-columns:62px 1fr;gap:18px;background:#141c14;border:1px solid #425039;padding:18px}
+.proposal.building{border-color:#6e5c22}
+.p-votes{display:flex;flex-direction:column;align-items:center;gap:6px}
+.p-votes button{padding:6px 11px;font-size:12px;background:#1d2619}
+.p-votes button.on{border-color:#b4d96b;color:#dceab8}
+.p-votes b{font:800 19px Arial,sans-serif}
+.p-body h2{margin:0 0 9px;font-size:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;text-transform:none;letter-spacing:0}
+.p-kind,.p-status{font:9px ui-monospace,monospace;letter-spacing:1.5px;text-transform:uppercase;padding:4px 8px;border:1px solid #49553f;color:#8b9b80;font-style:normal}
+.p-status.building{color:#e7c75a;border-color:#6e5c22}
+.p-body p{font-size:12.5px;color:#9aa98f;margin:0 0 9px}
+.p-body small{font-size:11px;color:#7d8b73}
+
+.legal-page{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;max-width:1100px}
+.legal-nav{display:flex;flex-direction:column;gap:3px;align-self:start;position:sticky;top:24px}
+.legal-nav a{padding:11px 13px;font-size:12.5px;border-left:2px solid transparent}
+.legal-nav a.on{border-left-color:#b4d96b;background:#18231699;color:#dceab8}
+.legal-body{max-width:76ch}
+.legal-body h2{font-size:15px;margin:32px 0 12px}
+.legal-body p,.legal-body li{font-size:13px;line-height:1.85;color:#c3cdba}
+.legal-body ul{padding-left:22px}
+.legal-body li{margin-bottom:9px}
+.legal-meta{font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#7d8b73;text-transform:uppercase}
+.legal-placeholder{border-left:3px solid #e7c75a;background:#2a241055;padding:13px 16px;color:#ddc98a !important;font-size:12.5px !important}
+.legal-placeholder b{color:#e7c75a}
+.legal-foot{margin-top:40px;padding-top:22px;border-top:1px solid #2e3a28;font-size:12px;color:#8b9b80}
+
+.consent-banner{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:26px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:20px 4%;background:#101a11f2;border-top:1px solid #526039;backdrop-filter:blur(6px)}
+.consent-banner p:not(.eyebrow){margin:8px 0 0;font-size:12.5px;line-height:1.75;color:#c3cdba;max-width:74ch}
+.consent-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.consent-upgrade{font:10px ui-monospace,monospace;letter-spacing:1.5px}
+
+.ad-break{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#060a07f7;padding:4%}
+.ad-stage{position:relative;width:min(100%,900px);aspect-ratio:16/9;background:#000;border:1px solid #425039;overflow:hidden}
+.ad-ima,.ad-video{position:absolute;inset:0;width:100%;height:100%}
+.ad-video{object-fit:contain;background:#000}
+.ad-house{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:8%;background:radial-gradient(ellipse at 60% 20%,#2d3d2199,transparent 75%),#0d120e}
+.ad-house h3{font:800 clamp(20px,2.6vw,34px) Arial,sans-serif;text-transform:uppercase;letter-spacing:-.5px;margin:0}
+.ad-house p{font-size:13px;color:#9aa98f;line-height:1.8;max-width:46ch;margin:0}
+.ad-cta{border:1px solid #526039;padding:13px 20px;font:11px ui-monospace,monospace;letter-spacing:1.5px}
+.ad-bar{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;width:min(100%,900px)}
+.ad-count{font:800 20px ui-monospace,monospace;color:#b4d96b;font-variant-numeric:tabular-nums}
+.ad-progress{height:4px;background:#1d2619;border:1px solid #35412e;grid-column:2;grid-row:1}
+.ad-progress i{display:block;height:100%;background:#b4d96b;transition:width .25s linear}
+.ad-note{grid-column:1/-1;font-size:11.5px;color:#8b9b80;line-height:1.7}
+.ad-mute{grid-column:3;grid-row:1;padding:9px 13px}
+.ad-consent{font-size:11px;color:#7d8b73}
+
+.share{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0}
+.share.compact{margin:14px 0;gap:8px}
+.share a,.share button{font:10px ui-monospace,monospace;letter-spacing:1.5px;padding:10px 13px;border:1px solid #425039;color:#b2d777;background:#1a2418}
+.share a:hover,.share button:hover{border-color:#b4d96b}
+.share .eyebrow{margin-right:4px}
+
+@media(max-width:860px){
+  .legal-page{grid-template-columns:1fr;gap:22px}
+  .legal-nav{position:static;flex-direction:row;flex-wrap:wrap}
+  /* style.css's header is a single flex row; let it wrap so the nav and the account menu
+     drop onto their own line instead of overflowing off the side. */
+  header{flex-wrap:wrap}
+  .site-nav{order:3;width:100%;margin-left:0;justify-content:flex-start;flex-wrap:wrap}
+  .account-menu{order:2}
+  .brand{flex:1 1 auto;min-width:0}
+  .stat-row span{flex-basis:92px;padding:13px}
+  .stat-row span b{font-size:19px}
+  .invoices,.matches,.rivals,.scoreboard{display:block;overflow-x:auto;white-space:nowrap}
+  .proposal{grid-template-columns:48px 1fr;gap:12px}
+  .ad-bar{grid-template-columns:auto 1fr}
+  .ad-mute{grid-column:2;grid-row:2;justify-self:end}
+}
+.tier-price-soon{color:#8b9b80;font-size:12px}
+
+@media(max-width:650px){
+  /* style.css hides every header link on phones, which was fine when the only one was
+     "Source". The site navigation and the account links have to stay reachable. */
+  header .site-nav a,header .account-menu a{display:inline-block}
+  .site-nav a{padding:8px 9px;font-size:10px}
+  .site-nav{gap:2px}
+  .account-menu{gap:7px}
+  .account-dropdown{right:auto;left:0}
+  .consent-banner{gap:14px;padding:16px 5%}
+  .consent-actions button{flex:1 1 140px}
+  .tier-switch-row{grid-template-columns:auto 1fr;row-gap:8px}
+  .tier-switch-row button{grid-column:2;justify-self:start}
+}
