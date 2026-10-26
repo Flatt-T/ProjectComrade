@@ -1,21 +1,43 @@
-// Terms, privacy, refunds and the advertising/cookies notice.
+// Terms, privacy, refunds, advertising and acceptable use.
 //
-// IMPORTANT: the copy below is a working skeleton, not legal advice, and every block marked
-// [NEEDS YOUR TEXT] has to be filled in and the whole thing reviewed before the paid service
-// opens. The structure, routing, consent wiring and the facts about how the service actually
-// behaves are real; the commitments a business makes are yours to set.
+// These are complete drafts, written against what the service actually does — every factual
+// claim here (what is stored, what a cookie is for, how a refund works, how long an
+// advertisement runs) was checked against the code, so they describe the real system rather
+// than a template's idea of one.
+//
+// They are NOT legal advice and have not been reviewed by a solicitor. Three things cannot be
+// drafted for you and are marked [NEEDS YOUR TEXT]: the operating entity's registered details,
+// and the list of advertising networks you actually enable. Several positions are *choices*
+// rather than requirements — the refund window, the liability cap, retention periods — and are
+// flagged in COMPANY.notes below so they can be changed deliberately rather than by accident.
 import React from 'react';
 import { useAuth } from '../auth';
 import { Link, useRoute } from '../router';
 import { Notice } from '../ui';
 
-/** Replace this with the operating entity's own details before launch. */
+/**
+ * The operating entity. Fill in the two marked fields before launch — a UK trader must give
+ * its registered address and company number where consumers can find them.
+ */
 const COMPANY = {
   name: 'Thunderchild Creative Technologies',
+  service: 'Project Comrade',
   contact: 'support@thunderchildcreativetechnologies.com',
   address: '[NEEDS YOUR TEXT: registered address]',
-  registration: '[NEEDS YOUR TEXT: company number and VAT number if registered]',
+  registration: '[NEEDS YOUR TEXT: company number, and VAT number if VAT registered]',
+  jurisdiction: 'England and Wales',
 };
+
+/**
+ * Advertising networks whose tags are configured in COMRADE_AD_TAGS. Each one receives what
+ * the browser sends it when the advertisement loads, so each has to be named here with a link
+ * to its own notice. Leave it empty while only the house advertisement runs — the pages then
+ * say so, truthfully.
+ */
+const AD_NETWORKS: { name: string; href: string }[] = [
+  // Example once a network is live:
+  // { name: 'Google Ad Manager', href: 'https://policies.google.com/privacy' },
+];
 
 const PAGES = [
   { id: 'terms', title: 'Terms of service' },
@@ -29,11 +51,31 @@ function Placeholder({ children }: { children: React.ReactNode }) {
   return <p className="legal-placeholder"><b>[NEEDS YOUR TEXT]</b> {children}</p>;
 }
 
+/** A position that is a deliberate choice rather than a legal requirement. */
+function Choice({ children }: { children: React.ReactNode }) {
+  return <p className="legal-choice"><b>Chosen position —</b> {children}</p>;
+}
+
+function AdNetworkList() {
+  if (!AD_NETWORKS.length) {
+    return <p>We are not currently serving third-party advertisements: the pre-match slot shows
+      our own promotion. If that changes, this page will name every network we use and link to
+      its privacy notice before any of their advertisements run.</p>;
+  }
+  return <>
+    <p>The networks that may serve an advertisement to you, and their own privacy notices:</p>
+    <ul>{AD_NETWORKS.map(network => <li key={network.name}>
+      <a href={network.href} target="_blank" rel="noreferrer noopener">{network.name}</a>
+    </li>)}</ul>
+  </>;
+}
+
 export default function Legal() {
   const { match } = useRoute();
   const { tiers } = useAuth();
   const page = PAGES.find(p => match(`/legal/${p.id}`)) ?? PAGES[0];
   const version = tiers?.termsVersion ?? '';
+  const incomplete = COMPANY.address.startsWith('[') || COMPANY.registration.startsWith('[');
 
   return <section className="page legal-page">
     <nav className="legal-nav">
@@ -43,181 +85,469 @@ export default function Legal() {
 
     <article className="legal-body">
       <h1>{page.title}</h1>
-      <p className="legal-meta">Version {version || 'draft'} · operated by {COMPANY.name}</p>
-      <Notice kind="bad">
-        Draft. This text has not been reviewed by a solicitor and must be completed before the
-        paid service opens to the public.
-      </Notice>
+      <p className="legal-meta">Version {version || 'draft'} · {COMPANY.name}</p>
+      {incomplete && <Notice kind="bad">
+        Draft. The operating entity's registered details are not filled in and this text has not
+        been reviewed by a solicitor. Complete both before the paid service opens.
+      </Notice>}
 
+      {/* ------------------------------------------------------------------ */}
       {page.id === 'terms' && <>
-        <h2>1. Who we are</h2>
-        <p>Project Comrade is operated by {COMPANY.name}, {COMPANY.address}. {COMPANY.registration}.
-          You can reach us at {COMPANY.contact}.</p>
+        <h2>1. Who we are, and what this covers</h2>
+        <p>{COMPANY.service} is operated by {COMPANY.name}, {COMPANY.address}. {COMPANY.registration}.
+          You can reach us at {COMPANY.contact}, and we aim to answer within five working days.</p>
+        <p>These terms are the agreement between you and us for your use of the service, whether
+          you play free, as a guest, or on a subscription. By using the service you accept them.
+          If you do not accept them, please do not use the service.</p>
 
         <h2>2. What the service is</h2>
-        <p>Project Comrade is a browser-based real-time strategy platform. Some game styles run
-          original GPL-licensed engines with freeware content; the Comrade Fusion Engine styles are
-          independent gameplay replications with original procedural art. This is an unofficial
-          community project and is not affiliated with, endorsed by or sponsored by Electronic Arts
-          or Westwood Studios.</p>
+        <p>{COMPANY.service} is a browser-based real-time strategy platform. The Classic game
+          styles run original GPL-licensed engines with freeware content. The Comrade Fusion
+          Engine styles are independent gameplay replications with original procedural art: they
+          approximate how the classics played and are tuned over time.</p>
+        <p>This is an unofficial community project. It is not affiliated with, endorsed by,
+          sponsored by or connected to Electronic Arts, Westwood Studios or any other rights
+          holder in the original games. Trade marks belong to their owners and are used only to
+          describe what a game style replicates.</p>
 
-        <h2>3. Accounts</h2>
-        <p>You need an account to keep a callsign, a record and a subscription. You must give an
-          email address you control, keep your password to yourself, and tell us promptly if you
-          think somebody else has got into your account. One person, one account. You must be at
-          least 13 years old to register, and if you are under 18 you need your parent or guardian's
-          permission.</p>
-        <p>Your callsign is yours while your account is live. We may reclaim a callsign that
-          impersonates somebody, that is used to deceive, or that is unlawful or abusive.</p>
+        <h2>3. Who may use it</h2>
+        <p>You must be at least 13 years old to register. If you are under 18 you need the
+          permission of a parent or guardian, and if you are under 18 you may not subscribe
+          without their consent to the payment.</p>
+        <p>You may hold one account. You must give an email address you control, keep your
+          password to yourself, and tell us promptly at {COMPANY.contact} if you believe somebody
+          else has got into your account. You are responsible for what is done through your
+          account up to the point you tell us.</p>
 
-        <h2>4. Free play and subscriptions</h2>
-        <p>Free accounts get a weekly allowance of matches, which renews seven days after the day
-          you registered, and see a short advertisement before each match. Subscriptions remove the
-          advertisement and raise or remove the allowances as set out on the
-          {' '}<Link to="/tiers">tiers page</Link>. We may change the allowances or the prices; if we
-          do, we will tell subscribers before the change applies to them, and you can cancel.</p>
+        <h2>4. Your callsign</h2>
+        <p>Your callsign is yours for as long as your account is open, and nobody else can take
+          it while you hold it. If you delete your account it is released and somebody else may
+          claim it.</p>
+        <p>We may reclaim a callsign that impersonates another person or organisation, that is
+          used to deceive, that implies a connection with us or with a rights holder, or that is
+          unlawful or abusive. Where we do, we will tell you and give you a chance to choose
+          another one unless the circumstances make that inappropriate.</p>
 
-        <h2>5. Paying</h2>
-        <p>Subscriptions are billed monthly in advance by Stripe, who process the payment and hold
-          the card details — we never see them. Prices are shown before you buy and include or exclude
-          VAT as stated at checkout. If a payment fails, Stripe retries it; you keep your tier while it
-          does, and the subscription lapses if it cannot be collected.</p>
+        <h2>5. Free play, allowances and advertisements</h2>
+        <p>Guests and free accounts get a weekly allowance of matches. The allowance renews seven
+          days after the day you registered — not on a fixed day of the week — and the current
+          allowances for every tier are set out on the <Link to="/tiers">tiers page</Link>.</p>
+        <p>On the free and guest tiers a short advertisement of up to thirty seconds plays before
+          a match. Your base is on the battlefield while it runs, so what you lose is the time,
+          not the position. Subscribers see no advertisement.</p>
 
-        <h2>6. Cancelling</h2>
-        <p>You can cancel at any time from your billing page. See
+        <h2>6. Subscriptions and payment</h2>
+        <p>Subscriptions are monthly, billed in advance, and renew automatically until you cancel.
+          Payment is taken by Stripe, who process the payment and hold your card details — we
+          never see or store them.</p>
+        <p>The price is shown before you buy, in pounds sterling, and the checkout tells you
+          whether VAT is included. By subscribing you authorise the recurring charge until you
+          cancel.</p>
+        <p>If a payment fails, Stripe retries it on a schedule. You keep your tier while it does.
+          If it cannot be collected, the subscription ends and your account returns to the free
+          tier; nothing is owed and nothing is sent to collection.</p>
+
+        <h2>7. Changing tier and cancelling</h2>
+        <p>Upgrades take effect immediately and you pay only the prorated difference for the rest
+          of the month. Downgrades take effect at your renewal date, so you keep what you have
+          already paid for. You can cancel at any time from your billing page; your subscription
+          then runs to the end of the paid month and does not renew. See
           {' '}<Link to="/legal/refunds">cancellations and refunds</Link>.</p>
 
-        <h2>7. Fair play</h2>
-        <p>See <Link to="/legal/acceptable-use">acceptable use</Link>. We may suspend or close an
-          account that breaks those rules, and where we do we will refund the unused part of a paid
-          month unless the account was closed for serious or repeated abuse.</p>
+        <h2>8. Changes to the service, the allowances and the price</h2>
+        <p>We will keep developing the service: adding, changing and sometimes withdrawing game
+          styles, maps and features. We may also change the allowances or the price.</p>
+        <p>If we change the price of your subscription, or reduce what your tier includes, we
+          will tell you by email at least 30 days before it applies to you, and you may cancel
+          before it takes effect. Your existing paid month is never changed.</p>
 
-        <h2>8. Availability</h2>
-        <p>We work to keep the service up but we do not promise it will be uninterrupted. We may
-          change, suspend or withdraw game styles, maps and features. Nothing here excludes liability
-          we cannot exclude by law, including for death or personal injury caused by negligence, or
-          for fraud.</p>
-        <Placeholder>Set out your liability cap, the law and courts that apply (England and Wales, presumably), and how disputes are handled.</Placeholder>
+        <h2>9. Fair play</h2>
+        <p>Our <Link to="/legal/acceptable-use">acceptable use policy</Link> is part of these
+          terms. If you break it we may warn you, restrict chat, suspend your account or close
+          it, depending on how serious and how repeated the matter is. Where we close a paid
+          account other than for serious or repeated abuse, we refund the unused part of the
+          month.</p>
 
-        <h2>9. Intellectual property</h2>
+        <h2>10. Your content</h2>
+        <p>You keep whatever rights you have in what you post — chat, a callsign, a display name,
+          an avatar, a proposal. By posting it you give us a non-exclusive, royalty-free licence
+          to store it and show it on the service for as long as you keep it there. You confirm
+          you have the right to post it. We may remove anything that breaks these terms.</p>
+
+        <h2>11. Our content and third-party licences</h2>
         <p>The engine source we distribute stays under its own licences, which are recorded in the
-          project's rights ledger and shipped with the service. Classic artwork and sound remain the
-          property of their owners. Our own code, art, maps and branding stay ours. You keep whatever
-          rights you have in what you post; by posting it you let us show it on the service.</p>
+          project's rights ledger and shipped with the service. Classic artwork and sound remain
+          the property of their owners. Our own code, procedural art, maps, interface and
+          branding remain ours. Nothing here transfers any of it to you beyond the right to use
+          the service.</p>
 
-        <h2>10. Changes to these terms</h2>
-        <p>We will tell you about material changes and ask you to accept them when you next sign in.</p>
+        <h2>12. Availability</h2>
+        <p>We work to keep the service up, but we do not promise it will be uninterrupted or
+          error-free. We may take it down for maintenance, and we will give notice where we
+          reasonably can. The service is provided as it is, and we do not promise it will meet
+          any particular requirement of yours.</p>
+
+        <h2>13. Our responsibility to you</h2>
+        <p>Nothing in these terms limits liability that cannot be limited by law — including for
+          death or personal injury caused by negligence, for fraud or fraudulent
+          misrepresentation, or for your rights under the Consumer Rights Act 2015.</p>
+        <p>Subject to that, we are not liable for loss that was not reasonably foreseeable, for
+          business losses (the service is supplied for private use), or for loss of game progress,
+          statistics or standing. Our total liability to you in any twelve-month period is limited
+          to the greater of £100 and the amount you paid us in that period.</p>
+        <Choice>The £100 / twelve-months-of-fees cap is a normal position for a low-value
+          consumer subscription, not a requirement. Raise or lower it deliberately.</Choice>
+
+        <h2>14. Ending the agreement</h2>
+        <p>You may stop using the service and delete your account at any time. We may end this
+          agreement by closing your account if you seriously or repeatedly break these terms, or
+          if we withdraw the service altogether — in which case we will give reasonable notice and
+          refund any unused paid time.</p>
+
+        <h2>15. Law and disputes</h2>
+        <p>These terms are governed by the law of {COMPANY.jurisdiction}, and you and we can both
+          bring claims in its courts. If you live elsewhere in the UK you may also bring a claim
+          in your local courts. Nothing here affects your rights as a consumer where you live.</p>
+        <p>If something goes wrong, please write to {COMPANY.contact} first — most things are
+          settled that way.</p>
+        <Choice>Governing law is set to {COMPANY.jurisdiction} on the assumption the operating
+          entity is there. Change it if that is not so.</Choice>
+
+        <h2>16. Changes to these terms</h2>
+        <p>We may update these terms. We will tell you about material changes by email or in the
+          service, and ask you to accept them when you next sign in. The version in force is shown
+          at the top of this page.</p>
       </>}
 
+      {/* ------------------------------------------------------------------ */}
       {page.id === 'privacy' && <>
-        <h2>What we hold</h2>
+        <p>This notice explains what we hold about you, why, and what you can do about it. It
+          covers {COMPANY.service} only. We are the data controller: {COMPANY.name},
+          {' '}{COMPANY.address}. {COMPANY.registration}. Contact {COMPANY.contact}.</p>
+
+        <h2>The short version</h2>
+        <p>We hold the least we can: a callsign, an email address, what you played and whether you
+          are subscribed. We never see your password or your card details. We set no analytics or
+          tracking cookies. We do not sell your data. You can erase almost all of it yourself in
+          two clicks from your account page.</p>
+
+        <h2>What we hold, and why</h2>
+        <table className="legal-table">
+          <thead><tr><th>What</th><th>Why</th><th>Lawful basis</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Callsign and email address</td>
+              <td>To run your account, sign you in and send service messages</td>
+              <td>Performing our contract with you</td>
+            </tr>
+            <tr>
+              <td>Password</td>
+              <td>Held by AWS Cognito, hashed. We never see or store it</td>
+              <td>Performing our contract with you</td>
+            </tr>
+            <tr>
+              <td>Display name, country, preferred side, avatar</td>
+              <td>Optional profile. You can change or clear any of them at any time</td>
+              <td>Performing our contract with you</td>
+            </tr>
+            <tr>
+              <td>Match records: what you played, when, on what map, how it ended, and the final
+                economy and combat figures</td>
+              <td>Your record, your history and the results other players see</td>
+              <td>Performing our contract with you</td>
+            </tr>
+            <tr>
+              <td>Play records: one row each time you start a match</td>
+              <td>To count your weekly allowance and to stop it being circumvented</td>
+              <td>Performing our contract; our legitimate interest in preventing abuse</td>
+            </tr>
+            <tr>
+              <td>A Stripe customer reference, your tier and subscription status</td>
+              <td>To give you what you have paid for and show you your invoices</td>
+              <td>Performing our contract with you</td>
+            </tr>
+            <tr>
+              <td>Invoices and payment records</td>
+              <td>Accounting and tax</td>
+              <td>Legal obligation</td>
+            </tr>
+            <tr>
+              <td>Consent records: what you agreed to, and when</td>
+              <td>To honour your choices and show that we did</td>
+              <td>Legal obligation</td>
+            </tr>
+            <tr>
+              <td>Advertising choice</td>
+              <td>To decide whether an advertisement may be personalised</td>
+              <td>Consent, which you can withdraw at any time</td>
+            </tr>
+            <tr>
+              <td>Product email</td>
+              <td>To tell you when new maps and fusions launch</td>
+              <td>Consent, which you can withdraw at any time</td>
+            </tr>
+            <tr>
+              <td>Guest identifier: a signed random id in a cookie</td>
+              <td>So an unregistered visitor's taster match can be counted</td>
+              <td>Our legitimate interest in offering a free trial fairly</td>
+            </tr>
+            <tr>
+              <td>Operational logs</td>
+              <td>To keep the service running and investigate faults</td>
+              <td>Our legitimate interest in a reliable, secure service</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>What we deliberately do not hold</h2>
         <ul>
-          <li><b>Your account:</b> callsign, email address, and the password hash held by AWS Cognito
-            (we never see or store your password).</li>
-          <li><b>Optional profile:</b> display name, country, preferred side and an avatar, all of
-            which you can change or clear whenever you like.</li>
-          <li><b>Play records:</b> which matches you played, when, on what map and how they ended,
-            with the final economy and combat figures.</li>
-          <li><b>Allowance records:</b> one row per match you start, so your weekly allowance can be
-            counted.</li>
-          <li><b>Billing:</b> a Stripe customer reference, your subscription tier and status. Card
-            details are held by Stripe, never by us.</li>
-          <li><b>Consent records:</b> what you agreed to and when.</li>
-          <li><b>Operational logs:</b> deliberately free of IP addresses and chat text. Rate limiting
-            uses a one-way hash of the connecting address, which is never stored.</li>
+          <li><b>Your password.</b> It goes to AWS Cognito over an encrypted connection and is
+            never stored or logged by us.</li>
+          <li><b>Your card details.</b> They are entered on Stripe's own pages and held by Stripe.
+            They never reach our servers.</li>
+          <li><b>IP addresses, in our logs.</b> Our operational logs contain no IP address and no
+            chat text. Rate limiting uses a one-way hash of the connecting address, computed for
+            the request and never stored.</li>
+          <li><b>Analytics or tracking cookies of our own.</b> We set none.</li>
         </ul>
 
-        <h2>Why we hold it</h2>
-        <p>To run your account and your subscription (to perform our contract with you), to count
-          allowances and prevent abuse (our legitimate interests), to meet our tax and accounting
-          duties (legal obligation), and — only where you have said yes — to show personalised
-          advertisements or send you product email (consent, which you can withdraw at any time from
-          your <Link to="/account">account page</Link>).</p>
+        <h2>Who else is involved</h2>
+        <ul>
+          <li><b>Stripe</b> — payments, subscriptions and invoicing. Stripe is a controller in its
+            own right for payment data. <a href="https://stripe.com/gb/privacy" target="_blank" rel="noreferrer noopener">Stripe's privacy policy</a>.</li>
+          <li><b>Amazon Web Services</b> — the Cognito user pool that holds your sign-in
+            credentials, and the email service that sends confirmation and reset codes.
+            {' '}<a href="https://aws.amazon.com/privacy/" target="_blank" rel="noreferrer noopener">AWS privacy notice</a>.</li>
+          <li><b>Advertising networks</b> — see below and <Link to="/legal/cookies">cookies and advertising</Link>.</li>
+        </ul>
+        <AdNetworkList />
+        {!AD_NETWORKS.length && <Placeholder>When you enable a network in
+          <code> COMRADE_AD_TAGS</code>, add it to <code>AD_NETWORKS</code> in this file with a
+          link to its privacy notice. Naming them is required before their advertisements run.</Placeholder>}
 
-        <h2>Who we share it with</h2>
-        <p>Stripe (payments and invoicing), Amazon Web Services (the Cognito user pool that holds your
-          sign-in credentials), and the advertising networks that serve the pre-match slot. Advertising
-          networks receive what your browser sends them when the advertisement loads; with
-          personalisation off, the request is marked non-personalised.</p>
-        <Placeholder>Name each advertising network you actually enable, with a link to its own privacy notice, and confirm the lawful basis and any international transfer mechanism.</Placeholder>
+        <h2>Where your data is held</h2>
+        <p>Our database and the service itself run on our own infrastructure in the United
+          Kingdom. AWS Cognito and the email service run in the AWS London region. Stripe and any
+          advertising networks may process data outside the UK; where they do, they rely on the
+          UK's approved transfer mechanisms, such as the International Data Transfer Addendum.</p>
 
         <h2>How long we keep it</h2>
-        <p>Your account for as long as it is open. When you delete your account we release the
-          callsign and erase your profile, avatar and sign-in immediately; match rows stay, with your
-          name removed, because they are also the other players' history. Invoices are kept for as
-          long as tax law requires.</p>
-        <Placeholder>Confirm retention periods, especially for invoices and logs.</Placeholder>
+        <ul>
+          <li><b>Your account and profile:</b> while your account is open. When you delete it, your
+            callsign is released and your profile, avatar and sign-in are erased immediately.</li>
+          <li><b>Match records:</b> kept after you delete your account, with your name removed and
+            no link to you, because they are also the other players' history.</li>
+          <li><b>Play records:</b> 12 months, then deleted.</li>
+          <li><b>Invoices and payment records:</b> seven years, as tax law requires.</li>
+          <li><b>Consent records:</b> for as long as the consent applies, and then two years.</li>
+          <li><b>Operational logs:</b> 30 days.</li>
+        </ul>
+        <Choice>These retention periods are our proposal, except the seven years for invoices,
+          which follows HMRC's requirement. Shorten them if you prefer.</Choice>
 
         <h2>Your rights</h2>
-        <p>You can see, correct, export or erase your data, object to processing, or withdraw consent.
-          Most of it you can do yourself from your account page; for anything else write to
-          {' '}{COMPANY.contact}. You can complain to the Information Commissioner's Office.</p>
+        <p>You have the right to see what we hold, to correct it, to have it erased, to get a copy
+          in a portable form, to restrict or object to how we use it, and to withdraw consent at
+          any time. Most of this you can do yourself:</p>
+        <ul>
+          <li><b>See and correct:</b> your <Link to="/account">account page</Link>.</li>
+          <li><b>Withdraw consent:</b> the advertising and email switches on the same page.</li>
+          <li><b>Erase:</b> "Delete your account" on the same page.</li>
+        </ul>
+        <p>For anything else — including a copy of your data — write to {COMPANY.contact} and we
+          will answer within one month.</p>
+        <p>If you are not happy with how we have handled your data you can complain to the
+          Information Commissioner's Office at <a href="https://ico.org.uk/make-a-complaint/" target="_blank" rel="noreferrer noopener">ico.org.uk</a>,
+          or to your local supervisory authority. We would rather you told us first.</p>
+
+        <h2>Children</h2>
+        <p>The service is not intended for children under 13 and we do not knowingly hold data
+          about them. If you believe a child under 13 has registered, tell us at
+          {' '}{COMPANY.contact} and we will remove the account.</p>
+
+        <h2>Changes</h2>
+        <p>If we change this notice we will update the version at the top and, for material
+          changes, tell you in the service or by email.</p>
       </>}
 
+      {/* ------------------------------------------------------------------ */}
       {page.id === 'refunds' && <>
         <h2>Cancelling</h2>
-        <p>Cancel whenever you like from your <Link to="/account/billing">billing page</Link>. Your
-          subscription then runs to the end of the month you have already paid for and does not renew.
-          You keep your tier until that date.</p>
+        <p>Cancel whenever you like from your <Link to="/account/billing">billing page</Link> —
+          no email, no form, no retention call. Your subscription then runs to the end of the
+          month you have already paid for and does not renew. You keep your tier until that date,
+          and the page tells you what that date is.</p>
 
         <h2>Your 14-day right to change your mind</h2>
-        <p>As a consumer in the UK or EU you normally have 14 days from subscribing to cancel for a
-          refund. Because the service is digital and available immediately, you are asked to agree
-          that it starts straight away, and you keep a refund right for the part you have not used.</p>
-        <Placeholder>State exactly what you will refund inside 14 days — in full, or pro rata for the unused days — and how to ask. A clear, more generous rule causes fewer disputes than the legal minimum.</Placeholder>
+        <p>As a consumer in the UK you have 14 days from subscribing to change your mind. Because
+          the service is digital and available to you immediately, you are asked at checkout to
+          agree that it starts straight away, which would normally end that right once you have
+          used it.</p>
+        <p><b>We do not rely on that.</b> If you ask within 14 days of your first subscription
+          payment, we will refund it in full, whether or not you have played — once per customer.
+          Write to {COMPANY.contact} from the address on the account.</p>
+        <Choice>A full no-questions refund in the first 14 days is more generous than the law
+          requires, and causes far fewer disputes and chargebacks than a pro-rata rule. The
+          "once per customer" limit stops it being used as a monthly free pass.</Choice>
+
+        <h2>After 14 days</h2>
+        <p>Subscriptions are monthly and we do not refund part-months as a matter of course —
+          cancel and you keep the tier until the month runs out. If something went wrong, the
+          sections below apply, and if you think your case is unfair, write to us: we would rather
+          sort it out than argue.</p>
 
         <h2>Changing tier</h2>
-        <p>Upgrades take effect immediately and Stripe charges only the difference for the rest of the
-          month. Downgrades take effect at your renewal date, so you are never charged twice for the
-          same period and never lose a tier you have paid for.</p>
+        <p>Upgrades take effect immediately and you pay only the prorated difference for the rest
+          of the month — the exact amount is quoted to you before you confirm. Downgrades take
+          effect at your renewal date, so you are never charged twice for the same period and never
+          lose a tier you have already paid for.</p>
 
-        <h2>If something goes wrong</h2>
-        <p>If the service is unavailable for a long stretch, or you were charged in error, write to
-          {' '}{COMPANY.contact} and we will put it right.</p>
-        <Placeholder>Define what counts as a long outage and what you will do about it.</Placeholder>
+        <h2>If the service is unavailable</h2>
+        <p>If the service is unavailable to subscribers for more than 24 hours in a row, or for
+          more than 72 hours in total in a calendar month, write to {COMPANY.contact} and we will
+          credit the affected days against your next invoice, or refund them if you would rather.
+          Short interruptions and planned maintenance are not included.</p>
+        <Choice>These thresholds are a deliberate, modest commitment for a hobby-scale service.
+          They are a promise once published, so set them where you can keep them.</Choice>
+
+        <h2>If you were charged in error</h2>
+        <p>Tell us at {COMPANY.contact} and we will refund it in full, promptly. That includes a
+          payment taken after you cancelled, a duplicate charge, or a charge you did not
+          authorise.</p>
+
+        <h2>If we close your account</h2>
+        <p>If we close a paid account for anything other than serious or repeated breach of the
+          <Link to="/legal/acceptable-use"> acceptable use policy</Link>, we refund the unused part
+          of the month. For serious or repeated breach, we do not.</p>
+
+        <h2>How refunds are paid</h2>
+        <p>Refunds go back to the card or method you paid with, through Stripe. They usually
+          appear within five to ten working days, depending on your bank. We do not refund to a
+          different method.</p>
+
+        <h2>Before you ask your bank</h2>
+        <p>If you are unhappy with a charge, please write to {COMPANY.contact} first. A chargeback
+          costs us a fee and is far slower for you than our asking Stripe to refund it, which we
+          can do the same day.</p>
       </>}
 
+      {/* ------------------------------------------------------------------ */}
       {page.id === 'cookies' && <>
         <h2>What we store on your device</h2>
-        <ul>
-          <li><b>Session cookie</b> (<code>cmrd_session</code>): keeps you signed in. It is httpOnly,
-            so no script on the page can read it. Strictly necessary.</li>
-          <li><b>Guest cookie</b> (<code>cmrd_guest</code>): a signed random id, so an unregistered
-            visitor's taster match can be counted. No personal data, strictly necessary for that.</li>
-          <li><b>Local settings</b>: your callsign, audio settings and your advertising choice, kept
-            in your browser's own storage and never sent anywhere except as your choice.</li>
-        </ul>
-        <p>We set no analytics or tracking cookies of our own.</p>
+        <p>We set no analytics cookies and no tracking cookies of our own. There are two cookies,
+          both strictly necessary, plus some settings kept in your browser's own storage.</p>
+        <table className="legal-table">
+          <thead><tr><th>Name</th><th>What it does</th><th>How long</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>cmrd_session</code></td>
+              <td>Keeps you signed in. It is httpOnly, so no script on the page can read it, and
+                it is only sent to us</td>
+              <td>30 days</td>
+            </tr>
+            <tr>
+              <td><code>cmrd_guest</code></td>
+              <td>A signed random identifier so an unregistered visitor's taster match can be
+                counted. It holds no personal data</td>
+              <td>13 months</td>
+            </tr>
+            <tr>
+              <td>Browser storage</td>
+              <td>Your callsign, audio settings and your advertising choice. These stay on your
+                device; only the advertising choice is sent to us, and only if you are signed in</td>
+              <td>Until you clear it</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>Strictly necessary cookies do not need your consent, which is why you are not asked to
+          accept cookies to use the site. You are asked one question, about advertising.</p>
 
         <h2>Advertising</h2>
-        <p>Free and guest players see one advertisement of up to thirty seconds before a match. Your
-          base is already on the battlefield while it plays, so the only cost is the time. Subscribers
-          see none at all.</p>
-        <p>With personalisation <b>off</b> — the default until you turn it on — the advertisement
-          request is marked non-personalised and the networks are asked not to profile you. With it
-          <b> on</b>, the networks may use what your browser sends them to choose a more relevant
-          advertisement. You can change this at any time on your
-          {' '}<Link to="/account">account page</Link>, and the change applies to the very next match.</p>
-        <Placeholder>List the networks you enable and link their notices. If you join a network that requires IAB TCF consent strings, a certified consent management platform has to be added here.</Placeholder>
+        <p>Free and guest players see one advertisement of up to thirty seconds before a match.
+          Your base is already on the battlefield while it plays, so the only cost is the time.
+          Subscribers see no advertisement at all, and are never asked this question.</p>
+
+        <h3>Personalised or not</h3>
+        <p>With personalisation <b>off</b> — which is the default until you turn it on — the
+          request we make is marked as non-personalised and the network is asked not to build or
+          use a profile of you. With it <b>on</b>, the network may use what your browser sends it
+          to choose a more relevant advertisement.</p>
+        <p>Either way the advertisement is the same length and you lose nothing by saying no. You
+          can change your answer whenever you like on your <Link to="/account">account page</Link>,
+          and it applies to your very next match.</p>
+
+        <h3>What the network receives</h3>
+        <p>When an advertisement loads, your browser contacts the network directly. It will
+          receive what any web request carries — your IP address, your browser and device type,
+          and the page the request came from. We do not send it your callsign, your email address
+          or your match history, ever.</p>
+        <AdNetworkList />
+        {!AD_NETWORKS.length && <Placeholder>Name every network you enable here and in
+          <code> AD_NETWORKS</code> in this file, each with a link to its privacy notice and its
+          opt-out, before its advertisements run.</Placeholder>}
+
+        <h3>Turning advertisements off entirely</h3>
+        <p>Any <Link to="/tiers">subscription</Link> removes them completely.</p>
       </>}
 
+      {/* ------------------------------------------------------------------ */}
       {page.id === 'acceptable-use' && <>
+        <p>This policy is part of the <Link to="/legal/terms">terms of service</Link>. It is short
+          because it is mostly one idea: play properly and leave other people alone.</p>
+
         <h2>Play fair</h2>
         <ul>
-          <li>No cheating: no modified clients, no automation, no exploiting bugs for advantage, and
-            no interfering with the lockstep simulation other players depend on.</li>
-          <li>No getting round the allowances — multiple accounts, cleared cookies to farm guest
-            matches, or anything else meant to dodge the limits.</li>
-          <li>No abuse in chat or in a callsign: nothing hateful, threatening, sexual about children,
-            or designed to harass another player.</li>
-          <li>No impersonating staff or other commanders.</li>
-          <li>No attacking the service: no scraping at volume, no probing, no denial of service.</li>
+          <li>No modified clients, no automation, no scripts that play for you.</li>
+          <li>No exploiting a bug for advantage. Tell us about it instead — use the help button.</li>
+          <li>No interfering with the synchronised simulation other players depend on.</li>
+          <li>No deliberately ruining matches: sabotaging allies, stalling to run the clock down,
+            or quitting repeatedly to spoil other people's games.</li>
         </ul>
-        <h2>What happens if you do</h2>
-        <p>Depending on how serious it is: a warning, a chat restriction, a suspension, or the account
-          closed. Where we close a paid account for a first, minor matter we refund the unused part of
-          the month.</p>
-        <Placeholder>Say how an appeal works and who hears it.</Placeholder>
+
+        <h2>Do not dodge the allowances</h2>
+        <ul>
+          <li>One account per person.</li>
+          <li>No clearing cookies or using private windows to farm guest matches.</li>
+          <li>No sharing or selling an account, and no using somebody else's.</li>
+        </ul>
+
+        <h2>Treat people decently</h2>
+        <ul>
+          <li>Nothing hateful, threatening or harassing in chat, a callsign or a display name —
+            including on the grounds of race, religion, sex, gender identity, sexual orientation
+            or disability.</li>
+          <li>Nothing sexual involving children, ever. We report this to the authorities.</li>
+          <li>No doxxing: do not post anyone's personal information, including your own.</li>
+          <li>No impersonating staff, another commander, or anybody else.</li>
+          <li>No advertising, spam or links to malware.</li>
+        </ul>
+
+        <h2>Do not attack the service</h2>
+        <ul>
+          <li>No probing, scanning or testing our security without written permission. If you find
+            something, tell us at {COMPANY.contact} — we will thank you properly.</li>
+          <li>No denial of service, no scraping at volume, no automated account creation.</li>
+          <li>No reverse engineering the paid parts of the service to get round them.</li>
+        </ul>
+
+        <h2>What happens if you break this</h2>
+        <p>Depending on how serious and how repeated it is: a warning, a chat restriction, a
+          temporary suspension, or the account closed. We aim to match the response to the
+          conduct, and a first minor slip will not cost you an account.</p>
+        <p>If we close a paid account for a first, minor matter, we refund the unused part of the
+          month. For serious or repeated breach — cheating, harassment, attacking the service — we
+          do not.</p>
+
+        <h2>Appeals</h2>
+        <p>If you think we got it wrong, write to {COMPANY.contact} within 30 days with your
+          callsign and what happened. Somebody who was not involved in the original decision will
+          look at it, and we will tell you the outcome and why. Our decision after an appeal is
+          final.</p>
+
+        <h2>Reporting somebody</h2>
+        <p>Use the help button in the war room, or write to {COMPANY.contact} with the callsign,
+          the game code and roughly when it happened. We will tell you we have received it; we may
+          not be able to tell you what we did about it.</p>
       </>}
 
       <footer className="legal-foot">

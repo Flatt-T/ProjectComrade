@@ -160,7 +160,8 @@ With the toolchain on PATH, run `python tools/prepare-content.py` and `python to
 - [COMRADE 08 - Verification](docs/spec/COMRADE-08-VERIFICATION.md) - Fidelity oracle and acceptance tests
 - [COMRADE 09 - Hosting](docs/spec/COMRADE-09-HOSTING.md) - ChatGPT Sites evaluation and deployment
 - [ADR 011 - Paid platform](docs/adr/011-paid-platform.md) - Accounts, allowances, advertisements and subscriptions
-- [Paid platform setup](docs/runbooks/paid-platform-setup.md) - Postgres, Cognito, Stripe and advertising provisioning
+- [External services](docs/runbooks/external-services.md) - What each third party is for, what it costs and in what order
+- [Paid platform setup](docs/runbooks/paid-platform-setup.md) - Exact Postgres, Cognito, Stripe and advertising configuration
 
 ## License
 

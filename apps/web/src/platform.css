@@ -172,6 +172,15 @@
 .legal-meta{font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#7d8b73;text-transform:uppercase}
 .legal-placeholder{border-left:3px solid #e7c75a;background:#2a241055;padding:13px 16px;color:#ddc98a !important;font-size:12.5px !important}
 .legal-placeholder b{color:#e7c75a}
+/* A position that is a deliberate choice rather than a legal requirement. */
+.legal-choice{border-left:3px solid #526039;background:#18231699;padding:13px 16px;color:#9aa98f !important;font-size:12.5px !important}
+.legal-choice b{color:#b4d96b}
+.legal-body h3{font:700 13px Arial,sans-serif;letter-spacing:.3px;margin:24px 0 10px;color:#dceab8}
+.legal-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:16px 0}
+.legal-table th{text-align:left;font:9px ui-monospace,monospace;letter-spacing:1.5px;color:#7d8b73;text-transform:uppercase;padding:10px 12px;border-bottom:1px solid #35412e;vertical-align:bottom}
+.legal-table td{padding:11px 12px;border-bottom:1px solid #222c1e;vertical-align:top;line-height:1.65;color:#c3cdba}
+.legal-table code{font:11px ui-monospace,monospace;color:#b2d777}
+.legal-body code{font:12px ui-monospace,monospace;color:#b2d777}
 .legal-foot{margin-top:40px;padding-top:22px;border-top:1px solid #2e3a28;font-size:12px;color:#8b9b80}
 
 .consent-banner{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:26px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:20px 4%;background:#101a11f2;border-top:1px solid #526039;backdrop-filter:blur(6px)}
@@ -213,6 +222,7 @@
   .stat-row span{flex-basis:92px;padding:13px}
   .stat-row span b{font-size:19px}
   .invoices,.matches,.rivals,.scoreboard{display:block;overflow-x:auto;white-space:nowrap}
+  .legal-table td,.legal-table th{padding:9px 8px}
   .proposal{grid-template-columns:48px 1fr;gap:12px}
   .ad-bar{grid-template-columns:auto 1fr}
   .ad-mute{grid-column:2;grid-row:2;justify-self:end}

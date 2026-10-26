@@ -16,6 +16,10 @@ block below switches on one more layer, and each can be done and verified on its
 
 `/health` reports which of the four are configured, so a deploy can be checked at a glance.
 
+For what each third party is *for*, what it costs, what it issues back and what order to do it
+in, read [external-services.md](external-services.md) first. This document is the exact
+configuration.
+
 ---
 
 ## 1. Postgres
