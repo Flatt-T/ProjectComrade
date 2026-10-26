@@ -62,10 +62,26 @@ jobs:
           node-version: '24.13.0'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The freeware archives come from one third-party host. Caching them on their pinned
+      # hashes means a single good fetch protects every later build, so an outage there cannot
+      # stop a release the way it did on 2026-10-26.
+      - uses: actions/cache@v4
+        with:
+          path: build/*.zip
+          key: content-${{ hashFiles('tools/prepare-content.py', 'tools/prepare-ra-content.py', 'tools/prepare-art.py') }}
+          restore-keys: content-
       - run: python3 tools/prepare-content.py
+        env:
+          # Optional: a reachable copy of the pinned archives. The sha256 still decides what is
+          # accepted, so a mirror can only be a faster route to the same bytes.
+          COMRADE_CONTENT_MIRROR: ${{ vars.COMRADE_CONTENT_MIRROR }}
       - run: python3 tools/prepare-ra-content.py
+        env:
+          COMRADE_CONTENT_MIRROR: ${{ vars.COMRADE_CONTENT_MIRROR }}
       # The classic sprites and tiles the Fusion td and ra1 packs draw with.
       - run: python3 tools/prepare-art.py
+        env:
+          COMRADE_CONTENT_MIRROR: ${{ vars.COMRADE_CONTENT_MIRROR }}
       - run: pnpm lint && pnpm typecheck && pnpm test:unit && pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - name: Playable GDI and Nod browser validation

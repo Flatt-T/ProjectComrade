@@ -11,13 +11,13 @@ import urllib.request
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'tools'))
+from fetch import fetch  # noqa: E402
+
 archive = ROOT / 'build/cnc-packages.zip'
-archive.parent.mkdir(exist_ok=True)
 url = 'https://openra.ppmsite.com/cnc-packages.zip'
-if not archive.exists():
-    urllib.request.urlretrieve(url, archive)
-if hashlib.sha256(archive.read_bytes()).hexdigest() != 'a55b2c160b534f6d1b865ad6120e1f4fde8c418d47bb2fb1a9c72c586a5e1603':
-    raise RuntimeError('Freeware content checksum mismatch')
+# Retries, then any COMRADE_CONTENT_MIRROR, and the sha256 decides what is accepted.
+fetch(url, archive, 'a55b2c160b534f6d1b865ad6120e1f4fde8c418d47bb2fb1a9c72c586a5e1603')
 out = ROOT / 'apps/web/public/content/td'
 out.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(archive) as package:
