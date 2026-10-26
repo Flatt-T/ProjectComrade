@@ -27,6 +27,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from westwood import Mix, read_pal, read_shp, read_tmp, write_png  # noqa: E402
+from fetch import fetch  # noqa: E402
 
 TD_ZIP = ROOT / 'build/cnc-packages.zip'
 RA_ZIP = ROOT / 'build/ra-packages.zip'
@@ -117,12 +118,8 @@ RA_RESOURCE = ('ore', ['GOLD01', 'GOLD02', 'GOLD03', 'GOLD04'])
 
 
 def pinned(path: Path, url: str, sha: str) -> bytes:
-    if not path.exists():
-        urllib.request.urlretrieve(url, path)
-    data = path.read_bytes()
-    if hashlib.sha256(data).hexdigest() != sha:
-        raise RuntimeError(f'Pinned download changed: {path.name}')
-    return data
+    """Hash-pinned download with retries and an optional mirror; see tools/fetch.py."""
+    return fetch(url, path, sha).read_bytes()
 
 
 def ledger_hashes(entry_id: str) -> dict:

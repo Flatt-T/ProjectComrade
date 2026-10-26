@@ -19,6 +19,31 @@ Superweapons are balanced by class across every pack, every building upgrade unl
 
 The **Comrade Fusion Engine** (`packages/fusion`) is one deterministic, data-driven engine: integer simulation, seeded RNG, command-only lockstep with desync checksums, and rule packs that describe a whole game as data. All four classics are packs — `td`, `ra1`, `dune`, `ra2` — so a future original "fusion" game is a further pack mixing any of their units, structures, weapons and mechanics ([ADR 010](docs/adr/010-fusion-engine.md)). These styles are independent gameplay replications with original procedural art; unit values approximate the classics and are tuned over time.
 
+## Tiers
+
+| Tier | Classic matches | Fusion matches | Advertisement | Extras |
+|---|---|---|---|---|
+| **Guest** (no account) | 1 a week | — | 30s before the match | — |
+| **Free** (callsign) | 3 a week | 1 a week | 30s before the match | Record, history, sharing |
+| **Bronze** £3.49/mo | Unlimited | 5 a week | None | — |
+| **Silver** £7.49/mo | Unlimited | Unlimited | None | — |
+| **Gold** £9.79/mo | Unlimited | Unlimited | None | Feature and map voting; new content a week early |
+
+Every amount is retrieved live from Stripe by lookup key — no price is written into the site.
+The tier table itself ([`packages/contracts/src/billing.ts`](packages/contracts/src/billing.ts))
+is read by both the pages and the enforcement, so what is advertised and what is allowed cannot
+drift apart. Weekly allowances renew seven days after the day you registered, not on a Monday.
+
+The free tier's advertisement plays **over a simulation that is already running**: your base is
+on the battlefield from the first tick with your orders held back, so subscribers walk straight
+in and you arrive about thirty seconds behind — and no lockstep peer ever waits for an
+advertisement ([ADR 011](docs/adr/011-paid-platform.md)).
+
+Accounts are AWS Cognito; subscriptions, invoices and the billing portal are Stripe. With no
+database configured the service runs open and unmetered exactly as before, so each layer can be
+switched on independently — see the
+[paid platform setup runbook](docs/runbooks/paid-platform-setup.md).
+
 **War room:** registration-free lobby with a live public-games list, shareable `?room=CODE` invite links, public/invite-only rooms, host-controlled match setup (game style, battlefield, human players, AI opponents, starting credits, tech level, sandworm activity, resource renewal, superweapon recharge, bonus crates and game speed) and per-player side selection.
 
 Classic C&C renders the authentic 640×400 framebuffer with an optional WebGL **Enhanced view**; that is a render filter, not redrawn HD art. **Classic Red Alert** now runs on the original engine too, with its freeware content and two authored battlefields (Ore Crossing, Winter Line) carrying their own Format80-packed terrain ([ADR 007](docs/adr/007-lobby-roster-and-multiplayer.md)). Design records: [006](docs/adr/006-playable-td-slice.md) engine slice, [007](docs/adr/007-lobby-roster-and-multiplayer.md) lobby/roster, [008](docs/adr/008-synchronized-multiplayer.md) multiplayer, [010](docs/adr/010-fusion-engine.md) Fusion Engine.
@@ -33,8 +58,8 @@ Classic C&C renders the authentic 640×400 framebuffer with an optional WebGL **
 
 ```
 apps/
-  web/              # Landing, lobby, settings, canvas host
-  service/          # HTTPS API, WSS, room coordinator
+  web/              # Landing, lobby, settings, canvas host, account/billing pages
+  service/          # HTTPS API, WSS, room coordinator, accounts, entitlements, billing
 packages/
   contracts/        # API, pack, match, command schemas
   fusion/           # Comrade Fusion Engine: deterministic sim, rule packs, renderer, lockstep
@@ -134,6 +159,9 @@ With the toolchain on PATH, run `python tools/prepare-content.py` and `python to
 - [COMRADE 07 - Assets and Maps](docs/spec/COMRADE-07-ASSETS.md) - Asset, map, rendering and audio pipelines
 - [COMRADE 08 - Verification](docs/spec/COMRADE-08-VERIFICATION.md) - Fidelity oracle and acceptance tests
 - [COMRADE 09 - Hosting](docs/spec/COMRADE-09-HOSTING.md) - ChatGPT Sites evaluation and deployment
+- [ADR 011 - Paid platform](docs/adr/011-paid-platform.md) - Accounts, allowances, advertisements and subscriptions
+- [External services](docs/runbooks/external-services.md) - What each third party is for, what it costs and in what order
+- [Paid platform setup](docs/runbooks/paid-platform-setup.md) - Exact Postgres, Cognito, Stripe and advertising configuration
 
 ## License
 

@@ -10,6 +10,27 @@ services:
       PORT: "3001"
       # Enables the internal /ops/logs export used by n8n (blank disables it).
       COMRADE_OPS_TOKEN: ${COMRADE_OPS_TOKEN:-}
+      # Accounts, quotas and billing. Every one of these is optional: with no DATABASE_URL the
+      # service runs exactly as it did before billing existed — open, unmetered, no accounts —
+      # so a missing secret degrades to free play rather than an outage.
+      DATABASE_URL: ${DATABASE_URL:-}
+      DATABASE_SSL_VERIFY: ${DATABASE_SSL_VERIFY:-}
+      COGNITO_REGION: ${COGNITO_REGION:-eu-west-2}
+      COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:-}
+      COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:-}
+      COGNITO_CLIENT_SECRET: ${COGNITO_CLIENT_SECRET:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_AUTOMATIC_TAX: ${STRIPE_AUTOMATIC_TAX:-true}
+      STRIPE_PROMOTION_CODES: ${STRIPE_PROMOTION_CODES:-true}
+      # Ordered advertising waterfall, highest paying first (JSON). Empty runs the house ad.
+      COMRADE_AD_TAGS: ${COMRADE_AD_TAGS:-}
+      COMRADE_AD_SECONDS: ${COMRADE_AD_SECONDS:-30}
+      COMRADE_AD_TIMEOUT_MS: ${COMRADE_AD_TIMEOUT_MS:-8000}
+      COMRADE_PUBLIC_URL: ${COMRADE_PUBLIC_URL:-}
+      COMRADE_TERMS_VERSION: ${COMRADE_TERMS_VERSION:-}
+      # Signs the guest cookie. Set it, or guest allowances reset on every deploy.
+      COMRADE_GUEST_SECRET: ${COMRADE_GUEST_SECRET:-}
     read_only: true
     tmpfs:
       - /tmp

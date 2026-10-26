@@ -4,6 +4,11 @@ import { EngineSnapshot, LaunchRequest, parseOrder, STYLES } from '@comrade/cont
 import { createUpscaler, Upscaler } from './upscale';
 import { attachTouchGestures, goLandscape, isTouchDevice, trackVisibleHeight } from './touch';
 import { enterBattleHelp, toggleHelp } from './help';
+import AdBreak from './AdBreak';
+import Share, { shareTextFor } from './Share';
+import { api } from './api';
+import type { MatchRecord } from '@comrade/contracts';
+import type { RoomConnection } from './net';
 
 /** Send a mouse event to the engine canvas, which SDL reads as the pointer. */
 function mouse(el: HTMLElement, type: string, x: number, y: number, button = 0) {
@@ -19,7 +24,7 @@ declare global {
   interface Window { comrade?: { snapshot(): EngineSnapshot; order(value: unknown): number } }
 }
 
-export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequest; mapName: string; onExit: () => void }) {
+export default function Battle({ launch, mapName, conn, onExit }: { launch: LaunchRequest; mapName: string; conn: RoomConnection; onExit: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const display = useRef<HTMLCanvasElement>(null);
   const stack = useRef<HTMLDivElement>(null);
@@ -31,6 +36,13 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
   const [enhancedOk, setEnhancedOk] = useState(true);
   const [status, setStatus] = useState('Starting Vanilla Conquer…');
   const [snapshot, setSnapshot] = useState<EngineSnapshot>({ frame: 0 });
+  /**
+   * The pre-match advertisement for the advertising tiers. The engine boots and runs behind
+   * it, so the only thing the player loses is the thirty seconds.
+   */
+  const [ad, setAd] = useState(() => conn.match?.ad);
+  const [record, setRecord] = useState<MatchRecord | null>(null);
+  const reported = useRef(false);
   const [logs, setLogs] = useState<string[]>([]);
   const log = (line: string) => setLogs(previous => [...previous.slice(-35), line]);
   const [touch] = useState(isTouchDevice);
@@ -145,7 +157,28 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
   const running = phase === 'playing';
   const faction = launch.faction;
   const useEnhanced = enhanced && enhancedOk;
+  // Report this commander's own result once the engine says the mission is decided.
+  useEffect(() => {
+    if (!(snapshot.won || snapshot.defeated) || reported.current) return;
+    const kickoff = conn.match;
+    if (!kickoff?.matchId) return;
+    reported.current = true;
+    api.reportResult(kickoff.matchId, {
+      reportToken: kickoff.reportToken,
+      outcome: snapshot.won ? 'won' : 'lost',
+      credits: snapshot.credits ?? 0,
+      harvested: snapshot.harvested ?? 0,
+      spent: snapshot.spent ?? 0,
+      unitsLost: snapshot.lost ?? 0,
+      unitsKilled: 0,
+      buildingsLost: 0,
+      buildingsKilled: 0,
+      durationSeconds: Math.round((snapshot.frame ?? 0) / 15),
+    }).then(setRecord).catch(() => undefined);
+  }, [snapshot.won, snapshot.defeated, conn]);
+
   return <section className={`game-layout${touch ? ' touch' : ''}${drawer ? ' drawer-open' : ''}`}>
+    {ad && <AdBreak ad={ad} onDone={() => setAd(undefined)} />}
     <div className="battlefield">
       <div className="screen-top"><span>{faction.toUpperCase()} COMMAND · {mapName.toUpperCase()}</span><span data-testid="engine-status">{status}</span></div>
       <div className={useEnhanced ? 'canvas-stack enhanced' : 'canvas-stack'} ref={stack}>
@@ -169,6 +202,7 @@ export default function Battle({ launch, mapName, onExit }: { launch: LaunchRequ
       : <div className="controls"><span>SELECT / COMMAND</span><b>Left click</b><span>DESELECT / CANCEL</span><b>Right click</b><span>SCROLL THE MAP</span><b>Move pointer to edge</b><span>SELECT A GROUP</span><b>Drag on the battlefield</b></div>}
       <div className="live-stats" data-testid="telemetry" data-frame={snapshot.frame}><span>CREDITS <b>{snapshot.credits ?? '—'}</b></span><span>POWER <b>{snapshot.power ?? '—'} / {snapshot.drain ?? '—'}</b></span><span>BUILDINGS <b>{snapshot.buildings ?? '—'}</b></span><span>HARVESTED <b>{snapshot.harvested ?? '—'}</b></span><span>SIMULATION <b>{snapshot.frame} ticks</b></span></div>
       {snapshot.won && <p className="victory">MISSION ACCOMPLISHED</p>}{snapshot.defeated && <p className="defeat">MISSION FAILED</p>}
+      {record && <Share url={`/match/${record.id}`} text={shareTextFor(record)} compact />}
       <button disabled={!running} onClick={() => engine.current?._comrade_audio?.()}>{snapshot.audioRunning ? 'SOUND ENABLED' : 'ENABLE GAME AUDIO'}</button>
       <button disabled={!enhancedOk} onClick={() => setEnhanced(v => { try { localStorage.setItem('comrade-enhanced', v ? '0' : '1'); } catch { /* ignore */ } return !v; })} title={enhancedOk ? 'Toggle WebGL smoothing over the classic framebuffer' : 'WebGL is unavailable in this browser'}>{!enhancedOk ? 'ENHANCED VIEW UNAVAILABLE' : useEnhanced ? 'VIEW · ENHANCED (SMOOTH)' : 'VIEW · CLASSIC (SHARP)'}</button>
       <button disabled={!running} onClick={() => stack.current?.requestFullscreen()}>FULLSCREEN BATTLEFIELD ↗</button>

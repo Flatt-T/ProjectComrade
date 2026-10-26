@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LaunchRequest, styleInfo } from '@comrade/contracts';
-import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, PlayerSetup, QueueKind, RulePack, Session } from '../../../packages/fusion/src/index';
+import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, PlayerSetup, QueueKind, RulePack, Session, TICKS_PER_SECOND } from '../../../packages/fusion/src/index';
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
 import TechTree from './TechTree';
@@ -9,6 +9,10 @@ import { recordAction, recordEvent, recordNotice, setMatchSnapshot } from './dia
 import Chat from './Chat';
 import { attachTouchGestures, goLandscape, isTouchDevice, trackVisibleHeight } from './touch';
 import { AudioSettings, FusionAudio, loadAudioSettings, saveAudioSettings } from '../../../packages/fusion/src/audio';
+import AdBreak from './AdBreak';
+import Share, { shareTextFor } from './Share';
+import { api } from './api';
+import type { MatchRecord } from '@comrade/contracts';
 
 /** Notices that have an EVA voice line (the meaning keys of the sound tables). */
 const EVA_FOR: Record<string, string> = {
@@ -69,6 +73,16 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const keys = useRef(new Set<string>());
   const [tab, setTab] = useState<QueueKind>('structure');
   const [ui, setUi] = useState<UiState | null>(null);
+  /**
+   * The pre-match advertisement, if this player's tier watches one. The simulation starts on
+   * the first tick regardless; `adLock` holds this player's orders back until it finishes, so
+   * their base sits idle for thirty seconds while every peer's lockstep carries on normally.
+   */
+  const [ad, setAd] = useState(() => conn.match?.ad);
+  const adLock = useRef(!!conn.match?.ad);
+  /** The match as the service recorded it, once the result has been reported. */
+  const [record, setRecord] = useState<MatchRecord | null>(null);
+  const reported = useRef(false);
   const [messages, setMessages] = useState<{ text: string; at: number }[]>([]);
   const [modeView, setModeView] = useState<Mode>('normal');
   const [help, setHelp] = useState(false);
@@ -143,7 +157,13 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     window.comradeFusion = { game, slot, renderer, issue: cmd => session.issue(cmd), audio: sfx };
     // Every command the player issues goes into the report diagnostics, with the game tick.
     const send = session.issue.bind(session);
-    session.issue = cmd => { recordAction({ tick: game.tick, ...cmd }); send(cmd); };
+    session.issue = cmd => {
+      // Orders are dropped while the advertisement plays — the sim is running, this player
+      // just is not commanding yet. Turn packets keep flowing, so nobody else is held up.
+      if (adLock.current) return;
+      recordAction({ tick: game.tick, ...cmd });
+      send(cmd);
+    };
     recordEvent('match-start', { style: launch.style, map: setup.mapId, players: setup.players.length, humans: setup.humans, slot });
     setMatchSnapshot(() => {
       const me = game.players[slot];
@@ -684,7 +704,30 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   const lowPower = !!ui && ui.powerUse > ui.powerGen;
 
   const ownUnitsSelected = !!ui?.selection?.own && !ui.selection.structure;
+
+  // Report this player's own result once, as soon as the match is decided. The service holds
+  // the match record and the slot this token speaks for, so nobody can report for anyone else.
+  useEffect(() => {
+    if (!ui || !(ui.over || ui.defeated) || reported.current) return;
+    const kickoff = conn.match;
+    if (!kickoff?.matchId) return;
+    reported.current = true;
+    api.reportResult(kickoff.matchId, {
+      reportToken: kickoff.reportToken,
+      outcome: ui.won ? 'won' : 'lost',
+      credits: ui.credits,
+      harvested: ui.stats.harvested,
+      spent: 0,
+      unitsLost: ui.stats.lost,
+      unitsKilled: ui.stats.killed,
+      buildingsLost: 0,
+      buildingsKilled: 0,
+      durationSeconds: Math.round(ui.tick / TICKS_PER_SECOND),
+    }).then(setRecord).catch(() => undefined);
+  }, [ui, conn]);
+
   return <section className={`fusion-battle ${pack.projection}${touch ? ' touch' : ''}${drawer ? ' drawer-open' : ''}`} style={{ ['--house' as string]: faction.color, ['--house-accent' as string]: faction.accent }}>
+    {ad && <AdBreak ad={ad} onDone={() => { adLock.current = false; setAd(undefined); }} />}
     <div className="fusion-stage" ref={stage}>
       <canvas ref={canvas} className="fusion-canvas" tabIndex={0} aria-label={`${style.name} battlefield`}
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onDoubleClick={onDoubleClick}
@@ -752,7 +795,9 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       {ui && (ui.over || ui.defeated) && <div className="fusion-over">
         <p className="eyebrow">{style.name.toUpperCase()}</p>
         <h2 className={ui.won ? 'victory' : 'defeat'}>{ui.won ? 'MISSION ACCOMPLISHED' : 'MISSION FAILED'}</h2>
-        <div className="fusion-stats"><span>Built <b>{ui.stats.built}</b></span><span>Destroyed <b>{ui.stats.killed}</b></span><span>Lost <b>{ui.stats.lost}</b></span><span>Harvested <b>{ui.stats.harvested}</b></span></div>
+        <div className="fusion-stats"><span>Built <b>{ui.stats.built}</b></span><span>Destroyed <b>{ui.stats.killed}</b></span><span>Lost <b>{ui.stats.lost}</b></span><span>Harvested <b>{ui.stats.harvested}</b></span>
+          {record?.you && <span>Score <b>{record.you.score.toLocaleString('en-GB')}</b></span>}</div>
+        {record && <Share url={`/match/${record.id}`} text={shareTextFor(record)} compact />}
         <button className="deploy" onClick={onExit}>RETURN TO THE WAR ROOM →</button>
       </div>}
     </div>

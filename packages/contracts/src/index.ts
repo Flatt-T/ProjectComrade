@@ -1,3 +1,6 @@
+// Type-only, so this stays erased at runtime and the two modules never import each other.
+import type { AdBreak } from './billing.js';
+
 export const PROTOCOL_VERSION = 1 as const;
 export const MAP_ID = 'tiberium-crossing' as const;
 /** Faction ids are per game style (gdi/nod, atreides/harkonnen/ordos, allies/soviets...). */
@@ -91,7 +94,10 @@ export type LaunchRequest = {
 };
 
 export type ClientMessage =
-  | { version: 1; type: 'join'; room: string; name: string; faction: Faction }
+  /** `token` is a Cognito access token: it links this peer to an account for quotas and history. */
+  | { version: 1; type: 'join'; room: string; name: string; faction: Faction; token?: string }
+  /** Sent when a player signs in or out without leaving the lobby. */
+  | { version: 1; type: 'identify'; token?: string }
   | { version: 1; type: 'configure'; options: RoomOptions }
   | { version: 1; type: 'faction'; faction: Faction }
   | { version: 1; type: 'ready'; ready: boolean }
@@ -107,11 +113,21 @@ export interface TurnMessage { version: 1; type: 'turn'; turn: number; tick: num
 
 export type ChatAudience = 'all' | 'allies';
 export const CHAT_MAX = 200;
-export interface RoomPlayer { id: string; name: string; faction: Faction; ready: boolean; host: boolean; team?: number }
+export interface RoomPlayer {
+  id: string; name: string; faction: Faction; ready: boolean; host: boolean; team?: number;
+  /** Set once the peer has identified itself with an access token. */
+  handle?: string;
+  /** Subscription tier, so the lobby can show who is skipping the advertisement. */
+  tier?: string;
+  /** False when this player has no weekly allowance left for the chosen style. */
+  entitled?: boolean;
+}
 export interface RoomState {
   version: 1; type: 'room'; room: string; host: string; phase: 'lobby' | 'started'; options: RoomOptions; players: RoomPlayer[];
   /** Set when the match starts: shared random seed and player ids in slot order. */
   seed?: number; slots?: string[];
+  /** Slots watching a pre-match advertisement, so the others can see who is held up. */
+  adSlots?: number[];
 }
 export interface RoomSummary { room: string; hostName: string; style: GameStyle; map: string; players: number; maxPlayers: number; phase: 'lobby' | 'started' }
 
@@ -125,7 +141,14 @@ export type ServerMessage = RoomState
   | { version: 1; type: 'rooms'; rooms: RoomSummary[] }
   | { version: 1; type: 'error'; message: string }
   | { version: 1; type: 'chat'; from: string; name: string; text: string; to: ChatAudience; at: number }
-  | { version: 1; type: 'turn'; slot: number; turn: number; tick: number; checksum: number; commands: unknown[]; final?: boolean };
+  | { version: 1; type: 'turn'; slot: number; turn: number; tick: number; checksum: number; commands: unknown[]; final?: boolean }
+  /**
+   * Sent privately to each player as the match starts. `ad` is present only for the tiers
+   * that watch one; the simulation runs underneath it from the first tick either way, so a
+   * player watching an advertisement arrives with their base already thirty seconds idle
+   * and never holds up anyone else's lockstep.
+   */
+  | { version: 1; type: 'match'; matchId: string; reportToken: string; slot: number; ad?: AdBreak };
 export type PlayerOrder = { version: 1; type: 'order'; sequence: number; tick: number; action: 'move' | 'attack' | 'harvest' | 'build' | 'train' | 'place'; entities: number[]; cell?: number; target?: number; item?: string };
 
 function object(value: unknown): Record<string, unknown> {
@@ -133,6 +156,9 @@ function object(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 const isFaction = (x: unknown): x is Faction => typeof x === 'string' && /^[a-z0-9-]{2,24}$/.test(x);
+/** A JWT as the client holds it: shape-checked only — the service verifies the signature. */
+const token = (x: unknown): string | undefined =>
+  typeof x === 'string' && x.length <= 4096 && /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(x) ? x : undefined;
 const isStyle = (x: unknown): x is GameStyle => STYLES.some(s => s.id === x);
 
 export function parseSettings(value: unknown): MatchSettings {
@@ -184,8 +210,9 @@ export function parseClientMessage(value: unknown): ClientMessage {
   if (v.version !== 1) throw new Error('Unsupported protocol version');
   if (v.type === 'join' && typeof v.room === 'string' && /^[a-z0-9-]{3,32}$/.test(v.room)
     && typeof v.name === 'string' && /^[\p{L}\p{N} _-]{1,24}$/u.test(v.name) && isFaction(v.faction)) {
-    return { version: 1, type: 'join', room: v.room, name: v.name.trim() || 'Commander', faction: v.faction };
+    return { version: 1, type: 'join', room: v.room, name: v.name.trim() || 'Commander', faction: v.faction, token: token(v.token) };
   }
+  if (v.type === 'identify') return { version: 1, type: 'identify', token: token(v.token) };
   if (v.type === 'configure') return { version: 1, type: 'configure', options: parseOptions(v.options) };
   if (v.type === 'faction' && isFaction(v.faction)) return { version: 1, type: 'faction', faction: v.faction };
   if (v.type === 'ready' && typeof v.ready === 'boolean') return { version: 1, type: 'ready', ready: v.ready };
@@ -232,3 +259,7 @@ export function parseContentManifest(value: unknown): ContentManifest {
   }
   return v as unknown as ContentManifest;
 }
+
+// Paid platform vocabulary: tiers, quotas, billing payloads, accounts, history and voting.
+export * from './billing.js';
+export * from './account.js';

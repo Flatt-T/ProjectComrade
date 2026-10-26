@@ -13,14 +13,13 @@ import sys
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'tools'))
+from fetch import fetch  # noqa: E402
+
 archive = ROOT / 'build/ra-packages.zip'
-archive.parent.mkdir(exist_ok=True)
 url = 'https://openra.ppmsite.com/ra-packages.zip'
-if not archive.exists():
-    urllib.request.urlretrieve(url, archive)
-# Pinned against the mirror as measured 2026-10-23.
-if hashlib.sha256(archive.read_bytes()).hexdigest() != 'de3697903497d3d40db2f17d9b1aabbb3ef0b3bfccd9097a0b93836dc7343ab1':
-    raise RuntimeError('Freeware RA content checksum mismatch')
+# Pinned against the mirror as measured 2026-10-23. Retries, then any COMRADE_CONTENT_MIRROR.
+fetch(url, archive, 'de3697903497d3d40db2f17d9b1aabbb3ef0b3bfccd9097a0b93836dc7343ab1')
 
 out = ROOT / 'apps/web/public/content/ra'
 out.mkdir(parents=True, exist_ok=True)

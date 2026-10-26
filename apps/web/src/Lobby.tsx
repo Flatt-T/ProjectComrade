@@ -7,6 +7,10 @@ import { PACKS } from '../../../packages/fusion/src/index';
 import type { RoomConnection } from './net';
 import Chat from './Chat';
 import HelpDock from './HelpDock';
+import { api } from './api';
+import { useAuth } from './auth';
+import { Link } from './router';
+import { Allowances, TierBadge } from './ui';
 
 interface LobbyMap { id: string; name: string; description: string; maxPlayers: number; detail: string }
 
@@ -31,9 +35,12 @@ function factionColor(style: GameStyle, faction: string): string | undefined {
 }
 
 export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaunch: (launch: LaunchRequest, mapName: string) => void }) {
+  const { ready: authReady, signedIn, profile, entitlements, tier } = useAuth();
   const [connected, setConnected] = useState(conn.connected);
   const [name, setName] = useState(() => { try { return localStorage.getItem('comrade-name') || ''; } catch { return ''; } });
   const [entered, setEntered] = useState(false);
+  /** Maps still inside their Gold early-access window, so the list can label and lock them. */
+  const [earlyAccess, setEarlyAccess] = useState<Record<string, { opensAt: string }>>({});
   const [rooms, setRooms] = useState<RoomSummary[]>([]);
   const [room, setRoom] = useState<RoomState | null>(null);
   const [tdMaps, setTdMaps] = useState<MapInfo[]>([]);
@@ -42,6 +49,17 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
   const [joinCode, setJoinCode] = useState(() => new URLSearchParams(location.search).get('room') || '');
   const [copied, setCopied] = useState(false);
   const launched = useRef(false);
+
+  // A registered commander arrives with a callsign already, so the gate is skipped.
+  useEffect(() => {
+    if (!signedIn || !profile) return;
+    setName(profile.displayName || profile.handle);
+    setEntered(true);
+  }, [signedIn, profile]);
+
+  useEffect(() => {
+    api.earlyAccess().then(r => setEarlyAccess(r.items)).catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     fetch('/content/td/manifest.json', { cache: 'no-store' })
@@ -118,7 +136,9 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
   if (!entered) return <div className="lobby-gate">
     <p className="eyebrow">COMMANDER IDENTIFICATION</p>
     <h2>Enter your callsign</h2>
-    <p>No account, no install. Pick a name and jump straight into a lobby.</p>
+    <p>No install. Pick a name and jump straight into a lobby for a taster match —
+      or <Link to="/register">register a callsign</Link> to claim it for good and get three Classic
+      and one Fusion match every week, with your record kept.</p>
     <input value={name} maxLength={24} placeholder="Commander" onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && enter()} aria-label="Your name" />
     <button className="deploy" onClick={enter}>ENTER THE WAR ROOM →</button>
     {error && <small className="lobby-error">{error}</small>}
@@ -151,7 +171,10 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
                   <option value={0}>No team</option>{[1, 2, 3, 4].map(t => <option key={t} value={t}>Team {t}</option>)}
                 </select>
               : <span className="pteam">{p.team ? `TEAM ${p.team}` : ''}</span>}
-            <span className={p.ready ? 'pready on' : 'pready'}>{p.id === room.host ? 'HOST' : p.ready ? 'READY' : 'NOT READY'}</span>
+            {p.tier && p.tier !== 'guest' && <TierBadge tier={p.tier as 'free'} small />}
+            <span className={p.ready ? 'pready on' : 'pready'}>
+              {p.entitled === false ? 'NO PLAYS LEFT' : p.id === room.host ? 'HOST' : p.ready ? 'READY' : 'NOT READY'}
+            </span>
           </div>)}
           {fusion && Array.from({ length: Math.min(aiMax, room.options.settings.ai) }).map((_, i) =>
             <div key={`ai-${i}`} className="player ai"><span className="pname">Computer {i + 1}</span><span className="pfaction">AI</span><span className="pready on">READY</span></div>)}
@@ -168,9 +191,19 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
         </div>
 
         <div className="room-launch">
+          {me?.entitled === false && <p className="quota-block">
+            You have used your {fusion ? 'Fusion' : 'Classic'} matches for this week.
+            {' '}<Link to="/tiers">Subscribe for unlimited play</Link>
+            {signedIn ? '' : <> or <Link to="/register">register a callsign</Link> for a free weekly allowance</>}.
+          </p>}
           {isHost
-            ? <button className="deploy" disabled={!othersReady} onClick={() => conn.send({ type: 'start' })}>START OPERATION →</button>
-            : <button className="deploy" onClick={() => conn.send({ type: 'ready', ready: !me?.ready })}>{me?.ready ? 'CANCEL READY' : 'READY UP ✓'}</button>}
+            ? <button className="deploy" disabled={!othersReady || me?.entitled === false} onClick={() => conn.send({ type: 'start' })}>START OPERATION →</button>
+            : <button className="deploy" disabled={me?.entitled === false} onClick={() => conn.send({ type: 'ready', ready: !me?.ready })}>{me?.ready ? 'CANCEL READY' : 'READY UP ✓'}</button>}
+          {entitlements?.ads && <small className="ad-warning">
+            A 30-second advertisement plays before the match. Your base is on the field while it
+            runs, so you join about half a minute behind the subscribers.
+            {' '}<Link to="/tiers">Bronze removes it</Link>.
+          </small>}
           <small>{isHost ? (othersReady ? 'All commanders ready. Launch when you are.' : 'Waiting for the other commanders to ready up.') : 'Ready up — the host launches the match.'}{' '}
             {fusion ? 'Fusion Engine matches are fully synchronized: everyone fights on the same battlefield.' : 'Classic C&C runs the original engine; each commander fights the built-in enemy on the configured map.'}</small>
         </div>
@@ -189,9 +222,16 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
           const m = maps.find(x => x.id === e.target.value);
           configure({ map: e.target.value, maxPlayers: Math.max(room.players.length, Math.min(room.options.maxPlayers, m?.maxPlayers ?? 4)) });
         }}>
-          {maps.map(m => <option key={m.id} value={m.id}>{m.name} · {m.detail}</option>)}
+          {maps.map(m => <option key={m.id} value={m.id}>
+            {m.name} · {m.detail}{earlyAccess[m.id] ? ' · GOLD EARLY ACCESS' : ''}
+          </option>)}
         </select></label>
         {chosenMap && <p className="map-blurb">{chosenMap.description}</p>}
+        {chosenMap && earlyAccess[chosenMap.id] && <p className={`map-early ${tier === 'gold' ? 'yours' : 'locked'}`}>
+          {tier === 'gold'
+            ? `Gold early access — open to everyone on ${new Date(earlyAccess[chosenMap.id].opensAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}.`
+            : <>In Gold early access until {new Date(earlyAccess[chosenMap.id].opensAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}. <Link to="/tiers">Gold plays it now</Link>.</>}
+        </p>}
         <label>Visibility<select disabled={!isHost} value={room.options.visibility} onChange={e => configure({ visibility: e.target.value as RoomOptions['visibility'] })}>
           <option value="public">Public — listed for anyone</option>
           <option value="invite">Invite only — link required</option>
@@ -260,6 +300,11 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
       <p className="eyebrow">COMMANDER {name.trim().toUpperCase() || 'ANON'}</p>
       <h2>Jump in</h2>
       <button className="deploy" onClick={createGame}>CREATE A NEW GAME →</button>
+      {authReady && entitlements && <div className="lobby-allowance">
+        <Allowances />
+        {!signedIn && <small><Link to="/register">Register a callsign</Link> for three Classic and one Fusion match every week, free.</small>}
+        {signedIn && entitlements.ads && <small><Link to="/tiers">Subscribe</Link> to play unlimited and skip the advertisement.</small>}
+      </div>}
       <p className="divider">or join by code</p>
       <div className="join-row">
         <input value={joinCode} placeholder="e.g. fox-7421" onChange={e => setJoinCode(e.target.value)} onKeyDown={e => e.key === 'Enter' && join(joinCode)} aria-label="Game code" />

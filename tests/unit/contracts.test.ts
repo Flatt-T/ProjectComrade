@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MAP_ID, parseLaunch, parseClientMessage, parseOrder, parseContentManifest, parseOptions } from '../../packages/contracts/src/index';
 import { RoomCoordinator } from '../../apps/service/src/rooms';
 
@@ -35,7 +35,7 @@ describe('protocol contracts', () => {
   });
 });
 describe('room coordinator', () => {
-  it('assigns identities, transfers host on disconnect and starts when others are ready', () => {
+  it('assigns identities, transfers host on disconnect and starts when others are ready', async () => {
     const coordinator = new RoomCoordinator(); const a: string[] = []; const b: string[] = [];
     const first = coordinator.connect(x => a.push(x)); const second = coordinator.connect(x => b.push(x));
     const join = (id: string, name: string) => coordinator.receive(id, JSON.stringify({ version: 1, type: 'join', room: 'test-room', name, faction: 'gdi' }));
@@ -47,9 +47,10 @@ describe('room coordinator', () => {
     coordinator.disconnect(first);
     expect(roomOf(b).host).toBe(second);
     expect(roomOf(b).players[0].ready).toBe(false);
-    // Second is now the sole host; with no other members, start succeeds.
+    // Second is now the sole host; with no other members, start succeeds. Starting checks
+    // every commander's weekly allowance first, so the transition is asynchronous.
     coordinator.receive(second, JSON.stringify({ version: 1, type: 'start' }));
-    expect(roomOf(b).phase).toBe('started');
+    await vi.waitFor(() => expect(roomOf(b).phase).toBe('started'));
   });
   it('lets only the host configure the match', () => {
     const coordinator = new RoomCoordinator(); const a: string[] = []; const b: string[] = [];
