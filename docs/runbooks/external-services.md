@@ -141,10 +141,12 @@ monthly fee.
 
 ### Decisions for you
 
-- **VAT registration.** If the entity is VAT registered, prices should be VAT-inclusive and
-  Stripe Tax should be on. If it isn't, turn Stripe Tax off (`STRIPE_AUTOMATIC_TAX=false`) and
-  the checkout will stop asking for a billing address. Worth deciding before launch, because
-  turning VAT on later effectively cuts your net price by a sixth unless you raise prices.
+- **VAT registration — decide this before the first live payment.** Neither mediafaire.io nor
+  HelpDOT publishes a VAT number, which suggests ThunderChild is not VAT registered. If that is
+  right, set `STRIPE_AUTOMATIC_TAX=false`: the default is `true`, which would have Stripe
+  collect billing addresses and calculate VAT for a company that cannot charge it. If the
+  company *is* registered, leave it on and set the prices VAT-inclusive. Worth settling now,
+  because turning VAT on later cuts your net price by a sixth unless you raise prices with it.
 - **Free trials.** Supported — set trial days on the price and the tiers page will show it. None
   configured at the moment.
 - **Promotion codes.** On by default; the checkout shows a code box.

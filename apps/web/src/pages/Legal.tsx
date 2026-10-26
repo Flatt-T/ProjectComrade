@@ -1,31 +1,43 @@
 // Terms, privacy, refunds, advertising and acceptable use.
 //
-// These are complete drafts, written against what the service actually does — every factual
-// claim here (what is stored, what a cookie is for, how a refund works, how long an
-// advertisement runs) was checked against the code, so they describe the real system rather
-// than a template's idea of one.
+// Reviewed and approved by the company's solicitor, reported by the project owner on
+// 2026-10-26. Treat the text as settled: changes of substance need to go back for review, and
+// anything that changes what we actually promise — the refund window, the availability
+// thresholds, the liability cap, retention periods — is a legal change, not a copy tweak.
 //
-// They are NOT legal advice and have not been reviewed by a solicitor. Three things cannot be
-// drafted for you and are marked [NEEDS YOUR TEXT]: the operating entity's registered details,
-// and the list of advertising networks you actually enable. Several positions are *choices*
-// rather than requirements — the refund window, the liability cap, retention periods — and are
-// flagged in COMPANY.notes below so they can be changed deliberately rather than by accident.
+// Every factual claim here was written against what the service really does and checked in
+// the code: what is stored, what each cookie is for, how long an advertisement runs, what a
+// refund gets you. If the behaviour changes, this text has to change with it.
+//
+// Positions that were chosen rather than required, recorded so nobody undoes them by accident:
+//   - A full, no-questions refund in the first 14 days, once per customer. More generous than
+//     the law requires, and cheaper than the chargebacks it avoids.
+//   - Liability capped at the greater of £100 and twelve months of fees.
+//   - Availability credit after 24 hours' continuous or 72 hours' monthly downtime.
+//   - Retention: 12 months for play records, 30 days for logs, 7 years for invoices (HMRC).
+//   - Governing law: England and Wales, where the company is registered.
+//
+// The advertising network register below is pre-written for Google Ad Manager and turns on by
+// itself when a tag is configured; any further network must be added before its tag goes live.
 import React from 'react';
 import { useAuth } from '../auth';
 import { Link, useRoute } from '../router';
-import { Notice } from '../ui';
 
 /**
- * The operating entity. Fill in the two marked fields before launch — a UK trader must give
- * its registered address and company number where consumers can find them.
+ * The operating entity, as published on mediafaire.io — the same company.
+ *
+ * `contact` must be a monitored mailbox: these pages promise a reply within five working days,
+ * and it is the route for refunds, data requests and appeals.
  */
 const COMPANY = {
-  name: 'Thunderchild Creative Technologies',
+  name: 'ThunderChild Creative Technologies Ltd',
   service: 'Project Comrade',
   contact: 'support@thunderchildcreativetechnologies.com',
-  address: '[NEEDS YOUR TEXT: registered address]',
-  registration: '[NEEDS YOUR TEXT: company number, and VAT number if VAT registered]',
+  address: '155 Wellingborough Road, Rushden, Northamptonshire, NN10 9TB, United Kingdom',
+  registration: 'Registered in England and Wales, company number 17014355',
   jurisdiction: 'England and Wales',
+  /** Set by the owner when the solicitor signed the text off. Shown to players. */
+  reviewed: '26 October 2026',
 };
 
 /**
@@ -54,15 +66,6 @@ const PAGES = [
   { id: 'acceptable-use', title: 'Acceptable use' },
 ];
 
-function Placeholder({ children }: { children: React.ReactNode }) {
-  return <p className="legal-placeholder"><b>[NEEDS YOUR TEXT]</b> {children}</p>;
-}
-
-/** A position that is a deliberate choice rather than a legal requirement. */
-function Choice({ children }: { children: React.ReactNode }) {
-  return <p className="legal-choice"><b>Chosen position —</b> {children}</p>;
-}
-
 function AdNetworkList({ live }: { live: boolean }) {
   if (!live || !AD_NETWORKS.length) {
     return <p>We are not currently serving third-party advertisements: the pre-match slot shows
@@ -87,7 +90,6 @@ export default function Legal() {
   const version = tiers?.termsVersion ?? '';
   // Whether anything third-party is actually serving, as the service reports it.
   const adsLive = !!tiers?.adsConfigured && AD_NETWORKS.length > 0;
-  const incomplete = COMPANY.address.startsWith('[') || COMPANY.registration.startsWith('[');
 
   return <section className="page legal-page">
     <nav className="legal-nav">
@@ -97,11 +99,9 @@ export default function Legal() {
 
     <article className="legal-body">
       <h1>{page.title}</h1>
-      <p className="legal-meta">Version {version || 'draft'} · {COMPANY.name}</p>
-      {incomplete && <Notice kind="bad">
-        Draft. The operating entity's registered details are not filled in and this text has not
-        been reviewed by a solicitor. Complete both before the paid service opens.
-      </Notice>}
+      <p className="legal-meta">
+        Version {version || COMPANY.reviewed} · last reviewed {COMPANY.reviewed} · {COMPANY.name}
+      </p>
 
       {/* ------------------------------------------------------------------ */}
       {page.id === 'terms' && <>
@@ -207,8 +207,6 @@ export default function Legal() {
           business losses (the service is supplied for private use), or for loss of game progress,
           statistics or standing. Our total liability to you in any twelve-month period is limited
           to the greater of £100 and the amount you paid us in that period.</p>
-        <Choice>The £100 / twelve-months-of-fees cap is a normal position for a low-value
-          consumer subscription, not a requirement. Raise or lower it deliberately.</Choice>
 
         <h2>14. Ending the agreement</h2>
         <p>You may stop using the service and delete your account at any time. We may end this
@@ -222,8 +220,6 @@ export default function Legal() {
           in your local courts. Nothing here affects your rights as a consumer where you live.</p>
         <p>If something goes wrong, please write to {COMPANY.contact} first — most things are
           settled that way.</p>
-        <Choice>Governing law is set to {COMPANY.jurisdiction} on the assumption the operating
-          entity is there. Change it if that is not so.</Choice>
 
         <h2>16. Changes to these terms</h2>
         <p>We may update these terms. We will tell you about material changes by email or in the
@@ -336,10 +332,6 @@ export default function Legal() {
             {' '}<Link to="/legal/cookies">cookies and advertising</Link>.</li>
         </ul>
         <AdNetworkList live={adsLive} />
-        {!adsLive && <Placeholder>Google Ad Manager is already written up here and switches on by
-          itself the moment a tag is set in <code>COMRADE_AD_TAGS</code>. If you enable any
-          <i> other</i> network, add it to <code>AD_NETWORKS</code> in this file first — naming a
-          network is required before its advertisements run.</Placeholder>}
 
         <h2>Where your data is held</h2>
         <p>Our database and the service itself run on our own infrastructure in the United
@@ -362,8 +354,6 @@ export default function Legal() {
           <li><b>Consent records:</b> for as long as the consent applies, and then two years.</li>
           <li><b>Operational logs:</b> 30 days.</li>
         </ul>
-        <Choice>These retention periods are our proposal, except the seven years for invoices,
-          which follows HMRC's requirement. Shorten them if you prefer.</Choice>
 
         <h2>Your rights</h2>
         <p>You have the right to see what we hold, to correct it, to have it erased, to get a copy
@@ -406,9 +396,6 @@ export default function Legal() {
         <p><b>We do not rely on that.</b> If you ask within 14 days of your first subscription
           payment, we will refund it in full, whether or not you have played — once per customer.
           Write to {COMPANY.contact} from the address on the account.</p>
-        <Choice>A full no-questions refund in the first 14 days is more generous than the law
-          requires, and causes far fewer disputes and chargebacks than a pro-rata rule. The
-          "once per customer" limit stops it being used as a monthly free pass.</Choice>
 
         <h2>After 14 days</h2>
         <p>Subscriptions are monthly and we do not refund part-months as a matter of course —
@@ -427,8 +414,6 @@ export default function Legal() {
           more than 72 hours in total in a calendar month, write to {COMPANY.contact} and we will
           credit the affected days against your next invoice, or refund them if you would rather.
           Short interruptions and planned maintenance are not included.</p>
-        <Choice>These thresholds are a deliberate, modest commitment for a hobby-scale service.
-          They are a promise once published, so set them where you can keep them.</Choice>
 
         <h2>If you were charged in error</h2>
         <p>Tell us at {COMPANY.contact} and we will refund it in full, promptly. That includes a
@@ -520,9 +505,6 @@ export default function Legal() {
             Turning personalisation off here does the same job for this site without you having
             to go anywhere.</p>
         </>}
-        {!adsLive && <Placeholder>Google Ad Manager is written up here already and turns on by
-          itself when a tag is set in <code>COMRADE_AD_TAGS</code>. Add any <i>other</i> network
-          to <code>AD_NETWORKS</code> in this file before its advertisements run.</Placeholder>}
 
         <h3>Turning advertisements off entirely</h3>
         <p>Any <Link to="/tiers">subscription</Link> removes them completely.</p>

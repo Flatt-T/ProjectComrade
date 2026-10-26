@@ -170,11 +170,6 @@
 .legal-body ul{padding-left:22px}
 .legal-body li{margin-bottom:9px}
 .legal-meta{font:10px ui-monospace,monospace;letter-spacing:1.5px;color:#7d8b73;text-transform:uppercase}
-.legal-placeholder{border-left:3px solid #e7c75a;background:#2a241055;padding:13px 16px;color:#ddc98a !important;font-size:12.5px !important}
-.legal-placeholder b{color:#e7c75a}
-/* A position that is a deliberate choice rather than a legal requirement. */
-.legal-choice{border-left:3px solid #526039;background:#18231699;padding:13px 16px;color:#9aa98f !important;font-size:12.5px !important}
-.legal-choice b{color:#b4d96b}
 .legal-body h3{font:700 13px Arial,sans-serif;letter-spacing:.3px;margin:24px 0 10px;color:#dceab8}
 .legal-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:16px 0}
 .legal-table th{text-align:left;font:9px ui-monospace,monospace;letter-spacing:1.5px;color:#7d8b73;text-transform:uppercase;padding:10px 12px;border-bottom:1px solid #35412e;vertical-align:bottom}

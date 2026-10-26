@@ -167,10 +167,18 @@ House advertisement copy, if you want something other than the upgrade pitch:
 
 ## 6. Before opening to the public
 
-- [ ] Fill in every `[NEEDS YOUR TEXT]` block in `apps/web/src/pages/Legal.tsx` — company
-      address and registration, liability and governing law, the refund rule inside 14 days,
-      retention periods, and the advertising networks you actually enable — and have the result
-      reviewed. The pages render a visible draft warning until this is done.
+- [x] Legal pages completed and approved (26 October 2026). ThunderChild Creative Technologies
+      Ltd, company number 17014355, registered office 155 Wellingborough Road, Rushden, NN10 9TB.
+      Changes of substance need to go back for review — see the header of `Legal.tsx` for the
+      positions that were chosen rather than required.
+- [ ] **Confirm `support@thunderchildcreativetechnologies.com` is a monitored mailbox.** The
+      pages promise a reply within five working days and it is the route for refunds, data
+      requests and appeals. A dead address here is a real problem, not a cosmetic one.
+- [ ] **Settle VAT before the first live payment.** Neither mediafaire.io nor helpdot publish a
+      VAT number, which suggests the company is not VAT registered. If that is right, set
+      `STRIPE_AUTOMATIC_TAX=false` — the default is `true`, which would have Stripe collect
+      billing addresses and calculate VAT for a company that cannot charge it. If the company
+      *is* registered, leave it on and set the prices VAT-inclusive.
 - [ ] Check the tier table on `/tiers` against what the service enforces. Both read the same
       table in `packages/contracts/src/billing.ts`, so they cannot disagree, but read it once.
 - [ ] Register in Stripe **test mode** first and walk the whole path: register → confirm →
