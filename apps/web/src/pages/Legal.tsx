@@ -147,6 +147,10 @@ export default function Legal() {
         <p>On the free and guest tiers a short advertisement of up to thirty seconds plays before
           a match. Your base is on the battlefield while it runs, so what you lose is the time,
           not the position. Subscribers see no advertisement.</p>
+        <p>If you have used your weekly matches, you can watch an advertisement — thirty seconds
+          for Classic, sixty seconds for Fusion — to add one match of that kind to your account,
+          or buy a one-off battle pack of extra matches. Extra matches are kept until you play
+          them and do not expire when your week renews.</p>
 
         <h2>6. Subscriptions and payment</h2>
         <p>Subscriptions are monthly, billed in advance, and renew automatically until you cancel.
@@ -154,7 +158,10 @@ export default function Legal() {
           never see or store them.</p>
         <p>The price is shown before you buy, in pounds sterling, and the checkout tells you
           whether VAT is included. By subscribing you authorise the recurring charge until you
-          cancel.</p>
+          cancel. If you have a voucher code, enter it on the tiers or billing page, or on
+          Stripe's checkout page. A voucher applies only to the purchase it is written for —
+          Gold 100% vouchers take 100% off the first Gold invoice, not other tiers, battle
+          packs, or later months.</p>
         <p>If a payment fails, Stripe retries it on a schedule. You keep your tier while it does.
           If it cannot be collected, the subscription ends and your account returns to the free
           tier; nothing is owed and nothing is sent to collection.</p>
@@ -397,6 +404,13 @@ export default function Legal() {
           payment, we will refund it in full, whether or not you have played — once per customer.
           Write to {COMPANY.contact} from the address on the account.</p>
 
+        <h2>Battle packs</h2>
+        <p>A battle pack is a one-off purchase of extra matches, not a subscription. Unused
+          matches stay on the account until they are played. If you ask within 14 days of buying
+          a pack and you have not used any of its matches, we will refund it in full. Once any
+          match from the pack has been played we treat the service as supplied and do not refund
+          the rest as a matter of course — write to us if that seems unfair in your case.</p>
+
         <h2>After 14 days</h2>
         <p>Subscriptions are monthly and we do not refund part-months as a matter of course —
           cancel and you keep the tier until the month runs out. If something went wrong, the
@@ -471,6 +485,10 @@ export default function Legal() {
         <p>Free and guest players see one advertisement of up to thirty seconds before a match.
           Your base is already on the battlefield while it plays, so the only cost is the time.
           Subscribers see no advertisement at all, and are never asked this question.</p>
+        <p>If you have no matches left you may also choose to watch an advertisement — thirty
+          seconds for Classic, sixty seconds for Fusion — to earn one extra match. The same
+          personalisation choice applies. You do not have to; you can wait for your week to
+          renew, subscribe, or buy a battle pack instead.</p>
 
         <h3>Personalised or not</h3>
         <p>With personalisation <b>off</b> — which is the default until you turn it on — the

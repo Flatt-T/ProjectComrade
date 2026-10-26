@@ -245,6 +245,58 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
     );
     `,
   },
+  {
+    version: 2,
+    name: 'bonus credits, advertisement earn sessions, pack lots',
+    sql: `
+    -- Extra matches earned by watching an advertisement or buying the battle pack.
+    -- Counting unspent rows is the bonus; weekly allowance still counts play_ledger.
+    create table credit_lots (
+      lot_key     text primary key,
+      account_id  uuid references accounts(id) on delete cascade,
+      guest_id    text references guests(id) on delete cascade,
+      source      text not null,
+      created_at  timestamptz not null default now(),
+      constraint credit_lots_subject_check check (account_id is not null or guest_id is not null),
+      constraint credit_lots_source_check check (source in ('ad', 'pack'))
+    );
+    create index credit_lots_account_idx on credit_lots (account_id, created_at desc);
+    create index credit_lots_guest_idx on credit_lots (guest_id, created_at desc);
+
+    create table play_credits (
+      id          uuid primary key default gen_random_uuid(),
+      lot_key     text not null references credit_lots(lot_key) on delete cascade,
+      account_id  uuid references accounts(id) on delete cascade,
+      guest_id    text references guests(id) on delete cascade,
+      kind        text not null,
+      created_at  timestamptz not null default now(),
+      spent_at    timestamptz,
+      constraint play_credits_subject_check check (account_id is not null or guest_id is not null),
+      constraint play_credits_kind_check check (kind in ('classic', 'fusion'))
+    );
+    create index play_credits_account_open_idx on play_credits (account_id, kind) where spent_at is null;
+    create index play_credits_guest_open_idx on play_credits (guest_id, kind) where spent_at is null;
+    create index play_credits_ad_cap_idx on play_credits (account_id, kind, created_at) where account_id is not null;
+    create index play_credits_guest_cap_idx on play_credits (guest_id, kind, created_at) where guest_id is not null;
+
+    create table ad_credit_sessions (
+      token         text primary key,
+      account_id    uuid references accounts(id) on delete cascade,
+      guest_id      text,
+      kind          text not null,
+      seconds       integer not null,
+      issued_at     timestamptz not null default now(),
+      completed_at  timestamptz,
+      constraint ad_credit_sessions_kind_check check (kind in ('classic', 'fusion'))
+    );
+    create index ad_credit_sessions_open_account_idx on ad_credit_sessions (account_id, kind) where completed_at is null;
+    create index ad_credit_sessions_open_guest_idx on ad_credit_sessions (guest_id, kind) where completed_at is null;
+
+    alter table play_ledger add column source text not null default 'allowance';
+    alter table play_ledger add column credit_id uuid references play_credits(id) on delete set null;
+    alter table play_ledger add constraint play_ledger_source_check check (source in ('allowance', 'bonus'));
+    `,
+  },
 ];
 
 /** Create the schema if missing and apply any migrations this build is ahead on. */

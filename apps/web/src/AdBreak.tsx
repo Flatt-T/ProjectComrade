@@ -134,9 +134,8 @@ export default function AdBreak({ ad, onDone }: { ad: AdBreakSlot; onDone: () =>
                 provider.current = `rung-${index + 1}`;
                 setPhase('playing');
               });
-              const complete = () => finish(true);
-              manager.addEventListener(ima.AdEvent.Type.ALL_ADS_COMPLETED, complete);
-              manager.addEventListener(ima.AdEvent.Type.COMPLETE, complete);
+              // Completing the creative early must not dismiss the slot: the timer is the
+              // only finish, so a delayed start and a credit-earn watch last the full length.
               try {
                 const box = host.current!.getBoundingClientRect();
                 manager.init(Math.max(320, box.width), Math.max(180, box.height), ima.ViewMode.NORMAL);
@@ -177,7 +176,9 @@ export default function AdBreak({ ad, onDone }: { ad: AdBreakSlot; onDone: () =>
     };
   }, [ad, deadline, onDone]);
 
-  return <div className="ad-break" role="dialog" aria-label="Advertisement before the match">
+  const credit = ad.purpose === 'credit';
+
+  return <div className="ad-break" role="dialog" aria-label={credit ? 'Advertisement to earn a match' : 'Advertisement before the match'}>
     <div className="ad-stage">
       <div className="ad-ima" ref={host} />
       <video ref={video} className="ad-video" muted={muted} playsInline />
@@ -192,8 +193,10 @@ export default function AdBreak({ ad, onDone }: { ad: AdBreakSlot; onDone: () =>
       <span className="ad-count">{left}s</span>
       <div className="ad-progress"><i style={{ width: `${100 - (left / Math.max(1, ad.seconds)) * 100}%` }} /></div>
       <span className="ad-note">
-        Your base is already on the field — you join the battle when this ends.
-        {' '}<Link to="/tiers">Bronze removes this</Link>.
+        {credit
+          ? 'Watch to the end to add one match to your account.'
+          : <>Your base is already on the field — you join the battle when this ends.
+            {' '}<Link to="/tiers">Bronze removes this</Link>.</>}
       </span>
       {phase === 'playing' && <button className="ad-mute" onClick={() => setMuted(m => !m)}>{muted ? 'UNMUTE' : 'MUTE'}</button>}
     </div>

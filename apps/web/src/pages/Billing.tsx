@@ -5,12 +5,12 @@
 // is shown here is read back from Stripe: the amount actually being charged, the real renewal
 // date, and the invoices with their hosted pages and PDFs.
 import React, { useCallback, useEffect, useState } from 'react';
-import type { InvoiceSummary, SubscriptionState, Tier } from '@comrade/contracts';
-import { PAID_TIERS, plan as planFor } from '@comrade/contracts';
+import type { InvoiceSummary, PackPrice, SubscriptionState, Tier } from '@comrade/contracts';
+import { CREDIT_PACK, PAID_TIERS, plan as planFor } from '@comrade/contracts';
 import { api, money } from '../api';
 import { errorText, useAuth } from '../auth';
 import { Link, useRoute } from '../router';
-import { Allowances, DangerButton, Notice, SignInWall, Spinner, TierBadge } from '../ui';
+import { Allowances, DangerButton, Notice, SignInWall, Spinner, TierBadge, VoucherField } from '../ui';
 
 const STATUS_TEXT: Record<string, string> = {
   active: 'Active',
@@ -31,20 +31,25 @@ export default function Billing() {
   const { search, navigate } = useRoute();
   const [subscription, setSubscription] = useState<SubscriptionState | null>(null);
   const [invoices, setInvoices] = useState<InvoiceSummary[] | null>(null);
+  const [pack, setPack] = useState<PackPrice | null>(null);
   const [quote, setQuote] = useState<{ tier: Tier; amountDue: number | null; currency: string | null; nextRenewal: string | null } | null>(null);
   const [busy, setBusy] = useState('');
+  const [voucher, setVoucher] = useState('');
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
-  const justPaid = search.get('checkout') === 'done';
+  const justPaid = search.get('checkout') === 'done' || search.get('checkout') === 'pack';
+  const paidSession = search.get('session');
   const wanted = search.get('change') as Tier | null;
 
   const load = useCallback(async () => {
-    const [sub, list] = await Promise.all([
+    const [sub, list, catalogue] = await Promise.all([
       api.subscription().catch(() => ({ subscription: null, tier: 'free' as Tier })),
       api.invoices().then(r => r.invoices).catch(() => []),
+      api.plans().catch(() => null),
     ]);
     setSubscription(sub.subscription);
     setInvoices(list);
+    setPack(catalogue?.packs.find(p => p.pack === CREDIT_PACK.id) ?? null);
   }, []);
 
   useEffect(() => { if (signedIn) void load(); }, [signedIn, load]);
@@ -53,11 +58,11 @@ export default function Billing() {
   useEffect(() => {
     if (!justPaid || !signedIn) return;
     setBusy('sync');
-    api.syncBilling()
-      .then(me => { applyMe(me); setDone('Subscription active — thank you.'); })
+    api.syncBilling(paidSession ?? undefined)
+      .then(me => { applyMe(me); setDone(search.get('checkout') === 'pack' ? 'Battle pack added — thank you.' : 'Subscription active — thank you.'); })
       .catch(() => undefined)
       .finally(() => { setBusy(''); void load(); });
-  }, [justPaid, signedIn, applyMe, load]);
+  }, [justPaid, signedIn, applyMe, load, paidSession, search]);
 
   // A tier arriving as ?change= (from the tiers page) opens its quote straight away.
   useEffect(() => {
@@ -97,6 +102,8 @@ export default function Billing() {
     {done && <Notice kind="good">{done}</Notice>}
     {busy === 'sync' && <Spinner label="Confirming your subscription with Stripe…" />}
 
+    <VoucherField value={voucher} onChange={setVoucher} disabled={!!busy} />
+
     <div className="billing-grid">
       <article className="card">
         <h2>Current tier</h2>
@@ -113,6 +120,14 @@ export default function Billing() {
             </dl>
           : <p>You are on the free tier. <Link to="/tiers">See what a subscription gives you</Link>.</p>}
         <Allowances />
+        {pack && <div className="pack-buy">
+          <h3>{CREDIT_PACK.name}</h3>
+          <p className="card-note">{CREDIT_PACK.blurb} {money(pack.unitAmount, pack.currency)} once.</p>
+          <button disabled={!!busy} onClick={() => run('pack', async () => {
+            const { url } = await api.checkoutPack('/account/billing', voucher);
+            window.location.assign(url);
+          })}>{busy === 'pack' ? 'OPENING…' : `BUY ${CREDIT_PACK.classic} CLASSIC + ${CREDIT_PACK.fusion} FUSION`}</button>
+        </div>}
         {subscription?.status === 'past_due' && <Notice kind="bad">
           Stripe could not take the last payment. Update your card in the billing portal and it
           will retry — you keep your tier in the meantime.
@@ -139,7 +154,7 @@ export default function Billing() {
                     {busy === `quote-${target}` ? 'CHECKING…' : 'QUOTE'}
                   </button>
                 : <button disabled={!!busy} onClick={() => run(`buy-${target}`, async () => {
-                    const { url } = await api.checkout(target);
+                    const { url } = await api.checkout(target, voucher);
                     window.location.assign(url);
                   })}>{busy === `buy-${target}` ? 'OPENING…' : 'SUBSCRIBE'}</button>}
             </div>;

@@ -106,6 +106,8 @@ export type ClientMessage =
   | { version: 1; type: 'start' }
   | { version: 1; type: 'list' }
   | { version: 1; type: 'leave' }
+  /** Re-read this peer's allowance after they earned or bought a credit. */
+  | { version: 1; type: 'recheck' }
   | TurnMessage;
 
 /** One lockstep turn of Fusion Engine commands; the service relays it untouched. */
@@ -222,7 +224,7 @@ export function parseClientMessage(value: unknown): ClientMessage {
     const text = [...v.text].filter(c => c >= ' ' && c !== String.fromCharCode(127)).join('').trim().slice(0, CHAT_MAX);
     if (text) return { version: 1, type: 'chat', text, to: v.to };
   }
-  if (v.type === 'start' || v.type === 'leave' || v.type === 'list') return { version: 1, type: v.type };
+  if (v.type === 'start' || v.type === 'leave' || v.type === 'list' || v.type === 'recheck') return { version: 1, type: v.type };
   if (v.type === 'turn') {
     const int = (x: unknown) => Number.isSafeInteger(x) && (x as number) >= 0;
     if (!int(v.turn) || !int(v.tick) || !Number.isSafeInteger(v.checksum) || !Array.isArray(v.commands) || v.commands.length > 64

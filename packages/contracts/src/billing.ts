@@ -15,6 +15,39 @@ export const TIERS: Tier[] = ['guest', 'free', 'bronze', 'silver', 'gold'];
 /** Paid tiers, cheapest first: the order the upgrade ladder is shown in. */
 export const PAID_TIERS: Tier[] = ['bronze', 'silver', 'gold'];
 
+/** Seconds a player must watch to earn one match when they have none left. */
+export const CREDIT_AD_SECONDS: Record<PlayKind, number> = { classic: 30, fusion: 60 };
+/** Rolling 24-hour cap on advertisement-earned matches, per kind, against house-ad farming. */
+export const AD_CREDITS_PER_DAY = 20;
+
+/** One-off pack of extra matches. The amount is in Stripe, bound by `lookupKey`. */
+export type CreditPackId = 'battle';
+export interface CreditPack {
+  id: CreditPackId;
+  name: string;
+  lookupKey: string;
+  classic: number;
+  fusion: number;
+  blurb: string;
+}
+export const CREDIT_PACK: CreditPack = {
+  id: 'battle',
+  name: 'Battle pack',
+  lookupKey: 'comrade_credit_pack',
+  classic: 5,
+  fusion: 3,
+  blurb: 'Five Classic matches and three Fusion matches, kept until you play them.',
+};
+export function packForLookupKey(key: string | null | undefined): CreditPack | null {
+  return key === CREDIT_PACK.lookupKey ? CREDIT_PACK : null;
+}
+
+/** Weekly remaining plus any extra credits; `null` means unlimited. */
+export function remainingPlays(limit: number | null, used: number, bonus = 0): number | null {
+  if (limit === null) return null;
+  return Math.max(0, limit - used) + Math.max(0, bonus);
+}
+
 export interface TierPlan {
   id: Tier;
   name: string;
@@ -114,7 +147,17 @@ export interface PlanPrice {
   trialDays: number | null;
 }
 
-export interface PlanCatalogue { prices: PlanPrice[]; currency: string }
+export interface PackPrice {
+  pack: CreditPackId;
+  priceId: string;
+  lookupKey: string;
+  /** Minor units (pence for GBP), exactly as Stripe stores it. */
+  unitAmount: number | null;
+  currency: string;
+  taxBehavior: 'inclusive' | 'exclusive' | 'unspecified' | null;
+}
+
+export interface PlanCatalogue { prices: PlanPrice[]; packs: PackPrice[]; currency: string }
 
 /** What one kind of play has left in the current window. */
 export interface QuotaState {
@@ -123,6 +166,8 @@ export interface QuotaState {
   limit: number | null;
   used: number;
   remaining: number | null;
+  /** Extra matches from advertisements or a pack, kept until spent. */
+  bonus: number;
   /** ISO timestamp the window resets at; absent when unlimited. */
   resetsAt?: string;
 }
@@ -182,6 +227,8 @@ export interface PlayDecision {
   reason?: 'quota' | 'early-access' | 'registration-required';
   /** Pre-match advertisement this player must watch. */
   ad?: AdBreak;
+  /** True when this player can watch an advertisement to earn one match of `kind`. */
+  canEarnByAd?: boolean;
   quota: QuotaState;
   tier: Tier;
 }
@@ -199,6 +246,8 @@ export interface AdBreak {
   timeoutMs: number;
   /** False when the viewer has not consented to personalised advertising. */
   personalised: boolean;
+  /** `credit` is watched to earn a match; `delay` is the free-tier overlay on a live match. */
+  purpose?: 'delay' | 'credit';
 }
 
 export interface HouseAd { headline: string; body: string; cta: string; href: string }

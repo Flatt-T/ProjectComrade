@@ -19,6 +19,7 @@ export const unauthorised = (message = 'Sign in to continue') => new HttpError(4
 export const forbidden = (message = 'Not available on your tier') => new HttpError(403, message);
 export const notFound = (message = 'Not found') => new HttpError(404, message);
 export const conflict = (message: string, code?: string) => new HttpError(409, message, code);
+export const tooMany = (message = 'Too many requests', code?: string) => new HttpError(429, message, code);
 export const unavailable = (message = 'Not configured') => new HttpError(503, message);
 
 export interface Ctx {

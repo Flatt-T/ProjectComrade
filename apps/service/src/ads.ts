@@ -30,15 +30,22 @@ function expand(tag: string, personalised: boolean): string {
   return url;
 }
 
-/** Resolve the advertisement a player must watch before the match. */
-export function adBreak(personalised: boolean): AdBreak {
+export interface AdBreakOptions {
+  seconds?: number;
+  purpose?: AdBreak['purpose'];
+  token?: string;
+}
+
+/** Resolve the advertisement a player must watch before the match, or to earn a credit. */
+export function adBreak(personalised: boolean, options: AdBreakOptions = {}): AdBreak {
   return {
-    token: randomUUID(),
-    seconds: ads.seconds(),
+    token: options.token ?? randomUUID(),
+    seconds: options.seconds ?? ads.seconds(),
     tags: ads.tags().map(t => expand(t.tag, personalised)),
     house: ads.house(),
     timeoutMs: ads.timeoutMs(),
     personalised,
+    purpose: options.purpose ?? 'delay',
   };
 }
 

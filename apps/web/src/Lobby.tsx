@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   AILevel, CRATES_MAX, CreditsPreset, DEFAULT_SETTINGS, GameStyle, LaunchRequest, MapInfo, RENEWAL_CLASSIC, RENEWAL_MAX, RoomOptions, RoomState, RoomSummary,
-  SPEED_MAX, SPEED_MIN, SPEED_STEP, STYLES, SUPER_CHARGE_MAX, SUPER_CHARGE_MIN, SUPER_CHARGE_STEP, styleInfo, WORMS_MAX,
+  SPEED_MAX, SPEED_MIN, SPEED_STEP, STYLES, SUPER_CHARGE_MAX, SUPER_CHARGE_MIN, SUPER_CHARGE_STEP, playKind, styleInfo, WORMS_MAX,
 } from '@comrade/contracts';
 import { PACKS } from '../../../packages/fusion/src/index';
 import type { RoomConnection } from './net';
 import Chat from './Chat';
+import CreditGate from './CreditGate';
 import HelpDock from './HelpDock';
 import { api } from './api';
 import { useAuth } from './auth';
@@ -35,7 +36,7 @@ function factionColor(style: GameStyle, faction: string): string | undefined {
 }
 
 export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaunch: (launch: LaunchRequest, mapName: string) => void }) {
-  const { ready: authReady, signedIn, profile, entitlements, tier } = useAuth();
+  const { ready: authReady, signedIn, profile, entitlements, tier, applyMe, reload } = useAuth();
   const [connected, setConnected] = useState(conn.connected);
   const [name, setName] = useState(() => { try { return localStorage.getItem('comrade-name') || ''; } catch { return ''; } });
   const [entered, setEntered] = useState(false);
@@ -60,6 +61,20 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
   useEffect(() => {
     api.earlyAccess().then(r => setEarlyAccess(r.items)).catch(() => undefined);
   }, []);
+
+  // Returning from a battle-pack Checkout: pull the credits through without waiting on the webhook.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('checkout') !== 'pack' || !signedIn) return;
+    const session = params.get('session') ?? undefined;
+    api.syncBilling(session)
+      .then(me => { applyMe(me); conn.send({ type: 'recheck' }); })
+      .catch(() => { void reload(); });
+    params.delete('checkout');
+    params.delete('session');
+    const next = params.toString();
+    history.replaceState(null, '', next ? `${location.pathname}?${next}` : location.pathname);
+  }, [signedIn, applyMe, reload, conn]);
 
   useEffect(() => {
     fetch('/content/td/manifest.json', { cache: 'no-store' })
@@ -191,11 +206,10 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
         </div>
 
         <div className="room-launch">
-          {me?.entitled === false && <p className="quota-block">
-            You have used your {fusion ? 'Fusion' : 'Classic'} matches for this week.
-            {' '}<Link to="/tiers">Subscribe for unlimited play</Link>
-            {signedIn ? '' : <> or <Link to="/register">register a callsign</Link> for a free weekly allowance</>}.
-          </p>}
+          {me?.entitled === false && <div className="quota-block">
+            <CreditGate kind={playKind(room.options.style)} room={room.room}
+              onEarned={() => conn.send({ type: 'recheck' })} />
+          </div>}
           {isHost
             ? <button className="deploy" disabled={!othersReady || me?.entitled === false} onClick={() => conn.send({ type: 'start' })}>START OPERATION →</button>
             : <button className="deploy" disabled={me?.entitled === false} onClick={() => conn.send({ type: 'ready', ready: !me?.ready })}>{me?.ready ? 'CANCEL READY' : 'READY UP ✓'}</button>}

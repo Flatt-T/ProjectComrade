@@ -90,14 +90,24 @@ player's own access token, so none of them needs request signing.
 
 ## 3. Stripe
 
-Three products, each with one monthly GBP price, and the **`lookup_key` is what binds them to
-the tiers** — the application never stores an amount:
+Three monthly subscriptions and one one-off pack. The **`lookup_key` is what binds them** —
+the application never stores an amount:
 
 | Product | Price | `lookup_key` |
 |---|---|---|
 | Comrade Bronze | £3.49 / month | `comrade_bronze_monthly` |
 | Comrade Silver | £7.49 / month | `comrade_silver_monthly` |
 | Comrade Gold | £9.79 / month | `comrade_gold_monthly` |
+| Comrade Battle pack | £1.79 one-off | `comrade_credit_pack` |
+
+The battle pack is a **one-time** GBP price (Checkout `mode: payment`), not a recurring price.
+It grants 5 Classic matches and 3 Fusion matches.
+
+Checkout accepts Stripe promotion codes. Leave `STRIPE_PROMOTION_CODES` unset (it defaults
+to `true`) so a player who skips the on-site voucher field can still enter a code on Stripe's
+page. Gold 100% vouchers are single-use promotion codes on coupon `comrade_gold_100_once`
+(`duration: once`, Gold product only). Mint more with `tools/stripe-create-gold-vouchers.py`
+on the service host; issued codes live in `ops/vouchers/` and are gitignored.
 
 Set the lookup key exactly. Change a price later by creating a new price and moving the lookup
 key to it; the site picks it up within a minute and nothing needs redeploying.
@@ -114,7 +124,8 @@ key to it; the site picks it up within a minute and nothing needs redeploying.
 - **Dunning:** set the retry schedule and what happens when retries run out (cancel).
 - **Webhook endpoint:** `https://projectcomrade.thunderchildcreativetechnologies.com/api/stripe/webhook`
   subscribed to:
-  `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`,
+  `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+  `customer.subscription.created`, `customer.subscription.updated`,
   `customer.subscription.deleted`, `customer.subscription.paused`, `customer.subscription.resumed`,
   `invoice.paid`, `invoice.payment_failed`, `invoice.payment_action_required`, `customer.deleted`.
 

@@ -36,6 +36,16 @@ Prices are **not** in it. Every amount comes from Stripe, retrieved by a `lookup
 against each tier, so the Stripe dashboard is the only place a price exists and a price change
 needs no deployment.
 
+### Extra matches sit beside the weekly allowance
+
+When the weekly allowance is gone, a player can watch an advertisement (30 seconds for
+Classic, 60 for Fusion) to earn one extra match of that kind, or buy a one-off battle pack
+(5 Classic + 3 Fusion) through Stripe Checkout in `payment` mode. Extra matches are rows in
+`play_credits`, granted under a unique lot key so a retried webhook cannot double-credit.
+They are spent only after the weekly allowance is exhausted, and they survive week rollover
+until played. The duration of a credit-earn watch is enforced server-side from the moment
+the slot was issued; the client timer is not trusted.
+
 ### A play is a row, and the week is the player's own
 
 Spending a play inserts a row in `play_ledger`. Checking a quota counts the rows since the

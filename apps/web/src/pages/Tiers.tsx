@@ -4,12 +4,12 @@
 // what a player is quoted is always what Stripe will charge them, and changing a price is a
 // change in the Stripe dashboard and nowhere else.
 import React, { useEffect, useState } from 'react';
-import type { PlanPrice, Tier, TierPlan } from '@comrade/contracts';
-import { PAID_TIERS, plan as planFor } from '@comrade/contracts';
+import type { PackPrice, PlanPrice, Tier, TierPlan } from '@comrade/contracts';
+import { CREDIT_PACK, PAID_TIERS, plan as planFor } from '@comrade/contracts';
 import { api, money } from '../api';
 import { errorText, useAuth } from '../auth';
 import { Link, useRoute } from '../router';
-import { Notice, Spinner, TierBadge } from '../ui';
+import { Notice, Spinner, TierBadge, VoucherField } from '../ui';
 
 const ORDER: Tier[] = ['free', 'bronze', 'silver', 'gold'];
 
@@ -23,19 +23,43 @@ export default function Tiers() {
   const { signedIn, tier, entitlements, tiers, open } = useAuth();
   const { navigate, search } = useRoute();
   const [prices, setPrices] = useState<PlanPrice[] | null>(null);
+  const [pack, setPack] = useState<PackPrice | null>(null);
   const [currency, setCurrency] = useState('gbp');
   const [configured, setConfigured] = useState(true);
-  const [busy, setBusy] = useState<Tier | null>(null);
+  const [busy, setBusy] = useState<Tier | 'pack' | null>(null);
+  const [voucher, setVoucher] = useState('');
   const [error, setError] = useState('');
   const cancelled = search.get('checkout') === 'cancelled';
 
   useEffect(() => {
     api.plans()
-      .then(result => { setPrices(result.prices); setCurrency(result.currency); setConfigured(result.configured); })
+      .then(result => {
+        setPrices(result.prices);
+        setPack(result.packs?.find(p => p.pack === CREDIT_PACK.id) ?? null);
+        setCurrency(result.currency);
+        setConfigured(result.configured);
+      })
       .catch(() => setPrices([]));
   }, []);
 
   const priceFor = (id: Tier) => prices?.find(p => p.tier === id);
+
+  async function buyPack() {
+    setError('');
+    if (!signedIn) {
+      navigate(`/register?next=${encodeURIComponent('/tiers')}`);
+      return;
+    }
+    setBusy('pack');
+    try {
+      const { url } = await api.checkoutPack('/account/billing', voucher);
+      window.location.assign(url);
+    } catch (caught) {
+      setError(errorText(caught));
+    } finally {
+      setBusy(null);
+    }
+  }
 
   async function choose(target: Tier) {
     setError('');
@@ -51,7 +75,7 @@ export default function Tiers() {
         navigate(`/account/billing?change=${target}`);
         return;
       }
-      const { url } = await api.checkout(target);
+      const { url } = await api.checkout(target, voucher);
       window.location.assign(url);
     } catch (caught) {
       setError(errorText(caught));
@@ -75,6 +99,8 @@ export default function Tiers() {
     {error && <Notice kind="bad">{error}</Notice>}
     {!configured && <Notice>Subscriptions are not switched on for this deployment yet. Free play is unlimited in the meantime.</Notice>}
     {!prices && <Spinner label="Fetching prices from Stripe…" />}
+
+    {configured && <VoucherField value={voucher} onChange={setVoucher} disabled={!!busy} />}
 
     <div className="tier-grid">
       {table.map(details => {
@@ -119,7 +145,32 @@ export default function Tiers() {
       })}
     </div>
 
+    {configured && <article className="tier-card pack-card">
+      <header>
+        <p className="eyebrow">ONE-OFF</p>
+        <h2>{CREDIT_PACK.name}</h2>
+        <p className="tier-price">
+          {pack
+            ? <><b>{money(pack.unitAmount, pack.currency)}</b><span> once</span></>
+            : <span className="tier-price-missing">Price unavailable</span>}
+          {pack?.taxBehavior === 'inclusive' && <small>VAT included</small>}
+          {pack?.taxBehavior === 'exclusive' && <small>plus VAT</small>}
+        </p>
+        <p className="tier-blurb">{CREDIT_PACK.blurb}</p>
+      </header>
+      <ul className="tier-perks">
+        <li>{CREDIT_PACK.classic} extra Classic matches</li>
+        <li>{CREDIT_PACK.fusion} extra Fusion matches</li>
+        <li>Kept until you play them — they do not expire with your week</li>
+      </ul>
+      {pack && <button className="deploy" disabled={busy === 'pack'} onClick={() => void buyPack()}>
+        {busy === 'pack' ? 'OPENING…' : signedIn ? 'BUY THE BATTLE PACK →' : 'REGISTER TO BUY →'}
+      </button>}
+    </article>}
+
     <footer className="tiers-foot">
+      <p>Have a voucher? Enter it above before you choose a tier, or on Stripe's checkout page
+        if you skip that field. Gold 100% vouchers apply to the first Gold invoice only.</p>
       <p>Prices shown in {currency.toUpperCase()}, charged by Stripe. You can change or cancel your subscription
         at any time from <Link to="/account/billing">your billing page</Link>, where every invoice is available too.</p>
       <p><Link to="/legal/terms">Terms</Link> · <Link to="/legal/refunds">Cancellations and refunds</Link> · <Link to="/legal/privacy">Privacy</Link></p>

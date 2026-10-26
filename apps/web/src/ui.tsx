@@ -59,6 +59,28 @@ export function Field({ label, hint, error, children }: {
   </label>;
 }
 
+/** Optional Stripe promotion code, applied to Checkout when the player has one. */
+export function VoucherField({ value, onChange, disabled }: {
+  value: string; onChange: (value: string) => void; disabled?: boolean;
+}) {
+  return <div className="voucher-field">
+    <Field label="Voucher code" hint="Optional. Gold 100% vouchers apply to the first Gold invoice only.">
+      <input
+        type="text"
+        name="voucher"
+        autoComplete="off"
+        autoCapitalize="characters"
+        spellCheck={false}
+        maxLength={40}
+        placeholder="CG100-XXXX-XXXX"
+        value={value}
+        disabled={disabled}
+        onChange={e => onChange(e.target.value.toUpperCase())}
+      />
+    </Field>
+  </div>;
+}
+
 export function Notice({ kind = 'info', children }: { kind?: 'info' | 'good' | 'bad'; children: React.ReactNode }) {
   return <p className={`notice ${kind}`}>{children}</p>;
 }

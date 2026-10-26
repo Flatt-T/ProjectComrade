@@ -8,6 +8,7 @@ describe('protocol contracts', () => {
     expect(() => parseLaunch({ version: 1, type: 'launch', map: MAP_ID, faction: 'gdi', style: 'made-up' })).toThrow();
     expect(() => parseLaunch({ version: 1, type: 'launch', map: 'x', faction: 'gdi', style: 'td-classic' })).toThrow();
     expect(() => parseClientMessage({ version: 9, type: 'leave' })).toThrow();
+    expect(parseClientMessage({ version: 1, type: 'recheck' }).type).toBe('recheck');
     expect(() => parseClientMessage({ version: 1, type: 'join', room: '../root', name: 'Test', faction: 'gdi' })).toThrow();
   });
   it('validates room options and clamps player counts', () => {

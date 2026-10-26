@@ -8,12 +8,13 @@
 // slow or retried never leaves someone staring at a tier they have paid for.
 import Stripe from 'stripe';
 import {
-  InvoiceSummary, PAID_TIERS, PlanCatalogue, PlanPrice, Tier,
-  plan, tierForLookupKey,
+  CREDIT_PACK, InvoiceSummary, PAID_TIERS, PackPrice, PlanCatalogue, PlanPrice, Tier,
+  packForLookupKey, plan, tierForLookupKey,
 } from '@comrade/contracts';
 import { AccountRow, accountByCustomer, accountById, recordAccountEvent, setStripeCustomer } from './accounts.js';
 import { publicUrl, stripe as stripeConfig } from './config.js';
-import { HttpError, badRequest, notFound, unavailable } from './http.js';
+import { grantPack } from './credits.js';
+import { HttpError, badRequest, forbidden, notFound, unavailable } from './http.js';
 import { eventAlreadyHandled, upsertSubscription } from './entitlements.js';
 import { log } from './ops.js';
 
@@ -44,13 +45,26 @@ function seconds(value: unknown): Date | null {
 let cached: { at: number; catalogue: PlanCatalogue } | undefined;
 const CATALOGUE_TTL_MS = 60_000;
 
-/** Live prices for every paid tier, by lookup key. Cached briefly to spare the API. */
+/** Live prices for every paid tier and the battle pack, by lookup key. Cached briefly to spare the API. */
 export async function catalogue(force = false): Promise<PlanCatalogue> {
   if (!force && cached && Date.now() - cached.at < CATALOGUE_TTL_MS) return cached.catalogue;
-  const lookupKeys = PAID_TIERS.map(t => plan(t).lookupKey!).filter(Boolean);
+  const lookupKeys = [...PAID_TIERS.map(t => plan(t).lookupKey!), CREDIT_PACK.lookupKey].filter(Boolean);
   const result = await stripe().prices.list({ lookup_keys: lookupKeys, active: true, expand: ['data.tiers'], limit: 100 });
   const prices: PlanPrice[] = [];
+  const packs: PackPrice[] = [];
   for (const price of result.data) {
+    const pack = packForLookupKey(price.lookup_key);
+    if (pack) {
+      packs.push({
+        pack: pack.id,
+        priceId: price.id,
+        lookupKey: price.lookup_key!,
+        unitAmount: price.unit_amount ?? null,
+        currency: price.currency,
+        taxBehavior: (price.tax_behavior ?? null) as PackPrice['taxBehavior'],
+      });
+      continue;
+    }
     const tier = tierForLookupKey(price.lookup_key);
     if (!tier) continue;
     prices.push({
@@ -66,7 +80,9 @@ export async function catalogue(force = false): Promise<PlanCatalogue> {
     });
   }
   prices.sort((a, b) => PAID_TIERS.indexOf(a.tier) - PAID_TIERS.indexOf(b.tier));
-  const catalogue: PlanCatalogue = { prices, currency: prices[0]?.currency ?? 'gbp' };
+  const catalogue: PlanCatalogue = {
+    prices, packs, currency: prices[0]?.currency ?? packs[0]?.currency ?? 'gbp',
+  };
   cached = { at: Date.now(), catalogue };
   return catalogue;
 }
@@ -78,6 +94,13 @@ async function priceFor(tier: Tier): Promise<PlanPrice> {
     // A price added in Stripe moments ago should not need a cache expiry to be buyable.
     ?? (await catalogue(true)).prices.find(p => p.tier === tier);
   if (!found) throw new HttpError(503, `No active Stripe price with lookup key ${key}`);
+  return found;
+}
+
+async function priceForPack(): Promise<PackPrice> {
+  const found = (await catalogue()).packs.find(p => p.pack === CREDIT_PACK.id)
+    ?? (await catalogue(true)).packs.find(p => p.pack === CREDIT_PACK.id);
+  if (!found) throw new HttpError(503, `No active Stripe price with lookup key ${CREDIT_PACK.lookupKey}`);
   return found;
 }
 
@@ -103,9 +126,61 @@ export async function ensureCustomer(account: AccountRow): Promise<string> {
 // Buying and managing
 // ---------------------------------------------------------------------------
 
-export async function checkout(account: AccountRow, tier: Tier): Promise<{ url: string }> {
+/** Stripe forbids setting both `discounts` and `allow_promotion_codes` on one session. */
+function checkoutPromo(
+  promotionCodeId: string | undefined,
+): Pick<Stripe.Checkout.SessionCreateParams, 'allow_promotion_codes' | 'discounts'> {
+  if (promotionCodeId) return { discounts: [{ promotion_code: promotionCodeId }] };
+  return stripeConfig.promotionCodes() ? { allow_promotion_codes: true } : {};
+}
+
+function voucherCode(value: string | undefined): string {
+  return (value ?? '').replace(/\s+/g, '').toUpperCase().slice(0, 40);
+}
+
+/** Stripe 23 moved `coupon` under `promotion`; older versions still have it on the code. */
+function couponIdOf(promo: Stripe.PromotionCode): string {
+  const raw = loose(promo);
+  const nested = loose(raw.promotion);
+  const coupon = raw.coupon ?? nested.coupon;
+  if (typeof coupon === 'string' && coupon) return coupon;
+  const id = loose(coupon).id;
+  if (typeof id === 'string' && id) return id;
+  throw badRequest('That voucher is no longer valid');
+}
+
+async function productIdForPrice(priceId: string): Promise<string> {
+  const price = await stripe().prices.retrieve(priceId);
+  return typeof price.product === 'string' ? price.product : price.product.id;
+}
+
+/** Resolve a customer-facing code to a Stripe promotion_code id, or reject it plainly. */
+async function resolveVoucher(value: string | undefined, productId: string): Promise<string | undefined> {
+  const code = voucherCode(value);
+  if (!code) return undefined;
+  const listed = await stripe().promotionCodes.list({ code, active: true, limit: 1 });
+  const promo = listed.data[0];
+  if (!promo) throw badRequest('That voucher code is not valid');
+  if (promo.expires_at && promo.expires_at * 1000 < Date.now()) {
+    throw badRequest('That voucher has expired');
+  }
+  if (promo.max_redemptions != null && promo.times_redeemed >= promo.max_redemptions) {
+    throw badRequest('That voucher has already been used');
+  }
+  const couponId = couponIdOf(promo);
+  const coupon = await stripe().coupons.retrieve(couponId);
+  if (!coupon.valid) throw badRequest('That voucher is no longer valid');
+  const products = coupon.applies_to?.products;
+  if (products?.length && !products.includes(productId)) {
+    throw badRequest('That voucher is not valid for this purchase');
+  }
+  return promo.id;
+}
+
+export async function checkout(account: AccountRow, tier: Tier, voucher?: string): Promise<{ url: string }> {
   const price = await priceFor(tier);
   const customer = await ensureCustomer(account);
+  const promotionCode = await resolveVoucher(voucher, await productIdForPrice(price.priceId));
   const session = await stripe().checkout.sessions.create({
     mode: 'subscription',
     customer,
@@ -114,14 +189,45 @@ export async function checkout(account: AccountRow, tier: Tier): Promise<{ url: 
     subscription_data: { metadata: { accountId: account.id, handle: account.handle, tier } },
     success_url: `${publicUrl()}/account/billing?checkout=done&session={CHECKOUT_SESSION_ID}`,
     cancel_url: `${publicUrl()}/tiers?checkout=cancelled`,
-    allow_promotion_codes: stripeConfig.promotionCodes(),
+    ...checkoutPromo(promotionCode),
     automatic_tax: { enabled: stripeConfig.automaticTax() },
     // Stripe requires these to be updatable when it is calculating tax for a saved customer.
     customer_update: stripeConfig.automaticTax() ? { address: 'auto', name: 'auto' } : undefined,
     billing_address_collection: stripeConfig.automaticTax() ? 'required' : 'auto',
   });
   if (!session.url) throw new HttpError(502, 'Stripe did not return a checkout page');
-  await recordAccountEvent(account.id, 'checkout-started', { tier });
+  await recordAccountEvent(account.id, 'checkout-started', { tier, voucher: !!promotionCode });
+  return { url: session.url };
+}
+
+function safeReturnPath(path: string | undefined, fallback: string): string {
+  return path && /^\/[\w\-/?=&]*$/.test(path) ? path : fallback;
+}
+
+/** One-off battle pack: 5 Classic and 3 Fusion matches, paid through Checkout. */
+export async function checkoutPack(
+  account: AccountRow, returnPath?: string, voucher?: string,
+): Promise<{ url: string }> {
+  const price = await priceForPack();
+  const customer = await ensureCustomer(account);
+  const dest = safeReturnPath(returnPath, '/account/billing');
+  const sep = dest.includes('?') ? '&' : '?';
+  const promotionCode = await resolveVoucher(voucher, await productIdForPrice(price.priceId));
+  const session = await stripe().checkout.sessions.create({
+    mode: 'payment',
+    customer,
+    line_items: [{ price: price.priceId, quantity: 1 }],
+    client_reference_id: account.id,
+    metadata: { accountId: account.id, handle: account.handle, pack: CREDIT_PACK.id },
+    success_url: `${publicUrl()}${dest}${sep}checkout=pack&session={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${publicUrl()}${dest}${sep}checkout=cancelled`,
+    ...checkoutPromo(promotionCode),
+    automatic_tax: { enabled: stripeConfig.automaticTax() },
+    customer_update: stripeConfig.automaticTax() ? { address: 'auto', name: 'auto' } : undefined,
+    billing_address_collection: stripeConfig.automaticTax() ? 'required' : 'auto',
+  });
+  if (!session.url) throw new HttpError(502, 'Stripe did not return a checkout page');
+  await recordAccountEvent(account.id, 'pack-checkout-started', { pack: CREDIT_PACK.id, voucher: !!promotionCode });
   return { url: session.url };
 }
 
@@ -309,6 +415,36 @@ export async function syncSubscription(subscription: Stripe.Subscription, known?
   });
 }
 
+/** Grant a paid pack or refresh a subscription from a verified Checkout session. */
+export async function fulfillCheckout(session: Stripe.Checkout.Session): Promise<void> {
+  const accountId = session.client_reference_id ?? String(session.metadata?.accountId ?? '');
+  const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
+  if (accountId && customerId) await setStripeCustomer(accountId, customerId).catch(() => undefined);
+  const account = (customerId ? await accountByCustomer(customerId) : undefined)
+    ?? (accountId ? await accountById(accountId) : undefined);
+  if (!account) {
+    log('stripe-orphan-checkout', { session: session.id, mode: session.mode });
+    return;
+  }
+  const packId = String(session.metadata?.pack ?? '');
+  if (session.mode === 'payment' && packId === CREDIT_PACK.id) {
+    if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') return;
+    const granted = await grantPack({ accountId: account.id }, session.id);
+    if (granted) await recordAccountEvent(account.id, 'pack-granted', { session: session.id, pack: CREDIT_PACK.id });
+    return;
+  }
+  await resync(account);
+  await recordAccountEvent(account.id, 'checkout-completed', { session: session.id });
+}
+
+/** Used when a player returns from Checkout so a slow webhook is not the only path. */
+export async function fulfillSession(account: AccountRow, sessionId: string): Promise<void> {
+  const session = await stripe().checkout.sessions.retrieve(sessionId);
+  const owner = session.client_reference_id ?? String(session.metadata?.accountId ?? '');
+  if (owner && owner !== account.id) throw forbidden('That checkout does not belong to this account');
+  await fulfillCheckout(session);
+}
+
 /** Pull this customer's subscriptions from Stripe and mirror them. Used after Checkout. */
 export async function resync(account: AccountRow): Promise<void> {
   if (!account.stripe_customer_id) return;
@@ -340,20 +476,10 @@ export async function applyWebhook(raw: Buffer, signature: string | undefined): 
   log('stripe-event', { type: event.type });
 
   switch (event.type) {
-    case 'checkout.session.completed': {
-      const session = event.data.object;
-      const accountId = session.client_reference_id ?? String(session.metadata?.accountId ?? '');
-      const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
-      if (accountId && customerId) await setStripeCustomer(accountId, customerId).catch(() => undefined);
-      if (customerId) {
-        const account = await accountByCustomer(customerId);
-        if (account) {
-          await resync(account);
-          await recordAccountEvent(account.id, 'checkout-completed', { session: session.id });
-        }
-      }
+    case 'checkout.session.completed':
+    case 'checkout.session.async_payment_succeeded':
+      await fulfillCheckout(event.data.object);
       break;
-    }
     case 'customer.subscription.created':
     case 'customer.subscription.updated':
     case 'customer.subscription.paused':

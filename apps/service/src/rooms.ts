@@ -378,9 +378,13 @@ export class RoomCoordinator {
       if (message.type === 'ready' && room.phase === 'lobby') {
         // Somebody with nothing left this week cannot hold the room at "ready".
         if (message.ready && peer.player.entitled === false) {
-          throw new Error(`You have used your ${playKind(room.options.style) === 'fusion' ? 'Fusion' : 'Classic'} matches for this week — upgrade or wait for your week to turn over`);
+          throw new Error(`You have no ${playKind(room.options.style) === 'fusion' ? 'Fusion' : 'Classic'} matches left — watch an advertisement or buy a battle pack`);
         }
         peer.player.ready = message.ready; this.broadcast(peer.room); return;
+      }
+      if (message.type === 'recheck' && room.phase === 'lobby') {
+        void this.refreshEntitlement(id).then(() => this.broadcast(peer.room!));
+        return;
       }
       if (message.type === 'start') {
         if (room.host !== id) throw new Error('Only the host can start the match');

@@ -4,7 +4,7 @@
 // that need a database or an identity provider say so with a 503 when the deployment has
 // none, rather than failing in some obscure way, so the site degrades to free open play.
 import {
-  AVATAR_MAX_BYTES, AVATAR_TYPES, GameStyle, HANDLE_MAX, PAID_TIERS, PlayDecision, STYLES, Tier,
+  AVATAR_MAX_BYTES, AVATAR_TYPES, CREDIT_PACK, GameStyle, HANDLE_MAX, PAID_TIERS, PlayDecision, PlayKind, STYLES, Tier,
   allowance, handleValid, playKind, plan, tierRank,
 } from '@comrade/contracts';
 import {
@@ -13,6 +13,7 @@ import {
   setAvatar, setConsent, setPendingEmail, updateProfile,
 } from './accounts.js';
 import { adBreak, recordImpression } from './ads.js';
+import { completeAdCredit, startAdCredit } from './credits.js';
 import { SESSION_COOKIE, optionalCaller, setSessionCookie, verifyAccessToken } from './auth.js';
 import * as billingApi from './billing.js';
 import * as cognito from './cognito.js';
@@ -22,7 +23,7 @@ import {
 } from './entitlements.js';
 import {
   BODY_LIMIT, Ctx, UPLOAD_LIMIT, badRequest, conflict, del, get, limit, notFound,
-  patch, post, put, unavailable, unauthorised,
+  patch, post, put, unavailable, unauthorised, forbidden,
 } from './http.js';
 import { historyFor, matchById, parseReport, playerRecord, recordResult, slotForToken } from './history.js';
 import { log } from './ops.js';
@@ -57,6 +58,10 @@ function tierParam(value: unknown): Tier {
   const tier = PAID_TIERS.find(t => t === value);
   if (!tier) throw badRequest('Unknown tier');
   return tier;
+}
+function playKindParam(value: unknown): PlayKind {
+  if (value === 'classic' || value === 'fusion') return value;
+  throw badRequest('Unknown match kind');
 }
 
 // ---------------------------------------------------------------------------
@@ -345,7 +350,7 @@ del('/api/me', async (ctx: Ctx) => {
 
 /** Live Stripe prices. Public, because the tiers page shows them before anyone signs in. */
 get('/api/billing/plans', async () => {
-  if (!billingEnabled()) return { prices: [], currency: 'gbp', configured: false };
+  if (!billingEnabled()) return { prices: [], packs: [], currency: 'gbp', configured: false };
   const catalogue = await billingApi.catalogue();
   return { ...catalogue, configured: true };
 });
@@ -354,7 +359,12 @@ post('/api/billing/checkout', async (ctx: Ctx) => {
   requireBilling();
   const { account } = await resolveAccount(ctx);
   limit(ctx, 'checkout', 20, 60 * 60_000);
-  return billingApi.checkout(account, tierParam((await ctx.body()).tier));
+  const body = await ctx.body();
+  const voucher = str(body.voucher, 40) || undefined;
+  if (str(body.pack, 20) === CREDIT_PACK.id) {
+    return billingApi.checkoutPack(account, str(body.returnPath, 120) || undefined, voucher);
+  }
+  return billingApi.checkout(account, tierParam(body.tier), voucher);
 });
 
 post('/api/billing/portal', async (ctx: Ctx) => {
@@ -414,6 +424,8 @@ post('/api/billing/sync', async (ctx: Ctx) => {
   requireBilling();
   const { account } = await resolveAccount(ctx);
   limit(ctx, 'sync', 30, 10 * 60_000);
+  const sessionId = str((await ctx.body<{ session?: string }>()).session, 80);
+  if (sessionId) await billingApi.fulfillSession(account, sessionId);
   await billingApi.resync(account);
   const subscription = await activeSubscription(account.id);
   const who = {
@@ -454,11 +466,39 @@ get('/api/play/check', async (ctx: Ctx) => {
   const lock = map ? await lockFor(map, who.tier) : { locked: false };
   const allowed = !lock.locked && (quota.remaining === null || quota.remaining > 0);
   const details = plan(who.tier);
+  const outOfPlays = !lock.locked && quota.remaining !== null && quota.remaining <= 0;
   return {
     allowed, kind, tier: who.tier, quota,
     reason: lock.locked ? 'early-access' : allowed ? undefined : (who.registered ? 'quota' : 'registration-required'),
     ad: allowed && details.ads ? adBreak(await personalised(ctx, who.account?.id)) : undefined,
+    canEarnByAd: outOfPlays,
   } satisfies PlayDecision;
+});
+
+post('/api/play/ad-credit', async (ctx: Ctx) => {
+  requirePlatform();
+  limit(ctx, 'ad-credit', 40, 60 * 60_000);
+  const who = await resolve(ctx);
+  const body = await ctx.body();
+  const kind = playKindParam(body.kind);
+  const quota = await quotaFor(who.subject, kind, who.tier, who.anchor);
+  if (quota.remaining === null) throw forbidden('Your tier does not need extra matches');
+  if (quota.remaining > 0) throw conflict('You already have a match left to play');
+  const adsOn = who.account ? (await consentFor(who.account.id)).personalisedAds : body.personalised === true;
+  return startAdCredit(who.subject, kind, adsOn);
+});
+
+post('/api/play/ad-credit/complete', async (ctx: Ctx) => {
+  requirePlatform();
+  limit(ctx, 'ad-credit-complete', 40, 60 * 60_000);
+  const who = await resolve(ctx);
+  const token = str((await ctx.body()).token, 64);
+  const result = await completeAdCredit(who.subject, token);
+  return {
+    granted: true,
+    kind: result.kind,
+    entitlements: await entitlementsFor(who),
+  };
 });
 
 /** Styles that can actually be launched; anything else is only a roster entry. */

@@ -54,3 +54,7 @@ temp/
 references/actual-binaries/
 references/recordings/
 rights/actual-licences/
+
+# Issued Stripe voucher / promotion codes — never commit these
+ops/vouchers/*
+!ops/vouchers/README.md

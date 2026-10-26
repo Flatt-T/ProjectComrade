@@ -91,7 +91,7 @@ export async function beginMatch(brief: MatchBrief): Promise<StartOutcome> {
       refusals.push({
         peerId: player.peerId,
         name: player.name,
-        message: `${player.name} has used their ${what} matches for this week`,
+        message: `${player.name} has no ${what} matches left — watch an advertisement or buy a battle pack`,
       });
     }
   }
@@ -128,7 +128,8 @@ export async function beginMatch(brief: MatchBrief): Promise<StartOutcome> {
     if (quota.limit !== null) {
       try {
         const ledgerId = await spendPlay({
-          subject, kind, tier: player.tier, style: brief.style, map: brief.map, room: brief.room, matchId,
+          subject, kind, tier: player.tier, anchor: player.anchor,
+          style: brief.style, map: brief.map, room: brief.room, matchId,
         });
         if (matchId) await attachMatch(ledgerId, matchId);
       } catch (error) {

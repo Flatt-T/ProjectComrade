@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  EARLY_ACCESS_DAYS, PAID_TIERS, PLANS, TIERS, VOTES_PER_WEEK,
-  allowance, handleValid, plan, playKind, tierForLookupKey, tierRank,
+  AD_CREDITS_PER_DAY, CREDIT_AD_SECONDS, CREDIT_PACK, EARLY_ACCESS_DAYS, PAID_TIERS, PLANS, TIERS, VOTES_PER_WEEK,
+  allowance, handleValid, packForLookupKey, plan, playKind, remainingPlays, tierForLookupKey, tierRank,
 } from '../../packages/contracts/src/index';
 import { WEEK_MS, tierFromSubscription, weekWindow } from '../../apps/service/src/entitlements';
 import { scoreOf } from '../../apps/service/src/history';
@@ -56,6 +56,21 @@ describe('tier entitlements', () => {
     expect(keys.every(Boolean)).toBe(true);
     expect(PLANS.free.lookupKey).toBeUndefined();
     expect(PLANS.guest.lookupKey).toBeUndefined();
+  });
+
+  it('defines the battle pack and advertisement-earn durations', () => {
+    expect(CREDIT_PACK.classic).toBe(5);
+    expect(CREDIT_PACK.fusion).toBe(3);
+    expect(CREDIT_PACK.lookupKey).toBe('comrade_credit_pack');
+    expect(packForLookupKey(CREDIT_PACK.lookupKey)?.id).toBe('battle');
+    expect(packForLookupKey('comrade_bronze_monthly')).toBeNull();
+    expect(CREDIT_AD_SECONDS.classic).toBe(30);
+    expect(CREDIT_AD_SECONDS.fusion).toBe(60);
+    expect(AD_CREDITS_PER_DAY).toBeGreaterThan(0);
+    expect(remainingPlays(3, 3, 0)).toBe(0);
+    expect(remainingPlays(3, 3, 2)).toBe(2);
+    expect(remainingPlays(3, 1, 0)).toBe(2);
+    expect(remainingPlays(null, 10, 5)).toBeNull();
   });
 
   it('maps a Stripe lookup key back to the tier it sells', () => {

@@ -4,8 +4,8 @@
 // page could read it. The long-lived refresh token lives in an httpOnly cookie the page
 // cannot touch, so a reload calls /api/auth/refresh to get a new access token and carries on.
 import type {
-  ConsentState, Entitlements, HistoryPage, InvoiceSummary, MatchRecord, Me, PlanPrice, PlayDecision,
-  PlayerRecord, ProposalPage, ReleaseInfo, SubscriptionState, Tier, TierPlan,
+  AdBreak, ConsentState, Entitlements, HistoryPage, InvoiceSummary, MatchRecord, Me, PackPrice, PlanPrice, PlayDecision,
+  PlayKind, PlayerRecord, ProposalPage, ReleaseInfo, SubscriptionState, Tier, TierPlan,
 } from '@comrade/contracts';
 
 export class ApiError extends Error {
@@ -129,20 +129,27 @@ export const api = {
   removeAvatar: () => remove<Me>('/api/me/avatar'),
   eraseAccount: () => remove<{ erased: boolean }>('/api/me', { confirm: 'DELETE' }),
 
-  plans: () => get<{ prices: PlanPrice[]; currency: string; configured: boolean }>('/api/billing/plans'),
-  checkout: (tier: Tier) => post<{ url: string }>('/api/billing/checkout', { tier }),
+  plans: () => get<{ prices: PlanPrice[]; packs: PackPrice[]; currency: string; configured: boolean }>('/api/billing/plans'),
+  checkout: (tier: Tier, voucher?: string) =>
+    post<{ url: string }>('/api/billing/checkout', { tier, voucher: voucher || undefined }),
+  checkoutPack: (returnPath?: string, voucher?: string) =>
+    post<{ url: string }>('/api/billing/checkout', { pack: 'battle', returnPath, voucher: voucher || undefined }),
   portal: (returnPath?: string) => post<{ url: string }>('/api/billing/portal', { returnPath }),
   subscription: () => get<{ subscription: SubscriptionState | null; tier: Tier }>('/api/billing/subscription'),
   previewChange: (tier: Tier) => post<{ tier: Tier; amountDue: number | null; currency: string | null; immediate: boolean; nextRenewal: string | null }>('/api/billing/preview', { tier }),
   changeTier: (tier: Tier) => post<{ subscription: SubscriptionState | null; tier: Tier; direction: 'up' | 'down' }>('/api/billing/change', { tier }),
   cancelSubscription: (cancel: boolean) => post<{ subscription: SubscriptionState | null }>('/api/billing/cancel', { cancel }),
   invoices: () => get<{ invoices: InvoiceSummary[] }>('/api/billing/invoices'),
-  syncBilling: () => post<Me>('/api/billing/sync'),
+  syncBilling: (session?: string) => post<Me>('/api/billing/sync', session ? { session } : {}),
 
   playCheck: (style: string, map: string, personalised: boolean) =>
     get<PlayDecision>(`/api/play/check?style=${encodeURIComponent(style)}&map=${encodeURIComponent(map)}&personalised=${personalised}`),
   adImpression: (body: { token: string; provider: string; filled: boolean; seconds: number }) =>
     post<{ recorded: boolean }>('/api/ads/impression', body),
+  startAdCredit: (kind: PlayKind, personalised: boolean) =>
+    post<{ ad: AdBreak; kind: PlayKind; seconds: number }>('/api/play/ad-credit', { kind, personalised }),
+  completeAdCredit: (token: string) =>
+    post<{ granted: boolean; kind: PlayKind; entitlements: Entitlements }>('/api/play/ad-credit/complete', { token }),
 
   history: (cursor?: string) => get<HistoryPage>(`/api/history${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`),
   commander: (handle: string) => get<CommanderResponse>(`/api/players/${encodeURIComponent(handle)}`),

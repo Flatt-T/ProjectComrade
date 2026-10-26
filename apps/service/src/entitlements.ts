@@ -6,8 +6,9 @@
 // drift, and a refund is a deleted row.
 import {
   Entitlements, PlayKind, QuotaState, SubscriptionState, SubscriptionStatus, Tier,
-  allowance, plan,
+  allowance, plan, remainingPlays,
 } from '@comrade/contracts';
+import { consumeCredit, restoreCredit, unspentCredits } from './credits.js';
 import { one, query } from './db.js';
 import { platformEnabled } from './config.js';
 
@@ -71,20 +72,22 @@ export function weekWindow(anchor: Date, now = new Date()): { start: Date; end: 
 async function playsUsed(subject: Subject, kind: PlayKind, since: Date): Promise<number> {
   const row = subject.accountId
     ? await one<{ used: string }>(
-      `select count(*)::text as used from play_ledger where account_id = $1 and kind = $2 and created_at >= $3`,
+      `select count(*)::text as used from play_ledger
+       where account_id = $1 and kind = $2 and created_at >= $3 and source = 'allowance'`,
       [subject.accountId, kind, since])
     : await one<{ used: string }>(
-      `select count(*)::text as used from play_ledger where guest_id = $1 and kind = $2 and created_at >= $3`,
+      `select count(*)::text as used from play_ledger
+       where guest_id = $1 and kind = $2 and created_at >= $3 and source = 'allowance'`,
       [subject.guestId, kind, since]);
   return Number(row?.used ?? 0);
 }
 
 export async function quotaFor(subject: Subject, kind: PlayKind, tier: Tier, anchor: Date): Promise<QuotaState> {
   const limit = allowance(tier, kind);
-  if (limit === null) return { kind, limit: null, used: 0, remaining: null };
+  if (limit === null) return { kind, limit: null, used: 0, remaining: null, bonus: 0 };
   const { start, end } = weekWindow(anchor);
-  const used = await playsUsed(subject, kind, start);
-  return { kind, limit, used, remaining: Math.max(0, limit - used), resetsAt: end.toISOString() };
+  const [used, bonus] = await Promise.all([playsUsed(subject, kind, start), unspentCredits(subject, kind)]);
+  return { kind, limit, used, remaining: remainingPlays(limit, used, bonus), bonus, resetsAt: end.toISOString() };
 }
 
 export interface Who {
@@ -113,7 +116,10 @@ export async function entitlementsFor(who: Who): Promise<Entitlements> {
 export function openEntitlements(): Entitlements {
   return {
     tier: 'silver', registered: false, ads: false, voting: false, earlyAccess: true,
-    quotas: [{ kind: 'classic', limit: null, used: 0, remaining: null }, { kind: 'fusion', limit: null, used: 0, remaining: null }],
+    quotas: [
+      { kind: 'classic', limit: null, used: 0, remaining: null, bonus: 0 },
+      { kind: 'fusion', limit: null, used: 0, remaining: null, bonus: 0 },
+    ],
   };
 }
 
@@ -121,25 +127,40 @@ export interface PlaySpend {
   subject: Subject;
   kind: PlayKind;
   tier: Tier;
+  /** Start of this player's weekly window, so bonus credits are only spent once the allowance is gone. */
+  anchor: Date;
   style: string;
   map?: string;
   room?: string;
   matchId?: string;
 }
 
+async function insertLedger(spend: PlaySpend, source: 'allowance' | 'bonus', creditId: string | null): Promise<string> {
+  const row = await one<{ id: string }>(
+    `insert into play_ledger (account_id, guest_id, kind, tier, style, map, room, match_id, source, credit_id)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning id::text as id`,
+    [spend.subject.accountId ?? null, spend.subject.guestId ?? null, spend.kind, spend.tier,
+      spend.style, spend.map ?? null, spend.room ?? null, spend.matchId ?? null, source, creditId]);
+  return row!.id;
+}
+
 /** Spend one play. Returns the ledger id, so it can be refunded if the match never starts. */
 export async function spendPlay(spend: PlaySpend): Promise<string> {
-  const row = await one<{ id: string }>(
-    `insert into play_ledger (account_id, guest_id, kind, tier, style, map, room, match_id)
-     values ($1, $2, $3, $4, $5, $6, $7, $8) returning id::text as id`,
-    [spend.subject.accountId ?? null, spend.subject.guestId ?? null, spend.kind, spend.tier,
-      spend.style, spend.map ?? null, spend.room ?? null, spend.matchId ?? null]);
-  return row!.id;
+  const limit = allowance(spend.tier, spend.kind);
+  if (limit === null) return insertLedger(spend, 'allowance', null);
+  const { start } = weekWindow(spend.anchor);
+  const used = await playsUsed(spend.subject, spend.kind, start);
+  if (used < limit) return insertLedger(spend, 'allowance', null);
+  const creditId = await consumeCredit(spend.subject, spend.kind);
+  if (!creditId) throw new Error('No play remaining');
+  return insertLedger(spend, 'bonus', creditId);
 }
 
 /** Give a play back — used when a match is abandoned before it really began. */
 export async function refundPlay(ledgerId: string): Promise<void> {
-  await query(`delete from play_ledger where id = $1`, [ledgerId]);
+  const row = await one<{ credit_id: string | null }>(
+    `delete from play_ledger where id = $1 returning credit_id::text as credit_id`, [ledgerId]);
+  if (row?.credit_id) await restoreCredit(row.credit_id);
 }
 
 export async function attachMatch(ledgerId: string, matchId: string): Promise<void> {

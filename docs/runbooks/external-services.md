@@ -112,21 +112,25 @@ a `lookup_key`, so changing a price is a change in the Stripe dashboard with no 
 
 1. **A Stripe account** for the operating entity, with its bank details and identity
    verification completed — this takes longest, so start it early.
-2. **Three products**, each with one monthly GBP price, and the `lookup_key` set exactly:
+2. **Three subscription products**, each with one monthly GBP price, plus one one-off pack,
+   with the `lookup_key` set exactly:
 
    | Product | Price | `lookup_key` |
    |---|---|---|
    | Comrade Bronze | £3.49/month | `comrade_bronze_monthly` |
    | Comrade Silver | £7.49/month | `comrade_silver_monthly` |
    | Comrade Gold | £9.79/month | `comrade_gold_monthly` |
+   | Comrade Battle pack | £1.79 one-off | `comrade_credit_pack` |
 
-   The lookup key is the contract between Stripe and the application. Get it wrong and that tier
-   simply cannot be bought.
+   The lookup key is the contract between Stripe and the application. Get it wrong and that
+   product simply cannot be bought. The battle pack is a one-time price (not recurring) and
+   grants 5 Classic + 3 Fusion matches.
 3. **Stripe Tax**, with the prices set VAT-inclusive if £3.49 is what the customer pays.
 4. **The Customer Portal** configured to allow card updates, cancellation, invoice history and
-   switching between the three products.
-5. **A webhook endpoint** at `/api/stripe/webhook` on the live domain, subscribed to the ten
-   events listed in the setup runbook.
+   switching between the three subscription products.
+5. **A webhook endpoint** at `/api/stripe/webhook` on the live domain, subscribed to the
+   events listed in the setup runbook (including `checkout.session.async_payment_succeeded`
+   so a delayed pack payment still grants the matches).
 
 ### What it issues back
 

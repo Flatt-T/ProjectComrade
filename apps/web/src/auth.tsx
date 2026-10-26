@@ -130,6 +130,9 @@ export function errorText(error: unknown): string {
 export function quotaText(quota: QuotaState | undefined): string {
   if (!quota) return '';
   if (quota.limit === null) return 'Unlimited';
+  const weekly = Math.max(0, quota.limit - quota.used);
+  const bonus = quota.bonus ?? 0;
+  if (bonus) return `${weekly} of ${quota.limit} this week · ${bonus} extra`;
   return `${quota.remaining ?? 0} of ${quota.limit} left`;
 }
 
