@@ -19,7 +19,10 @@ import urllib.request
 
 USER_AGENT = 'ProjectComrade-content'
 ATTEMPTS = 4
-TIMEOUT = 120
+# Per socket operation, not for the whole transfer, so a large archive is unaffected while an
+# unreachable host gives up in seconds. With the long default, four attempts against a dead
+# host burned eight minutes of runner time before reporting what was already obvious.
+TIMEOUT = 30
 
 
 def digest(path: Path) -> str:
