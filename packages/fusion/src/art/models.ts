@@ -193,6 +193,17 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'barracks': {
+      if (style === 'allied') {
+        // The Allied barracks is a camp: olive canvas tents behind a sandbagged front.
+        const canvas: RGB = [128, 160, 96], shade: RGB = [96, 128, 80];
+        for (const cx of [0.62, 1.38]) {
+          m.roof(cx - 0.34, 0.34, cx + 0.34, 1.5, 0.07, 0.56, cx > 1 ? shade : canvas, 'x');
+          m.box(cx - 0.34, 1.46, 0.07, cx + 0.34, 1.52, 0.3, tint(shade, 0.85));
+        }
+        m.box(0.2, 1.56, 0.07, 1.8, 1.8, 0.22, [176, 160, 128], { top: [148, 134, 104] });
+        m.box(0.6, 1.52, 0.12, 1.4, 1.58, 0.26, team);
+        break;
+      }
       if (td) {
         // GDI's barracks: a pale flat-roofed hut with a dark doorway and a vent stack.
         m.box(0.18, 0.3, 0.07, 1.82, 1.78, 0.56, p.body, { top: p.trim });
@@ -212,6 +223,19 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'silo': {
+      if (w > 1) {
+        // Tiberian Dawn and Red Alert store their harvest in low paired tanks lying flat.
+        for (const cy of [0.5, h > 1 ? 1.5 : 0.5]) {
+          for (const cx of [0.56, 1.44].slice(0, w > 1 ? 2 : 1)) {
+            m.cylinder(cx, cy, 0.07, 0.42, 0.26, 0.26, p.body, 14, { cap: false });
+            m.dome(cx, cy, 0.42, 0.26, tint(p.body, 1.06), 3, 14, 0.14);
+            m.cylinder(cx, cy, 0.26, 0.3, 0.27, 0.27, team, 14, { cap: false });
+          }
+          if (h === 1) break;
+        }
+        m.box(0.2, 0.42, 0.07, w - 0.2, 0.52, 0.16, p.dark);
+        break;
+      }
       m.cylinder(0.5, 0.5, 0.07, 0.55, 0.36, 0.36, p.body, 18, { cap: false });
       m.cylinder(0.5, 0.5, 0.32, 0.38, 0.37, 0.37, team, 18, { cap: false });
       m.dome(0.5, 0.5, 0.55, 0.36, p.body, 4, 18, 0.25);
@@ -242,6 +266,16 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'radar': {
+      if (td) {
+        // Communications Center: a blockhouse with the white dish on its roof.
+        m.box(0.2, 0.3, 0.07, w - 0.2, h - 0.2, 0.68, p.body, { top: p.trim });
+        m.box(0.3, 0.4, 0.68, w - 0.3, h - 0.3, 0.74, tint(p.trim, 0.9));
+        m.box(0.2, h - 0.24, 0.2, w - 0.2, h - 0.18, 0.5, team);
+        m.cylinder(w / 2, h / 2 - 0.1, 0.74, 1.1, 0.1, 0.08, p.metal, 10);
+        m.cylinder(w / 2, h / 2 - 0.1, 1.06, 1.42, 0.12, 0.5, [208, 208, 192], 20, { cap: false });
+        m.cylinder(w / 2, h / 2 - 0.1, 1.08, 1.12, 0.14, 0.14, p.dark, 12);
+        break;
+      }
       if (soviet) {
         m.box(0.3, 0.3, 0.07, 1.7, 1.7, 0.35, p.body);
         for (const [x, y] of [[0.55, 0.55], [1.45, 0.55], [0.55, 1.45], [1.45, 1.45]]) m.box(x - 0.05, y - 0.05, 0.35, x + 0.05, y + 0.05, 1.5, p.metal);
@@ -254,6 +288,15 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'lab': {
+      if (soviet) {
+        // The Soviet tech centre is a slab with blue-grey glazing and a mast.
+        m.box(0.2, 0.25, 0.07, w - 0.2, h - 0.2, 0.78, [96, 104, 112], { top: [64, 80, 96] });
+        for (let x = 0.35; x < w - 0.4; x += 0.4) m.box(x, 0.2, 0.3, x + 0.24, 0.26, 0.66, [120, 140, 160]);
+        m.box(0.2, h - 0.24, 0.2, w - 0.2, h - 0.18, 0.6, team);
+        m.cylinder(w - 0.5, 0.55, 0.78, 1.6, 0.06, 0.04, p.metal, 8);
+        m.dome(w - 0.5, 0.55, 1.6, 0.08, GLOW_RED, 2, 8);
+        break;
+      }
       m.box(0.2, 0.2, 0.07, w - 0.2, h - 0.2, 0.42, p.body);
       m.dome(w / 2, h / 2, 0.42, Math.min(w, h) * 0.36, dune ? p.body : p.glass, 6, 22, Math.min(w, h) * 0.32);
       m.cylinder(w / 2, h / 2, 0.36, 0.44, Math.min(w, h) * 0.37, Math.min(w, h) * 0.37, team, 22, { cap: false });
@@ -333,8 +376,9 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'repairpad': {
-      // Repair Pad / Service Depot: a ramped platform under a gantry crane.
-      m.box(0.2, 0.2, 0.07, w - 0.2, h - 0.2, 0.18, p.trim, { top: p.dark });
+      // Repair bay: in the classics this is almost all apron, with a light gantry over it.
+      m.box(0.12, 0.12, 0.07, w - 0.12, h - 0.12, 0.14, tint(p.pad, 1.05), { top: tint(p.metal, 0.95) });
+      m.box(0.5, 0.5, 0.14, w - 0.5, h - 0.5, 0.16, tint(p.metal, 0.88));
       m.box(0.85, 0.85, 0.18, w - 0.85, h - 0.85, 0.2, p.metal);
       for (const [x, y] of [[0.3, 0.3], [w - 0.5, 0.3], [0.3, h - 0.5], [w - 0.5, h - 0.5]]) m.box(x, y, 0.18, x + 0.2, y + 0.2, 0.24, team);
       m.box(0.25, h / 2 - 0.1, 0.18, 0.45, h / 2 + 0.1, 1.05, p.metal);
@@ -473,26 +517,34 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
     }
     // ------------------------------------------------ Tiberian Dawn and Red Alert
     case 'tdpower': {
-      // Power Plant: a turbine hall with two stacks and louvred vents.
-      m.box(0.2, 0.5, 0.07, 1.8, 1.8, 0.5, p.body, { top: p.trim });
-      m.box(0.2, 1.76, 0.18, 1.8, 1.82, 0.44, team);
-      for (const cx of [0.62, 1.22]) {
-        m.cylinder(cx, 0.4, 0.07, 1.05, 0.2, 0.17, p.metal, 14, { cap: false });
-        m.cylinder(cx, 0.4, 1.03, 1.1, 0.19, 0.19, p.dark, 14);
+      // Power Plant: a turbine hall under a sloped vented roof, with a low annex at the
+      // front. Red Alert's wears the red-brown roof its sprite has.
+      const roof: RGB = td ? p.trim : [96, 56, 48];
+      m.box(0.2, 0.42, 0.07, 1.8, 1.72, 0.62, p.body);
+      m.roof(0.14, 0.36, 1.86, 1.76, 0.62, 0.95, roof, 'x');
+      for (let x = 0.36; x < 1.6; x += 0.34) m.box(x, 0.34, 0.5, x + 0.2, 0.4, 0.74, p.dark);
+      m.box(0.32, 1.72, 0.07, 1.68, 1.86, 0.34, tint(p.body, 0.94), { top: p.dark });
+      m.box(0.32, 1.84, 0.12, 1.68, 1.9, 0.3, team);
+      for (const cx of [0.56, 1.3]) {
+        m.cylinder(cx, 0.78, 0.95, 1.38, 0.13, 0.11, p.metal, 12, { cap: false });
+        m.cylinder(cx, 0.78, 1.36, 1.42, 0.12, 0.12, p.dark, 12);
       }
-      for (let x = 0.32; x < 1.7; x += 0.3) m.box(x, 1.82, 0.12, x + 0.2, 1.88, 0.4, p.dark);
       break;
     }
     case 'advpower': {
-      // Advanced Power Plant: the same hall grown, with four stacks and a hot core.
-      m.box(0.2, 0.55, 0.07, w - 0.2, h - 0.2, 0.62, p.body, { top: p.trim });
-      m.box(0.2, h - 0.24, 0.2, w - 0.2, h - 0.18, 0.52, team);
-      for (let k2 = 0; k2 < 4; k2++) {
-        const cx = 0.45 + k2 * ((w - 0.9) / 3);
-        m.cylinder(cx, 0.42, 0.07, 1.25, 0.17, 0.14, p.metal, 12, { cap: false });
-        m.cylinder(cx, 0.42, 1.23, 1.3, 0.16, 0.16, p.dark, 12);
+      // Advanced Power Plant: the same hall again, longer, with a second roof and the
+      // turbine housings along its flank.
+      const roof: RGB = td ? p.trim : [96, 56, 48];
+      m.box(0.2, 0.42, 0.07, w - 0.2, h - 0.5, 0.66, p.body);
+      m.roof(0.14, 0.36, w - 0.14, h - 0.44, 0.66, 1.02, roof, 'x');
+      for (let x = 0.4; x < w - 0.5; x += 0.36) m.box(x, 0.34, 0.54, x + 0.22, 0.4, 0.8, p.dark);
+      m.box(0.3, h - 0.5, 0.07, w - 0.3, h - 0.16, 0.38, tint(p.body, 0.94), { top: p.dark });
+      m.box(0.3, h - 0.22, 0.12, w - 0.3, h - 0.16, 0.34, team);
+      for (let k2 = 0; k2 < 3; k2++) {
+        const cx = 0.6 + k2 * ((w - 1.2) / 2);
+        m.cylinder(cx, 0.8, 1.02, 1.5, 0.14, 0.12, p.metal, 12, { cap: false });
+        m.cylinder(cx, 0.8, 1.48, 1.54, 0.13, 0.13, p.dark, 12);
       }
-      m.box(w / 2 - 0.35, h - 0.22, 0.14, w / 2 + 0.35, h - 0.16, 0.34, GLOW_BLUE, { glow: true });
       break;
     }
     case 'handofnod': {
@@ -519,8 +571,10 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'helipad': {
-      // Helipad: a concrete pad with a landing circle and corner lights.
-      m.box(0.12, 0.12, 0.07, w - 0.12, h - 0.12, 0.12, p.pad, { top: tint(p.dark, 1.4) });
+      // Helipad: a dark apron with a painted circle, a service hut on one side.
+      m.box(0.12, 0.12, 0.07, w - 0.12, h - 0.12, 0.12, tint(p.dark, 1.3), { top: tint(p.dark, 1.15) });
+      m.box(w - 0.6, 0.18, 0.12, w - 0.16, 0.74, 0.46, p.body, { top: p.trim });
+      m.box(w - 0.6, 0.7, 0.18, w - 0.16, 0.76, 0.4, team);
       m.cylinder(w / 2, h / 2, 0.12, 0.125, 0.62, 0.62, tint(p.trim, 1.1), 24);
       m.cylinder(w / 2, h / 2, 0.125, 0.13, 0.5, 0.5, p.dark, 24);
       m.box(w / 2 - 0.3, h / 2 - 0.06, 0.13, w / 2 + 0.3, h / 2 + 0.06, 0.135, team);
@@ -530,11 +584,12 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'ioncannon': {
-      // Advanced Communications Center: an uplink block under a steerable dish.
-      m.box(0.22, 0.22, 0.07, w - 0.22, h - 0.22, 0.5, p.body, { top: p.trim });
+      // Advanced Communications Center: a dark uplink block under a big white dish.
+      m.box(0.22, 0.22, 0.07, w - 0.22, h - 0.22, 0.5, tint(p.body, 0.72), { top: p.dark });
+      m.box(0.3, 0.3, 0.5, w - 0.3, h - 0.3, 0.56, tint(p.dark, 1.25));
       m.box(0.22, h - 0.26, 0.2, w - 0.22, h - 0.2, 0.44, team);
       m.cylinder(w / 2, h / 2, 0.5, 1.15, 0.14, 0.1, p.metal, 12);
-      m.cylinder(w / 2, h / 2, 1.1, 1.52, 0.16, 0.72, p.body, 24, { cap: false });
+      m.cylinder(w / 2, h / 2, 1.1, 1.52, 0.16, 0.72, [208, 208, 192], 24, { cap: false });
       m.cylinder(w / 2, h / 2, 1.12, 1.16, 0.18, 0.18, p.dark, 12);
       m.cylinder(w / 2, h / 2, 1.16, 1.78, 0.035, 0.025, p.metal, 6);
       m.dome(w / 2, h / 2, 1.78, 0.09, GLOW_CYAN, 2, 10);
@@ -554,8 +609,8 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'gtower': {
-      // Guard Tower: a concrete post with a firing slit under a flat cap.
-      m.cylinder(0.5, 0.5, 0.07, 0.78, 0.36, 0.3, p.body, 8, { top: p.trim });
+      // Guard Tower: a squat concrete post with a firing slit under a flat cap.
+      m.cylinder(0.5, 0.5, 0.07, 0.62, 0.36, 0.3, tint(p.body, 0.8), 8, { top: p.trim });
       m.cylinder(0.5, 0.5, 0.78, 0.88, 0.4, 0.4, p.trim, 8);
       m.cylinder(0.5, 0.5, 0.56, 0.64, 0.33, 0.33, p.dark, 8, { cap: false });
       m.box(0.3, 0.46, 0.3, 0.7, 0.54, 0.4, team);
@@ -589,8 +644,8 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       break;
     }
     case 'flametower': {
-      // Flame Tower: a squat turret with a burner nozzle and a pilot flame.
-      m.cylinder(0.5, 0.5, 0.07, 0.42, 0.38, 0.34, p.body, 10, { top: p.trim });
+      // Flame Tower: a white-capped turret with a burner nozzle and a pilot flame.
+      m.cylinder(0.5, 0.5, 0.07, 0.42, 0.38, 0.34, tint(p.body, 1.15), 10, { top: [232, 232, 232] });
       m.cylinder(0.5, 0.5, 0.42, 0.62, 0.3, 0.26, p.trim, 10, { top: p.dark });
       m.box(0.44, 0.5, 0.48, 0.92, 0.56, 0.56, p.dark);
       m.cylinder(0.5, 0.5, 0.3, 0.38, 0.39, 0.39, team, 10, { cap: false });
