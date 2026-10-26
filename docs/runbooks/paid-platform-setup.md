@@ -175,6 +175,23 @@ House advertisement copy, if you want something other than the upgrade pitch:
       bought tier within a second or two of Checkout.
 - [ ] Play one free match end to end and watch the advertisement run while your base sits idle.
 
+## Putting a map or fusion into Gold early access
+
+Early access is driven entirely by a publish date. To give a new map its week:
+
+```sql
+insert into comrade.content_releases (id, kind, published_at)
+values ('ore-crossing', 'map', now())
+on conflict (id) do update set published_at = excluded.published_at;
+```
+
+`id` is the map id the lobby uses (or the pack id for a fusion), and `kind` is `map`, `pack`
+or `fusion`. From then on only Gold can launch it for seven days; the lobby labels it, the
+service refuses it for anyone else, and after seven days it opens to everyone with nothing
+further to do. Content with no row has always been available, so existing maps are untouched.
+
+To cancel early access immediately, delete the row. The service caches releases for a minute.
+
 ## How entitlements actually work
 
 Worth knowing before changing anything:
