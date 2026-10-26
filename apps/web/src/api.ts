@@ -87,6 +87,8 @@ export interface TierTable {
   termsVersion: string;
   authEnabled: boolean;
   billingEnabled: boolean;
+  /** True once a third-party advertising tag is configured; drives the legal pages' wording. */
+  adsConfigured: boolean;
 }
 
 export interface MeResponse {

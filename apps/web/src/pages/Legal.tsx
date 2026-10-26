@@ -29,14 +29,21 @@ const COMPANY = {
 };
 
 /**
- * Advertising networks whose tags are configured in COMRADE_AD_TAGS. Each one receives what
- * the browser sends it when the advertisement loads, so each has to be named here with a link
- * to its own notice. Leave it empty while only the house advertisement runs — the pages then
- * say so, truthfully.
+ * Advertising networks we are set up to use. Each receives whatever the browser sends it when
+ * the advertisement loads, so each has to be named with a link to its own notice and, where it
+ * has one, its opt-out.
+ *
+ * This list describes what *would* serve; whether anything third-party is serving at all comes
+ * from the service (`adsConfigured`, true once COMRADE_AD_TAGS holds a tag). So the pages never
+ * claim a network is involved before its tag is live, and need no edit on the day it is.
  */
-const AD_NETWORKS: { name: string; href: string }[] = [
-  // Example once a network is live:
-  // { name: 'Google Ad Manager', href: 'https://policies.google.com/privacy' },
+const AD_NETWORKS: { name: string; operator: string; href: string; optOut?: string }[] = [
+  {
+    name: 'Google Ad Manager',
+    operator: 'Google Ireland Limited',
+    href: 'https://policies.google.com/technologies/partner-sites',
+    optOut: 'https://adssettings.google.com/',
+  },
 ];
 
 const PAGES = [
@@ -56,16 +63,19 @@ function Choice({ children }: { children: React.ReactNode }) {
   return <p className="legal-choice"><b>Chosen position —</b> {children}</p>;
 }
 
-function AdNetworkList() {
-  if (!AD_NETWORKS.length) {
+function AdNetworkList({ live }: { live: boolean }) {
+  if (!live || !AD_NETWORKS.length) {
     return <p>We are not currently serving third-party advertisements: the pre-match slot shows
-      our own promotion. If that changes, this page will name every network we use and link to
-      its privacy notice before any of their advertisements run.</p>;
+      our own promotion, and nothing about you leaves this site for it. If that changes, this
+      page will name every network involved before any of their advertisements run.</p>;
   }
   return <>
-    <p>The networks that may serve an advertisement to you, and their own privacy notices:</p>
+    <p>The networks that may serve an advertisement to you. Each is an independent controller of
+      the data its own request collects, and each has its own notice:</p>
     <ul>{AD_NETWORKS.map(network => <li key={network.name}>
-      <a href={network.href} target="_blank" rel="noreferrer noopener">{network.name}</a>
+      <b>{network.name}</b> ({network.operator}) —
+      {' '}<a href={network.href} target="_blank" rel="noreferrer noopener">how it uses data</a>
+      {network.optOut && <> · <a href={network.optOut} target="_blank" rel="noreferrer noopener">opt out</a></>}
     </li>)}</ul>
   </>;
 }
@@ -75,6 +85,8 @@ export default function Legal() {
   const { tiers } = useAuth();
   const page = PAGES.find(p => match(`/legal/${p.id}`)) ?? PAGES[0];
   const version = tiers?.termsVersion ?? '';
+  // Whether anything third-party is actually serving, as the service reports it.
+  const adsLive = !!tiers?.adsConfigured && AD_NETWORKS.length > 0;
   const incomplete = COMPANY.address.startsWith('[') || COMPANY.registration.startsWith('[');
 
   return <section className="page legal-page">
@@ -318,18 +330,26 @@ export default function Legal() {
           <li><b>Amazon Web Services</b> — the Cognito user pool that holds your sign-in
             credentials, and the email service that sends confirmation and reset codes.
             {' '}<a href="https://aws.amazon.com/privacy/" target="_blank" rel="noreferrer noopener">AWS privacy notice</a>.</li>
-          <li><b>Advertising networks</b> — see below and <Link to="/legal/cookies">cookies and advertising</Link>.</li>
+          <li><b>Advertising networks</b> — only on the free and guest tiers, and only for the
+            pre-match slot. They are independent controllers of what their own request collects;
+            we send them nothing about you. See below and
+            {' '}<Link to="/legal/cookies">cookies and advertising</Link>.</li>
         </ul>
-        <AdNetworkList />
-        {!AD_NETWORKS.length && <Placeholder>When you enable a network in
-          <code> COMRADE_AD_TAGS</code>, add it to <code>AD_NETWORKS</code> in this file with a
-          link to its privacy notice. Naming them is required before their advertisements run.</Placeholder>}
+        <AdNetworkList live={adsLive} />
+        {!adsLive && <Placeholder>Google Ad Manager is already written up here and switches on by
+          itself the moment a tag is set in <code>COMRADE_AD_TAGS</code>. If you enable any
+          <i> other</i> network, add it to <code>AD_NETWORKS</code> in this file first — naming a
+          network is required before its advertisements run.</Placeholder>}
 
         <h2>Where your data is held</h2>
         <p>Our database and the service itself run on our own infrastructure in the United
-          Kingdom. AWS Cognito and the email service run in the AWS London region. Stripe and any
-          advertising networks may process data outside the UK; where they do, they rely on the
-          UK's approved transfer mechanisms, such as the International Data Transfer Addendum.</p>
+          Kingdom. AWS Cognito and the email service run in the AWS London region, so your
+          sign-in credentials stay in the UK.</p>
+        <p>Stripe and the advertising networks may process data outside the UK, including in the
+          United States. Where they do, they rely on the UK's approved transfer mechanisms — an
+          adequacy decision where one covers them, otherwise the International Data Transfer
+          Addendum to the European Commission's standard contractual clauses. Google Ireland
+          Limited is the contracting party for Google Ad Manager in the UK and EEA.</p>
 
         <h2>How long we keep it</h2>
         <ul>
@@ -475,16 +495,34 @@ export default function Legal() {
         <p>Either way the advertisement is the same length and you lose nothing by saying no. You
           can change your answer whenever you like on your <Link to="/account">account page</Link>,
           and it applies to your very next match.</p>
+        {adsLive && <p>In practice, with personalisation off we add Google's
+          {' '}<code>npa=1</code> parameter to the request, which tells Google to serve a
+          non-personalised advertisement: it may still use coarse signals such as the page and
+          your general location to pick something sensible, but not a profile built from your
+          browsing.</p>}
 
         <h3>What the network receives</h3>
         <p>When an advertisement loads, your browser contacts the network directly. It will
           receive what any web request carries — your IP address, your browser and device type,
           and the page the request came from. We do not send it your callsign, your email address
           or your match history, ever.</p>
-        <AdNetworkList />
-        {!AD_NETWORKS.length && <Placeholder>Name every network you enable here and in
-          <code> AD_NETWORKS</code> in this file, each with a link to its privacy notice and its
-          opt-out, before its advertisements run.</Placeholder>}
+        <AdNetworkList live={adsLive} />
+        {adsLive && <>
+          <p>Google Ad Manager may set cookies or read device identifiers in your browser to
+            measure that an advertisement was shown and to limit how often you see the same one.
+            Those are Google's own, not ours, and they are set only when an advertisement
+            actually loads — so a subscriber, who never sees one, never gets them.</p>
+          <p>You can control this at Google's own
+            {' '}<a href="https://adssettings.google.com/" target="_blank" rel="noreferrer noopener">Ads Settings</a>,
+            which applies across every site using Google's advertising, and more broadly at
+            {' '}<a href="https://optout.aboutads.info/" target="_blank" rel="noreferrer noopener">optout.aboutads.info</a>
+            {' '}and <a href="https://youronlinechoices.eu/" target="_blank" rel="noreferrer noopener">Your Online Choices</a>.
+            Turning personalisation off here does the same job for this site without you having
+            to go anywhere.</p>
+        </>}
+        {!adsLive && <Placeholder>Google Ad Manager is written up here already and turns on by
+          itself when a tag is set in <code>COMRADE_AD_TAGS</code>. Add any <i>other</i> network
+          to <code>AD_NETWORKS</code> in this file before its advertisements run.</Placeholder>}
 
         <h3>Turning advertisements off entirely</h3>
         <p>Any <Link to="/tiers">subscription</Link> removes them completely.</p>

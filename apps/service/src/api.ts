@@ -16,7 +16,7 @@ import { adBreak, recordImpression } from './ads.js';
 import { SESSION_COOKIE, optionalCaller, setSessionCookie, verifyAccessToken } from './auth.js';
 import * as billingApi from './billing.js';
 import * as cognito from './cognito.js';
-import { authEnabled, billingEnabled, platformEnabled, termsVersion } from './config.js';
+import { ads as adsConfig, authEnabled, billingEnabled, platformEnabled, termsVersion } from './config.js';
 import {
   activeSubscription, entitlementsFor, openEntitlements, quotaFor, tierFromSubscription,
 } from './entitlements.js';
@@ -569,4 +569,6 @@ get('/api/tiers', async () => ({
   termsVersion: termsVersion(),
   authEnabled: authEnabled(),
   billingEnabled: billingEnabled(),
+  // The privacy and cookies pages name third-party networks only while one is really serving.
+  adsConfigured: adsConfig.tags().length > 0,
 }));

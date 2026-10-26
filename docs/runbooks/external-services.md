@@ -186,9 +186,14 @@ paying first.
 
 ### The one real constraint
 
-**Naming them is a legal requirement, not a nicety.** When you enable a network you must add it
-to `AD_NETWORKS` in `apps/web/src/pages/Legal.tsx` — the privacy and cookies pages list the
-networks from there, and say truthfully that there are none while the list is empty.
+**Naming a network is a legal requirement, not a nicety.** The privacy and cookies pages list
+them from `AD_NETWORKS` in `apps/web/src/pages/Legal.tsx`.
+
+**Google Ad Manager is already written up there**, including what Google receives, the cookies
+it may set, what `npa=1` actually does, and its opt-out links. It switches on by itself the
+moment a tag appears in `COMRADE_AD_TAGS` — the service reports whether a tag is configured and
+the pages follow, so they never claim a network is involved before it is, and need no edit on
+the day it is. If you enable any *other* network, add it to `AD_NETWORKS` first.
 
 If a network requires **IAB TCF consent strings**, a certified consent management platform has
 to be added first. The current banner records a plain personalised / not-personalised choice,
@@ -245,4 +250,5 @@ them.
    confirm → subscribe → upgrade → downgrade → cancel → invoice PDF. Then repeat in live mode.
 4. **Before any of it is public:** complete the registered-entity details in `Legal.tsx` and
    have the drafts reviewed.
-5. **After launch:** apply to ad networks, add their tags, and name them in `AD_NETWORKS`.
+5. **After launch:** apply to ad networks and add their tags. Google Ad Manager needs no
+   further wording; any other network must be added to `AD_NETWORKS` before its tag goes live.
