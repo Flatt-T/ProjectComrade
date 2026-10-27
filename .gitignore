@@ -17,6 +17,9 @@ engines/adapters/*/obj/
 *.mem
 apps/web/public/engines/
 apps/web/public/content/
+apps/web/public/kb/
+apps/web/public/robots.txt
+apps/web/public/sitemap.xml
 
 # Test coverage
 coverage/

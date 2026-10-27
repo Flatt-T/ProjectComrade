@@ -44,7 +44,7 @@ export default function HelpDock() {
       <span className="eyebrow">HELP &amp; REPORTS</span>
       <button onClick={toggle} disabled={!ready} aria-expanded={open}>{!ready ? 'LOADING…' : open ? 'CLOSE HELP' : 'OPEN HELP CHAT'}</button>
     </div>
-    {!open && <p className="help-dock-blurb">Questions about the game, or something not working? Ask the help desk or file a report.</p>}
+    {!open && <p className="help-dock-blurb">Read the <a href="/kb">game guide</a>, or ask the help desk. Something not working? File a report.</p>}
     <div className="help-dock-host" ref={host} />
   </section>;
 }

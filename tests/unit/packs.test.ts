@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { STYLES } from '../../packages/contracts/src/index';
 import { CLASSIC_PACKS, Game, PACKS, factionCanUse, prereqsMet, tdPack } from '../../packages/fusion/src/index';
-import { buildingMesh, crateMesh, hasTurret, hullMesh, turretMesh } from '../../packages/fusion/src/art/models';
+import { buildingMesh, crateMesh, hasTurret, hullMesh, turretMesh, type ArtStyle } from '../../packages/fusion/src/art/models';
 import type { RulePack } from '../../packages/fusion/src/index';
 
 const packs = Object.values(PACKS);
@@ -206,19 +206,31 @@ describe('rule pack integrity', () => {
 
   it('has a model for every shape any pack names', () => {
     // The meshes are pure geometry, so a typo or a broken shape shows up here rather than
-    // as an empty square in the sidebar.
-    for (const pack of CLASSIC_PACKS) {
-      for (const style of ['dune', 'allied', 'soviet', 'gdi', 'nod'] as const) {
+    // as an empty square in the sidebar. Unknown shapes fall back to a generic tracked box,
+    // so Conquer (and any original-pack fusion) is checked against that fallback.
+    const team: [number, number, number] = [200, 200, 200];
+    const faces = (mesh: { faces: { pts: unknown }[] }) => JSON.stringify(mesh.faces.map(f => f.pts));
+    const check = (pack: RulePack, styles: readonly ArtStyle[], rejectGeneric: boolean) => {
+      for (const style of styles) {
+        const genericHull = faces(hullMesh('\0', style, team));
         for (const u of Object.values(pack.units)) {
           if (u.kind === 'infantry') continue; // Infantry are drawn by the renderer, not modelled.
-          expect(hullMesh(u.shape, style, [200, 200, 200]).faces.length, `${pack.id}/${u.id} (${u.shape}) has a hull`).toBeGreaterThan(0);
-          if (hasTurret(u.shape)) expect(turretMesh(u.shape, style, [200, 200, 200]).faces.length, `${u.shape} turret`).toBeGreaterThan(0);
+          const hull = hullMesh(u.shape, style, team);
+          expect(hull.faces.length, `${pack.id}/${u.id} (${u.shape}) has a hull`).toBeGreaterThan(0);
+          if (rejectGeneric) expect(faces(hull), `${pack.id}/${u.id} (${u.shape}) is not the generic box`).not.toEqual(genericHull);
+          if (hasTurret(u.shape)) expect(turretMesh(u.shape, style, team).faces.length, `${u.shape} turret`).toBeGreaterThan(0);
         }
         for (const st of Object.values(pack.structures)) {
-          expect(buildingMesh(st.shape, st.w, st.h, style, [200, 200, 200]).faces.length, `${pack.id}/${st.id} (${st.shape}) has a model`).toBeGreaterThan(0);
+          const mesh = buildingMesh(st.shape, st.w, st.h, style, team);
+          expect(mesh.faces.length, `${pack.id}/${st.id} (${st.shape}) has a model`).toBeGreaterThan(0);
+          if (rejectGeneric && st.shape !== 'wall') {
+            expect(faces(mesh), `${pack.id}/${st.id} (${st.shape}) is not the generic box`).not.toEqual(faces(buildingMesh('\0', st.w, st.h, style, team)));
+          }
         }
       }
-    }
+    };
+    for (const pack of CLASSIC_PACKS) check(pack, ['dune', 'allied', 'soviet', 'gdi', 'nod'], false);
+    check(PACKS.conquer, ['rebel', 'republic', 'empire', 'cis'], true);
   });
 
   it('every airstrip flies bombers, and every silo holds a proper reserve', () => {
@@ -241,7 +253,7 @@ describe('rule pack integrity', () => {
 
   it('registers the four classics and the fusions', () => {
     expect(CLASSIC_PACKS.map(p => p.id)).toEqual(['td', 'dune', 'ra1', 'ra2']);
-    expect(Object.keys(PACKS)).toEqual(expect.arrayContaining(['td', 'dune', 'ra1', 'ra2', 'leviathan']));
+    expect(Object.keys(PACKS)).toEqual(expect.arrayContaining(['td', 'dune', 'ra1', 'ra2', 'leviathan', 'conquer']));
   });
 });
 

@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { kbPlugin } from './src/kb/plugin';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), kbPlugin()],
   server: {
     port: 3000,
     proxy: {

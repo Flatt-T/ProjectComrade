@@ -9,6 +9,7 @@ import { guestIdFromCookieHeader } from './auth.js';
 import { configSummary, platformEnabled } from './config.js';
 import { databaseConfigured, migrate } from './db.js';
 import { handleApi } from './http.js';
+import { publicFileCandidates } from './static.js';
 // Importing the API module registers every route on the table in http.ts.
 import './api.js';
 
@@ -16,13 +17,11 @@ import './api.js';
 const PORT = process.env.COMRADE_PORT || process.env.PORT || 3001;
 
 const publicRoot = resolve(process.env.STATIC_ROOT || 'public');
-const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.wasm': 'application/wasm', '.json': 'application/json', '.txt': 'text/plain', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
-
-/**
- * Paths the single-page app owns. A deep link to one of these is served index.html so the
- * router can take over, while anything that looks like a file keeps returning 404.
- */
-const APP_ROUTES = /^\/(?:account|billing|tiers|legal|signin|register|commanders|match|vote)(?:\/|$)/;
+const mime: Record<string, string> = {
+  '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.wasm': 'application/wasm',
+  '.json': 'application/json', '.txt': 'text/plain', '.xml': 'application/xml',
+  '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
+};
 
 const server = createServer(async (req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -39,10 +38,18 @@ const server = createServer(async (req, res) => {
   } else if (req.method === 'GET' || req.method === 'HEAD') {
     try {
       const pathname = decodeURIComponent(new URL(req.url || '/', 'http://localhost').pathname);
-      const spa = APP_ROUTES.test(pathname) && !extname(pathname);
-      const file = resolve(publicRoot, `.${pathname === '/' || spa ? '/index.html' : pathname}`);
-      if (!file.startsWith(publicRoot + sep)) throw new Error('Invalid path');
-      const body = await readFile(file);
+      let file = '';
+      let body: Buffer | undefined;
+      for (const rel of publicFileCandidates(pathname)) {
+        const candidate = resolve(publicRoot, `.${rel}`);
+        if (!candidate.startsWith(publicRoot + sep)) continue;
+        try {
+          body = await readFile(candidate);
+          file = candidate;
+          break;
+        } catch { /* try the next candidate */ }
+      }
+      if (!body || !file) throw new Error('Not found');
       res.writeHead(200, { 'Content-Type': mime[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
       res.end(req.method === 'HEAD' ? undefined : body);
     } catch {

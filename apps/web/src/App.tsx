@@ -122,6 +122,7 @@ function Shell() {
       {warRoom && <span className="badge">WAR ROOM</span>}
       <nav className="site-nav">
         <Link to="/" className={warRoom ? 'on' : ''}>War room</Link>
+        <a href="/kb">Guide</a>
         <Link to="/tiers" className={path === '/tiers' ? 'on' : ''}>Tiers</Link>
         <Link to="/vote" className={path === '/vote' ? 'on' : ''}>Vote</Link>
         {warRoom && <a href="?view=fusion-requests" onClick={e => { e.preventDefault(); showRequests(!requests); }}>
@@ -149,6 +150,7 @@ function Shell() {
       <span>Classic C&amp;C runs the original GPL engine with freeware artwork. The Fusion Engine styles — Tiberian Dawn, Red Alert, Dune and Red Alert 2 — are independent gameplay replications with original procedural art.</span>
       <a href="/content/td/manifest.json">Content credits ↗</a> <a href="/content/audio/manifest.json">Sound credits ↗</a>
       <a href="/engines/source.txt">Engine licence ↗</a>
+      <a href="/kb">Game guide</a>
       <Link to="/legal/terms">Terms</Link> <Link to="/legal/privacy">Privacy</Link>
       <Link to="/legal/cookies">Cookies &amp; advertising</Link> <Link to="/legal/refunds">Refunds</Link>
     </footer>

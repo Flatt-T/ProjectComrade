@@ -10,7 +10,7 @@ export type Faction = string;
 // 'fusion' styles run the Comrade Fusion Engine with the named rule pack, which also
 // supports lockstep multiplayer. Unplayable styles are declared so the roster is visible.
 /** Classic styles, then community fusions (`fusion-<pack id>`). */
-export type GameStyle = 'td-classic' | 'td-fusion' | 'ra1' | 'ra1-fusion' | 'ra2' | 'dune2k' | 'fusion-leviathan';
+export type GameStyle = 'td-classic' | 'td-fusion' | 'ra1' | 'ra1-fusion' | 'ra2' | 'dune2k' | 'fusion-leviathan' | 'fusion-conquer';
 export interface FactionInfo { id: Faction; name: string; full: string; blurb: string }
 export interface StyleInfo {
   id: GameStyle; name: string; engine: 'vanilla-td' | 'vanilla-ra' | 'fusion'; pack?: string;
@@ -44,6 +44,14 @@ export const STYLES: StyleInfo[] = [
   { id: 'fusion-leviathan', name: 'Fusion: Leviathan Isles', engine: 'fusion', pack: 'leviathan', playable: true, lockstep: true,
     blurb: 'Red Alert 2 armies on a worm-infested archipelago: thin ore at home, riches on the central island, sandworms in the sea.',
     factions: RA2_COUNTRIES },
+  { id: 'fusion-conquer', name: 'Fusion: Star Wars Conquer', engine: 'fusion', pack: 'conquer', playable: true, lockstep: true,
+    blurb: 'Light versus Dark: Rebels and Republic against Empire and Separatists. Tibanna, walkers, starfighters and a wet navy.',
+    factions: [
+      { id: 'rebels', name: 'Rebels', full: 'Light · Rebel Alliance', blurb: 'X-wings, the Falcon and Jedi.' },
+      { id: 'empire', name: 'Empire', full: 'Dark · Galactic Empire', blurb: 'AT-ATs, TIE fighters and the Superlaser.' },
+      { id: 'republic', name: 'Republic', full: 'Light · Galactic Republic', blurb: 'Clones, AT-TEs and LAAT gunships.' },
+      { id: 'cis', name: 'CIS', full: 'Dark · Confederacy', blurb: 'Battle droids, AATs and vulture swarms.' },
+    ] },
   { id: 'ra1', name: 'Classic Red Alert', engine: 'vanilla-ra', playable: true, lockstep: false,
     blurb: 'Red Alert on the original engine, with freeware content and authored battlefields. Each commander fights the built-in enemy.',
     factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: 'Greece. Mobility and the navy.' }, { id: 'soviet', name: 'Soviet', full: 'Soviet Union', blurb: 'USSR. Heavy armour and numbers.' }] },
