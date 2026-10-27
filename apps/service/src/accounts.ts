@@ -145,7 +145,7 @@ export async function applyEmailChange(id: string, email: string): Promise<void>
     [id, email]);
 }
 
-export async function setStripeCustomer(id: string, customerId: string): Promise<void> {
+export async function setStripeCustomer(id: string, customerId: string | null): Promise<void> {
   await query(`update accounts set stripe_customer_id = $2, updated_at = now() where id = $1`, [id, customerId]);
 }
 

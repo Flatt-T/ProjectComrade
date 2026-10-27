@@ -33,7 +33,7 @@ export const stripe = {
   webhookSecret: () => text('STRIPE_WEBHOOK_SECRET'),
   configured: () => !!text('STRIPE_SECRET_KEY'),
   /** Enables Stripe Tax on Checkout so UK VAT is calculated and shown. */
-  automaticTax: () => text('STRIPE_AUTOMATIC_TAX', 'true') === 'true',
+  automaticTax: () => text('STRIPE_AUTOMATIC_TAX', 'false') === 'true',
   /** Lets Checkout accept promotion codes. */
   promotionCodes: () => text('STRIPE_PROMOTION_CODES', 'true') === 'true',
 };
