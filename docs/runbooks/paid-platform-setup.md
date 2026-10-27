@@ -192,9 +192,12 @@ House advertisement copy, if you want something other than the upgrade pitch:
       *is* registered, leave it on and set the prices VAT-inclusive.
 - [ ] Check the tier table on `/tiers` against what the service enforces. Both read the same
       table in `packages/contracts/src/billing.ts`, so they cannot disagree, but read it once.
-- [ ] Register in Stripe **test mode** first and walk the whole path: register → confirm →
+- [x] Register in Stripe **test mode** first and walk the whole path: register → confirm →
       subscribe → upgrade → downgrade → cancel → invoice PDF.
-- [ ] Confirm the webhook is arriving (Stripe shows deliveries) and that `/api/me` reports the
+- [x] Live Stripe on `acct_1U5jjC2AlCr8Xzbo` (27 October 2026): live catalogue, Customer
+      Portal, webhook `we_1UV95X2AlCr8XzbofmQaFZyy`, Gold coupon `comrade_gold_100_once`.
+      Host `service.env` uses `sk_live_` / live `whsec_`. VAT remains off (`STRIPE_AUTOMATIC_TAX=false`).
+- [ ] Confirm the live webhook is arriving (Stripe shows deliveries) and that `/api/me` reports the
       bought tier within a second or two of Checkout.
 - [ ] Play one free match end to end and watch the advertisement run while your base sits idle.
 

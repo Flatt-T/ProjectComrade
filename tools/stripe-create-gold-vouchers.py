@@ -10,13 +10,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import secrets
 import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 
-ENV_PATH = "/opt/comrade/service.env"
+ENV_PATH = os.environ.get("COMRADE_SERVICE_ENV", "/opt/comrade/service.env")
 # Pin a version that still takes `coupon` on promotion codes. Account default is newer
 # (polymorphic `promotion[coupon]`), which would 400 this script.
 API_VERSION = "2025-08-27.basil"
@@ -30,12 +31,16 @@ COUNT = 50
 
 
 def secret_key() -> str:
-    with open(ENV_PATH, encoding="utf-8") as fh:
-        for raw in fh:
-            line = raw.strip()
-            if line.startswith("STRIPE_SECRET_KEY="):
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
-    raise SystemExit("STRIPE_SECRET_KEY is not set in service.env")
+    env = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+    if env:
+        return env
+    if os.path.exists(ENV_PATH):
+        with open(ENV_PATH, encoding="utf-8") as fh:
+            for raw in fh:
+                line = raw.strip()
+                if line.startswith("STRIPE_SECRET_KEY="):
+                    return line.split("=", 1)[1].strip().strip('"').strip("'")
+    raise SystemExit("STRIPE_SECRET_KEY is not set")
 
 
 def stripe(method: str, path: str, data: dict | None = None, allow_404: bool = False) -> dict:
@@ -158,10 +163,15 @@ def write_out(path: str, rows: list[dict]) -> None:
 
 
 def main() -> None:
+    global BATCH
     parser = argparse.ArgumentParser()
     parser.add_argument("--count", type=int, default=COUNT)
-    parser.add_argument("--out", default=f"/tmp/comrade-{BATCH}.txt")
+    parser.add_argument("--batch", default=BATCH)
+    parser.add_argument("--out", default="")
     args = parser.parse_args()
+    BATCH = args.batch
+    if not args.out:
+        args.out = f"/tmp/comrade-{BATCH}.txt"
 
     gold = gold_product()
     coupon = ensure_coupon(gold["product"])
