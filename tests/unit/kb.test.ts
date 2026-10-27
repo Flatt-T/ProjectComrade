@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { PAGES } from '../../apps/web/src/kb/catalog';
 import { writeKnowledgebase } from '../../apps/web/src/kb/build';
 import { buildPages, fileForPath, SIDE_PAGES, sitemapPaths } from '../../apps/web/src/kb/pages';
-import { packById, sideRoster } from '../../apps/web/src/kb/fromPacks';
+import { describeSuperweapon, packById, sideRoster } from '../../apps/web/src/kb/fromPacks';
 import { PACKS } from '../../packages/fusion/src/index';
 import { renderDocument } from '../../apps/web/src/kb/html';
 import { esc } from '../../apps/web/src/kb/escape';
@@ -86,5 +86,24 @@ describe('player knowledgebase', () => {
   it('resolves pack names for prerequisite copy', () => {
     const td = packById('td');
     expect(td.units.mammoth.name).toBe('Mammoth Tank');
+  });
+
+  it('describes Conquer superweapons by the action they perform', () => {
+    const pack = PACKS.conquer;
+    const dish = pack.structures['d-superlaser'];
+    const laser = Array.isArray(dish.superweapon) ? dish.superweapon[0] : dish.superweapon!;
+    const laserCopy = describeSuperweapon(pack, dish, laser).toLowerCase();
+    expect(laserCopy).toContain('laser');
+    expect(laserCopy).not.toContain('missile');
+
+    const array = pack.structures['d-tractor'];
+    const tractor = Array.isArray(array.superweapon) ? array.superweapon[0] : array.superweapon!;
+    expect(describeSuperweapon(pack, array, tractor).toLowerCase()).toContain('pull');
+
+    const gen = pack.structures['l-shield'];
+    const shield = Array.isArray(gen.superweapon) ? gen.superweapon[0] : gen.superweapon!;
+    const shieldCopy = describeSuperweapon(pack, gen, shield).toLowerCase();
+    expect(shieldCopy).toContain('shield');
+    expect(shieldCopy).toContain('infantry');
   });
 });

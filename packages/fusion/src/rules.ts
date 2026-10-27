@@ -125,6 +125,13 @@ export interface UnitDef {
   amphibious?: boolean;
   /** Aircraft: shots before returning to an airfield to rearm (omitted = unlimited). */
   ammo?: number;
+  /**
+   * Sortie aircraft keep hunting until the magazine is empty, fly attack passes
+   * instead of hovering, then restock and return to the fight.
+   */
+  sortie?: boolean;
+  /** Fired when the primary weapon is out of range (Jedi Force, Sith lightning). */
+  altWeapon?: string;
   /** Flying height in cells, for drawing. */
   altitude?: number;
   /** Dune Carryall: automatically airlifts harvesters. */
@@ -228,7 +235,7 @@ export interface StructureDef {
   shape: string;
 }
 
-export type SuperweaponKind = 'missile' | 'storm' | 'ion' | 'reinforce' | 'paradrop' | 'chrono' | 'curtain' | 'reveal';
+export type SuperweaponKind = 'missile' | 'storm' | 'ion' | 'laser' | 'tractor' | 'shield' | 'reinforce' | 'paradrop' | 'chrono' | 'curtain' | 'reveal';
 
 export interface SuperweaponDef {
   id: string;
@@ -239,11 +246,11 @@ export interface SuperweaponDef {
   damage: number;
   /** Blast or effect radius in leptons. */
   radius: number;
-  /** Ticks from launch to impact (missile flight, ion focusing, storm gathering). */
+  /** Ticks from launch to impact (missile flight, ion/laser focusing, storm gathering). */
   delay: number;
   /** Storms: lightning strikes spread over `duration` ticks, each hitting `boltRadius`. */
   strikes?: number;
-  /** Storm length, or how long the Iron Curtain protects. */
+  /** Storm length, Iron Curtain / planetary shield, or tractor lock. */
   duration?: number;
   boltRadius?: number;
   /** Reinforcements and paradrops: the units delivered. */
@@ -302,6 +309,8 @@ export interface Mechanics {
     habitat?: string[];
     /** Worms surface and prowl within this many cells of resource fields. */
     nearResources?: number;
+    /** Visual / biome form per terrain id (Conquer: tusken on sand, ewok in trees, opee in water). */
+    form?: Record<string, string>;
   };
   /** Spice blooms seed new fields over time. */
   bloom?: { everyTicks: number; radius: number; resource: string };

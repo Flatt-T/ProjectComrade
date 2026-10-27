@@ -7,6 +7,7 @@ import { WARP_TICKS } from './game';
 import type { Effect, Entity, Game, Projectile } from './game';
 import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
+import { infantryCostume } from './art/costume';
 import { ArtStyle, FLYING, ROTATING_DEFENCES, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
 import { ClassicArt, artPackFor, drawTileFrame, paintClassicTerrain } from './art/classic';
 import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
@@ -256,6 +257,11 @@ export class FusionRenderer {
         case 'ionStrike':
           e.emit(p.x, p.y, 6, 60, 'blue', 2); e.emit(p.x, p.y, 10, 12, 'smoke', 1.5);
           this.decal(p.x, p.y, (fx.x2 / LEPTONS) * cell * 0.7, 'scorch', 50000); this.shake = Math.max(this.shake, 12); break;
+        case 'laserStrike': {
+          const hit = this.project(fx.x2 / LEPTONS, fx.y2 / LEPTONS);
+          e.emit(hit.x, hit.y, 8, 50, 'fire', 2.2); e.emit(hit.x, hit.y, 6, 20, 'spark', 1.8);
+          this.decal(hit.x, hit.y, cell * 2.4, 'scorch', 60000); this.shake = Math.max(this.shake, 16); break;
+        }
         case 'lightning':
           e.emit(p.x, p.y, 4, 12, 'blue'); e.emit(p.x, p.y, 4, 6, 'spark');
           this.decal(p.x, p.y, cell * 0.4, 'scorch', 20000); this.shake = Math.max(this.shake, 3); break;
@@ -297,9 +303,14 @@ export class FusionRenderer {
     const now = performance.now();
     for (const d of this.fx.decals) if (d.kind === 'wreck' && now - d.born < 9000 && Math.random() < 0.3) this.fx.emit(d.x, d.y, 4, 1, 'smoke', 0.7);
     for (const fx of game.effects) {
-      if (fx.kind !== 'superLaunch') continue;
       const age = game.tick - fx.tick;
-      if (age >= 0 && age < fx.dur * 0.45) { const p = this.project(fx.x / LEPTONS, fx.y / LEPTONS); this.fx.emit(p.x, p.y, 12, 2, 'smoke', 1.8); }
+      if (fx.kind === 'superLaunch' && age >= 0 && age < fx.dur * 0.45) {
+        const p = this.project(fx.x / LEPTONS, fx.y / LEPTONS); this.fx.emit(p.x, p.y, 12, 2, 'smoke', 1.8);
+      }
+      if (fx.kind === 'laserCharge' && age >= 0 && age < fx.dur && this.frame % 2 === 0) {
+        const hit = this.project(fx.x2 / LEPTONS, fx.y2 / LEPTONS);
+        this.fx.emit(hit.x, hit.y, 3, 1, 'spark', 0.7);
+      }
     }
   }
 
@@ -740,14 +751,21 @@ export class FusionRenderer {
     if (this.selected.has(e.id) || this.hover === e.id) this.healthBar(p.x, p.y - (def.kind === 'infantry' ? 18 : 24), def.kind === 'infantry' ? 14 : 26, e.hp / e.maxHp, this.selected.has(e.id));
   }
 
-  /** Iron Curtain sheen and a blinking planted charge, for units and buildings alike. */
+  /** Iron Curtain / planetary shield sheen, tractor lock, and a blinking planted charge. */
   private statusMarks(e: Entity, p: { x: number; y: number }, r: number) {
     const { ctx, game } = this;
     if (e.invulnUntil > game.tick) {
+      const shielded = game.effects.some(fx => fx.kind === 'shield' && fx.owner === e.owner);
       ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = `rgba(255,40,30,${0.22 + 0.12 * Math.sin(this.frame / 5)})`;
+      ctx.fillStyle = shielded
+        ? `rgba(80,190,255,${0.22 + 0.12 * Math.sin(this.frame / 5)})`
+        : `rgba(255,40,30,${0.22 + 0.12 * Math.sin(this.frame / 5)})`;
       ctx.beginPath(); ctx.ellipse(p.x, p.y - r * 0.4, r, r * 0.7, 0, 0, Math.PI * 2); ctx.fill();
       ctx.globalCompositeOperation = 'source-over';
+    }
+    if (e.heldUntil > game.tick) {
+      ctx.strokeStyle = `rgba(120,220,255,${0.45 + 0.35 * Math.sin(this.frame / 4)})`; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y - r * 0.2, r * 1.15, r * 0.7, 0, 0, Math.PI * 2); ctx.stroke();
     }
     if (e.c4At > game.tick && this.frame % 12 < 6) {
       ctx.fillStyle = '#ff2a1a'; ctx.beginPath(); ctx.arc(p.x, p.y - r * 0.6, 2.5, 0, Math.PI * 2); ctx.fill();
@@ -795,17 +813,24 @@ export class FusionRenderer {
       ctx.restore();
       return;
     }
-    const dark = shade(color, -55), mid = shade(color, -20);
-    // Legs.
-    ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1.6;
+    const paint = infantryCostume(shape, color);
+    const dark = shade(paint.body, -55), mid = shade(paint.body, -20);
+    // Legs: black joints on plated armour, otherwise a dark of the costume.
+    ctx.strokeStyle = shape === 'storm' || shape === 'scout' || shape === 'clone' || shape === 'death' || shape === 'dark' ? '#1a1a1c' : '#3d3a33';
+    ctx.lineWidth = 1.6;
     ctx.beginPath();
     ctx.moveTo(x - 1, y - 5); ctx.lineTo(x - 1.5 + step * 1.6, y);
     ctx.moveTo(x + 1, y - 5); ctx.lineTo(x + 1.5 - step * 1.6, y);
     ctx.stroke();
-    // Body with light from the north-west.
+    // Body with light from the north-west — costume colour, not the faction stripe.
     const g = ctx.createLinearGradient(x - 3, y - 11, x + 3, y - 4);
-    g.addColorStop(0, shade(color, 30)); g.addColorStop(1, dark);
+    g.addColorStop(0, shade(paint.body, 30)); g.addColorStop(1, dark);
     ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y - 7.5, 3, 3.8, 0, 0, Math.PI * 2); ctx.fill();
+    // Small team pauldron so sides stay readable without dyeing the whole suit.
+    if (shape === 'storm' || shape === 'scout' || shape === 'clone' || shape === 'death' || shape === 'dark' || shape === 'commando' || shape === 'rebel') {
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.ellipse(x + 2.2, y - 8.4, 1.3, 1.6, 0, 0, Math.PI * 2); ctx.fill();
+    }
     // Head and helmet.
     if (shape === 'probe') {
       ctx.fillStyle = '#8a9298';
@@ -816,27 +841,31 @@ export class FusionRenderer {
       ctx.beginPath(); ctx.moveTo(x - 3, y - 5); ctx.lineTo(x - 5, y); ctx.moveTo(x + 3, y - 5); ctx.lineTo(x + 5, y); ctx.stroke();
       return;
     }
-    if (shape === 'droid' || shape === 'droideka') {
-      ctx.fillStyle = shape === 'droideka' ? '#6a7a88' : '#c4a56a';
+    if (shape === 'droid' || shape === 'droideka' || shape === 'b2' || shape === 'magna') {
+      ctx.fillStyle = paint.body;
       ctx.beginPath(); ctx.ellipse(x, y - 8, shape === 'droideka' ? 4 : 3, 4.2, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#2a2a28';
       ctx.beginPath(); ctx.arc(x + cos * 1.5, y - 10, 1.2, 0, Math.PI * 2); ctx.fill();
       if (shape === 'droideka') this.glow(x, y - 8, 10, '120,180,220', 0.25);
     } else {
-      ctx.fillStyle = shape === 'wookiee' ? '#6b4423' : '#e2bf94';
+      ctx.fillStyle = paint.skin;
       ctx.beginPath(); ctx.arc(x, y - 12, 1.9, 0, Math.PI * 2); ctx.fill();
-      const helmet: Record<string, string> = {
-        'infantry-elite': '#222', engineer: '#e8c640', spy: '#2a2a30', saboteur: '#1a1a1a',
-        yuri: '#c9a07c', ivan: '#5a3a24', chrono: '#9fd4ff', desolator: '#3e5a2c', thumper: '#8a7350',
-        clone: '#e8e8ea', storm: '#f0f0f2', jedi: '#c9a07c', sith: '#1a1a1a', wookiee: '#6b4423',
-        rebel: '#6a7a48',
-      };
-      ctx.fillStyle = helmet[shape] ?? mid;
-      ctx.beginPath(); ctx.arc(x, y - 12.6, shape === 'clone' || shape === 'storm' ? 2.5 : 2.2, Math.PI, Math.PI * 2); ctx.fill();
-      if (shape === 'clone' || shape === 'storm') {
+      ctx.fillStyle = paint.helm;
+      const fullHelm = shape === 'clone' || shape === 'storm' || shape === 'scout' || shape === 'death' || shape === 'dark' || shape === 'commando';
+      ctx.beginPath(); ctx.arc(x, y - 12.6, fullHelm ? 2.5 : 2.2, Math.PI, Math.PI * 2); ctx.fill();
+      if (fullHelm) {
         ctx.beginPath(); ctx.arc(x, y - 12, 2.2, 0, Math.PI); ctx.fill();
+        if (shape === 'clone') {
+          ctx.fillStyle = color;
+          ctx.fillRect(x - 2.4, y - 13.2, 4.8, 1.1);
+        }
+        if (shape === 'scout') {
+          ctx.fillStyle = '#1a1a1c';
+          ctx.fillRect(x - 2.2, y - 12.4, 4.4, 1.4);
+        }
       }
       if (shape === 'rebel') ctx.fillRect(x - 2.6, y - 12.5, 5.2, 1.3);
+      if (shape === 'officer') ctx.fillRect(x - 2.4, y - 14.2, 4.8, 1.2);
     }
     if (shape === 'chrono') this.glow(x, y - 8, 8, '140,200,255', 0.35 + 0.15 * Math.sin(this.frame / 6));
     if (shape === 'yuri') this.glow(x, y - 12, 6, '205,130,255', 0.3);
@@ -844,9 +873,9 @@ export class FusionRenderer {
     if (shape === 'sith') this.glow(x, y - 10, 9, '255,70,50', 0.35 + 0.15 * Math.sin(this.frame / 6));
     if (shape === 'desolator') { ctx.fillStyle = '#7fbf4a'; ctx.fillRect(x - 4, y - 10, 2, 5); }
     if (shape === 'ivan') { ctx.fillStyle = '#c03020'; ctx.beginPath(); ctx.arc(x - cos * 4, y - 7, 1.8, 0, Math.PI * 2); ctx.fill(); }
-    if (shape === 'engineer' || shape === 'spy' || shape === 'thumper' || shape === 'saboteur' || shape === 'yuri') {
+    if (shape === 'engineer' || shape === 'officer' || shape === 'spy' || shape === 'thumper' || shape === 'saboteur' || shape === 'yuri') {
       // No rifle: a toolbox, a briefcase, the thumper or a satchel instead.
-      ctx.fillStyle = shape === 'engineer' ? '#c8a030' : shape === 'thumper' ? '#6a6052' : '#3a3530';
+      ctx.fillStyle = shape === 'engineer' || shape === 'officer' ? '#c8a030' : shape === 'thumper' ? '#6a6052' : '#3a3530';
       ctx.fillRect(x + cos * 3 - 1.5, y - 6, 3, 3);
       return;
     }
@@ -885,15 +914,48 @@ export class FusionRenderer {
       const t = game.pack.terrains[game.map.terrain[game.cellIndex(Math.floor(lx / LEPTONS), Math.floor(ly / LEPTONS))]];
       const wet = !!t?.water;
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(a);
-      // Churned sand (or white water) trail and the worm's ridged back breaking the surface.
-      for (let k = 7; k >= 0; k--) {
-        const wob = Math.sin(this.frame / 6 + k) * 2.2;
-        ctx.fillStyle = wet ? `rgba(225,240,250,${0.12 + k * 0.035})` : `rgba(150,108,62,${0.18 + k * 0.03})`;
-        ctx.beginPath(); ctx.ellipse(-k * 8, wob, 12 - k * 0.8, 7 - k * 0.6, 0, 0, Math.PI * 2); ctx.fill();
-      }
-      for (let k = 0; k < 5; k++) {
-        ctx.fillStyle = k % 2 ? '#9b6a3c' : '#b98652';
-        ctx.beginPath(); ctx.ellipse(-k * 6, Math.sin(this.frame / 6 + k) * 1.5, 5.5 - k * 0.5, 4 - k * 0.4, 0, 0, Math.PI * 2); ctx.fill();
+      if (w.form === 'tusken') {
+        ctx.fillStyle = 'rgba(150,108,62,0.35)';
+        ctx.beginPath(); ctx.ellipse(0, 2, 10, 5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#8a6a48'; ctx.fillRect(-4, -12, 8, 12);
+        ctx.fillStyle = '#c4a070'; ctx.beginPath(); ctx.arc(0, -14, 3.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#6a5038'; ctx.fillRect(-3.2, -16, 6.4, 3);
+        ctx.strokeStyle = '#4a3a28'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(3, -8); ctx.lineTo(10, -16); ctx.stroke();
+      } else if (w.form === 'ewok') {
+        ctx.fillStyle = 'rgba(40,70,30,0.35)';
+        ctx.beginPath(); ctx.ellipse(0, 2, 8, 4, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#6b4423'; ctx.beginPath(); ctx.ellipse(0, -6, 4.5, 6, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -13, 3.4, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(-3.4, -15, 1.6, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(3.4, -15, 1.6, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#c9a07c'; ctx.beginPath(); ctx.arc(0, -12.4, 1.6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#3a2818'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(3, -6); ctx.lineTo(9, -12); ctx.stroke();
+      } else if (w.form === 'opee') {
+        // Opee Sea Killer: long merchandised Naboo hunter breaking the surface.
+        for (let k = 8; k >= 0; k--) {
+          const wob = Math.sin(this.frame / 5 + k) * 2.4;
+          ctx.fillStyle = `rgba(180,220,240,${0.1 + k * 0.03})`;
+          ctx.beginPath(); ctx.ellipse(-k * 9, wob, 14 - k * 0.9, 8 - k * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#3a5a6a';
+        ctx.beginPath(); ctx.ellipse(4, 0, 16, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#2a4452';
+        ctx.beginPath(); ctx.moveTo(16, -3); ctx.lineTo(34, 0); ctx.lineTo(16, 3); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#8ec8d8';
+        ctx.beginPath(); ctx.ellipse(8, -2, 4, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+      } else {
+        // Churned sand (or white water) trail and the worm's ridged back breaking the surface.
+        for (let k = 7; k >= 0; k--) {
+          const wob = Math.sin(this.frame / 6 + k) * 2.2;
+          ctx.fillStyle = wet ? `rgba(225,240,250,${0.12 + k * 0.035})` : `rgba(150,108,62,${0.18 + k * 0.03})`;
+          ctx.beginPath(); ctx.ellipse(-k * 8, wob, 12 - k * 0.8, 7 - k * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        for (let k = 0; k < 5; k++) {
+          ctx.fillStyle = k % 2 ? '#9b6a3c' : '#b98652';
+          ctx.beginPath(); ctx.ellipse(-k * 6, Math.sin(this.frame / 6 + k) * 1.5, 5.5 - k * 0.5, 4 - k * 0.4, 0, 0, Math.PI * 2); ctx.fill();
+        }
       }
       ctx.restore();
     }
@@ -1075,6 +1137,58 @@ export class FusionRenderer {
             ctx.beginPath(); ctx.ellipse(a.x, a.y, R * k * t + 3, (R * k * t + 3) * squash, 0, 0, Math.PI * 2); ctx.stroke();
           }
           ctx.globalCompositeOperation = 'source-over';
+          break;
+        }
+        case 'laserCharge': {
+          ctx.globalCompositeOperation = 'lighter';
+          const w = 2 + t * 10;
+          ctx.strokeStyle = `rgba(90,255,110,${0.35 + 0.4 * t})`; ctx.lineWidth = w;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 18); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.strokeStyle = `rgba(255,255,220,${0.5 + 0.4 * t})`; ctx.lineWidth = w * 0.28;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 18); ctx.lineTo(b.x, b.y); ctx.stroke();
+          const rr = cell * 2.4 * (1 - t) + 5;
+          ctx.strokeStyle = `rgba(80,255,90,${0.35 + 0.55 * t})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.ellipse(b.x, b.y, rr, rr * squash, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalCompositeOperation = 'source-over';
+          break;
+        }
+        case 'laserStrike': {
+          ctx.globalCompositeOperation = 'lighter';
+          const fade = 1 - t;
+          const W = 28 * fade + 8;
+          ctx.strokeStyle = `rgba(40,220,70,${0.55 * fade})`; ctx.lineWidth = W;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 22); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.strokeStyle = `rgba(210,255,180,${0.95 * fade})`; ctx.lineWidth = W * 0.32;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 22); ctx.lineTo(b.x, b.y); ctx.stroke();
+          const R = cell * (2.2 + t * 2);
+          const gb = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, R);
+          gb.addColorStop(0, `rgba(255,255,210,${fade})`); gb.addColorStop(0.45, `rgba(80,220,90,${0.7 * fade})`); gb.addColorStop(1, 'rgba(20,80,30,0)');
+          ctx.fillStyle = gb; ctx.beginPath(); ctx.ellipse(b.x, b.y, R, R * squash, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.globalCompositeOperation = 'source-over';
+          break;
+        }
+        case 'tractorCharge': case 'tractorHold': {
+          const fade = fx.kind === 'tractorHold' ? Math.max(0, Math.min(1, t / 0.08, (1 - t) / 0.12)) : 0.4 + 0.5 * t;
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.strokeStyle = `rgba(120,220,255,${0.45 * fade})`; ctx.lineWidth = fx.kind === 'tractorHold' ? 10 : 4 + t * 6;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 16); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.strokeStyle = `rgba(230,255,255,${0.7 * fade})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y - 16); ctx.lineTo(b.x, b.y); ctx.stroke();
+          const pulse = 0.5 + 0.5 * Math.sin(this.frame / 5);
+          ctx.strokeStyle = `rgba(140,230,255,${0.35 * fade * pulse})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.ellipse(b.x, b.y, cell * 1.6, cell * 1.6 * squash, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalCompositeOperation = 'source-over';
+          break;
+        }
+        case 'shieldCharge': case 'shield': {
+          const R = (fx.x2 / LEPTONS) * cell;
+          const fade = fx.kind === 'shield' ? Math.max(0, Math.min(1, t / 0.08, (1 - t) / 0.15)) : 0.3 + 0.6 * t;
+          const pulse = 0.5 + 0.5 * Math.sin(this.frame / 7);
+          const g = ctx.createRadialGradient(a.x, a.y - R * 0.2, 0, a.x, a.y, R * 1.15);
+          g.addColorStop(0, `rgba(160,230,255,${0.08 * fade})`); g.addColorStop(0.7, `rgba(80,190,255,${0.18 * fade * pulse})`); g.addColorStop(1, 'rgba(40,120,200,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(a.x, a.y, R, R * squash * 0.85, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = `rgba(170,230,255,${0.55 * fade})`; ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.ellipse(a.x, a.y, R, R * squash * 0.85, 0, 0, Math.PI * 2); ctx.stroke();
           break;
         }
         case 'stormClouds': {
@@ -1330,6 +1444,8 @@ export function shade(hex: string, amount: number): string {
   return `rgb(${f((n >> 16) & 255)},${f((n >> 8) & 255)},${f(n & 255)})`;
 }
 
+export { infantryCostume } from './art/costume';
+
 const iconCache = new Map<string, Sprite>();
 
 /** Sidebar cameo: the unit or building rendered from its 3D model on a dark plate. */
@@ -1364,11 +1480,13 @@ export function drawIcon(target: HTMLCanvasElement, game: Game, item: string, co
     g.imageSmoothingEnabled = true;
     g.drawImage(sprite.canvas, (W - sprite.canvas.width * scale) / 2, (H - sprite.canvas.height * scale) / 2 + 2, sprite.canvas.width * scale, sprite.canvas.height * scale);
   } else if (unit) {
-    // Infantry cameo: a large figure in faction colours.
+    // Infantry cameo: costume armour with a small faction pauldron.
+    const paint = infantryCostume(unit.shape, color);
     g.save(); g.translate(W / 2, H / 2 + 6);
-    g.fillStyle = shade(color, -40); g.beginPath(); g.ellipse(0, -6, 7, 9, 0, 0, Math.PI * 2); g.fill();
-    g.fillStyle = '#e2bf94'; g.beginPath(); g.arc(0, -18, 4.5, 0, Math.PI * 2); g.fill();
-    g.fillStyle = color; g.beginPath(); g.arc(0, -19.5, 5, Math.PI, Math.PI * 2); g.fill();
+    g.fillStyle = shade(paint.body, -40); g.beginPath(); g.ellipse(0, -6, 7, 9, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = paint.skin; g.beginPath(); g.arc(0, -18, 4.5, 0, Math.PI * 2); g.fill();
+    g.fillStyle = paint.helm; g.beginPath(); g.arc(0, -19.5, 5, Math.PI, Math.PI * 2); g.fill();
+    g.fillStyle = color; g.beginPath(); g.ellipse(6, -8, 2.4, 3, 0, 0, Math.PI * 2); g.fill();
     g.strokeStyle = unit.shape === 'infantry-rocket' ? accent : '#1e1e1e'; g.lineWidth = unit.shape === 'infantry-rocket' ? 4 : 2.5;
     g.beginPath(); g.moveTo(-2, -8); g.lineTo(14, -12); g.stroke();
     g.restore();

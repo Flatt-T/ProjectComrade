@@ -238,9 +238,12 @@ export function describeSuperweapon(pack: RulePack, building: StructureDef, powe
   const bits = [`The ${power.name} is fired from the ${building.name}.`];
   if (power.kind === 'missile') bits.push('It is a missile strike.');
   if (power.kind === 'storm') bits.push('It is a storm over the target.');
-  if (power.kind === 'ion') bits.push('It is an orbital strike.');
+  if (power.kind === 'ion') bits.push('It is an ion beam from orbit.');
+  if (power.kind === 'laser') bits.push('It fires a laser at the target.');
+  if (power.kind === 'tractor') bits.push('It pulls enemy units into a lock and holds them.');
+  if (power.kind === 'shield') bits.push('It raises a shield that protects your forces, including infantry.');
   if (power.kind === 'chrono') bits.push('Pick the area, then the destination.');
-  if (power.kind === 'curtain') bits.push('It makes units invulnerable for a short time.');
+  if (power.kind === 'curtain') bits.push('It makes vehicles and buildings invulnerable; infantry do not survive it.');
   if (power.kind === 'reveal') bits.push('It reveals the target area.');
   if (power.kind === 'paradrop' || power.kind === 'reinforce') {
     bits.push(power.atBase

@@ -121,8 +121,10 @@ export interface Entity {
   /** A planted charge: detonation tick and the player who planted it. */
   c4At: number;
   c4By: number;
-  /** Iron Curtain: invulnerable until this tick. */
+  /** Iron Curtain / planetary shield: invulnerable until this tick. */
   invulnUntil: number;
+  /** Tractor beam: cannot move or act until this tick. */
+  heldUntil: number;
   /** Terror drone inside this vehicle. */
   drone: number;
   /** Tick a Chrono Miner last arrived by teleport (for the fade-in). */
@@ -169,7 +171,7 @@ export interface Effect { kind: string; x: number; y: number; x2: number; y2: nu
 /** A scheduled superweapon impact, resolved deterministically on its tick. */
 export interface Strike {
   tick: number; x: number; y: number; owner: number; damage: number; radius: number;
-  kind: 'missile' | 'ion' | 'bolt' | 'drop' | 'chrono' | 'curtain' | 'reveal';
+  kind: 'missile' | 'ion' | 'laser' | 'bolt' | 'drop' | 'chrono' | 'curtain' | 'shield' | 'tractor' | 'reveal';
   name: string;
   /** Chronosphere destination. */
   x2?: number; y2?: number;
@@ -178,7 +180,7 @@ export interface Strike {
   /** Iron Curtain length. */
   duration?: number;
 }
-export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number; /** Prowl destination (cell index), or -1. */ goal: number; /** Ticks spent on the surface this stint. */ up: number }
+export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number; /** Prowl destination (cell index), or -1. */ goal: number; /** Ticks spent on the surface this stint. */ up: number; /** Visual / biome form (worm, tusken, ewok, opee). */ form: string }
 
 /** A bonus crate waiting on the map. */
 export type CrateKind = 'money' | 'heal' | 'veteran' | 'reveal' | 'unit';
@@ -305,7 +307,8 @@ export class Game {
         const kind = this.targetKind(target);
         for (const u of own(cmd.ids)) {
           if (this.canEngage(u, target, kind) && (cmd.force || this.isEnemy(slot, target.owner) || target.owner < 0)) {
-            u.order = 'attack'; u.target = target.id; u.force = !!cmd.force; u.path = []; u.repathTick = 0; u.resume = -1;
+            u.order = 'attack'; u.target = target.id; u.force = !!cmd.force; u.path = []; u.repathTick = 0;
+            u.resume = this.unitDef(u).sortie ? this.cellOf(target) : -1;
           }
         }
         break;
@@ -453,6 +456,16 @@ export class Game {
     const id = def ? (e.deployed && def.deployWeapon) || def.weapon : this.pack.structures[e.type]?.weapon;
     return id ? this.pack.weapons[id] : undefined;
   }
+  /** Primary weapon, or the alt (Force, etc.) when the primary cannot reach this target. */
+  weaponFor(e: Entity, t?: Entity): WeaponDef | undefined {
+    const primary = this.weaponOf(e);
+    if (!t || e.kind !== 'unit') return primary;
+    if (primary && this.inRange(e, t, primary)) return primary;
+    const altId = this.unitDef(e).altWeapon;
+    const alt = altId ? this.pack.weapons[altId] : undefined;
+    if (alt && this.inRange(e, t, alt)) return alt;
+    return primary ?? alt;
+  }
   targetKind(e: Entity): TargetKind {
     return e.kind === 'structure' ? 'structure' : this.pack.units[e.type].kind;
   }
@@ -461,8 +474,8 @@ export class Game {
     const def = this.unitDef(u);
     if (def.c4 && (kind === 'structure' || !def.weapon)) return true;
     if (def.terror && kind === 'vehicle') return true;
-    const w = this.weaponOf(u);
-    return !!w && weaponCanTarget(w, kind);
+    const ids = [def.weapon, def.deployWeapon, def.altWeapon];
+    return ids.some(id => id && this.pack.weapons[id] && weaponCanTarget(this.pack.weapons[id], kind));
   }
   sightOf(e: Entity) { return e.kind === 'unit' ? this.pack.units[e.type].sight : this.pack.structures[e.type].sight; }
   armorOf(e: Entity) { return e.kind === 'unit' ? this.pack.units[e.type].armor : this.pack.structures[e.type].armor; }
@@ -473,7 +486,7 @@ export class Game {
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
-      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, drone: 0, warp: -999, passengers: [],
+      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [],
     };
   }
 
@@ -807,6 +820,7 @@ export class Game {
     }
     if (u.drone) this.droneBite(u);
     for (const id of u.passengers) { const p = this.entities.get(id); if (p) { p.px = p.x; p.py = p.y; p.x = u.x; p.y = u.y; } }
+    if (u.heldUntil > this.tick) { u.path = []; u.order = 'idle'; u.target = 0; return; }
     if (def.carrier && (u.order === 'idle' || u.order === 'ferry')) { this.ferry(u, def); return; }
     if (def.harvester && (u.order === 'harvest' || u.order === 'idle')) { u.order = 'harvest'; this.harvest(u, def); return; }
     if (def.ammo && u.ammo <= 0 && u.order !== 'rearm' && u.order !== 'move') { u.order = 'rearm'; u.dock = 0; u.path = []; }
@@ -817,15 +831,31 @@ export class Game {
       const t = this.entities.get(u.target);
       if (!t || t.hp <= 0 || t.carriedBy || !u.force && !this.isEnemy(u.owner, t.owner) && !t.convertedUntil && t.owner !== -1) {
         u.target = 0; u.force = false;
-        if (def.ammo) { u.order = 'rearm'; u.dock = 0; u.path = []; return; } // Jets head home after a sortie.
+        if (def.ammo) {
+          if (def.sortie && u.ammo > 0) {
+            const next = weapon && this.acquire(u, Math.max(weapon.range, def.sight * LEPTONS) + LEPTONS, weapon);
+            if (next) { u.target = next.id; u.repathTick = 0; return; }
+          }
+          u.order = 'rearm'; u.dock = 0; u.path = []; return;
+        }
         if (u.resume >= 0 && this.cellOf(u) !== u.resume && u.goal === u.resume) { u.order = 'attackMove'; u.path = this.pathFor(u, u.resume); } else u.order = 'idle';
         return;
       }
       const kind = this.targetKind(t);
+      const used = this.weaponFor(u, t);
       if (def.c4 && (kind === 'structure' || !weapon) || def.terror && kind === 'vehicle') {
         // Hands-on abilities: walk up and plant the charge, or jump inside the vehicle.
         if (this.distTo(u.x, u.y, t) <= (t.kind === 'structure' ? REACH : 160)) { u.path = []; this.contact(u, def, t); return; }
-      } else if (weapon && this.inRange(u, t, weapon)) { u.path = []; this.aimAndFire(u, t, weapon); return; }
+      } else if (used && this.inRange(u, t, used) && def.kind === 'aircraft' && def.sortie) {
+        this.aimAndFire(u, t, used);
+        if (!u.path.length || this.tick >= u.repathTick) { u.path = this.flyPast(u, t); u.repathTick = this.tick + 12; }
+        this.move(u, def);
+        return;
+      } else if (used && this.inRange(u, t, used) && used === weapon) { u.path = []; this.aimAndFire(u, t, used); return; }
+      else if (used && this.inRange(u, t, used)) {
+        // Alt weapon (Force): fire while closing to melee.
+        this.aimAndFire(u, t, used);
+      }
       if (!u.path.length || this.tick >= u.repathTick) {
         u.path = this.pathFor(u, this.cellOf(t)); u.repathTick = this.tick + 20;
       }
@@ -841,9 +871,9 @@ export class Game {
       this.move(u, def);
       return;
     }
-    // Idle and attack-moving units engage what they can see. Jets only strike when ordered,
-    // and a thumping Thumper just thumps.
-    if (weapon && !def.ammo && (u.order === 'idle' || u.order === 'attackMove') && (this.tick + u.id) % 8 === 0) {
+    // Idle and attack-moving units engage what they can see. Classic jets only strike when
+    // ordered; sortie aircraft keep hunting until the magazine is empty.
+    if (weapon && (!def.ammo || def.sortie) && (u.order === 'idle' || u.order === 'attackMove') && (this.tick + u.id) % 8 === 0) {
       const reach = u.order === 'attackMove' ? def.sight * LEPTONS : weapon.range + LEPTONS;
       const t = this.acquire(u, reach, weapon);
       if (t) { u.order = 'attack'; u.target = t.id; u.repathTick = 0; return; }
@@ -937,7 +967,23 @@ export class Game {
       return;
     }
     if (u.ammo < (def.ammo ?? 0)) { if (this.tick % 30 === 0) u.ammo++; return; }
+    if (def.sortie && u.resume >= 0) {
+      u.order = 'attackMove'; u.goal = u.resume; u.path = this.pathFor(u, u.resume);
+      return;
+    }
     u.order = 'idle';
+  }
+
+  /** A cell past the target, offset left or right so the next pass comes from the other side. */
+  private flyPast(u: Entity, t: Entity): number[] {
+    const dx = t.x - u.x, dy = t.y - u.y;
+    const d = Math.max(1, dist(u.x, u.y, t.x, t.y));
+    const ahead = 6 * LEPTONS, perp = 4 * LEPTONS;
+    const side = (u.ammo & 1) ? 1 : -1;
+    const px = t.x + Math.trunc((dx * ahead) / d) + Math.trunc((-dy * perp * side) / d);
+    const py = t.y + Math.trunc((dy * ahead) / d) + Math.trunc((dx * perp * side) / d);
+    const cell = this.cellIndex(toCell(px), toCell(py));
+    return cell === this.cellOf(u) ? this.pathFor(u, this.cellOf(t)) : [cell];
   }
 
   /** Where a harvester is heading, for the Carryall: its refinery or its spice field. */
@@ -1591,10 +1637,24 @@ export class Game {
     if (this.tick < this.wormDelay(cfg.appearAfter)) return;
     // Where worms can go: sand by default; fusions can let them swim (habitat includes water).
     const habitat = cfg.habitat ? new Set(cfg.habitat.map(id => this.pack.terrains.findIndex(t => t.id === id))) : null;
-    const isSand = (x: number, y: number) => {
+    const formOf = (t: number) => {
+      const id = this.pack.terrains[t]?.id;
+      return (id && cfg.form?.[id]) || '';
+    };
+    const formsOnMap = (): string[] => {
+      if (!cfg.form) return [];
+      const seen: string[] = [];
+      for (const t of this.map.terrain) {
+        const f = formOf(t);
+        if (f && !seen.includes(f)) seen.push(f);
+      }
+      return seen;
+    };
+    const isSand = (worm: Worm, x: number, y: number) => {
       const cx = toCell(x), cy = toCell(y);
       if (!inBounds(this.map, cx, cy)) return false;
       const t = this.map.terrain[cy * this.map.w + cx];
+      if (worm.form && worm.form !== 'worm' && cfg.form) return formOf(t) === worm.form;
       return habitat ? habitat.has(t) : !!this.pack.terrains[t].sand;
     };
     // Resource cells worms are drawn to (fields as they were made, so worms keep circling mined-out ground).
@@ -1607,7 +1667,9 @@ export class Game {
       return { x: cellCenter((c % this.map.w) + this.rng.int(r * 2 + 1) - r), y: cellCenter(Math.floor(c / this.map.w) + this.rng.int(r * 2 + 1) - r) };
     };
     while (this.worms.length < this.wormCount(cfg)) {
-      this.worms.push({ id: this.nextId++, x: 0, y: 0, px: 0, py: 0, target: 0, hidden: 1 + this.worms.length * 45, hp: 0, facing: 0, wander: 0, goal: -1, up: 0 });
+      const available = formsOnMap();
+      const form = available.length ? available[this.worms.length % available.length] : 'worm';
+      this.worms.push({ id: this.nextId++, x: 0, y: 0, px: 0, py: 0, target: 0, hidden: 1 + this.worms.length * 45, hp: 0, facing: 0, wander: 0, goal: -1, up: 0, form });
     }
     for (const worm of this.worms) {
       worm.px = worm.x; worm.py = worm.y;
@@ -1617,7 +1679,7 @@ export class Game {
         for (let attempt = 0; attempt < 60; attempt++) {
           const spot = lure.length ? nearLure() : { x: cellCenter(this.rng.int(this.map.w)), y: cellCenter(this.rng.int(this.map.h)) };
           const { x, y } = spot;
-          if (isSand(x, y) && !this.map.starts.some(s => dist(cellCenter(s.x), cellCenter(s.y), x, y) < 10 * LEPTONS)) {
+          if (isSand(worm, x, y) && !this.map.starts.some(s => dist(cellCenter(s.x), cellCenter(s.y), x, y) < 10 * LEPTONS)) {
             worm.x = worm.px = x; worm.y = worm.py = y; worm.hp = 1000; worm.target = 0; worm.wander = 0; worm.up = 0; break;
           }
         }
@@ -1634,12 +1696,12 @@ export class Game {
         this.effect('wormDive', worm.x, worm.y, 0, 0, 20);
         continue;
       }
-      if (!prey || prey.hp <= 0 || prey.kind !== 'unit' || prey.carriedBy || !isSand(prey.x, prey.y)) {
+      if (!prey || prey.hp <= 0 || prey.kind !== 'unit' || prey.carriedBy || !isSand(worm, prey.x, prey.y)) {
         prey = undefined; worm.target = 0;
         if ((this.tick + worm.id) % 10 === 0) {
           let best = cfg.sight * LEPTONS;
           for (const e of this.entities.values()) {
-            if (e.kind !== 'unit' || e.hp <= 0 || e.carriedBy || this.isAircraft(e) || !isSand(e.x, e.y)) continue;
+            if (e.kind !== 'unit' || e.hp <= 0 || e.carriedBy || this.isAircraft(e) || !isSand(worm, e.x, e.y)) continue;
             // A thumping Thumper draws worms from anywhere on the map.
             const d = this.unitDef(e).lure && e.deployed ? 0 : dist(worm.x, worm.y, e.x, e.y);
             if (d < best) { best = d; prey = e; }
@@ -1655,7 +1717,7 @@ export class Game {
           let g = nearLure();
           if (this.rng.int(3) === 0) for (let k = 0; k < 20; k++) {
             const x = cellCenter(this.rng.int(this.map.w)), y = cellCenter(this.rng.int(this.map.h));
-            if (isSand(x, y)) { g = { x, y }; break; }
+            if (isSand(worm, x, y)) { g = { x, y }; break; }
           }
           worm.goal = this.cellIndex(toCell(g.x), toCell(g.y));
         }
@@ -1674,7 +1736,7 @@ export class Game {
       if (d > 0) {
         const nx = worm.x + Math.trunc(((tx - worm.x) * Math.min(cfg.speed, d)) / d);
         const ny = worm.y + Math.trunc(((ty - worm.y) * Math.min(cfg.speed, d)) / d);
-        if (isSand(nx, ny)) { worm.facing = facingTo(nx - worm.x, ny - worm.y); worm.x = nx; worm.y = ny; } else { worm.wander = this.rng.int(256); worm.goal = -1; }
+        if (isSand(worm, nx, ny)) { worm.facing = facingTo(nx - worm.x, ny - worm.y); worm.x = nx; worm.y = ny; } else { worm.wander = this.rng.int(256); worm.goal = -1; }
       }
     }
   }
@@ -1846,6 +1908,18 @@ export class Game {
         if (sw.kind === 'missile') tag(this.effect('superIncoming', tx, ty, s.x, s.y, sw.delay));
         this.strikes.push({ ...base, x: tx, y: ty, kind: sw.kind });
         break;
+      case 'laser':
+        tag(this.effect('laserCharge', s.x, s.y, tx, ty, sw.delay));
+        this.strikes.push({ ...base, x: tx, y: ty, x2: s.x, y2: s.y, kind: 'laser' });
+        break;
+      case 'tractor':
+        tag(this.effect('tractorCharge', s.x, s.y, tx, ty, sw.delay));
+        this.strikes.push({ ...base, x: tx, y: ty, x2: s.x, y2: s.y, kind: 'tractor', duration: sw.duration ?? 450 });
+        break;
+      case 'shield':
+        tag(this.effect('shieldCharge', tx, ty, sw.radius, 0, sw.delay));
+        this.strikes.push({ ...base, x: tx, y: ty, kind: 'shield', duration: sw.duration ?? 300 });
+        break;
       case 'paradrop': case 'reinforce': {
         // Paratroopers and Fremen arrive at the target; the Ordos Saboteur walks out of the palace.
         const at = sw.atBase ? this.cellIndex(s.cx + (s.w >> 1), s.cy + s.h) : this.cellIndex(toCell(tx), toCell(ty));
@@ -1880,8 +1954,17 @@ export class Game {
       if (s.kind === 'drop') { this.dropUnits(s); continue; }
       if (s.kind === 'chrono') { this.chronoShift(s); continue; }
       if (s.kind === 'curtain') { this.ironCurtain(s); continue; }
+      if (s.kind === 'shield') { this.planetaryShield(s); continue; }
+      if (s.kind === 'tractor') { this.tractorHold(s); continue; }
       if (s.kind === 'reveal') { this.reveals.push({ owner: s.owner, x: s.x, y: s.y, r: Math.ceil(s.radius / LEPTONS), until: this.tick + (s.duration ?? 450) }); continue; }
-      const fx = this.effect(s.kind === 'missile' ? 'nuke' : s.kind === 'ion' ? 'ionStrike' : 'lightning', s.x, s.y, s.radius, 0, s.kind === 'bolt' ? 12 : s.kind === 'ion' ? 45 : 90);
+      const fx = this.effect(
+        s.kind === 'missile' ? 'nuke' : s.kind === 'ion' ? 'ionStrike' : s.kind === 'laser' ? 'laserStrike' : 'lightning',
+        s.kind === 'laser' && s.x2 !== undefined ? s.x2 : s.x,
+        s.kind === 'laser' && s.y2 !== undefined ? s.y2 : s.y,
+        s.kind === 'laser' ? s.x : s.radius,
+        s.kind === 'laser' ? s.y : 0,
+        s.kind === 'bolt' ? 12 : s.kind === 'ion' ? 45 : s.kind === 'laser' ? 55 : 90,
+      );
       fx.owner = s.owner; fx.color = s.name;
       for (const e of this.entities.values()) {
         if (e.hp <= 0 || e.carriedBy) continue;
@@ -1937,15 +2020,42 @@ export class Game {
     }
   }
 
+  /** Planetary Shield: a dome that protects friendlies, including infantry. */
+  private planetaryShield(s: Strike) {
+    const fx = this.effect('shield', s.x, s.y, s.radius, 0, s.duration ?? 300); fx.owner = s.owner;
+    for (const e of this.entities.values()) {
+      if (e.hp <= 0 || e.carriedBy || this.distTo(s.x, s.y, e) >= s.radius) continue;
+      if (!this.players[e.owner] || this.isEnemy(s.owner, e.owner)) continue;
+      e.invulnUntil = this.tick + (s.duration ?? 300);
+    }
+  }
+
+  /** Tractor Beam: pull enemy units into the lock and hold them. */
+  private tractorHold(s: Strike) {
+    const fx = this.effect('tractorHold', s.x2 ?? s.x, s.y2 ?? s.y, s.x, s.y, s.duration ?? 450); fx.owner = s.owner;
+    const hold = this.tick + (s.duration ?? 450);
+    for (const e of this.entities.values()) {
+      if (e.kind !== 'unit' || e.hp <= 0 || e.carriedBy || !this.isEnemy(s.owner, e.owner) || this.distTo(s.x, s.y, e) >= s.radius) continue;
+      const def = this.unitDef(e);
+      if (this.isAircraft(e)) {
+        e.x = e.px = s.x; e.y = e.py = s.y;
+      } else {
+        const cell = nearestCell(this.map, this.cellIndex(toCell(s.x), toCell(s.y)), 3, i => passable(this.pack, this.map, i, this.moveClass(def)) && !this.unitInCell(i, e.id));
+        if (cell >= 0) { e.x = e.px = cellCenter(cell % this.map.w); e.y = e.py = cellCenter(Math.floor(cell / this.map.w)); }
+      }
+      e.heldUntil = hold; e.path = []; e.order = 'idle'; e.target = 0;
+    }
+  }
+
   /** Desync detector: identical on every client running the same commands. */
   checksum(): number {
     const h = new Hasher().add(this.tick).add(this.rng.seed);
     for (const p of this.players) h.add(p.credits).add(p.defeated ? 1 : 0);
     h.add(this.market);
-    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0).add(e.passengers.length);
+    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0).add(e.passengers.length).add(e.heldUntil);
     for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
-    for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden).add(worm.goal).add(worm.up);
+    for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden).add(worm.goal).add(worm.up).addString(worm.form);
     for (const crate of this.crates) h.add(crate.cell).add(CRATE_KINDS.indexOf(crate.kind));
     return h.value;
   }

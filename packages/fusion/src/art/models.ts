@@ -885,6 +885,13 @@ export function buildingMesh(shape: string, w: number, h: number, style: ArtStyl
       m.dome(w / 2, h / 2, 1.85, 0.08, GLOW_RED, 2, 8);
       break;
     }
+    case 'beacon': {
+      m.box(0.22, 0.22, 0.07, w - 0.22, h - 0.22, 0.38, p.body, { top: p.trim });
+      m.cylinder(w / 2, h / 2, 0.38, 1.05, 0.1, 0.08, p.metal, 10);
+      m.cylinder(w / 2, h / 2, 0.95, 1.15, 0.42, 0.42, GLOW_CYAN, 16, { glow: true, cap: false });
+      m.box(0.22, h - 0.28, 0.14, w - 0.22, h - 0.18, 0.32, team);
+      break;
+    }
     case 'xwing-hangar': {
       m.box(0.15, 0.15, 0.07, w - 0.15, h - 0.45, 0.55, p.body, { top: p.trim });
       m.box(0.4, h - 0.5, 0.07, w - 0.4, h - 0.12, 0.48, p.dark);
@@ -1018,13 +1025,17 @@ export function wallMesh(mask: number, style: ArtStyle): Mesh {
 
 // ---------------------------------------------------------------- vehicles
 
-const HAS_TURRET = new Set(['tank-turret', 'siege-turret', 'mammoth-turret', 'launcher', 'sonic', 'devastator', 'prism', 'mirage', 'tesla-tank', 'ship-destroyer', 'ship-patrol', 'ship-cruiser', 'ship-dreadnought', 'hovertank', 'atst', 'atte', 'atat', 'mptl', 'corvette', 'stardestroyer', 'atat-swimmer']);
-/** Ships are modelled small and scaled up to RA2's big hulls. */
+const HAS_TURRET = new Set(['tank-turret', 'siege-turret', 'mammoth-turret', 'launcher', 'sonic', 'devastator', 'prism', 'mirage', 'tesla-tank', 'ship-destroyer', 'ship-patrol', 'ship-cruiser', 'ship-dreadnought', 'hovertank', 'atst', 'atdp', 'atte', 'atat', 'atact', 'atap', 'mptl', 'corvette', 'stardestroyer', 'atat-swimmer', 'aac1', 'juggernaut']);
+/** Ships are modelled small and scaled up to RA2's big hulls. Walkers are scaled so the legs read at 32px/cell. */
 const SHIP_SCALE: Record<string, number> = {
   hovercraft: 1.5, 'ship-destroyer': 1.8, 'ship-cruiser': 1.8, 'ship-carrier': 1.9, 'ship-patrol': 1.5,
   'ship-dreadnought': 1.9, sub: 1.7, dolphin: 1.3, squid: 1.5,
   gr75: 1.6, c9979: 1.7, waveskimmer: 1.5, corvette: 1.8, 'manta-sub': 1.6, mc80: 1.9,
   stardestroyer: 2.0, 'atat-swimmer': 1.8, trident: 1.7, lucrehulk: 2.0, acclamator: 1.9,
+  atst: 1.9, atpt: 1.5, atdp: 1.75, atrt: 1.55, atxt: 1.55, atap: 1.7, atte: 1.9, atot: 1.85,
+  atat: 2.4, atact: 2.2, spider: 1.65, dwarfspider: 1.4, crab: 1.55, octuptarra: 1.8, juggernaut: 2.1,
+  nebulon: 1.85, hammerhead: 1.7, consular: 1.65, arquitens: 1.85, gozanti: 1.7, victory: 2.0,
+  recusant: 1.9, hardcell: 1.6, venator: 2.0,
 };
 function scaled(m: Mesh, k = 1): Mesh {
   if (k !== 1) for (const f of m.faces) f.pts = f.pts.map(([x, y, z]) => [x * k, y * k, z * k] as Vec3);
@@ -1035,6 +1046,7 @@ export const FLYING = new Set([
   'kirov', 'jet', 'ornithopter', 'carryall', 'helicopter', 'orca', 'apache',
   'xwing', 'awing', 'ywing', 'bwing', 't47', 'falcon', 'v19', 'arc170', 'laat',
   'tie', 'tieint', 'tiebomber', 'lambda', 'vulture', 'trifighter', 'hyena', 'hmp',
+  'z95', 'uwing', 'vwing', 'delta7', 'tieadv', 'tiedef', 'sentinel', 'soulless', 'rogue',
 ]);
 export function hasTurret(shape: string) { return HAS_TURRET.has(shape); }
 
@@ -1340,43 +1352,97 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       m.box(-0.46, -0.23, 0.22, -0.1, -0.2, 0.32, team);
       m.box(-0.2, -0.12, 0.36, 0.2, 0.12, 0.48, p.glass);
       break;
-    case 'atst': {
-      for (const y of [-0.14, 0.14]) {
-        m.box(-0.06, y - 0.04, 0, 0.08, y + 0.04, 0.18, p.dark);
-        m.box(-0.02, y - 0.035, 0.16, 0.06, y + 0.035, 0.42, p.metal);
+    case 'atst':
+    case 'atpt':
+    case 'atdp':
+    case 'atxt': {
+      // Chicken walkers: reverse-joint legs thick enough to read at 32px/cell, head on the hull
+      // so the silhouette is a walker even before the chin-gun turret is blitted.
+      const hip = shape === 'atpt' || shape === 'atxt' ? 0.48 : 0.7;
+      const stance = shape === 'atpt' ? 0.16 : 0.24;
+      for (const y of [-stance, stance]) {
+        m.box(-0.16, y - 0.08, 0, 0.18, y + 0.08, 0.1, p.dark);
+        m.box(-0.18, y - 0.065, 0.08, 0.02, y + 0.065, hip * 0.55, p.metal);
+        m.box(-0.02, y - 0.06, hip * 0.42, 0.16, y + 0.06, hip + 0.02, hull);
       }
-      m.box(-0.16, -0.16, 0.4, 0.2, 0.16, 0.62, hull, { top: team });
+      m.box(-0.26, -0.2, hip - 0.06, 0.3, 0.2, hip + 0.32, hull, { top: tint(hull, 1.04) });
+      m.box(0.14, -0.16, hip + 0.18, 0.48, 0.16, hip + 0.5, hull, { top: p.glass });
+      m.box(-0.24, -0.22, hip + 0.06, 0.06, -0.17, hip + 0.2, team);
+      m.box(0.42, -0.035, hip + 0.3, 0.62, 0.035, hip + 0.4, BARREL);
       break;
     }
     case 'atrt': {
-      m.box(-0.04, -0.05, 0, 0.06, 0.05, 0.28, p.dark);
-      m.box(-0.12, -0.1, 0.26, 0.16, 0.1, 0.46, hull, { top: team });
-      m.box(0.14, -0.02, 0.34, 0.32, 0.02, 0.4, BARREL);
+      m.box(-0.12, -0.08, 0, 0.16, 0.08, 0.1, p.dark);
+      m.box(-0.1, -0.06, 0.08, 0.04, 0.06, 0.32, p.metal);
+      m.box(-0.02, -0.055, 0.28, 0.14, 0.055, 0.52, hull);
+      m.box(-0.16, -0.12, 0.48, 0.22, 0.12, 0.7, hull, { top: tint(hull, 1.04) });
+      m.box(0.18, -0.03, 0.54, 0.4, 0.03, 0.64, BARREL);
+      m.box(-0.14, -0.14, 0.54, 0.04, -0.1, 0.64, team);
       break;
     }
-    case 'atte': {
-      for (const [x, y] of [[-0.38, -0.2], [-0.38, 0.2], [0, -0.22], [0, 0.22], [0.38, -0.2], [0.38, 0.2]]) {
-        m.box(x - 0.06, y - 0.04, 0, x + 0.06, y + 0.04, 0.16, p.dark);
+    case 'atte':
+    case 'atot':
+    case 'atap': {
+      for (const [x, y] of [[-0.48, -0.26], [-0.48, 0.26], [0, -0.3], [0, 0.3], [0.48, -0.26], [0.48, 0.26]]) {
+        m.box(x - 0.09, y - 0.07, 0, x + 0.09, y + 0.07, 0.1, p.dark);
+        m.box(x - 0.07, y - 0.055, 0.08, x + 0.07, y + 0.055, 0.28, p.metal);
       }
-      m.box(-0.48, -0.18, 0.16, 0.48, 0.18, 0.34, hull, { top: tint(hull, 1.03) });
-      m.box(-0.44, -0.19, 0.24, -0.1, -0.16, 0.32, team);
+      m.box(-0.62, -0.22, 0.24, 0.62, 0.22, 0.48, hull, { top: tint(hull, 1.03) });
+      if (shape === 'atot') m.box(-0.4, -0.18, 0.48, 0.35, 0.18, 0.68, p.trim, { top: team });
+      if (shape === 'atap') m.box(0.1, -0.06, 0.48, 0.55, 0.06, 0.62, BARREL);
+      m.box(-0.58, -0.24, 0.34, -0.18, -0.2, 0.44, team);
       break;
     }
-    case 'atat': {
-      for (const [x, y] of [[-0.32, -0.2], [-0.32, 0.2], [0.28, -0.2], [0.28, 0.2]]) {
-        m.box(x - 0.07, y - 0.05, 0, x + 0.07, y + 0.05, 0.55, p.dark);
+    case 'atat':
+    case 'atact': {
+      for (const [x, y] of [[-0.48, -0.28], [-0.48, 0.28], [0.42, -0.28], [0.42, 0.28]]) {
+        m.box(x - 0.12, y - 0.1, 0, x + 0.12, y + 0.1, 0.14, p.dark);
+        m.box(x - 0.09, y - 0.08, 0.12, x + 0.09, y + 0.08, 0.98, p.metal);
       }
-      m.box(-0.42, -0.18, 0.5, 0.38, 0.18, 0.78, hull, { top: tint(hull, 1.02) });
-      m.box(-0.38, -0.19, 0.6, -0.05, -0.16, 0.72, team);
+      m.box(-0.7, -0.26, 0.9, 0.55, 0.26, 1.22, hull, { top: tint(hull, 1.03) });
+      if (shape === 'atact') m.box(-0.5, -0.22, 1.22, 0.2, 0.22, 1.42, p.trim);
+      m.box(0.48, -0.18, 0.96, 0.92, 0.18, 1.2, hull, { top: p.glass });
+      m.box(-0.66, -0.28, 1.02, -0.22, -0.23, 1.14, team);
       break;
     }
-    case 'spider': {
+    case 'spider':
+    case 'dwarfspider': {
+      const reach = shape === 'dwarfspider' ? 0.28 : 0.4;
       for (let k2 = 0; k2 < 4; k2++) {
         const a = (k2 / 4) * Math.PI * 2 + 0.4;
-        m.box(Math.cos(a) * 0.08 - 0.04, Math.sin(a) * 0.08 - 0.04, 0, Math.cos(a) * 0.32 + 0.04, Math.sin(a) * 0.32 + 0.04, 0.08, p.dark);
+        m.box(Math.cos(a) * 0.06 - 0.05, Math.sin(a) * 0.06 - 0.05, 0, Math.cos(a) * reach + 0.05, Math.sin(a) * reach + 0.05, 0.1, p.dark);
+        m.box(Math.cos(a) * 0.08 - 0.04, Math.sin(a) * 0.08 - 0.04, 0.08, Math.cos(a) * (reach * 0.55) + 0.04, Math.sin(a) * (reach * 0.55) + 0.04, 0.32, p.metal);
       }
-      m.cylinder(0, 0, 0.08, 0.42, 0.16, 0.14, hull, 10, { top: team });
-      m.box(0.12, -0.03, 0.28, 0.42, 0.03, 0.34, BARREL);
+      m.cylinder(0, 0, 0.16, 0.52, 0.2, 0.18, hull, 10, { top: team });
+      m.box(0.12, -0.04, 0.36, 0.48, 0.04, 0.44, BARREL);
+      break;
+    }
+    case 'crab': {
+      for (let k2 = 0; k2 < 6; k2++) {
+        const a = (k2 / 6) * Math.PI * 2;
+        m.box(Math.cos(a) * 0.1 - 0.05, Math.sin(a) * 0.1 - 0.05, 0, Math.cos(a) * 0.38 + 0.05, Math.sin(a) * 0.38 + 0.05, 0.08, p.dark);
+      }
+      m.box(-0.22, -0.2, 0.12, 0.28, 0.2, 0.38, hull, { top: team });
+      m.box(0.22, -0.04, 0.22, 0.48, 0.04, 0.32, BARREL);
+      break;
+    }
+    case 'octuptarra': {
+      for (let k2 = 0; k2 < 3; k2++) {
+        const a = (k2 / 3) * Math.PI * 2 - Math.PI / 2;
+        m.box(Math.cos(a) * 0.08 - 0.07, Math.sin(a) * 0.08 - 0.07, 0, Math.cos(a) * 0.36 + 0.07, Math.sin(a) * 0.36 + 0.07, 0.12, p.dark);
+        m.box(Math.cos(a) * 0.1 - 0.05, Math.sin(a) * 0.1 - 0.05, 0.1, Math.cos(a) * 0.2 + 0.05, Math.sin(a) * 0.2 + 0.05, 0.55, p.metal);
+      }
+      m.cylinder(0, 0, 0.5, 0.82, 0.22, 0.2, hull, 10, { top: team });
+      m.box(-0.04, -0.04, 0.8, 0.04, 0.04, 1.02, BARREL);
+      break;
+    }
+    case 'juggernaut': {
+      for (const [x, y] of [[-0.55, -0.28], [-0.18, -0.3], [0.18, -0.3], [0.55, -0.28], [-0.55, 0.28], [-0.18, 0.3], [0.18, 0.3], [0.55, 0.28]]) {
+        m.cylinder(x, y, 0, 0.16, 0.1, 0.1, TRACK, 8);
+      }
+      m.box(-0.7, -0.26, 0.14, 0.7, 0.26, 0.48, hull, { top: tint(hull, 1.03) });
+      m.box(-0.2, -0.16, 0.48, 0.35, 0.16, 0.7, hull, { top: p.glass });
+      m.box(-0.66, -0.28, 0.28, -0.2, -0.24, 0.4, team);
       break;
     }
     case 'nrn99':
@@ -1561,8 +1627,131 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       m.box(-0.55, -0.06, 0.08, -0.2, 0.06, 0.16, p.dark);
       break;
     case 'acclamator':
+    case 'venator':
       prism(m, [[-0.75, -0.22], [0.45, -0.28], [0.85, 0], [0.45, 0.28], [-0.75, 0.22]], -0.04, 0.16, tint(hull, 0.9), p.trim);
       m.box(-0.2, -0.12, 0.16, 0.2, 0.12, 0.34, hull, { top: team });
+      if (shape === 'venator') m.box(-0.4, -0.04, 0.16, 0.55, 0.04, 0.2, p.dark);
+      break;
+    case 'ulav':
+    case 'freerunner':
+      m.box(-0.28, -0.16, 0.08, 0.32, 0.16, 0.22, hull, { top: tint(hull, 1.04) });
+      m.box(0.12, -0.1, 0.22, 0.3, 0.1, 0.32, p.glass);
+      m.box(-0.26, -0.18, 0.12, 0.04, -0.14, 0.18, team);
+      m.box(0.28, -0.025, 0.16, 0.46, 0.025, 0.24, BARREL);
+      break;
+    case 't1a':
+      m.box(-0.34, -0.22, 0.06, 0.34, 0.22, 0.24, hull, { top: tint(hull, 1.03) });
+      m.box(-0.2, -0.12, 0.24, 0.18, 0.12, 0.36, hull, { top: p.glass });
+      m.box(-0.32, -0.24, 0.14, 0.06, -0.2, 0.2, team);
+      m.box(0.16, -0.03, 0.26, 0.48, 0.03, 0.32, BARREL);
+      break;
+    case 'aac1':
+      m.box(-0.32, -0.2, 0.08, 0.32, 0.2, 0.24, hull, { top: tint(hull, 1.03) });
+      m.cylinder(0, 0, 0.24, 0.42, 0.14, 0.14, p.trim, 10, { top: team });
+      for (const y of [-0.08, 0.08]) m.box(0.08, y - 0.03, 0.32, 0.36, y + 0.03, 0.4, BARREL);
+      break;
+    case 'skiff':
+      m.box(-0.4, -0.16, 0.06, 0.4, 0.16, 0.14, hull, { top: tint(hull, 1.06) });
+      m.box(-0.16, -0.12, 0.14, 0.22, 0.12, 0.22, p.dark);
+      m.box(-0.36, -0.18, 0.1, -0.08, -0.14, 0.16, team);
+      break;
+    case 'saber-repulsor':
+      m.box(-0.36, -0.2, 0.08, 0.36, 0.2, 0.26, hull, { top: tint(hull, 1.04) });
+      m.box(0.08, -0.1, 0.26, 0.32, 0.1, 0.36, p.glass);
+      m.box(-0.34, -0.22, 0.16, 0.02, -0.18, 0.22, team);
+      m.box(0.28, -0.03, 0.22, 0.54, 0.03, 0.3, BARREL);
+      break;
+    case 'z95':
+      lathe(m, -0.28, 0.34, 0, 0.1, t => 0.06 * Math.pow(Math.sin(Math.PI * t), 0.55), p.metal, 8, 10);
+      m.add([[-0.04, -0.3, 0.1], [0.2, -0.06, 0.1], [0.2, 0.06, 0.1], [-0.04, 0.3, 0.1]], tint(p.metal, 0.92));
+      m.box(0.2, -0.04, 0.1, 0.34, 0.04, 0.16, p.glass);
+      m.box(-0.14, -0.04, 0.14, 0.02, 0.04, 0.18, team);
+      break;
+    case 'uwing':
+      lathe(m, -0.4, 0.38, 0, 0.14, t => 0.11 * Math.pow(Math.sin(Math.PI * (0.15 + t * 0.85)), 0.5), p.metal, 10, 12);
+      m.box(-0.08, -0.32, 0.12, 0.22, -0.22, 0.18, tint(p.metal, 0.92), { top: team });
+      m.box(-0.08, 0.22, 0.12, 0.22, 0.32, 0.18, tint(p.metal, 0.92), { top: team });
+      m.box(0.2, -0.06, 0.14, 0.36, 0.06, 0.24, p.glass);
+      break;
+    case 'vwing':
+      lathe(m, -0.22, 0.3, 0, 0.1, t => 0.05 * Math.pow(Math.sin(Math.PI * t), 0.6), p.metal, 7, 8);
+      m.box(-0.08, -0.26, 0.08, 0.16, -0.18, 0.14, p.trim);
+      m.box(-0.08, 0.18, 0.08, 0.16, 0.26, 0.14, p.trim);
+      m.box(0.2, -0.03, 0.1, 0.32, 0.03, 0.16, p.glass);
+      m.box(-0.12, -0.03, 0.14, 0.04, 0.03, 0.18, team);
+      break;
+    case 'delta7':
+      lathe(m, -0.2, 0.34, 0, 0.1, t => 0.045 * Math.pow(Math.sin(Math.PI * t), 0.7), p.metal, 7, 8);
+      m.add([[-0.02, -0.22, 0.1], [0.22, -0.04, 0.1], [0.22, 0.04, 0.1], [-0.02, 0.22, 0.1]], tint(p.trim, 0.95));
+      m.box(0.22, -0.03, 0.1, 0.34, 0.03, 0.16, p.glass);
+      m.box(-0.1, -0.03, 0.14, 0.06, 0.03, 0.18, team);
+      break;
+    case 'tieadv':
+    case 'tiedef': {
+      m.dome(0, 0, 0.04, 0.12, p.metal, 4, 12, 0.12);
+      if (shape === 'tiedef') {
+        for (const a of [-0.7, 0, 0.7]) {
+          m.box(Math.cos(a) * 0.14 - 0.03, Math.sin(a) * 0.14 - 0.16, 0.04, Math.cos(a) * 0.14 + 0.03, Math.sin(a) * 0.14 + 0.16, 0.3, p.dark);
+        }
+      } else {
+        m.box(-0.2, -0.18, 0.06, -0.14, 0.18, 0.28, p.dark);
+        m.box(0.14, -0.18, 0.06, 0.2, 0.18, 0.28, p.dark);
+      }
+      m.box(-0.04, -0.03, 0.14, 0.04, 0.03, 0.18, team);
+      break;
+    }
+    case 'sentinel':
+      lathe(m, -0.38, 0.36, 0, 0.14, t => 0.12 * Math.pow(Math.sin(Math.PI * t), 0.5), p.metal, 9, 10);
+      m.add([[-0.06, 0, 0.14], [0.14, 0, 0.14], [-0.06, 0, 0.4]], p.trim);
+      m.box(0.18, -0.06, 0.14, 0.34, 0.06, 0.22, p.glass);
+      m.box(-0.2, -0.05, 0.16, 0.0, 0.05, 0.22, team);
+      break;
+    case 'soulless':
+      lathe(m, -0.24, 0.36, 0, 0.1, t => 0.055 * Math.pow(Math.sin(Math.PI * t), 0.55), p.metal, 8, 8);
+      m.box(-0.1, -0.24, 0.08, 0.18, -0.16, 0.16, p.dark);
+      m.box(-0.1, 0.16, 0.08, 0.18, 0.24, 0.16, p.dark);
+      m.box(0.24, -0.03, 0.1, 0.4, 0.03, 0.16, p.glass);
+      m.box(-0.12, -0.03, 0.14, 0.06, 0.03, 0.18, team);
+      break;
+    case 'rogue':
+      lathe(m, -0.26, 0.32, 0, 0.1, t => 0.06 * Math.pow(Math.sin(Math.PI * t), 0.5), p.metal, 8, 10);
+      m.add([[-0.06, -0.26, 0.1], [0.2, -0.05, 0.1], [0.2, 0.05, 0.1], [-0.06, 0.26, 0.1]], tint(p.metal, 0.9));
+      m.box(0.2, -0.03, 0.1, 0.34, 0.03, 0.16, p.glass);
+      m.box(-0.14, -0.03, 0.14, 0.04, 0.03, 0.18, team);
+      break;
+    case 'nebulon':
+      lathe(m, -0.55, 0.15, 0, 0.08, t => 0.14 * Math.pow(Math.sin(Math.PI * t), 0.5), tint(hull, 0.92), 8, 10, 0.7);
+      lathe(m, 0.12, 0.7, 0, 0.08, t => 0.1 * Math.pow(Math.sin(Math.PI * t), 0.5), tint(hull, 0.95), 7, 10, 0.65);
+      m.box(-0.08, -0.06, 0.08, 0.18, 0.06, 0.42, hull, { top: team });
+      break;
+    case 'hammerhead':
+      prism(m, [[-0.65, -0.16], [0.2, -0.14], [0.55, -0.22], [0.7, 0], [0.55, 0.22], [0.2, 0.14], [-0.65, 0.16]], -0.04, 0.16, tint(hull, 0.92), p.trim);
+      m.box(-0.2, -0.1, 0.16, 0.16, 0.1, 0.32, hull, { top: team });
+      break;
+    case 'consular':
+      lathe(m, -0.6, 0.55, 0, 0.06, t => 0.1 * Math.pow(Math.sin(Math.PI * t), 0.5), tint(hull, 0.94), 10, 12, 0.65);
+      m.box(-0.15, -0.08, 0.12, 0.2, 0.08, 0.28, hull, { top: team });
+      break;
+    case 'arquitens':
+      prism(m, [[-0.7, -0.12], [0.4, -0.28], [0.8, 0], [0.4, 0.28], [-0.7, 0.12]], -0.04, 0.14, tint(hull, 0.9), p.trim);
+      m.box(-0.2, -0.1, 0.14, 0.16, 0.1, 0.34, hull, { top: team });
+      break;
+    case 'gozanti':
+      m.box(-0.5, -0.18, 0.02, 0.5, 0.18, 0.22, hull, { top: tint(hull, 1.03) });
+      m.box(-0.15, -0.1, 0.22, 0.2, 0.1, 0.36, hull, { top: team });
+      m.box(-0.46, -0.2, 0.1, -0.1, -0.16, 0.18, team);
+      break;
+    case 'victory':
+      prism(m, [[-0.8, -0.1], [0.5, -0.36], [0.9, 0], [0.5, 0.36], [-0.8, 0.1]], -0.04, 0.14, tint(hull, 0.88), p.trim);
+      m.box(-0.12, -0.1, 0.14, 0.16, 0.1, 0.4, hull, { top: team });
+      break;
+    case 'recusant':
+      prism(m, [[-0.85, -0.08], [0.2, -0.16], [0.9, 0], [0.2, 0.16], [-0.85, 0.08]], -0.04, 0.12, tint(hull, 0.9), p.trim);
+      m.box(-0.2, -0.08, 0.12, 0.25, 0.08, 0.3, hull, { top: team });
+      break;
+    case 'hardcell':
+      lathe(m, -0.5, 0.5, 0, 0.08, t => 0.14 * Math.pow(Math.sin(Math.PI * t), 0.45), tint(hull, 0.92), 9, 10, 0.75);
+      m.box(-0.16, -0.08, 0.16, 0.16, 0.08, 0.3, hull, { top: team });
       break;
     default:
       tracked(0.38, 0.26, 0.18);
@@ -1634,16 +1823,27 @@ export function turretMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       m.box(0.14, -0.03, 0.26, 0.52, 0.03, 0.32, BARREL);
       break;
     case 'atst':
-      m.box(-0.08, -0.12, 0.58, 0.22, 0.12, 0.78, p.hull, { top: team });
-      m.box(0.2, -0.025, 0.64, 0.42, 0.025, 0.72, BARREL);
+    case 'atdp':
+      m.box(-0.08, -0.14, 0.72, 0.28, 0.14, 1.0, p.hull, { top: team });
+      m.box(0.24, -0.03, 0.82, 0.52, 0.03, 0.94, BARREL);
       break;
     case 'atte':
-      m.cylinder(0.08, 0, 0.34, 0.5, 0.12, 0.1, p.hull, 10, { top: team });
-      m.box(0.1, -0.03, 0.42, 0.48, 0.03, 0.5, BARREL);
+    case 'atap':
+      m.cylinder(0.08, 0, 0.44, 0.62, 0.14, 0.12, p.hull, 10, { top: team });
+      m.box(0.1, -0.035, 0.52, 0.55, 0.035, 0.62, BARREL);
       break;
     case 'atat':
-      m.box(0.28, -0.1, 0.58, 0.55, 0.1, 0.78, p.hull, { top: team });
-      for (const y of [-0.05, 0.05]) m.box(0.52, y - 0.02, 0.64, 0.78, y + 0.02, 0.72, BARREL);
+    case 'atact':
+      m.box(0.42, -0.12, 0.96, 0.78, 0.12, 1.2, p.hull, { top: team });
+      for (const y of [-0.06, 0.06]) m.box(0.72, y - 0.025, 1.04, 1.05, y + 0.025, 1.14, BARREL);
+      break;
+    case 'aac1':
+      m.cylinder(0, 0, 0.24, 0.42, 0.12, 0.12, p.hull, 10, { top: team });
+      for (const y of [-0.07, 0.07]) m.box(0.08, y - 0.025, 0.32, 0.38, y + 0.025, 0.4, BARREL);
+      break;
+    case 'juggernaut':
+      m.box(-0.12, -0.14, 0.48, 0.22, 0.14, 0.7, p.hull, { top: team });
+      m.box(0.18, -0.04, 0.56, 0.52, 0.04, 0.66, BARREL);
       break;
     case 'mptl':
       m.box(-0.18, -0.16, 0.18, 0.18, 0.16, 0.4, p.hull, { top: p.trim });
