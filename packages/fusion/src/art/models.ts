@@ -1032,8 +1032,8 @@ const SHIP_SCALE: Record<string, number> = {
   'ship-dreadnought': 1.9, sub: 1.7, dolphin: 1.3, squid: 1.5,
   gr75: 1.6, c9979: 1.7, waveskimmer: 1.5, corvette: 1.8, 'manta-sub': 1.6, mc80: 1.9,
   stardestroyer: 2.0, 'atat-swimmer': 1.8, trident: 1.7, lucrehulk: 2.0, acclamator: 1.9,
-  atst: 1.9, atpt: 1.5, atdp: 1.75, atrt: 1.55, atxt: 1.55, atap: 1.7, atte: 1.9, atot: 1.85,
-  atat: 2.4, atact: 2.2, spider: 1.65, dwarfspider: 1.4, crab: 1.55, octuptarra: 1.8, juggernaut: 2.1,
+  atst: 1.27, atpt: 1.5, atdp: 1.17, atrt: 1.55, atxt: 1.55, atap: 1.7, atte: 1.9, atot: 1.85,
+  atat: 1.6, atact: 1.47, spider: 1.65, dwarfspider: 1.4, crab: 1.55, octuptarra: 1.8, juggernaut: 2.1,
   nebulon: 1.85, hammerhead: 1.7, consular: 1.65, arquitens: 1.85, gozanti: 1.7, victory: 2.0,
   recusant: 1.9, hardcell: 1.6, venator: 2.0,
 };
@@ -1049,9 +1049,19 @@ export const FLYING = new Set([
   'z95', 'uwing', 'vwing', 'delta7', 'tieadv', 'tiedef', 'sentinel', 'soulless', 'rogue',
 ]);
 export function hasTurret(shape: string) { return HAS_TURRET.has(shape); }
+/** Biped and quadruped walkers that play a gait while they move. */
+export const WALKER_GAIT = new Set([
+  'atst', 'atpt', 'atdp', 'atxt', 'atrt', 'atte', 'atot', 'atap', 'atat', 'atact',
+  'spider', 'dwarfspider', 'crab', 'octuptarra',
+]);
+function gaitSwing(gait: number, odd: boolean, stride = 0.12, lift = 0.09) {
+  if (!gait) return { x: 0, z: 0 };
+  const phase = ((gait - 1) / 4) * Math.PI * 2 + (odd ? Math.PI : 0);
+  return { x: Math.sin(phase) * stride, z: Math.max(0, Math.cos(phase)) * lift };
+}
 
-/** Vehicle hull pointing +X, centred on the origin. Sizes are in cells. */
-export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
+/** Vehicle hull pointing +X, centred on the origin. Sizes are in cells. `gait` 1–4 is a walk frame. */
+export function hullMesh(shape: string, style: ArtStyle, team: RGB, gait = 0): Mesh {
   const p = PALETTES[style];
   const m = new Mesh();
   const hull = p.hull;
@@ -1360,11 +1370,12 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       // so the silhouette is a walker even before the chin-gun turret is blitted.
       const hip = shape === 'atpt' || shape === 'atxt' ? 0.48 : 0.7;
       const stance = shape === 'atpt' ? 0.16 : 0.24;
-      for (const y of [-stance, stance]) {
-        m.box(-0.16, y - 0.08, 0, 0.18, y + 0.08, 0.1, p.dark);
-        m.box(-0.18, y - 0.065, 0.08, 0.02, y + 0.065, hip * 0.55, p.metal);
+      [-stance, stance].forEach((y, i) => {
+        const g = gaitSwing(gait, i === 1, 0.16, 0.1);
+        m.box(-0.16 + g.x, y - 0.08, g.z, 0.18 + g.x, y + 0.08, g.z + 0.1, p.dark);
+        m.box(-0.18 + g.x * 0.6, y - 0.065, g.z + 0.08, 0.02 + g.x * 0.6, y + 0.065, hip * 0.55, p.metal);
         m.box(-0.02, y - 0.06, hip * 0.42, 0.16, y + 0.06, hip + 0.02, hull);
-      }
+      });
       m.box(-0.26, -0.2, hip - 0.06, 0.3, 0.2, hip + 0.32, hull, { top: tint(hull, 1.04) });
       m.box(0.14, -0.16, hip + 0.18, 0.48, 0.16, hip + 0.5, hull, { top: p.glass });
       m.box(-0.24, -0.22, hip + 0.06, 0.06, -0.17, hip + 0.2, team);
@@ -1372,8 +1383,9 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       break;
     }
     case 'atrt': {
-      m.box(-0.12, -0.08, 0, 0.16, 0.08, 0.1, p.dark);
-      m.box(-0.1, -0.06, 0.08, 0.04, 0.06, 0.32, p.metal);
+      const g = gaitSwing(gait, false, 0.1, 0.08);
+      m.box(-0.12 + g.x, -0.08, g.z, 0.16 + g.x, 0.08, g.z + 0.1, p.dark);
+      m.box(-0.1 + g.x * 0.5, -0.06, g.z + 0.08, 0.04 + g.x * 0.5, 0.06, 0.32, p.metal);
       m.box(-0.02, -0.055, 0.28, 0.14, 0.055, 0.52, hull);
       m.box(-0.16, -0.12, 0.48, 0.22, 0.12, 0.7, hull, { top: tint(hull, 1.04) });
       m.box(0.18, -0.03, 0.54, 0.4, 0.03, 0.64, BARREL);
@@ -1383,10 +1395,11 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
     case 'atte':
     case 'atot':
     case 'atap': {
-      for (const [x, y] of [[-0.48, -0.26], [-0.48, 0.26], [0, -0.3], [0, 0.3], [0.48, -0.26], [0.48, 0.26]]) {
-        m.box(x - 0.09, y - 0.07, 0, x + 0.09, y + 0.07, 0.1, p.dark);
-        m.box(x - 0.07, y - 0.055, 0.08, x + 0.07, y + 0.055, 0.28, p.metal);
-      }
+      [[-0.48, -0.26], [-0.48, 0.26], [0, -0.3], [0, 0.3], [0.48, -0.26], [0.48, 0.26]].forEach(([x, y], i) => {
+        const g = gaitSwing(gait, i % 2 === 1, 0.1, 0.07);
+        m.box(x - 0.09 + g.x, y - 0.07, g.z, x + 0.09 + g.x, y + 0.07, g.z + 0.1, p.dark);
+        m.box(x - 0.07 + g.x * 0.4, y - 0.055, g.z + 0.08, x + 0.07 + g.x * 0.4, y + 0.055, 0.28, p.metal);
+      });
       m.box(-0.62, -0.22, 0.24, 0.62, 0.22, 0.48, hull, { top: tint(hull, 1.03) });
       if (shape === 'atot') m.box(-0.4, -0.18, 0.48, 0.35, 0.18, 0.68, p.trim, { top: team });
       if (shape === 'atap') m.box(0.1, -0.06, 0.48, 0.55, 0.06, 0.62, BARREL);
@@ -1395,10 +1408,11 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
     }
     case 'atat':
     case 'atact': {
-      for (const [x, y] of [[-0.48, -0.28], [-0.48, 0.28], [0.42, -0.28], [0.42, 0.28]]) {
-        m.box(x - 0.12, y - 0.1, 0, x + 0.12, y + 0.1, 0.14, p.dark);
-        m.box(x - 0.09, y - 0.08, 0.12, x + 0.09, y + 0.08, 0.98, p.metal);
-      }
+      [[-0.48, -0.28], [-0.48, 0.28], [0.42, -0.28], [0.42, 0.28]].forEach(([x, y], i) => {
+        const g = gaitSwing(gait, i === 0 || i === 3, 0.14, 0.1);
+        m.box(x - 0.12 + g.x, y - 0.1, g.z, x + 0.12 + g.x, y + 0.1, g.z + 0.14, p.dark);
+        m.box(x - 0.09 + g.x * 0.35, y - 0.08, g.z + 0.12, x + 0.09 + g.x * 0.35, y + 0.08, 0.98, p.metal);
+      });
       m.box(-0.7, -0.26, 0.9, 0.55, 0.26, 1.22, hull, { top: tint(hull, 1.03) });
       if (shape === 'atact') m.box(-0.5, -0.22, 1.22, 0.2, 0.22, 1.42, p.trim);
       m.box(0.48, -0.18, 0.96, 0.92, 0.18, 1.2, hull, { top: p.glass });
@@ -1410,8 +1424,10 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
       const reach = shape === 'dwarfspider' ? 0.28 : 0.4;
       for (let k2 = 0; k2 < 4; k2++) {
         const a = (k2 / 4) * Math.PI * 2 + 0.4;
-        m.box(Math.cos(a) * 0.06 - 0.05, Math.sin(a) * 0.06 - 0.05, 0, Math.cos(a) * reach + 0.05, Math.sin(a) * reach + 0.05, 0.1, p.dark);
-        m.box(Math.cos(a) * 0.08 - 0.04, Math.sin(a) * 0.08 - 0.04, 0.08, Math.cos(a) * (reach * 0.55) + 0.04, Math.sin(a) * (reach * 0.55) + 0.04, 0.32, p.metal);
+        const g = gaitSwing(gait, k2 % 2 === 1, 0.08, 0.07);
+        const cx = Math.cos(a), sy = Math.sin(a);
+        m.box(cx * 0.06 - 0.05 + g.x * cx, sy * 0.06 - 0.05 + g.x * sy, g.z, cx * reach + 0.05 + g.x * cx, sy * reach + 0.05 + g.x * sy, g.z + 0.1, p.dark);
+        m.box(cx * 0.08 - 0.04, sy * 0.08 - 0.04, g.z + 0.08, cx * (reach * 0.55) + 0.04, sy * (reach * 0.55) + 0.04, 0.32, p.metal);
       }
       m.cylinder(0, 0, 0.16, 0.52, 0.2, 0.18, hull, 10, { top: team });
       m.box(0.12, -0.04, 0.36, 0.48, 0.04, 0.44, BARREL);
@@ -1420,7 +1436,9 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
     case 'crab': {
       for (let k2 = 0; k2 < 6; k2++) {
         const a = (k2 / 6) * Math.PI * 2;
-        m.box(Math.cos(a) * 0.1 - 0.05, Math.sin(a) * 0.1 - 0.05, 0, Math.cos(a) * 0.38 + 0.05, Math.sin(a) * 0.38 + 0.05, 0.08, p.dark);
+        const g = gaitSwing(gait, k2 % 2 === 1, 0.07, 0.05);
+        const cx = Math.cos(a), sy = Math.sin(a);
+        m.box(cx * 0.1 - 0.05 + g.x * cx, sy * 0.1 - 0.05 + g.x * sy, g.z, cx * 0.38 + 0.05 + g.x * cx, sy * 0.38 + 0.05 + g.x * sy, g.z + 0.08, p.dark);
       }
       m.box(-0.22, -0.2, 0.12, 0.28, 0.2, 0.38, hull, { top: team });
       m.box(0.22, -0.04, 0.22, 0.48, 0.04, 0.32, BARREL);
@@ -1429,8 +1447,10 @@ export function hullMesh(shape: string, style: ArtStyle, team: RGB): Mesh {
     case 'octuptarra': {
       for (let k2 = 0; k2 < 3; k2++) {
         const a = (k2 / 3) * Math.PI * 2 - Math.PI / 2;
-        m.box(Math.cos(a) * 0.08 - 0.07, Math.sin(a) * 0.08 - 0.07, 0, Math.cos(a) * 0.36 + 0.07, Math.sin(a) * 0.36 + 0.07, 0.12, p.dark);
-        m.box(Math.cos(a) * 0.1 - 0.05, Math.sin(a) * 0.1 - 0.05, 0.1, Math.cos(a) * 0.2 + 0.05, Math.sin(a) * 0.2 + 0.05, 0.55, p.metal);
+        const g = gaitSwing(gait, k2 === 1, 0.1, 0.08);
+        const cx = Math.cos(a), sy = Math.sin(a);
+        m.box(cx * 0.08 - 0.07 + g.x * cx, sy * 0.08 - 0.07 + g.x * sy, g.z, cx * 0.36 + 0.07 + g.x * cx, sy * 0.36 + 0.07 + g.x * sy, g.z + 0.12, p.dark);
+        m.box(cx * 0.1 - 0.05, sy * 0.1 - 0.05, g.z + 0.1, cx * 0.2 + 0.05, sy * 0.2 + 0.05, 0.55, p.metal);
       }
       m.cylinder(0, 0, 0.5, 0.82, 0.22, 0.2, hull, 10, { top: team });
       m.box(-0.04, -0.04, 0.8, 0.04, 0.04, 1.02, BARREL);

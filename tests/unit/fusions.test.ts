@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { STYLES } from '../../packages/contracts/src/index';
 import { infantryCostume } from '../../packages/fusion/src/art/costume';
+import { hullMesh } from '../../packages/fusion/src/art/models';
 import { FUSIONS, Game, PACKS, conquerPack, factionCanUse, leviathanPack } from '../../packages/fusion/src/index';
 
 const four = (seed = 11, ai = false) => new Game({
@@ -291,6 +292,48 @@ describe('fusion: Star Wars Conquer', () => {
     const scarif = conquerSeats('scarif-lagoon', 9);
     run(scarif, conquerPack.mechanics.sandworm!.appearAfter + 80);
     expect(scarif.worms.some(w => w.form === 'opee')).toBe(true);
+  });
+
+  it('unlocks Dark superweapons from the Sith Academy, without an extra upgrade gate', () => {
+    for (const faction of ['empire', 'cis'] as const) {
+      const g = new Game({
+        pack: conquerPack, mapId: 'tatooine-dune-sea', seed: 3, techLevel: 15,
+        players: [{ name: 'D', faction, ai: false }, { name: 'R', faction: 'rebels', ai: false }],
+      });
+      g.spawnStructure('d-yard', 0, 16, 16);
+      g.spawnStructure('d-lab', 0, 20, 16);
+      const defence = g.buildOptions(g.players[0], 'defense');
+      expect(defence, faction).toEqual(expect.arrayContaining(['d-superlaser', 'd-tractor']));
+      expect(g.canBuild(g.players[0], 'd-jammer'), `${faction} jammer`).toBe(true);
+    }
+  });
+
+  it('gives the AT-AT a longer gun than tanks, walks its legs, and lets Sand People raid instead of swallow', () => {
+    expect(conquerPack.weapons.atatchin.range).toBeGreaterThan(conquerPack.weapons.occupiergun.range * 1.5);
+    expect(conquerPack.weapons.atatchin.range).toBeGreaterThan(conquerPack.weapons.atstchin.range);
+    const team: [number, number, number] = [200, 200, 200];
+    expect(JSON.stringify(hullMesh('atst', 'empire', team, 0).faces)).not.toEqual(JSON.stringify(hullMesh('atst', 'empire', team, 2).faces));
+    expect(JSON.stringify(hullMesh('atat', 'empire', team, 0).faces)).not.toEqual(JSON.stringify(hullMesh('atat', 'empire', team, 3).faces));
+    expect(JSON.stringify(hullMesh('dwarfspider', 'cis', team, 0).faces)).not.toEqual(JSON.stringify(hullMesh('dwarfspider', 'cis', team, 2).faces));
+
+    expect(conquerPack.mechanics.sandworm!.raid).toContain('tusken');
+    const g = new Game({
+      pack: conquerPack, mapId: 'tatooine-dune-sea', seed: 3, techLevel: 15,
+      players: [{ name: 'E', faction: 'empire', ai: false }, { name: 'R', faction: 'rebels', ai: false }],
+    });
+    run(g, conquerPack.mechanics.sandworm!.appearAfter);
+    const sand = g.map.terrain.findIndex(t => conquerPack.terrains[t].id === 'sand');
+    const tank = g.spawnUnit('occupier', 0, sand);
+    const tusken = g.worms.find(w => w.form === 'tusken') ?? g.worms[0];
+    tusken.form = 'tusken';
+    tusken.hidden = 0; tusken.hp = 1000; tusken.up = 0;
+    tusken.x = tusken.px = tank.x; tusken.y = tusken.py = tank.y;
+    tusken.target = tank.id;
+    const before = tank.hp;
+    run(g, 8, () => tank.hp < before);
+    expect(tank.hp).toBeGreaterThan(0);
+    expect(tank.hp).toBe(before - 80);
+    expect(g.effects.some(e => e.kind === 'wormEat' && e.item === 'tusken')).toBe(true);
   });
 
   it('plays deterministically with mixed Light/Dark teams and AI (lockstep safe)', () => {

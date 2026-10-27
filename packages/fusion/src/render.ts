@@ -8,7 +8,7 @@ import type { Effect, Entity, Game, Projectile } from './game';
 import { FxLayer, bolt, missile } from './art/fx';
 import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
 import { infantryCostume } from './art/costume';
-import { ArtStyle, FLYING, ROTATING_DEFENCES, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
+import { ArtStyle, FLYING, ROTATING_DEFENCES, WALKER_GAIT, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
 import { ClassicArt, artPackFor, drawTileFrame, paintClassicTerrain } from './art/classic';
 import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
 
@@ -693,7 +693,9 @@ export class FusionRenderer {
       }
       const hull = this.rot(e.facing);
       const air = FLYING.has(def.shape);
-      const hs = this.sprite(`h|${def.shape}|${style}|${color}|${hull.key}`, () => bake(hullMesh(def.shape, style, team).rotated(hull.angle), this.view, undefined, { shadow: !air && def.kind !== 'naval' }));
+      const moving = e.px !== e.x || e.py !== e.y;
+      const gait = WALKER_GAIT.has(def.shape) && moving ? 1 + (Math.floor(this.frame / 5 + e.id) % 4) : 0;
+      const hs = this.sprite(`h|${def.shape}|${style}|${color}|${hull.key}|${gait}`, () => bake(hullMesh(def.shape, style, team, gait).rotated(hull.angle), this.view, undefined, { shadow: !air && def.kind !== 'naval' }));
       if (def.kind === 'naval') {
         ctx.strokeStyle = 'rgba(220,240,255,0.35)'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.ellipse(ground.x, ground.y + 1, def.shape === 'ship-carrier' || def.shape === 'ship-dreadnought' ? 40 : def.shape.startsWith('ship') || def.shape === 'sub' ? 30 : 18, this.iso ? 9 : 12, 0, 0, Math.PI * 2); ctx.stroke();
