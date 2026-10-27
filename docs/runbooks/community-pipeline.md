@@ -12,6 +12,9 @@ schedules; GitHub Actions runs the agent that plans and builds; a human approves
 
 Votes close daily at 06:30 when their time is up; each winner starts `community-build-selected`.
 
+The widget’s AI answers come from the public guide at `/kb`. After a production deploy, sync
+the sitemap as described in [knowledgebase.md](knowledgebase.md).
+
 ## Widget contract (helpdot.me)
 
 The widget files issues in this shape so the pipeline can read them (the GitHub issue forms

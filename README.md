@@ -163,6 +163,7 @@ With the toolchain on PATH, run `python tools/prepare-content.py` and `python to
 - [ADR 011 - Paid platform](docs/adr/011-paid-platform.md) - Accounts, allowances, advertisements and subscriptions
 - [External services](docs/runbooks/external-services.md) - What each third party is for, what it costs and in what order
 - [Paid platform setup](docs/runbooks/paid-platform-setup.md) - Exact Postgres, Cognito, Stripe and advertising configuration
+- [Player knowledgebase](docs/runbooks/knowledgebase.md) - Public `/kb` game guide and HelpDot sitemap sync
 
 ## License
 
