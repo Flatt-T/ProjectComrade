@@ -603,8 +603,8 @@ get('/api/content/early-access', async () => {
 get('/api/tiers', async () => ({
   tiers: (['guest', 'free', 'bronze', 'silver', 'gold'] as Tier[]).map(id => ({
     ...plan(id),
-    classicPlaysPerWeek: allowance(id, 'classic'),
-    fusionPlaysPerWeek: allowance(id, 'fusion'),
+    classicPlaysPerDay: allowance(id, 'classic'),
+    fusionPlaysPerDay: allowance(id, 'fusion'),
   })),
   termsVersion: termsVersion(),
   authEnabled: authEnabled(),

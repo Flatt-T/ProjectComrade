@@ -4,6 +4,9 @@
 // match, a commander's record). That needs history, back-button support and shareable links
 // — not a routing library. The service serves index.html for these paths so a deep link or a
 // refresh lands in the right place.
+//
+// The first history entry belongs to whatever site was open before this one. A sentinel entry
+// is placed behind the current page so the first Back stays on Project Comrade.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 interface RouteValue {
@@ -15,11 +18,16 @@ interface RouteValue {
 }
 
 const RouteContext = createContext<RouteValue | null>(null);
+const URL_EVENT = 'comrade-url';
 
 export function useRoute(): RouteValue {
   const value = useContext(RouteContext);
   if (!value) throw new Error('useRoute used outside RouterProvider');
   return value;
+}
+
+function here(): string {
+  return `${window.location.pathname}${window.location.search}`;
 }
 
 function matchPath(pattern: string, path: string): Record<string, string> | null {
@@ -34,19 +42,52 @@ function matchPath(pattern: string, path: string): Record<string, string> | null
   return params;
 }
 
+/** History state for every in-app entry. `match` marks the battlefield entry Back should leave. */
+export function appState(match = false): { comrade: true; match?: true } {
+  return match ? { comrade: true, match: true } : { comrade: true };
+}
+
+/**
+ * Rewrite the current URL without adding a history entry, and keep the in-app mark so Back
+ * still cannot step off the site.
+ */
+export function replaceLocation(url: string) {
+  window.history.replaceState(appState(false), '', url);
+  window.dispatchEvent(new Event(URL_EVENT));
+}
+
+/** Put the war room behind the current page when this visit arrived from outside the site. */
+function seedHistory() {
+  if (window.history.state?.comrade) return;
+  const current = here();
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (path === '/') {
+    window.history.replaceState(appState(), '', current);
+    window.history.pushState(appState(), '', current);
+    return;
+  }
+  window.history.replaceState(appState(), '', '/');
+  window.history.pushState(appState(), '', current);
+}
+
 export function RouterProvider({ children }: { children: React.ReactNode }) {
-  const [location, setLocation] = useState(() => `${window.location.pathname}${window.location.search}`);
+  const [location, setLocation] = useState(() => here());
 
   useEffect(() => {
-    const onPop = () => setLocation(`${window.location.pathname}${window.location.search}`);
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
+    seedHistory();
+    const sync = () => setLocation(here());
+    window.addEventListener('popstate', sync);
+    window.addEventListener(URL_EVENT, sync);
+    return () => {
+      window.removeEventListener('popstate', sync);
+      window.removeEventListener(URL_EVENT, sync);
+    };
   }, []);
 
   const navigate = useCallback((to: string, options: { replace?: boolean } = {}) => {
     const target = to.startsWith('/') ? to : `/${to}`;
-    if (options.replace) window.history.replaceState(null, '', target);
-    else window.history.pushState(null, '', target);
+    if (options.replace) window.history.replaceState(appState(), '', target);
+    else window.history.pushState(appState(), '', target);
     setLocation(target);
     // A new page starts at the top, as a page navigation would.
     window.scrollTo({ top: 0 });

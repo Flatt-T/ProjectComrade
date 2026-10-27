@@ -75,7 +75,7 @@ export default function CreditGate({ kind, room, onEarned }: { kind: PlayKind; r
   return <>
     {ad && <AdBreak ad={ad} onDone={() => void finished()} />}
     <div className="credit-gate">
-      <p>You have no {label} matches left this week. Watch a {seconds}-second advertisement for one
+      <p>You have no {label} matches left today. Watch a {seconds}-second advertisement for one
         more, or buy a battle pack.</p>
       <div className="credit-actions">
         <button className="deploy" disabled={!!busy} onClick={() => void watch()}>
@@ -88,7 +88,7 @@ export default function CreditGate({ kind, room, onEarned }: { kind: PlayKind; r
         </button>
       </div>
       <p className="credit-alt">Or <Link to="/tiers">subscribe for unlimited play</Link>
-        {signedIn ? '' : <> · <Link to="/register">register a callsign</Link> for a free weekly allowance</>}.</p>
+        {signedIn ? '' : <> · <Link to="/register">register a callsign</Link> for a free daily allowance</>}.</p>
       {error && <small className="lobby-error">{error}</small>}
     </div>
   </>;

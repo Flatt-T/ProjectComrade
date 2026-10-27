@@ -53,9 +53,9 @@ export interface TierPlan {
   name: string;
   /** Stripe price `lookup_key`; absent for the tiers nobody buys. */
   lookupKey?: string;
-  /** Plays allowed in a weekly window; `null` means unlimited. */
-  classicPlaysPerWeek: number | null;
-  fusionPlaysPerWeek: number | null;
+  /** Plays allowed in a 24-hour window; `null` means unlimited. */
+  classicPlaysPerDay: number | null;
+  fusionPlaysPerDay: number | null;
   /** Whether a pre-match advertisement is shown. */
   ads: boolean;
   /** Voting rights on proposed features and maps. */
@@ -70,34 +70,34 @@ export const EARLY_ACCESS_DAYS = 7;
 
 export const PLANS: Record<Tier, TierPlan> = {
   guest: {
-    id: 'guest', name: 'Guest', classicPlaysPerWeek: 1, fusionPlaysPerWeek: 0,
+    id: 'guest', name: 'Guest', classicPlaysPerDay: 2, fusionPlaysPerDay: 1,
     ads: true, voting: false, earlyAccess: false,
-    blurb: 'One taster match, no account needed.',
-    perks: ['One Classic match a week', 'Advertisement before the match'],
+    blurb: 'A daily taster, no account needed.',
+    perks: ['2 Classic matches a day', '1 Fusion match a day', 'Advertisement before the match'],
   },
   free: {
-    id: 'free', name: 'Free', classicPlaysPerWeek: 3, fusionPlaysPerWeek: 1,
+    id: 'free', name: 'Free', classicPlaysPerDay: 3, fusionPlaysPerDay: 2,
     ads: true, voting: false, earlyAccess: false,
     blurb: 'Register a callsign and keep your record.',
-    perks: ['3 Classic matches a week', '1 Fusion match a week', 'Advertisement before the match', 'Match history and sharing'],
+    perks: ['3 Classic matches a day', '2 Fusion matches a day', 'Advertisement before the match', 'Match history and sharing'],
   },
   bronze: {
     id: 'bronze', name: 'Bronze', lookupKey: 'comrade_bronze_monthly',
-    classicPlaysPerWeek: null, fusionPlaysPerWeek: 5,
+    classicPlaysPerDay: null, fusionPlaysPerDay: 5,
     ads: false, voting: false, earlyAccess: false,
     blurb: 'Unlimited Classic play, no advertisements.',
-    perks: ['Unlimited Classic matches', '5 Fusion matches a week', 'No advertisements — straight into the match', 'Match history and sharing'],
+    perks: ['Unlimited Classic matches', '5 Fusion matches a day', 'No advertisements — straight into the match', 'Match history and sharing'],
   },
   silver: {
     id: 'silver', name: 'Silver', lookupKey: 'comrade_silver_monthly',
-    classicPlaysPerWeek: null, fusionPlaysPerWeek: null,
+    classicPlaysPerDay: null, fusionPlaysPerDay: null,
     ads: false, voting: false, earlyAccess: false,
     blurb: 'Everything, unlimited.',
     perks: ['Unlimited Classic matches', 'Unlimited Fusion matches', 'No advertisements', 'Match history and sharing'],
   },
   gold: {
     id: 'gold', name: 'Gold', lookupKey: 'comrade_gold_monthly',
-    classicPlaysPerWeek: null, fusionPlaysPerWeek: null,
+    classicPlaysPerDay: null, fusionPlaysPerDay: null,
     ads: false, voting: true, earlyAccess: true,
     blurb: 'Unlimited play, a vote on what gets built, and new content first.',
     perks: ['Unlimited Classic matches', 'Unlimited Fusion matches', 'No advertisements',
@@ -112,10 +112,10 @@ export function playKind(style: GameStyle): PlayKind {
   return styleInfo(style).engine === 'fusion' ? 'fusion' : 'classic';
 }
 
-/** The weekly allowance for a kind of play; `null` is unlimited. */
+/** The daily allowance for a kind of play; `null` is unlimited. */
 export function allowance(tier: Tier, kind: PlayKind): number | null {
   const p = plan(tier);
-  return kind === 'fusion' ? p.fusionPlaysPerWeek : p.classicPlaysPerWeek;
+  return kind === 'fusion' ? p.fusionPlaysPerDay : p.classicPlaysPerDay;
 }
 
 /** Map a Stripe price lookup key back to the tier it sells. */

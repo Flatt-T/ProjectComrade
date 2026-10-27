@@ -16,7 +16,7 @@ const ORDER: Tier[] = ['free', 'bronze', 'silver', 'gold'];
 function playsText(limit: number | null, what: string): string {
   if (limit === null) return `Unlimited ${what}`;
   if (limit === 0) return `No ${what}`;
-  return `${limit} ${what} a week`;
+  return `${limit} ${what} a day`;
 }
 
 export default function Tiers() {
@@ -84,14 +84,14 @@ export default function Tiers() {
     }
   }
 
-  const table: (TierPlan & { classicPlaysPerWeek: number | null; fusionPlaysPerWeek: number | null })[] =
+  const table: TierPlan[] =
     tiers?.tiers.filter(t => ORDER.includes(t.id)) ?? ORDER.map(id => planFor(id));
 
   return <section className="page tiers-page">
     <header className="page-head">
       <p className="eyebrow">SUBSCRIPTIONS</p>
       <h1>Pick your rank</h1>
-      <p>Play free every week, or subscribe for unlimited battles with no advertisements.
+      <p>Play free every day, or subscribe for unlimited battles with no advertisements.
         Cancel whenever you like — you keep the tier until the end of the month you have paid for.</p>
     </header>
 
@@ -126,8 +126,8 @@ export default function Tiers() {
             <p className="tier-blurb">{details.blurb}</p>
           </header>
           <ul className="tier-perks">
-            <li>{playsText(details.classicPlaysPerWeek, 'Classic matches')}</li>
-            <li>{playsText(details.fusionPlaysPerWeek, 'Fusion matches')}</li>
+            <li>{playsText(details.classicPlaysPerDay, 'Classic matches')}</li>
+            <li>{playsText(details.fusionPlaysPerDay, 'Fusion matches')}</li>
             <li className={details.ads ? 'minus' : ''}>{details.ads ? '30-second advertisement before each match' : 'No advertisements'}</li>
             {details.voting && <li>Voting rights on new features and maps</li>}
             {details.earlyAccess && <li>New maps and fusions a week early</li>}
@@ -161,7 +161,7 @@ export default function Tiers() {
       <ul className="tier-perks">
         <li>{CREDIT_PACK.classic} extra Classic matches</li>
         <li>{CREDIT_PACK.fusion} extra Fusion matches</li>
-        <li>Kept until you play them — they do not expire with your week</li>
+        <li>Kept until you play them — they do not expire when the day renews</li>
       </ul>
       {pack && <button className="deploy" disabled={busy === 'pack'} onClick={() => void buyPack()}>
         {busy === 'pack' ? 'OPENING…' : signedIn ? 'BUY THE BATTLE PACK →' : 'REGISTER TO BUY →'}

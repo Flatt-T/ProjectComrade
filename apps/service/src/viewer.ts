@@ -2,7 +2,7 @@
 //
 // Every metered route starts here. A signed-in caller resolves to their account and its
 // subscription tier; anyone else resolves to a guest identified by a signed cookie, whose
-// weekly window is anchored to the first time we saw them.
+// allowance clock is anchored to the first time we saw them.
 import { Me } from '@comrade/contracts';
 import { AccountRow, accountBySub, consentFor, profileOf, touchGuest } from './accounts.js';
 import { ensureGuestId, optionalCaller, requireCaller } from './auth.js';

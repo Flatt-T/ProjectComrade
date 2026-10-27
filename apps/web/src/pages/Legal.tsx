@@ -141,16 +141,16 @@ export default function Legal() {
           another one unless the circumstances make that inappropriate.</p>
 
         <h2>5. Free play, allowances and advertisements</h2>
-        <p>Guests and free accounts get a weekly allowance of matches. The allowance renews seven
-          days after the day you registered — not on a fixed day of the week — and the current
-          allowances for every tier are set out on the <Link to="/tiers">tiers page</Link>.</p>
+        <p>Guests and free accounts get a daily allowance of matches. It renews 24 hours after you
+          first arrived as a guest, or 24 hours after you registered — not at midnight — and the
+          current allowances for every tier are set out on the <Link to="/tiers">tiers page</Link>.</p>
         <p>On the free and guest tiers a short advertisement of up to thirty seconds plays before
           a match. Your base is on the battlefield while it runs, so what you lose is the time,
           not the position. Subscribers see no advertisement.</p>
-        <p>If you have used your weekly matches, you can watch an advertisement — thirty seconds
+        <p>If you have used your matches for the day, you can watch an advertisement — thirty seconds
           for Classic, sixty seconds for Fusion — to add one match of that kind to your account,
           or buy a one-off battle pack of extra matches. Extra matches are kept until you play
-          them and do not expire when your week renews.</p>
+          them and do not expire when the day renews.</p>
 
         <h2>6. Subscriptions and payment</h2>
         <p>Subscriptions are monthly, billed in advance, and renew automatically until you cancel.
@@ -273,7 +273,7 @@ export default function Legal() {
             </tr>
             <tr>
               <td>Play records: one row each time you start a match</td>
-              <td>To count your weekly allowance and to stop it being circumvented</td>
+              <td>To count your daily allowance and to stop it being circumvented</td>
               <td>Performing our contract; our legitimate interest in preventing abuse</td>
             </tr>
             <tr>
@@ -487,7 +487,7 @@ export default function Legal() {
           Subscribers see no advertisement at all, and are never asked this question.</p>
         <p>If you have no matches left you may also choose to watch an advertisement — thirty
           seconds for Classic, sixty seconds for Fusion — to earn one extra match. The same
-          personalisation choice applies. You do not have to; you can wait for your week to
+          personalisation choice applies. You do not have to; you can wait for the day to
           renew, subscribe, or buy a battle pack instead.</p>
 
         <h3>Personalised or not</h3>

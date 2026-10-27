@@ -83,7 +83,7 @@ export async function refresh(): Promise<boolean> {
 }
 
 export interface TierTable {
-  tiers: (TierPlan & { classicPlaysPerWeek: number | null; fusionPlaysPerWeek: number | null })[];
+  tiers: TierPlan[];
   termsVersion: string;
   authEnabled: boolean;
   billingEnabled: boolean;

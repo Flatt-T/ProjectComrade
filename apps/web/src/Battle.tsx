@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EngineModule, loadEngine, mountBundledContent, stopEngine } from '../../../packages/client-runtime/src/engine';
-import { EngineSnapshot, LaunchRequest, parseOrder, STYLES } from '@comrade/contracts';
+import { EngineSnapshot, LaunchRequest, parseOrder, styleInfo } from '@comrade/contracts';
 import { createUpscaler, Upscaler } from './upscale';
 import { attachTouchGestures, goLandscape, isTouchDevice, trackVisibleHeight } from './touch';
 import { enterBattleHelp, toggleHelp } from './help';
 import AdBreak from './AdBreak';
 import Share, { shareTextFor } from './Share';
 import { api } from './api';
+import { appState } from './router';
 import type { MatchRecord } from '@comrade/contracts';
 import type { RoomConnection } from './net';
 
@@ -31,10 +32,13 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
   const engine = useRef<EngineModule>();
   const upscaler = useRef<Upscaler | null>(null);
   const started = useRef(false);
+  const style = styleInfo(launch.style);
   const [phase, setPhase] = useState<'loading' | 'playing' | 'error'>('loading');
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
   const [enhanced, setEnhanced] = useState(() => localStorage.getItem('comrade-enhanced') === '1');
   const [enhancedOk, setEnhancedOk] = useState(true);
-  const [status, setStatus] = useState('Starting Vanilla Conquer…');
+  const [status, setStatus] = useState(`Starting ${style.name}…`);
   const [snapshot, setSnapshot] = useState<EngineSnapshot>({ frame: 0 });
   /**
    * The pre-match advertisement for the advertising tiers. The engine boots and runs behind
@@ -92,6 +96,13 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
   }, [touch]);
 
   useEffect(() => {
+    const title = `Project Comrade · ${mapName}`;
+    document.title = title;
+    const keep = window.setInterval(() => { if (document.title !== title) document.title = title; }, 500);
+    return () => clearInterval(keep);
+  }, [mapName]);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       const current = engine.current;
       if (current?._comrade_snapshot) {
@@ -102,7 +113,14 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
         } catch { /* Initialization has not finished yet. */ }
       }
     }, 500);
-    return () => clearInterval(timer);
+    // WASM compile plus the first content fetch can take a while on a cold cache; after
+    // this the overlay is a stuck boot, not a slow one.
+    const timeout = window.setTimeout(() => {
+      if (phaseRef.current !== 'loading') return;
+      setStatus('The original engine did not start this battlefield.');
+      setPhase('error');
+    }, 120000);
+    return () => { clearInterval(timer); clearTimeout(timeout); };
   }, []);
 
   // Leaving has to take the engine with it: an Emscripten module keeps its main loop (and
@@ -111,6 +129,11 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
     const stopped = stopEngine(engine.current);
     engine.current = undefined;
     delete window.comrade;
+    // A reload has to stay on this URL. Stepping back at the same time would race it
+    // and can land outside the site.
+    if (!stopped && window.history.state?.match) {
+      window.history.replaceState(appState(), '', `${location.pathname}${location.search}`);
+    }
     onExit();
     // Older engine builds export no way to stop; starting the page over is the only
     // thing that silences them.
@@ -122,8 +145,14 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
     started.current = true;
     (async () => {
       try {
-        const engineKind = STYLES.find(s => s.id === launch.style)?.engine === 'vanilla-ra' ? 'ra' : 'td';
-        const current = await loadEngine(engineKind, canvas.current!, log, launch.faction);
+        const engineKind = styleInfo(launch.style).engine === 'vanilla-ra' ? 'ra' : 'td';
+        const node = canvas.current;
+        if (!node) throw new Error('Battlefield canvas is missing');
+        const current = await loadEngine(engineKind, node, log, launch.faction, reason => {
+          log(reason);
+          setStatus(reason);
+          setPhase('error');
+        });
         engine.current = current;
         await mountBundledContent(current, { faction: launch.faction, mapId: launch.map, settings: launch.settings, engine: engineKind }, setStatus);
         window.comrade = {
@@ -177,6 +206,15 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
     }).then(setRecord).catch(() => undefined);
   }, [snapshot.won, snapshot.defeated, conn]);
 
+  const finished = snapshot.won || snapshot.defeated;
+  const leaveRef = useRef(leave);
+  leaveRef.current = leave;
+  useEffect(() => {
+    if (!finished) return;
+    const timer = window.setTimeout(() => leaveRef.current(), 4000);
+    return () => clearTimeout(timer);
+  }, [finished]);
+
   return <section className={`game-layout${touch ? ' touch' : ''}${drawer ? ' drawer-open' : ''}`}>
     {ad && <AdBreak ad={ad} onDone={() => setAd(undefined)} />}
     <div className="battlefield">
@@ -185,7 +223,7 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
         <canvas id="canvas" ref={canvas} width={640} height={400} tabIndex={0} aria-label="Command and Conquer battlefield" onContextMenu={e => e.preventDefault()} />
         <canvas className="upscale-display" ref={display} style={{ display: useEnhanced ? 'block' : 'none' }} aria-hidden="true" />
       </div>
-      {phase === 'loading' && <div className="loading" role="status"><span className="loader" /><h2>Establishing battlefield link</h2><p>{status}</p><small>Preparing engine and verifying bundled game files.</small></div>}
+      {phase === 'loading' && <div className="loading" role="status"><span className="loader" /><h2>Establishing battlefield link</h2><p>{status}</p><small>Loading the original-engine battlefield for this match.</small></div>}
       {phase === 'error' && <div className="loading"><h2>Deployment interrupted</h2><p>{status}</p><button onClick={leave}>Return to lobby</button></div>}
       {touch && <div className="fusion-rotate" hidden={rotateOk}>
         <p>Turn your device sideways to command the battlefield.</p>
@@ -202,6 +240,7 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
       : <div className="controls"><span>SELECT / COMMAND</span><b>Left click</b><span>DESELECT / CANCEL</span><b>Right click</b><span>SCROLL THE MAP</span><b>Move pointer to edge</b><span>SELECT A GROUP</span><b>Drag on the battlefield</b></div>}
       <div className="live-stats" data-testid="telemetry" data-frame={snapshot.frame}><span>CREDITS <b>{snapshot.credits ?? '—'}</b></span><span>POWER <b>{snapshot.power ?? '—'} / {snapshot.drain ?? '—'}</b></span><span>BUILDINGS <b>{snapshot.buildings ?? '—'}</b></span><span>HARVESTED <b>{snapshot.harvested ?? '—'}</b></span><span>SIMULATION <b>{snapshot.frame} ticks</b></span></div>
       {snapshot.won && <p className="victory">MISSION ACCOMPLISHED</p>}{snapshot.defeated && <p className="defeat">MISSION FAILED</p>}
+      {finished && <p>Returning to the war room…</p>}
       {record && <Share url={`/match/${record.id}`} text={shareTextFor(record)} compact />}
       <button disabled={!running} onClick={() => engine.current?._comrade_audio?.()}>{snapshot.audioRunning ? 'SOUND ENABLED' : 'ENABLE GAME AUDIO'}</button>
       <button disabled={!enhancedOk} onClick={() => setEnhanced(v => { try { localStorage.setItem('comrade-enhanced', v ? '0' : '1'); } catch { /* ignore */ } return !v; })} title={enhancedOk ? 'Toggle WebGL smoothing over the classic framebuffer' : 'WebGL is unavailable in this browser'}>{!enhancedOk ? 'ENHANCED VIEW UNAVAILABLE' : useEnhanced ? 'VIEW · ENHANCED (SMOOTH)' : 'VIEW · CLASSIC (SHARP)'}</button>

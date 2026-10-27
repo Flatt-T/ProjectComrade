@@ -1,3 +1,5 @@
+import { CREDITS_VALUES, Faction, MatchSettings, MAP_ID, parseContentManifest, DEFAULT_SETTINGS } from '@comrade/contracts';
+
 export interface EngineModule {
   comradePointerInside?: boolean;
   UTF8ToString(pointer: number): string;
@@ -68,12 +70,30 @@ export async function mountGameFiles(engine: EngineModule, files: LocalGameFile[
   return entries.map(entry => entry.name);
 }
 
-export async function loadEngine(game: 'td' | 'ra', canvas: HTMLCanvasElement, print: (line: string) => void, faction: Faction = 'gdi'): Promise<EngineModule> {
-  const name = game === 'td' ? 'vanillatd' : 'vanillara';
-  return loadNamedEngine(name, canvas, print, faction);
+/** Player-facing line when the WASM engine aborts after the factory has already resolved. */
+export function engineAbortLine(reason: unknown): string {
+  const text = (typeof reason === 'string' ? reason : String(reason ?? '')).trim();
+  return `The original engine stopped: ${text || 'unknown error'}`;
 }
 
-async function loadNamedEngine(name: 'vanillatd' | 'vanillara', canvas: HTMLCanvasElement, print: (line: string) => void, faction: Faction): Promise<EngineModule> {
+export async function loadEngine(
+  game: 'td' | 'ra',
+  canvas: HTMLCanvasElement,
+  print: (line: string) => void,
+  faction: Faction = 'gdi',
+  onFatal?: (reason: string) => void,
+): Promise<EngineModule> {
+  const name = game === 'td' ? 'vanillatd' : 'vanillara';
+  return loadNamedEngine(name, canvas, print, faction, onFatal);
+}
+
+async function loadNamedEngine(
+  name: 'vanillatd' | 'vanillara',
+  canvas: HTMLCanvasElement,
+  print: (line: string) => void,
+  faction: Faction,
+  onFatal?: (reason: string) => void,
+): Promise<EngineModule> {
   const healthResponse = await fetch('/health', { cache: 'no-store' });
   if (!healthResponse.ok) throw new Error('Cannot resolve the deployed engine version');
   const { commit } = await healthResponse.json();
@@ -86,7 +106,11 @@ async function loadNamedEngine(name: 'vanillatd' | 'vanillara', canvas: HTMLCanv
     canvas, noInitialRun: true, thisProgram: '/comrade/data/engine', comradeFaction: faction, comradePointerInside: false,
     locateFile: (file: string) => `/engines/${file}?release=${version}`,
     print, printErr: print,
-    onAbort: (reason: string) => print(`Engine aborted: ${reason}`),
+    onAbort: (reason: string) => {
+      const line = engineAbortLine(reason);
+      print(line);
+      onFatal?.(line);
+    },
   });
   if (!engine.FS || typeof engine.callMain !== 'function') throw new Error('Engine is missing required filesystem or launch exports');
   canvas.addEventListener('pointermove', () => { engine.comradePointerInside = true; });
@@ -94,7 +118,6 @@ async function loadNamedEngine(name: 'vanillatd' | 'vanillara', canvas: HTMLCanv
   canvas.addEventListener('pointerleave', () => { engine.comradePointerInside = false; });
   return engine;
 }
-import { CREDITS_VALUES, Faction, MatchSettings, MAP_ID, parseContentManifest, DEFAULT_SETTINGS } from '@comrade/contracts';
 
 /** Put the human on the Soviet side of an authored Red Alert scenario. */
 function applyRaScenario(ini: string, faction: Faction, settings: MatchSettings): string {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LaunchRequest, styleInfo } from '@comrade/contracts';
 import Lobby from './Lobby';
 import Battle from './Battle';
@@ -8,7 +8,7 @@ import ConsentBanner from './ConsentBanner';
 import { RoomConnection } from './net';
 import { currentToken, onToken } from './api';
 import { AuthProvider, useAuth } from './auth';
-import { Link, RouterProvider, useRoute } from './router';
+import { appState, Link, replaceLocation, RouterProvider, useRoute } from './router';
 import { Avatar, TierBadge } from './ui';
 import Tiers from './pages/Tiers';
 import { Forgot, Register, SignIn } from './pages/Auth';
@@ -60,10 +60,15 @@ function Shell() {
   // One connection for the whole visit: lockstep matches outlive the lobby view.
   const conn = useMemo(() => new RoomConnection(), []);
   const [session, setSession] = useState<{ launch: LaunchRequest; mapName: string } | null>(null);
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
   const [requests, setRequests] = useState(() => new URLSearchParams(location.search).get('view') === 'fusion-requests');
   const { path, navigate } = useRoute();
   const { ready, entitlements } = useAuth();
-  const showRequests = (on: boolean) => { setRequests(on); history.replaceState(null, '', on ? '?view=fusion-requests' : location.pathname); };
+  const showRequests = (on: boolean) => {
+    setRequests(on);
+    replaceLocation(on ? `${location.pathname}?view=fusion-requests` : location.pathname);
+  };
   const fusion = session && styleInfo(session.launch.style).engine === 'fusion';
 
   // Keep the room socket's idea of who we are in step with the signed-in account, so the
@@ -73,12 +78,31 @@ function Shell() {
     return onToken(token => conn.identify(token));
   }, [conn]);
 
-  function exit() {
+  // Back during a match ends the operation and stays on the site. The battlefield is its own
+  // history entry, so the browser steps back onto the war room instead of the previous website.
+  const exit = useCallback((fromHistory = false) => {
+    if (!sessionRef.current) return;
+    sessionRef.current = null;
     conn.send({ type: 'leave' });
     conn.resetTurns();
     setSession(null);
-    if (path === '/') history.replaceState(null, '', location.pathname);
-  }
+    if (fromHistory) return;
+    if (window.history.state?.match) window.history.back();
+    else if (path === '/') replaceLocation(location.pathname);
+  }, [conn, path]);
+
+  useEffect(() => {
+    if (!session || window.history.state?.match) return;
+    window.history.pushState(appState(true), '', `${window.location.pathname}${window.location.search}`);
+  }, [session]);
+
+  useEffect(() => {
+    const onPop = () => {
+      if (sessionRef.current) exit(true);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [exit]);
 
   // A match takes over the whole window, wherever in the site it was started from.
   if (session) {
@@ -109,7 +133,7 @@ function Shell() {
     </header>
 
     {warRoom && !requests && <div className="battle-top">
-      <div><p className="eyebrow">{ready && entitlements?.registered ? 'YOUR WEEK · YOUR RECORD' : 'FREE TO PLAY · NO INSTALL'}</p>
+      <div><p className="eyebrow">{ready && entitlements?.registered ? 'YOUR DAY · YOUR RECORD' : 'FREE TO PLAY · NO INSTALL'}</p>
         <h1>Command the classics, in your browser</h1></div>
       <p className="mission-objective">Pick a callsign. Create or join a game.<br />
         <span>Share the link. Choose your side and deploy.</span></p>

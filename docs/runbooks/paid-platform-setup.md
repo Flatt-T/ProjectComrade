@@ -224,8 +224,9 @@ Worth knowing before changing anything:
   the same table.
 - **A play is a row** in `play_ledger`. The quota check counts rows since the start of the
   current window; there is no running total to drift, and a refund is a deleted row.
-- **The week is anchored to registration**, not the calendar: each player's allowance renews on
-  their own day. Guests are anchored to the first time we saw their signed cookie.
+- **The day is anchored to registration**, not midnight: each player's play allowance renews
+  24 hours after they registered. Guests are anchored to the first time we saw their signed
+  cookie. Gold votes still use a seven-day window from that same anchor.
 - **A play is spent on match start, for every human in the room**, in one place
   (`apps/service/src/matchstart.ts`). Either everyone entering is entitled and all the
   allowances are spent together, or nothing is spent and the room stays in the lobby. A player

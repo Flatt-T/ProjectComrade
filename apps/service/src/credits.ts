@@ -1,8 +1,8 @@
 // Extra matches: earned by watching an advertisement, or bought as the battle pack.
 //
-// Weekly allowance is still a count of `play_ledger` rows. These credits sit beside it and
-// are spent only once that allowance is gone, so a pack bought mid-week survives the
-// rollover and an advertisement watched at zero is a real extra match, not a refund.
+// The daily allowance is still a count of `play_ledger` rows. These credits sit beside it and
+// are spent only once that allowance is gone, so a pack bought today survives the
+// next renewal and an advertisement watched at zero is a real extra match, not a refund.
 import {
   AD_CREDITS_PER_DAY, AdBreak, CREDIT_AD_SECONDS, CREDIT_PACK, CreditPack, PlayKind,
 } from '@comrade/contracts';

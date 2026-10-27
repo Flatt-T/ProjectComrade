@@ -10,7 +10,7 @@ import CreditGate from './CreditGate';
 import HelpDock from './HelpDock';
 import { api } from './api';
 import { useAuth } from './auth';
-import { Link } from './router';
+import { Link, replaceLocation } from './router';
 import { Allowances, TierBadge } from './ui';
 
 interface LobbyMap { id: string; name: string; description: string; maxPlayers: number; detail: string }
@@ -73,7 +73,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     params.delete('checkout');
     params.delete('session');
     const next = params.toString();
-    history.replaceState(null, '', next ? `${location.pathname}?${next}` : location.pathname);
+    replaceLocation(next ? `${location.pathname}?${next}` : location.pathname);
   }, [signedIn, applyMe, reload, conn]);
 
   useEffect(() => {
@@ -153,7 +153,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     <h2>Enter your callsign</h2>
     <p>No install. Pick a name and jump straight into a lobby for a taster match —
       or <Link to="/register">register a callsign</Link> to claim it for good and get three Classic
-      and one Fusion match every week, with your record kept.</p>
+      and two Fusion matches every day, with your record kept.</p>
     <input value={name} maxLength={24} placeholder="Commander" onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && enter()} aria-label="Your name" />
     <button className="deploy" onClick={enter}>ENTER THE WAR ROOM →</button>
     {error && <small className="lobby-error">{error}</small>}
@@ -316,7 +316,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
       <button className="deploy" onClick={createGame}>CREATE A NEW GAME →</button>
       {authReady && entitlements && <div className="lobby-allowance">
         <Allowances />
-        {!signedIn && <small><Link to="/register">Register a callsign</Link> for three Classic and one Fusion match every week, free.</small>}
+        {!signedIn && <small><Link to="/register">Register a callsign</Link> for three Classic and two Fusion matches every day, free.</small>}
         {signedIn && entitlements.ads && <small><Link to="/tiers">Subscribe</Link> to play unlimited and skip the advertisement.</small>}
       </div>}
       <p className="divider">or join by code</p>

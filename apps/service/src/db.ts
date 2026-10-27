@@ -82,7 +82,7 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       avatar          bytea,
       avatar_type     text,
       avatar_version  integer not null default 0,
-      -- The weekly allowance window is anchored to registration, not the calendar.
+      -- The allowance clock is anchored to registration, not midnight. Plays renew every 24 hours.
       week_anchor     timestamptz not null default now(),
       stripe_customer_id text unique,
       status          text not null default 'pending',
@@ -250,7 +250,7 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
     name: 'bonus credits, advertisement earn sessions, pack lots',
     sql: `
     -- Extra matches earned by watching an advertisement or buying the battle pack.
-    -- Counting unspent rows is the bonus; weekly allowance still counts play_ledger.
+    -- Counting unspent rows is the bonus; the daily allowance still counts play_ledger.
     create table credit_lots (
       lot_key     text primary key,
       account_id  uuid references accounts(id) on delete cascade,

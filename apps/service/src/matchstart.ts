@@ -28,7 +28,7 @@ export interface StartingPlayer {
   accountId?: string;
   guestId?: string;
   tier: Tier;
-  /** Start of this player's weekly window, resolved when their peer identified. */
+  /** Start of this player's allowance clock, resolved when their peer identified. */
   anchor: Date;
 }
 

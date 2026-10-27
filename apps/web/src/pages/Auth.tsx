@@ -122,7 +122,7 @@ export function Register() {
     <p className="eyebrow">COMMANDER REGISTRATION</p>
     <h1>Claim your callsign</h1>
     <p>Your callsign is how other commanders see you, and it is yours alone. Registering is free:
-      three Classic matches and one Fusion match every week, plus your record and match history.</p>
+      three Classic matches and two Fusion matches every day, plus your record and match history.</p>
     <form onSubmit={register}>
       <Field label="Callsign"
         hint="3–20 letters or numbers. Dots, dashes and underscores allowed inside."

@@ -94,7 +94,7 @@ export function SignInWall({ what }: { what: string }) {
   return <div className="signin-wall">
     <p className="eyebrow">ACCOUNT REQUIRED</p>
     <h2>Register a callsign</h2>
-    <p>{what} needs an account. Registering claims your callsign, keeps your record and gives you three Classic matches and one Fusion match every week, free.</p>
+    <p>{what} needs an account. Registering claims your callsign, keeps your record and gives you three Classic matches and two Fusion matches every day, free.</p>
     <div className="wall-actions">
       <Link to="/register" className="deploy">REGISTER A CALLSIGN →</Link>
       <Link to="/signin">I already have one</Link>

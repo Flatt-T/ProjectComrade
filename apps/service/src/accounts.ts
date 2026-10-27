@@ -259,7 +259,7 @@ export function profileOf(row: AccountRow): Profile {
   };
 }
 
-/** Note a guest's visit so their weekly window has a start date. */
+/** Note a guest's visit so their allowance clock has a start. */
 export async function touchGuest(guest: string): Promise<Date> {
   const row = await one<{ first_seen: Date }>(
     `insert into guests (id) values ($1)

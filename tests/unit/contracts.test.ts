@@ -49,7 +49,7 @@ describe('room coordinator', () => {
     expect(roomOf(b).host).toBe(second);
     expect(roomOf(b).players[0].ready).toBe(false);
     // Second is now the sole host; with no other members, start succeeds. Starting checks
-    // every commander's weekly allowance first, so the transition is asynchronous.
+    // every commander's daily allowance first, so the transition is asynchronous.
     coordinator.receive(second, JSON.stringify({ version: 1, type: 'start' }));
     await vi.waitFor(() => expect(roomOf(b).phase).toBe('started'));
   });

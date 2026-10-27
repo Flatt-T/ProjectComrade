@@ -23,16 +23,17 @@ The **Comrade Fusion Engine** (`packages/fusion`) is one deterministic, data-dri
 
 | Tier | Classic matches | Fusion matches | Advertisement | Extras |
 |---|---|---|---|---|
-| **Guest** (no account) | 1 a week | — | 30s before the match | — |
-| **Free** (callsign) | 3 a week | 1 a week | 30s before the match | Record, history, sharing |
-| **Bronze** £3.49/mo | Unlimited | 5 a week | None | — |
+| **Guest** (no account) | 2 a day | 1 a day | 30s before the match | — |
+| **Free** (callsign) | 3 a day | 2 a day | 30s before the match | Record, history, sharing |
+| **Bronze** £3.49/mo | Unlimited | 5 a day | None | — |
 | **Silver** £7.49/mo | Unlimited | Unlimited | None | — |
 | **Gold** £9.79/mo | Unlimited | Unlimited | None | Feature and map voting; new content a week early |
 
 Every amount is retrieved live from Stripe by lookup key — no price is written into the site.
 The tier table itself ([`packages/contracts/src/billing.ts`](packages/contracts/src/billing.ts))
 is read by both the pages and the enforcement, so what is advertised and what is allowed cannot
-drift apart. Weekly allowances renew seven days after the day you registered, not on a Monday.
+drift apart. Play allowances renew 24 hours after you registered (or after a guest was first
+seen), not at midnight. Gold votes still renew every seven days from that same moment.
 
 The free tier's advertisement plays **over a simulation that is already running**: your base is
 on the battlefield from the first tick with your orders held back, so subscribers walk straight

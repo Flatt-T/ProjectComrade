@@ -1,9 +1,9 @@
-// What a player may do right now: their tier, their weekly allowances and what is left.
+// What a player may do right now: their tier, their daily allowances and what is left.
 //
-// The weekly window is anchored to the account's own registration date rather than the
-// calendar, so each player's allowance renews on their own day. Counting plays is counting
+// The window is anchored to the account's own registration moment rather than midnight, so
+// each player's allowance renews 24 hours after they registered. Counting plays is counting
 // rows in `play_ledger` since the start of the current window — there is no running total to
-// drift, and a refund is a deleted row.
+// drift, and a refund is a deleted row. Gold votes keep a separate seven-day window.
 import {
   Entitlements, PlayKind, QuotaState, SubscriptionState, SubscriptionStatus, Tier,
   allowance, plan, remainingPlays,
@@ -12,7 +12,16 @@ import { consumeCredit, restoreCredit, unspentCredits } from './credits.js';
 import { one, query } from './db.js';
 import { platformEnabled } from './config.js';
 
-export const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
+export const WEEK_MS = 7 * DAY_MS;
+
+function windowOf(anchor: Date, span: number, now: Date): { start: Date; end: Date } {
+  const elapsed = now.getTime() - anchor.getTime();
+  // A clock skew or a future anchor must not produce a negative window.
+  const windows = elapsed > 0 ? Math.floor(elapsed / span) : 0;
+  const start = new Date(anchor.getTime() + windows * span);
+  return { start, end: new Date(start.getTime() + span) };
+}
 
 /** Subscription states that still carry their tier's benefits. */
 const ENTITLED: SubscriptionStatus[] = ['active', 'trialing', 'past_due'];
@@ -60,13 +69,14 @@ export function tierFromSubscription(subscription: SubscriptionState | undefined
   return subscription.tier;
 }
 
-/** The current weekly window for an allowance anchored to `anchor`. */
+/** The current 24-hour play window, anchored to `anchor`. */
+export function allowanceWindow(anchor: Date, now = new Date()): { start: Date; end: Date } {
+  return windowOf(anchor, DAY_MS, now);
+}
+
+/** The current weekly window, used for Gold votes. */
 export function weekWindow(anchor: Date, now = new Date()): { start: Date; end: Date } {
-  const elapsed = now.getTime() - anchor.getTime();
-  // A clock skew or a future anchor must not produce a negative window.
-  const windows = elapsed > 0 ? Math.floor(elapsed / WEEK_MS) : 0;
-  const start = new Date(anchor.getTime() + windows * WEEK_MS);
-  return { start, end: new Date(start.getTime() + WEEK_MS) };
+  return windowOf(anchor, WEEK_MS, now);
 }
 
 async function playsUsed(subject: Subject, kind: PlayKind, since: Date): Promise<number> {
@@ -85,7 +95,7 @@ async function playsUsed(subject: Subject, kind: PlayKind, since: Date): Promise
 export async function quotaFor(subject: Subject, kind: PlayKind, tier: Tier, anchor: Date): Promise<QuotaState> {
   const limit = allowance(tier, kind);
   if (limit === null) return { kind, limit: null, used: 0, remaining: null, bonus: 0 };
-  const { start, end } = weekWindow(anchor);
+  const { start, end } = allowanceWindow(anchor);
   const [used, bonus] = await Promise.all([playsUsed(subject, kind, start), unspentCredits(subject, kind)]);
   return { kind, limit, used, remaining: remainingPlays(limit, used, bonus), bonus, resetsAt: end.toISOString() };
 }
@@ -127,7 +137,7 @@ export interface PlaySpend {
   subject: Subject;
   kind: PlayKind;
   tier: Tier;
-  /** Start of this player's weekly window, so bonus credits are only spent once the allowance is gone. */
+  /** Start of this player's daily window, so bonus credits are only spent once the allowance is gone. */
   anchor: Date;
   style: string;
   map?: string;
@@ -148,7 +158,7 @@ async function insertLedger(spend: PlaySpend, source: 'allowance' | 'bonus', cre
 export async function spendPlay(spend: PlaySpend): Promise<string> {
   const limit = allowance(spend.tier, spend.kind);
   if (limit === null) return insertLedger(spend, 'allowance', null);
-  const { start } = weekWindow(spend.anchor);
+  const { start } = allowanceWindow(spend.anchor);
   const used = await playsUsed(spend.subject, spend.kind, start);
   if (used < limit) return insertLedger(spend, 'allowance', null);
   const creditId = await consumeCredit(spend.subject, spend.kind);

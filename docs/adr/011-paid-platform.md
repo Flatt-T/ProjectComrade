@@ -1,4 +1,4 @@
-# ADR 011 — Accounts, weekly allowances, advertisements and subscriptions
+# ADR 011 — Accounts, daily allowances, advertisements and subscriptions
 
 Status: Accepted
 Date: 2026-10-26
@@ -27,7 +27,7 @@ whole match back.
 
 ### Entitlements are data, in one table
 
-`packages/contracts/src/billing.ts` declares every tier: both weekly allowances, whether an
+`packages/contracts/src/billing.ts` declares every tier: both daily allowances, whether an
 advertisement plays, voting rights, early access. The web app renders from that table and the
 service enforces from the same table, so the offer shown and the offer enforced cannot
 disagree. Changing the offer is a change to one file.
@@ -36,25 +36,28 @@ Prices are **not** in it. Every amount comes from Stripe, retrieved by a `lookup
 against each tier, so the Stripe dashboard is the only place a price exists and a price change
 needs no deployment.
 
-### Extra matches sit beside the weekly allowance
+### Extra matches sit beside the daily allowance
 
-When the weekly allowance is gone, a player can watch an advertisement (30 seconds for
+When the daily allowance is gone, a player can watch an advertisement (30 seconds for
 Classic, 60 for Fusion) to earn one extra match of that kind, or buy a one-off battle pack
 (5 Classic + 3 Fusion) through Stripe Checkout in `payment` mode. Extra matches are rows in
 `play_credits`, granted under a unique lot key so a retried webhook cannot double-credit.
-They are spent only after the weekly allowance is exhausted, and they survive week rollover
+They are spent only after the daily allowance is exhausted, and they survive the next day
 until played. The duration of a credit-earn watch is enforced server-side from the moment
 the slot was issued; the client timer is not trusted.
 
-### A play is a row, and the week is the player's own
+### A play is a row, and the day is the player's own
 
 Spending a play inserts a row in `play_ledger`. Checking a quota counts the rows since the
 start of the current window. There is no running total to drift out of step, a refund is a
 deleted row, and the ledger doubles as the record of what was played.
 
-The weekly window is anchored to the account's registration moment rather than to Monday, so
-allowances renew on each player's own day and the load spreads itself. Guests are anchored to
-the first time their signed cookie was seen.
+The play window is 24 hours, anchored to the account's registration moment rather than to
+midnight, so allowances renew on each player's own clock and the load spreads itself. Guests
+are anchored to the first time their signed cookie was seen. Gold votes keep a seven-day
+window from the same anchor. Guest play is 2 Classic and 1 Fusion a day; a registered free
+account is 3 Classic and 2 Fusion a day. Bronze is unlimited Classic and 5 Fusion a day.
+Silver and Gold are unlimited.
 
 ### Plays are spent once, for everyone, at match start
 

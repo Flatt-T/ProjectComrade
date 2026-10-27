@@ -726,6 +726,15 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     }).then(setRecord).catch(() => undefined);
   }, [ui, conn]);
 
+  const matchOver = !!ui && (ui.over || ui.defeated);
+  const exitRef = useRef(onExit);
+  exitRef.current = onExit;
+  useEffect(() => {
+    if (!matchOver) return;
+    const timer = window.setTimeout(() => exitRef.current(), 4000);
+    return () => clearTimeout(timer);
+  }, [matchOver]);
+
   return <section className={`fusion-battle ${pack.projection}${touch ? ' touch' : ''}${drawer ? ' drawer-open' : ''}`} style={{ ['--house' as string]: faction.color, ['--house-accent' as string]: faction.accent }}>
     {ad && <AdBreak ad={ad} onDone={() => { adLock.current = false; setAd(undefined); }} />}
     <div className="fusion-stage" ref={stage}>
@@ -798,6 +807,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         <div className="fusion-stats"><span>Built <b>{ui.stats.built}</b></span><span>Destroyed <b>{ui.stats.killed}</b></span><span>Lost <b>{ui.stats.lost}</b></span><span>Harvested <b>{ui.stats.harvested}</b></span>
           {record?.you && <span>Score <b>{record.you.score.toLocaleString('en-GB')}</b></span>}</div>
         {record && <Share url={`/match/${record.id}`} text={shareTextFor(record)} compact />}
+        <p>Returning to the war room…</p>
         <button className="deploy" onClick={onExit}>RETURN TO THE WAR ROOM →</button>
       </div>}
     </div>

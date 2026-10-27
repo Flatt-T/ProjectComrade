@@ -130,16 +130,18 @@ export function errorText(error: unknown): string {
 export function quotaText(quota: QuotaState | undefined): string {
   if (!quota) return '';
   if (quota.limit === null) return 'Unlimited';
-  const weekly = Math.max(0, quota.limit - quota.used);
+  const today = Math.max(0, quota.limit - quota.used);
   const bonus = quota.bonus ?? 0;
-  if (bonus) return `${weekly} of ${quota.limit} this week · ${bonus} extra`;
+  if (bonus) return `${today} of ${quota.limit} today · ${bonus} extra`;
   return `${quota.remaining ?? 0} of ${quota.limit} left`;
 }
 
 export function resetText(quota: QuotaState | undefined): string {
   if (!quota?.resetsAt) return '';
-  const when = new Date(quota.resetsAt);
-  const days = Math.max(0, Math.ceil((when.getTime() - Date.now()) / 86_400_000));
-  if (days <= 1) return 'renews within a day';
-  return `renews in ${days} days`;
+  const ms = new Date(quota.resetsAt).getTime() - Date.now();
+  if (ms <= 0) return 'renews now';
+  const hours = Math.max(1, Math.ceil(ms / 3_600_000));
+  if (hours <= 1) return 'renews within the hour';
+  if (hours < 24) return `renews in ${hours} hours`;
+  return 'renews within a day';
 }

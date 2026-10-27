@@ -20,7 +20,7 @@ interface Identity {
   handle?: string;
   guestId?: string;
   tier: Tier;
-  /** Start of this peer's weekly allowance window. */
+  /** Start of this peer's allowance clock. Play quotas step every 24 hours from here. */
   anchor: Date;
   /** The style the `entitled` flag was last worked out for. */
   checkedFor?: string;
@@ -58,7 +58,7 @@ export class RoomCoordinator {
     });
     send(JSON.stringify({ version: 1, type: 'welcome', id, capabilities: ['rooms', 'public-list', 'configure', 'lockstep', 'accounts'], gameplay: 'lobby-presence' }));
     this.sendLobbyList(id);
-    // A guest's weekly window starts the first time we see them, not the first time they play.
+    // A guest's allowance clock starts the first time we see them, not the first time they play.
     if (guestId && platformEnabled()) {
       void touchGuest(guestId)
         .then(firstSeen => { const peer = this.peers.get(id); if (peer) peer.identity.anchor = firstSeen; })
@@ -376,7 +376,7 @@ export class RoomCoordinator {
         return;
       }
       if (message.type === 'ready' && room.phase === 'lobby') {
-        // Somebody with nothing left this week cannot hold the room at "ready".
+        // Somebody with nothing left today cannot hold the room at "ready".
         if (message.ready && peer.player.entitled === false) {
           throw new Error(`You have no ${playKind(room.options.style) === 'fusion' ? 'Fusion' : 'Classic'} matches left — watch an advertisement or buy a battle pack`);
         }

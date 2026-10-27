@@ -44,7 +44,7 @@ export interface Profile {
   /** Cache-busting token for the avatar URL. */
   avatarVersion: number;
   createdAt: string;
-  /** Start of this account's weekly allowance window, anchored to registration. */
+  /** Start of this account's allowance clock, anchored to registration. Play quotas renew every 24 hours from here; Gold votes renew every 7 days. */
   weekAnchor: string;
 }
 

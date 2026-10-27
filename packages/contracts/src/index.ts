@@ -121,7 +121,7 @@ export interface RoomPlayer {
   handle?: string;
   /** Subscription tier, so the lobby can show who is skipping the advertisement. */
   tier?: string;
-  /** False when this player has no weekly allowance left for the chosen style. */
+  /** False when this player has no daily allowance left for the chosen style. */
   entitled?: boolean;
 }
 export interface RoomState {
