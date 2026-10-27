@@ -1728,8 +1728,12 @@ export class Game {
       }
       const d = dist(worm.x, worm.y, tx, ty);
       if (prey && d < LEPTONS) {
-        if (this.rng.chance(cfg.eatChance)) this.damage(prey, prey.hp, -1); else this.damage(prey, cfg.damage, -1);
-        this.effect('wormEat', prey.x, prey.y, 0, 0, 30);
+        const raid = !!cfg.raid?.includes(worm.form);
+        const amount = cfg.formDamage?.[worm.form] ?? cfg.damage;
+        if (!raid && this.rng.chance(cfg.eatChance)) this.damage(prey, prey.hp, -1);
+        else this.damage(prey, amount, -1);
+        const fx = this.effect('wormEat', prey.x, prey.y, 0, 0, 30);
+        fx.item = worm.form || 'worm';
         worm.hidden = this.wormDelay(450 + this.rng.int(300));
         continue;
       }

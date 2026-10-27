@@ -311,6 +311,10 @@ export interface Mechanics {
     nearResources?: number;
     /** Visual / biome form per terrain id (Conquer: tusken on sand, ewok in trees, opee in water). */
     form?: Record<string, string>;
+    /** Forms that raid for `formDamage` / `damage` and never swallow prey whole. */
+    raid?: string[];
+    /** Damage dealt by a raid form; omitted forms use `damage`. */
+    formDamage?: Record<string, number>;
   };
   /** Spice blooms seed new fields over time. */
   bloom?: { everyTicks: number; radius: number; resource: string };

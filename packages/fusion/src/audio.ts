@@ -287,7 +287,7 @@ export class FusionAudio {
         case 'paradrop': case 'spyPlane': pick('~plane'); break;
         case 'board': case 'unload': pick(table.deploy); break;
         case 'reinforce': case 'wormDive': pick('~rumble'); break;
-        case 'wormEat': pick('~worm'); break;
+        case 'wormEat': pick(fx.item === 'tusken' ? '~hallah' : '~worm'); break;
         case 'bloom': case 'lift': case 'drop': case 'delivery': pick('~whoosh'); break;
         case 'deploy': pick(table.deploy); break;
         case 'place': pick(table.place); break;
@@ -456,6 +456,13 @@ export class FusionAudio {
       case 'thunder': { const g = env(0.9, 0.01, 1.6); noise(1.6, 'lowpass', 1800, 90, g); return 1.6; }
       case 'rumble': { const g = env(0.6, 0.3, 2.2); noise(2.2, 'lowpass', 220, 60, g); return 2.2; }
       case 'worm': { const g = env(0.8, 0.1, 1.4); noise(1.4, 'lowpass', 500, 80, g); osc('sawtooth', 55, 35, 1.4, g); return 1.4; }
+      case 'hallah': {
+        const g = env(0.55, 0.012, 0.2);
+        osc('sawtooth', 430, 290, 0.18, g); noise(0.18, 'bandpass', 1100, 650, g, 3);
+        const g2 = env(0.5, 0.16, 0.44);
+        osc('sawtooth', 390, 250, 0.26, g2); noise(0.26, 'bandpass', 900, 520, g2, 3);
+        return 0.46;
+      }
       case 'whoosh': { const g = env(0.35, 0.08, 0.6); noise(0.6, 'bandpass', 400, 2400, g, 2); return 0.6; }
       case 'plane': { const g = env(0.3, 0.6, 2.5); osc('sawtooth', 95, 80, 2.5, g); noise(2.5, 'lowpass', 600, 300, g); return 2.5; }
       case 'chime': { const g = env(0.3, 0.01, 0.6); osc('sine', 880, 880, 0.3, g); const g2 = env(0.25, 0.15, 0.6); osc('sine', 1320, 1320, 0.6, g2); return 0.6; }
