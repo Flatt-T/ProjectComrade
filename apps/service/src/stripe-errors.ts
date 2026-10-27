@@ -11,6 +11,14 @@ export interface StripeFailure {
   statusCode?: number;
 }
 
+/** True when the stored Stripe customer id is from the other mode or has been deleted. */
+export function isMissingCustomer(error: { code?: string | null; message?: string | null }): boolean {
+  const message = error.message ?? '';
+  if (/no such customer/i.test(message)) return true;
+  if (/similar object exists in (test|live) mode/i.test(message) && /customer/i.test(message)) return true;
+  return error.code === 'resource_missing' && /customer/i.test(message);
+}
+
 /** True when Stripe Tax cannot run on this price or account. */
 export function isTaxIncompatible(error: { code?: string | null; message?: string | null }): boolean {
   const code = error.code ?? '';
@@ -54,7 +62,8 @@ export function asStripeFailure(error: unknown): StripeFailure | null {
   const apiType = type === 'invalid_request_error' || type === 'api_error' || type === 'card_error'
     || type === 'authentication_error' || type === 'rate_limit_error' || type === 'idempotency_error'
     || type === 'invalid_grant';
-  if (!stripeType && !apiType && !rawType && !requestId) return null;
+  const knownStripeCopy = /no such customer|no such price|similar object exists in (test|live) mode|automatic_tax|tax_behavior/i.test(value.message);
+  if (!stripeType && !apiType && !rawType && !requestId && !knownStripeCopy) return null;
   return { type: rawType ?? type, code, message: value.message, statusCode };
 }
 
@@ -72,6 +81,7 @@ export function stripePlayerMessage(error: StripeFailure): string {
   if (/portal/i.test(message) && /settings|configuration|save your customer portal/i.test(message)) {
     return 'The billing portal is not available yet.';
   }
+  if (isMissingCustomer(error)) return 'Billing is being set up for this account. Try again.';
   if (error.code === 'resource_missing') return 'That price is no longer available.';
   if (error.type === 'rate_limit_error' || error.statusCode === 429) {
     return 'Too many attempts — try again shortly';

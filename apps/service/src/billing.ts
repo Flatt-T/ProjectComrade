@@ -18,7 +18,7 @@ import { HttpError, badRequest, forbidden, notFound, unavailable } from './http.
 import { eventAlreadyHandled, upsertSubscription } from './entitlements.js';
 import { log } from './ops.js';
 import {
-  asStripeFailure, checkoutTaxFields, describeStripeError, isTaxIncompatible, taxOnCheckout,
+  asStripeFailure, checkoutTaxFields, describeStripeError, isMissingCustomer, isTaxIncompatible, taxOnCheckout,
 } from './stripe-errors.js';
 
 let client: Stripe | undefined;
@@ -150,9 +150,41 @@ async function priceForPack(): Promise<PackPrice> {
 // Customers
 // ---------------------------------------------------------------------------
 
+async function forgetStripeCustomer(account: AccountRow): Promise<void> {
+  if (!account.stripe_customer_id) return;
+  await setStripeCustomer(account.id, null);
+  account.stripe_customer_id = null;
+}
+
+/**
+ * A stored customer id that exists in the mode this key is using. Test-mode ids left
+ * over from provisioning are forgotten so live Checkout can create a live customer.
+ */
+async function usableCustomerId(account: AccountRow): Promise<string | null> {
+  if (!account.stripe_customer_id) return null;
+  try {
+    const customer = await stripe().customers.retrieve(account.stripe_customer_id);
+    if ('deleted' in customer && customer.deleted) {
+      log('stripe-customer-deleted', {});
+      await forgetStripeCustomer(account);
+      return null;
+    }
+    return customer.id;
+  } catch (error) {
+    const failure = asStripeFailure(error) ?? { message: String(error) };
+    if (isMissingCustomer(failure)) {
+      log('stripe-customer-stale', { message: failure.message.slice(0, 160) });
+      await forgetStripeCustomer(account);
+      return null;
+    }
+    rethrowStripe(error);
+  }
+}
+
 /** The account's Stripe customer, created on first need and remembered. */
 export async function ensureCustomer(account: AccountRow): Promise<string> {
-  if (account.stripe_customer_id) return account.stripe_customer_id;
+  const usable = await usableCustomerId(account);
+  if (usable) return usable;
   // Reuse a customer that already exists for this address rather than making a duplicate.
   const existing = await callStripe(() => stripe().customers.list({ email: account.email, limit: 1 }));
   const customer = existing.data[0] ?? await callStripe(() => stripe().customers.create({
@@ -161,6 +193,7 @@ export async function ensureCustomer(account: AccountRow): Promise<string> {
     metadata: { accountId: account.id, handle: account.handle },
   }));
   await setStripeCustomer(account.id, customer.id);
+  account.stripe_customer_id = customer.id;
   return customer.id;
 }
 
@@ -346,7 +379,8 @@ export async function changeTier(account: AccountRow, tier: Tier, direction: 'up
 }
 
 export async function cancelAtPeriodEnd(account: AccountRow, cancel: boolean): Promise<void> {
-  const customer = await ensureCustomer(account);
+  const customer = cancel ? await usableCustomerId(account) : await ensureCustomer(account);
+  if (!customer) return;
   const subscription = await changeableSubscription(customer);
   const updated = await callStripe(() => stripe().subscriptions.update(subscription.id, { cancel_at_period_end: cancel }));
   await syncSubscription(updated, account);
@@ -358,11 +392,12 @@ export async function cancelAtPeriodEnd(account: AccountRow, cancel: boolean): P
 // ---------------------------------------------------------------------------
 
 export async function invoices(account: AccountRow, limit = 24): Promise<InvoiceSummary[]> {
-  if (!account.stripe_customer_id) return [];
-  const list = await stripe().invoices.list({
-    customer: account.stripe_customer_id,
+  const customer = await usableCustomerId(account);
+  if (!customer) return [];
+  const list = await callStripe(() => stripe().invoices.list({
+    customer,
     limit: Math.min(100, Math.max(1, limit)),
-  });
+  }));
   return list.data.map(invoice => ({
     id: invoice.id!,
     number: invoice.number ?? null,
@@ -484,10 +519,11 @@ export async function fulfillSession(account: AccountRow, sessionId: string): Pr
 
 /** Pull this customer's subscriptions from Stripe and mirror them. Used after Checkout. */
 export async function resync(account: AccountRow): Promise<void> {
-  if (!account.stripe_customer_id) return;
-  const list = await stripe().subscriptions.list({
-    customer: account.stripe_customer_id, status: 'all', limit: 20, expand: ['data.items.data.price'],
-  });
+  const customer = await usableCustomerId(account);
+  if (!customer) return;
+  const list = await callStripe(() => stripe().subscriptions.list({
+    customer, status: 'all', limit: 20, expand: ['data.items.data.price'],
+  }));
   for (const subscription of list.data) await syncSubscription(subscription, account);
 }
 

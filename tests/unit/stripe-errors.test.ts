@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { HttpError } from '../../apps/service/src/http';
 import {
-  asStripeFailure, checkoutTaxFields, describeStripeError, isTaxIncompatible, taxOnCheckout,
+  asStripeFailure, checkoutTaxFields, describeStripeError, isMissingCustomer, isTaxIncompatible, taxOnCheckout,
 } from '../../apps/service/src/stripe-errors';
 
 describe('checkout tax gating', () => {
@@ -61,6 +61,15 @@ describe('Stripe error mapping', () => {
     expect(asStripeFailure(new Error('disk full'))).toBeNull();
     expect(describeStripeError(new Error('disk full'))).toBeNull();
     expect(describeStripeError(new HttpError(404, 'Not found'))).toBeNull();
+  });
+
+  it('recognises a test-mode customer used with a live key, which is the live Upgrade 500', () => {
+    const message = "No such customer: 'cus_VWBEbwnWIs3G3b'; a similar object exists in test mode, but a live mode key was used to make this request.";
+    expect(isMissingCustomer({ message })).toBe(true);
+    expect(isMissingCustomer({ code: 'resource_missing', message: "No such customer: 'cus_abc'" })).toBe(true);
+    expect(isMissingCustomer({ code: 'resource_missing', message: 'No such price: price_abc' })).toBe(false);
+    const mapped = describeStripeError(new Error(message));
+    expect(mapped?.message).toBe('Billing is being set up for this account. Try again.');
   });
 
   it('maps a missing Customer Portal configuration to a portal-specific message', () => {
