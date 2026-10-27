@@ -21,7 +21,7 @@ services:
       COGNITO_CLIENT_SECRET: ${COGNITO_CLIENT_SECRET:-}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-      STRIPE_AUTOMATIC_TAX: ${STRIPE_AUTOMATIC_TAX:-true}
+      STRIPE_AUTOMATIC_TAX: ${STRIPE_AUTOMATIC_TAX:-false}
       STRIPE_PROMOTION_CODES: ${STRIPE_PROMOTION_CODES:-true}
       # Ordered advertising waterfall, highest paying first (JSON). Empty runs the house ad.
       COMRADE_AD_TAGS: ${COMRADE_AD_TAGS:-}

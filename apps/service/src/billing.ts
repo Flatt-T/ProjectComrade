@@ -17,6 +17,9 @@ import { grantPack } from './credits.js';
 import { HttpError, badRequest, forbidden, notFound, unavailable } from './http.js';
 import { eventAlreadyHandled, upsertSubscription } from './entitlements.js';
 import { log } from './ops.js';
+import {
+  asStripeFailure, checkoutTaxFields, describeStripeError, isTaxIncompatible, taxOnCheckout,
+} from './stripe-errors.js';
 
 let client: Stripe | undefined;
 
@@ -30,6 +33,45 @@ export function stripe(): Stripe {
     appInfo: { name: 'Project Comrade', url: publicUrl() },
   });
   return client;
+}
+
+/** Stripe SDK failures become player-safe HttpError instead of the generic 500. */
+function rethrowStripe(error: unknown): never {
+  if (error instanceof HttpError) throw error;
+  const mapped = describeStripeError(error);
+  if (mapped) {
+    log('stripe-error', { type: asStripeFailure(error)?.type, code: mapped.code, message: String(error).slice(0, 200) });
+    throw new HttpError(mapped.status, mapped.message, mapped.code);
+  }
+  throw error;
+}
+
+async function callStripe<T>(work: () => Promise<T>): Promise<T> {
+  try { return await work(); } catch (error) { rethrowStripe(error); }
+}
+
+/**
+ * Hosted Checkout. If Stripe Tax cannot run on this price (unspecified tax_behavior, Tax
+ * not enabled on the account), retry once without tax so the player still reaches Checkout.
+ */
+async function createCheckoutSession(params: Stripe.Checkout.SessionCreateParams): Promise<Stripe.Checkout.Session> {
+  try {
+    return await stripe().checkout.sessions.create(params);
+  } catch (error) {
+    const failure = asStripeFailure(error) ?? { message: String(error) };
+    if (params.automatic_tax?.enabled && isTaxIncompatible(failure)) {
+      log('stripe-tax-skipped', { message: failure.message.slice(0, 160) });
+      const rest = { ...params };
+      delete rest.customer_update;
+      try {
+        return await stripe().checkout.sessions.create({
+          ...rest,
+          ...checkoutTaxFields(false),
+        });
+      } catch (retryError) { rethrowStripe(retryError); }
+    }
+    rethrowStripe(error);
+  }
 }
 
 /** Stripe moved some fields between API versions; read both shapes. */
@@ -49,7 +91,7 @@ const CATALOGUE_TTL_MS = 60_000;
 export async function catalogue(force = false): Promise<PlanCatalogue> {
   if (!force && cached && Date.now() - cached.at < CATALOGUE_TTL_MS) return cached.catalogue;
   const lookupKeys = [...PAID_TIERS.map(t => plan(t).lookupKey!), CREDIT_PACK.lookupKey].filter(Boolean);
-  const result = await stripe().prices.list({ lookup_keys: lookupKeys, active: true, expand: ['data.tiers'], limit: 100 });
+  const result = await callStripe(() => stripe().prices.list({ lookup_keys: lookupKeys, active: true, expand: ['data.tiers'], limit: 100 }));
   const prices: PlanPrice[] = [];
   const packs: PackPrice[] = [];
   for (const price of result.data) {
@@ -112,12 +154,12 @@ async function priceForPack(): Promise<PackPrice> {
 export async function ensureCustomer(account: AccountRow): Promise<string> {
   if (account.stripe_customer_id) return account.stripe_customer_id;
   // Reuse a customer that already exists for this address rather than making a duplicate.
-  const existing = await stripe().customers.list({ email: account.email, limit: 1 });
-  const customer = existing.data[0] ?? await stripe().customers.create({
+  const existing = await callStripe(() => stripe().customers.list({ email: account.email, limit: 1 }));
+  const customer = existing.data[0] ?? await callStripe(() => stripe().customers.create({
     email: account.email,
     name: account.display_name ?? account.handle,
     metadata: { accountId: account.id, handle: account.handle },
-  });
+  }));
   await setStripeCustomer(account.id, customer.id);
   return customer.id;
 }
@@ -181,7 +223,7 @@ export async function checkout(account: AccountRow, tier: Tier, voucher?: string
   const price = await priceFor(tier);
   const customer = await ensureCustomer(account);
   const promotionCode = await resolveVoucher(voucher, await productIdForPrice(price.priceId));
-  const session = await stripe().checkout.sessions.create({
+  const session = await createCheckoutSession({
     mode: 'subscription',
     customer,
     line_items: [{ price: price.priceId, quantity: 1 }],
@@ -190,10 +232,7 @@ export async function checkout(account: AccountRow, tier: Tier, voucher?: string
     success_url: `${publicUrl()}/account/billing?checkout=done&session={CHECKOUT_SESSION_ID}`,
     cancel_url: `${publicUrl()}/tiers?checkout=cancelled`,
     ...checkoutPromo(promotionCode),
-    automatic_tax: { enabled: stripeConfig.automaticTax() },
-    // Stripe requires these to be updatable when it is calculating tax for a saved customer.
-    customer_update: stripeConfig.automaticTax() ? { address: 'auto', name: 'auto' } : undefined,
-    billing_address_collection: stripeConfig.automaticTax() ? 'required' : 'auto',
+    ...checkoutTaxFields(taxOnCheckout(stripeConfig.automaticTax(), price.taxBehavior)),
   });
   if (!session.url) throw new HttpError(502, 'Stripe did not return a checkout page');
   await recordAccountEvent(account.id, 'checkout-started', { tier, voucher: !!promotionCode });
@@ -213,7 +252,7 @@ export async function checkoutPack(
   const dest = safeReturnPath(returnPath, '/account/billing');
   const sep = dest.includes('?') ? '&' : '?';
   const promotionCode = await resolveVoucher(voucher, await productIdForPrice(price.priceId));
-  const session = await stripe().checkout.sessions.create({
+  const session = await createCheckoutSession({
     mode: 'payment',
     customer,
     line_items: [{ price: price.priceId, quantity: 1 }],
@@ -222,9 +261,7 @@ export async function checkoutPack(
     success_url: `${publicUrl()}${dest}${sep}checkout=pack&session={CHECKOUT_SESSION_ID}`,
     cancel_url: `${publicUrl()}${dest}${sep}checkout=cancelled`,
     ...checkoutPromo(promotionCode),
-    automatic_tax: { enabled: stripeConfig.automaticTax() },
-    customer_update: stripeConfig.automaticTax() ? { address: 'auto', name: 'auto' } : undefined,
-    billing_address_collection: stripeConfig.automaticTax() ? 'required' : 'auto',
+    ...checkoutTaxFields(taxOnCheckout(stripeConfig.automaticTax(), price.taxBehavior)),
   });
   if (!session.url) throw new HttpError(502, 'Stripe did not return a checkout page');
   await recordAccountEvent(account.id, 'pack-checkout-started', { pack: CREDIT_PACK.id, voucher: !!promotionCode });
@@ -234,16 +271,16 @@ export async function checkoutPack(
 /** The Stripe-hosted portal: payment methods, cancellation, invoices, plan changes. */
 export async function portal(account: AccountRow, returnPath = '/account/billing'): Promise<{ url: string }> {
   const customer = await ensureCustomer(account);
-  const session = await stripe().billingPortal.sessions.create({
+  const session = await callStripe(() => stripe().billingPortal.sessions.create({
     customer,
     return_url: `${publicUrl()}${returnPath.startsWith('/') ? returnPath : `/${returnPath}`}`,
-  });
+  }));
   return { url: session.url };
 }
 
 /** The subscription we would change when the player switches tier. */
 async function changeableSubscription(customer: string): Promise<Stripe.Subscription> {
-  const subscriptions = await stripe().subscriptions.list({ customer, status: 'all', limit: 10 });
+  const subscriptions = await callStripe(() => stripe().subscriptions.list({ customer, status: 'all', limit: 10 }));
   const live = subscriptions.data.find(s => ['active', 'trialing', 'past_due'].includes(s.status));
   if (!live) throw notFound('No active subscription to change');
   return live;
@@ -298,12 +335,12 @@ export async function changeTier(account: AccountRow, tier: Tier, direction: 'up
   const customer = await ensureCustomer(account);
   const subscription = await changeableSubscription(customer);
   const item = subscription.items.data[0];
-  const updated = await stripe().subscriptions.update(subscription.id, {
+  const updated = await callStripe(() => stripe().subscriptions.update(subscription.id, {
     items: [{ id: item.id, price: price.priceId, quantity: 1 }],
     proration_behavior: direction === 'up' ? 'always_invoice' : 'none',
     metadata: { ...subscription.metadata, accountId: account.id, tier },
     payment_behavior: 'pending_if_incomplete',
-  });
+  }));
   await syncSubscription(updated, account);
   await recordAccountEvent(account.id, 'tier-changed', { tier, direction });
 }
@@ -311,7 +348,7 @@ export async function changeTier(account: AccountRow, tier: Tier, direction: 'up
 export async function cancelAtPeriodEnd(account: AccountRow, cancel: boolean): Promise<void> {
   const customer = await ensureCustomer(account);
   const subscription = await changeableSubscription(customer);
-  const updated = await stripe().subscriptions.update(subscription.id, { cancel_at_period_end: cancel });
+  const updated = await callStripe(() => stripe().subscriptions.update(subscription.id, { cancel_at_period_end: cancel }));
   await syncSubscription(updated, account);
   await recordAccountEvent(account.id, cancel ? 'cancellation-scheduled' : 'cancellation-withdrawn', {});
 }

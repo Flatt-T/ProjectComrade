@@ -6,6 +6,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { cookieSecure } from './config.js';
 import { log } from './ops.js';
+import { describeStripeError } from './stripe-errors.js';
 
 export const BODY_LIMIT = 64 * 1024;
 /** Avatar uploads are the only large body the API accepts. */
@@ -183,8 +184,14 @@ export async function handleApi(req: IncomingMessage, res: ServerResponse, url: 
       }
       json(res, error.status, { error: error.message, code: error.code });
     } else {
-      log('api-crash', { path: url.pathname, message: String(error).slice(0, 300) });
-      json(res, 500, { error: 'Something went wrong on our side' });
+      const stripe = describeStripeError(error);
+      if (stripe) {
+        log('stripe-error', { path: url.pathname, status: stripe.status, message: String(error).slice(0, 300) });
+        json(res, stripe.status, { error: stripe.message, code: stripe.code });
+      } else {
+        log('api-crash', { path: url.pathname, message: String(error).slice(0, 300) });
+        json(res, 500, { error: 'Something went wrong on our side' });
+      }
     }
   }
   return true;
