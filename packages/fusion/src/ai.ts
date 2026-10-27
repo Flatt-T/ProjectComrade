@@ -182,8 +182,11 @@ export function runAI(game: Game, p: Player, s: AIState) {
   for (const e of structures) {
     const sw = game.superweaponOf(e);
     if (!sw || e.charge < game.chargeFor(sw) || sw.kind === 'chrono') continue;
-    if (sw.kind === 'curtain') {
-      const lead = units.find(u => game.pack.units[u.type].weapon && game.pack.units[u.type].kind === 'vehicle' && u.order === 'attackMove');
+    if (sw.kind === 'curtain' || sw.kind === 'shield') {
+      const lead = units.find(u => {
+        const d = game.pack.units[u.type];
+        return d.weapon && (sw.kind === 'shield' || d.kind === 'vehicle') && u.order === 'attackMove';
+      });
       if (lead) game.enqueue(p.slot, { t: 'super', id: e.id, x: toCell(lead.x), y: toCell(lead.y) });
       continue;
     }

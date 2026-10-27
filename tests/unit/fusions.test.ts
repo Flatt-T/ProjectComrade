@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { STYLES } from '../../packages/contracts/src/index';
+import { infantryCostume } from '../../packages/fusion/src/art/costume';
 import { FUSIONS, Game, PACKS, conquerPack, factionCanUse, leviathanPack } from '../../packages/fusion/src/index';
 
 const four = (seed = 11, ai = false) => new Game({
@@ -135,6 +136,161 @@ describe('fusion: Star Wars Conquer', () => {
       expect(units.some(u => u.kind === 'aircraft'), `${faction.id} aircraft`).toBe(true);
       expect(units.some(u => u.kind === 'naval'), `${faction.id} ship`).toBe(true);
     }
+  });
+
+  it('gives each faction three superweapons, including a dedicated drop beacon', () => {
+    for (const faction of conquerPack.factions) {
+      const mine = (def: { factions?: string[] }) => factionCanUse(def, faction.id, faction.side);
+      const powers = Object.values(conquerPack.structures).filter(mine)
+        .flatMap(st => (st.superweapon ? [st.superweapon].flat() : []).filter(sw => factionCanUse(sw, faction.id, faction.side)));
+      expect(powers.map(p => p.id), faction.id).toHaveLength(3);
+      expect(powers.some(p => p.kind === 'paradrop'), `${faction.id} drop`).toBe(true);
+    }
+  });
+
+  it('names every superweapon after the action it performs', () => {
+    const byId: Record<string, string> = {
+      ionstrike: 'ion', planetaryshield: 'shield',
+      alliancedrop: 'paradrop', laatdrop: 'paradrop',
+      superlaser: 'laser', tractorbeam: 'tractor',
+      probeswarm: 'paradrop', droiddrop: 'paradrop',
+    };
+    for (const st of Object.values(conquerPack.structures)) {
+      for (const sw of st.superweapon ? [st.superweapon].flat() : []) {
+        expect(sw.kind, sw.id).toBe(byId[sw.id]);
+        expect(['missile', 'curtain', 'chrono']).not.toContain(sw.kind);
+      }
+    }
+  });
+
+  it('fires the Superlaser as a beam, not a missile', () => {
+    const g = new Game({
+      pack: conquerPack, mapId: 'tatooine-dune-sea', seed: 3, techLevel: 15,
+      players: [{ name: 'E', faction: 'empire', ai: false }, { name: 'R', faction: 'rebels', ai: false }],
+    });
+    const dish = g.spawnStructure('d-superlaser', 0, 16, 16);
+    const sw = g.superweaponOf(dish)!;
+    expect(sw.kind).toBe('laser');
+    dish.charge = sw.charge;
+    const target = g.spawnUnit('rebel-trooper', 1, g.cellIndex(19, 17));
+    const before = target.hp;
+    g.enqueue(0, { t: 'super', id: dish.id, x: 19, y: 17 });
+    g.step();
+    expect(g.effects.some(e => e.kind === 'laserCharge')).toBe(true);
+    expect(g.effects.some(e => e.kind === 'superLaunch' || e.kind === 'superIncoming')).toBe(false);
+    run(g, sw.delay + 2);
+    expect(g.effects.some(e => e.kind === 'laserStrike')).toBe(true);
+    expect(g.effects.some(e => e.kind === 'nuke')).toBe(false);
+    expect(target.hp).toBeLessThan(before);
+  });
+
+  it('locks enemies in a tractor beam and shields friendlies, including infantry', () => {
+    const g = new Game({
+      pack: conquerPack, mapId: 'tatooine-dune-sea', seed: 3, techLevel: 15,
+      players: [{ name: 'E', faction: 'empire', ai: false }, { name: 'R', faction: 'rebels', ai: false }],
+    });
+    const array = g.spawnStructure('d-tractor', 0, 16, 16);
+    const tractor = g.superweaponOf(array)!;
+    expect(tractor.kind).toBe('tractor');
+    array.charge = tractor.charge;
+    const victim = g.spawnUnit('t2b', 1, g.cellIndex(19, 17));
+    g.enqueue(0, { t: 'super', id: array.id, x: 19, y: 17 });
+    g.step();
+    expect(g.effects.some(e => e.kind === 'tractorCharge')).toBe(true);
+    expect(g.effects.some(e => e.kind === 'chronoCharge')).toBe(false);
+    run(g, tractor.delay + 2);
+    expect(g.effects.some(e => e.kind === 'tractorHold')).toBe(true);
+    expect(victim.heldUntil).toBeGreaterThan(g.tick);
+    g.enqueue(1, { t: 'move', ids: [victim.id], x: 40, y: 40 });
+    const locked = { x: victim.x, y: victim.y };
+    run(g, 30);
+    expect(victim.x).toBe(locked.x);
+    expect(victim.y).toBe(locked.y);
+    expect(victim.order).toBe('idle');
+
+    const gen = g.spawnStructure('l-shield', 1, 40, 40);
+    const shield = g.superweaponOf(gen)!;
+    expect(shield.kind).toBe('shield');
+    gen.charge = shield.charge;
+    const trooper = g.spawnUnit('rebel-trooper', 1, g.cellIndex(44, 41));
+    g.enqueue(1, { t: 'super', id: gen.id, x: 44, y: 41 });
+    run(g, shield.delay + 3);
+    expect(g.effects.some(e => e.kind === 'shield')).toBe(true);
+    expect(g.effects.some(e => e.kind === 'curtain')).toBe(false);
+    expect(trooper.hp).toBe(trooper.maxHp);
+    expect(trooper.invulnUntil).toBeGreaterThan(g.tick);
+    g.damage(trooper, 999, 0);
+    expect(trooper.hp).toBe(trooper.maxHp);
+  });
+
+  it('lets the Falcon keep the attack after the first kill, then restock and return', () => {
+    const g = new Game({
+      pack: conquerPack, mapId: 'tatooine-dune-sea', seed: 3, techLevel: 15,
+      players: [{ name: 'R', faction: 'rebels', ai: false }, { name: 'E', faction: 'empire', ai: false }],
+    });
+    g.spawnStructure('l-hpad', 0, 8, 8);
+    g.players[0].explored.fill(1); g.players[0].visible.fill(1);
+    const falcon = g.spawnUnit('falcon', 0, g.cellIndex(12, 12));
+    const first = g.spawnUnit('stormtrooper', 1, g.cellIndex(16, 12));
+    const second = g.spawnUnit('stormtrooper', 1, g.cellIndex(18, 12));
+    g.enqueue(0, { t: 'attack', ids: [falcon.id], target: first.id });
+    run(g, 500, () => first.hp <= 0);
+    expect(first.hp).toBeLessThanOrEqual(0);
+    expect(falcon.ammo).toBeGreaterThan(0);
+    expect(falcon.order).not.toBe('rearm');
+    run(g, 700, () => second.hp <= 0);
+    expect(second.hp).toBeLessThanOrEqual(0);
+  });
+
+  it('loads bombers with a rack, and Jedi fight saber-to-saber with the Force at range', () => {
+    expect(conquerPack.units.ywing.ammo).toBeGreaterThanOrEqual(4);
+    expect(conquerPack.units.falcon.sortie).toBe(true);
+    expect(conquerPack.units['jedi-knight'].altWeapon).toBe('forcepush');
+    expect(conquerPack.weapons.lightsaber.range).toBeLessThan(conquerPack.weapons.forcepush.range);
+  });
+
+  it('fields walkers at the start, with a large vehicle/air/naval roster per faction', () => {
+    const walkers = ['atst', 'atrt', 'atpt', 'atdp', 'atte', 'atat', 'dwarf-spider'];
+    for (const id of walkers) expect(conquerPack.units[id], id).toBeTruthy();
+    const g = conquerSeats('tatooine-dune-sea');
+    const empire = g.players.find(p => p.faction === 'empire')!;
+    expect([...g.entities.values()].some(e => e.owner === empire.slot && e.type === 'atst')).toBe(true);
+    for (const faction of conquerPack.factions) {
+      const mine = (def: { factions?: string[] }) => factionCanUse(def, faction.id, faction.side);
+      const units = Object.values(conquerPack.units).filter(mine);
+      expect(units.filter(u => u.kind === 'vehicle').length, `${faction.id} vehicles`).toBeGreaterThanOrEqual(8);
+      expect(units.filter(u => u.kind === 'aircraft').length, `${faction.id} aircraft`).toBeGreaterThanOrEqual(6);
+      expect(units.filter(u => u.kind === 'naval').length, `${faction.id} ships`).toBeGreaterThanOrEqual(6);
+    }
+  });
+
+  it('paints stormtroopers white and clones white, not the faction stripe', () => {
+    expect(conquerPack.units.stormtrooper.shape).toBe('storm');
+    expect(conquerPack.units['death-trooper'].shape).toBe('death');
+    expect(conquerPack.units['scout-trooper'].shape).toBe('scout');
+    const storm = infantryCostume('storm', '#c2281f');
+    expect(storm.body.toLowerCase()).not.toBe('#c2281f');
+    expect(storm.body.toLowerCase()).toMatch(/^#e[0-9a-f]{5}$|^#f[0-9a-f]{5}$/);
+    const death = infantryCostume('death', '#c2281f');
+    expect(parseInt(death.body.slice(1, 3), 16)).toBeLessThan(40);
+    const clone = infantryCostume('clone', '#3a72d6');
+    expect(clone.body.toLowerCase()).toMatch(/^#e[0-9a-f]{5}$|^#f[0-9a-f]{5}$/);
+  });
+
+  it('assigns Sand People, Ewoks and Opee Sea Killers to the matching biomes', () => {
+    expect(conquerPack.mechanics.sandworm!.form).toMatchObject({ sand: 'tusken', trees: 'ewok', water: 'opee' });
+    const tatooine = conquerSeats('tatooine-dune-sea', 9);
+    run(tatooine, conquerPack.mechanics.sandworm!.appearAfter + 80);
+    expect(tatooine.worms.length).toBeGreaterThan(0);
+    expect(tatooine.worms.every(w => w.form === 'tusken')).toBe(true);
+
+    const endor = conquerSeats('endor-canopy', 9);
+    run(endor, conquerPack.mechanics.sandworm!.appearAfter + 80);
+    expect(endor.worms.some(w => w.form === 'ewok')).toBe(true);
+
+    const scarif = conquerSeats('scarif-lagoon', 9);
+    run(scarif, conquerPack.mechanics.sandworm!.appearAfter + 80);
+    expect(scarif.worms.some(w => w.form === 'opee')).toBe(true);
   });
 
   it('plays deterministically with mixed Light/Dark teams and AI (lockstep safe)', () => {

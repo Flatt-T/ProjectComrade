@@ -27,7 +27,7 @@ describe('rule pack integrity', () => {
         }
         for (const u of Object.values(pack.units)) {
           expect(armors.has(u.armor), `${u.id} armour ${u.armor}`).toBe(true);
-          for (const key of [u.weapon, u.deployWeapon, u.deathWeapon]) if (key) expect(pack.weapons[key], `${u.id} weapon ${key}`).toBeTruthy();
+          for (const key of [u.weapon, u.deployWeapon, u.deathWeapon, u.altWeapon]) if (key) expect(pack.weapons[key], `${u.id} weapon ${key}`).toBeTruthy();
         }
         for (const s of Object.values(pack.structures)) {
           expect(armors.has(s.armor), `${s.id} armour ${s.armor}`).toBe(true);

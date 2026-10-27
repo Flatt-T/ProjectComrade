@@ -284,14 +284,16 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
           if (fx.kind === 'capture' && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say(fx.owner === slot ? 'Building captured' : 'Our building has been captured'); }
           if (fx.kind === 'promote' && fx.owner === slot && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say('Unit promoted'); }
           if (fx.kind === 'upgrade' && fx.owner === slot && !announced.has(fx) && game.tick - fx.tick < fx.dur) { announced.add(fx); say('Upgrade complete'); }
-          if (announced.has(fx) || game.tick - fx.tick > fx.dur || !['superLaunch', 'ionCharge', 'stormClouds', 'paradrop', 'reinforce', 'chronoCharge', 'curtainCharge'].includes(fx.kind)) continue;
+          if (announced.has(fx) || game.tick - fx.tick > fx.dur || !['superLaunch', 'ionCharge', 'laserCharge', 'tractorCharge', 'shieldCharge', 'stormClouds', 'paradrop', 'reinforce', 'chronoCharge', 'curtainCharge'].includes(fx.kind)) continue;
           announced.add(fx);
           const name = fx.color ?? 'Superweapon';
-          const kind = fx.kind === 'superLaunch' ? 'missile' : fx.kind === 'ionCharge' ? 'ion' : '';
+          const kind = fx.kind === 'superLaunch' ? 'missile' : fx.kind === 'ionCharge' ? 'ion' : fx.kind === 'laserCharge' ? 'laser' : fx.kind === 'tractorCharge' ? 'tractor' : fx.kind === 'shieldCharge' ? 'shield' : '';
           if (['paradrop', 'reinforce'].includes(fx.kind)) { if (fx.owner === slot) say(`${name} on the way`, 'reinforcements'); continue; }
-          if (['chronoCharge', 'curtainCharge'].includes(fx.kind)) { say(fx.owner === slot ? `${name} activated` : `Warning: ${name} activated`, ''); continue; }
-          if (fx.owner === slot) say(fx.kind === 'stormClouds' ? `${name} unleashed` : `${name} launched`, kind && `launch:${kind}`);
-          else say(fx.kind === 'stormClouds' ? `Warning: ${name} approaching` : `Warning: ${name} launched`, kind && `incoming:${kind}`);
+          if (['chronoCharge', 'curtainCharge', 'shieldCharge', 'tractorCharge'].includes(fx.kind)) { say(fx.owner === slot ? `${name} activated` : `Warning: ${name} activated`, kind && `ready:${kind}`); continue; }
+          const ours = fx.kind === 'stormClouds' ? `${name} unleashed` : fx.kind === 'laserCharge' || fx.kind === 'ionCharge' ? `${name} firing` : `${name} launched`;
+          const theirs = fx.kind === 'stormClouds' ? `Warning: ${name} approaching` : fx.kind === 'laserCharge' || fx.kind === 'ionCharge' ? `Warning: ${name} firing` : `Warning: ${name} launched`;
+          if (fx.owner === slot) say(ours, kind && `launch:${kind}`);
+          else say(theirs, kind && `incoming:${kind}`);
         }
         const structures = [...game.entities.values()].filter(e => e.owner === slot && e.kind === 'structure').length;
         const optionCount = tabs.reduce((n, t) => n + options[t.id].length, 0);

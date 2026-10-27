@@ -85,7 +85,12 @@ const TABLES: Record<Bank, Table> = {
       'launch:missile': 'NUKLNCH1', 'incoming:missile': 'NUKE1',
     },
     replies: { select: ['REPORT1', 'AWAIT1', 'READY', 'UNIT1', 'YESSIR1'], order: ['ACKNO', 'AFFIRM1', 'MOVOUT1', 'ROGER', 'UGOTIT', 'RITAWAY', 'NOPROB'], vehicleSelect: ['VEHIC1', 'REPORT1', 'AWAIT1', 'READY'] },
-    special: {},
+    special: {
+      'jedi-knight': { select: ['YESSIR1', 'READY', 'UNIT1'], order: ['ACKNO', 'AFFIRM1', 'RITAWAY'] },
+      'jedi-general': { select: ['YESSIR1', 'READY'], order: ['ACKNO', 'AFFIRM1'] },
+      'sith-lord': { select: ['REPORT1', 'AWAIT1'], order: ['ACKNO', 'MOVOUT1'] },
+      falcon: { select: ['VEHIC1', 'REPORT1', 'READY'], order: ['MOVOUT1', 'RITAWAY', 'NOPROB'] },
+    },
   },
   ra: {
     explosion: ['KABOOM30', 'KABOOM22', ['KABOOM15', 'KABOOM12']], vehicleDeath: ['KABOOM25', 'KABOOM22'], buildingDeath: ['KABOOM12', 'KABOOM15'], crumble: 'CRMBLE2',
@@ -112,10 +117,25 @@ const TABLES: Record<Bank, Table> = {
   },
 };
 
+const BLASTER_IDS = new Set([
+  'e11', 'dc15', 'b1blaster', 'b2wrist', 'speederblaster', 'heavyblaster', 'vulcan', 'dekastatic',
+  'chaingun', 'df9', 'eweb', 'atrtblaster', 'probezap',
+]);
+const HEAVY_BLASTER_IDS = new Set(['lasercannon', 'quadlaser', 'aatgun', 'saber-tank', 'hovercannon', 'occupiergun', 't4bgun']);
+const TURBO_IDS = new Set(['turbolaser', 'heavyturbo', 'ptower', 'atatchin', 'attedriver', 'atstchin', 'spidercannon', 'nrn99gun']);
+const SABER_IDS = new Set(['lightsaber', 'darksaber', 'electostaff']);
+const FORCE_IDS = new Set(['forcepush', 'forcechoke']);
+
 /** Which bank sound (or synth) fires a weapon, from its look and punch. */
 function weaponCue(bank: Bank, game: Game, weaponId: string, shooter?: Entity): Cue {
   const w = game.pack.weapons[weaponId];
   if (!w) return '';
+  if (SABER_IDS.has(weaponId)) return '~saber';
+  if (FORCE_IDS.has(weaponId)) return '~force';
+  if (BLASTER_IDS.has(weaponId)) return '~blaster';
+  if (HEAVY_BLASTER_IDS.has(weaponId)) return '~blasterh';
+  if (TURBO_IDS.has(weaponId)) return '~turbo';
+  if (weaponId === 'towmissile' || weaponId === 'protontorpedo' || weaponId === 'plex') return '~proton';
   const td = bank === 'td';
   const fromBuilding = shooter?.kind === 'structure';
   switch (w.visual) {
@@ -237,7 +257,7 @@ export class FusionAudio {
       this.seen.add(fx);
       if (this.game.tick - fx.tick > 3) continue; // Stale (e.g. after catching up a background tab).
       const pos = this.position(listener, fx.x, fx.y);
-      const big = ['nuke', 'ionStrike', 'stormClouds', 'chronoFlash', 'curtain', 'superLaunch'].includes(fx.kind);
+      const big = ['nuke', 'ionStrike', 'laserStrike', 'laserCharge', 'stormClouds', 'chronoFlash', 'curtain', 'shield', 'tractorHold', 'superLaunch'].includes(fx.kind);
       if (!pos && !big) continue;
       const at = pos ?? { pan: 0, gain: 1 };
       const pick = (cue: Cue) => this.cue(cue, at.pan, at.gain);
@@ -255,6 +275,10 @@ export class FusionAudio {
         case 'superLaunch': pick(table.launch); break;
         case 'ionCharge': pick(table.ionCharge); break;
         case 'ionStrike': pick(table.ionStrike); break;
+        case 'laserCharge': pick('~superlaser'); break;
+        case 'laserStrike': pick('~superlaser'); pick('~rumble'); break;
+        case 'tractorCharge': case 'tractorHold': pick('~tractor'); break;
+        case 'shieldCharge': case 'shield': pick('~shield'); break;
         case 'stormClouds': pick('~rumble'); break;
         case 'lightning': pick('~thunder'); break;
         case 'chronoFlash': pick(table.chrono); break;
@@ -332,6 +356,10 @@ export class FusionAudio {
     if (!takes.length) return;
     const src = this.source(takes[Math.floor(Math.random() * takes.length)]);
     if (!src) return;
+    if (this.game.pack.id === 'conquer') {
+      const side = this.game.players[lead.owner]?.side;
+      src.playbackRate.value = side === 'empire' ? 0.86 : side === 'cis' ? 1.18 : side === 'rebels' ? 1.06 : 1;
+    }
     src.connect(this.voice);
     src.start();
   }
@@ -417,6 +445,9 @@ export class FusionAudio {
       case 'zap': { const g = env(0.5, 0.005, 0.3); osc('sawtooth', 1400, 200, 0.3, g); noise(0.3, 'highpass', 3000, 1500, g); return 0.3; }
       case 'prism': { const g = env(0.35, 0.01, 0.45); osc('sine', 900, 2600, 0.45, g); osc('triangle', 1800, 5200, 0.45, g); return 0.45; }
       case 'laser': { const g = env(0.3, 0.005, 0.25); osc('square', 1100, 260, 0.25, g); return 0.25; }
+      case 'superlaser': { const g = env(0.75, 0.08, 1.8); osc('sawtooth', 180, 70, 1.8, g); osc('square', 2400, 380, 1.2, g); noise(1.8, 'bandpass', 2200, 400, g, 2); return 1.8; }
+      case 'tractor': { const g = env(0.4, 0.15, 1.6); osc('sine', 90, 70, 1.6, g); osc('sine', 180, 140, 1.6, g); noise(1.6, 'bandpass', 500, 200, g, 4); return 1.6; }
+      case 'shield': { const g = env(0.4, 0.2, 1.4); osc('sine', 220, 330, 1.4, g); osc('triangle', 440, 520, 1.4, g); return 1.4; }
       case 'sonic': { const g = env(0.6, 0.05, 0.8); osc('sine', 70, 45, 0.8, g); osc('sine', 140, 90, 0.8, g); return 0.8; }
       case 'chrono': { const g = env(0.35, 0.02, 0.5); osc('sine', 250, 1600, 0.5, g); noise(0.5, 'bandpass', 600, 3000, g, 4); return 0.5; }
       case 'psychic': { const g = env(0.3, 0.05, 0.7); osc('sine', 330, 300, 0.7, g); osc('sine', 336, 420, 0.7, g); return 0.7; }
@@ -430,6 +461,12 @@ export class FusionAudio {
       case 'chime': { const g = env(0.3, 0.01, 0.6); osc('sine', 880, 880, 0.3, g); const g2 = env(0.25, 0.15, 0.6); osc('sine', 1320, 1320, 0.6, g2); return 0.6; }
       case 'curtain': { const g = env(0.5, 0.2, 1.5); osc('sawtooth', 60, 120, 1.5, g); noise(1.5, 'bandpass', 300, 900, g, 3); return 1.5; }
       case 'thud': { const g = env(0.5, 0.005, 0.2); noise(0.2, 'lowpass', 400, 100, g); return 0.2; }
+      case 'blaster': { const g = env(0.45, 0.004, 0.14); osc('square', 1680, 320, 0.14, g); noise(0.1, 'highpass', 2800, 900, g); return 0.14; }
+      case 'blasterh': { const g = env(0.5, 0.005, 0.2); osc('square', 2100, 280, 0.2, g); osc('sawtooth', 900, 180, 0.2, g); return 0.2; }
+      case 'turbo': { const g = env(0.55, 0.008, 0.32); osc('sawtooth', 420, 90, 0.32, g); osc('square', 1400, 220, 0.28, g); noise(0.28, 'lowpass', 1800, 200, g); return 0.32; }
+      case 'saber': { const g = env(0.4, 0.02, 0.28); osc('sawtooth', 220, 340, 0.28, g); osc('sine', 90, 70, 0.28, g); noise(0.22, 'bandpass', 1800, 600, g, 3); return 0.28; }
+      case 'force': { const g = env(0.4, 0.04, 0.55); osc('sine', 140, 60, 0.55, g); noise(0.55, 'bandpass', 400, 1200, g, 2); return 0.55; }
+      case 'proton': { const g = env(0.5, 0.01, 0.35); osc('sawtooth', 380, 70, 0.35, g); noise(0.35, 'lowpass', 2200, 180, g); return 0.35; }
     }
     return 0;
   }
