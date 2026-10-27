@@ -27,12 +27,21 @@ const TEMPERATE: Record<string, Material> = {
   water: { base: [40, 64, 94], alt: [32, 52, 78], height: -0.35, kind: 'water', edge: 0.35 },
   snow: { base: [220, 228, 234], alt: [198, 210, 220], height: 0, kind: 'snow', edge: 0.3 },
 };
+/** Star Wars Conquer: Tatooine sand, Hoth snow, Endor woods and Scarif water in one pack. */
+const CONQUER: Record<string, Material> = {
+  ...TEMPERATE,
+  sand: { base: [228, 196, 142], alt: [210, 174, 118], height: 0, kind: 'sand', edge: 0.32 },
+  dunes: { base: [222, 186, 128], alt: [200, 162, 104], height: 0.12, kind: 'dunes', edge: 0.35 },
+  rock: { base: [168, 148, 118], alt: [140, 120, 92], height: 0.32, kind: 'rock', edge: 0.7 },
+  trees: { base: [52, 92, 38], alt: [36, 72, 28], height: 0, kind: 'woods', edge: 0.42 },
+  water: { base: [36, 88, 118], alt: [24, 68, 98], height: -0.35, kind: 'water', edge: 0.35 },
+};
 
 function hex(c: string): RGB { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 
 export function materials(pack: RulePack): Material[] {
-  // Desert theatre for the Dune-style packs, temperate for everything with open ground.
-  const table = pack.terrains.some(t => t.id === 'clear') ? TEMPERATE : DUNE;
+  // Desert theatre for the Dune-style packs, mixed theatres for Conquer, temperate otherwise.
+  const table = pack.id === 'conquer' ? CONQUER : pack.terrains.some(t => t.id === 'clear') ? TEMPERATE : DUNE;
   return pack.terrains.map(t => table[t.id] ?? {
     base: hex(t.color), alt: hex(t.color2), height: t.vehicle ? 0 : 0.8,
     kind: t.sand ? 'sand' : t.foot ? 'grass' : 'cliff', edge: 0.35,

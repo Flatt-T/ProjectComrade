@@ -10,9 +10,9 @@ import { dunePack } from './packs/dune';
 import { ra1Pack } from './packs/ra1';
 import { ra2Pack } from './packs/ra2';
 import { tdPack } from './packs/td';
-import { FUSIONS, leviathanPack } from './fusions';
+import { FUSIONS, conquerPack, leviathanPack } from './fusions';
 
-export { dunePack, ra1Pack, ra2Pack, tdPack, leviathanPack, FUSIONS };
+export { dunePack, ra1Pack, ra2Pack, tdPack, leviathanPack, conquerPack, FUSIONS };
 
 /** The classics replicated on this engine, in release order. A fusion game may draw on any of them. */
 export const CLASSIC_PACKS: RulePack[] = [tdPack, dunePack, ra1Pack, ra2Pack];

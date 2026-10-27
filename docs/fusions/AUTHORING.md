@@ -1,21 +1,23 @@
 # Authoring a fusion
 
-A fusion is a playable level for the Comrade Fusion Engine built from the classic rule packs
-(`packages/fusion/src/packs/dune.ts`, `ra2.ts`) plus its own map and mechanics. Community
-fusion requests (GitHub issues labelled `type:fusion`) are voted on weekly; the winner is built
-by following this guide. The reference example is
+A fusion is a playable level for the Comrade Fusion Engine. Most fusions remix a classic
+rule pack (`packages/fusion/src/packs/dune.ts`, `ra2.ts`) plus their own map and mechanics.
+A fusion may also be a **full original pack** with its own units, buildings and art, as
+[`packages/fusion/src/fusions/conquer.ts`](../../packages/fusion/src/fusions/conquer.ts)
+does. Community fusion requests (GitHub issues labelled `type:fusion`) are voted on weekly.
+The remix reference is
 [`packages/fusion/src/fusions/leviathan.ts`](../../packages/fusion/src/fusions/leviathan.ts).
 
 ## 1. Map the request to the engine
 
 | Request field | Where it goes |
 | --- | --- |
-| Sides and factions | Spread the base pack: `...ra2Pack` (countries, teams) or `...dunePack` (houses). |
+| Sides and factions | Spread the base pack: `...ra2Pack` (countries, teams) or `...dunePack` (houses). Original-pack fusions declare their own `factions`. |
 | Map, type, size | A `MapPreset` (64, 80, 96 or 128 square). Features paint terrain (`circle`, `rect`, `ridge`); use `quad()` / `mirror()` from `packs/mapkit.ts` so starts are fair. |
 | Characteristics, resources | `fields` with `resource`, radius `r` and optional `amount` (scarce fields: lower `amount`). |
 | Dangers | `mechanics`: `sandworm` (`count`, `speed`, `sight`, `damage`, `appearAfter`, `eatChance`, `habitat` terrain ids such as `['sand', 'water']`, `nearResources` radius); `bloom`; `regrowth`. Resources regrow via `regrowEvery`. |
 | Tech level | Players pick it in the lobby; "full" needs nothing. To cap a fusion, filter `units`/`structures` by `tech`. |
-| Infantry, vehicles, aircraft, naval | Keep the base pack's units, remove with object rest, or add units copied from the other pack (bring their `weapons` and `warheads`). Units need a `shape` the art knows (see `art/models.ts`). |
+| Infantry, vehicles, aircraft, naval | Keep the base pack's units, remove with object rest, or add units copied from the other pack (bring their `weapons` and `warheads`). Original-pack fusions author a full roster. Units need a `shape` the art knows (see `art/models.ts`). |
 | Buildings and upgrades | `structures`; upgrades are `upgrades`/`upgradeCost` plus `name@1` prerequisites. |
 | Superweapons | A structure's `superweapon` (`missile`, `storm`, `ion`, `reinforce`, `paradrop`, `chrono`, `curtain`, `reveal`). |
 | Bonus objects | Not in the engine yet: say so in the PR and suggest the closest substitute. |

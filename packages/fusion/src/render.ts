@@ -807,18 +807,53 @@ export class FusionRenderer {
     g.addColorStop(0, shade(color, 30)); g.addColorStop(1, dark);
     ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y - 7.5, 3, 3.8, 0, 0, Math.PI * 2); ctx.fill();
     // Head and helmet.
-    ctx.fillStyle = '#e2bf94'; ctx.beginPath(); ctx.arc(x, y - 12, 1.9, 0, Math.PI * 2); ctx.fill();
-    const helmet: Record<string, string> = { 'infantry-elite': '#222', engineer: '#e8c640', spy: '#2a2a30', saboteur: '#1a1a1a', yuri: '#c9a07c', ivan: '#5a3a24', chrono: '#9fd4ff', desolator: '#3e5a2c', thumper: '#8a7350' };
-    ctx.fillStyle = helmet[shape] ?? mid;
-    ctx.beginPath(); ctx.arc(x, y - 12.6, 2.2, Math.PI, Math.PI * 2); ctx.fill();
+    if (shape === 'probe') {
+      ctx.fillStyle = '#8a9298';
+      ctx.beginPath(); ctx.arc(x, y - 8, 3.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = mid;
+      ctx.beginPath(); ctx.arc(x, y - 8, 1.4, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#3a4044'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(x - 3, y - 5); ctx.lineTo(x - 5, y); ctx.moveTo(x + 3, y - 5); ctx.lineTo(x + 5, y); ctx.stroke();
+      return;
+    }
+    if (shape === 'droid' || shape === 'droideka') {
+      ctx.fillStyle = shape === 'droideka' ? '#6a7a88' : '#c4a56a';
+      ctx.beginPath(); ctx.ellipse(x, y - 8, shape === 'droideka' ? 4 : 3, 4.2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#2a2a28';
+      ctx.beginPath(); ctx.arc(x + cos * 1.5, y - 10, 1.2, 0, Math.PI * 2); ctx.fill();
+      if (shape === 'droideka') this.glow(x, y - 8, 10, '120,180,220', 0.25);
+    } else {
+      ctx.fillStyle = shape === 'wookiee' ? '#6b4423' : '#e2bf94';
+      ctx.beginPath(); ctx.arc(x, y - 12, 1.9, 0, Math.PI * 2); ctx.fill();
+      const helmet: Record<string, string> = {
+        'infantry-elite': '#222', engineer: '#e8c640', spy: '#2a2a30', saboteur: '#1a1a1a',
+        yuri: '#c9a07c', ivan: '#5a3a24', chrono: '#9fd4ff', desolator: '#3e5a2c', thumper: '#8a7350',
+        clone: '#e8e8ea', storm: '#f0f0f2', jedi: '#c9a07c', sith: '#1a1a1a', wookiee: '#6b4423',
+        rebel: '#6a7a48',
+      };
+      ctx.fillStyle = helmet[shape] ?? mid;
+      ctx.beginPath(); ctx.arc(x, y - 12.6, shape === 'clone' || shape === 'storm' ? 2.5 : 2.2, Math.PI, Math.PI * 2); ctx.fill();
+      if (shape === 'clone' || shape === 'storm') {
+        ctx.beginPath(); ctx.arc(x, y - 12, 2.2, 0, Math.PI); ctx.fill();
+      }
+      if (shape === 'rebel') ctx.fillRect(x - 2.6, y - 12.5, 5.2, 1.3);
+    }
     if (shape === 'chrono') this.glow(x, y - 8, 8, '140,200,255', 0.35 + 0.15 * Math.sin(this.frame / 6));
     if (shape === 'yuri') this.glow(x, y - 12, 6, '205,130,255', 0.3);
+    if (shape === 'jedi') this.glow(x, y - 10, 9, '140,220,255', 0.35 + 0.15 * Math.sin(this.frame / 6));
+    if (shape === 'sith') this.glow(x, y - 10, 9, '255,70,50', 0.35 + 0.15 * Math.sin(this.frame / 6));
     if (shape === 'desolator') { ctx.fillStyle = '#7fbf4a'; ctx.fillRect(x - 4, y - 10, 2, 5); }
     if (shape === 'ivan') { ctx.fillStyle = '#c03020'; ctx.beginPath(); ctx.arc(x - cos * 4, y - 7, 1.8, 0, Math.PI * 2); ctx.fill(); }
     if (shape === 'engineer' || shape === 'spy' || shape === 'thumper' || shape === 'saboteur' || shape === 'yuri') {
       // No rifle: a toolbox, a briefcase, the thumper or a satchel instead.
       ctx.fillStyle = shape === 'engineer' ? '#c8a030' : shape === 'thumper' ? '#6a6052' : '#3a3530';
       ctx.fillRect(x + cos * 3 - 1.5, y - 6, 3, 3);
+      return;
+    }
+    if (shape === 'jedi' || shape === 'sith') {
+      ctx.strokeStyle = shape === 'jedi' ? '#9fd4ff' : '#ff6a4a';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(x, y - 8); ctx.lineTo(x + cos * 8, y - 8 + sin * (this.iso ? 4 : 6)); ctx.stroke();
       return;
     }
     // Weapon pointing along the facing.

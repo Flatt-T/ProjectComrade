@@ -47,6 +47,7 @@ describe('tier entitlements', () => {
     expect(playKind('dune2k')).toBe('fusion');
     expect(playKind('ra2')).toBe('fusion');
     expect(playKind('fusion-leviathan')).toBe('fusion');
+    expect(playKind('fusion-conquer')).toBe('fusion');
   });
 
   it('only sells the three paid tiers, each with its own Stripe lookup key', () => {
