@@ -10,13 +10,24 @@ import { HANDLE_MAX, HANDLE_MIN, handleValid } from '@comrade/contracts';
 import { api } from '../api';
 import { errorText, useAuth } from '../auth';
 import { Link, useRoute } from '../router';
-import { Field, Notice } from '../ui';
+import { Field, Notice, Spinner } from '../ui';
 
 function useNext(): string {
   const { search } = useRoute();
   const next = search.get('next') ?? '/';
   // Only ever return to a path on this site.
   return next.startsWith('/') && !next.startsWith('//') ? next : '/';
+}
+
+/** Signed-in commanders never see the login or register form again. */
+function useSignedInHome() {
+  const { ready, signedIn } = useAuth();
+  const { navigate } = useRoute();
+  const next = useNext();
+  useEffect(() => {
+    if (ready && signedIn) navigate(next, { replace: true });
+  }, [ready, signedIn, next, navigate]);
+  return { ready, signedIn, next };
 }
 
 // ---------------------------------------------------------------------------
@@ -28,7 +39,7 @@ type Stage = 'details' | 'confirm';
 export function Register() {
   const { applyMe, tiers, setLocalConsent } = useAuth();
   const { navigate } = useRoute();
-  const next = useNext();
+  const { ready, signedIn, next } = useSignedInHome();
   const [stage, setStage] = useState<Stage>('details');
   const [handle, setHandle] = useState('');
   const [email, setEmail] = useState('');
@@ -101,6 +112,8 @@ export function Register() {
     <Link to="/" className="deploy">BACK TO THE WAR ROOM →</Link>
   </section>;
 
+  if (!ready || signedIn) return <section className="page auth-page"><Spinner label="Restoring your session…" /></section>;
+
   if (stage === 'confirm') return <section className="page auth-page">
     <p className="eyebrow">ONE MORE STEP</p>
     <h1>Confirm your email</h1>
@@ -168,7 +181,7 @@ export function Register() {
 export function SignIn() {
   const { signIn } = useAuth();
   const { navigate } = useRoute();
-  const next = useNext();
+  const { ready, signedIn, next } = useSignedInHome();
   const [email, setEmail] = useState('');
   const [secret, setSecret] = useState('');
   const [error, setError] = useState('');
@@ -188,6 +201,8 @@ export function SignIn() {
       setBusy(false);
     }
   }
+
+  if (!ready || signedIn) return <section className="page auth-page"><Spinner label="Restoring your session…" /></section>;
 
   return <section className="page auth-page">
     <p className="eyebrow">COMMANDER SIGN-IN</p>
@@ -218,6 +233,7 @@ export function SignIn() {
 
 export function Forgot() {
   const { navigate } = useRoute();
+  const { ready, signedIn } = useSignedInHome();
   const [stage, setStage] = useState<'email' | 'reset'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -252,6 +268,8 @@ export function Forgot() {
       setBusy(false);
     }
   }
+
+  if (!ready || signedIn) return <section className="page auth-page"><Spinner label="Restoring your session…" /></section>;
 
   if (stage === 'reset') return <section className="page auth-page">
     <p className="eyebrow">PASSWORD RESET</p>

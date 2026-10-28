@@ -114,11 +114,24 @@ export async function signIn(email: string, password: string): Promise<AuthToken
   return tokens(result.AuthenticationResult);
 }
 
+/**
+ * REFRESH_TOKEN_AUTH parameters. A confidential app client requires USERNAME plus SECRET_HASH
+ * — the hash is HMAC(username + clientId) with the client secret, the same as at sign-in.
+ */
+export function refreshParameters(refreshToken: string, username?: string): Record<string, string> {
+  const params: Record<string, string> = { REFRESH_TOKEN: refreshToken };
+  if (!username) return params;
+  params.USERNAME = username;
+  const hash = secretHash(username);
+  if (hash) params.SECRET_HASH = hash;
+  return params;
+}
+
 export async function refresh(refreshToken: string, username?: string): Promise<AuthTokens> {
-  const hash = username ? secretHash(username) : undefined;
+  if (cognito.clientSecret() && !username) throw unauthorised('Those details are not right');
   const result = await call<{ AuthenticationResult?: Record<string, unknown> }>('InitiateAuth', {
     ClientId: cognito.clientId(), AuthFlow: 'REFRESH_TOKEN_AUTH',
-    AuthParameters: { REFRESH_TOKEN: refreshToken, ...(hash ? { SECRET_HASH: hash } : {}) },
+    AuthParameters: refreshParameters(refreshToken, username),
   });
   return tokens(result.AuthenticationResult);
 }

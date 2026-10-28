@@ -64,7 +64,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [localConsent, setLocal] = useState<LocalConsent>(readLocalConsent);
 
   const load = useCallback(async () => {
-    try { setState(await api.me()); } catch { setState(null); }
+    try {
+      setState(await api.me());
+    } catch {
+      // Keep the last known profile when /api/me blips; only drop it if we have no token.
+      if (!currentToken()) setState(null);
+    }
     setToken(currentToken());
   }, []);
 

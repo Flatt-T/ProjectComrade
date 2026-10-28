@@ -77,7 +77,9 @@ export async function refresh(): Promise<boolean> {
     setToken(session.accessToken, session.expiresIn);
     return true;
   } catch {
-    setToken('');
+    // A failed cookie refresh must not wipe a still-valid access token — that is what
+    // dumped signed-in commanders onto the login screen while they clicked around.
+    if (!accessToken || (expiresAt && Date.now() > expiresAt)) setToken('');
     return false;
   }
 }

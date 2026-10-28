@@ -75,7 +75,12 @@ function match(method: string, pathname: string): { route: Route; params: Record
 }
 
 export function json(res: ServerResponse, status: number, body: unknown, headers: Record<string, string> = {}) {
-  res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...headers });
+  // setHeader, not writeHead({...}): writeHead's header object can replace a Set-Cookie
+  // already queued by ctx.setCookie, which would drop the session on every login.
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Cache-Control', 'no-store');
+  for (const [name, value] of Object.entries(headers)) res.setHeader(name, value);
   res.end(JSON.stringify(body));
 }
 

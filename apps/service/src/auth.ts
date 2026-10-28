@@ -117,9 +117,52 @@ export function ensureGuestId(ctx: Ctx): string {
   return id;
 }
 
+/**
+ * Cognito refresh tokens are opaque; SECRET_HASH on REFRESH_TOKEN_AUTH needs the username
+ * that was used at sign-in. Both live in the cookie so a reload can restore the session.
+ * Older cookies were the raw refresh token alone — those still parse.
+ */
+export function encodeSessionCookie(refreshToken: string, username?: string): string {
+  if (!username) return refreshToken;
+  return JSON.stringify({ r: refreshToken, u: username });
+}
+
+export function parseSessionCookie(raw: string): { refreshToken: string; username?: string } {
+  const value = raw.trim();
+  if (value.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(value) as { r?: unknown; u?: unknown };
+      if (typeof parsed.r === 'string' && parsed.r) {
+        return {
+          refreshToken: parsed.r,
+          username: typeof parsed.u === 'string' && parsed.u ? parsed.u : undefined,
+        };
+      }
+    } catch { /* fall through to the raw token */ }
+  }
+  return { refreshToken: value };
+}
+
+/** Cognito username claim from an access token — used only to compute SECRET_HASH on refresh. */
+export function usernameFromAccessToken(accessToken: string): string | undefined {
+  const parts = accessToken.split('.');
+  if (parts.length < 2) return undefined;
+  try {
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as {
+      username?: unknown; 'cognito:username'?: unknown;
+    };
+    const name = payload.username ?? payload['cognito:username'];
+    return typeof name === 'string' && name ? name : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Store the Cognito refresh token where page scripts cannot reach it. */
-export function setSessionCookie(ctx: Ctx, refreshToken: string) {
-  ctx.setCookie(SESSION_COOKIE, refreshToken, { maxAge: SESSION_DAYS * 24 * 3600, sameSite: 'Lax' });
+export function setSessionCookie(ctx: Ctx, refreshToken: string, username?: string) {
+  ctx.setCookie(SESSION_COOKIE, encodeSessionCookie(refreshToken, username), {
+    maxAge: SESSION_DAYS * 24 * 3600, sameSite: 'Lax',
+  });
 }
 
 export function requireVoting(canVote: boolean) {
