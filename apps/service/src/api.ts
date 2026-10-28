@@ -14,7 +14,10 @@ import {
 } from './accounts.js';
 import { adBreak, recordImpression } from './ads.js';
 import { completeAdCredit, startAdCredit } from './credits.js';
-import { SESSION_COOKIE, optionalCaller, setSessionCookie, verifyAccessToken } from './auth.js';
+import {
+  SESSION_COOKIE, optionalCaller, parseSessionCookie, setSessionCookie, usernameFromAccessToken,
+  verifyAccessToken,
+} from './auth.js';
 import * as billingApi from './billing.js';
 import * as cognito from './cognito.js';
 import { ads as adsConfig, authEnabled, billingEnabled, platformEnabled, termsVersion } from './config.js';
@@ -22,7 +25,7 @@ import {
   activeSubscription, entitlementsFor, openEntitlements, quotaFor, tierFromSubscription,
 } from './entitlements.js';
 import {
-  BODY_LIMIT, Ctx, UPLOAD_LIMIT, badRequest, conflict, del, get, limit, notFound,
+  BODY_LIMIT, Ctx, HttpError, UPLOAD_LIMIT, badRequest, conflict, del, get, limit, notFound,
   patch, post, put, unavailable, unauthorised, forbidden,
 } from './http.js';
 import { historyFor, matchById, parseReport, playerRecord, recordResult, slotForToken } from './history.js';
@@ -140,7 +143,8 @@ post('/api/auth/login', async (ctx: Ctx) => {
   const body = await ctx.body();
   const address = email(body.email);
   const tokens = await cognito.signIn(address, password(body.password));
-  if (tokens.refreshToken) setSessionCookie(ctx, tokens.refreshToken);
+  const username = usernameFromAccessToken(tokens.accessToken) ?? address;
+  if (tokens.refreshToken) setSessionCookie(ctx, tokens.refreshToken, username);
   return session(ctx, tokens.accessToken, tokens.idToken, tokens.expiresIn);
 });
 
@@ -150,14 +154,19 @@ post('/api/auth/refresh', async (ctx: Ctx) => {
   const cookie = ctx.cookies[SESSION_COOKIE];
   if (!cookie) throw unauthorised('No session');
   limit(ctx, 'refresh', 60, 60_000);
+  const parsed = parseSessionCookie(cookie);
+  let tokens: Awaited<ReturnType<typeof cognito.refresh>>;
   try {
-    const tokens = await cognito.refresh(cookie);
-    return session(ctx, tokens.accessToken, tokens.idToken, tokens.expiresIn);
+    tokens = await cognito.refresh(parsed.refreshToken, parsed.username);
   } catch (error) {
-    // A refresh token that no longer works should not keep being retried.
-    ctx.clearCookie(SESSION_COOKIE);
+    // Only a rejected refresh token should forget the session. A Cognito blip or
+    // rate-limit must not sign the commander out.
+    if (error instanceof HttpError && error.status === 401) ctx.clearCookie(SESSION_COOKIE);
     throw error;
   }
+  const username = usernameFromAccessToken(tokens.accessToken) ?? parsed.username;
+  setSessionCookie(ctx, tokens.refreshToken ?? parsed.refreshToken, username);
+  return session(ctx, tokens.accessToken, tokens.idToken, tokens.expiresIn);
 });
 
 post('/api/auth/logout', async (ctx: Ctx) => {
