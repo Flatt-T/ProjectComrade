@@ -437,9 +437,10 @@ export class FusionAudio {
    */
   private spoke(lead: Entity, player: { faction?: string; side?: string } | undefined, kind: 'select' | 'order'): boolean {
     const pack = this.game.pack.id;
-    const key = `${pack}:${player?.faction ?? ''}`;
-    const want = SPEECH_VOICES[key] ?? SPEECH_VOICES[`${pack}:${player?.side ?? ''}`];
-    if (!want) return false;
+    // Whichever of faction or side carries the voice also carries the fallback lines.
+    const key = [`${pack}:${player?.faction ?? ''}`, `${pack}:${player?.side ?? ''}`].find(k => SPEECH_VOICES[k]);
+    const want = key ? SPEECH_VOICES[key] : undefined;
+    if (!want || !key) return false;
     const lines = SPEECH_LINES[`${pack}:${lead.type}`] ?? SPEECH_LINES[key];
     const pool = lines?.[kind];
     if (!pool?.length) return false;
