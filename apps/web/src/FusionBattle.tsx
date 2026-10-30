@@ -164,6 +164,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
       pack, mapId: setup.mapId, seed: setup.seed, players: setup.players,
       credits: s.credits, techLevel: s.techLevel, worms: s.worms ?? 100,
       renewal: s.renewal, superCharge: s.superCharge, crates: s.crates,
+      doctrine: s.doctrine ?? 'irregular',
     });
     const humans = Array.from({ length: setup.humans }, (_, i) => i);
     const session: Session = setup.humans > 1 ? new LockstepSession(game, slot, humans, conn.transport(), s.speed) : new LocalSession(game, slot, s.speed);

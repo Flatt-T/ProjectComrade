@@ -399,7 +399,10 @@ class Composer {
       // An imported building can share an id with one of the base's own: give it its own.
       const id = seat.some(s => s.id === ns(src.id)) ? ns(`x-${src.id}`) : ns(src.id);
       if (seat.some(s => s.id === id)) return;
-      seat.push({ id, def: { ...src, id, factions: [tag] }, from: pack, src });
+      // A mashup is a commander's own army: whatever they picked is theirs, doctrine or not.
+      const def: StructureDef = { ...src, id, factions: [tag] };
+      delete def.doctrine;
+      seat.push({ id, def, from: pack, src });
     };
     for (const st of base.defs as StructureDef[]) take(base.pack, st);
 
@@ -509,6 +512,7 @@ class Composer {
       imported.set(`${pack.id}/${src.id}`, id);
       if (this.units[id]) return id;
       const def: UnitDef = { ...src, id, factions: [tag], prereqs: bridge(src.prereqs, pack) };
+      delete def.doctrine;
       def.weapon = this.weapon(pack, src.weapon);
       def.altWeapon = this.weapon(pack, src.altWeapon);
       def.deployWeapon = this.weapon(pack, src.deployWeapon);

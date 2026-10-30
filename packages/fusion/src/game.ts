@@ -1,7 +1,7 @@
 import { Hasher, LEPTONS, Rng, cellCenter, dist, facingDelta, facingTo, toCell } from './core';
 import { MapData, buildableTerrain, generateMap, inBounds, isWater, passable, resourceIndex, terrainPassable } from './map';
 import { findPath, nearestCell } from './path';
-import { InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules';
+import { Doctrine, FactionDef, InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules';
 import { runAI, AIState, AILevel, AI_LEVELS, createAIState } from './ai';
 
 export type Command =
@@ -36,6 +36,8 @@ export interface GameSetup {
   credits?: CreditsPreset;
   /** 1..15, matching the lobby setting; 15 unlocks everything. */
   techLevel?: number;
+  /** Which roster a pack that describes both doctrines fields (default 'irregular'). */
+  doctrine?: Doctrine;
   /** Sandworm activity, percent of the pack's base rate (0 = none, default 100). */
   worms?: number;
   /** Resource renewal, 0 (never) to 50; 25 is the rule pack's own rate. */
@@ -218,6 +220,7 @@ export class Game {
   private powerDirty = true;
   /** Highest tech level buildable in this match (the lobby setting mapped to 1..10). */
   readonly techCap: number;
+  readonly doctrine: Doctrine;
   /** Sandworm activity percent (0 = none): how many worms roam, and how long they stay under. */
   readonly wormRate: number;
   /** Resource renewal setting; RENEWAL_CLASSIC (25) is the pack's own rate, 0 turns it off. */
@@ -237,6 +240,7 @@ export class Game {
     this.map = generateMap(setup.pack, preset, setup.seed);
     this.rng = new Rng(setup.seed);
     this.techCap = Math.ceil(((setup.techLevel ?? 15) * 10) / 15);
+    this.doctrine = setup.doctrine ?? 'irregular';
     this.wormRate = Math.max(0, Math.min(200, Math.trunc(setup.worms ?? 100)));
     this.renewal = Math.max(0, Math.min(50, Math.trunc(setup.renewal ?? RENEWAL_CLASSIC)));
     this.superCharge = Math.max(100, Math.min(200, Math.trunc(setup.superCharge ?? 100)));
@@ -258,7 +262,8 @@ export class Game {
       // The MCV sits on the start cell; the escort forms up outside its deploy footprint.
       const start = preset.starts[slot];
       const startCell = start.y * this.map.w + start.x;
-      const mcvType = faction.startUnits.find(t => this.pack.units[t].deploysTo);
+      const starting = this.startUnitsFor(faction);
+      const mcvType = starting.find(t => this.pack.units[t].deploysTo);
       const yard = mcvType ? this.pack.structures[this.pack.units[mcvType].deploysTo!] : undefined;
       const fx = start.x - ((yard?.w ?? 1) >> 1), fy = start.y - ((yard?.h ?? 1) >> 1);
       const inFootprint = (i: number) => {
@@ -266,7 +271,7 @@ export class Game {
         return !!yard && x >= fx - 1 && x <= fx + yard.w && y >= fy - 1 && y <= fy + yard.h;
       };
       if (mcvType) this.spawnUnit(mcvType, slot, startCell);
-      faction.startUnits.filter(t => t !== mcvType).forEach(type => {
+      starting.filter(t => t !== mcvType).forEach(type => {
         const origin = (Math.min(this.map.h - 1, fy + (yard?.h ?? 1) + 1)) * this.map.w + start.x;
         const cell = nearestCell(this.map, origin, 8,
           i => passable(this.pack, this.map, i, this.moveClass(this.pack.units[type])) && !this.unitInCell(i) && !inFootprint(i));
@@ -596,6 +601,12 @@ export class Game {
     return list;
   }
 
+  /** What a faction takes the field with, which the regular doctrine may change. */
+  startUnitsFor(faction: FactionDef): string[] {
+    const start = this.doctrine === 'regular' && faction.regularStart ? faction.regularStart : faction.startUnits;
+    return start.filter(type => !!this.pack.units[type]);
+  }
+
   canBuild(p: Player, item: string, owned = this.owned(p)): boolean {
     const queue = this.queueFor(item);
     if (!queue) return false;
@@ -605,6 +616,8 @@ export class Game {
     // The tech level caps what may be built, but not the improvement of a building already
     // standing: Construction Yards are never built directly (tech 99) yet can be upgraded.
     if (!item.startsWith(UPGRADE) && def.tech > this.techCap) return false;
+    // A pack may describe both an irregular and a regular army; only one of them turns out.
+    if (def.doctrine && def.doctrine !== this.doctrine) return false;
     if (item.startsWith(UPGRADE)) {
       // Upgrades are bought once the building stands, up to its number of levels.
       const level = owned.get(base);
@@ -1566,7 +1579,7 @@ export class Game {
       case 'unit': {
         // A crew is already aboard: the free unit is whatever this side rolls out first.
         const faction = this.pack.factions.find(f => f.id === p.faction);
-        const type = faction?.startUnits.find(t => !this.pack.units[t]?.deploysTo) ?? Object.keys(this.pack.units)[0];
+        const type = (faction ? this.startUnitsFor(faction) : []).find(t => !this.pack.units[t]?.deploysTo) ?? Object.keys(this.pack.units)[0];
         const spot = nearestCell(this.map, crate.cell, 4, i => passable(this.pack, this.map, i, this.moveClass(this.pack.units[type])) && !this.unitInCell(i));
         if (spot >= 0) this.spawnUnit(type, finder.owner, spot);
         break;

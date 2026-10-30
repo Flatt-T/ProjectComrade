@@ -16,6 +16,9 @@ export function styleFor(packId: string, side: string): ArtStyle {
   if (side === 'empire' || side === 'dark') return 'empire';
   if (side === 'cis') return 'cis';
   if (packId === 'conquer') return 'rebel';
+  // The two original modern packs: conventional forces read Allied grey, irregulars read dusty.
+  if (packId === 'irregular') return side === 'state' ? 'allied' : 'nod';
+  if (packId === 'holdout') return side === 'contractor' ? 'allied' : 'dune';
   return packId === 'ra2' || packId === 'ra1' ? 'allied' : 'dune';
 }
 

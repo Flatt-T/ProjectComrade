@@ -10,7 +10,7 @@ export type Faction = string;
 // 'fusion' styles run the Comrade Fusion Engine with the named rule pack, which also
 // supports lockstep multiplayer. Unplayable styles are declared so the roster is visible.
 /** Classic styles, community fusions (`fusion-<pack id>`), then the Custom Mashup. */
-export type GameStyle = 'td-classic' | 'td-fusion' | 'ra1' | 'ra1-fusion' | 'ra2' | 'dune2k' | 'fusion-leviathan' | 'fusion-conquer' | 'fusion-mashup';
+export type GameStyle = 'td-classic' | 'td-fusion' | 'ra1' | 'ra1-fusion' | 'ra2' | 'dune2k' | 'fusion-leviathan' | 'fusion-conquer' | 'fusion-irregular' | 'fusion-holdout' | 'fusion-mashup';
 /** The Gold game type with no fixed rule pack: each commander assembles their own forces. */
 export const MASHUP_STYLE = 'fusion-mashup' as const;
 export interface FactionInfo { id: Faction; name: string; full: string; blurb: string }
@@ -55,6 +55,22 @@ export const STYLES: StyleInfo[] = [
       { id: 'empire', name: 'Empire', full: 'Dark · Galactic Empire', blurb: 'AT-ATs, TIE fighters and the Superlaser.' },
       { id: 'republic', name: 'Republic', full: 'Light · Galactic Republic', blurb: 'Clones, AT-TEs and LAAT gunships.' },
       { id: 'cis', name: 'CIS', full: 'Dark · Confederacy', blurb: 'Battle droids, AATs and vulture swarms.' },
+    ] },
+  { id: 'fusion-irregular', name: 'Fusion: Irregular Warfare', engine: 'fusion', pack: 'irregular', playable: true, lockstep: true,
+    blurb: 'Asymmetric conflict, played straight. Three invented irregular forces with very different budgets against a conventional intervention force: numbers and concealment against armour, air and a precision strike.',
+    factions: [
+      { id: 'cadres', name: 'Valley Cadres', full: 'Irregular · Valley Cadres', blurb: 'Infantry in depth, mortars and tunnels.' },
+      { id: 'coastal', name: 'Coastal Syndicate', full: 'Irregular · Coastal Syndicate', blurb: 'Smuggling money, skiffs and technicals.' },
+      { id: 'vanguard', name: 'Northern Vanguard', full: 'Irregular · Northern Vanguard', blurb: 'Sponsored armour and a strike drone.' },
+      { id: 'mandate', name: 'Mandate Force', full: 'State · Mandate Force', blurb: 'Tanks, helicopters, and a bill for each one.' },
+    ] },
+  { id: 'fusion-holdout', name: 'Fusion: Holdouts', engine: 'fusion', pack: 'holdout', playable: true, lockstep: true,
+    blurb: 'Dark humour on the same asymmetric bones. Preppers, a residents’ association, a harbour racket and a private security firm, all convinced the coast is theirs.',
+    factions: [
+      { id: 'preppers', name: 'The Compound', full: 'Holdout · The Compound', blurb: 'Crossbows, a plough bus and an egg drone.' },
+      { id: 'hoa', name: 'Pelican Point', full: 'Holdout · Residents’ Association', blurb: 'Leaf blowers, a ride-on mower and the Chair.' },
+      { id: 'pirates', name: 'Gull Reach', full: 'Holdout · Gull Reach', blurb: 'Skiffs, boarding parties and a mothership.' },
+      { id: 'vantage', name: 'Vantage Risk Group', full: 'Contractor · Vantage Risk Group', blurb: 'Immaculate kit, billed by the quarter hour.' },
     ] },
   // No fixed rule pack: the battlefield decides the world, and each commander assembles their
   // own army out of every other Fusion game's buildings, soldiers, vehicles, aircraft and ships.
@@ -109,9 +125,12 @@ export type AILevel = 'easy' | 'normal' | 'hard';
  * `crates` is bonus-crate frequency, 0 (none) to 200; 100 drops one about every minute.
  * `speed` is how fast the clock runs, 100 (classic 15 ticks a second) to 300.
  */
+/** Which army a pack that describes both doctrines fields; packs without the axis ignore it. */
+export type Doctrine = 'regular' | 'irregular';
 export interface MatchSettings {
   credits: CreditsPreset; techLevel: number; ai: number; aiLevel: AILevel;
   worms: number; renewal: number; superCharge: number; crates: number; speed: number;
+  doctrine: Doctrine;
 }
 export const WORMS_MAX = 200;
 export const RENEWAL_MAX = 50;
@@ -123,6 +142,7 @@ export const SPEED_MIN = 100, SPEED_MAX = 300, SPEED_STEP = 25;
 export const DEFAULT_SETTINGS: MatchSettings = {
   credits: 'standard', techLevel: 15, ai: 1, aiLevel: 'normal',
   worms: 50, renewal: RENEWAL_CLASSIC, superCharge: 100, crates: 0, speed: 100,
+  doctrine: 'irregular',
 };
 export const CREDITS_VALUES: Record<CreditsPreset, number> = { low: 30, standard: 60, high: 120 };
 
@@ -225,7 +245,8 @@ export function parseSettings(value: unknown): MatchSettings {
   const superCharge = whole(v.superCharge, SUPER_CHARGE_MIN, SUPER_CHARGE_MAX, DEFAULT_SETTINGS.superCharge);
   const crates = whole(v.crates, 0, CRATES_MAX, DEFAULT_SETTINGS.crates);
   const speed = whole(v.speed, SPEED_MIN, SPEED_MAX, DEFAULT_SETTINGS.speed);
-  return { credits, techLevel, ai, aiLevel, worms, renewal, superCharge, crates, speed };
+  const doctrine: Doctrine = v.doctrine === 'regular' ? 'regular' : DEFAULT_SETTINGS.doctrine;
+  return { credits, techLevel, ai, aiLevel, worms, renewal, superCharge, crates, speed, doctrine };
 }
 export function parseOptions(value: unknown): RoomOptions {
   const v = object(value);
