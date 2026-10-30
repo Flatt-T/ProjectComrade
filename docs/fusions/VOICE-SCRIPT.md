@@ -1,26 +1,39 @@
 # Voice script: Irregular Warfare and Holdouts
 
-The Fusion Engine has no voices of its own. Every spoken line in the game today is freeware
-Westwood audio out of the Tiberian Dawn and Red Alert banks, and a faction is given character
-by which of those replies it draws on and how fast it says them — see `VOICES` and
-`UNIT_VOICES` in [`packages/fusion/src/audio.ts`](../../packages/fusion/src/audio.ts).
+Both packs speak. Every soldier, vehicle, aircraft and ship in Irregular Warfare and Holdouts
+has its own two lines — one for being selected, one for being given an order — and the browser's
+own speech synthesiser says them. The text and the casting live in
+[`packages/fusion/src/speech.ts`](../../packages/fusion/src/speech.ts): `SPEECH_LINES` keyed
+`pack:unit` with a `pack:faction` fallback, and `SPEECH_VOICES` giving each faction its locale,
+pitch and rate.
 
-This file is the script those stand-ins stand in for: what each faction would say if the
-project had voices of its own. Record it, or run it through a text-to-speech service, and the
-lines drop into a new bank keyed by the same reply names.
+This file is the same casting written for a human to read, and it is the brief if the lines are
+ever recorded properly.
 
-Before adding any recorded or generated audio, add a `rights/ledger.jsonl` entry for it.
+**Why synthesis.** Recording about a hundred and forty units is not something this project can
+ship, and nothing has to be: the voices are installed on the player's machine and rendered at
+run time, so there is no audio file to download, host or license. A browser with no speech
+synthesiser, or no voice for the language, falls back silently to the Westwood bank replies
+below — see `VOICES` and `UNIT_VOICES` in
+[`packages/fusion/src/audio.ts`](../../packages/fusion/src/audio.ts), which still give the eight
+factions distinct pitches out of the freeware samples. Players can turn speech off under VOLUME.
+
+**If you record these for real**, add a `rights/ledger.jsonl` entry first.
 `tests/unit/rights-validation.test.ts` enforces that every asset has provenance, a licence and
-a distribution class, and generated speech carries its own terms about commercial use and
-voice likeness. A TTS service's output is not automatically yours to ship.
+a distribution class, and recorded or generated speech carries its own terms about commercial
+use and voice likeness. A TTS service's *downloaded output* is not automatically yours to ship —
+which is a reason the run-time path, where nothing is distributed, is the one in the game.
 
 ## How the lines map
 
 Each unit answers twice: **select** (you clicked it) and **order** (you told it to do
-something). Write four takes of each line so the game can vary them; the engine looks for
-`NAME`, `NAME.V00`, `NAME.V01`, `NAME.V02` and `NAME.V03`.
+something), and picks at random from the lines it has for that answer.
 
-Keep them short. A reply that runs past about a second and a half steps on the next one.
+If you record them, write four takes of each line so the game can vary them the same way; the
+bank path looks for `NAME`, `NAME.V00`, `NAME.V01`, `NAME.V02` and `NAME.V03`.
+
+Keep them short. Replies are throttled at 600 ms and a new one cancels the last, so a line
+that runs long gets cut off mid-word. A test holds every line to 60 characters.
 
 ---
 

@@ -4,6 +4,7 @@
 // thunder...) are synthesised here. Audio is presentation only: it reads Game.effects and
 // never touches the simulation, so it is safe in lockstep.
 import type { Effect, Entity, Game } from './game';
+import { SPEECH_LINES, SPEECH_VOICES, Speaker } from './speech';
 
 // ------------------------------------------------------------------ Westwood AUD decoding
 
@@ -219,10 +220,14 @@ function weaponCue(bank: Bank, game: Game, weaponId: string, shooter?: Entity): 
 
 // ------------------------------------------------------------------ settings
 
-export interface AudioSettings { master: number; effects: number; voices: number; muted: boolean }
+export interface AudioSettings {
+  master: number; effects: number; voices: number; muted: boolean;
+  /** Speak scripted unit lines with the browser's synthesiser where a pack has them. */
+  speech: boolean;
+}
 const SETTINGS_KEY = 'comrade.audio';
 export function loadAudioSettings(): AudioSettings {
-  const fallback = { master: 0.8, effects: 0.8, voices: 0.9, muted: false };
+  const fallback = { master: 0.8, effects: 0.8, voices: 0.9, muted: false, speech: true };
   try { return { ...fallback, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }; } catch { return fallback; }
 }
 export function saveAudioSettings(s: AudioSettings) {
@@ -248,6 +253,7 @@ export class FusionAudio {
   private evaQueue: string[] = [];
   private evaBusy = false;
   private lastReply = { select: 0, order: 0 };
+  private speaker = new Speaker();
   private noise: AudioBuffer;
   readonly bank: Bank;
   notice = '';
@@ -283,6 +289,8 @@ export class FusionAudio {
     this.master.gain.setTargetAtTime(s.muted ? 0 : s.master, t, 0.02);
     this.sfx.gain.setTargetAtTime(s.effects, t, 0.02);
     this.voice.gain.setTargetAtTime(s.voices, t, 0.02);
+    // Speech sits outside the audio graph, so a gain change cannot reach a line already running.
+    if (s.muted || !s.speech) this.speaker.silence();
   }
 
   /** Browsers start audio suspended until the player interacts with the page. */
@@ -296,7 +304,7 @@ export class FusionAudio {
   }
   /** True once the browser lets this page make sound. */
   get unlocked() { return this.ctx.state === 'running'; }
-  dispose() { void this.ctx.close(); }
+  dispose() { this.speaker.dispose(); void this.ctx.close(); }
 
   // -------------------------------------------------------------- game events
 
@@ -402,8 +410,10 @@ export class FusionAudio {
     const lead = units[0];
     const def = this.game.pack.units[lead.type];
     const special = table.special[lead.type];
-    // A unit's own voice wins, then its faction's, then the bank's general replies.
     const player = this.game.players[lead.owner];
+    // A pack with its own script speaks it; the bank is what everything else has.
+    if (this.settings.speech && this.spoke(lead, player, kind)) return;
+    // A unit's own voice wins, then its faction's, then the bank's general replies.
     const byPack = VOICES[this.game.pack.id] ?? {};
     const voice = UNIT_VOICES[`${this.game.pack.id}:${lead.type}`] ?? byPack[player?.faction ?? ''] ?? byPack[player?.side ?? ''];
     const pool = voice?.[kind] ?? (special ? special[kind]
@@ -416,6 +426,25 @@ export class FusionAudio {
     if (voice?.rate) src.playbackRate.value = voice.rate;
     src.connect(this.voice);
     src.start();
+  }
+
+  /**
+   * Say this unit's own scripted line, if its pack has one for it.
+   *
+   * The unit's lines win over its faction's, and the faction supplies the voice
+   * either way — a Gate Warden is still a Compound man. False means nothing was
+   * spoken (no script, no installed voice, silenced) and the bank should answer.
+   */
+  private spoke(lead: Entity, player: { faction?: string; side?: string } | undefined, kind: 'select' | 'order'): boolean {
+    const pack = this.game.pack.id;
+    const key = `${pack}:${player?.faction ?? ''}`;
+    const want = SPEECH_VOICES[key] ?? SPEECH_VOICES[`${pack}:${player?.side ?? ''}`];
+    if (!want) return false;
+    const lines = SPEECH_LINES[`${pack}:${lead.type}`] ?? SPEECH_LINES[key];
+    const pool = lines?.[kind];
+    if (!pool?.length) return false;
+    const volume = this.settings.muted ? 0 : this.settings.master * this.settings.voices;
+    return this.speaker.speak(pool[Math.floor(Math.random() * pool.length)], key, want, volume);
   }
 
   /** Short UI feedback (button clicks, refusals). */

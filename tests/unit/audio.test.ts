@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { TABLES, UNIT_VOICES, VOICES, decodeAud, parseBank } from '../../packages/fusion/src/audio';
 import { PACKS } from '../../packages/fusion/src/index';
+import { SPEECH_LINES, SPEECH_VOICES, Speaker, packHasSpeech } from '../../packages/fusion/src/speech';
 
 /** A minimal AUD file: 12-byte header, then one chunk (size, output size, 0x0000DEAF, data). */
 function aud(data: number[]): Uint8Array {
@@ -125,5 +126,88 @@ describe('faction voices', () => {
         expect(script, `${faction.name} is scripted`).toContain(faction.name);
       }
     }
+  });
+});
+
+describe('spoken lines', () => {
+  const PACK_IDS = ['irregular', 'holdout'];
+  const factionKeys = (packId: string) => PACKS[packId].factions.map(f => `${packId}:${f.id}`);
+
+  it('gives every faction of both packs a voice and a fallback line set', () => {
+    for (const packId of PACK_IDS) {
+      expect(packHasSpeech(packId), `${packId} is scripted`).toBe(true);
+      for (const key of factionKeys(packId)) {
+        expect(SPEECH_VOICES[key], `${key} has a voice`).toBeTruthy();
+        // Anything without its own entry falls back to the faction's, so it must exist.
+        expect(SPEECH_LINES[key]?.select.length, `${key} has select lines`).toBeGreaterThan(0);
+        expect(SPEECH_LINES[key]?.order.length, `${key} has order lines`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('gives every soldier and vehicle type in both packs its own lines', () => {
+    // The point of the script: no unit falls back to its faction's generic reply.
+    for (const packId of PACK_IDS) {
+      for (const unitId of Object.keys(PACKS[packId].units)) {
+        const lines = SPEECH_LINES[`${packId}:${unitId}`];
+        expect(lines, `${packId}:${unitId} is scripted`).toBeTruthy();
+        expect(lines.select.length, `${packId}:${unitId} select`).toBeGreaterThan(0);
+        expect(lines.order.length, `${packId}:${unitId} order`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('names a pack, and a faction or unit, that exists', () => {
+    for (const key of Object.keys(SPEECH_VOICES)) {
+      const [packId, id] = key.split(':');
+      expect(PACKS[packId], `${key} names a pack`).toBeTruthy();
+      const known = new Set([...PACKS[packId].factions.map(f => f.id), ...PACKS[packId].factions.map(f => f.side)]);
+      expect(known.has(id), `${key} names a faction or side`).toBe(true);
+    }
+    for (const key of Object.keys(SPEECH_LINES)) {
+      const [packId, id] = key.split(':');
+      expect(PACKS[packId], `${key} names a pack`).toBeTruthy();
+      const known = new Set([
+        ...PACKS[packId].factions.map(f => f.id), ...PACKS[packId].factions.map(f => f.side),
+        ...Object.keys(PACKS[packId].units),
+      ]);
+      expect(known.has(id), `${key} names a faction or unit`).toBe(true);
+    }
+  });
+
+  it('stays inside the Web Speech ranges, and gives each faction its own setting', () => {
+    for (const [key, v] of Object.entries(SPEECH_VOICES)) {
+      expect(v.pitch, `${key} pitch`).toBeGreaterThanOrEqual(0.5);
+      expect(v.pitch, `${key} pitch`).toBeLessThanOrEqual(2);
+      expect(v.rate, `${key} rate`).toBeGreaterThanOrEqual(0.5);
+      expect(v.rate, `${key} rate`).toBeLessThanOrEqual(2);
+      expect(v.lang, `${key} lang`).toMatch(/^[a-z]{2}-[A-Z]{2}$/);
+    }
+    // Two factions on the same pitch and rate are the same voice saying different words.
+    for (const packId of PACK_IDS) {
+      const pairs = factionKeys(packId).map(k => `${SPEECH_VOICES[k].pitch}/${SPEECH_VOICES[k].rate}`);
+      expect(new Set(pairs).size, `${packId} factions sound alike`).toBe(pairs.length);
+    }
+  });
+
+  it('keeps every line short enough to finish before the next one', () => {
+    // Replies are throttled at 600ms; a long line still gets cancelled, but it should be rare.
+    for (const [key, lines] of Object.entries(SPEECH_LINES)) {
+      for (const line of [...lines.select, ...lines.order]) {
+        expect(line.length, `${key}: "${line}"`).toBeLessThanOrEqual(60);
+        expect(line.trim(), `${key} has no empty line`).not.toBe('');
+        // The packs are cast in one language; a stray non-Latin glyph is a mistake, not a choice.
+        expect(line, `${key}: "${line}" is Latin script`).toMatch(/^[\x20-\x7E\u2018\u2019\u201C\u201D\u2014\u00e9]+$/);
+      }
+    }
+  });
+
+  it('speaks nothing, rather than throwing, where the browser has no synthesiser', () => {
+    // Node has no speechSynthesis, which is exactly the unsupported case.
+    expect(Speaker.supported).toBe(false);
+    const speaker = new Speaker();
+    expect(speaker.ready).toBe(false);
+    expect(speaker.speak('Yes, hello.', 'holdout:hoa', SPEECH_VOICES['holdout:hoa'], 1)).toBe(false);
+    expect(() => { speaker.silence(); speaker.dispose(); }).not.toThrow();
   });
 });
