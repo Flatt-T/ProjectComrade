@@ -242,9 +242,9 @@ export default function Legal() {
 
         <h2>The short version</h2>
         <p>We hold the least we can: a callsign, an email address, what you played and whether you
-          are subscribed. We never see your password or your card details. We set no analytics or
-          tracking cookies. We do not sell your data. You can erase almost all of it yourself in
-          two clicks from your account page.</p>
+          are subscribed. We never see your password or your card details. Google Analytics runs
+          only if you opt in; otherwise we set no analytics cookies. We do not sell your data. You
+          can erase almost all of it yourself in two clicks from your account page.</p>
 
         <h2>What we hold, and why</h2>
         <table className="legal-table">
@@ -292,6 +292,11 @@ export default function Legal() {
               <td>Legal obligation</td>
             </tr>
             <tr>
+              <td>Analytics choice</td>
+              <td>To decide whether Google Analytics may set cookies and count visits</td>
+              <td>Consent, which you can withdraw at any time</td>
+            </tr>
+            <tr>
               <td>Advertising choice</td>
               <td>To decide whether an advertisement may be personalised</td>
               <td>Consent, which you can withdraw at any time</td>
@@ -323,13 +328,17 @@ export default function Legal() {
           <li><b>IP addresses, in our logs.</b> Our operational logs contain no IP address and no
             chat text. Rate limiting uses a one-way hash of the connecting address, computed for
             the request and never stored.</li>
-          <li><b>Analytics or tracking cookies of our own.</b> We set none.</li>
+          <li><b>Analytics cookies, unless you opt in.</b> Google Analytics cookies are set only
+            after you say yes. The default is off.</li>
         </ul>
 
         <h2>Who else is involved</h2>
         <ul>
           <li><b>Stripe</b> — payments, subscriptions and invoicing. Stripe is a controller in its
             own right for payment data. <a href="https://stripe.com/gb/privacy" target="_blank" rel="noreferrer noopener">Stripe's privacy policy</a>.</li>
+          <li><b>Google Analytics</b> — visit counts, but only if you opt in. Google Ireland
+            Limited is the contracting party in the UK and EEA.
+            {' '}<a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer noopener">Google's privacy policy</a>.</li>
           <li><b>Amazon Web Services</b> — the Cognito user pool that holds your sign-in
             credentials, and the email service that sends confirmation and reset codes.
             {' '}<a href="https://aws.amazon.com/privacy/" target="_blank" rel="noreferrer noopener">AWS privacy notice</a>.</li>
@@ -368,7 +377,7 @@ export default function Legal() {
           any time. Most of this you can do yourself:</p>
         <ul>
           <li><b>See and correct:</b> your <Link to="/account">account page</Link>.</li>
-          <li><b>Withdraw consent:</b> the advertising and email switches on the same page.</li>
+          <li><b>Withdraw consent:</b> the analytics, advertising and email switches on the same page.</li>
           <li><b>Erase:</b> "Delete your account" on the same page.</li>
         </ul>
         <p>For anything else — including a copy of your data — write to {COMPANY.contact} and we
@@ -453,8 +462,8 @@ export default function Legal() {
       {/* ------------------------------------------------------------------ */}
       {page.id === 'cookies' && <>
         <h2>What we store on your device</h2>
-        <p>We set no analytics cookies and no tracking cookies of our own. There are two cookies,
-          both strictly necessary, plus some settings kept in your browser's own storage.</p>
+        <p>There are two strictly necessary cookies of our own, plus optional Google Analytics
+          cookies if you opt in, plus some settings kept in your browser's own storage.</p>
         <table className="legal-table">
           <thead><tr><th>Name</th><th>What it does</th><th>How long</th></tr></thead>
           <tbody>
@@ -471,15 +480,29 @@ export default function Legal() {
               <td>13 months</td>
             </tr>
             <tr>
+              <td><code>_ga</code>, <code>_ga_*</code></td>
+              <td>Google Analytics visit measurement. Set only after you opt in</td>
+              <td>Up to 13 months</td>
+            </tr>
+            <tr>
               <td>Browser storage</td>
-              <td>Your callsign, audio settings and your advertising choice. These stay on your
-                device; only the advertising choice is sent to us, and only if you are signed in</td>
+              <td>Your callsign, audio settings, your advertising choice and your analytics
+                choice. These stay on your device; only the advertising choice is sent to us, and
+                only if you are signed in</td>
               <td>Until you clear it</td>
             </tr>
           </tbody>
         </table>
-        <p>Strictly necessary cookies do not need your consent, which is why you are not asked to
-          accept cookies to use the site. You are asked one question, about advertising.</p>
+        <p>Strictly necessary cookies do not need your consent, which is why you can use the site
+          without accepting optional cookies. You are asked about analytics, and — if you will see
+          an advertisement — about personalised advertising.</p>
+
+        <h2>Analytics</h2>
+        <p>If you opt in, we load Google Analytics 4 (measurement id <code>G-3Y9X4LBRWH</code>) so
+          we can see which pages are used. Until you opt in, Google's consent mode keeps analytics
+          storage denied, so those cookies are not set. You can change your answer on your
+          {' '}<Link to="/account">account page</Link>, or by answering the banner again after
+          clearing site data.</p>
 
         <h2>Advertising</h2>
         <p>Free and guest players see one advertisement of up to thirty seconds before a match.

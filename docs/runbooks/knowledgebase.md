@@ -1,6 +1,6 @@
 # Player knowledgebase (`/kb`) and HelpDot indexing
 
-The public game guide lives at `https://projectcomrade.thunderchildcreativetechnologies.com/kb`.
+The public game guide lives at `https://projectcomrade.co.uk/kb`.
 Each article is a real HTML file (not the React shell) so search engines and the HelpDot.me
 widget can index headings and body text.
 
@@ -13,7 +13,7 @@ Unit and upgrade facts are generated from Fusion rule packs at web build time
 2. Knowledge Base tab → Documentation Sources.
 3. Add a source if it is not already there:
    - Type: **sitemap**
-   - URL: `https://projectcomrade.thunderchildcreativetechnologies.com/sitemap.xml`
+   - URL: `https://projectcomrade.co.uk/sitemap.xml`
    - Label: `Project Comrade guide`
 4. Click **Sync**. Wait until the job finishes.
 5. Indexed Pages should list `/kb`, `/kb/how-to-play`, each game and side article, `/kb/units`

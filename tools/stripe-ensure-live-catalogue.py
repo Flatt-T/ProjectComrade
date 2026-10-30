@@ -16,7 +16,7 @@ import urllib.request
 
 ENV_PATH = "/opt/comrade/service.env"
 API_VERSION = "2025-08-27.basil"
-PUBLIC_URL = "https://projectcomrade.thunderchildcreativetechnologies.com"
+PUBLIC_URL = "https://projectcomrade.co.uk"
 WEBHOOK_URL = PUBLIC_URL + "/api/stripe/webhook"
 EXPECTED_ACCOUNT = "acct_1U5jjC2AlCr8Xzbo"
 COUPON_ID = "comrade_gold_100_once"

@@ -122,7 +122,7 @@ key to it; the site picks it up within a minute and nothing needs redeploying.
 - **Customer emails:** turn on successful payments and failed payments. The service sends no
   email of its own.
 - **Dunning:** set the retry schedule and what happens when retries run out (cancel).
-- **Webhook endpoint:** `https://projectcomrade.thunderchildcreativetechnologies.com/api/stripe/webhook`
+- **Webhook endpoint:** `https://projectcomrade.co.uk/api/stripe/webhook`
   subscribed to:
   `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
   `customer.subscription.created`, `customer.subscription.updated`,
@@ -165,8 +165,8 @@ choice, which is enough for a non-personalised serve and for Google's `npa=1`.
 ## 5. The rest of the environment
 
 ```
-COMRADE_PUBLIC_URL=https://projectcomrade.thunderchildcreativetechnologies.com
-COMRADE_TERMS_VERSION=2026-10-26          # bump to re-request acceptance
+COMRADE_PUBLIC_URL=https://projectcomrade.co.uk
+COMRADE_TERMS_VERSION=2026-10-30          # bump to re-request acceptance
 COMRADE_GUEST_SECRET=<32+ random chars>   # signs the guest cookie
 ```
 

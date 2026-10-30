@@ -10,7 +10,7 @@
 // starts on the first tick with their input locked, so their turns keep flowing and nobody
 // else's lockstep waits on them; they simply arrive with thirty seconds already gone.
 import { randomBytes } from 'node:crypto';
-import { AdBreak, PlayKind, Tier, plan, playKind } from '@comrade/contracts';
+import { AdBreak, GameStyle, Loadout, PlayKind, Tier, plan, playKind, styleAllowed } from '@comrade/contracts';
 import { consentFor } from './accounts.js';
 import { adBreak } from './ads.js';
 import { platformEnabled } from './config.js';
@@ -30,6 +30,8 @@ export interface StartingPlayer {
   tier: Tier;
   /** Start of this player's allowance clock, resolved when their peer identified. */
   anchor: Date;
+  /** Custom Mashup: the forces this commander assembled, recorded with the match. */
+  loadout?: Loadout;
 }
 
 export interface StartingAi { slot: number; name: string; faction: string; team: number }
@@ -81,6 +83,13 @@ export async function beginMatch(brief: MatchBrief): Promise<StartOutcome> {
   }));
 
   for (const { player, quota, lock } of checks) {
+    if (!styleAllowed(brief.style as GameStyle, player.tier)) {
+      refusals.push({
+        peerId: player.peerId, name: player.name,
+        message: `${player.name} needs Gold to play the Custom Mashup`,
+      });
+      continue;
+    }
     if (lock.locked) {
       const opens = lock.opensAt ? new Date(lock.opensAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) : 'soon';
       refusals.push({ peerId: player.peerId, name: player.name, message: `${player.name}: that battlefield is in Gold early access until ${opens}` });

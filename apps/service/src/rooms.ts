@@ -1,8 +1,8 @@
 import { randomInt, randomUUID } from 'node:crypto';
 import { log } from './ops.js';
 import {
-  DEFAULT_OPTIONS, RoomOptions, RoomPlayer, RoomState, RoomSummary, Tier,
-  factionAllowed, parseClientMessage, playKind, styleInfo,
+  DEFAULT_OPTIONS, MASHUP_STYLE, RoomOptions, RoomPlayer, RoomState, RoomSummary, Tier,
+  factionAllowed, parseClientMessage, playKind, styleAllowed, styleInfo,
 } from '@comrade/contracts';
 import { accountBySub, touchGuest } from './accounts.js';
 import { verifyAccessToken } from './auth.js';
@@ -154,7 +154,8 @@ export class RoomCoordinator {
     try {
       const quota = await quotaFor(subject, playKind(style), peer.identity.tier, peer.identity.anchor);
       const lock = await lockFor(room!.options.map, peer.identity.tier);
-      const entitled = !lock.locked && (quota.remaining === null || quota.remaining > 0);
+      const entitled = !lock.locked && styleAllowed(style, peer.identity.tier)
+        && (quota.remaining === null || quota.remaining > 0);
       peer.identity.entitled = entitled;
       peer.identity.checkedFor = `${style}:${room!.options.map}`;
       peer.player.entitled = entitled;
@@ -231,6 +232,7 @@ export class RoomCoordinator {
         team: other.player.team ?? 0,
         accountId: other.identity.accountId, guestId: other.identity.guestId,
         tier: other.identity.tier, anchor: other.identity.anchor,
+        loadout: other.player.loadout,
       };
     });
     const ai: StartingAi[] = Array.from({ length: aiCount }, (_, n) => ({
@@ -337,6 +339,9 @@ export class RoomCoordinator {
         if (room.host !== id) throw new Error('Only the host can configure the match');
         if (room.phase !== 'lobby') throw new Error('Match already started');
         if (message.options.maxPlayers < room.members.size) throw new Error('Cannot reduce below current player count');
+        if (platformEnabled() && !styleAllowed(message.options.style, peer.identity.tier)) {
+          throw new Error('The Custom Mashup is a Gold game type — subscribe to Gold to build your own army');
+        }
         const styleChanged = message.options.style !== room.options.style;
         const mapChanged = message.options.map !== room.options.map;
         room.options = message.options;
@@ -345,6 +350,8 @@ export class RoomCoordinator {
           const player = this.peers.get(member)!.player;
           player.ready = false;
           if (styleChanged || !factionAllowed(style.id, player.faction)) player.faction = style.factions[n % style.factions.length].id;
+          // Forces belong to the Custom Mashup; any other style fields its own roster.
+          if (style.id !== MASHUP_STYLE) player.loadout = undefined;
         });
         // A different style or battlefield draws on a different allowance.
         if (styleChanged || mapChanged) void this.refreshRoom(peer.room);
@@ -353,6 +360,11 @@ export class RoomCoordinator {
       if (message.type === 'faction') {
         if (!factionAllowed(room.options.style, message.faction)) throw new Error('That side is not part of this game style');
         peer.player.faction = message.faction; peer.player.ready = false; this.broadcast(peer.room); return;
+      }
+      if (message.type === 'loadout') {
+        if (room.phase !== 'lobby') throw new Error('Forces are fixed once the match starts');
+        if (room.options.style !== MASHUP_STYLE) throw new Error('Only a Custom Mashup takes a choice of forces');
+        peer.player.loadout = message.loadout; peer.player.ready = false; this.broadcast(peer.room); return;
       }
       if (message.type === 'team') {
         if (room.phase !== 'lobby') throw new Error('Teams are fixed once the match starts');
@@ -377,6 +389,9 @@ export class RoomCoordinator {
       }
       if (message.type === 'ready' && room.phase === 'lobby') {
         // Somebody with nothing left today cannot hold the room at "ready".
+        if (message.ready && room.options.style === MASHUP_STYLE && !peer.player.loadout) {
+          throw new Error('Choose your forces first');
+        }
         if (message.ready && peer.player.entitled === false) {
           throw new Error(`You have no ${playKind(room.options.style) === 'fusion' ? 'Fusion' : 'Classic'} matches left — watch an advertisement or buy a battle pack`);
         }
@@ -391,6 +406,10 @@ export class RoomCoordinator {
         if (room.phase !== 'lobby') throw new Error('Match already started');
         if (room.starting) throw new Error('Already starting');
         if (!styleInfo(room.options.style).playable) throw new Error('That game style is not playable yet');
+        if (room.options.style === MASHUP_STYLE) {
+          const unset = [...room.members].filter(m => !this.peers.get(m)!.player.loadout);
+          if (unset.length) throw new Error('Every commander must choose their forces first');
+        }
         const others = [...room.members].filter(m => m !== id);
         if (others.some(m => !this.peers.get(m)!.player.ready)) throw new Error('All players must be ready');
         // Marked synchronously so a second click cannot charge the room twice.

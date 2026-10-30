@@ -31,7 +31,7 @@ async function toAvatar(file: File): Promise<Blob> {
 }
 
 export default function Account() {
-  const { ready, signedIn, profile, entitlements, consent, applyMe, reload, signOut, setLocalConsent } = useAuth();
+  const { ready, signedIn, profile, entitlements, consent, localConsent, applyMe, reload, signOut, setLocalConsent } = useAuth();
   const file = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
@@ -192,7 +192,16 @@ export default function Account() {
       </article>
 
       <article className="card">
-        <h2>Advertising and email</h2>
+        <h2>Advertising, analytics and email</h2>
+        <label className="check">
+          <input type="checkbox" checked={localConsent.analytics} disabled={!!busy}
+            onChange={event => {
+              const analytics = event.target.checked;
+              setLocalConsent({ analyticsDecided: true, analytics });
+            }} />
+          <span>Google Analytics. Off means we do not set analytics cookies; the site works the
+            same either way.</span>
+        </label>
         <label className="check">
           <input type="checkbox" checked={!!consent?.personalisedAds} disabled={!!busy}
             onChange={event => {
@@ -215,7 +224,8 @@ export default function Account() {
           <span>Email me when new maps and fusions launch.</span>
         </label>
         <p className="card-note">
-          Subscribers see no advertisements at all. <Link to="/legal/cookies">How advertising works here</Link>.
+          Subscribers see no advertisements at all. Analytics is optional for everyone.
+          {' '}<Link to="/legal/cookies">How advertising and analytics work here</Link>.
         </p>
       </article>
 

@@ -1,5 +1,5 @@
 /** Public origin used in canonical URLs, Open Graph and the sitemap. */
-export const SITE_ORIGIN = 'https://projectcomrade.thunderchildcreativetechnologies.com';
+export const SITE_ORIGIN = 'https://projectcomrade.co.uk';
 
 /** Same public widget key as apps/web/index.html — this is the site embed key, not a secret. */
 export const HELPDOT_API_KEY = 'sh_03a26280997620149987f25eb65ab5d5da66ee4a9d3127fd';

@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { LaunchRequest, styleInfo } from '@comrade/contracts';
-import { Command, Entity, Game, LocalSession, LockstepSession, PACKS, PlayerSetup, QueueKind, RulePack, Session, TICKS_PER_SECOND } from '../../../packages/fusion/src/index';
+import { LaunchRequest, MASHUP_STYLE, styleInfo } from '@comrade/contracts';
+import {
+  Command, Entity, Game, LocalSession, LockstepSession, PACKS, PlayerSetup, QueueKind, RulePack, Session,
+  TICKS_PER_SECOND, composeMashup, mashupMap, wholePackLoadout,
+} from '../../../packages/fusion/src/index';
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import type { RoomConnection } from './net';
 import TechTree from './TechTree';
@@ -55,7 +58,26 @@ declare global {
 
 export default function FusionBattle({ launch, mapName, conn, onExit }: { launch: LaunchRequest; mapName: string; conn: RoomConnection; onExit: () => void }) {
   const style = styleInfo(launch.style);
-  const pack = PACKS[style.pack ?? 'dune'];
+  /**
+   * A Custom Mashup has no rule pack of its own: it is composed here, on every client, from
+   * the battlefield and the loadouts the launch carries. Composition is deterministic, so
+   * every client in the match plays the same pack — which is what lockstep needs.
+   */
+  const composed = useMemo(() => {
+    if (launch.style !== MASHUP_STYLE) return null;
+    const { pack: arena, preset } = mashupMap(launch.map);
+    const seats = (launch.players?.length ? launch.players : [{ id: 'local', name: 'Commander', faction: launch.faction }]).slice(0, preset.maxPlayers);
+    const aiCount = Math.max(0, Math.min(launch.settings.ai, preset.maxPlayers - seats.length));
+    // A commander who somehow arrived without choices, and every computer opponent, fields one
+    // pack whole — the battlefield's own, so they look at home on it.
+    const house = (n: number) => wholePackLoadout(arena.id, arena.factions[n % arena.factions.length].id);
+    const loadouts = [
+      ...seats.map((p, i) => p.loadout ?? house(i)),
+      ...Array.from({ length: aiCount }, (_, i) => house(seats.length + i)),
+    ];
+    return composeMashup(launch.map, loadouts);
+  }, []);
+  const pack = composed?.pack ?? PACKS[style.pack ?? 'dune'];
   const canvas = useRef<HTMLCanvasElement>(null);
   const minimap = useRef<HTMLCanvasElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -101,10 +123,12 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     const preset = pack.maps.find(m => m.id === launch.map) ?? pack.maps[0];
     const aiCount = Math.max(0, Math.min(launch.settings.ai, preset.maxPlayers - humans.length));
     // Humans who picked the same team in the lobby are allies; everyone else fights alone.
-    const players: PlayerSetup[] = humans.slice(0, preset.maxPlayers).map((h, i) => ({ name: h.name, faction: h.faction, ai: false, team: h.team ? 100 + h.team : i }));
+    // In a mashup every seat is its own faction, composed from that commander's own choices.
+    const players: PlayerSetup[] = humans.slice(0, preset.maxPlayers).map((h, i) => ({ name: h.name, faction: composed?.factions[i] ?? h.faction, ai: false, team: h.team ? 100 + h.team : i }));
     for (let i = 0; i < aiCount; i++) {
       const used = new Set(players.map(p => p.faction));
-      const faction = pack.factions.find(f => !used.has(f.id)) ?? pack.factions[players.length % pack.factions.length];
+      const faction = composed ? pack.factions[players.length] ?? pack.factions[0]
+        : pack.factions.find(f => !used.has(f.id)) ?? pack.factions[players.length % pack.factions.length];
       players.push({ name: `Computer ${i + 1}`, faction: faction.id, ai: true, level: launch.settings.aiLevel ?? 'normal', team: players.length });
     }
     return {

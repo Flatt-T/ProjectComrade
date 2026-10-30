@@ -37,7 +37,18 @@ classics and write the difference in the PR description.
    the request's key promises hold (for example "resources are scarce at home"); dangers behave
    as described; two identical games stay identical (lockstep).
 
-## 3. Check it
+## 3. It joins the Custom Mashup on its own
+
+Adding the pack to `FUSIONS` (step 2 above) is all it needs to appear in the Gold Custom
+Mashup — `MASHUP_PACKS` is built from `CLASSIC_PACKS` and `FUSIONS`: its battlefields are offered there, and its
+buildings, soldiers, vehicles, aircraft and ships become selectable sets — one per faction,
+or one for the pack where every faction fields the same things. There is no mashup data to
+author and no service deploy; see `docs/adr/012-custom-mashup.md` for how a mashup is composed.
+
+A pack that reuses another's roster (Leviathan Isles is Red Alert 2's armies) contributes its
+battlefields only, so the unit lists are not doubled up.
+
+## 4. Check it
 
 `pnpm exec tsc --noEmit`, `pnpm lint` and `pnpm exec vitest run tests/unit` must pass. The
 `fusions are registered and playable` test checks that the pack and lobby style agree.

@@ -1,6 +1,6 @@
 # Project Comrade deployment
 
-Target: `https://projectcomrade.thunderchildcreativetechnologies.com`.
+Target: `https://projectcomrade.co.uk`. The previous hostname `https://projectcomrade.thunderchildcreativetechnologies.com` remains on NPM host 49 so existing links keep working.
 
 Initial verified engine/container build: [GitHub Actions](https://github.com/Flatt-T/ProjectComrade/actions/runs/39475714528).
 
@@ -29,10 +29,11 @@ Inside the guest, `comrade-deploy.timer` runs every two minutes. `/usr/local/lib
 
 The route uses the existing Nginx Proxy Manager edge rather than a new tunnel:
 
-- Cloudflare zone: `85400a3889dbd309007a2876f833c9f1`.
-- Proxied A record: `projectcomrade` → `109.145.201.162` (record `27280e70a44a06352e96ed03c7381cc7`).
-- NPM: proxy host **49**, domain `projectcomrade.thunderchildcreativetechnologies.com` → `http://10.1.0.60:3001`, WebSockets enabled, forced HTTPS.
-- NPM Let's Encrypt certificate **68**, initially expires 18 January 2027; normal NPM renewal applies.
+- Cloudflare zone: `be11dbfdc06aa587b950cb6c6524f41f` (`projectcomrade.co.uk`).
+- Proxied A record: apex `projectcomrade.co.uk` → `109.145.201.162`.
+- Proxied CNAME: `www.projectcomrade.co.uk` → `projectcomrade.co.uk`.
+- NPM: proxy host **50**, domains `projectcomrade.co.uk` and `www.projectcomrade.co.uk` → `http://10.1.0.60:3001`, WebSockets enabled, forced HTTPS, Let's Encrypt certificate **69**.
+- Previous hostname remains: Cloudflare zone `85400a3889dbd309007a2876f833c9f1`, proxied A `projectcomrade` → `109.145.201.162` (record `27280e70a44a06352e96ed03c7381cc7`); NPM host **49** / certificate **68**.
 - Compose binds port 3001 to the guest's workload address. For local development it defaults to loopback unless `COMRADE_BIND_ADDRESS` is set.
 
 Operator credential locations are documented in `C:\ProjectsOnTheGo\AWS Cost optimisation`. Keep values outside this repository and workflow logs. Only the new DNS record, certificate and proxy host were created for this service.

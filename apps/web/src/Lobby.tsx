@@ -1,9 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  AILevel, CRATES_MAX, CreditsPreset, DEFAULT_SETTINGS, GameStyle, LaunchRequest, MapInfo, RENEWAL_CLASSIC, RENEWAL_MAX, RoomOptions, RoomState, RoomSummary,
-  SPEED_MAX, SPEED_MIN, SPEED_STEP, STYLES, SUPER_CHARGE_MAX, SUPER_CHARGE_MIN, SUPER_CHARGE_STEP, playKind, styleInfo, WORMS_MAX,
+  AILevel, CRATES_MAX, CreditsPreset, DEFAULT_SETTINGS, GameStyle, LaunchRequest, Loadout, MapInfo, MASHUP_STYLE,
+  RENEWAL_CLASSIC, RENEWAL_MAX, RoomOptions, RoomState, RoomSummary,
+  SPEED_MAX, SPEED_MIN, SPEED_STEP, STYLES, SUPER_CHARGE_MAX, SUPER_CHARGE_MIN, SUPER_CHARGE_STEP,
+  playKind, styleAllowedFor, styleInfo, WORMS_MAX,
 } from '@comrade/contracts';
-import { PACKS } from '../../../packages/fusion/src/index';
+import {
+  MASHUP_SLOTS, MASHUP_SLOT_BLURB, MASHUP_SLOT_LABEL, MashupSlot, PACKS,
+  mashupCatalogue, mashupLoadoutProblem, mashupMap, wholePackLoadout,
+} from '../../../packages/fusion/src/index';
 import type { RoomConnection } from './net';
 import Chat from './Chat';
 import CreditGate from './CreditGate';
@@ -18,19 +23,41 @@ interface LobbyMap { id: string; name: string; description: string; maxPlayers: 
 const CREDIT_LABELS: Record<string, Record<CreditsPreset, string>> = {
   'td-classic': { low: 'Low (3000)', standard: 'Standard (6000)', high: 'High (12000)' },
 };
+// Every set a Custom Mashup can draw on, derived from the rule packs themselves: a pack
+// added to the platform turns up here with no change to the lobby.
+const MASHUP = mashupCatalogue();
 const CODE_WORDS = ['fox', 'hawk', 'bear', 'wolf', 'echo', 'nova', 'iron', 'rook', 'kilo', 'zulu'];
 const randomCode = () => `${CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)]}-${Math.floor(1000 + Math.random() * 8999)}`;
 
-function creditLabels(style: GameStyle): Record<CreditsPreset, string> {
+/** The rule pack a room's world comes from: the style's own, or a mashup's battlefield. */
+function arenaPack(style: GameStyle, map: string) {
+  if (style === MASHUP_STYLE) { try { return mashupMap(map).pack; } catch { return undefined; } }
   const info = styleInfo(style);
-  if (info.engine === 'fusion' && info.pack) {
-    const c = PACKS[info.pack].startCredits;
+  return info.pack ? PACKS[info.pack] : undefined;
+}
+
+function creditLabels(style: GameStyle, map: string): Record<CreditsPreset, string> {
+  const arena = arenaPack(style, map);
+  if (arena) {
+    const c = arena.startCredits;
     return { low: `Low (${c.low})`, standard: `Standard (${c.standard})`, high: `High (${c.high})` };
   }
   return CREDIT_LABELS[style] ?? CREDIT_LABELS['td-classic'];
 }
 
-function factionColor(style: GameStyle, faction: string): string | undefined {
+/** A coherent starting loadout: one pack fielded whole, so a new room is playable at once. */
+function houseLoadout(map: string, seat: number): Loadout {
+  const arena = mashupMap(map).pack;
+  const loadout = wholePackLoadout(arena.id, arena.factions[seat % arena.factions.length].id);
+  // No water, no navy: nothing is proposed that would have nowhere to sail.
+  if (MASHUP.maps.find(m => m.mapId === map)?.water === false) delete loadout.naval;
+  return loadout;
+}
+
+const MASHUP_SEAT_COLORS = ['#2f6fd0', '#c2281f', '#3c9b44', '#d5bc68'];
+
+function factionColor(style: GameStyle, faction: string, seat = 0): string | undefined {
+  if (style === MASHUP_STYLE) return MASHUP_SEAT_COLORS[seat % MASHUP_SEAT_COLORS.length];
   const info = styleInfo(style);
   return info.pack ? PACKS[info.pack].factions.find(f => f.id === faction)?.color : undefined;
 }
@@ -95,6 +122,12 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
 
   const mapsFor = (style: GameStyle): LobbyMap[] => {
     const info = styleInfo(style);
+    if (style === MASHUP_STYLE) {
+      return MASHUP.maps.map(m => ({
+        id: m.mapId, name: m.name, description: m.description, maxPlayers: m.maxPlayers,
+        detail: `${m.packName === m.name ? '' : `${m.packName} · `}${m.maxPlayers} players${m.water ? '' : ' · no water'}`,
+      }));
+    }
     if (info.engine === 'fusion' && info.pack) {
       return PACKS[info.pack].maps.map(m => ({ id: m.id, name: m.name, description: m.description, maxPlayers: m.maxPlayers, detail: `${m.maxPlayers} players` }));
     }
@@ -104,6 +137,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
 
   const me = room?.players.find(p => p.id === conn.id);
   const isHost = !!me?.host;
+  /** Gold-only styles: decided from this player's own entitlements, not their tier name. */
+  const allowedStyle = (id: GameStyle) => styleAllowedFor(id, entitlements ?? { tier, customMashup: false });
 
   // When the host starts, every client in the room launches the configured match.
   useEffect(() => {
@@ -113,13 +148,26 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     const map = mapsFor(room.options.style).find(m => m.id === room.options.map) ?? mapsFor(room.options.style)[0];
     const players = (room.slots ?? room.players.map(p => p.id)).map(id => {
       const p = room.players.find(x => x.id === id);
-      return { id, name: p?.name ?? 'Commander', faction: p?.faction ?? style.factions[0].id, team: p?.team ?? 0 };
+      return { id, name: p?.name ?? 'Commander', faction: p?.faction ?? style.factions[0].id, team: p?.team ?? 0, loadout: p?.loadout };
     });
     onLaunch({
       version: 1, type: 'launch', map: map?.id ?? room.options.map, faction: me.faction, style: room.options.style,
       settings: room.options.settings, seed: room.seed, players, you: conn.id,
     }, map?.name ?? room.options.map);
   }, [room, me]);
+
+  // A mashup room is playable the moment you walk in: until you choose, you field the
+  // battlefield's own pack whole.
+  const proposed = useRef('');
+  useEffect(() => {
+    if (!room || room.options.style !== MASHUP_STYLE || room.phase !== 'lobby') return;
+    const mine = room.players.find(p => p.id === conn.id);
+    if (!mine || mine.loadout || proposed.current === room.room + room.options.map) return;
+    proposed.current = room.room + room.options.map;
+    try {
+      conn.send({ type: 'loadout', loadout: houseLoadout(room.options.map, room.players.findIndex(p => p.id === conn.id)) });
+    } catch { /* an unknown battlefield: the picker still offers every set */ }
+  }, [room, conn]);
 
   function enter() {
     const trimmed = name.trim();
@@ -168,7 +216,28 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     const mapMax = chosenMap?.maxPlayers ?? 2;
     const aiMax = Math.max(0, mapMax - room.players.length);
     const fusion = style.engine === 'fusion';
-    const hasWorms = fusion && !!style.pack && !!PACKS[style.pack]?.mechanics.sandworm;
+    const arena = arenaPack(room.options.style, room.options.map);
+    const hasWorms = fusion && !!arena?.mechanics.sandworm;
+    const mashup = room.options.style === MASHUP_STYLE;
+    const canMashup = allowedStyle(MASHUP_STYLE);
+    const myLoadout = me?.loadout;
+    const mashupProblem = mashup ? mashupLoadoutProblem(myLoadout) : null;
+    const dryNavy = mashup && !!myLoadout?.naval && MASHUP.maps.find(m => m.mapId === room.options.map)?.water === false;
+    const setSlot = (slot: MashupSlot, key: string) => {
+      const next: Loadout = { ...(myLoadout ?? houseLoadout(room.options.map, room.players.findIndex(p => p.id === conn.id))) };
+      if (key) next[slot] = key; else delete next[slot];
+      const problem = mashupLoadoutProblem(next);
+      if (problem) { setError(problem); return; }
+      setError('');
+      conn.send({ type: 'loadout', loadout: next });
+    };
+    // One line of who this commander fields, with the same source named only once.
+    const setsOf = (loadout: Loadout | undefined) => {
+      if (!loadout) return 'CHOOSING…';
+      const names = MASHUP_SLOTS.filter(slot => loadout[slot])
+        .map(slot => MASHUP.choices[slot].find(c => c.key === loadout[slot])?.label ?? loadout[slot]!);
+      return [...new Set(names)].join(' / ').toUpperCase();
+    };
     const set = { ...DEFAULT_SETTINGS, ...room.options.settings };
     const worms = set.worms, renewal = set.renewal, superCharge = set.superCharge, crates = set.crates, speed = set.speed;
     return <div className="lobby-room">
@@ -178,9 +247,9 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
         <p className="room-share">Invite link: <code>{location.origin}/?room={room.room}</code></p>
 
         <div className="players">
-          {room.players.map(p => <div key={p.id} className={`player ${p.faction}`} style={{ borderLeftColor: factionColor(room.options.style, p.faction) }}>
+          {room.players.map((p, seat) => <div key={p.id} className={`player ${p.faction}`} style={{ borderLeftColor: factionColor(room.options.style, p.faction, seat) }}>
             <span className="pname">{p.name}{p.host && <em> · HOST</em>}{p.id === conn.id && <em> · YOU</em>}</span>
-            <span className="pfaction">{style.factions.find(f => f.id === p.faction)?.name.toUpperCase() ?? p.faction}</span>
+            <span className="pfaction">{mashup ? setsOf(p.loadout) : style.factions.find(f => f.id === p.faction)?.name.toUpperCase() ?? p.faction}</span>
             {p.id === conn.id
               ? <select className="pteam" aria-label="Your team" value={p.team ?? 0} onChange={e => conn.send({ type: 'team', team: Number(e.target.value) })}>
                   <option value={0}>No team</option>{[1, 2, 3, 4].map(t => <option key={t} value={t}>Team {t}</option>)}
@@ -188,7 +257,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
               : <span className="pteam">{p.team ? `TEAM ${p.team}` : ''}</span>}
             {p.tier && p.tier !== 'guest' && <TierBadge tier={p.tier as 'free'} small />}
             <span className={p.ready ? 'pready on' : 'pready'}>
-              {p.entitled === false ? 'NO PLAYS LEFT' : p.id === room.host ? 'HOST' : p.ready ? 'READY' : 'NOT READY'}
+              {mashup && p.tier !== 'gold' ? 'GOLD ONLY'
+                : p.entitled === false ? 'NO PLAYS LEFT' : p.id === room.host ? 'HOST' : p.ready ? 'READY' : 'NOT READY'}
             </span>
           </div>)}
           {fusion && Array.from({ length: Math.min(aiMax, room.options.settings.ai) }).map((_, i) =>
@@ -197,22 +267,50 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
             <div key={`open-${i}`} className="player open"><span className="pname">Open slot</span><span className="pfaction">—</span><span className="pready">WAITING</span></div>)}
         </div>
 
-        <div className="faction-pick">
-          <span className="eyebrow">YOUR SIDE</span>
-          <div className={`factions n${style.factions.length}`}>
-            {style.factions.map(f => <button key={f.id} className={me?.faction === f.id ? 'selected' : ''} style={{ ['--house' as string]: factionColor(room.options.style, f.id) ?? (f.id === 'nod' ? '#ce745f' : '#d5bc68') }}
-              onClick={() => conn.send({ type: 'faction', faction: f.id })}><b>{f.name.toUpperCase()}</b><span>{f.full}</span><small>{f.blurb}</small></button>)}
-          </div>
-        </div>
+        {mashup
+          ? <div className="faction-pick mashup-pick">
+              <span className="eyebrow">YOUR FORCES</span>
+              <p className="map-blurb">The battlefield decides the world; you decide who fights on it. Every commander
+                assembles their own army, so nobody has to agree on anything but the map.</p>
+              {!canMashup && <p className="map-early locked">
+                The Custom Mashup is a Gold game type. <Link to="/tiers">Gold builds its own army</Link>.
+              </p>}
+              <div className="mashup-slots">
+                {MASHUP_SLOTS.map(slot => {
+                  const options = MASHUP.choices[slot];
+                  const chosen = myLoadout?.[slot] ?? '';
+                  const picked = options.find(o => o.key === chosen);
+                  return <label key={slot}>{MASHUP_SLOT_LABEL[slot]}
+                    <select value={chosen} aria-label={`Your ${MASHUP_SLOT_LABEL[slot].toLowerCase()}`} onChange={e => setSlot(slot, e.target.value)}>
+                      {slot !== 'structures' && <option value="">None</option>}
+                      {options.map(o => <option key={o.key} value={o.key}>{o.label === o.packName ? o.label : `${o.packName} · ${o.label}`}</option>)}
+                    </select>
+                    <small>{picked ? `${picked.count} to build: ${picked.blurb}` : MASHUP_SLOT_BLURB[slot]}</small>
+                  </label>;
+                })}
+              </div>
+              {mashupProblem && <small className="lobby-error">{mashupProblem}</small>}
+              {dryNavy && <small className="ad-warning">This battlefield has no water: your sea forces would have nowhere to sail.</small>}
+            </div>
+          : <div className="faction-pick">
+              <span className="eyebrow">YOUR SIDE</span>
+              <div className={`factions n${style.factions.length}`}>
+                {style.factions.map(f => <button key={f.id} className={me?.faction === f.id ? 'selected' : ''} style={{ ['--house' as string]: factionColor(room.options.style, f.id) ?? (f.id === 'nod' ? '#ce745f' : '#d5bc68') }}
+                  onClick={() => conn.send({ type: 'faction', faction: f.id })}><b>{f.name.toUpperCase()}</b><span>{f.full}</span><small>{f.blurb}</small></button>)}
+              </div>
+            </div>}
 
         <div className="room-launch">
-          {me?.entitled === false && <div className="quota-block">
-            <CreditGate kind={playKind(room.options.style)} room={room.room}
-              onEarned={() => conn.send({ type: 'recheck' })} />
-          </div>}
+          {me?.entitled === false && (mashup && !canMashup
+            ? <small className="ad-warning">The Custom Mashup is a Gold game type — no advertisement unlocks it.
+              {' '}<Link to="/tiers">Subscribe to Gold</Link> to field an army of your own.</small>
+            : <div className="quota-block">
+              <CreditGate kind={playKind(room.options.style)} room={room.room}
+                onEarned={() => conn.send({ type: 'recheck' })} />
+            </div>)}
           {isHost
-            ? <button className="deploy" disabled={!othersReady || me?.entitled === false} onClick={() => conn.send({ type: 'start' })}>START OPERATION →</button>
-            : <button className="deploy" disabled={me?.entitled === false} onClick={() => conn.send({ type: 'ready', ready: !me?.ready })}>{me?.ready ? 'CANCEL READY' : 'READY UP ✓'}</button>}
+            ? <button className="deploy" disabled={!othersReady || me?.entitled === false || !!mashupProblem || room.players.some(p => mashup && !p.loadout)} onClick={() => conn.send({ type: 'start' })}>START OPERATION →</button>
+            : <button className="deploy" disabled={me?.entitled === false || !!mashupProblem} onClick={() => conn.send({ type: 'ready', ready: !me?.ready })}>{me?.ready ? 'CANCEL READY' : 'READY UP ✓'}</button>}
           {entitlements?.ads && <small className="ad-warning">
             A 30-second advertisement plays before the match. Your base is on the field while it
             runs, so you join about half a minute behind the subscribers.
@@ -229,7 +327,9 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
       <aside className="room-config">
         <p className="eyebrow">MATCH SETUP{!isHost && ' · HOST CONTROLLED'}</p>
         <label>Game style<select disabled={!isHost} value={room.options.style} onChange={e => changeStyle(e.target.value as GameStyle)}>
-          {STYLES.map(s => <option key={s.id} value={s.id} disabled={!s.playable}>{s.name}{s.playable ? '' : ' (coming soon)'}</option>)}
+          {STYLES.map(s => <option key={s.id} value={s.id} disabled={!s.playable || !allowedStyle(s.id)}>
+            {s.name}{!s.playable ? ' (coming soon)' : s.tier && !allowedStyle(s.id) ? ' (Gold only)' : ''}
+          </option>)}
         </select></label>
         <p className="map-blurb">{style.blurb}</p>
         <label>Battlefield<select disabled={!isHost} value={chosenMap?.id ?? ''} onChange={e => {
@@ -260,7 +360,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
           <option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option>
         </select></label>}
         <label>Starting credits<select disabled={!isHost} value={room.options.settings.credits} onChange={e => configureSettings({ credits: e.target.value as CreditsPreset })}>
-          {(['low', 'standard', 'high'] as CreditsPreset[]).map(c => <option key={c} value={c}>{creditLabels(room.options.style)[c]}</option>)}
+          {(['low', 'standard', 'high'] as CreditsPreset[]).map(c => <option key={c} value={c}>{creditLabels(room.options.style, room.options.map)[c]}</option>)}
         </select></label>
         <label>Tech level<select disabled={!isHost} value={room.options.settings.techLevel} onChange={e => configureSettings({ techLevel: Number(e.target.value) })}>
           {[3, 6, 10, 15].map(n => <option key={n} value={n}>Level {n}{n === 15 ? ' (full)' : ''}</option>)}

@@ -4,7 +4,7 @@ A browser RTS platform built on a self-contained C&C Tiberian Dawn slice: origin
 
 ## Status
 
-**Live:** [Launch Project Comrade](https://projectcomrade.thunderchildcreativetechnologies.com). Enter a callsign (no account, no install), create or join a game, share the invite link, pick a game style and your side, and deploy.
+**Live:** [Launch Project Comrade](https://projectcomrade.co.uk). Enter a callsign (no account, no install), create or join a game, share the invite link, pick a game style and your side, and deploy.
 
 | Game style | Engine | Multiplayer |
 |---|---|---|

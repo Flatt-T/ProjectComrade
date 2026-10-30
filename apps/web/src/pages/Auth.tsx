@@ -46,6 +46,7 @@ export function Register() {
   const [secret, setSecret] = useState('');
   const [terms, setTerms] = useState(false);
   const [ads, setAds] = useState(false);
+  const [analytics, setAnalytics] = useState(false);
   const [mail, setMail] = useState(false);
   const [code, setCode] = useState('');
   const [available, setAvailable] = useState<{ ok: boolean; reason: string | null } | null>(null);
@@ -75,7 +76,11 @@ export function Register() {
     try {
       const result = await api.register({ handle, email, password: secret, terms, personalisedAds: ads, marketingEmail: mail });
       // Remember the advertising choice locally too, so the banner stops asking.
-      setLocalConsent({ decided: true, personalisedAds: ads });
+      setLocalConsent({
+        decided: true,
+        personalisedAds: ads,
+        ...(analytics ? { analyticsDecided: true, analytics: true } : {}),
+      });
       if (result.confirmRequired) setStage('confirm');
       else await finish();
     } catch (caught) {
@@ -155,6 +160,11 @@ export function Register() {
       <label className="check">
         <input type="checkbox" checked={terms} onChange={e => setTerms(e.target.checked)} required />
         <span>I accept the <Link to="/legal/terms">terms</Link> and the <Link to="/legal/privacy">privacy policy</Link>.</span>
+      </label>
+      <label className="check">
+        <input type="checkbox" checked={analytics} onChange={e => setAnalytics(e.target.checked)} />
+        <span>Allow Google Analytics to count visits. Leave this off and we set no analytics
+          cookies.</span>
       </label>
       <label className="check">
         <input type="checkbox" checked={ads} onChange={e => setAds(e.target.checked)} />
