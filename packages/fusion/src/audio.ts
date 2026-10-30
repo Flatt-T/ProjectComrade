@@ -70,7 +70,7 @@ interface Table {
   special: Record<string, { select: string[]; order: string[] }>;
 }
 
-const TABLES: Record<Bank, Table> = {
+export const TABLES: Record<Bank, Table> = {
   td: {
     explosion: ['XPLOS', 'XPLOSML2', ['XPLOBIG4', 'XPLOBIG6']], vehicleDeath: 'XPLOSML2', buildingDeath: ['XPLOBIG4', 'XPLOBIG6'], crumble: 'CRUMBLE',
     infantryDeath: ['NUYELL1', 'NUYELL3', 'NUYELL4', 'NUYELL5', 'YELL1'], crush: 'SQUISH2',
@@ -115,6 +115,58 @@ const TABLES: Record<Bank, Table> = {
       dog: { select: ['DOGW3PX'], order: ['DOGY1'] },
     },
   },
+};
+
+/**
+ * A faction's voice, out of the bank the pack already uses. There are no original voice
+ * recordings in this project — every spoken line is freeware Westwood — so a faction is
+ * given its own character two ways: which replies it draws on, and how fast it says them.
+ * Rate is a small shift only; past about 0.85/1.2 the samples stop sounding like people.
+ *
+ * `docs/fusions/VOICE-SCRIPT.md` holds the lines each of these stands in for, for the day
+ * the project has voices of its own to record.
+ */
+export interface VoiceDef { rate?: number; select?: string[]; order?: string[] }
+export const VOICES: Record<string, Record<string, VoiceDef>> = {
+  // The original per-side pitch shift, moved here so there is one mechanism, not two.
+  conquer: { empire: { rate: 0.86 }, cis: { rate: 1.18 }, rebels: { rate: 1.06 } },
+  // Irregular Warfare is differentiated by radio discipline: the poorer the force, the less
+  // procedure it has. Cadres answer slowly and informally; the Mandate is clipped and brisk.
+  irregular: {
+    cadres: { rate: 0.93, select: ['AWAIT1', 'REPORT1'], order: ['MOVOUT1', 'UGOTIT', 'NOPROB'] },
+    coastal: { rate: 0.98, select: ['REPORT1', 'UNIT1'], order: ['ROGER', 'UGOTIT', 'MOVOUT1'] },
+    vanguard: { rate: 1.02, select: ['UNIT1', 'READY', 'REPORT1'], order: ['ACKNO', 'AFFIRM1', 'MOVOUT1'] },
+    mandate: { rate: 1.08, select: ['YESSIR1', 'READY'], order: ['ACKNO', 'AFFIRM1', 'RITAWAY'] },
+  },
+  // Holdouts plays the same axis for laughs: the Compound drawls, the Association is brisk
+  // and clipped, Gull Reach is rough and slow, and Vantage sounds like it is on the clock.
+  holdout: {
+    preppers: { rate: 0.9, select: ['AWAIT1', 'REPORT1'], order: ['UGOTIT', 'NOPROB', 'MOVOUT1'] },
+    pirates: { rate: 0.88, select: ['AWAIT1', 'UNIT1'], order: ['UGOTIT', 'RITAWAY', 'MOVOUT1'] },
+    hoa: { rate: 1.14, select: ['READY', 'REPORT1'], order: ['ACKNO', 'AFFIRM1', 'ROGER'] },
+    vantage: { rate: 1.06, select: ['YESSIR1', 'READY'], order: ['ACKNO', 'AFFIRM1', 'RITAWAY'] },
+  },
+};
+
+/** Units that answer out of turn, whatever their faction's usual voice. Keyed `pack:unit`,
+ *  because unit ids are only unique inside their own pack. */
+export const UNIT_VOICES: Record<string, VoiceDef> = {
+  // The Chair does not acknowledge orders so much as ratify them.
+  'holdout:chair': { rate: 1.12, select: ['READY'], order: ['AFFIRM1', 'ACKNO'] },
+  'holdout:officer': { rate: 1.1, select: ['REPORT1'], order: ['RITAWAY', 'ACKNO'] },
+  'holdout:boarder': { rate: 0.86, select: ['AWAIT1'], order: ['UGOTIT', 'RITAWAY'] },
+  'holdout:bowman': { rate: 0.92, select: ['AWAIT1'], order: ['NOPROB'] },
+  'holdout:liaison': { rate: 1.04, select: ['YESSIR1'], order: ['ACKNO'] },
+  'holdout:teamlead': { rate: 1.04, select: ['READY'], order: ['AFFIRM1', 'RITAWAY'] },
+  // Every drone crew in both packs answers the same way: quietly, and a little too pleased.
+  'irregular:quadteam': { rate: 1.1, select: ['READY'], order: ['NOPROB'] },
+  'irregular:quadbought': { rate: 1.1, select: ['READY'], order: ['NOPROB'] },
+  'irregular:quadmunition': { rate: 1.1, select: ['READY'], order: ['NOPROB'] },
+  'holdout:eggdrone': { rate: 1.1, select: ['READY'], order: ['NOPROB'] },
+  'holdout:noisedrone': { rate: 1.14, select: ['READY'], order: ['NOPROB'] },
+  'holdout:gullcam': { rate: 1.08, select: ['READY'], order: ['NOPROB'] },
+  // The smuggler and the fixer trade in quiet; they do not shout about either.
+  'irregular:smuggler': { rate: 1.0, select: ['AWAIT1'], order: ['NOPROB'] },
 };
 
 const BLASTER_IDS = new Set([
@@ -350,16 +402,18 @@ export class FusionAudio {
     const lead = units[0];
     const def = this.game.pack.units[lead.type];
     const special = table.special[lead.type];
-    const pool = special ? special[kind] : kind === 'select' && def?.kind !== 'infantry' ? table.replies.vehicleSelect : table.replies[kind];
+    // A unit's own voice wins, then its faction's, then the bank's general replies.
+    const player = this.game.players[lead.owner];
+    const byPack = VOICES[this.game.pack.id] ?? {};
+    const voice = UNIT_VOICES[`${this.game.pack.id}:${lead.type}`] ?? byPack[player?.faction ?? ''] ?? byPack[player?.side ?? ''];
+    const pool = voice?.[kind] ?? (special ? special[kind]
+      : kind === 'select' && def?.kind !== 'infantry' ? table.replies.vehicleSelect : table.replies[kind]);
     // Each reply exists in up to four takes (.V00-.V03); pick any that this bank has.
     const takes = pool.flatMap(n => [n, `${n}.V00`, `${n}.V01`, `${n}.V02`, `${n}.V03`]).filter(n => this.has(n));
     if (!takes.length) return;
     const src = this.source(takes[Math.floor(Math.random() * takes.length)]);
     if (!src) return;
-    if (this.game.pack.id === 'conquer') {
-      const side = this.game.players[lead.owner]?.side;
-      src.playbackRate.value = side === 'empire' ? 0.86 : side === 'cis' ? 1.18 : side === 'rebels' ? 1.06 : 1;
-    }
+    if (voice?.rate) src.playbackRate.value = voice.rate;
     src.connect(this.voice);
     src.start();
   }
