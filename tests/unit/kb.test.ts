@@ -28,7 +28,9 @@ describe('player knowledgebase', () => {
       expect(html.match(/<h1>/g)?.length).toBe(1);
       expect(html).toContain(`<h1>${esc(page.meta.title)}</h1>`);
       expect(html).toContain(`<meta name="description" content="${esc(page.meta.description)}"`);
-      expect(html).toContain(`<link rel="canonical" href="https://projectcomrade.thunderchildcreativetechnologies.com${page.meta.path}"`);
+      expect(html).toContain(`<link rel="canonical" href="https://projectcomrade.co.uk${page.meta.path}"`);
+      expect(html).toContain('googletagmanager.com/gtag/js?id=G-3Y9X4LBRWH');
+      expect(html).toContain("gtag('config', 'G-3Y9X4LBRWH')");
       expect(html).toContain('helpdot.me/api/widget/embed.js');
     }
   });
@@ -71,10 +73,10 @@ describe('player knowledgebase', () => {
       writeKnowledgebase(dir);
       const sitemap = readFileSync(join(dir, 'sitemap.xml'), 'utf8');
       const robots = readFileSync(join(dir, 'robots.txt'), 'utf8');
-      expect(robots).toContain('Sitemap: https://projectcomrade.thunderchildcreativetechnologies.com/sitemap.xml');
+      expect(robots).toContain('Sitemap: https://projectcomrade.co.uk/sitemap.xml');
       expect(robots).toContain('Disallow: /account');
       for (const page of PAGES) {
-        expect(sitemap).toContain(`https://projectcomrade.thunderchildcreativetechnologies.com${page.path}`);
+        expect(sitemap).toContain(`https://projectcomrade.co.uk${page.path}`);
         const html = readFileSync(join(dir, fileForPath(page.path)), 'utf8');
         expect(html).toContain('<h1>');
       }

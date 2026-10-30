@@ -1,3 +1,4 @@
+import { GA_MEASUREMENT_ID } from '../analytics';
 import { PAGES, SITE_ORIGIN, HELPDOT_API_KEY, canonicalUrl, type PageMeta } from './catalog';
 import { DISCLAIMER } from './prose';
 import { esc } from './escape';
@@ -71,6 +72,26 @@ export function renderDocument(page: RenderedPage): string {
   <meta property="og:site_name" content="Project Comrade" />
   <link rel="stylesheet" href="/kb.css" />
   ${jsonLd(page)}
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied'
+    });
+    gtag('js', new Date());
+    gtag('config', '${GA_MEASUREMENT_ID}');
+    try {
+      var stored = JSON.parse(localStorage.getItem('comrade-consent') || '{}');
+      if (stored.analyticsDecided && stored.analytics) {
+        gtag('consent', 'update', { analytics_storage: 'granted' });
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <main class="kb-shell">

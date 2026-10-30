@@ -13,7 +13,7 @@ function whole(name: string, fallback: number): number {
 
 /** Public origin, used for Stripe redirects and share links. */
 export function publicUrl(): string {
-  return text('COMRADE_PUBLIC_URL', 'https://projectcomrade.thunderchildcreativetechnologies.com').replace(/\/$/, '');
+  return text('COMRADE_PUBLIC_URL', 'https://projectcomrade.co.uk').replace(/\/$/, '');
 }
 
 export const cognito = {
@@ -70,7 +70,7 @@ export const ads = {
 };
 
 /** Bumped whenever the terms change, so acceptance can be re-requested. */
-export function termsVersion(): string { return text('COMRADE_TERMS_VERSION', '2026-10-26'); }
+export function termsVersion(): string { return text('COMRADE_TERMS_VERSION', '2026-10-30'); }
 
 /** Secret used to sign the guest cookie. Generated per boot when unset, which simply means
  *  guest allowances reset on deploy — acceptable, and better than a predictable default. */

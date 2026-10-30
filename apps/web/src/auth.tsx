@@ -6,20 +6,35 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ConsentState, Entitlements, Me, PlayKind, QuotaState, Tier } from '@comrade/contracts';
 import { ApiError, MeResponse, TierTable, api, currentToken, refresh } from './api';
+import { applyAnalyticsConsent } from './analytics';
 
-/** The viewer's local advertising choice, kept per browser for guests. */
+/** The viewer's local advertising and analytics choices, kept per browser. */
 const CONSENT_KEY = 'comrade-consent';
-export interface LocalConsent { decided: boolean; personalisedAds: boolean }
+export interface LocalConsent {
+  decided: boolean;
+  personalisedAds: boolean;
+  analyticsDecided: boolean;
+  analytics: boolean;
+}
+
+const UNDECIDED: LocalConsent = {
+  decided: false, personalisedAds: false, analyticsDecided: false, analytics: false,
+};
 
 export function readLocalConsent(): LocalConsent {
   try {
     const raw = localStorage.getItem(CONSENT_KEY);
-    if (!raw) return { decided: false, personalisedAds: false };
-    const parsed = JSON.parse(raw) as LocalConsent;
-    return { decided: !!parsed.decided, personalisedAds: !!parsed.personalisedAds };
+    if (!raw) return { ...UNDECIDED };
+    const parsed = JSON.parse(raw) as Partial<LocalConsent>;
+    return {
+      decided: !!parsed.decided,
+      personalisedAds: !!parsed.personalisedAds,
+      analyticsDecided: !!parsed.analyticsDecided,
+      analytics: !!parsed.analytics,
+    };
   } catch {
     // Private mode or blocked storage: treat it as undecided and non-personalised.
-    return { decided: false, personalisedAds: false };
+    return { ...UNDECIDED };
   }
 }
 
@@ -45,7 +60,7 @@ interface AuthValue {
   signOut(): Promise<void>;
   reload(): Promise<void>;
   applyMe(me: Me): void;
-  setLocalConsent(consent: LocalConsent): void;
+  setLocalConsent(consent: Partial<LocalConsent>): void;
 }
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -62,6 +77,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tiers, setTiers] = useState<TierTable | null>(null);
   const [token, setToken] = useState('');
   const [localConsent, setLocal] = useState<LocalConsent>(readLocalConsent);
+
+  useEffect(() => {
+    applyAnalyticsConsent(localConsent.analyticsDecided && localConsent.analytics);
+  }, [localConsent]);
 
   const load = useCallback(async () => {
     try {
@@ -118,7 +137,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     reload: load,
     applyMe,
-    setLocalConsent(consent) { writeLocalConsent(consent); setLocal(consent); },
+    setLocalConsent(patch) {
+      setLocal(current => {
+        const next = { ...current, ...patch };
+        writeLocalConsent(next);
+        return next;
+      });
+    },
   }), [ready, state, tiers, token, localConsent, load, applyMe]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -213,11 +213,14 @@ None — this is the revenue side.
 
 ## 5. DNS and the edge — already yours
 
-No change needed, with one thing to check: **Stripe's webhook has to reach
-`/api/stripe/webhook` from the public internet.** It is an ordinary POST on the existing domain,
-so it should already work, but if anything at the edge challenges or rate-limits unknown POST
+The public origin is `https://projectcomrade.co.uk` (www is the same site). **Stripe's webhook
+has to reach `https://projectcomrade.co.uk/api/stripe/webhook` from the public internet.** It is
+an ordinary POST on that hostname. If anything at the edge challenges or rate-limits unknown POST
 traffic, Stripe's deliveries will fail and subscriptions will not activate promptly. Stripe's
 dashboard shows failed deliveries — check it after the first test payment.
+
+**Google Analytics 4** (`G-3Y9X4LBRWH`) is loaded on the site with consent mode denied until the
+viewer opts in. No extra Cloudflare or NPM change is required for it.
 
 The internal `/ops/logs` export stays internal: it already refuses anything arriving through
 Cloudflare.

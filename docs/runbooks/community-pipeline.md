@@ -43,7 +43,7 @@ when `COMRADE_OPS_TOKEN` is set.
 
 1. **Repository secrets and variables** (Settings, Secrets and variables, Actions):
    `ANTHROPIC_API_KEY` (the agent); optional variable `COMRADE_BETA_URL` (for example
-   `https://beta.projectcomrade.thunderchildcreativetechnologies.com`) to verify beta deploys.
+   `https://beta.projectcomrade.co.uk`) to verify beta deploys.
 2. **Human sign-off**: protect `main` and `beta` (Settings, Branches): require a pull request,
    one approving review and review from Code Owners (`.github/CODEOWNERS` names @Flatt-T).
    Note: PRs opened with the default Actions token do not trigger other workflows; re-run CI
