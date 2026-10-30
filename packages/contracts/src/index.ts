@@ -183,6 +183,8 @@ export type ChatAudience = 'all' | 'allies';
 export const CHAT_MAX = 200;
 export interface RoomPlayer {
   id: string; name: string; faction: Faction; ready: boolean; host: boolean; team?: number;
+  /** False while a disconnected commander can still resume their seat. */
+  connected?: boolean;
   /** Set once the peer has identified itself with an access token. */
   handle?: string;
   /** Subscription tier, so the lobby can show who is skipping the advertisement. */
@@ -207,7 +209,7 @@ export interface ContentFile { name: string; bytes: number; sha256: string }
 export interface ContentManifest { version: 1; id: string; engine: 'vanilla-td' | 'vanilla-ra'; notice: string; source: string; maps: MapInfo[]; files: ContentFile[] }
 export interface EngineSnapshot { frame: number; audioRunning?: boolean; camera?: number; mouseX?: number; mouseY?: number; selected?: number; credits?: number; harvested?: number; spent?: number; units?: number; buildings?: number; power?: number; drain?: number; lost?: number; won?: boolean; defeated?: boolean; entities?: { id: number; owner: number; cell: number; hp: number; name: string }[] }
 export type ServerMessage = RoomState
-  | { version: 1; type: 'welcome'; id: string; capabilities: string[]; gameplay: 'lobby-presence' }
+  | { version: 1; type: 'welcome'; id: string; resumeToken: string; resumed: boolean; capabilities: string[]; gameplay: 'lobby-presence' }
   | { version: 1; type: 'rooms'; rooms: RoomSummary[] }
   | { version: 1; type: 'error'; message: string }
   | { version: 1; type: 'chat'; from: string; name: string; text: string; to: ChatAudience; at: number }

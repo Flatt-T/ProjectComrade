@@ -4,6 +4,14 @@ import { recordEvent } from './diagnostics';
 
 type Listener = (message: ServerMessage) => void;
 
+const RESUME_KEY = 'comrade-room-resume';
+function savedResumeToken() {
+  try { return sessionStorage.getItem(RESUME_KEY) || ''; } catch { return ''; }
+}
+function saveResumeToken(token: string) {
+  try { sessionStorage.setItem(RESUME_KEY, token); } catch { /* storage may be disabled */ }
+}
+
 /**
  * One WebSocket for the whole visit. The lobby and the battle share it, so a lockstep
  * match keeps its connection when the lobby view unmounts. Turn packets that arrive
@@ -32,12 +40,16 @@ export class RoomConnection {
   match?: { matchId: string; reportToken: string; slot: number; ad?: AdBreak };
   /** The access token last sent to the service, so a reconnect re-identifies itself. */
   private token = '';
+  /** Tab-scoped ticket that restores the same room seat and host authority after a drop. */
+  private resumeToken = savedResumeToken();
   private closed = false;
 
   constructor(private url = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`) { this.open(); }
 
   private open() {
-    const ws = new WebSocket(this.url);
+    const url = new URL(this.url);
+    if (this.resumeToken) url.searchParams.set('resume', this.resumeToken);
+    const ws = new WebSocket(url);
     this.ws = ws;
     ws.onopen = () => {
       this.connected = true;
@@ -56,7 +68,11 @@ export class RoomConnection {
     ws.onmessage = event => {
       let message: ServerMessage;
       try { message = JSON.parse(event.data) as ServerMessage; } catch { return; }
-      if (message.type === 'welcome') this.id = message.id;
+      if (message.type === 'welcome') {
+        this.id = message.id;
+        this.resumeToken = message.resumeToken;
+        saveResumeToken(message.resumeToken);
+      }
       if (message.type === 'error') recordEvent('server-error', { message: message.message });
       if (message.type === 'chat') this.chatLog = [...this.chatLog.slice(-99), { from: message.from, name: message.name, text: message.text, to: message.to, at: message.at }];
       if (message.type === 'match') {

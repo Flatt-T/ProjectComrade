@@ -71,7 +71,9 @@ wss.on('connection', (ws, req) => {
   if (wss.clients.size > 128) { log('capacity', { clients: wss.clients.size }); ws.close(1013, 'Connection capacity reached'); return; }
   // The upgrade carries the guest cookie, so an unregistered visitor's allowance follows them
   // into the lobby without the page having to tell us who it thinks it is.
-  const id = rooms.connect(message => ws.send(message), guestIdFromCookieHeader(req.headers.cookie));
+  const resumeToken = new URL(req.url || '/ws', 'http://localhost').searchParams.get('resume');
+  const id = rooms.connect(message => ws.send(message), guestIdFromCookieHeader(req.headers.cookie), resumeToken);
+  const connectionVersion = rooms.connectionVersion(id);
   log('connect', { peer: id.slice(0, 8), clients: wss.clients.size });
   let messages = 0;
   const interval = setInterval(() => { messages = 0; }, 1000);
@@ -83,7 +85,7 @@ wss.on('connection', (ws, req) => {
 
   ws.on('close', () => {
     clearInterval(interval);
-    rooms.disconnect(id);
+    rooms.connectionLost(id, connectionVersion);
     log('disconnect', { peer: id.slice(0, 8), clients: wss.clients.size });
   });
 });

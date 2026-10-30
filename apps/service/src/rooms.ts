@@ -27,7 +27,17 @@ interface Identity {
   entitled?: boolean;
 }
 
-interface Peer { send(message: string): void; room?: string; player: RoomPlayer; chat: number[]; identity: Identity }
+interface Peer {
+  send(message: string): void;
+  room?: string;
+  player: RoomPlayer;
+  chat: number[];
+  identity: Identity;
+  resumeToken: string;
+  connectionVersion: number;
+  connected: boolean;
+  tombstone?: ReturnType<typeof setTimeout>;
+}
 interface Room {
   host: string;
   phase: 'lobby' | 'started';
@@ -44,19 +54,45 @@ interface Room {
   lastTurn: Map<string, number>;
 }
 
+// Keep a disconnected setup available long enough for a player to return after a browser or
+// network sleep. Once this expires, normal leave/host migration rules reclaim the room.
+const ROOM_RESUME_GRACE_MS = 2 * 60 * 60 * 1000;
+
 export class RoomCoordinator {
   private peers = new Map<string, Peer>();
   private rooms = new Map<string, Room>();
 
-  connect(send: (message: string) => void, guestId?: string) {
+  connect(send: (message: string) => void, guestId?: string, resumeToken?: string | null) {
+    const resumed = resumeToken && /^[0-9a-f-]{36}$/i.test(resumeToken)
+      ? [...this.peers.entries()].find(([, peer]) => peer.resumeToken === resumeToken)
+      : undefined;
+    if (resumed) {
+      const [id, peer] = resumed;
+      if (peer.tombstone) clearTimeout(peer.tombstone);
+      peer.tombstone = undefined;
+      peer.connectionVersion++;
+      peer.connected = true;
+      peer.send = send;
+      peer.player.connected = true;
+      send(JSON.stringify({ version: 1, type: 'welcome', id, resumeToken: peer.resumeToken, resumed: true, capabilities: ['rooms', 'public-list', 'configure', 'lockstep', 'accounts'], gameplay: 'lobby-presence' }));
+      this.sendLobbyList(id);
+      if (peer.room) this.broadcast(peer.room);
+      this.broadcastLobbyList();
+      log('room-resume', { room: peer.room, peer: id.slice(0, 8) });
+      return id;
+    }
+
     const id = randomUUID();
     this.peers.set(id, {
       send,
       player: { id, name: 'Commander', faction: 'gdi', ready: false, host: false, team: 0 },
       chat: [],
       identity: { guestId, tier: 'guest', anchor: new Date() },
+      resumeToken: randomUUID(), connectionVersion: 1, connected: true,
     });
-    send(JSON.stringify({ version: 1, type: 'welcome', id, capabilities: ['rooms', 'public-list', 'configure', 'lockstep', 'accounts'], gameplay: 'lobby-presence' }));
+    const peer = this.peers.get(id)!;
+    peer.player.connected = true;
+    send(JSON.stringify({ version: 1, type: 'welcome', id, resumeToken: peer.resumeToken, resumed: false, capabilities: ['rooms', 'public-list', 'configure', 'lockstep', 'accounts'], gameplay: 'lobby-presence' }));
     this.sendLobbyList(id);
     // A guest's allowance clock starts the first time we see them, not the first time they play.
     if (guestId && platformEnabled()) {
@@ -66,6 +102,9 @@ export class RoomCoordinator {
     }
     return id;
   }
+
+  /** Bind a WebSocket close callback to the connection instance that created it. */
+  connectionVersion(id: string) { return this.peers.get(id)?.connectionVersion ?? 0; }
 
   private summaries(): RoomSummary[] {
     return [...this.rooms.entries()]
@@ -205,7 +244,39 @@ export class RoomCoordinator {
     this.broadcastLobbyList();
   }
 
-  disconnect(id: string) { this.leave(id); this.peers.delete(id); }
+  /** Final removal for an explicit leave or a match that cannot resume. */
+  disconnect(id: string) {
+    this.leave(id);
+    const peer = this.peers.get(id);
+    if (peer?.tombstone) clearTimeout(peer.tombstone);
+    this.peers.delete(id);
+  }
+
+  /** A transport drop during setup creates a temporary seat that the same browser can resume. */
+  connectionLost(id: string, connectionVersion: number) {
+    const peer = this.peers.get(id);
+    // A replaced socket can close after the resumed socket is already live.
+    if (!peer || peer.connectionVersion !== connectionVersion || !peer.connected) return;
+    const room = peer.room ? this.rooms.get(peer.room) : undefined;
+    // A live match must surrender a dropped lockstep slot promptly; the grace period is for
+    // setup lobbies, where nobody's simulation is waiting on that player.
+    if (!room || room.phase !== 'lobby') {
+      this.disconnect(id);
+      return;
+    }
+    peer.connected = false;
+    peer.player.connected = false;
+    this.broadcast(peer.room!);
+    this.broadcastLobbyList();
+    peer.tombstone = setTimeout(() => {
+      const current = this.peers.get(id);
+      if (current !== peer || peer.connected || peer.connectionVersion !== connectionVersion) return;
+      this.disconnect(id);
+      log('room-tombstone-expired', { room: peer.room, peer: id.slice(0, 8) });
+    }, ROOM_RESUME_GRACE_MS);
+    peer.tombstone.unref?.();
+    log('room-disconnected', { room: peer.room, peer: id.slice(0, 8), graceMs: ROOM_RESUME_GRACE_MS });
+  }
 
   // -------------------------------------------------------------------------
   // Starting a match

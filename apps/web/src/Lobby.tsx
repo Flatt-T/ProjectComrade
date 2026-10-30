@@ -112,7 +112,12 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
 
   useEffect(() => conn.on(message => {
     setConnected(conn.connected);
-    if (message.type === 'rooms') setRooms(message.rooms);
+    if (message.type === 'welcome') {
+      if (conn.drops > 0 && !message.resumed) {
+        setRoom(null);
+        setError('This waiting room expired while disconnected. Rejoin with its invite link or create a new game.');
+      }
+    } else if (message.type === 'rooms') setRooms(message.rooms);
     else if (message.type === 'room') { setRoom(message); setError(''); }
     else if (message.type === 'error') setError(message.message);
   }), [conn]);
@@ -259,7 +264,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
               : <span className="pteam">{p.team ? `TEAM ${p.team}` : ''}</span>}
             {p.tier && p.tier !== 'guest' && <TierBadge tier={p.tier as 'free'} small />}
             <span className={p.ready ? 'pready on' : 'pready'}>
-              {mashup && p.tier !== 'gold' ? 'GOLD ONLY'
+              {p.connected === false ? 'RECONNECTING'
+                : mashup && p.tier !== 'gold' ? 'GOLD ONLY'
                 : p.entitled === false ? 'NO PLAYS LEFT' : p.id === room.host ? 'HOST' : p.ready ? 'READY' : 'NOT READY'}
             </span>
           </div>)}
