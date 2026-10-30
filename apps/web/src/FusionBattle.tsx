@@ -12,6 +12,7 @@ import { recordAction, recordEvent, recordNotice, setMatchSnapshot } from './dia
 import Chat from './Chat';
 import { attachTouchGestures, goLandscape, isTouchDevice, trackVisibleHeight } from './touch';
 import { AudioSettings, FusionAudio, loadAudioSettings, saveAudioSettings } from '../../../packages/fusion/src/audio';
+import { Speaker, packHasSpeech } from '../../../packages/fusion/src/speech';
 import AdBreak from './AdBreak';
 import Share, { shareTextFor } from './Share';
 import { api } from './api';
@@ -892,6 +893,9 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         {soundOpen && <div className="fusion-volume">
           {(['master', 'effects', 'voices'] as const).map(k => <label key={k}><span>{k === 'master' ? 'Master' : k === 'effects' ? 'Effects' : 'Voices'}</span>
             <input type="range" min={0} max={1} step={0.05} value={sound[k]} onChange={e => changeSound({ [k]: Number(e.target.value) })} /></label>)}
+          {packHasSpeech(pack.id) && <label className="fusion-speech" title={Speaker.supported ? 'Units speak this pack’s own scripted lines' : 'This browser has no speech synthesiser'}>
+            <span>Spoken lines</span>
+            <input type="checkbox" disabled={!Speaker.supported} checked={sound.speech} onChange={e => changeSound({ speech: e.target.checked })} /></label>}
         </div>}
       </div>
       {ui?.selection && <div className="fusion-selection">

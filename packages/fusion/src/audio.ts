@@ -4,6 +4,7 @@
 // thunder...) are synthesised here. Audio is presentation only: it reads Game.effects and
 // never touches the simulation, so it is safe in lockstep.
 import type { Effect, Entity, Game } from './game';
+import { SPEECH_LINES, SPEECH_VOICES, Speaker } from './speech';
 
 // ------------------------------------------------------------------ Westwood AUD decoding
 
@@ -70,7 +71,7 @@ interface Table {
   special: Record<string, { select: string[]; order: string[] }>;
 }
 
-const TABLES: Record<Bank, Table> = {
+export const TABLES: Record<Bank, Table> = {
   td: {
     explosion: ['XPLOS', 'XPLOSML2', ['XPLOBIG4', 'XPLOBIG6']], vehicleDeath: 'XPLOSML2', buildingDeath: ['XPLOBIG4', 'XPLOBIG6'], crumble: 'CRUMBLE',
     infantryDeath: ['NUYELL1', 'NUYELL3', 'NUYELL4', 'NUYELL5', 'YELL1'], crush: 'SQUISH2',
@@ -115,6 +116,58 @@ const TABLES: Record<Bank, Table> = {
       dog: { select: ['DOGW3PX'], order: ['DOGY1'] },
     },
   },
+};
+
+/**
+ * A faction's voice, out of the bank the pack already uses. There are no original voice
+ * recordings in this project — every spoken line is freeware Westwood — so a faction is
+ * given its own character two ways: which replies it draws on, and how fast it says them.
+ * Rate is a small shift only; past about 0.85/1.2 the samples stop sounding like people.
+ *
+ * `docs/fusions/VOICE-SCRIPT.md` holds the lines each of these stands in for, for the day
+ * the project has voices of its own to record.
+ */
+export interface VoiceDef { rate?: number; select?: string[]; order?: string[] }
+export const VOICES: Record<string, Record<string, VoiceDef>> = {
+  // The original per-side pitch shift, moved here so there is one mechanism, not two.
+  conquer: { empire: { rate: 0.86 }, cis: { rate: 1.18 }, rebels: { rate: 1.06 } },
+  // Irregular Warfare is differentiated by radio discipline: the poorer the force, the less
+  // procedure it has. Cadres answer slowly and informally; the Mandate is clipped and brisk.
+  irregular: {
+    cadres: { rate: 0.93, select: ['AWAIT1', 'REPORT1'], order: ['MOVOUT1', 'UGOTIT', 'NOPROB'] },
+    coastal: { rate: 0.98, select: ['REPORT1', 'UNIT1'], order: ['ROGER', 'UGOTIT', 'MOVOUT1'] },
+    vanguard: { rate: 1.02, select: ['UNIT1', 'READY', 'REPORT1'], order: ['ACKNO', 'AFFIRM1', 'MOVOUT1'] },
+    mandate: { rate: 1.08, select: ['YESSIR1', 'READY'], order: ['ACKNO', 'AFFIRM1', 'RITAWAY'] },
+  },
+  // Holdouts plays the same axis for laughs: the Compound drawls, the Association is brisk
+  // and clipped, Gull Reach is rough and slow, and Vantage sounds like it is on the clock.
+  holdout: {
+    preppers: { rate: 0.9, select: ['AWAIT1', 'REPORT1'], order: ['UGOTIT', 'NOPROB', 'MOVOUT1'] },
+    pirates: { rate: 0.88, select: ['AWAIT1', 'UNIT1'], order: ['UGOTIT', 'RITAWAY', 'MOVOUT1'] },
+    hoa: { rate: 1.14, select: ['READY', 'REPORT1'], order: ['ACKNO', 'AFFIRM1', 'ROGER'] },
+    vantage: { rate: 1.06, select: ['YESSIR1', 'READY'], order: ['ACKNO', 'AFFIRM1', 'RITAWAY'] },
+  },
+};
+
+/** Units that answer out of turn, whatever their faction's usual voice. Keyed `pack:unit`,
+ *  because unit ids are only unique inside their own pack. */
+export const UNIT_VOICES: Record<string, VoiceDef> = {
+  // The Chair does not acknowledge orders so much as ratify them.
+  'holdout:chair': { rate: 1.12, select: ['READY'], order: ['AFFIRM1', 'ACKNO'] },
+  'holdout:officer': { rate: 1.1, select: ['REPORT1'], order: ['RITAWAY', 'ACKNO'] },
+  'holdout:boarder': { rate: 0.86, select: ['AWAIT1'], order: ['UGOTIT', 'RITAWAY'] },
+  'holdout:bowman': { rate: 0.92, select: ['AWAIT1'], order: ['NOPROB'] },
+  'holdout:liaison': { rate: 1.04, select: ['YESSIR1'], order: ['ACKNO'] },
+  'holdout:teamlead': { rate: 1.04, select: ['READY'], order: ['AFFIRM1', 'RITAWAY'] },
+  // Every drone crew in both packs answers the same way: quietly, and a little too pleased.
+  'irregular:quadteam': { rate: 1.1, select: ['READY'], order: ['NOPROB'] },
+  'irregular:quadbought': { rate: 1.1, select: ['READY'], order: ['NOPROB'] },
+  'irregular:quadmunition': { rate: 1.1, select: ['READY'], order: ['NOPROB'] },
+  'holdout:eggdrone': { rate: 1.1, select: ['READY'], order: ['NOPROB'] },
+  'holdout:noisedrone': { rate: 1.14, select: ['READY'], order: ['NOPROB'] },
+  'holdout:gullcam': { rate: 1.08, select: ['READY'], order: ['NOPROB'] },
+  // The smuggler and the fixer trade in quiet; they do not shout about either.
+  'irregular:smuggler': { rate: 1.0, select: ['AWAIT1'], order: ['NOPROB'] },
 };
 
 const BLASTER_IDS = new Set([
@@ -167,10 +220,14 @@ function weaponCue(bank: Bank, game: Game, weaponId: string, shooter?: Entity): 
 
 // ------------------------------------------------------------------ settings
 
-export interface AudioSettings { master: number; effects: number; voices: number; muted: boolean }
+export interface AudioSettings {
+  master: number; effects: number; voices: number; muted: boolean;
+  /** Speak scripted unit lines with the browser's synthesiser where a pack has them. */
+  speech: boolean;
+}
 const SETTINGS_KEY = 'comrade.audio';
 export function loadAudioSettings(): AudioSettings {
-  const fallback = { master: 0.8, effects: 0.8, voices: 0.9, muted: false };
+  const fallback = { master: 0.8, effects: 0.8, voices: 0.9, muted: false, speech: true };
   try { return { ...fallback, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') }; } catch { return fallback; }
 }
 export function saveAudioSettings(s: AudioSettings) {
@@ -196,6 +253,7 @@ export class FusionAudio {
   private evaQueue: string[] = [];
   private evaBusy = false;
   private lastReply = { select: 0, order: 0 };
+  private speaker = new Speaker();
   private noise: AudioBuffer;
   readonly bank: Bank;
   notice = '';
@@ -231,6 +289,8 @@ export class FusionAudio {
     this.master.gain.setTargetAtTime(s.muted ? 0 : s.master, t, 0.02);
     this.sfx.gain.setTargetAtTime(s.effects, t, 0.02);
     this.voice.gain.setTargetAtTime(s.voices, t, 0.02);
+    // Speech sits outside the audio graph, so a gain change cannot reach a line already running.
+    if (s.muted || !s.speech) this.speaker.silence();
   }
 
   /** Browsers start audio suspended until the player interacts with the page. */
@@ -244,7 +304,7 @@ export class FusionAudio {
   }
   /** True once the browser lets this page make sound. */
   get unlocked() { return this.ctx.state === 'running'; }
-  dispose() { void this.ctx.close(); }
+  dispose() { this.speaker.dispose(); void this.ctx.close(); }
 
   // -------------------------------------------------------------- game events
 
@@ -350,18 +410,42 @@ export class FusionAudio {
     const lead = units[0];
     const def = this.game.pack.units[lead.type];
     const special = table.special[lead.type];
-    const pool = special ? special[kind] : kind === 'select' && def?.kind !== 'infantry' ? table.replies.vehicleSelect : table.replies[kind];
+    const player = this.game.players[lead.owner];
+    // A pack with its own script speaks it; the bank is what everything else has.
+    if (this.settings.speech && this.spoke(lead, player, kind)) return;
+    // A unit's own voice wins, then its faction's, then the bank's general replies.
+    const byPack = VOICES[this.game.pack.id] ?? {};
+    const voice = UNIT_VOICES[`${this.game.pack.id}:${lead.type}`] ?? byPack[player?.faction ?? ''] ?? byPack[player?.side ?? ''];
+    const pool = voice?.[kind] ?? (special ? special[kind]
+      : kind === 'select' && def?.kind !== 'infantry' ? table.replies.vehicleSelect : table.replies[kind]);
     // Each reply exists in up to four takes (.V00-.V03); pick any that this bank has.
     const takes = pool.flatMap(n => [n, `${n}.V00`, `${n}.V01`, `${n}.V02`, `${n}.V03`]).filter(n => this.has(n));
     if (!takes.length) return;
     const src = this.source(takes[Math.floor(Math.random() * takes.length)]);
     if (!src) return;
-    if (this.game.pack.id === 'conquer') {
-      const side = this.game.players[lead.owner]?.side;
-      src.playbackRate.value = side === 'empire' ? 0.86 : side === 'cis' ? 1.18 : side === 'rebels' ? 1.06 : 1;
-    }
+    if (voice?.rate) src.playbackRate.value = voice.rate;
     src.connect(this.voice);
     src.start();
+  }
+
+  /**
+   * Say this unit's own scripted line, if its pack has one for it.
+   *
+   * The unit's lines win over its faction's, and the faction supplies the voice
+   * either way — a Gate Warden is still a Compound man. False means nothing was
+   * spoken (no script, no installed voice, silenced) and the bank should answer.
+   */
+  private spoke(lead: Entity, player: { faction?: string; side?: string } | undefined, kind: 'select' | 'order'): boolean {
+    const pack = this.game.pack.id;
+    // Whichever of faction or side carries the voice also carries the fallback lines.
+    const key = [`${pack}:${player?.faction ?? ''}`, `${pack}:${player?.side ?? ''}`].find(k => SPEECH_VOICES[k]);
+    const want = key ? SPEECH_VOICES[key] : undefined;
+    if (!want || !key) return false;
+    const lines = SPEECH_LINES[`${pack}:${lead.type}`] ?? SPEECH_LINES[key];
+    const pool = lines?.[kind];
+    if (!pool?.length) return false;
+    const volume = this.settings.muted ? 0 : this.settings.master * this.settings.voices;
+    return this.speaker.speak(pool[Math.floor(Math.random() * pool.length)], key, want, volume);
   }
 
   /** Short UI feedback (button clicks, refusals). */
