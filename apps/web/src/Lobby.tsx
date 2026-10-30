@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  AILevel, CRATES_MAX, CreditsPreset, DEFAULT_SETTINGS, GameStyle, LaunchRequest, Loadout, MapInfo, MASHUP_STYLE,
+  AILevel, CRATES_MAX, CreditsPreset, DEFAULT_SETTINGS, Doctrine, GameStyle, LaunchRequest, Loadout, MapInfo, MASHUP_STYLE,
   RENEWAL_CLASSIC, RENEWAL_MAX, RoomOptions, RoomState, RoomSummary,
   SPEED_MAX, SPEED_MIN, SPEED_STEP, STYLES, SUPER_CHARGE_MAX, SUPER_CHARGE_MIN, SUPER_CHARGE_STEP,
   playKind, styleAllowedFor, styleInfo, WORMS_MAX,
 } from '@comrade/contracts';
 import {
   MASHUP_SLOTS, MASHUP_SLOT_BLURB, MASHUP_SLOT_LABEL, MashupSlot, PACKS,
-  mashupCatalogue, mashupLoadoutProblem, mashupMap, wholePackLoadout,
+  mashupCatalogue, mashupLoadoutProblem, mashupMap, packHasDoctrines, wholePackLoadout,
 } from '../../../packages/fusion/src/index';
 import type { RoomConnection } from './net';
 import Chat from './Chat';
@@ -218,6 +218,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     const fusion = style.engine === 'fusion';
     const arena = arenaPack(room.options.style, room.options.map);
     const hasWorms = fusion && !!arena?.mechanics.sandworm;
+    // Only the packs that describe both armies are asked which one turns out.
+    const hasDoctrines = fusion && !!arena && packHasDoctrines(arena);
     const mashup = room.options.style === MASHUP_STYLE;
     const canMashup = allowedStyle(MASHUP_STYLE);
     const myLoadout = me?.loadout;
@@ -365,6 +367,13 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
         <label>Tech level<select disabled={!isHost} value={room.options.settings.techLevel} onChange={e => configureSettings({ techLevel: Number(e.target.value) })}>
           {[3, 6, 10, 15].map(n => <option key={n} value={n}>Level {n}{n === 15 ? ' (full)' : ''}</option>)}
         </select></label>
+        {hasDoctrines && <label>Warfare<select disabled={!isHost} value={set.doctrine} onChange={e => configureSettings({ doctrine: e.target.value as Doctrine })}>
+          <option value="irregular">Irregular</option><option value="regular">Regular</option>
+        </select>
+          <small>{set.doctrine === 'regular'
+            ? 'Every side fields a comparable army of its own make. The poorer the force, the cruder the machine — tougher and quicker to build, slower to fire and shorter-ranged.'
+            : 'Each side fights with what it actually has: improvised armour, technicals, drones and very unequal budgets.'}</small>
+        </label>}
         {hasWorms && <label>Sandworm activity · {worms === 0 ? 'Off' : `${worms}%`}
           <input type="range" min={0} max={WORMS_MAX} step={25} disabled={!isHost} value={worms} aria-label="Sandworm activity"
             onChange={e => configureSettings({ worms: Number(e.target.value) })} />

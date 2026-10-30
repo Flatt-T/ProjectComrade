@@ -20,10 +20,24 @@ The remix reference is
 | Infantry, vehicles, aircraft, naval | Keep the base pack's units, remove with object rest, or add units copied from the other pack (bring their `weapons` and `warheads`). Original-pack fusions author a full roster. Units need a `shape` the art knows (see `art/models.ts`). |
 | Buildings and upgrades | `structures`; upgrades are `upgrades`/`upgradeCost` plus `name@1` prerequisites. |
 | Superweapons | A structure's `superweapon` (`missile`, `storm`, `ion`, `reinforce`, `paradrop`, `chrono`, `curtain`, `reveal`). |
+| Two armies in one pack | `doctrine: 'regular' \| 'irregular'` on a unit or building. A definition with no doctrine belongs to both; one that has it is only buildable under that doctrine, and the lobby offers the choice to any pack where both appear (`packHasDoctrines`). Give each faction a `regularStart` when its regular escort differs. |
 | Bonus objects | Not in the engine yet: say so in the PR and suggest the closest substitute. |
 
 Where the engine cannot do something exactly, choose the closest option that stays true to the
 classics and write the difference in the PR description.
+
+### Balancing two doctrines
+
+A pack that describes both armies is promising that the regular one is even, so say so in data
+and prove it in a test. The pair in
+[`irregular.ts`](../../packages/fusion/src/fusions/irregular.ts) and
+[`holdout.ts`](../../packages/fusion/src/fusions/holdout.ts) share one ladder: every faction
+fields the same five roles (line infantry, tank, field gun, strike aircraft, warship), each
+worth about the same in a fight — durability times rate of fire, within a 1.35 spread — and
+differing only in workmanship. Read the factions poorest-first and the price climbs while the
+machine gets smaller and less tough, fires sooner, reaches further, lands tighter and loses its
+minimum range. Build time is not a field: the engine derives it from `cost`, so the crude
+machine being cheaper is what makes it quicker to field.
 
 ## 2. Files to add or change
 

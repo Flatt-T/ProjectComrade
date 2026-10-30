@@ -125,9 +125,12 @@ export type AILevel = 'easy' | 'normal' | 'hard';
  * `crates` is bonus-crate frequency, 0 (none) to 200; 100 drops one about every minute.
  * `speed` is how fast the clock runs, 100 (classic 15 ticks a second) to 300.
  */
+/** Which army a pack that describes both doctrines fields; packs without the axis ignore it. */
+export type Doctrine = 'regular' | 'irregular';
 export interface MatchSettings {
   credits: CreditsPreset; techLevel: number; ai: number; aiLevel: AILevel;
   worms: number; renewal: number; superCharge: number; crates: number; speed: number;
+  doctrine: Doctrine;
 }
 export const WORMS_MAX = 200;
 export const RENEWAL_MAX = 50;
@@ -139,6 +142,7 @@ export const SPEED_MIN = 100, SPEED_MAX = 300, SPEED_STEP = 25;
 export const DEFAULT_SETTINGS: MatchSettings = {
   credits: 'standard', techLevel: 15, ai: 1, aiLevel: 'normal',
   worms: 50, renewal: RENEWAL_CLASSIC, superCharge: 100, crates: 0, speed: 100,
+  doctrine: 'irregular',
 };
 export const CREDITS_VALUES: Record<CreditsPreset, number> = { low: 30, standard: 60, high: 120 };
 
@@ -241,7 +245,8 @@ export function parseSettings(value: unknown): MatchSettings {
   const superCharge = whole(v.superCharge, SUPER_CHARGE_MIN, SUPER_CHARGE_MAX, DEFAULT_SETTINGS.superCharge);
   const crates = whole(v.crates, 0, CRATES_MAX, DEFAULT_SETTINGS.crates);
   const speed = whole(v.speed, SPEED_MIN, SPEED_MAX, DEFAULT_SETTINGS.speed);
-  return { credits, techLevel, ai, aiLevel, worms, renewal, superCharge, crates, speed };
+  const doctrine: Doctrine = v.doctrine === 'regular' ? 'regular' : DEFAULT_SETTINGS.doctrine;
+  return { credits, techLevel, ai, aiLevel, worms, renewal, superCharge, crates, speed, doctrine };
 }
 export function parseOptions(value: unknown): RoomOptions {
   const v = object(value);

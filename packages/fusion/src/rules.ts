@@ -3,6 +3,13 @@
 // leptons (256 per cell) unless noted, all durations in ticks (15 per second).
 
 export type Projection = 'ortho' | 'iso';
+/**
+ * How a match is fought, for packs that describe both. 'irregular' is the asymmetric
+ * roster — improvised, unequal, each side fighting with whatever it has. 'regular' is the
+ * conventional one, where every side fields a comparable army. A definition with no
+ * doctrine belongs to both, which is every definition in every pack that ignores the axis.
+ */
+export type Doctrine = 'regular' | 'irregular';
 export type UnitKind = 'infantry' | 'vehicle' | 'aircraft' | 'naval';
 /** Movement class used for pathfinding and terrain checks. */
 export type MoveClass = UnitKind | 'amphibious';
@@ -114,6 +121,8 @@ export interface UnitDef {
   factions?: string[];
   /** Tech level 1..10; the lobby's tech setting caps what is available. */
   tech: number;
+  /** Only buildable under this doctrine; omitted means under both. */
+  doctrine?: Doctrine;
   /** Production tab override (e.g. the Kirov rolls out of the War Factory). */
   queue?: QueueKind;
   harvester?: HarvesterDef;
@@ -188,6 +197,8 @@ export interface StructureDef {
   prereqs: string[];
   factions?: string[];
   tech: number;
+  /** Only buildable under this doctrine; omitted means under both. */
+  doctrine?: Doctrine;
   /** Sidebar tab it appears under. */
   queue: 'structure' | 'defense';
   /** Production queue this building enables. */
@@ -269,6 +280,8 @@ export interface FactionDef {
   accent: string;
   blurb: string;
   startUnits: string[];
+  /** What this faction starts a regular-doctrine match with; defaults to `startUnits`. */
+  regularStart?: string[];
 }
 
 export interface MapField { x: number; y: number; r: number; resource: string; amount?: number }
@@ -359,6 +372,12 @@ export interface RulePack {
   veterancy?: Veterancy;
   /** Credit line shown in-game: these are approximations of the classic values. */
   fidelityNote: string;
+}
+
+/** True when a pack describes both doctrines, so the lobby is worth offering the choice. */
+export function packHasDoctrines(pack: { units: Record<string, UnitDef>; structures: Record<string, StructureDef> }): boolean {
+  const defs = [...Object.values(pack.units), ...Object.values(pack.structures)];
+  return defs.some(d => d.doctrine === 'regular') && defs.some(d => d.doctrine === 'irregular');
 }
 
 /** Lists name factions (countries/houses) or whole sides; either matches. */

@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { STYLES } from '../../packages/contracts/src/index';
 import { infantryCostume } from '../../packages/fusion/src/art/costume';
 import { hullMesh } from '../../packages/fusion/src/art/models';
-import { FUSIONS, Game, PACKS, conquerPack, factionCanUse, holdoutPack, irregularPack, leviathanPack } from '../../packages/fusion/src/index';
+import {
+  CLASSIC_PACKS, FUSIONS, Game, PACKS, composeMashup, conquerPack, factionCanUse, holdoutPack,
+  irregularPack, leviathanPack, packHasDoctrines, wholePackLoadout,
+} from '../../packages/fusion/src/index';
 
 const four = (seed = 11, ai = false) => new Game({
   pack: leviathanPack, mapId: 'leviathan-isles', seed,
@@ -515,5 +518,180 @@ describe('fusion: Holdouts', () => {
     expect(a.checksum()).toBe(b.checksum());
     expect(a.isEnemy(0, 2)).toBe(false);
     expect(a.isEnemy(0, 1)).toBe(true);
+  });
+});
+
+/**
+ * The regular/irregular toggle. Both original modern packs describe two whole armies, and
+ * the promise of the regular one is that it is even: every side fields the same five roles,
+ * each worth about the same on the day, differing only in how crudely it is made.
+ */
+describe('doctrines: regular and irregular', () => {
+  const DOCTRINE_PACKS = [irregularPack, holdoutPack];
+  /** Poorest force first, in both packs: the whole ladder is read in this order. */
+  const LADDER: Record<string, string[]> = {
+    irregular: ['cadres', 'coastal', 'vanguard', 'mandate'],
+    holdout: ['preppers', 'pirates', 'hoa', 'vantage'],
+  };
+  /** The five roles a regular army fields, keyed the way the pack data distinguishes them. */
+  const ROLES = [
+    { name: 'line infantry', kind: 'infantry', role: 'combat' },
+    { name: 'tank', kind: 'vehicle', role: 'combat' },
+    { name: 'field gun', kind: 'vehicle', role: 'siege' },
+    { name: 'strike aircraft', kind: 'aircraft', role: 'combat' },
+    { name: 'warship', kind: 'naval', role: 'siege' },
+  ] as const;
+
+  const regulars = (pack: typeof irregularPack, faction: string, kind: string, role: string) =>
+    Object.values(pack.units).filter(u => u.doctrine === 'regular' && u.kind === kind && u.role === role
+      && factionCanUse(u, faction, pack.factions.find(f => f.id === faction)!.side));
+  /** Durability times rate of fire: what the thing is worth in a fight, to one number. */
+  const value = (pack: typeof irregularPack, id: string) => {
+    const u = pack.units[id];
+    const w = pack.weapons[u.weapon!];
+    return (u.hp * w.damage * (w.burst ?? 1)) / w.rof;
+  };
+  const spread = (ns: number[]) => Math.max(...ns) / Math.min(...ns);
+
+  it('offers the choice only in the packs that describe both armies', () => {
+    for (const pack of DOCTRINE_PACKS) expect(packHasDoctrines(pack), pack.id).toBe(true);
+    for (const pack of [...CLASSIC_PACKS, leviathanPack, conquerPack]) {
+      expect(packHasDoctrines(pack), pack.id).toBe(false);
+    }
+  });
+
+  for (const pack of DOCTRINE_PACKS) {
+    describe(pack.id, () => {
+      it('gives every faction exactly one of each regular role', () => {
+        for (const faction of LADDER[pack.id]) {
+          for (const r of ROLES) {
+            const found = regulars(pack, faction, r.kind, r.role);
+            expect(found.map(u => u.id), `${faction} ${r.name}`).toHaveLength(1);
+          }
+        }
+      });
+
+      it('makes the five roles worth about the same whoever fields them', () => {
+        for (const r of ROLES) {
+          const values = LADDER[pack.id].map(f => value(pack, regulars(pack, f, r.kind, r.role)[0].id));
+          const detail = LADDER[pack.id].map((f, i) => `${f}=${values[i].toFixed(0)}`).join(' ');
+          expect(spread(values), `${r.name}: ${detail}`).toBeLessThanOrEqual(1.35);
+        }
+      });
+
+      it('pays for sophistication: the cheaper machine is bigger, slower-firing and shorter-ranged', () => {
+        for (const r of ROLES) {
+          const rungs = LADDER[pack.id].map(f => {
+            const u = regulars(pack, f, r.kind, r.role)[0];
+            return { f, u, w: pack.weapons[u.weapon!] };
+          });
+          for (let i = 1; i < rungs.length; i++) {
+            const lo = rungs[i - 1], hi = rungs[i];
+            const where = `${r.name}: ${lo.f} vs ${hi.f}`;
+            expect(hi.u.cost, `${where} costs more`).toBeGreaterThan(lo.u.cost);
+            expect(hi.u.hp, `${where} is less of a target`).toBeLessThan(lo.u.hp);
+            expect(hi.w.rof, `${where} fires sooner`).toBeLessThan(lo.w.rof);
+            expect(hi.w.range, `${where} reaches further`).toBeGreaterThan(lo.w.range);
+            expect(hi.w.damage, `${where} hits harder per shot`).toBeGreaterThan(lo.w.damage);
+            if (lo.w.splash !== undefined && hi.w.splash !== undefined) {
+              expect(hi.w.splash, `${where} lands tighter`).toBeLessThan(lo.w.splash);
+            }
+            if (lo.w.minRange !== undefined && hi.w.minRange !== undefined) {
+              expect(hi.w.minRange, `${where} can fire closer in`).toBeLessThan(lo.w.minRange);
+            }
+          }
+        }
+      });
+
+      it('gives every faction an air force and a navy under the regular doctrine', () => {
+        for (const faction of LADDER[pack.id]) {
+          const side = pack.factions.find(f => f.id === faction)!.side;
+          const mine = Object.values(pack.structures).filter(s => factionCanUse(s, faction, side));
+          for (const queue of ['aircraft', 'naval'] as const) {
+            const producer = mine.find(s => s.produces === queue && s.doctrine !== 'irregular');
+            expect(producer, `${faction} can build somewhere to make ${queue}`).toBeTruthy();
+          }
+        }
+      });
+
+      it('starts a regular match with units that exist in it', () => {
+        for (const f of pack.factions) {
+          expect(f.regularStart, `${f.id} has a regular escort`).toBeTruthy();
+          for (const type of f.regularStart!) {
+            const u = pack.units[type];
+            expect(u, `${f.id} starts with ${type}`).toBeTruthy();
+            expect(u.doctrine === 'irregular', `${f.id} starts with no irregular ${type}`).toBe(false);
+            expect(factionCanUse(u, f.id, f.side), `${f.id} may field ${type}`).toBe(true);
+          }
+        }
+      });
+    });
+  }
+
+  it('turns out one army or the other, never both', () => {
+    // Cadres with a yard and a workshop: under one doctrine the Ironclad, under the other
+    // the pickup, and under neither of them both at once.
+    const build = (doctrine: 'regular' | 'irregular') => {
+      const g = new Game({
+        pack: irregularPack, mapId: 'wadi-road', seed: 4, techLevel: 15, doctrine,
+        players: [{ name: 'A', faction: 'cadres', ai: false }, { name: 'B', faction: 'mandate', ai: false }],
+      });
+      g.spawnStructure('yard', 0, 14, 30);
+      g.spawnStructure('works', 0, 18, 30);
+      g.spawnStructure('muster', 0, 22, 30);
+      return { g, options: [...g.buildOptions(g.players[0], 'vehicle'), ...g.buildOptions(g.players[0], 'infantry')] };
+    };
+    const regular = build('regular');
+    expect(regular.g.doctrine).toBe('regular');
+    expect(regular.options).toContain('ironclad');
+    expect(regular.options).toContain('conscript');
+    expect(regular.options).not.toContain('pickup');
+    expect(regular.options).not.toContain('fighter');
+
+    const irregular = build('irregular');
+    expect(irregular.options).toContain('pickup');
+    expect(irregular.options).toContain('fighter');
+    expect(irregular.options).not.toContain('ironclad');
+    expect(irregular.options).not.toContain('conscript');
+  });
+
+  it('defaults to the irregular army, and keeps the shared trades in both', () => {
+    const g = new Game({
+      pack: holdoutPack, mapId: 'pelican-point', seed: 4, techLevel: 15,
+      players: [{ name: 'A', faction: 'preppers', ai: false }, { name: 'B', faction: 'vantage', ai: false }],
+    });
+    expect(g.doctrine).toBe('irregular');
+    // The construction van, the skip loader and the handyman belong to neither army alone.
+    for (const id of ['van', 'skiploader', 'handyman']) expect(holdoutPack.units[id].doctrine).toBeUndefined();
+  });
+
+  it('fields a regular escort when the regular doctrine is chosen', () => {
+    const g = new Game({
+      pack: irregularPack, mapId: 'wadi-road', seed: 4, techLevel: 15, doctrine: 'regular',
+      players: [{ name: 'A', faction: 'cadres', ai: false }, { name: 'B', faction: 'mandate', ai: false }],
+    });
+    const mine = [...g.entities.values()].filter(e => e.owner === 0).map(e => e.type);
+    expect(mine).toContain('conscript');
+    expect(mine).not.toContain('pickup');
+  });
+
+  it('plays the regular doctrine deterministically with AI (lockstep safe)', () => {
+    const seats = (seed: number) => new Game({
+      pack: irregularPack, mapId: 'border-crossing', seed, techLevel: 15, doctrine: 'regular',
+      players: IRREGULAR_SEATS.map((faction, i) => ({ name: `P${i}`, faction, ai: true, team: i % 2 === 0 ? 101 : 102 })),
+    });
+    const a = seats(5), b = seats(5);
+    for (let t = 0; t < 2500; t++) { a.step(); b.step(); }
+    expect(a.checksum()).toBe(b.checksum());
+  });
+
+  it('lets a mashup commander field whatever they picked, doctrine or not', () => {
+    // A mashup is already a pick-your-own army, so a doctrine tag must not survive into one.
+    const { pack } = composeMashup('wadi-road', [
+      wholePackLoadout('irregular', 'cadres'),
+      wholePackLoadout('holdout', 'vantage'),
+    ]);
+    const tagged = [...Object.values(pack.units), ...Object.values(pack.structures)].filter(d => d.doctrine);
+    expect(tagged.map(d => d.id)).toEqual([]);
   });
 });
