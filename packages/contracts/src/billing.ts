@@ -4,7 +4,7 @@
 // quota, ad rule and perk, so changing the offer is a change here and nowhere else. Prices
 // are deliberately absent — they are retrieved live from Stripe by lookup key, so the
 // product catalogue has exactly one source of truth and nothing can drift out of step.
-import { GameStyle, styleInfo } from './index.js';
+import { GameStyle, MASHUP_STYLE, styleInfo } from './index.js';
 
 /** `guest` is an unregistered visitor; the rest are account tiers. */
 export type Tier = 'guest' | 'free' | 'bronze' | 'silver' | 'gold';
@@ -62,6 +62,8 @@ export interface TierPlan {
   voting: boolean;
   /** Access to new maps and fusions during their early-access window. */
   earlyAccess: boolean;
+  /** The Custom Mashup game type: assemble an army from every pack on the platform. */
+  customMashup: boolean;
   blurb: string;
   perks: string[];
 }
@@ -71,36 +73,37 @@ export const EARLY_ACCESS_DAYS = 7;
 export const PLANS: Record<Tier, TierPlan> = {
   guest: {
     id: 'guest', name: 'Guest', classicPlaysPerDay: 2, fusionPlaysPerDay: 1,
-    ads: true, voting: false, earlyAccess: false,
+    ads: true, voting: false, earlyAccess: false, customMashup: false,
     blurb: 'A daily taster, no account needed.',
     perks: ['2 Classic matches a day', '1 Fusion match a day', 'Advertisement before the match'],
   },
   free: {
     id: 'free', name: 'Free', classicPlaysPerDay: 3, fusionPlaysPerDay: 2,
-    ads: true, voting: false, earlyAccess: false,
+    ads: true, voting: false, earlyAccess: false, customMashup: false,
     blurb: 'Register a callsign and keep your record.',
     perks: ['3 Classic matches a day', '2 Fusion matches a day', 'Advertisement before the match', 'Match history and sharing'],
   },
   bronze: {
     id: 'bronze', name: 'Bronze', lookupKey: 'comrade_bronze_monthly',
     classicPlaysPerDay: null, fusionPlaysPerDay: 5,
-    ads: false, voting: false, earlyAccess: false,
+    ads: false, voting: false, earlyAccess: false, customMashup: false,
     blurb: 'Unlimited Classic play, no advertisements.',
     perks: ['Unlimited Classic matches', '5 Fusion matches a day', 'No advertisements — straight into the match', 'Match history and sharing'],
   },
   silver: {
     id: 'silver', name: 'Silver', lookupKey: 'comrade_silver_monthly',
     classicPlaysPerDay: null, fusionPlaysPerDay: null,
-    ads: false, voting: false, earlyAccess: false,
+    ads: false, voting: false, earlyAccess: false, customMashup: false,
     blurb: 'Everything, unlimited.',
     perks: ['Unlimited Classic matches', 'Unlimited Fusion matches', 'No advertisements', 'Match history and sharing'],
   },
   gold: {
     id: 'gold', name: 'Gold', lookupKey: 'comrade_gold_monthly',
     classicPlaysPerDay: null, fusionPlaysPerDay: null,
-    ads: false, voting: true, earlyAccess: true,
-    blurb: 'Unlimited play, a vote on what gets built, and new content first.',
+    ads: false, voting: true, earlyAccess: true, customMashup: true,
+    blurb: 'Unlimited play, the Custom Mashup, a vote on what gets built, and new content first.',
     perks: ['Unlimited Classic matches', 'Unlimited Fusion matches', 'No advertisements',
+      'Custom Mashup: build your own army from every pack on the platform',
       'Voting rights on new features and maps', `New maps and fusions ${EARLY_ACCESS_DAYS} days before anyone else`],
   },
 };
@@ -110,6 +113,27 @@ export function plan(tier: Tier): TierPlan { return PLANS[tier] ?? PLANS.guest; 
 /** Which allowance a game style draws on. */
 export function playKind(style: GameStyle): PlayKind {
   return styleInfo(style).engine === 'fusion' ? 'fusion' : 'classic';
+}
+
+/**
+ * Whether a tier may play a game style at all. Only the Custom Mashup is gated this way: it
+ * is the Gold game type, and the style table says so, so adding another gated style later is
+ * a line of data rather than a rule here.
+ */
+export function styleAllowed(style: GameStyle, tier: Tier): boolean {
+  const needs = styleInfo(style).tier;
+  if (!needs) return true;
+  return style === MASHUP_STYLE ? plan(tier).customMashup : tierRank(tier) >= tierRank(needs);
+}
+
+/**
+ * The same rule decided from a player's resolved entitlements rather than their tier, which
+ * is what a deployment with no database has (everything open, nobody metered).
+ */
+export function styleAllowedFor(style: GameStyle, entitlements: Pick<Entitlements, 'tier' | 'customMashup'>): boolean {
+  const needs = styleInfo(style).tier;
+  if (!needs) return true;
+  return style === MASHUP_STYLE ? entitlements.customMashup : tierRank(entitlements.tier) >= tierRank(needs);
 }
 
 /** The daily allowance for a kind of play; `null` is unlimited. */
@@ -180,6 +204,8 @@ export interface Entitlements {
   ads: boolean;
   voting: boolean;
   earlyAccess: boolean;
+  /** The Custom Mashup game type is open to this player. */
+  customMashup: boolean;
   quotas: QuotaState[];
   subscription?: SubscriptionState;
 }
@@ -224,7 +250,7 @@ export interface PlayDecision {
   allowed: boolean;
   kind: PlayKind;
   /** Why it was refused, for the upgrade prompt. */
-  reason?: 'quota' | 'early-access' | 'registration-required';
+  reason?: 'quota' | 'early-access' | 'registration-required' | 'tier';
   /** Pre-match advertisement this player must watch. */
   ad?: AdBreak;
   /** True when this player can watch an advertisement to earn one match of `kind`. */

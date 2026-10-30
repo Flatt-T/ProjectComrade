@@ -117,6 +117,7 @@ export async function entitlementsFor(who: Who): Promise<Entitlements> {
     ads: details.ads,
     voting: details.voting,
     earlyAccess: details.earlyAccess,
+    customMashup: details.customMashup,
     quotas,
     subscription: who.subscription,
   };
@@ -125,7 +126,7 @@ export async function entitlementsFor(who: Who): Promise<Entitlements> {
 /** Entitlements for a deployment with no database: everything open, nothing metered. */
 export function openEntitlements(): Entitlements {
   return {
-    tier: 'silver', registered: false, ads: false, voting: false, earlyAccess: true,
+    tier: 'silver', registered: false, ads: false, voting: false, earlyAccess: true, customMashup: true,
     quotas: [
       { kind: 'classic', limit: null, used: 0, remaining: null, bonus: 0 },
       { kind: 'fusion', limit: null, used: 0, remaining: null, bonus: 0 },

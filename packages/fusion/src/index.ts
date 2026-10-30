@@ -5,17 +5,12 @@ export * from './rules';
 export * from './map';
 export * from './game';
 export * from './session';
+export * from './mashup';
 import { RulePack } from './rules';
-import { dunePack } from './packs/dune';
-import { ra1Pack } from './packs/ra1';
-import { ra2Pack } from './packs/ra2';
-import { tdPack } from './packs/td';
+import { CLASSIC_PACKS, dunePack, ra1Pack, ra2Pack, tdPack } from './packs';
 import { FUSIONS, conquerPack, leviathanPack } from './fusions';
 
-export { dunePack, ra1Pack, ra2Pack, tdPack, leviathanPack, conquerPack, FUSIONS };
-
-/** The classics replicated on this engine, in release order. A fusion game may draw on any of them. */
-export const CLASSIC_PACKS: RulePack[] = [tdPack, dunePack, ra1Pack, ra2Pack];
+export { dunePack, ra1Pack, ra2Pack, tdPack, leviathanPack, conquerPack, FUSIONS, CLASSIC_PACKS };
 
 /** Rule packs by id. A fusion game is registered here like any other pack. */
 export const PACKS: Record<string, RulePack> = {

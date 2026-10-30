@@ -9,12 +9,16 @@ export type Faction = string;
 // Game styles the platform offers. 'vanilla-*' styles run the original GPL engines;
 // 'fusion' styles run the Comrade Fusion Engine with the named rule pack, which also
 // supports lockstep multiplayer. Unplayable styles are declared so the roster is visible.
-/** Classic styles, then community fusions (`fusion-<pack id>`). */
-export type GameStyle = 'td-classic' | 'td-fusion' | 'ra1' | 'ra1-fusion' | 'ra2' | 'dune2k' | 'fusion-leviathan' | 'fusion-conquer';
+/** Classic styles, community fusions (`fusion-<pack id>`), then the Custom Mashup. */
+export type GameStyle = 'td-classic' | 'td-fusion' | 'ra1' | 'ra1-fusion' | 'ra2' | 'dune2k' | 'fusion-leviathan' | 'fusion-conquer' | 'fusion-mashup';
+/** The Gold game type with no fixed rule pack: each commander assembles their own forces. */
+export const MASHUP_STYLE = 'fusion-mashup' as const;
 export interface FactionInfo { id: Faction; name: string; full: string; blurb: string }
 export interface StyleInfo {
   id: GameStyle; name: string; engine: 'vanilla-td' | 'vanilla-ra' | 'fusion'; pack?: string;
   playable: boolean; lockstep: boolean; blurb: string; factions: FactionInfo[];
+  /** Subscription tier this style needs; absent means everyone, guests included. */
+  tier?: 'gold';
 }
 const RA2_COUNTRIES: FactionInfo[] = [
       { id: 'america', name: 'America', full: 'Allies · United States', blurb: 'Paratroopers.' },
@@ -52,6 +56,11 @@ export const STYLES: StyleInfo[] = [
       { id: 'republic', name: 'Republic', full: 'Light · Galactic Republic', blurb: 'Clones, AT-TEs and LAAT gunships.' },
       { id: 'cis', name: 'CIS', full: 'Dark · Confederacy', blurb: 'Battle droids, AATs and vulture swarms.' },
     ] },
+  // No fixed rule pack: the battlefield decides the world, and each commander assembles their
+  // own army out of every other Fusion game's buildings, soldiers, vehicles, aircraft and ships.
+  { id: MASHUP_STYLE, name: 'Custom Mashup', engine: 'fusion', playable: true, lockstep: true, tier: 'gold',
+    blurb: 'Gold only. Pick the battlefield, then whose buildings, soldiers, vehicles, air and sea forces you field — every commander chooses their own combination, from every pack on the platform.',
+    factions: [{ id: 'custom', name: 'Custom', full: 'Your own combination', blurb: 'Your buildings, your soldiers, your armour, your air and sea forces.' }] },
   { id: 'ra1', name: 'Classic Red Alert', engine: 'vanilla-ra', playable: true, lockstep: false,
     blurb: 'Red Alert on the original engine, with freeware content and authored battlefields. Each commander fights the built-in enemy.',
     factions: [{ id: 'allies', name: 'Allies', full: 'Allied Nations', blurb: 'Greece. Mobility and the navy.' }, { id: 'soviet', name: 'Soviet', full: 'Soviet Union', blurb: 'USSR. Heavy armour and numbers.' }] },
@@ -59,6 +68,33 @@ export const STYLES: StyleInfo[] = [
 export function styleInfo(id: GameStyle): StyleInfo { return STYLES.find(s => s.id === id) ?? STYLES[0]; }
 export function factionAllowed(style: GameStyle, faction: unknown): faction is Faction {
   return typeof faction === 'string' && styleInfo(style).factions.some(f => f.id === faction);
+}
+
+/**
+ * A Custom Mashup loadout: which set of definitions this commander fields in each slot, as
+ * catalogue keys ('ra2:russia' for one faction's set, 'dune' where a whole pack shares one).
+ * Buildings are compulsory and so is at least one kind of force; the rest is taste. The
+ * catalogue itself lives with the rule packs in the Fusion Engine — the service only checks
+ * the shape, because it holds no rule data of its own and new packs must not need a deploy.
+ */
+export type MashupSlotId = 'structures' | 'infantry' | 'vehicle' | 'aircraft' | 'naval';
+export const MASHUP_SLOT_IDS: MashupSlotId[] = ['structures', 'infantry', 'vehicle', 'aircraft', 'naval'];
+export type Loadout = Partial<Record<MashupSlotId, string>> & { structures: string };
+const SET_KEY = /^[a-z0-9-]{2,32}(:[a-z0-9-]{2,32})?$/;
+
+/** Validate a loadout off the wire. Empty slots are dropped; anything malformed is rejected. */
+export function parseLoadout(value: unknown): Loadout {
+  const v = object(value);
+  const out: Partial<Record<MashupSlotId, string>> = {};
+  for (const slot of MASHUP_SLOT_IDS) {
+    const key = v[slot];
+    if (key === undefined || key === null || key === '') continue;
+    if (typeof key !== 'string' || !SET_KEY.test(key)) throw new Error(`Invalid ${slot} selection`);
+    out[slot] = key;
+  }
+  if (!out.structures) throw new Error('Choose whose buildings you are fighting with');
+  if (!MASHUP_SLOT_IDS.some(s => s !== 'structures' && out[s])) throw new Error('Choose at least one kind of force to fight with');
+  return out as Loadout;
 }
 
 export type Visibility = 'public' | 'invite';
@@ -94,7 +130,7 @@ export interface RoomOptions { style: GameStyle; map: string; visibility: Visibi
 export const DEFAULT_OPTIONS: RoomOptions = { style: 'td-classic', map: MAP_ID, visibility: 'public', maxPlayers: 2, settings: DEFAULT_SETTINGS };
 
 /** `team` 0 means no team (everyone else is an enemy); players sharing 1..4 are allies. */
-export interface LaunchPlayer { id: string; name: string; faction: Faction; team?: number }
+export interface LaunchPlayer { id: string; name: string; faction: Faction; team?: number; loadout?: Loadout }
 /** Fusion matches also carry the shared seed and every human in slot order. */
 export type LaunchRequest = {
   version: 1; type: 'launch'; map: string; faction: Faction; style: GameStyle; settings: MatchSettings;
@@ -108,6 +144,8 @@ export type ClientMessage =
   | { version: 1; type: 'identify'; token?: string }
   | { version: 1; type: 'configure'; options: RoomOptions }
   | { version: 1; type: 'faction'; faction: Faction }
+  /** Custom Mashup: this commander's own choice of forces. */
+  | { version: 1; type: 'loadout'; loadout: Loadout }
   | { version: 1; type: 'ready'; ready: boolean }
   | { version: 1; type: 'team'; team: number }
   | { version: 1; type: 'chat'; text: string; to: ChatAudience }
@@ -131,6 +169,8 @@ export interface RoomPlayer {
   tier?: string;
   /** False when this player has no daily allowance left for the chosen style. */
   entitled?: boolean;
+  /** Custom Mashup: the forces this commander has assembled for themselves. */
+  loadout?: Loadout;
 }
 export interface RoomState {
   version: 1; type: 'room'; room: string; host: string; phase: 'lobby' | 'started'; options: RoomOptions; players: RoomPlayer[];
@@ -225,6 +265,7 @@ export function parseClientMessage(value: unknown): ClientMessage {
   if (v.type === 'identify') return { version: 1, type: 'identify', token: token(v.token) };
   if (v.type === 'configure') return { version: 1, type: 'configure', options: parseOptions(v.options) };
   if (v.type === 'faction' && isFaction(v.faction)) return { version: 1, type: 'faction', faction: v.faction };
+  if (v.type === 'loadout') return { version: 1, type: 'loadout', loadout: parseLoadout(v.loadout) };
   if (v.type === 'ready' && typeof v.ready === 'boolean') return { version: 1, type: 'ready', ready: v.ready };
   if (v.type === 'team' && Number.isInteger(v.team) && (v.team as number) >= 0 && (v.team as number) <= 4) return { version: 1, type: 'team', team: v.team as number };
   if (v.type === 'chat' && typeof v.text === 'string' && (v.to === 'all' || v.to === 'allies')) {

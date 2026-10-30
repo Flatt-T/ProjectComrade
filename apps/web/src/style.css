@@ -172,3 +172,10 @@ body.touch-battle{overflow:hidden;overscroll-behavior:none}
 .fusion-battle.touch .chat.overlay{bottom:0;width:0}
 .fusion-battle.touch .chat.overlay .chat-recent{bottom:60px}
 .fusion-battle.touch .chat.overlay .chat-tab{top:42%}
+
+/* Custom Mashup: one picker per force slot, laid out like the match setup controls. */
+.mashup-pick .mashup-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:12px 0 0}
+.mashup-pick .mashup-slots label{display:flex;flex-direction:column;gap:6px;font:9px ui-monospace,monospace;letter-spacing:1px;color:#8b9c7e}
+.mashup-pick .mashup-slots small{font:10px/1.6 monospace;color:#819471}
+.mashup-pick .map-early{margin:10px 0 0}
+.player .pfaction{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
