@@ -3,7 +3,9 @@
 // game style entry in packages/contracts (STYLES) so they appear in the lobby.
 import type { RulePack } from '../rules';
 import { conquerPack } from './conquer';
+import { holdoutPack } from './holdout';
+import { irregularPack } from './irregular';
 import { leviathanPack } from './leviathan';
 
-export const FUSIONS: RulePack[] = [leviathanPack, conquerPack];
-export { leviathanPack, conquerPack };
+export const FUSIONS: RulePack[] = [leviathanPack, conquerPack, irregularPack, holdoutPack];
+export { leviathanPack, conquerPack, irregularPack, holdoutPack };
