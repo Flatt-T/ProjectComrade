@@ -217,7 +217,7 @@ export type ServerMessage = RoomState
   /**
    * Sent privately to each player as the match starts. `ad` is present only for the tiers
    * that watch one; the simulation runs underneath it from the first tick either way, so a
-   * player watching an advertisement arrives with their base already thirty seconds idle
+   * player watching an advertisement arrives with their base already idle
    * and never holds up anyone else's lockstep.
    */
   | { version: 1; type: 'match'; matchId: string; reportToken: string; slot: number; ad?: AdBreak };

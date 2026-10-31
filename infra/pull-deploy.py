@@ -33,14 +33,14 @@ def request(url):
 def compose(image):
     env = {**os.environ, 'COMRADE_IMAGE': image, 'COMRADE_BIND_ADDRESS': '10.1.0.60', 'COMRADE_HOST_PORT': PORT}
     # Secrets live beside the state file, never in the repo or the image: the database URL,
-    # the Cognito pool, the Stripe keys, the advertising tags and the log-export token. Only
+    # the Cognito pool, the Stripe keys and the log-export token. Only
     # names the service actually reads are passed through, so a stray line cannot inject
     # anything into the container's environment.
     allowed = {
         'COMRADE_OPS_TOKEN', 'DATABASE_URL', 'DATABASE_SSL_VERIFY', 'DATABASE_POOL_MAX',
         'COGNITO_REGION', 'COGNITO_USER_POOL_ID', 'COGNITO_CLIENT_ID', 'COGNITO_CLIENT_SECRET',
         'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_AUTOMATIC_TAX', 'STRIPE_PROMOTION_CODES',
-        'COMRADE_AD_TAGS', 'COMRADE_AD_SECONDS', 'COMRADE_AD_TIMEOUT_MS',
+        'COMRADE_AD_SECONDS',
         'COMRADE_HOUSE_HEADLINE', 'COMRADE_HOUSE_BODY', 'COMRADE_HOUSE_CTA', 'COMRADE_HOUSE_HREF',
         'COMRADE_PUBLIC_URL', 'COMRADE_TERMS_VERSION', 'COMRADE_GUEST_SECRET', 'COMRADE_REPO',
         'COMRADE_GITHUB_TOKEN',

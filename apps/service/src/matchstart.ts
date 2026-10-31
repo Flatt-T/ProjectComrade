@@ -6,9 +6,9 @@
 // spent at all and the room stays in the lobby — a half-charged room is not a state worth
 // having.
 //
-// A player on an advertising tier is handed a VAST waterfall to play. Their simulation still
-// starts on the first tick with their input locked, so their turns keep flowing and nobody
-// else's lockstep waits on them; they simply arrive with thirty seconds already gone.
+// A player on an advertising tier is handed a pre-match slot. Their simulation still starts
+// on the first tick with their input locked, so their turns keep flowing and nobody else's
+// lockstep waits on them; they simply arrive after the advertisement.
 import { randomBytes } from 'node:crypto';
 import { AdBreak, GameStyle, Loadout, PlayKind, Tier, plan, playKind, styleAllowed } from '@comrade/contracts';
 import { consentFor } from './accounts.js';

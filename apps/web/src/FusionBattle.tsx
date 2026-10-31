@@ -99,7 +99,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
   /**
    * The pre-match advertisement, if this player's tier watches one. The simulation starts on
    * the first tick regardless; `adLock` holds this player's orders back until it finishes, so
-   * their base sits idle for thirty seconds while every peer's lockstep carries on normally.
+   * their base sits idle for the advertisement while every peer's lockstep carries on normally.
    */
   const [ad, setAd] = useState(() => conn.match?.ad);
   const adLock = useRef(!!conn.match?.ad);

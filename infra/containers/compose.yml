@@ -23,10 +23,8 @@ services:
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       STRIPE_AUTOMATIC_TAX: ${STRIPE_AUTOMATIC_TAX:-false}
       STRIPE_PROMOTION_CODES: ${STRIPE_PROMOTION_CODES:-true}
-      # Ordered advertising waterfall, highest paying first (JSON). Empty runs the house ad.
-      COMRADE_AD_TAGS: ${COMRADE_AD_TAGS:-}
+      # House-fallback length when AdSense does not fill. AdSense itself is in the web app.
       COMRADE_AD_SECONDS: ${COMRADE_AD_SECONDS:-30}
-      COMRADE_AD_TIMEOUT_MS: ${COMRADE_AD_TIMEOUT_MS:-8000}
       COMRADE_PUBLIC_URL: ${COMRADE_PUBLIC_URL:-}
       COMRADE_TERMS_VERSION: ${COMRADE_TERMS_VERSION:-}
       # Signs the guest cookie. Set it, or guest allowances reset on every deploy.

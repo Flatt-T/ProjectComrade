@@ -37,8 +37,10 @@ seen), not at midnight. Gold votes still renew every seven days from that same m
 
 The free tier's advertisement plays **over a simulation that is already running**: your base is
 on the battlefield from the first tick with your orders held back, so subscribers walk straight
-in and you arrive about thirty seconds behind — and no lockstep peer ever waits for an
-advertisement ([ADR 011](docs/adr/011-paid-platform.md)).
+in and you arrive after the placement — and no lockstep peer ever waits for an
+advertisement ([ADR 011](docs/adr/011-paid-platform.md)). Pre-match ads use Google's Ad
+Placement API (`preroll`); extra matches are a rewarded placement granted only if the
+advertisement is viewed to the end.
 
 Accounts are AWS Cognito; subscriptions, invoices and the billing portal are Stripe. With no
 database configured the service runs open and unmetered exactly as before, so each layer can be

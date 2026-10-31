@@ -15,7 +15,7 @@ export const TIERS: Tier[] = ['guest', 'free', 'bronze', 'silver', 'gold'];
 /** Paid tiers, cheapest first: the order the upgrade ladder is shown in. */
 export const PAID_TIERS: Tier[] = ['bronze', 'silver', 'gold'];
 
-/** Seconds a player must watch to earn one match when they have none left. */
+/** Typical house-fallback length when a rewarded placement does not fill. Not a grant rule. */
 export const CREDIT_AD_SECONDS: Record<PlayKind, number> = { classic: 30, fusion: 60 };
 /** Rolling 24-hour cap on advertisement-earned matches, per kind, against house-ad farming. */
 export const AD_CREDITS_PER_DAY = 20;
@@ -259,21 +259,18 @@ export interface PlayDecision {
   tier: Tier;
 }
 
-/** A pre-match advertisement slot, resolved server-side from the waterfall. */
+/** A pre-match advertisement slot. The client plays it with the Ad Placement API. */
 export interface AdBreak {
   /** Correlates the impression report with the slot that was served. */
   token: string;
+  /** House-fallback length in seconds when Google does not fill. */
   seconds: number;
-  /** Ordered VAST tag URLs; the client falls through them on error or timeout. */
-  tags: string[];
-  /** Shown when every network in the waterfall fails. */
+  /** Shown when the Ad Placement API cannot fill. */
   house: HouseAd;
-  /** Milliseconds to wait for a tag before moving down the waterfall. */
-  timeoutMs: number;
   /** False when the viewer has not consented to personalised advertising. */
   personalised: boolean;
   /** `credit` is watched to earn a match; `delay` is the free-tier overlay on a live match. */
-  purpose?: 'delay' | 'credit';
+  purpose: 'delay' | 'credit';
 }
 
 export interface HouseAd { headline: string; body: string; cta: string; href: string }

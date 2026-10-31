@@ -94,6 +94,18 @@ export async function restoreCredit(creditId: string): Promise<void> {
   await query(`update play_credits set spent_at = null where id = $1`, [creditId]);
 }
 
+/** Race guard only. Granting is decided by Google's `adViewed` on the client. */
+export const AD_CREDIT_MIN_WATCH_MS = 1_000;
+/** Abandoned tokens must not be cashed in later. */
+export const AD_CREDIT_MAX_WAIT_MS = 5 * 60 * 1000;
+
+export function adCreditWatchState(issuedAt: Date, now = new Date()): 'ok' | 'early' | 'expired' {
+  const elapsedMs = now.getTime() - issuedAt.getTime();
+  if (elapsedMs < AD_CREDIT_MIN_WATCH_MS) return 'early';
+  if (elapsedMs > AD_CREDIT_MAX_WAIT_MS) return 'expired';
+  return 'ok';
+}
+
 export interface AdCreditStart { ad: AdBreak; kind: PlayKind; seconds: number }
 
 /** Open an advertisement that, if watched in full, grants one match of `kind`. */
@@ -117,7 +129,7 @@ export async function startAdCredit(subject: Subject, kind: PlayKind, personalis
   return { ad, kind, seconds };
 }
 
-/** Grant the match after the player has actually waited the required duration. */
+/** Grant the match after the client reports the rewarded placement was viewed. */
 export async function completeAdCredit(subject: Subject, token: string): Promise<{ kind: PlayKind }> {
   if (!platformEnabled()) throw forbidden('Credits are not enabled on this deployment');
   const key = token.slice(0, 64);
@@ -129,13 +141,11 @@ export async function completeAdCredit(subject: Subject, token: string): Promise
     [key, id]);
   if (!session) throw badRequest('That advertisement is not waiting to be completed');
   if (session.completed_at) throw conflict('That advertisement has already granted a match');
-  const elapsedMs = Date.now() - session.issued_at.getTime();
-  const neededMs = Math.max(0, session.seconds - 1) * 1000;
-  if (elapsedMs < neededMs) {
+  const watch = adCreditWatchState(session.issued_at);
+  if (watch === 'early') {
     throw badRequest('Watch the advertisement to the end to earn the match', 'ad-credit-early');
   }
-  // Abandoned tokens must not be cashed in hours later.
-  if (elapsedMs > (session.seconds + 120) * 1000) {
+  if (watch === 'expired') {
     throw badRequest('That advertisement expired — start another');
   }
   const kind = session.kind as PlayKind;

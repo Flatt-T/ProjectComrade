@@ -320,8 +320,8 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
             ? <button className="deploy" disabled={!othersReady || me?.entitled === false || !!mashupProblem || room.players.some(p => mashup && !p.loadout)} onClick={() => conn.send({ type: 'start' })}>START OPERATION →</button>
             : <button className="deploy" disabled={me?.entitled === false || !!mashupProblem} onClick={() => conn.send({ type: 'ready', ready: !me?.ready })}>{me?.ready ? 'CANCEL READY' : 'READY UP ✓'}</button>}
           {entitlements?.ads && <small className="ad-warning">
-            A 30-second advertisement plays before the match. Your base is on the field while it
-            runs, so you join about half a minute behind the subscribers.
+            An advertisement plays before the match. Your base is on the field while it runs, so
+            you join a little behind the subscribers.
             {' '}<Link to="/tiers">Bronze removes it</Link>.
           </small>}
           <small>{isHost ? (othersReady ? 'All commanders ready. Launch when you are.' : 'Waiting for the other commanders to ready up.') : 'Ready up — the host launches the match.'}{' '}

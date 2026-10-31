@@ -23,7 +23,24 @@
         if (stored.analyticsDecided && stored.analytics) {
           gtag('consent', 'update', { analytics_storage: 'granted' });
         }
+        if (stored.decided && stored.personalisedAds) {
+          gtag('consent', 'update', {
+            ad_storage: 'granted',
+            ad_user_data: 'granted',
+            ad_personalization: 'granted'
+          });
+        }
       } catch (e) {}
+    </script>
+    <!-- Google AdSense / H5 Ad Placement API. data-adbreak-test="on" serves mock ads for
+         development and site verification. Remove that attribute before Request review. -->
+    <script async data-adbreak-test="on"
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3714156360561836"
+      crossorigin="anonymous"></script>
+    <script>
+      window.adsbygoogle = window.adsbygoogle || [];
+      window.adBreak = window.adConfig = function (o) { window.adsbygoogle.push(o); };
+      window.adConfig({ preloadAdBreaks: 'on', sound: 'on' });
     </script>
   </head>
   <body>

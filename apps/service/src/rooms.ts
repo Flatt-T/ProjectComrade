@@ -285,7 +285,7 @@ export class RoomCoordinator {
   /**
    * Check and charge everyone, then launch. Nothing is spent unless every commander in the
    * room can enter, and each player is sent its own kick-off privately: a report token and,
-   * on the advertising tiers, the VAST waterfall to play over the opening thirty seconds.
+   * on the advertising tiers, the pre-match advertisement slot to overlay on the opening ticks.
    */
   private async start(id: string, name: string) {
     const room = this.rooms.get(name);

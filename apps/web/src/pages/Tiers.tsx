@@ -128,7 +128,7 @@ export default function Tiers() {
           <ul className="tier-perks">
             <li>{playsText(details.classicPlaysPerDay, 'Classic matches')}</li>
             <li>{playsText(details.fusionPlaysPerDay, 'Fusion matches')}</li>
-            <li className={details.ads ? 'minus' : ''}>{details.ads ? '30-second advertisement before each match' : 'No advertisements'}</li>
+            <li className={details.ads ? 'minus' : ''}>{details.ads ? 'Advertisement before each match' : 'No advertisements'}</li>
             {details.voting && <li>Voting rights on new features and maps</li>}
             {details.earlyAccess && <li>New maps and fusions a week early</li>}
           </ul>

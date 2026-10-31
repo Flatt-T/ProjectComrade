@@ -15,6 +15,7 @@ describe('static file candidates', () => {
     ]);
     expect(publicFileCandidates('/sitemap.xml')).toEqual(['/sitemap.xml']);
     expect(publicFileCandidates('/robots.txt')).toEqual(['/robots.txt']);
+    expect(publicFileCandidates('/ads.txt')).toEqual(['/ads.txt']);
   });
 
   it('rejects path traversal', () => {
