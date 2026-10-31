@@ -6,7 +6,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ConsentState, Entitlements, Me, PlayKind, QuotaState, Tier } from '@comrade/contracts';
 import { ApiError, MeResponse, TierTable, api, currentToken, refresh } from './api';
-import { applyAnalyticsConsent } from './analytics';
+import { applyAdvertisingConsent, applyAnalyticsConsent } from './analytics';
 
 /** The viewer's local advertising and analytics choices, kept per browser. */
 const CONSENT_KEY = 'comrade-consent';
@@ -80,6 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     applyAnalyticsConsent(localConsent.analyticsDecided && localConsent.analytics);
+    applyAdvertisingConsent(localConsent.decided && localConsent.personalisedAds);
   }, [localConsent]);
 
   const load = useCallback(async () => {

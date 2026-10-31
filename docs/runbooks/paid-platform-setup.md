@@ -12,7 +12,7 @@ block below switches on one more layer, and each can be done and verified on its
 | `DATABASE_URL` | Guest allowances, match history, the play ledger |
 | `+ COGNITO_*` | Registration, sign-in, profiles, the free tier |
 | `+ STRIPE_*` | Subscriptions, invoices, tier changes |
-| `+ COMRADE_AD_TAGS` | Real advertisements (the house advertisement runs without them) |
+| AdSense snippet + `ads.txt` | Real advertisements (the house advertisement still runs on a miss) |
 
 `/health` reports which of the four are configured, so a deploy can be checked at a glance.
 
@@ -139,28 +139,32 @@ applied, and a redelivery changes nothing — Stripe can retry freely.
 
 ## 4. Advertising
 
-The service never talks to an ad network. It hands the browser an **ordered waterfall of VAST
-tag URLs** which the IMA SDK plays, falling to the next tag on an error or timeout and finally
-to the house advertisement. Highest paying first:
+Google AdSense for HTML5 games is wired in the web app (publisher `ca-pub-3714156360561836`).
+The service never talks to Google: it issues a token and the house creative. The browser calls
+the [Ad Placement API](https://developers.google.com/ad-placement): `adBreak({type: 'preroll'})`
+before gameplay, and `adBreak({type: 'reward'})` for an extra match, granted only in `adViewed`.
 
 ```
-COMRADE_AD_TAGS=[{"provider":"gam","tag":"https://pubads.g.doubleclick.net/gampad/ads?..."},{"provider":"partner","tag":"https://..."}]
 COMRADE_AD_SECONDS=30
-COMRADE_AD_TIMEOUT_MS=8000
 ```
 
-Tags must be `https`. `[CACHEBUSTER]`, `[TIMESTAMP]` and `[RANDOM]` are substituted per
-request, and `npa=1` is appended to Google tags when the viewer has not consented to
-personalisation. Adding, reordering or dropping a network is an environment change only.
+That is the house-fallback length when a placement does not fill, so the delayed start stays
+real during a miss or an ad blocker. Personalisation is Google consent mode
+(`ad_storage` / `ad_user_data` / `ad_personalization`), default denied.
 
-With no tags set the slot still runs for its full thirty seconds showing the house
-advertisement, so the flow, the timing and the delayed start are all live and testable from day
-one. Most gaming ad networks require existing traffic before they will approve an account —
-launching on the house advertisement and adding tags later is the normal path.
+`https://projectcomrade.co.uk/ads.txt` must serve exactly:
+
+```
+google.com, pub-3714156360561836, DIRECT, f08c47fec0942fa0
+```
+
+The site `<head>` loads `adsbygoogle.js?client=ca-pub-3714156360561836`. While testing, that
+script tag carries `data-adbreak-test="on"` — **remove the attribute before clicking Request
+review in AdSense**.
 
 **Before enabling a network that requires IAB TCF consent strings**, a certified consent
 management platform has to be added; the current banner records a plain personalised/not
-choice, which is enough for a non-personalised serve and for Google's `npa=1`.
+choice, which is enough for a non-personalised serve via consent mode.
 
 ## 5. The rest of the environment
 
@@ -236,7 +240,7 @@ Worth knowing before changing anything:
   with nothing left cannot ready up, so a room can never be held by someone who cannot enter.
 - **The advertisement is an overlay, not a gate.** The simulation starts on the first tick for
   everyone; an advertising player's orders are held back until it finishes. That is what makes
-  the delayed start real — thirty seconds of an idle base — while every subscriber plays on, and
+  the delayed start real — an idle base for the length of the placement — while every subscriber plays on, and
   it is why no lockstep peer ever waits for an advertisement. Holding a client at turn zero
   instead would stall the whole match, because `LockstepSession` only advances once every
   human's turn packet has arrived.

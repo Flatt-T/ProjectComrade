@@ -213,7 +213,7 @@ export default function Account() {
               });
             }} />
           <span>Personalised advertisements. Off means the pre-match slot runs non-personalised
-            advertisements instead — the same thirty seconds, without profiling.</span>
+            advertisements instead, without profiling.</span>
         </label>
         <label className="check">
           <input type="checkbox" checked={!!consent?.marketingEmail} disabled={!!busy}

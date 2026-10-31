@@ -163,47 +163,37 @@ monthly fee.
 
 ### How it works here
 
-The service never talks to an ad network. It hands the browser an ordered list of **VAST tag
-URLs** from configuration, which the IMA SDK plays in turn, falling to the next on an error or
-timeout and finally to a house advertisement. No network is named anywhere in the code.
+Google AdSense for HTML5 games is loaded in the site head (publisher `ca-pub-3714156360561836`).
+The service never talks to Google. The browser calls the Ad Placement API:
 
-That means: **you can launch with no network at all.** The slot runs for its full thirty
-seconds showing your own promotion, the timing and the delayed start are real and testable, and
-adding a network later is an environment change with no deployment.
+- `adBreak({type: 'preroll'})` before gameplay (later matches on the same page use `start`)
+- `adBreak({type: 'reward'})` for an extra match, granted only in `adViewed`
 
-### What to apply for
+If a placement does not fill, the house advertisement keeps the delayed start real. `ads.txt`
+is a static file at the origin.
 
-Most networks that pay well for in-game video want to see traffic first, so this is realistically
-a post-launch step:
+### What is already applied for
 
-- **Google Ad Manager / AdSense for Games** — the usual starting point, lowest barrier, serves
-  VAST natively.
-- **Venatus, AdinPlay, Snigel** — gaming specialists, better rates, but they generally want
-  meaningful monthly traffic before they will talk.
-- **Unity Ads, AppLovin** — strong on video, more mobile-oriented.
+- **Google AdSense** — property on the account, site `projectcomrade.co.uk`. Waiting on
+  verification, then review. Do not click Verify or Request review until `ads.txt` and the
+  head tag are live. Leave `data-adbreak-test="on"` until you are ready to request review.
 
-Apply to several. The waterfall exists precisely so you can run more than one and order them by
-what they actually pay.
+Other networks (Venatus, AdinPlay, Snigel, and so on) still want traffic first. Adding one
+later is a client change plus a line in `AD_NETWORKS`.
 
 ### What it issues back
 
-One or more VAST tag URLs, which go into `COMRADE_AD_TAGS` as a JSON array ordered highest
-paying first.
+The publisher id is already in the web app. No VAST tags, no `COMRADE_AD_TAGS`.
 
 ### The one real constraint
 
 **Naming a network is a legal requirement, not a nicety.** The privacy and cookies pages list
-them from `AD_NETWORKS` in `apps/web/src/pages/Legal.tsx`.
-
-**Google Ad Manager is already written up there**, including what Google receives, the cookies
-it may set, what `npa=1` actually does, and its opt-out links. It switches on by itself the
-moment a tag appears in `COMRADE_AD_TAGS` — the service reports whether a tag is configured and
-the pages follow, so they never claim a network is involved before it is, and need no edit on
-the day it is. If you enable any *other* network, add it to `AD_NETWORKS` first.
+them from `AD_NETWORKS` in `apps/web/src/pages/Legal.tsx`. Google AdSense is named there.
+If you enable any *other* network, add it to `AD_NETWORKS` first.
 
 If a network requires **IAB TCF consent strings**, a certified consent management platform has
 to be added first. The current banner records a plain personalised / not-personalised choice,
-which is enough for a non-personalised serve and for Google's `npa=1`, but is not a TCF string.
+which is enough for a non-personalised serve via Google's consent mode, but is not a TCF string.
 
 ### Cost
 
@@ -241,10 +231,9 @@ STRIPE_WEBHOOK_SECRET=   # from Stripe
 COMRADE_GUEST_SECRET=    # generate: 32+ random characters
 ```
 
-Plus `COMRADE_AD_TAGS` when a network is live, and `COGNITO_CLIENT_SECRET` if the app client
-has one. Keep a copy in whatever vault the rest of the estate uses — losing
-`COMRADE_GUEST_SECRET` only resets guest allowances, but losing the others means re-issuing
-them.
+Plus `COGNITO_CLIENT_SECRET` if the app client has one. Keep a copy in whatever vault the rest
+of the estate uses — losing `COMRADE_GUEST_SECRET` only resets guest allowances, but losing the
+others means re-issuing them.
 
 ---
 
@@ -259,5 +248,6 @@ them.
    confirm → subscribe → upgrade → downgrade → cancel → invoice PDF. Then repeat in live mode.
 4. **Before any of it is public:** complete the registered-entity details in `Legal.tsx` and
    have the drafts reviewed.
-5. **After launch:** apply to ad networks and add their tags. Google Ad Manager needs no
-   further wording; any other network must be added to `AD_NETWORKS` before its tag goes live.
+5. **AdSense:** once `ads.txt` and the head tag are deployed, verify the site in AdSense, then
+   remove `data-adbreak-test="on"` and request review. Any other network must be added to
+   `AD_NETWORKS` before its advertisements run.

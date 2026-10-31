@@ -17,8 +17,8 @@
 //   - Retention: 12 months for play records, 30 days for logs, 7 years for invoices (HMRC).
 //   - Governing law: England and Wales, where the company is registered.
 //
-// The advertising network register below is pre-written for Google Ad Manager and turns on by
-// itself when a tag is configured; any further network must be added before its tag goes live.
+// The advertising network register names Google AdSense, which is wired in the site head.
+// Any further network must be added here before its advertisements run.
 import React from 'react';
 import { useAuth } from '../auth';
 import { Link, useRoute } from '../router';
@@ -45,13 +45,12 @@ const COMPANY = {
  * the advertisement loads, so each has to be named with a link to its own notice and, where it
  * has one, its opt-out.
  *
- * This list describes what *would* serve; whether anything third-party is serving at all comes
- * from the service (`adsConfigured`, true once COMRADE_AD_TAGS holds a tag). So the pages never
- * claim a network is involved before its tag is live, and need no edit on the day it is.
+ * Whether anything third-party is serving comes from the service (`adsConfigured`). AdSense
+ * is wired in the web app, so that flag is on for this deployment.
  */
 const AD_NETWORKS: { name: string; operator: string; href: string; optOut?: string }[] = [
   {
-    name: 'Google Ad Manager',
+    name: 'Google AdSense',
     operator: 'Google Ireland Limited',
     href: 'https://policies.google.com/technologies/partner-sites',
     optOut: 'https://adssettings.google.com/',
@@ -144,13 +143,13 @@ export default function Legal() {
         <p>Guests and free accounts get a daily allowance of matches. It renews 24 hours after you
           first arrived as a guest, or 24 hours after you registered — not at midnight — and the
           current allowances for every tier are set out on the <Link to="/tiers">tiers page</Link>.</p>
-        <p>On the free and guest tiers a short advertisement of up to thirty seconds plays before
-          a match. Your base is on the battlefield while it runs, so what you lose is the time,
-          not the position. Subscribers see no advertisement.</p>
-        <p>If you have used your matches for the day, you can watch an advertisement — thirty seconds
-          for Classic, sixty seconds for Fusion — to add one match of that kind to your account,
-          or buy a one-off battle pack of extra matches. Extra matches are kept until you play
-          them and do not expire when the day renews.</p>
+        <p>On the free and guest tiers a short advertisement plays before a match. Your base is
+          on the battlefield while it runs, so what you lose is the time, not the position.
+          Subscribers see no advertisement.</p>
+        <p>If you have used your matches for the day, you can watch a rewarded advertisement to
+          add one match of that kind to your account, or buy a one-off battle pack of extra
+          matches. Extra matches are kept until you play them and do not expire when the day
+          renews. The extra match is added only if you watch the advertisement to the end.</p>
 
         <h2>6. Subscriptions and payment</h2>
         <p>Subscriptions are monthly, billed in advance, and renew automatically until you cancel.
@@ -357,7 +356,7 @@ export default function Legal() {
           United States. Where they do, they rely on the UK's approved transfer mechanisms — an
           adequacy decision where one covers them, otherwise the International Data Transfer
           Addendum to the European Commission's standard contractual clauses. Google Ireland
-          Limited is the contracting party for Google Ad Manager in the UK and EEA.</p>
+          Limited is the contracting party for Google AdSense in the UK and EEA.</p>
 
         <h2>How long we keep it</h2>
         <ul>
@@ -505,27 +504,26 @@ export default function Legal() {
           clearing site data.</p>
 
         <h2>Advertising</h2>
-        <p>Free and guest players see one advertisement of up to thirty seconds before a match.
-          Your base is already on the battlefield while it plays, so the only cost is the time.
-          Subscribers see no advertisement at all, and are never asked this question.</p>
-        <p>If you have no matches left you may also choose to watch an advertisement — thirty
-          seconds for Classic, sixty seconds for Fusion — to earn one extra match. The same
-          personalisation choice applies. You do not have to; you can wait for the day to
-          renew, subscribe, or buy a battle pack instead.</p>
+        <p>Free and guest players see one advertisement before a match. Your base is already on
+          the battlefield while it plays, so the only cost is the time. Subscribers see no
+          advertisement at all, and are never asked this question.</p>
+        <p>If you have no matches left you may also choose to watch a rewarded advertisement to
+          earn one extra match. The same personalisation choice applies. You do not have to; you
+          can wait for the day to renew, subscribe, or buy a battle pack instead. The extra match
+          is added only if you watch that advertisement to the end.</p>
 
         <h3>Personalised or not</h3>
-        <p>With personalisation <b>off</b> — which is the default until you turn it on — the
-          request we make is marked as non-personalised and the network is asked not to build or
+        <p>With personalisation <b>off</b> — which is the default until you turn it on — Google's
+          consent mode keeps advertising storage denied and the network is asked not to build or
           use a profile of you. With it <b>on</b>, the network may use what your browser sends it
           to choose a more relevant advertisement.</p>
-        <p>Either way the advertisement is the same length and you lose nothing by saying no. You
-          can change your answer whenever you like on your <Link to="/account">account page</Link>,
-          and it applies to your very next match.</p>
-        {adsLive && <p>In practice, with personalisation off we add Google's
-          {' '}<code>npa=1</code> parameter to the request, which tells Google to serve a
-          non-personalised advertisement: it may still use coarse signals such as the page and
-          your general location to pick something sensible, but not a profile built from your
-          browsing.</p>}
+        <p>Either way you lose nothing by saying no. You can change your answer whenever you like
+          on your <Link to="/account">account page</Link>, and it applies to your very next match.</p>
+        {adsLive && <p>In practice, with personalisation off we leave Google's consent mode on
+          denied for <code>ad_storage</code>, <code>ad_user_data</code> and
+          {' '}<code>ad_personalization</code>, which tells Google to serve a non-personalised
+          advertisement: it may still use coarse signals such as the page and your general
+          location to pick something sensible, but not a profile built from your browsing.</p>}
 
         <h3>What the network receives</h3>
         <p>When an advertisement loads, your browser contacts the network directly. It will
@@ -534,7 +532,7 @@ export default function Legal() {
           or your match history, ever.</p>
         <AdNetworkList live={adsLive} />
         {adsLive && <>
-          <p>Google Ad Manager may set cookies or read device identifiers in your browser to
+          <p>Google AdSense may set cookies or read device identifiers in your browser to
             measure that an advertisement was shown and to limit how often you see the same one.
             Those are Google's own, not ours, and they are set only when an advertisement
             actually loads — so a subscriber, who never sees one, never gets them.</p>

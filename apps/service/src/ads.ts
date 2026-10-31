@@ -1,34 +1,13 @@
 // The pre-match advertisement slot.
 //
-// The service does not talk to any ad network: it resolves an ordered waterfall of VAST tag
-// URLs and hands it to the client, which plays them with the IMA SDK and falls down the
-// list on error or timeout. Adding, reordering or removing a network is an environment
-// change, never a code change, and with nothing configured the house advertisement runs so
-// the flow is complete from day one.
-//
-// Tags are only ever read from configuration — never from anything a player sends — so a
-// client cannot make the page fetch a URL of its choosing.
+// The service does not talk to Google: it issues a token, the house creative, and how long
+// the house fallback should run. The browser calls the Ad Placement API. Adding a different
+// network later is a client change; the token and impression record stay the same.
 import { randomUUID } from 'node:crypto';
 import { AdBreak } from '@comrade/contracts';
-import { ads } from './config.js';
+import { ads, platformEnabled } from './config.js';
 import { query } from './db.js';
-import { platformEnabled } from './config.js';
 import { Subject } from './entitlements.js';
-
-/** Macros the networks expect to be filled in per request. */
-function expand(tag: string, personalised: boolean): string {
-  const buster = String(Date.now()) + Math.floor(Math.random() * 1e6);
-  let url = tag
-    .replace(/\[CACHEBUSTER\]|%%CACHEBUSTER%%/gi, buster)
-    .replace(/\[TIMESTAMP\]/gi, String(Date.now()))
-    .replace(/\[RANDOM\]/gi, buster);
-  // Google's parameter for serving a non-personalised ad; harmless on other networks but
-  // only added where it means something.
-  if (!personalised && /doubleclick\.net|googlesyndication\.com/.test(url) && !/[?&]npa=/.test(url)) {
-    url += `${url.includes('?') ? '&' : '?'}npa=1`;
-  }
-  return url;
-}
 
 export interface AdBreakOptions {
   seconds?: number;
@@ -41,9 +20,7 @@ export function adBreak(personalised: boolean, options: AdBreakOptions = {}): Ad
   return {
     token: options.token ?? randomUUID(),
     seconds: options.seconds ?? ads.seconds(),
-    tags: ads.tags().map(t => expand(t.tag, personalised)),
     house: ads.house(),
-    timeoutMs: ads.timeoutMs(),
     personalised,
     purpose: options.purpose ?? 'delay',
   };
@@ -51,9 +28,9 @@ export function adBreak(personalised: boolean, options: AdBreakOptions = {}): Ad
 
 export interface ImpressionReport {
   token: string;
-  /** Which rung of the waterfall actually played, or `house`. */
+  /** `adsense`, `house`, or another short provider label. */
   provider?: string;
-  /** False when every network failed and the house advertisement was shown. */
+  /** False when the house advertisement was shown instead. */
   filled: boolean;
   /** Seconds actually watched, as the player reported them. */
   seconds: number;

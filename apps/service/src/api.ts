@@ -618,6 +618,6 @@ get('/api/tiers', async () => ({
   termsVersion: termsVersion(),
   authEnabled: authEnabled(),
   billingEnabled: billingEnabled(),
-  // The privacy and cookies pages name third-party networks only while one is really serving.
-  adsConfigured: adsConfig.tags().length > 0,
+  // Privacy and cookies pages name AdSense while this is true.
+  adsConfigured: adsConfig.configured(),
 }));

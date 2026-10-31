@@ -193,8 +193,6 @@
 
 .ad-break{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#060a07f7;padding:4%}
 .ad-stage{position:relative;width:min(100%,900px);aspect-ratio:16/9;background:#000;border:1px solid #425039;overflow:hidden}
-.ad-ima,.ad-video{position:absolute;inset:0;width:100%;height:100%}
-.ad-video{object-fit:contain;background:#000}
 .ad-house{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:8%;background:radial-gradient(ellipse at 60% 20%,#2d3d2199,transparent 75%),#0d120e}
 .ad-house h3{font:800 clamp(20px,2.6vw,34px) Arial,sans-serif;text-transform:uppercase;letter-spacing:-.5px;margin:0}
 .ad-house p{font-size:13px;color:#9aa98f;line-height:1.8;max-width:46ch;margin:0}
@@ -204,7 +202,6 @@
 .ad-progress{height:4px;background:#1d2619;border:1px solid #35412e;grid-column:2;grid-row:1}
 .ad-progress i{display:block;height:100%;background:#b4d96b;transition:width .25s linear}
 .ad-note{grid-column:1/-1;font-size:11.5px;color:#8b9b80;line-height:1.7}
-.ad-mute{grid-column:3;grid-row:1;padding:9px 13px}
 .ad-consent{font-size:11px;color:#7d8b73}
 
 .share{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0}
@@ -228,7 +225,6 @@
   .legal-table td,.legal-table th{padding:9px 8px}
   .proposal{grid-template-columns:48px 1fr;gap:12px}
   .ad-bar{grid-template-columns:auto 1fr}
-  .ad-mute{grid-column:2;grid-row:2;justify-self:end}
 }
 .tier-price-soon{color:#8b9b80;font-size:12px}
 

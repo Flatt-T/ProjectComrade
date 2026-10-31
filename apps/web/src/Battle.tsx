@@ -42,7 +42,7 @@ export default function Battle({ launch, mapName, conn, onExit }: { launch: Laun
   const [snapshot, setSnapshot] = useState<EngineSnapshot>({ frame: 0 });
   /**
    * The pre-match advertisement for the advertising tiers. The engine boots and runs behind
-   * it, so the only thing the player loses is the thirty seconds.
+   * it, so the only thing the player loses is the time the placement takes.
    */
   const [ad, setAd] = useState(() => conn.match?.ad);
   const [record, setRecord] = useState<MatchRecord | null>(null);

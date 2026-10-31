@@ -38,29 +38,11 @@ export const stripe = {
   promotionCodes: () => text('STRIPE_PROMOTION_CODES', 'true') === 'true',
 };
 
-/** One rung of the advertising waterfall, highest paying first. */
-export interface AdTag { provider: string; tag: string }
-
 export const ads = {
+  /** House-fallback length when the Ad Placement API does not fill. */
   seconds: () => whole('COMRADE_AD_SECONDS', 30),
-  timeoutMs: () => whole('COMRADE_AD_TIMEOUT_MS', 8_000),
-  /**
-   * COMRADE_AD_TAGS is a JSON array ordered by what each network pays, e.g.
-   * [{"provider":"gam","tag":"https://pubads.g.doubleclick.net/gampad/ads?..."}]
-   * `[PLACEHOLDER]` macros in a tag are substituted per request (see ads.ts). With none
-   * configured the house advertisement runs, so the pre-match slot works from day one.
-   */
-  tags: (): AdTag[] => {
-    try {
-      const parsed: unknown = JSON.parse(text('COMRADE_AD_TAGS', '[]'));
-      if (!Array.isArray(parsed)) return [];
-      return parsed
-        .filter((t): t is AdTag => !!t && typeof t === 'object'
-          && typeof (t as AdTag).tag === 'string' && /^https:\/\//.test((t as AdTag).tag))
-        .map(t => ({ provider: String(t.provider || 'network').slice(0, 32), tag: t.tag }))
-        .slice(0, 8);
-    } catch { return []; }
-  },
+  /** AdSense is wired in the web app; the service always treats advertising as configured. */
+  configured: () => true,
   house: () => ({
     headline: text('COMRADE_HOUSE_HEADLINE', 'Skip the advertisements'),
     body: text('COMRADE_HOUSE_BODY', 'Bronze removes the pre-match break and unlocks unlimited Classic play.'),
@@ -89,6 +71,6 @@ export function billingEnabled(): boolean { return authEnabled() && stripe.confi
 export function configSummary() {
   return {
     database: databaseConfigured(), cognito: cognito.configured(), stripe: stripe.configured(),
-    adTags: ads.tags().length, publicUrl: publicUrl(), termsVersion: termsVersion(),
+    adsense: ads.configured(), publicUrl: publicUrl(), termsVersion: termsVersion(),
   };
 }

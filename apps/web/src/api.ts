@@ -89,7 +89,7 @@ export interface TierTable {
   termsVersion: string;
   authEnabled: boolean;
   billingEnabled: boolean;
-  /** True once a third-party advertising tag is configured; drives the legal pages' wording. */
+  /** True when a third-party network is wired; drives the legal pages' wording. */
   adsConfigured: boolean;
 }
 

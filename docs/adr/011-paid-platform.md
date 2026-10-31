@@ -83,15 +83,17 @@ seconds of commanding, and they arrive to a base that has been sitting idle. Tha
 the intended behaviour — subscribers walk straight into the match and the free player starts
 late — achieved with no protocol change and no possibility of desync.
 
-### Advertising is a waterfall of tags, not an integration
+### Advertising is the Ad Placement API, with a house fallback
 
-The service holds an ordered list of VAST tag URLs from configuration and hands it to the
-browser, which plays them with the IMA SDK and falls down the list on error or timeout, ending
-at a house advertisement. No network is named in the code. Adding, reordering or dropping a
-network is an environment change, and the slot works — full length, correct timing, real
-delayed start — before any network has approved an account.
+The browser loads Google AdSense (`ca-pub-3714156360561836`) and calls `adBreak({type:
+'preroll'})` before gameplay (later matches in the same page load use `start`, because Google
+allows only one preroll). Extra matches call `adBreak({type: 'reward'})` and are granted only
+in the `adViewed` callback. The service issues a token and the house creative; it never talks
+to Google. If the placement does not fill, the house advertisement keeps the delayed start
+real so a network outage cannot stall a match.
 
-Tags only ever come from configuration, never from anything a client sends.
+`ads.txt` is served at the site origin. Test placements use `data-adbreak-test="on"` on the
+snippet until review is requested.
 
 ### Identity rides the WebSocket, uniqueness lives in Postgres
 
