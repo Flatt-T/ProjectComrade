@@ -48,3 +48,29 @@ acceptance detail; this file is the resume point. Read it first in every session
 - Open: contracts only — no service, journal or engine wiring yet (PW05+).
   Classic `ClientMessage`/`PlayerOrder` untouched; `comrade.classic.v1` semantics
   unchanged.
+- Update: PR #14 merged to `main` (merge commit `d16397a`); THU-2228 Done.
+
+### PW05 — THU-2229 — durable world records and asset ownership ledger — 2026-11-11
+
+- State: implemented on branch `thu-2229-pw05-durable-world`.
+- Deliverables: `apps/service/src/mmo/{db,schema,store,fixture}.ts` (isolated
+  `mmo` schema, own pool gated on `MMO_DATABASE_URL` — live `comrade` schema
+  untouched), `Entity.bound` flag in `packages/fusion/src/game.ts` (0 free /
+  1 starter / 2 recovery, checksum-neutral for classic),
+  `tests/integration/mmo-store.test.ts` (14 tests), real `test:integration`
+  script + Postgres service in `ci.yml`.
+- Proven against disposable `postgres:16-alpine` (docker, localhost:55432):
+  `vitest run tests/integration/mmo-store.test.ts` — 14/14 pass covering
+  migration reload, ordered journal + outbox, fence rejection (stale epoch,
+  wrong worker, stale tick), lease takeover epoch bump, idempotent
+  operation commit with canonical-payload conflict detection, distinct
+  SELL_REFUND/PACK ledger causes, separate nightly/earned shield balances
+  with generation-fenced consumption and receipt-idempotent grants,
+  protection-record round-trips for all three reasons, contract-validated
+  trade offers resolving once, receipt-idempotent ladder, unique live
+  transfer per asset with the COMRADE 14 state machine, at-most-once
+  recovery episodes and settlements, snapshot applied-vs-committed
+  positions, leased scheduled jobs, deduplicated command intents.
+  `pnpm test:unit` 339 pass, `pnpm typecheck` 0, `pnpm lint` 0.
+- Open: journal/event bus ordering across workers (PW06), scheduler/activation
+  (PW07), engine snapshot/replay integration (PW21).
