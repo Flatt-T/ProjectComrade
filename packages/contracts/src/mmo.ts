@@ -102,6 +102,8 @@ export interface MmoRulesProfile {
   };
   /** Hibernation look-ahead for inbound transfers, milliseconds. */
   hibernateInboundLookaheadMs: number;
+  /** Minimum time a region stays awake before it may hibernate again (anti-thrash). */
+  hibernateMinAwakeMs: number;
 }
 
 /** COMRADE 18 approved starting defaults (tunable values). */
@@ -135,6 +137,7 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
     notificationShieldWarningMinutes: 30,
   },
   hibernateInboundLookaheadMs: 120_000,
+  hibernateMinAwakeMs: 300_000,
 };
 
 // ---------------------------------------------------------------------------
@@ -204,7 +207,7 @@ function parseProfile(value: unknown): MmoRulesProfile {
   for (const key of ['offlineAfterMs', 'battleWindowMs', 'setupProtectionOnlineMs', 'setupProtectionLapseMs',
     'starterCreditsMultiplier', 'maxCompounds', 'recoveryCreditCap', 'earnedShieldDailyCapSeconds',
     'nightlyShieldSeconds', 'armySupply', 'baseLevelMinutes', 'recoveryMilestone', 'salvage',
-    'sitesPerRegion', 'transport', 'rewards', 'hibernateInboundLookaheadMs', 'powerScoreSalvageFloorRatio',
+    'sitesPerRegion', 'transport', 'rewards', 'hibernateInboundLookaheadMs', 'hibernateMinAwakeMs', 'powerScoreSalvageFloorRatio',
     'allianceMaxMembers', 'recoveryBuildRoles'] as const) {
     if (v[key] === undefined) throw new Error(`Rules profile missing ${key}`);
   }
@@ -213,6 +216,7 @@ function parseProfile(value: unknown): MmoRulesProfile {
     || !isPosInt(p.starterCreditsMultiplier) || !isPosInt(p.maxCompounds)
     || !isNonNegInt(p.recoveryCreditCap) || !isNonNegInt(p.nightlyShieldSeconds)
     || !isNonNegInt(p.earnedShieldDailyCapSeconds) || !isNonNegInt(p.hibernateInboundLookaheadMs)
+    || !isNonNegInt(p.hibernateMinAwakeMs)
     || !isNonNegInt(p.allianceMaxMembers)
     || typeof p.powerScoreSalvageFloorRatio !== 'number' || p.powerScoreSalvageFloorRatio <= 0 || p.powerScoreSalvageFloorRatio > 1
     || !Array.isArray(p.recoveryBuildRoles) || p.recoveryBuildRoles.length > 16 || p.recoveryBuildRoles.length === 0
@@ -737,6 +741,7 @@ export const MMO_EVENT_KINDS = [
   'protection',         // protection transition committed by the authority
   'operation',          // committed SELL_REFUND/PACK/BARTER/... result
   'transfer',           // cross-region handoff stage
+  'accrual',            // quiescent-interval arithmetic advance applied at wake (PW22)
   'world',              // world-level fact (site capture, salvage, ladder, objective)
 ] as const;
 export type MmoEventKind = (typeof MMO_EVENT_KINDS)[number];

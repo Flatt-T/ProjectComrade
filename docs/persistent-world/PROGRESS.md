@@ -141,7 +141,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW07 - THU-2231 - durable region scheduler and runner - 2026-11-11
 
-- State: implemented on branch `thu-2231-pw07-region-scheduler` (in progress).
+- State: MERGED to main as aac888f (PR #18); THU-2231 Done.
 - Deliverables: `apps/service/src/mmo/runner.ts` (RegionRunner: fenced lease
   acquire/renew, snapshot restore + journal-first replay, wall-clock<->tick
   anchor via `region.started_at_ms`, real-time stepping, periodic checkpoint,
@@ -168,7 +168,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW08 - THU-2232 - region orchestration, /mmo gateway and client transport - 2026-11-11
 
-- State: implemented on branch `thu-2232-pw08-mmo-gateway` (in progress).
+- State: MERGED to main as 04ec477 (PR #19, commits 98cc9e5 + d422d70 ESM fix); THU-2232 Done.
 - Deliverables: `apps/service/src/mmo/regions.ts` (RegionService: on-demand
   runner supervision with bounded restart backoff, subscription snapshots,
   durable player provisioning, fence lookup), `apps/service/src/mmo/gateway.ts`
@@ -195,3 +195,38 @@ acceptance detail; this file is the resume point. Read it first in every session
   region picker yet; fog is render-side only (documented DEC-IMPL-9); world
   actions (sell/barter/shield/chat/ping/objective) journal but need handlers
   from PW09+; client e2e (Playwright) pending; capacity measurements pending.
+
+### PW22 - THU-2270 - region hibernation and capped idle accrual - 2026-11-11
+
+- State: implemented on branch `thu-2270-pw22-region-hibernation`, PR #20 (in progress).
+- Deliverables: `Game.fastForwardQuiescent(ticks, rates)` in
+  `packages/fusion/src/game.ts` (arithmetic per-tick production with cached
+  factory/speed context, measured per-slot harvest accrual with income bonus
+  and storage cap, `stats.harvested` parity with live delivery);
+  `RegionRunner` quiescence detection (rejects deliberate orders incl. timed
+  `deploy`/`rearm`/`enter`, armed entities with enemies in weapon range,
+  pending journal input, scheduled jobs inside `inboundLookaheadMs`),
+  hibernation metadata in snapshots (`hib`: wall anchor, sim tick, per-slot
+  rates), lease release + lifecycle `quiescent`, journaled `accrual` event on
+  wake applied exactly once (schema migration v4 adds the `accrual` kind),
+  wall-clock re-anchor after wake, restore path that re-applies the slept
+  interval even when the accrual event is already marked applied (crash
+  between apply and checkpoint cannot lose or double it);
+  `hibernateMinAwakeMs` (default 300 000) in `MmoRulesProfile` with parser
+  validation; `RegionService` wake poller (`wakePollMs`, default 5 000) and
+  `wakes`/`wakeLatenciesMs`/`hibernations` metrics.
+- Proven: `vitest run tests/unit/fusion-quiescent.test.ts` 6/6 (incl. live vs
+  fast-forward queue equivalence over 20k ticks); `vitest run
+  tests/integration/mmo-hibernation.test.ts` 6/6 against real PostgreSQL +
+  real Fusion: hibernate->checkpoint->lease release->ticking stops; no
+  hibernation under orders then hibernates once idle; wake accrual once,
+  storage-capped, exactly once across a simulated crash; queued production
+  completes during quiescence; service poller wakes a region for an in-window
+  scheduled job; scaling measurement `[pw22-load] awake control: 415 ticks,
+  234.0ms cpu; 8 quiescent regions: +0 ticks, 47.0ms cpu over 1500ms`.
+  Full integration suite 5 files / 42 tests pass. Also fixed a PW08 CI
+  regression: `@comrade/fusion` emitted extensionless ESM specifiers that
+  crash plain `node dist/index.js` once `/mmo` pulls the engine in - all
+  relative imports now carry `.js` (commit on the PW08 branch).
+- Open: hibernation look-ahead covers scheduled jobs and pending journal
+  input; cross-region inbound transfers waking a region land with PW10+.

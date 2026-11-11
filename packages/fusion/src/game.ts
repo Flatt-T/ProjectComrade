@@ -769,18 +769,29 @@ export class Game {
     q.items.splice(idx, 1);
   }
 
-  private production(p: Player) {
+  /** Per-kind production context that cannot change while a region is quiescent. */
+  private productionSpeed(p: Player, factories: Entity[]): number {
+    let speed = 100 + (factories.length - 1) * this.pack.extraFactoryBonus;
+    const ai = this.ai[p.slot];
+    if (ai) speed = Math.floor((speed * AI_LEVELS[ai.level].buildPercent) / 100);
+    if (p.powerUse > p.powerGen) speed = Math.floor((speed * this.pack.lowPowerProductionPercent) / 100);
+    return speed;
+  }
+
+  private production(p: Player, fast?: { factories: Map<QueueKind, Entity[]>; speed: Map<QueueKind, number> }) {
     for (const kind of QUEUES) {
       const q = p.queues[kind];
       if (!q.items.length || q.ready) continue;
-      const item = q.items[0];
-      const factories = this.factories(p, kind);
+      let factories = fast?.factories.get(kind);
+      if (factories === undefined) {
+        factories = this.factories(p, kind);
+        fast?.factories.set(kind, factories);
+      }
       if (!factories.length) continue;
+      const item = q.items[0];
       const cost = this.costOf(item, p);
-      let speed = 100 + (factories.length - 1) * this.pack.extraFactoryBonus;
-      const ai = this.ai[p.slot];
-      if (ai) speed = Math.floor((speed * AI_LEVELS[ai.level].buildPercent) / 100);
-      if (p.powerUse > p.powerGen) speed = Math.floor((speed * this.pack.lowPowerProductionPercent) / 100);
+      const speed = fast ? (fast.speed.get(kind) ?? this.productionSpeed(p, factories)) : this.productionSpeed(p, factories);
+      if (fast && !fast.speed.has(kind)) fast.speed.set(kind, speed);
       // Credits are charged as production progresses, like the originals.
       q.acc += Math.floor((100 * speed) / this.pack.buildTicksPer100);
       let pay = Math.floor(q.acc / 100);
@@ -2164,6 +2175,45 @@ export class Game {
         if (cell >= 0) { e.x = e.px = cellCenter(cell % this.map.w); e.y = e.py = cellCenter(Math.floor(cell / this.map.w)); }
       }
       e.heldUntil = hold; e.path = []; e.order = 'idle'; e.target = 0;
+    }
+  }
+
+  /**
+   * Quiescent-interval fast-forward (PW22 / COMRADE 18 §2.3). Advances production
+   * queues and abstracted harvest income arithmetically — the exact same per-tick
+   * production math step() runs, minus everything quiescence guarantees cannot
+   * intervene (movement orders, combat, player commands). `rates[slot]` is the
+   * measured harvest income in credits per tick, storage-capped exactly like a
+   * real refinery delivery. Only valid on a game verified quiescent for the whole
+   * interval; the caller journals the interval so replay applies it once.
+   */
+  fastForwardQuiescent(ticks: number, rates: number[]): void {
+    if (!this.persistent) throw new Error('fastForwardQuiescent is persistent-profile only');
+    if (ticks <= 0) return;
+    const caches = new Map<Player, { factories: Map<QueueKind, Entity[]>; speed: Map<QueueKind, number> }>();
+    const remainders = this.players.map(() => 0);
+    for (let i = 0; i < ticks; i++) {
+      for (let pi = 0; pi < this.players.length; pi++) {
+        const p = this.players[pi];
+        if (p.defeated) continue;
+        const rate = rates[pi] ?? 0;
+        if (rate > 0) {
+          remainders[pi] += rate;
+          const each = Math.floor(remainders[pi]);
+          if (each > 0) {
+            remainders[pi] -= each;
+            // Same delivery accounting as the live harvest path (storage-capped).
+            const next = p.credits + each + Math.floor((each * p.incomeBonus) / 100);
+            p.credits = p.storage > 0 && next > p.storage ? Math.max(p.credits, p.storage) : next;
+            p.stats.harvested += each;
+          }
+        }
+        let cache = caches.get(p);
+        if (!cache) { cache = { factories: new Map(), speed: new Map() }; caches.set(p, cache); }
+        this.production(p, cache);
+      }
+      // Effects are cosmetic and tick-frozen here; keep the same bound step() uses.
+      if (this.effects.length > 400) this.effects = this.effects.slice(-300);
     }
   }
 

@@ -333,8 +333,15 @@ describeDb('mmo region runner (real PostgreSQL + real Fusion sim)', () => {
       expect(event?.applied_at).not.toBeNull();
       expect(BigInt(event!.authority_epoch)).toBe(BigInt(lease.epoch));
 
-      // The pre-crash job fired under the new owner.
+      // The pre-crash job fired under the new owner. The handler records before the
+      // apply transaction commits, so wait for the durable 'done' state.
       await waitFor(async () => fired.length === 1, 8000);
+      await waitFor(async () => {
+        const job = await mmoOne<{ state: string }>(
+          `select state from scheduled_job where region_id = $1 and kind = $2 order by created_at desc limit 1`,
+          [fx.regionId, jobKind]);
+        return job?.state === 'done';
+      }, 8000);
       const job = await mmoOne<{ state: string }>(
         `select state from scheduled_job where region_id = $1 and kind = $2 order by created_at desc limit 1`,
         [fx.regionId, jobKind]);

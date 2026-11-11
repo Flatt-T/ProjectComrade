@@ -3,10 +3,10 @@
 // on failure), produces subscription snapshots and exposes the fence subscribers
 // need to submit commands. Everything here is inert unless MMO_DATABASE_URL is set.
 import { createHash, randomUUID } from 'node:crypto';
-import { mmoOne } from './db.js';
+import { mmoOne, mmoQuery } from './db.js';
 import { getRegion, joinWorld, createPlayer, type RegionRow } from './store.js';
 import { RegionRunner, type RegionRunnerOptions } from './runner.js';
-import { MMO_PROTOCOL, MMO_RULESET_VERSION, type MmoSnapshotHeader } from '@comrade/contracts';
+import { MMO_PROTOCOL, MMO_RULESET_VERSION, PERSISTENT_RULES_V1, type MmoSnapshotHeader } from '@comrade/contracts';
 
 export interface RegionIdentity {
   /** Stable account key: platform account uuid for registered users, a derived uuid for guests. */
@@ -38,18 +38,30 @@ interface RunnerEntry {
 
 const MAX_RESTARTS = 5;
 const RESTART_BACKOFF_MS = 5_000;
+const WAKE_POLL_MS = 5_000;
 
 export class RegionService {
   private entries = new Map<string, RunnerEntry>();
   private readonly opts: Omit<RegionRunnerOptions, 'regionId' | 'workerId'>;
   private readonly log: (event: string, data?: Record<string, unknown>) => void;
+  private readonly wakePollMs: number;
+  private wakeTimer?: ReturnType<typeof setInterval>;
+  /** PW22 metrics: hibernation/wake accounting for capacity reporting. */
+  readonly metrics = {
+    wakes: 0,
+    wakeLatenciesMs: [] as number[],
+    hibernations: 0,
+  };
 
   constructor(options?: {
     runner?: Omit<RegionRunnerOptions, 'regionId' | 'workerId'>;
     log?: (event: string, data?: Record<string, unknown>) => void;
+    /** Quiescent-region job wake scan interval. Default 5 s. */
+    wakePollMs?: number;
   }) {
     this.opts = options?.runner ?? {};
     this.log = options?.log ?? (() => undefined);
+    this.wakePollMs = options?.wakePollMs ?? WAKE_POLL_MS;
   }
 
   private async entryFor(regionId: string, startIfMissing = true): Promise<RunnerEntry | undefined> {
@@ -66,6 +78,7 @@ export class RegionService {
       }
     }
     if (!startIfMissing) return undefined;
+    if (existing?.runner.didHibernate) this.metrics.hibernations++;
     const region = await getRegion(regionId);
     if (!region) return undefined;
     const workerId = randomUUID();
@@ -74,6 +87,11 @@ export class RegionService {
     this.entries.set(regionId, entry);
     try {
       await runner.start();
+      if (runner.wakeLatencyMs !== undefined) {
+        this.metrics.wakes++;
+        this.metrics.wakeLatenciesMs.push(runner.wakeLatencyMs);
+        if (this.metrics.wakeLatenciesMs.length > 512) this.metrics.wakeLatenciesMs.shift();
+      }
     } catch (error) {
       this.entries.delete(regionId);
       this.log('region-start-failed', { regionId, error: String(error) });
@@ -131,10 +149,38 @@ export class RegionService {
   }
 
   /** All live runners (ops/diagnostics). */
-  regions(): { regionId: string; tick?: number; failed: boolean }[] {
+  regions(): { regionId: string; tick?: number; failed: boolean; awake: boolean }[] {
     return [...this.entries.entries()].map(([regionId, e]) => ({
       regionId, tick: e.runner.currentGame?.tick, failed: e.runner.isFailed,
+      awake: e.runner.isRunning,
     }));
+  }
+
+  /**
+   * PW22 wake poller: quiescent regions have no runner to claim their due jobs, so
+   * the service scans for scheduled work inside the look-ahead window and ensures
+   * those regions awake. Logins and commands wake through ensure() directly.
+   */
+  start(): void {
+    if (this.wakeTimer) return;
+    this.wakeTimer = setInterval(() => {
+      void mmoQuery<{ region_id: string }>(
+        `select distinct j.region_id from scheduled_job j
+           join region r on r.region_id = j.region_id
+          where j.state = 'pending' and r.lifecycle = 'quiescent'
+            and j.due_at_ms <= $1`,
+        [Date.now() + PERSISTENT_RULES_V1.hibernateInboundLookaheadMs])
+        .then(rows => {
+          for (const row of rows) void this.ensure(row.region_id).catch(() => undefined);
+        })
+        .catch(() => undefined);
+    }, this.wakePollMs);
+    this.wakeTimer.unref?.();
+  }
+
+  stop(): void {
+    if (this.wakeTimer) clearInterval(this.wakeTimer);
+    this.wakeTimer = undefined;
   }
 
   /** Find or provision the durable player row for an authenticated identity. */

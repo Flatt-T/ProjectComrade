@@ -378,4 +378,17 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
       where dedupe_key is not null;
     `,
   },
+  {
+    version: 4,
+    name: 'quiescent accrual journal kind',
+    sql: `
+    -- PW22: hibernation wake applies the quiescent interval (capped harvest accrual
+    -- plus arithmetic queue completion) as one journaled 'accrual' event, so the
+    -- advance is exactly-once across crash and replay like every other input.
+    alter table region_event drop constraint region_event_event_kind_check;
+    alter table region_event add constraint region_event_event_kind_check
+      check (event_kind in
+        ('command', 'scheduled', 'protection', 'operation', 'transfer', 'accrual', 'world'));
+    `,
+  },
 ];

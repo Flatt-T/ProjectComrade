@@ -227,7 +227,8 @@ describeDb('mmo gateway (real PostgreSQL + real WebSocket)', () => {
     const cookie = guestCookie();
     const first = await connect(port, cookie);
     first.send({ type: 'subscribe', regionId: fx.regionId, seenEpoch: '0', lastSeenEventSeq: '0' });
-    await waitFor(() => ofType(first.messages, 'welcome').length === 1);
+    await waitFor(() =>
+      ofType(first.messages, 'welcome').length === 1 && ofType(first.messages, 'snapshot').length === 1);
     const playerId = ofType(first.messages, 'welcome')[0].playerId;
     const firstEpoch = ofType(first.messages, 'snapshot')[0].epoch;
     first.close();
