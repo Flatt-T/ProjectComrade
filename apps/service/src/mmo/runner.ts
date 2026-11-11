@@ -15,9 +15,12 @@ import type { PoolClient } from 'pg';
 import { randomUUID } from 'node:crypto';
 import {
   Game, PACKS, captureGame, restoreGame,
-  type Command, type GameSetup, type RulePack,
+  type Command, type Entity, type GameSetup, type RulePack,
 } from '@comrade/fusion';
-import { mmoSimEntityId, type MmoAction, type MmoSimAction, type MmoWorldAction } from '@comrade/contracts';
+import {
+  mmoSimEntityId, PERSISTENT_RULES_V1,
+  type MmoAction, type MmoRulesProfile, type MmoSimAction, type MmoWorldAction,
+} from '@comrade/contracts';
 import { mmoOne, mmoTransaction } from './db.js';
 import {
   acquireRegionLease, appendRegionEvent, assertRegionFence, claimDueJobs, finishJobTx,
@@ -68,10 +71,25 @@ export interface RegionRunnerOptions {
   worldHandler?: WorldActionHandler;
   jobHandlers?: Record<string, ScheduledJobHandler>;
   log?: (event: string, data?: Record<string, unknown>) => void;
+  /** Persistent rules profile; hibernation tunables come from here (PW22). */
+  rules?: MmoRulesProfile;
+  /** Quiescence watchdog. Enabled by default for persistent regions. */
+  quiescence?: {
+    enabled?: boolean;
+    /** How often the quiescence predicate is evaluated. Default 10 s. */
+    checkMs?: number;
+    /** Minimum awake time before hibernation is allowed (anti-thrash). */
+    minAwakeMs?: number;
+    /** Wake scheduled work due within this window. Default rules lookahead. */
+    lookaheadMs?: number;
+  };
 }
 
 interface SnapshotPayload {
   v: 1; seed: number; snapshot: string; bindings: [string, number][];
+  /** Present only on checkpoints taken at hibernation: the quiescent interval the
+   *  wake path must account for arithmetically (PW22). */
+  hib?: { sinceMs: number; rates: number[]; sampleTick: number };
 }
 
 const SIM_ACTIONS = new Set([
@@ -96,20 +114,38 @@ export class RegionRunner {
   private lastRenew = 0;
   private lastCheckpointTick = 0;
   private lastAppliedSeq = 0n;
+  private wokeAtMs = 0;
+  private hibMeta?: { sinceMs: number; rates: number[]; sampleTick: number };
+  private lastHarvestSample?: { tick: number; harvested: number[] };
+  private quiescenceTimer?: ReturnType<typeof setInterval>;
+  /** Wake latency of this runner instance when it resumed from hibernation (ms). */
+  wakeLatencyMs?: number;
+  /** True once this runner hibernated itself (vs failed or externally stopped). */
+  didHibernate = false;
   readonly stats = {
     ticksStepped: 0, simMs: 0, scheduleMs: 0, eventsApplied: 0, jobsApplied: 0,
     jobErrors: 0, checkpoints: 0, catchUpTicks: 0,
   };
-  private readonly opts: Required<Omit<RegionRunnerOptions, 'now' | 'sim' | 'worldHandler' | 'jobHandlers' | 'log'>> & {
+  private readonly opts: Required<Omit<RegionRunnerOptions, 'now' | 'sim' | 'worldHandler' | 'jobHandlers' | 'log' | 'rules' | 'quiescence'>> & {
     now: () => number; sim?: RegionSimSpec; worldHandler?: WorldActionHandler;
     jobHandlers: Record<string, ScheduledJobHandler>; log: (e: string, d?: Record<string, unknown>) => void;
+    rules: MmoRulesProfile;
+    quiescence: { enabled: boolean; checkMs: number; minAwakeMs: number; lookaheadMs: number };
   };
 
   constructor(options: RegionRunnerOptions) {
+    const rules = options.rules ?? PERSISTENT_RULES_V1;
+    const q = options.quiescence ?? {};
     this.opts = {
       leaseMs: 30_000, tickMs: TICK_MS, pollMs: 250, checkpointEveryTicks: 0,
       maxJobAttempts: 8, now: () => Date.now(), ...options,
       jobHandlers: options.jobHandlers ?? {}, log: options.log ?? (() => undefined),
+      rules,
+      quiescence: {
+        enabled: q.enabled ?? true, checkMs: q.checkMs ?? 10_000,
+        minAwakeMs: q.minAwakeMs ?? rules.hibernateMinAwakeMs,
+        lookaheadMs: q.lookaheadMs ?? rules.hibernateInboundLookaheadMs,
+      },
     };
   }
 
@@ -167,8 +203,10 @@ export class RegionRunner {
     for (const [i, p] of spec.players.entries()) this.slotByPlayer.set(p.playerId, i);
 
     const snap = await latestSnapshot(this.opts.regionId);
+    let hib: SnapshotPayload['hib'];
     if (snap) {
       const payload = JSON.parse(snap.payload.toString('utf8')) as SnapshotPayload;
+      hib = payload.hib;
       this.simSeed = payload.seed;
       this.game = restoreGame(payload.snapshot, PACK_LIST);
       this.bindings = new Map(payload.bindings);
@@ -190,14 +228,29 @@ export class RegionRunner {
       this.opts.log('region-created', { regionId: this.opts.regionId, tick: 0, epoch: this.epoch });
     }
 
+    // PW22 wake: a hibernated region accounts for its quiescent interval as one
+    // journaled 'accrual' event, then re-anchors wall-clock so real-time resumes —
+    // the slept ticks are never re-simulated.
+    if (hib) {
+      const t0 = performance.now();
+      await this.applyWakeAccrual(hib);
+      this.wakeLatencyMs = performance.now() - t0;
+      this.region = await getRegion(this.opts.regionId);
+      this.opts.log('region-wake', {
+        regionId: this.opts.regionId, sinceMs: hib.sinceMs,
+        wakeMs: this.wakeLatencyMs,
+      });
+    }
+
     // Wall-clock ↔ sim-tick anchor. A region that was down fast-forwards through the
     // elapsed ticks on recovery — the sim is the only authority, so there is no
     // shortcut; quiescent accrual is PW22's concern, not this runner's.
     const now = this.opts.now();
-    this.startedAtMs = this.region.started_at_ms != null
-      ? Number(this.region.started_at_ms)
+    const startedAt = this.region?.started_at_ms;
+    this.startedAtMs = startedAt != null
+      ? Number(startedAt)
       : now - this.game.tick * this.opts.tickMs;
-    if (this.region.started_at_ms == null) await setRegionSimStart(this.opts.regionId, this.startedAtMs);
+    if (startedAt == null) await setRegionSimStart(this.opts.regionId, this.startedAtMs);
 
     await this.catchUpTo(this.tickFor(now));
     await this.applyUnappliedEvents();
@@ -205,10 +258,22 @@ export class RegionRunner {
 
     this.running = true;
     this.lastPoll = now; this.lastRenew = now;
+    this.wokeAtMs = now;
+    this.lastHarvestSample = {
+      tick: this.game.tick, harvested: this.game.players.map(p => p.stats.harvested),
+    };
+    this.armTimers();
+  }
+
+  private armTimers(): void {
     this.stepTimer = setInterval(() => void this.onTick(), this.opts.tickMs);
     this.stepTimer.unref?.();
     this.pollTimer = setInterval(() => void this.onPoll(), this.opts.pollMs);
     this.pollTimer.unref?.();
+    if (this.opts.quiescence.enabled) {
+      this.quiescenceTimer = setInterval(() => void this.onQuiescenceCheck(), this.opts.quiescence.checkMs);
+      this.quiescenceTimer.unref?.();
+    }
   }
 
   /** Step the sim forward to `tick`, bounded per call so the event loop stays live. */
@@ -289,13 +354,191 @@ export class RegionRunner {
   private stopTimers(): void {
     if (this.stepTimer) clearInterval(this.stepTimer);
     if (this.pollTimer) clearInterval(this.pollTimer);
-    this.stepTimer = this.pollTimer = undefined;
+    if (this.quiescenceTimer) clearInterval(this.quiescenceTimer);
+    this.stepTimer = this.pollTimer = this.quiescenceTimer = undefined;
+  }
+
+  // ------------------------------------------------------------------
+  // PW22: quiescence detection, hibernation and wake accrual
+  // ------------------------------------------------------------------
+
+  /**
+   * Journal the quiescent interval exactly once, apply its arithmetic advance to the
+   * restored game, then re-anchor wall-clock so real-time stepping resumes from the
+   * hibernated tick.
+   *
+   * Exactly-once across crash: snapshots are only rewritten at checkpoints, so a
+   * crash between the wake transaction and the next checkpoint restores the
+   * pre-accrual snapshot with `hib` still attached. The accrual event may already be
+   * marked applied in that case, so the fast-forward is applied to the restored game
+   * unconditionally — restoreGame is deterministic, making the advance replay-safe.
+   * The journal record itself is deduplicated on `sinceMs`.
+   */
+  private async applyWakeAccrual(hib: { sinceMs: number; rates: number[]; sampleTick: number }): Promise<void> {
+    const now = this.opts.now();
+    const ticks = Math.floor(Math.max(0, now - hib.sinceMs) / this.opts.tickMs);
+    await mmoTransaction(async tx => {
+      await assertRegionFence(tx, {
+        regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+      });
+      const existing = await tx.query<{ event_seq: string }>(
+        `select event_seq from region_event
+          where region_id = $1 and event_kind = 'accrual' and payload->>'sinceMs' = $2
+          order by event_seq desc limit 1`,
+        [this.opts.regionId, String(hib.sinceMs)]);
+      if (existing.rows.length) return; // interval already on the journal
+      const { eventSeq } = await appendRegionEvent(tx, {
+        regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+        tick: this.game!.tick, kind: 'accrual',
+        payload: { sinceMs: hib.sinceMs, rates: hib.rates, ticks, sampleTick: hib.sampleTick },
+        outboxTopic: 'mmo.accrual',
+        outboxPayload: { sinceMs: hib.sinceMs, ticks, regionId: this.opts.regionId },
+      });
+      await markRegionEventApplied(tx, {
+        regionId: this.opts.regionId, eventSeq,
+        result: { advancedTicks: ticks, dedupe: 'hib-' + hib.sinceMs },
+      });
+      this.lastAppliedSeq = BigInt(eventSeq);
+    });
+    // Apply to the restored (pre-interval) game. Deterministic, so re-running it on a
+    // fresh restore produces identical state.
+    this.game!.fastForwardQuiescent(ticks, hib.rates);
+    // Re-anchor: slept wall-time was consumed arithmetically, so the next tick is
+    // the hibernated tick stepping in real time again.
+    const anchor = now - this.game!.tick * this.opts.tickMs;
+    await setRegionSimStart(this.opts.regionId, anchor);
+    this.region = await getRegion(this.opts.regionId);
+    if (this.region) this.startedAtMs = Number(this.region.started_at_ms);
+  }
+
+  /** Refresh the harvest-rate sample once it spans a meaningful window. */
+  private sampleHarvest(): void {
+    const g = this.game;
+    const s = this.lastHarvestSample;
+    if (!g || !s) return;
+    if (g.tick - s.tick >= 150) {
+      this.lastHarvestSample = { tick: g.tick, harvested: g.players.map(p => p.stats.harvested) };
+    }
+  }
+
+  /** Measured harvest income per slot, credits per sim tick, over the last window. */
+  private harvestRates(): number[] {
+    const g = this.game!;
+    const s = this.lastHarvestSample;
+    const dt = s ? g.tick - s.tick : 0;
+    return g.players.map((p, i) => {
+      if (!s || dt <= 0) return 0;
+      return Math.max(0, (p.stats.harvested - (s.harvested[i] ?? 0)) / dt);
+    });
+  }
+
+  /**
+   * Quiescent (COMRADE 18 §2.3): no unit under a deliberate order (harvest loops
+   * and idle/guard posts are routine and their income is captured by the accrual
+   * rate), no armed entity with an enemy inside weapon range, no pending journal
+   * input, and no scheduled work due inside the look-ahead window.
+   */
+  private async isQuiescent(now: number): Promise<boolean> {
+    const g = this.game;
+    if (!g || g.over) return false;
+    for (const e of g.entities.values()) {
+      if (e.hp <= 0 || e.carriedBy || e.kind !== 'unit') continue;
+      switch (e.order) {
+        // Timed actions (deploy, rearm, boarding, ferry) would freeze mid-progress
+        // if the tick loop stopped, so they block quiescence like movement orders.
+        case 'move': case 'attackMove': case 'attack': case 'attackGround':
+        case 'enter': case 'rearm': case 'ferry': case 'deploy':
+          return false;
+        default: break; // idle, harvest: quiescent-compatible
+      }
+    }
+    // Hostile engagement: any armed entity with an enemy inside weapon range.
+    // Alt weapons (Force etc.) count too — a unit that could switch and fire is
+    // not quiescent.
+    const reachOf = (e: Entity): number => {
+      const ids = e.kind === 'unit'
+        ? [g.unitDef(e).weapon, g.unitDef(e).altWeapon]
+        : [g.structDef(e).weapon];
+      let best = 0;
+      for (const id of ids) {
+        const w = id ? g.pack.weapons[id] : undefined;
+        if (w) best = Math.max(best, w.range);
+      }
+      return best;
+    };
+    const armed: { e: Entity; reach: number }[] = [];
+    for (const e of g.entities.values()) {
+      if (e.hp <= 0 || e.carriedBy) continue;
+      const reach = reachOf(e);
+      if (reach > 0) armed.push({ e, reach });
+    }
+    if (armed.length) {
+      const all = [...g.entities.values()].filter(e => e.hp > 0 && !e.carriedBy);
+      for (const { e: a, reach } of armed) {
+        for (const b of all) {
+          if (b.id === a.id || !g.isEnemy(a.owner, b.owner)) continue;
+          if (g.distTo(a.x, a.y, b) <= reach) return false;
+        }
+      }
+    }
+    const pending = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual'], 1);
+    if (pending.length) return false;
+    const due = await mmoOne<{ n: string }>(
+      `select count(*)::text as n from scheduled_job
+        where region_id = $1 and state = 'pending' and due_at_ms <= $2`,
+      [this.opts.regionId, now + this.opts.quiescence.lookaheadMs]);
+    return Number(due?.n ?? 0) === 0;
+  }
+
+  private async onQuiescenceCheck(): Promise<void> {
+    if (this.busy || this.failed || !this.running || !this.game) return;
+    this.busy = true;
+    try {
+      const now = this.opts.now();
+      this.sampleHarvest();
+      if (now - this.wokeAtMs < this.opts.quiescence.minAwakeMs) return;
+      if (!(await this.isQuiescent(now))) return;
+      await this.hibernate(now);
+    } catch (error) {
+      this.opts.log('quiescence-error', { error: String(error) });
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  /** Checkpoint with hibernate metadata, go quiescent and release the worker. */
+  private async hibernate(now: number): Promise<void> {
+    const g = this.game!;
+    this.hibMeta = {
+      sinceMs: now, rates: this.harvestRates(), sampleTick: this.lastHarvestSample?.tick ?? g.tick,
+    };
+    this.opts.log('region-quiescing', { regionId: this.opts.regionId, tick: g.tick });
+    // Stop first so the checkpoint leaves lifecycle at 'checkpointing'; the lease
+    // release below is what lands the region on 'quiescent' for the next owner.
+    this.running = false;
+    this.stopTimers();
+    try {
+      await this.checkpoint('hibernate');
+    } catch (error) {
+      // A failed hibernate checkpoint must not leak `hib` into a later live
+      // checkpoint — that would skip real-time catch-up on the next restore.
+      this.hibMeta = undefined;
+      this.running = true;
+      this.wokeAtMs = this.opts.now();
+      this.armTimers();
+      throw error;
+    }
+    try { await releaseRegionLease(this.opts.regionId, this.opts.workerId); } catch { /* lease may already be gone */ }
+    this.didHibernate = true;
+    this.opts.log('region-hibernated', {
+      regionId: this.opts.regionId, tick: g.tick, rates: this.hibMeta.rates,
+    });
   }
 
   /** Apply every unapplied command/scheduled journal event in seq order. */
   private async applyUnappliedEvents(): Promise<void> {
     for (;;) {
-      const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled'], 64);
+      const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual'], 64);
       if (!events.length) return;
       for (const event of events) await this.applyEvent(event);
     }
@@ -357,6 +600,12 @@ export class RegionRunner {
     simCommand?: { slot: number; atTick: number; command: Command };
   }> {
     const payload = event.payload as Record<string, unknown>;
+    if (event.event_kind === 'accrual') {
+      const p = payload as { rates?: number[]; ticks?: number };
+      const ticks = Number(p.ticks ?? 0);
+      this.game!.fastForwardQuiescent(ticks, p.rates ?? []);
+      return { result: { advancedTicks: ticks } };
+    }
     if (event.event_kind === 'command') {
       const playerId = String(payload.playerId ?? '');
       const commandId = String(payload.commandId ?? '');
@@ -547,6 +796,7 @@ export class RegionRunner {
         v: 1, seed: this.simSeed,
         snapshot: captureGame(this.game, { seed: this.simSeed }),
         bindings: this.durableBindings(),
+        ...(this.hibMeta ? { hib: this.hibMeta } : {}),
       };
       const tail = await journalTail(this.opts.regionId);
       const region = await mmoOne<{ engine_artifact_sha256: string; ruleset_version: string }>(

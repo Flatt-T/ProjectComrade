@@ -71,7 +71,8 @@ const rooms = new RoomCoordinator();
 // Persistent world (PW08): the /mmo endpoint exists only when MMO_DATABASE_URL is
 // configured. Without it there is no gateway, no runner and no schema — classic play
 // is completely untouched.
-const mmoGateway = mmoDatabaseConfigured() ? new MmoGateway(new RegionService({ log })) : undefined;
+const mmoService = mmoDatabaseConfigured() ? new RegionService({ log }) : undefined;
+const mmoGateway = mmoService ? new MmoGateway(mmoService) : undefined;
 server.on('upgrade', (req, socket, head) => {
   const pathname = new URL(req.url || '/', 'http://localhost').pathname;
   if (pathname === '/mmo' && mmoGateway) mmoGateway.handleUpgrade(req, socket, head);
@@ -126,7 +127,8 @@ async function startup() {
   if (mmoGateway) {
     try {
       await mmoMigrate();
-      mmoGateway.start();
+      mmoGateway!.start();
+      mmoService!.start();
       log('mmo-start', { configured: true });
     } catch (error) {
       // A broken MMO schema must not take classic play down with it.

@@ -194,7 +194,7 @@ export async function assertRegionFence(tx: PoolClient, args: {
 // Journal + outbox
 // ---------------------------------------------------------------------------
 
-export type MmoEventKind = 'command' | 'scheduled' | 'protection' | 'operation' | 'transfer' | 'world';
+export type MmoEventKind = 'command' | 'scheduled' | 'protection' | 'operation' | 'transfer' | 'accrual' | 'world';
 
 export interface AppendEventArgs {
   regionId: string; workerId: string; epoch: string | bigint; tick: number | bigint;
