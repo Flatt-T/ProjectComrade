@@ -9,7 +9,7 @@
     "build": "pnpm --filter @comrade/contracts build && pnpm --filter @comrade/web build && pnpm --filter @comrade/service build && pnpm --filter @comrade/client-runtime build && pnpm --filter @comrade/pack-sdk build",
     "test": "pnpm test:unit && pnpm test:integration",
     "test:unit": "pnpm --filter @comrade/contracts build && vitest run tests/unit",
-    "test:integration": "echo 'Integration tests not yet implemented'",
+    "test:integration": "pnpm --filter @comrade/contracts build && vitest run tests/integration",
     "test:e2e": "echo 'E2E tests not yet implemented'",
     "test:parity": "echo 'Parity tests not yet implemented'",
     "test:security": "echo 'Security tests not yet implemented'",

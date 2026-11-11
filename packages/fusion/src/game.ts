@@ -133,6 +133,12 @@ export interface Entity {
   warp: number;
   /** Units riding inside this transport. */
   passengers: number[];
+  /**
+   * Persistent-world binding (PW26): 0 = freely tradable/sellable, nonzero = bound to
+   * the owning account and ineligible for barter or credit sale. 1 = starter grant,
+   * 2 = recovery grant. Always 0 in classic matches.
+   */
+  bound: number;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -491,7 +497,7 @@ export class Game {
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
-      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [],
+      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0,
     };
   }
 
@@ -2069,7 +2075,12 @@ export class Game {
     const h = new Hasher().add(this.tick).add(this.rng.seed);
     for (const p of this.players) h.add(p.credits).add(p.defeated ? 1 : 0);
     h.add(this.market);
-    for (const e of this.entities.values()) h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0).add(e.passengers.length).add(e.heldUntil);
+    for (const e of this.entities.values()) {
+      h.add(e.id).add(e.x).add(e.y).add(e.hp).add(e.owner).add(e.facing).add(e.charge).add(e.xp).add(e.ammo).add(e.carriedBy).add(e.deployed ? 1 : 0).add(e.passengers.length).add(e.heldUntil);
+      // Bound assets are persistent-world state; classic entities are all 0, so the
+      // classic checksum stream is unchanged.
+      if (e.bound) h.add(e.bound);
+    }
     for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
     for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden).add(worm.goal).add(worm.up).addString(worm.form);
