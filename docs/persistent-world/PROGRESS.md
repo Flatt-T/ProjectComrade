@@ -165,3 +165,33 @@ acceptance detail; this file is the resume point. Read it first in every session
   actions need per-kind handlers registered by later issues; quiescent/hibernate
   accrual is PW22; checkpoint interval default is stop-only (`checkpointEveryTicks`
   option exists for the beta config).
+
+### PW08 - THU-2232 - region orchestration, /mmo gateway and client transport - 2026-11-11
+
+- State: implemented on branch `thu-2232-pw08-mmo-gateway` (in progress).
+- Deliverables: `apps/service/src/mmo/regions.ts` (RegionService: on-demand
+  runner supervision with bounded restart backoff, subscription snapshots,
+  durable player provisioning, fence lookup), `apps/service/src/mmo/gateway.ts`
+  (`/mmo` WebSocket: guest/account identity from upgrade cookies, subscribe ->
+  welcome+snapshot, journaled commands -> commandResult, ordered `mmo.sim`
+  event fan-out, 2 s authoritative observations, stale-epoch and rate limits),
+  contracts (durable entity-id bridge `mmoEntityId`/`mmoSimEntityId`,
+  capabilities/decisions, snapshot/event/welcome/observation/result messages),
+  runner durable-entity bridge + `mmo.sim`/`mmo.result` outbox emission,
+  `apps/web/src/mmo.ts` (MmoConnection + PersistentSession: snapshot restore,
+  wall-time stepping, durable-id intents, no client prediction) and
+  `apps/web/src/PersistentWorld.tsx` + `/world?region=` route (select/move/
+  attack/harvest/build/place/repair/guard/scatter/stop/deploy/enter/super,
+  checksum-mismatch auto-resync). `/mmo` is inert unless `MMO_DATABASE_URL` is
+  set; classic `/ws` is untouched.
+- Proven: `vitest run tests/integration/mmo-gateway.test.ts` - 4 tests pass
+  against real PostgreSQL + real WebSocket clients (guest welcome + durable
+  player provisioning, snapshot + observation stream, ordered sim event +
+  applied result fan-out, UNKNOWN_PLAYER authoritative rejection, STALE_EPOCH,
+  same-cookie reconnect -> same player + fresh snapshot). Full suite:
+  `pnpm test:unit` 22 files / 355 pass, `pnpm test:integration` 4 files /
+  36 pass, `pnpm typecheck` 0, `pnpm lint` 0.
+- Open: region entry is URL-driven (`/world?region=<id>`) - there is no lobby
+  region picker yet; fog is render-side only (documented DEC-IMPL-9); world
+  actions (sell/barter/shield/chat/ping/objective) journal but need handlers
+  from PW09+; client e2e (Playwright) pending; capacity measurements pending.

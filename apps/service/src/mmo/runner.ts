@@ -12,11 +12,12 @@
 // (real-time stepping) → checkpointing (snapshot write) → active/quiescent. A stale
 // worker fails the fence check and the region is marked 'failed' for the next owner.
 import type { PoolClient } from 'pg';
+import { randomUUID } from 'node:crypto';
 import {
   Game, PACKS, captureGame, restoreGame,
   type Command, type GameSetup, type RulePack,
 } from '@comrade/fusion';
-import type { MmoAction, MmoSimAction, MmoWorldAction } from '@comrade/contracts';
+import { mmoSimEntityId, type MmoAction, type MmoSimAction, type MmoWorldAction } from '@comrade/contracts';
 import { mmoOne, mmoTransaction } from './db.js';
 import {
   acquireRegionLease, appendRegionEvent, assertRegionFence, claimDueJobs, finishJobTx,
@@ -116,10 +117,29 @@ export class RegionRunner {
   get isFailed() { return this.failed; }
   get currentGame() { return this.game; }
   get authorityEpoch() { return this.epoch; }
+  /** Journal position the live sim state represents (for snapshot headers). */
+  get appliedSeq(): string { return this.lastAppliedSeq.toString(); }
+
+  /** Live sim state in the same envelope a checkpoint persists (PW08 subscriptions). */
+  captureState(): { v: 1; seed: number; snapshot: string; bindings: [string, number][]; tick: number } | null {
+    if (!this.game) return null;
+    return {
+      v: 1, seed: this.simSeed,
+      snapshot: captureGame(this.game, { seed: this.simSeed }),
+      bindings: this.durableBindings(), tick: this.game.tick,
+    };
+  }
+
+  /** Cheap authoritative observation for subscriber checksum verification. */
+  observation(): { tick: number; checksum: number } | null {
+    return this.game ? { tick: this.game.tick, checksum: this.game.checksum() } : null;
+  }
 
   /** Map a durable entity id to its live sim entity id (persistent asset identity). */
   bindEntity(durableId: string, simId: number) { this.bindings.set(durableId, simId); }
   durableBindings(): [string, number][] { return [...this.bindings.entries()]; }
+  /** The sim slot a durable player occupies, for subscription welcomes. */
+  slotForPlayer(playerId: string): number | undefined { return this.slotByPlayer.get(playerId); }
 
   private tickFor(wallMs: number): number {
     return Math.max(0, Math.floor((wallMs - this.startedAtMs) / this.opts.tickMs));
@@ -302,6 +322,27 @@ export class RegionRunner {
              result = coalesce(result, '{}'::jsonb) || $3::jsonb, updated_at = clock_timestamp()
             where player_id = $1 and command_id = $2`,
           [applied.intent.playerId, applied.intent.commandId, JSON.stringify({ appliedResult: applied.result })]);
+        // Command result fan-out (PW08): subscribers see the authoritative outcome on
+        // the same journal position as the sim stream.
+        const payload = event.payload as { commandId?: string; playerId?: string };
+        await tx.query(
+          `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,'mmo.result',$4)`,
+          [randomUUID(), this.opts.regionId, event.event_seq, JSON.stringify({
+            commandId: payload.commandId, playerId: payload.playerId, epoch: this.epoch,
+            status: 'applied', result: applied.result, eventSeq: event.event_seq,
+            tick: event.simulation_tick,
+          })]);
+        // Resolved sim command fan-out: subscribers run the same engine, so they need
+        // the exact Fusion command (sim ids, apply tick) not the durable-id intent.
+        if (applied.simCommand) {
+          await tx.query(
+            `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,'mmo.sim',$4)`,
+            [randomUUID(), this.opts.regionId, event.event_seq, JSON.stringify({
+              eventSeq: event.event_seq, atTick: applied.simCommand.atTick,
+              slot: applied.simCommand.slot, command: applied.simCommand.command,
+              epoch: this.epoch,
+            })]);
+        }
       }
     });
     this.stats.scheduleMs += performance.now() - t0;
@@ -311,7 +352,10 @@ export class RegionRunner {
 
   private async applyPayload(tx: PoolClient, event: {
     event_kind: string; payload: unknown;
-  }): Promise<{ result: unknown; intent?: { playerId: string; commandId: string } }> {
+  }): Promise<{
+    result: unknown; intent?: { playerId: string; commandId: string };
+    simCommand?: { slot: number; atTick: number; command: Command };
+  }> {
     const payload = event.payload as Record<string, unknown>;
     if (event.event_kind === 'command') {
       const playerId = String(payload.playerId ?? '');
@@ -323,8 +367,12 @@ export class RegionRunner {
       if (SIM_ACTIONS.has(action.t)) {
         const cmd = this.toFusionCommand(action as MmoSimAction);
         if (!cmd) return { result: { accepted: false, reason: 'UNKNOWN_ENTITY' }, intent };
-        this.game!.enqueue(slot, cmd);
-        return { result: { accepted: true, via: 'sim', action: action.t }, intent };
+        const atTick = this.game!.tick + 1;
+        this.game!.enqueue(slot, cmd, atTick);
+        return {
+          result: { accepted: true, via: 'sim', action: action.t }, intent,
+          simCommand: { slot, atTick, command: cmd },
+        };
       }
       if (this.opts.worldHandler) {
         const handled = await this.opts.worldHandler(tx, action as MmoWorldAction, {
@@ -351,18 +399,28 @@ export class RegionRunner {
     return { result: { note: 'non-sim event kind' } };
   }
 
+  /**
+   * Resolve a durable entity id to a live sim id: explicit bound-asset bindings first
+   * (PW26), then the deterministic region/sim-id bridge (PW08).
+   */
+  private simIdFor(durableId: string): number | null {
+    const bound = this.bindings.get(durableId);
+    if (bound !== undefined) return bound;
+    return mmoSimEntityId(this.opts.regionId, durableId);
+  }
+
   /** Resolve durable entity ids to live sim ids and build the Fusion command. */
   private toFusionCommand(action: MmoSimAction): Command | null {
     const ids = (list: string[]): number[] | null => {
       const out: number[] = [];
       for (const id of list) {
-        const sim = this.bindings.get(id);
-        if (sim === undefined) return null;
+        const sim = this.simIdFor(id);
+        if (sim === null) return null;
         out.push(sim);
       }
       return out;
     };
-    const one = (id: string): number | null => this.bindings.get(id) ?? null;
+    const one = (id: string): number | null => this.simIdFor(id);
     const a = action as Record<string, unknown>;
     switch (action.t) {
       case 'move': case 'attackMove':

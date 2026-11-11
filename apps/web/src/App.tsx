@@ -4,6 +4,7 @@ import Lobby from './Lobby';
 import Battle from './Battle';
 import FusionBattle from './FusionBattle';
 import FusionRequests from './FusionRequests';
+import PersistentWorld from './PersistentWorld';
 import ConsentBanner from './ConsentBanner';
 import { RoomConnection } from './net';
 import { currentToken, onToken } from './api';
@@ -157,15 +158,23 @@ function Shell() {
   </main>;
 }
 
-function Routes({ conn, onLaunch, requests, showRequests }: {
+function Routes({ conn, onLaunch, requests, showRequests, navigate }: {
   conn: RoomConnection;
   onLaunch: (launch: LaunchRequest, mapName: string) => void;
   requests: boolean;
   showRequests: (on: boolean) => void;
   navigate: (to: string) => void;
 }) {
-  const { path, match } = useRoute();
+  const { path, match, search } = useRoute();
 
+  if (path === '/world') {
+    const regionId = search.get('region') ?? '';
+    if (!regionId) return <section className="page">
+      <h1>No region selected</h1>
+      <p>The persistent world needs a region. <Link to="/">Back to the war room</Link>.</p>
+    </section>;
+    return <PersistentWorld regionId={regionId} onExit={() => navigate('/')} />;
+  }
   if (path === '/tiers') return <Tiers />;
   if (path === '/signin') return <SignIn />;
   if (path === '/signin/forgot') return <Forgot />;
