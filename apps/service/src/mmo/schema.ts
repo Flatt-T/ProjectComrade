@@ -358,4 +358,24 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
       where applied_at is null;
     `,
   },
+  {
+    version: 3,
+    name: 'region scheduler durability',
+    sql: `
+    -- PW07: durable offline scheduling. started_at_ms anchors wall-clock to sim ticks
+    -- so a restarted region can reconstruct due work without a browser. Job attempts,
+    -- last error and an optional dedupe key give claiming/retry/duplicate suppression.
+    alter table region add column started_at_ms bigint;
+    -- PW07 lifecycle adds checkpointing/inactive alongside the PW05 set.
+    alter table region drop constraint region_lifecycle_check;
+    alter table region add constraint region_lifecycle_check
+      check (lifecycle in ('recovering', 'active', 'quiescent', 'checkpointing', 'inactive', 'failed'));
+    alter table scheduled_job
+      add column attempts integer not null default 0 check (attempts >= 0),
+      add column last_error text,
+      add column dedupe_key text;
+    create unique index scheduled_job_dedupe_idx on scheduled_job (region_id, dedupe_key)
+      where dedupe_key is not null;
+    `,
+  },
 ];

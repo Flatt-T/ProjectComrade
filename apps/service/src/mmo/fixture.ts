@@ -1,7 +1,8 @@
 // Migration-backed synthetic fixture world for tests and local beta bring-up.
 // Every identifier is generated fresh per call — fixtures are original synthetic data,
 // never copied assets or player data.
-import { randomUUID } from 'node:crypto';
+import { randomUUID, randomInt } from 'node:crypto';
+import { PACKS } from '@comrade/fusion';
 import {
   acquireRegionLease, createPlayer, createRegion, createWorld, joinWorld, type RegionRow,
 } from './store.js';
@@ -24,6 +25,8 @@ export interface FixtureWorld {
  */
 export async function seedFixtureWorld(args?: {
   workerId?: string; leaseMs?: number; playerCount?: number; capabilities?: MmoCapabilities;
+  /** Override the embedded Fusion sim spec; `null` skips embedding one. */
+  sim?: import('./runner.js').RegionSimSpec | null;
 }): Promise<FixtureWorld> {
   await mmoMigrate();
   const worldId = randomUUID();
@@ -46,6 +49,23 @@ export async function seedFixtureWorld(args?: {
     });
     await joinWorld(worldId, player.player_id);
     players.push({ playerId: player.player_id, accountId: player.account_id, displayName: player.display_name });
+  }
+  // Embed the Fusion sim spec the region runner needs (PW07). TD is the default
+  // persistent pack; factions rotate so every player gets a distinct side.
+  if (args?.sim !== null) {
+    const sim = args?.sim ?? (() => {
+      const pack = PACKS['td'];
+      return {
+        packId: pack.id, mapId: pack.maps[0].id, seed: randomInt(1, 0x7fffffff),
+        players: players.map((p, i) => ({
+          playerId: p.playerId, name: p.displayName,
+          faction: pack.factions[i % pack.factions.length].id,
+        })),
+      };
+    })();
+    await mmoQuery(
+      `update region set seed = seed || $2::jsonb where region_id = $1`,
+      [regionId, JSON.stringify({ sim })]);
   }
   const lease = await acquireRegionLease({ regionId, workerId, leaseMs: args?.leaseMs ?? 60_000 });
   await mmoQuery(`update region set lifecycle = 'active' where region_id = $1`, [regionId]);

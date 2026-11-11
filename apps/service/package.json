@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@comrade/contracts": "workspace:*",
+    "@comrade/fusion": "workspace:*",
     "jose": "^6.2.13",
     "pg": "^8.23.1",
     "stripe": "^23.0.1",

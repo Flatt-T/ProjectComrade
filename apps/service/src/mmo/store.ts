@@ -34,7 +34,11 @@ export interface WorldRow { world_id: string; ruleset_id: string; ruleset_versio
 export interface RegionRow {
   region_id: string; world_id: string; authority_epoch: string; owner_worker_id: string | null;
   lease_expires_at: Date | null; last_committed_seq: string; last_committed_tick: string;
-  lifecycle: 'recovering' | 'active' | 'quiescent' | 'failed';
+  lifecycle: 'recovering' | 'active' | 'quiescent' | 'checkpointing' | 'inactive' | 'failed';
+  started_at_ms?: string | null;
+  seed?: unknown;
+  ruleset_version?: string;
+  engine_artifact_sha256?: string;
 }
 export interface PlayerRow { player_id: string; account_id: string; display_name: string; }
 export interface ProtectionRow {
@@ -565,36 +569,122 @@ export async function latestSnapshot(regionId: string) {
 
 export async function scheduleJob(args: {
   jobId?: string; regionId: string; kind: string; dueAtMs: number | bigint;
-  generation?: number | bigint; payload?: unknown;
+  generation?: number | bigint; payload?: unknown; dedupeKey?: string;
 }): Promise<string> {
   const id = args.jobId ?? uuid();
+  if (args.dedupeKey) {
+    // Duplicate suppression: the same logical deadline scheduled twice resolves to
+    // the one durable job, so a retried transaction cannot double-fire it.
+    const existing = await mmoOne<{ job_id: string }>(
+      'select job_id from scheduled_job where region_id = $1 and dedupe_key = $2',
+      [args.regionId, args.dedupeKey]);
+    if (existing) return existing.job_id;
+  }
   await mmoQuery(
-    `insert into scheduled_job (job_id, region_id, kind, due_at_ms, generation, payload) values ($1,$2,$3,$4,$5,$6)`,
-    [id, args.regionId, args.kind, args.dueAtMs.toString(), (args.generation ?? 0).toString(), JSON.stringify(args.payload ?? {})]);
+    `insert into scheduled_job (job_id, region_id, kind, due_at_ms, generation, payload, dedupe_key)
+     values ($1,$2,$3,$4,$5,$6,$7) on conflict (region_id, dedupe_key) where dedupe_key is not null do nothing`,
+    [id, args.regionId, args.kind, args.dueAtMs.toString(), (args.generation ?? 0).toString(),
+     JSON.stringify(args.payload ?? {}), args.dedupeKey ?? null]);
+  if (args.dedupeKey) {
+    const row = await mmoOne<{ job_id: string }>(
+      'select job_id from scheduled_job where region_id = $1 and dedupe_key = $2',
+      [args.regionId, args.dedupeKey]);
+    if (row) return row.job_id;
+  }
   return id;
 }
 
-/** Claim due jobs for a worker; claiming never applies the effect by itself. */
+/**
+ * Claim due jobs for a worker; claiming never applies the effect by itself.
+ * When `authorityEpoch` is given the claim is fenced: only jobs in regions the
+ * worker currently owns at that epoch (unexpired lease) can be claimed, so a stale
+ * worker cannot even hold another owner's work.
+ */
 export async function claimDueJobs(args: {
-  regionId?: string; workerId: string; nowMs: number | bigint; leaseMs?: number; limit?: number;
-}): Promise<{ job_id: string; kind: string; generation: string; payload: unknown; due_at_ms: string }[]> {
+  regionId?: string; workerId: string; nowMs: number | bigint; leaseMs?: number;
+  limit?: number; authorityEpoch?: string | bigint;
+}): Promise<{ job_id: string; kind: string; generation: string; payload: unknown; due_at_ms: string; attempts: number }[]> {
   const leaseMs = args.leaseMs ?? 30_000;
   const until = BigInt(args.nowMs) + BigInt(leaseMs);
   return mmoQuery(
-    `update scheduled_job
-        set state = 'claimed', claimed_by = $2, claimed_until_ms = $3
-      where job_id in (
-        select job_id from scheduled_job
-         where state = 'pending' and due_at_ms <= $1
-           and ($4::uuid is null or region_id = $4)
-         order by due_at_ms limit $5
+    `update scheduled_job j
+        set state = 'claimed', claimed_by = $2, claimed_until_ms = $3,
+            attempts = attempts + 1
+      where j.job_id in (
+        select s.job_id from scheduled_job s
+         where s.state = 'pending' and s.due_at_ms <= $1
+           and ($4::uuid is null or s.region_id = $4)
+           and ($6::bigint is null or exists (
+             select 1 from region r
+              where r.region_id = s.region_id and r.owner_worker_id = $2
+                and r.authority_epoch = $6 and r.lease_expires_at > clock_timestamp()))
+         order by s.due_at_ms limit $5
          for update skip locked)
-      returning job_id, kind, generation, payload, due_at_ms`,
-    [args.nowMs.toString(), args.workerId, until.toString(), args.regionId ?? null, args.limit ?? 32]);
+      returning j.job_id, j.kind, j.generation, j.payload, j.due_at_ms, j.attempts`,
+    [args.nowMs.toString(), args.workerId, until.toString(), args.regionId ?? null,
+     args.limit ?? 32, args.authorityEpoch?.toString() ?? null]);
 }
 
 export async function finishJob(jobId: string, state: 'done' | 'cancelled'): Promise<void> {
   await mmoQuery(`update scheduled_job set state = $2 where job_id = $1 and state = 'claimed'`, [jobId, state]);
+}
+
+/** finishJob inside a caller's transaction (journal + effects + completion atomic). */
+export async function finishJobTx(tx: PoolClient, jobId: string, state: 'done' | 'cancelled'): Promise<void> {
+  await tx.query(`update scheduled_job set state = $2 where job_id = $1 and state = 'claimed'`, [jobId, state]);
+}
+
+/**
+ * Return a claimed job to pending (e.g. its sim boundary has not been reached yet).
+ * The claim attempt is refunded — the job was never actually applied.
+ */
+export async function releaseJobClaim(jobId: string): Promise<void> {
+  await mmoQuery(
+    `update scheduled_job set state = 'pending', claimed_by = null, claimed_until_ms = null,
+        attempts = greatest(attempts - 1, 0)
+      where job_id = $1 and state = 'claimed'`, [jobId]);
+}
+
+/**
+ * Requeue jobs whose claim lease expired (worker crash mid-apply). Safe to run on every
+ * scheduler pass; claiming alone never applies an effect.
+ */
+export async function reclaimExpiredJobs(args: { nowMs: number | bigint; limit?: number }): Promise<number> {
+  const rows = await mmoQuery<{ job_id: string }>(
+    `update scheduled_job set state = 'pending', claimed_by = null, claimed_until_ms = null
+      where job_id in (
+        select job_id from scheduled_job
+         where state = 'claimed' and claimed_until_ms <= $1
+         order by claimed_until_ms limit $2
+         for update skip locked)
+      returning job_id`,
+    [args.nowMs.toString(), args.limit ?? 256]);
+  return rows.length;
+}
+
+/** Journal events still awaiting application, in authoritative order. */
+export async function listUnappliedRegionEvents(regionId: string, kinds: string[], limit = 256) {
+  return mmoQuery<{
+    event_seq: string; event_kind: string; payload: unknown; simulation_tick: string;
+    authority_epoch: string; event_id: string;
+  }>(
+    `select event_seq, event_kind, payload, simulation_tick, authority_epoch, event_id
+       from region_event
+      where region_id = $1 and applied_at is null and event_kind = any($2)
+      order by event_seq limit $3`,
+    [regionId, kinds, limit]);
+}
+
+/** Record the wall-clock instant the region's sim epoch zero corresponds to. */
+export async function setRegionSimStart(regionId: string, startedAtMs: number | bigint): Promise<void> {
+  await mmoQuery('update region set started_at_ms = $2 where region_id = $1', [regionId, startedAtMs.toString()]);
+}
+
+/** Hand the region back to the pool: lease cleared, lifecycle quiescent. */
+export async function releaseRegionLease(regionId: string, workerId: string): Promise<void> {
+  await mmoQuery(
+    `update region set owner_worker_id = null, lease_expires_at = null, lifecycle = 'quiescent'
+      where region_id = $1 and owner_worker_id = $2`, [regionId, workerId]);
 }
 
 export async function listRegionEvents(regionId: string, afterSeq = 0, limit = 100) {
