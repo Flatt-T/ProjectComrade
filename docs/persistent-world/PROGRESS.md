@@ -141,7 +141,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW07 - THU-2231 - durable region scheduler and runner - 2026-11-11
 
-- State: implemented on branch `thu-2231-pw07-region-scheduler` (in progress).
+- State: MERGED to main as aac888f (PR #18); THU-2231 Done.
 - Deliverables: `apps/service/src/mmo/runner.ts` (RegionRunner: fenced lease
   acquire/renew, snapshot restore + journal-first replay, wall-clock<->tick
   anchor via `region.started_at_ms`, real-time stepping, periodic checkpoint,
@@ -168,7 +168,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW08 - THU-2232 - region orchestration, /mmo gateway and client transport - 2026-11-11
 
-- State: implemented on branch `thu-2232-pw08-mmo-gateway` (in progress).
+- State: MERGED to main as 04ec477 (PR #19, commits 98cc9e5 + d422d70 ESM fix); THU-2232 Done.
 - Deliverables: `apps/service/src/mmo/regions.ts` (RegionService: on-demand
   runner supervision with bounded restart backoff, subscription snapshots,
   durable player provisioning, fence lookup), `apps/service/src/mmo/gateway.ts`
@@ -198,7 +198,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW22 - THU-2270 - region hibernation and capped idle accrual - 2026-11-11
 
-- State: implemented on branch `thu-2270-pw22-region-hibernation` (in progress).
+- State: implemented on branch `thu-2270-pw22-region-hibernation`, PR #20 (in progress).
 - Deliverables: `Game.fastForwardQuiescent(ticks, rates)` in
   `packages/fusion/src/game.ts` (arithmetic per-tick production with cached
   factory/speed context, measured per-slot harvest accrual with income bonus
