@@ -9,6 +9,12 @@ export type SessionStatus = 'running' | 'waiting' | 'desync';
 export interface Session {
   readonly game: Game;
   readonly slot: number;
+  /**
+   * Highest turn the relay stood in for while this client was disconnected. Turn packets
+   * at or below it must carry no commands: every other client already applied the relay's
+   * empty synthetic turns, so sending real orders for them would desynchronise the match.
+   */
+  heldUntil?: number;
   issue(cmd: Command): void;
   /** Advance by elapsed wall time; returns render interpolation 0..1. */
   update(dtMs: number): number;
@@ -41,7 +47,7 @@ export class LocalSession implements Session {
   dispose() { /* nothing to release */ }
 }
 
-export interface TurnPacket { turn: number; tick: number; checksum: number; commands: Command[]; final?: boolean }
+export interface TurnPacket { turn: number; tick: number; checksum: number; commands: Command[]; final?: boolean; synthetic?: boolean }
 
 export interface TurnTransport {
   send(packet: TurnPacket): void;
@@ -63,6 +69,7 @@ export class LockstepSession implements Session {
   private waiting = false;
   private desynced = false;
   private unsubscribe: () => void;
+  heldUntil?: number;
 
   /** `humans` lists the slots driven by people; AI slots run inside the simulation. */
   constructor(readonly game: Game, readonly slot: number, private humans: number[], private transport: TurnTransport, private speedPercent = 100) {
@@ -74,8 +81,9 @@ export class LockstepSession implements Session {
   issue(cmd: Command) { this.local.push(cmd); }
 
   private sendTurn(turn: number) {
-    const packet: TurnPacket = { turn, tick: this.game.tick, checksum: this.game.checksum(), commands: this.local };
-    this.local = [];
+    const held = this.heldUntil !== undefined && turn <= this.heldUntil;
+    const packet: TurnPacket = { turn, tick: this.game.tick, checksum: this.game.checksum(), commands: held ? [] : this.local };
+    if (!held) this.local = [];
     this.store(this.slot, packet);
     this.mySums.set(packet.tick, packet.checksum);
     for (const theirs of this.peerSums.get(packet.tick) ?? []) if (theirs !== packet.checksum) this.desynced = true;
@@ -91,8 +99,14 @@ export class LockstepSession implements Session {
 
   private receive(slot: number, packet: TurnPacket) {
     if (slot === this.slot || !this.humans.includes(slot)) return;
+    // A packet for a turn this client already stepped is history (e.g. a reconnect
+    // replay), not a command; every client makes the same call because ticks agree.
+    if (packet.turn * TURN_TICKS < this.game.tick) return;
     this.store(slot, packet);
     if (packet.final) { this.dropped.set(slot, packet.turn); return; }
+    // A synthetic turn is the relay standing in for a disconnected commander: there is
+    // no sender checksum to compare, and every client sees the same empty command list.
+    if (packet.synthetic) return;
     const mine = this.mySums.get(packet.tick);
     if (mine === undefined) this.peerSums.set(packet.tick, [...(this.peerSums.get(packet.tick) ?? []), packet.checksum]);
     else if (mine !== packet.checksum) this.desynced = true;
@@ -107,6 +121,13 @@ export class LockstepSession implements Session {
     });
   }
 
+  /** True while buffered turns sit further ahead than the normal input-delay pipeline. */
+  private ahead(): boolean {
+    const now = this.game.tick / TURN_TICKS;
+    for (const t of this.turns.keys()) if (t > now + INPUT_DELAY_TURNS + 1) return true;
+    return false;
+  }
+
   update(dtMs: number): number {
     if (this.desynced) return 0;
     // Game speed is wall-clock pacing, not simulation: every client runs the same setting
@@ -115,10 +136,10 @@ export class LockstepSession implements Session {
     const most = Math.ceil((MAX_STEPS_PER_FRAME * this.speedPercent) / 100);
     this.acc += dtMs;
     let n = 0;
-    while (this.acc >= step && n < most) {
+    const tickOnce = (): boolean => {
       if (this.game.tick % TURN_TICKS === 0) {
         const turn = this.game.tick / TURN_TICKS;
-        if (!this.ready(turn)) { this.waiting = true; this.acc = Math.min(this.acc, step); break; }
+        if (!this.ready(turn)) { this.waiting = true; return false; }
         this.waiting = false;
         const bucket = this.turns.get(turn);
         // Same order on every client: by slot, then as issued.
@@ -129,10 +150,19 @@ export class LockstepSession implements Session {
         for (const tick of this.peerSums.keys()) if (tick < this.game.tick - 600) this.peerSums.delete(tick);
       }
       this.game.step();
+      return true;
+    };
+    while (this.acc >= step && n < most) {
+      if (!tickOnce()) { this.acc = Math.min(this.acc, step); break; }
       this.acc -= step;
       n++;
     }
     if (n === most) this.acc = 0;
+    // A reconnected commander has the missed turns buffered by the relay. Catch up as fast
+    // as the CPU allows — wall-clock pacing would leave them permanently behind, because
+    // everyone else kept playing on synthetic turns and never waits for them.
+    let drained = 0;
+    while (drained < 240 && this.ahead() && tickOnce()) drained++;
     return Math.min(1, this.acc / step);
   }
 
@@ -181,6 +211,16 @@ export function parseCommand(raw: unknown): Command | null {
       return int(c.x) && int(c.y) ? { t: 'rally', x: c.x, y: c.y } : null;
     case 'surrender':
       return { t: 'surrender' };
+    case 'join': {
+      const p = c.player as Record<string, unknown> | undefined;
+      if (!p || typeof p.name !== 'string' || p.name.length > 24 || typeof p.faction !== 'string' || p.faction.length > 32 || typeof p.ai !== 'boolean') return null;
+      const level = p.level === 'easy' || p.level === 'normal' || p.level === 'hard' ? p.level : undefined;
+      return { t: 'join', player: { name: p.name, faction: p.faction, ai: p.ai, team: int(p.team) ? p.team as number : undefined, level } };
+    }
+    case 'leave':
+      return int(c.slot) ? { t: 'leave', slot: c.slot } : null;
+    case 'transfer':
+      return ints(c.ids) && int(c.to) ? { t: 'transfer', ids: c.ids, to: c.to } : null;
     default:
       return null;
   }

@@ -24,9 +24,32 @@ export type Command =
   | { t: 'repair'; id: number }
   | { t: 'rally'; x: number; y: number }
   | { t: 'super'; id: number; x: number; y: number; x2?: number; y2?: number }
-  | { t: 'surrender' };
+  | { t: 'surrender' }
+  /** Persistent profile only: a player joins a running region (slot = players.length). */
+  | { t: 'join'; player: PlayerSetup }
+  /** Persistent profile only: a player disconnects; their base keeps running. */
+  | { t: 'leave'; slot: number }
+  /** Persistent profile only: hand entities to another player slot, state preserved. */
+  | { t: 'transfer'; ids: number[]; to: number };
 
 export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number; level?: AILevel }
+
+/**
+ * Persistent-region extension points (PW21). Classic matches leave this empty; the
+ * persistent profile fills the hooks that later PW issues implement (salvage,
+ * capturable sites, region-edge transfer, protection). Hooks run inside the
+ * deterministic step, so they must be pure functions of game state.
+ */
+export interface RegionHooks {
+  /** Where a joining player appears; default cycles the map's start positions. */
+  spawnCell?(game: Game, player: Player): number;
+  /** Bonus-crate contents hook (salvage crates land with PW22/PW23). */
+  crateKind?(game: Game): CrateKind;
+  /** Capturable-site ownership change hook (PW22/PW23). */
+  siteCapture?(game: Game, siteId: string, owner: number): void;
+  /** Entity leaving the region edge (cross-region transfer, PW13+). */
+  regionEdge?(game: Game, entityId: number, edge: 'north' | 'south' | 'east' | 'west'): void;
+}
 export type CreditsPreset = 'low' | 'standard' | 'high';
 export interface GameSetup {
   pack: RulePack;
@@ -46,6 +69,12 @@ export interface GameSetup {
   superCharge?: number;
   /** Bonus-crate frequency, 0 (none) to 200; 100 drops about one a minute. */
   crates?: number;
+  /**
+   * Persistent-world profile (PW21): players may join and leave a running region,
+   * entities change hands by command, and there is no match-over condition — the
+   * region authority decides elimination, protection and recovery instead.
+   */
+  persistent?: boolean;
 }
 
 export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy' | 'enter' | 'rearm' | 'ferry';
@@ -171,6 +200,8 @@ export interface Player {
   /** Cached from owned support buildings whenever the base changes. */
   incomeBonus: number;
   costReduction: number;
+  /** Persistent profile: false after a `leave` command; the base keeps simulating. */
+  connected: boolean;
 }
 
 export interface Projectile { id: number; owner: number; weapon: string; x: number; y: number; sx: number; sy: number; tx: number; ty: number; target: number; source: number }
@@ -238,6 +269,12 @@ export class Game {
   crates: Crate[] = [];
   private ai: (AIState | null)[] = [];
   readonly mapPreset: MapPreset;
+  /** True under the persistent profile: join/leave/transfer commands and no match-over. */
+  readonly persistent: boolean;
+  /** Region extension points; classic matches leave this empty. */
+  hooks: RegionHooks = {};
+  /** Starting credits for late joiners (the setup preset, resolved once). */
+  private startMoney = 0;
 
   constructor(setup: GameSetup) {
     this.pack = setup.pack;
@@ -251,40 +288,76 @@ export class Game {
     this.renewal = Math.max(0, Math.min(50, Math.trunc(setup.renewal ?? RENEWAL_CLASSIC)));
     this.superCharge = Math.max(100, Math.min(200, Math.trunc(setup.superCharge ?? 100)));
     this.crateRate = Math.max(0, Math.min(200, Math.trunc(setup.crates ?? 0)));
+    this.persistent = setup.persistent === true;
     const credits = setup.pack.startCredits[setup.credits ?? 'standard'];
+    this.startMoney = credits;
     const size = this.map.w * this.map.h;
-    setup.players.slice(0, preset.starts.length).forEach((p, slot) => {
-      const faction = setup.pack.factions.find(f => f.id === p.faction) ?? setup.pack.factions[slot % setup.pack.factions.length];
-      const queue = (): ProductionQueue => ({ items: [], paid: 0, acc: 0, ready: false, hold: false });
-      this.players.push({
-        slot, name: p.name, faction: faction.id, side: faction.side, color: faction.color, accent: faction.accent,
-        ai: p.ai, team: p.team ?? slot, credits, storage: 0, powerGen: 0, powerUse: 0, defeated: false,
-        queues: { structure: queue(), defense: queue(), infantry: queue(), vehicle: queue(), aircraft: queue(), naval: queue(), starport: queue() },
-        explored: new Uint8Array(size), visible: new Uint8Array(size), rally: -1,
-        stats: { built: 0, lost: 0, killed: 0, harvested: 0 },
-        upgrades: {}, blackoutUntil: 0, veteranQueues: [], incomeBonus: 0, costReduction: 0,
-      });
-      this.ai.push(p.ai ? createAIState(slot, p.level) : null);
-      // The MCV sits on the start cell; the escort forms up outside its deploy footprint.
-      const start = preset.starts[slot];
-      const startCell = start.y * this.map.w + start.x;
-      const starting = this.startUnitsFor(faction);
-      const mcvType = starting.find(t => this.pack.units[t].deploysTo);
-      const yard = mcvType ? this.pack.structures[this.pack.units[mcvType].deploysTo!] : undefined;
-      const fx = start.x - ((yard?.w ?? 1) >> 1), fy = start.y - ((yard?.h ?? 1) >> 1);
-      const inFootprint = (i: number) => {
-        const x = i % this.map.w, y = Math.floor(i / this.map.w);
-        return !!yard && x >= fx - 1 && x <= fx + yard.w && y >= fy - 1 && y <= fy + yard.h;
-      };
-      if (mcvType) this.spawnUnit(mcvType, slot, startCell);
-      starting.filter(t => t !== mcvType).forEach(type => {
-        const origin = (Math.min(this.map.h - 1, fy + (yard?.h ?? 1) + 1)) * this.map.w + start.x;
-        const cell = nearestCell(this.map, origin, 8,
-          i => passable(this.pack, this.map, i, this.moveClass(this.pack.units[type])) && !this.unitInCell(i) && !inFootprint(i));
-        if (cell >= 0) this.spawnUnit(type, slot, cell);
-      });
-    });
+    setup.players.slice(0, preset.starts.length).forEach(p => this.addPlayer(p, credits, size));
     this.updateFog();
+  }
+
+  /**
+   * Create a player slot and deploy their starting base. Used by the constructor for
+   * the initial roster and by the persistent `join` command — identical on every
+   * client because the journal fixes when it runs.
+   */
+  private addPlayer(p: PlayerSetup, credits = this.startMoney, size = this.map.w * this.map.h): Player {
+    const slot = this.players.length;
+    const faction = this.pack.factions.find(f => f.id === p.faction) ?? this.pack.factions[slot % this.pack.factions.length];
+    const queue = (): ProductionQueue => ({ items: [], paid: 0, acc: 0, ready: false, hold: false });
+    const startCredits = credits;
+    const mapSize = size;
+    const player: Player = {
+      slot, name: p.name, faction: faction.id, side: faction.side, color: faction.color, accent: faction.accent,
+      ai: p.ai, team: p.team ?? slot, credits: startCredits, storage: 0, powerGen: 0, powerUse: 0, defeated: false,
+      queues: { structure: queue(), defense: queue(), infantry: queue(), vehicle: queue(), aircraft: queue(), naval: queue(), starport: queue() },
+      explored: new Uint8Array(mapSize), visible: new Uint8Array(mapSize), rally: -1,
+      stats: { built: 0, lost: 0, killed: 0, harvested: 0 },
+      upgrades: {}, blackoutUntil: 0, veteranQueues: [], incomeBonus: 0, costReduction: 0,
+      connected: true,
+    };
+    this.players.push(player);
+    this.ai.push(p.ai ? createAIState(slot, p.level) : null);
+    // The MCV sits on the spawn cell; the escort forms up outside its deploy footprint.
+    const cell = this.hooks.spawnCell?.(this, player) ?? this.defaultSpawnCell(slot);
+    const cx = cell % this.map.w, cy = Math.floor(cell / this.map.w);
+    const startCell = cy * this.map.w + cx;
+    const starting = this.startUnitsFor(faction);
+    const mcvType = starting.find(t => this.pack.units[t].deploysTo);
+    const yard = mcvType ? this.pack.structures[this.pack.units[mcvType].deploysTo!] : undefined;
+    const fx = cx - ((yard?.w ?? 1) >> 1), fy = cy - ((yard?.h ?? 1) >> 1);
+    const inFootprint = (i: number) => {
+      const x = i % this.map.w, y = Math.floor(i / this.map.w);
+      return !!yard && x >= fx - 1 && x <= fx + yard.w && y >= fy - 1 && y <= fy + yard.h;
+    };
+    if (mcvType) this.spawnUnit(mcvType, slot, startCell);
+    starting.filter(t => t !== mcvType).forEach(type => {
+      const origin = (Math.min(this.map.h - 1, fy + (yard?.h ?? 1) + 1)) * this.map.w + cx;
+      const spot = nearestCell(this.map, origin, 8,
+        i => passable(this.pack, this.map, i, this.moveClass(this.pack.units[type])) && !this.unitInCell(i) && !inFootprint(i));
+      if (spot >= 0) this.spawnUnit(type, slot, spot);
+    });
+    return player;
+  }
+
+  /** Start cell for a slot: the map's own starts while they last, then a scan. */
+  private defaultSpawnCell(slot: number): number {
+    const starts = this.mapPreset.starts;
+    if (slot < starts.length) return starts[slot].y * this.map.w + starts[slot].x;
+    // Deterministic fallback for late joiners: first open vehicle cell scanning
+    // outward from the map centre, clear of units and structures.
+    const { w, h } = this.map;
+    const cx = w >> 1, cy = h >> 1;
+    for (let r = 0; r < Math.max(w, h); r++) {
+      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+        const x = cx + dx, y = cy + dy;
+        if (x < 0 || y < 0 || x >= w || y >= h) continue;
+        const i = y * w + x;
+        if (this.map.occupied[i] === 0 && passable(this.pack, this.map, i, 'vehicle') && !this.unitInCell(i)) return i;
+      }
+    }
+    return cy * w + cx;
   }
 
   // ---------------------------------------------------------------- commands
@@ -297,8 +370,14 @@ export class Game {
   }
 
   private apply(slot: number, cmd: Command) {
+    // Persistent-profile roster and ownership commands. They are journaled inputs
+    // like any other command; classic matches reject them here and in parseCommand.
+    // Enqueue them with slot -1 so they sort ahead of that tick's unit commands.
+    if (cmd.t === 'join') { if (this.persistent) this.addPlayer(cmd.player); return; }
+    if (cmd.t === 'leave') { const p = this.players[cmd.slot]; if (this.persistent && p) p.connected = false; return; }
+    if (cmd.t === 'transfer') { if (this.persistent) this.transferOwner(cmd.ids, cmd.to, slot); return; }
     const player = this.players[slot];
-    if (!player || player.defeated) return;
+    if (!player || player.defeated || !player.connected) return;
     const own = (ids: number[]) => ids.map(id => this.entities.get(id)).filter((e): e is Entity => !!e && e.owner === slot && e.kind === 'unit' && e.hp > 0 && !e.carriedBy);
     switch (cmd.t) {
       case 'move': case 'attackMove': {
@@ -412,6 +491,21 @@ export class Game {
     }
   }
 
+  /**
+   * Hand the issuer's live entities to another player slot. Position, health, orders
+   * and cargo are untouched — only ownership changes. Dead or carried entities and
+   * entities the issuer does not own are skipped.
+   */
+  private transferOwner(ids: number[], to: number, from: number) {
+    const target = this.players[to];
+    if (!target || to === from) return;
+    for (const id of ids) {
+      const e = this.entities.get(id);
+      if (!e || e.hp <= 0 || e.carriedBy || e.owner !== from) continue;
+      e.owner = to;
+    }
+  }
+
   // ---------------------------------------------------------------- main loop
 
   step() {
@@ -425,7 +519,7 @@ export class Game {
     }
     for (const p of this.players) {
       const ai = this.ai[p.slot];
-      if (ai && !p.defeated && (this.tick + p.slot * 5) % AI_LEVELS[ai.level].thinkEvery === 0) runAI(this, p, ai);
+      if (ai && p.connected && !p.defeated && (this.tick + p.slot * 5) % AI_LEVELS[ai.level].thinkEvery === 0) runAI(this, p, ai);
     }
     for (const p of this.players) if (p.blackoutUntil && this.tick >= p.blackoutUntil) { p.blackoutUntil = 0; this.powerDirty = true; }
     const market = this.pack.mechanics.market;
@@ -450,7 +544,9 @@ export class Game {
     this.collectCrates();
     if (this.tick % 4 === 0) this.updateFog();
     this.cleanup();
-    if (this.tick % 15 === 0) this.checkVictory();
+    // Persistent regions have no match-over: elimination, protection and recovery
+    // are world-authority decisions journaled as operations, not engine victory.
+    if (!this.persistent && this.tick % 15 === 0) this.checkVictory();
     if (this.effects.length > 400) this.effects = this.effects.slice(-300);
   }
 
@@ -1541,7 +1637,8 @@ export class Game {
       if (this.crates.some(c => c.cell === cell) || this.unitInCell(cell)) continue;
       const x = cell % this.map.w, y = Math.floor(cell / this.map.w);
       if (this.map.starts.some(st => Math.abs(st.x - x) < 6 && Math.abs(st.y - y) < 6)) continue;
-      this.crates.push({ id: this.nextId++, cell, kind: CRATE_KINDS[this.rng.int(CRATE_KINDS.length)] });
+      const hooked = this.hooks.crateKind?.(this);
+    this.crates.push({ id: this.nextId++, cell, kind: hooked ?? CRATE_KINDS[this.rng.int(CRATE_KINDS.length)] });
       return;
     }
   }

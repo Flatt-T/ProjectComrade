@@ -37,6 +37,8 @@ interface Peer {
   connectionVersion: number;
   connected: boolean;
   tombstone?: ReturnType<typeof setTimeout>;
+  /** Set while a started lockstep match holds this commander's seat for a resume. */
+  matchDropped?: boolean;
 }
 interface Room {
   host: string;
@@ -52,11 +54,21 @@ interface Room {
   starting?: boolean;
   /** Last lockstep turn relayed for each player, so a drop can be finalised deterministically. */
   lastTurn: Map<string, number>;
+  /** Recent relayed turn packets (`turn:slot` → raw message) so a resumed commander can catch up. */
+  turnLog?: Map<string, string>;
 }
 
 // Keep a disconnected setup available long enough for a player to return after a browser or
 // network sleep. Once this expires, normal leave/host migration rules reclaim the room.
 const ROOM_RESUME_GRACE_MS = 2 * 60 * 60 * 1000;
+// A commander whose socket drops mid-match keeps their slot this long: the relay fills
+// their turns with empties so the match continues, and a resume replays the buffer.
+const MATCH_RESUME_GRACE_MS = 120 * 1000;
+// Relayed turn packets kept per room for reconnect replay (turn:slot entries).
+const TURN_LOG_MAX = 50000;
+// How far behind a resumed commander's last sent turn the replay reaches; the client's
+// own stale-turn guard discards anything it already stepped.
+const TURN_REPLAY_MARGIN = 32;
 
 export class RoomCoordinator {
   private peers = new Map<string, Peer>();
@@ -74,9 +86,11 @@ export class RoomCoordinator {
       peer.connected = true;
       peer.send = send;
       peer.player.connected = true;
-      send(JSON.stringify({ version: 1, type: 'welcome', id, resumeToken: peer.resumeToken, resumed: true, capabilities: ['rooms', 'public-list', 'configure', 'lockstep', 'accounts'], gameplay: 'lobby-presence' }));
+      const heldUntil = this.heldUntilFor(peer);
+      send(JSON.stringify({ version: 1, type: 'welcome', id, resumeToken: peer.resumeToken, resumed: true, capabilities: ['rooms', 'public-list', 'configure', 'lockstep', 'accounts'], gameplay: 'lobby-presence', ...(heldUntil !== undefined ? { heldUntil } : {}) }));
       this.sendLobbyList(id);
       if (peer.room) this.broadcast(peer.room);
+      this.replayMatchTurns(peer, id);
       this.broadcastLobbyList();
       log('room-resume', { room: peer.room, peer: id.slice(0, 8) });
       return id;
@@ -252,12 +266,60 @@ export class RoomCoordinator {
     this.peers.delete(id);
   }
 
+  /**
+   * A commander whose socket dropped mid-match gets the buffered turns back on resume.
+   * The replay starts a little before their last sent turn; the client's own stale-turn
+   * guard discards anything it already stepped, so overlap is harmless.
+   */
+  /** Highest turn the relay has seen, when this peer is resuming a held match seat. */
+  private heldUntilFor(peer: Peer): number | undefined {
+    const room = peer.room ? this.rooms.get(peer.room) : undefined;
+    if (!room || room.phase !== 'started' || !styleInfo(room.options.style).lockstep || !peer.matchDropped) return undefined;
+    return Math.max(0, ...room.lastTurn.values());
+  }
+
+  private replayMatchTurns(peer: Peer, id: string) {
+    const name = peer.room;
+    const room = name ? this.rooms.get(name) : undefined;
+    if (!room || room.phase !== 'started' || !styleInfo(room.options.style).lockstep || !peer.matchDropped) return;
+    peer.matchDropped = false;
+    const buffer = room.turnLog;
+    if (!buffer?.size) return;
+    const floor = (room.lastTurn.get(id) ?? 0) - TURN_REPLAY_MARGIN;
+    const entries = [...buffer.entries()]
+      .map(([key, raw]) => ({ turn: Number(key.slice(0, key.indexOf(':'))), raw }))
+      .filter(e => e.turn > floor)
+      .sort((a, b) => a.turn - b.turn)
+      .slice(-TURN_LOG_MAX);
+    log('room-turn-replay', { room: name, peer: peer.resumeToken.slice(0, 8), turns: entries.length });
+    for (const entry of entries) peer.send(entry.raw);
+  }
+
   /** A transport drop during setup creates a temporary seat that the same browser can resume. */
   connectionLost(id: string, connectionVersion: number) {
     const peer = this.peers.get(id);
     // A replaced socket can close after the resumed socket is already live.
     if (!peer || peer.connectionVersion !== connectionVersion || !peer.connected) return;
     const room = peer.room ? this.rooms.get(peer.room) : undefined;
+    if (room?.phase === 'started' && styleInfo(room.options.style).lockstep) {
+      // Hold the seat: the relay fills this commander's turns with empties so the match
+      // continues in real time, and a resume inside the grace window replays the buffer.
+      peer.connected = false;
+      peer.player.connected = false;
+      peer.matchDropped = true;
+      if (peer.tombstone) clearTimeout(peer.tombstone);
+      peer.tombstone = setTimeout(() => {
+        const current = this.peers.get(id);
+        if (current !== peer || peer.connected || peer.connectionVersion !== connectionVersion) return;
+        this.disconnect(id);
+        log('room-match-grace-expired', { room: peer.room, peer: id.slice(0, 8) });
+      }, MATCH_RESUME_GRACE_MS);
+      peer.tombstone.unref?.();
+      this.broadcast(peer.room!);
+      this.broadcastLobbyList();
+      log('room-match-disconnected', { room: peer.room, peer: id.slice(0, 8), graceMs: MATCH_RESUME_GRACE_MS });
+      return;
+    }
     // A live match must surrender a dropped lockstep slot promptly; the grace period is for
     // setup lobbies, where nobody's simulation is waiting on that player.
     if (!room || room.phase !== 'lobby') {
@@ -401,9 +463,35 @@ export class RoomCoordinator {
         if (room.phase !== 'started' || !styleInfo(room.options.style).lockstep) throw new Error('No lockstep match in progress');
         const slot = room.slots?.indexOf(id) ?? -1;
         if (slot < 0) throw new Error('Not a player in this match');
-        room.lastTurn.set(id, Math.max(room.lastTurn.get(id) ?? -1, message.turn));
+        // Turns only move forward. A resumed commander fast-forwards through the buffered
+        // ones and re-sends turn numbers the room already has; relaying those again would
+        // let late commands overwrite the recorded (possibly synthetic) packet.
+        if (message.turn <= (room.lastTurn.get(id) ?? -1)) return;
+        room.lastTurn.set(id, message.turn);
         const relay = JSON.stringify({ ...message, slot });
+        room.turnLog ??= new Map();
+        const key = `${message.turn}:${slot}`;
+        if (!room.turnLog.has(key)) room.turnLog.set(key, relay);
+        if (room.turnLog.size > TURN_LOG_MAX) {
+          const cutoff = message.turn - TURN_LOG_MAX / room.slots!.length - 64;
+          for (const key of room.turnLog.keys()) if (Number(key.slice(0, key.indexOf(':'))) < cutoff) room.turnLog.delete(key);
+        }
         for (const member of room.members) if (member !== id) this.peers.get(member)?.send(relay);
+        // A commander inside the resume grace window cannot send turns; the relay holds
+        // their seat with an empty synthetic turn so everyone else's lockstep continues.
+        if (room.slots) {
+          for (const member of room.members) {
+            const dropped = this.peers.get(member);
+            if (!dropped?.matchDropped) continue;
+            const heldSlot = room.slots.indexOf(member);
+            if (heldSlot < 0 || (room.lastTurn.get(member) ?? -1) >= message.turn) continue;
+            const key = `${message.turn}:${heldSlot}`;
+            if (room.turnLog.has(key)) continue;
+            const synthetic = JSON.stringify({ version: 1, type: 'turn', slot: heldSlot, turn: message.turn, tick: -1, checksum: 0, commands: [], synthetic: true });
+            room.turnLog.set(key, synthetic);
+            for (const target of room.members) { const peer = this.peers.get(target); if (peer?.connected) peer.send(synthetic); }
+          }
+        }
         return;
       }
       if (message.type === 'configure') {

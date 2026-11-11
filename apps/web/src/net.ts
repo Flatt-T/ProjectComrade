@@ -42,6 +42,8 @@ export class RoomConnection {
   private token = '';
   /** Tab-scoped ticket that restores the same room seat and host authority after a drop. */
   private resumeToken = savedResumeToken();
+  /** Highest lockstep turn the relay held with empty commands while this client was away. */
+  heldUntil?: number;
   private closed = false;
 
   constructor(private url = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`) { this.open(); }
@@ -71,6 +73,7 @@ export class RoomConnection {
       if (message.type === 'welcome') {
         this.id = message.id;
         this.resumeToken = message.resumeToken;
+        this.heldUntil = message.heldUntil;
         saveResumeToken(message.resumeToken);
       }
       if (message.type === 'error') recordEvent('server-error', { message: message.message });
@@ -79,7 +82,7 @@ export class RoomConnection {
         this.match = { matchId: message.matchId, reportToken: message.reportToken, slot: message.slot, ad: message.ad };
       }
       if (message.type === 'turn') {
-        const packet: TurnPacket = { turn: message.turn, tick: message.tick, checksum: message.checksum, commands: message.commands as TurnPacket['commands'], final: message.final };
+        const packet: TurnPacket = { turn: message.turn, tick: message.tick, checksum: message.checksum, commands: message.commands as TurnPacket['commands'], final: message.final, synthetic: message.synthetic };
         if (this.turnLog.length < 50000) this.turnLog.push({ slot: message.slot, packet });
         this.turnHandler?.(message.slot, packet);
         return;

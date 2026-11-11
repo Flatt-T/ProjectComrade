@@ -209,11 +209,11 @@ export interface ContentFile { name: string; bytes: number; sha256: string }
 export interface ContentManifest { version: 1; id: string; engine: 'vanilla-td' | 'vanilla-ra'; notice: string; source: string; maps: MapInfo[]; files: ContentFile[] }
 export interface EngineSnapshot { frame: number; audioRunning?: boolean; camera?: number; mouseX?: number; mouseY?: number; selected?: number; credits?: number; harvested?: number; spent?: number; units?: number; buildings?: number; power?: number; drain?: number; lost?: number; won?: boolean; defeated?: boolean; entities?: { id: number; owner: number; cell: number; hp: number; name: string }[] }
 export type ServerMessage = RoomState
-  | { version: 1; type: 'welcome'; id: string; resumeToken: string; resumed: boolean; capabilities: string[]; gameplay: 'lobby-presence' }
+  | { version: 1; type: 'welcome'; id: string; resumeToken: string; resumed: boolean; capabilities: string[]; gameplay: 'lobby-presence'; heldUntil?: number }
   | { version: 1; type: 'rooms'; rooms: RoomSummary[] }
   | { version: 1; type: 'error'; message: string }
   | { version: 1; type: 'chat'; from: string; name: string; text: string; to: ChatAudience; at: number }
-  | { version: 1; type: 'turn'; slot: number; turn: number; tick: number; checksum: number; commands: unknown[]; final?: boolean }
+  | { version: 1; type: 'turn'; slot: number; turn: number; tick: number; checksum: number; commands: unknown[]; final?: boolean; synthetic?: boolean }
   /**
    * Sent privately to each player as the match starts. `ad` is present only for the tiers
    * that watch one; the simulation runs underneath it from the first tick either way, so a
