@@ -138,3 +138,30 @@ acceptance detail; this file is the resume point. Read it first in every session
   PW07+; client replication wiring (snapshot+stream into FusionBattle) is PW08;
   cold-restart rejoin, late-join spectating/journal replay UI and server-side
   ranked verification remain open (DEC-IMPL-8, ADR 014 §5).
+
+### PW07 - THU-2231 - durable region scheduler and runner - 2026-11-11
+
+- State: implemented on branch `thu-2231-pw07-region-scheduler` (in progress).
+- Deliverables: `apps/service/src/mmo/runner.ts` (RegionRunner: fenced lease
+  acquire/renew, snapshot restore + journal-first replay, wall-clock<->tick
+  anchor via `region.started_at_ms`, real-time stepping, periodic checkpoint,
+  durable job claim/apply/finish in one transaction, stale-worker fail without
+  clobbering the new owner), migration v3 (`started_at_ms`, lifecycle
+  `checkpointing`/`inactive`, job `attempts`/`last_error`/`dedupe_key`),
+  epoch-fenced `claimDueJobs` + attempt-refunding `releaseJobClaim`,
+  `@comrade/fusion` workspace package so the service consumes the real engine,
+  fixture sim spec in `region.seed.sim`, `tests/integration/mmo-runner.test.ts`
+  (9 tests).
+- Proven: `vitest run tests/integration` - 3 files / 32 tests pass against real
+  PostgreSQL 16 (docker `comrade-mmo-test-pg`) incl. journal-ordered command
+  application with intent completion, deduplicated resubmission, durable-id
+  resolution and UNKNOWN_ENTITY rejection, exactly-once scheduled jobs with
+  journal+outbox+completion atomicity, dedupe-key suppression, shield_expire
+  default handler, epoch-fenced claims, stale-worker fence loss, claim-expiry
+  reclaim, and stop-checkpoint -> restore -> journal replay across a simulated
+  restart. `vitest run tests/unit` 22 files / 355 pass, `pnpm typecheck` 0,
+  `pnpm lint` 0, `pnpm --filter @comrade/service build` 0.
+- Open: runner is library-only (no WS/HTTP wiring - that is PW08/PW09); world
+  actions need per-kind handlers registered by later issues; quiescent/hibernate
+  accrual is PW22; checkpoint interval default is stop-only (`checkpointEveryTicks`
+  option exists for the beta config).
