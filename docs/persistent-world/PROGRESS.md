@@ -77,7 +77,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW06 — THU-2230 — ordered authoritative mutations and transactional event bus — 2026-11-11
 
-- State: implemented on branch `thu-2230-pw06-event-bus`.
+- State: merged to `main` (merge commit `1bd10a9`), PR #16; THU-2230 Done.
 - Deliverables: `apps/service/src/mmo/commands.ts` (contract-validated command
   intake: intent + journal + outbox in one fenced transaction; stale-epoch and
   duplicate/conflicting commandId rejection; `applyCommandEffects` writes the
@@ -106,3 +106,35 @@ acceptance detail; this file is the resume point. Read it first in every session
   `applyCommandEffects` at tick boundaries lands with the region worker (PW07/PW21);
   client-facing commandResult emission over WS is part of PW09+; multi-dispatcher
   live failover is exercised only via lease expiry in tests.
+
+### PW21 — THU-2269 — Fusion persistent-region engine — 2026-11-11
+
+- State: implemented on branch `thu-2269-pw21-fusion-persistent` (in progress).
+- Deliverables: `packages/fusion/src/persistent.ts` (`captureGame`/`restoreGame`
+  full deterministic snapshot incl. RNG, pending orders, queues, timers, map
+  mutations `resKind`/`concrete`, stable entity IDs and `nextId`; `joinPlayer`/
+  `leavePlayer` without match-over; `transferOwner` command preserving
+  position/health/orders and rejecting dead/foreign entities; persistent rules
+  profile separate from classic packs), `Entity.bound` flags, `Game` persistent
+  setup flag disabling victory, `tests/unit/fusion-persistent.test.ts`,
+  ADR 014, DEC-IMPL-7/8.
+- Standard-match backport in the same branch: lockstep rejoin — the room relay
+  holds a dropped commander's seat for 120 s with empty `synthetic` turns,
+  buffers relayed turns (≤50 k) and replays them on resume; the client drains
+  catch-up at CPU speed and sends empty commands for turns ≤ `heldUntil`.
+  Surrender only after grace expiry; non-lockstep matches unchanged.
+  Files: `apps/service/src/rooms.ts`, `apps/service/src/index.ts` (dead-socket
+  send guard), `packages/fusion/src/session.ts` (synthetic packets, stale-turn
+  guard, catch-up drain, `heldUntil`), `packages/contracts` (`synthetic`,
+  `heldUntil` fields), `apps/web/src/net.ts`, `apps/web/src/FusionBattle.tsx`.
+- Proven: `vitest run tests/unit` — 22 files / 355 tests pass including
+  snapshot-at-N/replay-to-M checksum equality across all four classic packs,
+  join/leave lockstep agreement, transfer mid-combat, no-match-over, 2 h
+  headless endurance (108 000 ticks, 0.346 ms/tick, 541 entities, heap Δ 9.2 MB,
+  snapshot 450 KB), end-to-end lockstep rejoin with checksum equality after a
+  200+-tick outage, and 3 room-coordinator resume tests. `pnpm typecheck` 0,
+  `pnpm lint` 0.
+- Open: 24 h endurance run in progress; region-runner/journal integration is
+  PW07+; client replication wiring (snapshot+stream into FusionBattle) is PW08;
+  cold-restart rejoin, late-join spectating/journal replay UI and server-side
+  ranked verification remain open (DEC-IMPL-8, ADR 014 §5).

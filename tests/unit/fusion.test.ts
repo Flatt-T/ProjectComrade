@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CLASSIC_PACKS, Game, LocalSession, LockstepSession, PACKS, dunePack, parseCommand, ra2Pack, facingTo, isqrt, Rng } from '../../packages/fusion/src/index';
+import { CLASSIC_PACKS, Game, INPUT_DELAY_TURNS, LocalSession, LockstepSession, PACKS, dunePack, parseCommand, ra2Pack, facingTo, isqrt, Rng, TURN_TICKS } from '../../packages/fusion/src/index';
 import type { Command, GameSetup, TurnPacket, TurnTransport } from '../../packages/fusion/src/index';
 
 const ai2 = (pack: GameSetup['pack'], seed = 7, mapId = pack.maps[0].id): GameSetup => ({
@@ -135,13 +135,16 @@ describe('fusion lockstep multiplayer', () => {
    */
   function makeHub(slots: number[]) {
     const handlers = new Map<number, (from: number, p: TurnPacket) => void>();
+    const parked = new Map<number, (from: number, p: TurnPacket) => void>();
     const members = new Set(slots);
     const queue: { to: number; from: number; packet: TurnPacket; at: number }[] = [];
+    const history: { slot: number; packet: TurnPacket }[] = [];
     let clock = 0, jitter = 1;
+    const record = (slot: number, packet: TurnPacket) => { if (history.length < 60000) history.push({ slot, packet: JSON.parse(JSON.stringify(packet)) }); };
     return {
       transport(slot: number): TurnTransport {
         return {
-          send: packet => { for (const to of members) if (to !== slot) queue.push({ to, from: slot, packet: JSON.parse(JSON.stringify(packet)), at: clock + 20 + ((jitter = (jitter * 7 + 3) % 97)) }); },
+          send: packet => { record(slot, packet); for (const to of members) if (to !== slot) queue.push({ to, from: slot, packet: JSON.parse(JSON.stringify(packet)), at: clock + 20 + ((jitter = (jitter * 7 + 3) % 97)) }); },
           subscribe: h => { handlers.set(slot, h); return () => handlers.delete(slot); },
         };
       },
@@ -154,9 +157,27 @@ describe('fusion lockstep multiplayer', () => {
           handlers.get(m.to)!(m.from, m.packet);
         }
       },
-      drop(slot: number, finalTurn: number) {
-        members.delete(slot); handlers.delete(slot);
-        for (const to of members) queue.push({ to, from: slot, packet: { turn: finalTurn, tick: 0, checksum: 0, commands: [{ t: 'surrender' }], final: true }, at: clock + 10 });
+      drop(slot: number, finalTurn?: number) {
+        const handler = handlers.get(slot);
+        if (handler) parked.set(slot, handler);
+        handlers.delete(slot); members.delete(slot);
+        if (finalTurn !== undefined) for (const to of members) queue.push({ to, from: slot, packet: { turn: finalTurn, tick: 0, checksum: 0, commands: [{ t: 'surrender' }], final: true }, at: clock + 10 });
+      },
+      /** Socket drop without surrender: the seat is parked for a possible resume. */
+      park(slot: number) { this.drop(slot); },
+      restore(slot: number) {
+        const handler = parked.get(slot);
+        if (handler) { handlers.set(slot, handler); members.add(slot); parked.delete(slot); }
+      },
+      /** The service relay's stand-in for a disconnected commander: an empty synthetic turn. */
+      inject(slot: number, turn: number) {
+        const packet: TurnPacket = { turn, tick: -1, checksum: 0, commands: [], synthetic: true };
+        record(slot, packet);
+        for (const to of members) if (to !== slot) queue.push({ to, from: slot, packet: JSON.parse(JSON.stringify(packet)), at: clock + 5 });
+      },
+      /** What the service's turn buffer replays to a resumed commander. */
+      replay(slot: number, minTurn: number) {
+        for (const { slot: from, packet } of history) if (packet.turn >= minTurn) queue.push({ to: slot, from, packet: JSON.parse(JSON.stringify(packet)), at: clock + 5 });
       },
     };
   }
@@ -217,6 +238,41 @@ describe('fusion lockstep multiplayer', () => {
     expect(a.status()).toBe('running');
     expect(a.game.players[1].defeated).toBe(true);
     expect(a.game.tick).toBeGreaterThan(b.game.tick + 100);
+  });
+
+  it('lets a parked commander rejoin from the relay buffer and catch up without desync', () => {
+    const hub = makeHub([0, 1]);
+    const a = new LockstepSession(new Game(setup()), 0, [0, 1], hub.transport(0));
+    const b = new LockstepSession(new Game(setup()), 1, [0, 1], hub.transport(1));
+    for (let frame = 0; frame < 300; frame++) { hub.advance(16); a.update(16); b.update(16); }
+    // A's socket dies. Its last sent turn bounds which turns the relay must hold open.
+    const dropTurn = Math.floor(a.game.tick / TURN_TICKS) + INPUT_DELAY_TURNS;
+    hub.park(0);
+    let held = dropTurn, frontier = dropTurn;
+    for (let frame = 0; frame < 900; frame++) {
+      hub.advance(16); b.update(16);
+      frontier = Math.floor(b.game.tick / TURN_TICKS) + INPUT_DELAY_TURNS;
+      while (held < frontier) { held++; hub.inject(0, held); }
+    }
+    expect(b.status()).toBe('running');
+    const gap = b.game.tick - a.game.tick;
+    expect(gap).toBeGreaterThan(200);
+    // A resumes: the service replays its turn buffer and names the held boundary.
+    hub.restore(0);
+    hub.replay(0, dropTurn - 32);
+    a.heldUntil = frontier;
+    const sums: Record<number, number>[] = [{}, {}];
+    [a, b].forEach((s, i) => {
+      const step = s.game.step.bind(s.game);
+      s.game.step = () => { step(); if (s.game.tick % 60 === 0) sums[i][s.game.tick] = s.game.checksum(); };
+    });
+    for (let frame = 0; frame < 900; frame++) { hub.advance(16); a.update(16); b.update(16); }
+    expect(a.status()).not.toBe('desync');
+    expect(b.status()).not.toBe('desync');
+    expect(Math.abs(a.game.tick - b.game.tick)).toBeLessThan(30);
+    const common = Object.keys(sums[0]).filter(t => t in sums[1]);
+    expect(common.length).toBeGreaterThan(3);
+    for (const t of common) expect(sums[0][+t], `tick ${t}`).toBe(sums[1][+t]);
   });
 
   it('drops malformed network commands', () => {

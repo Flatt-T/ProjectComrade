@@ -72,7 +72,9 @@ wss.on('connection', (ws, req) => {
   // The upgrade carries the guest cookie, so an unregistered visitor's allowance follows them
   // into the lobby without the page having to tell us who it thinks it is.
   const resumeToken = new URL(req.url || '/ws', 'http://localhost').searchParams.get('resume');
-  const id = rooms.connect(message => ws.send(message), guestIdFromCookieHeader(req.headers.cookie), resumeToken);
+  // A peer inside the match-resume grace window keeps their seat but has no live socket;
+  // sends to it must not take the relay down with them.
+  const id = rooms.connect(message => { try { ws.send(message); } catch { /* socket already closed */ } }, guestIdFromCookieHeader(req.headers.cookie), resumeToken);
   const connectionVersion = rooms.connectionVersion(id);
   log('connect', { peer: id.slice(0, 8), clients: wss.clients.size });
   let messages = 0;

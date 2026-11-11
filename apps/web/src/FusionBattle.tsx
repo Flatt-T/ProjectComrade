@@ -169,6 +169,9 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     });
     const humans = Array.from({ length: setup.humans }, (_, i) => i);
     const session: Session = setup.humans > 1 ? new LockstepSession(game, slot, humans, conn.transport(), s.speed) : new LocalSession(game, slot, s.speed);
+    // A reconnected commander must not order the turns the relay already held open.
+    session.heldUntil = conn.heldUntil;
+    conn.heldUntil = undefined;
     const renderer = new FusionRenderer(canvas.current!, game, slot);
     rig.current = { game, session, renderer };
     const leaveHelp = enterBattleHelp();
@@ -221,6 +224,8 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     // ticker, so a hidden tab keeps playing (and keeps sending its lockstep turns).
     const advance = (now: number) => {
       const dt = Math.min(2000, now - last); last = now;
+      // A welcome carrying heldUntil can land mid-match, long after the session was built.
+      if (conn.heldUntil !== undefined) { session.heldUntil = conn.heldUntil; conn.heldUntil = undefined; }
       return session.update(dt);
     };
     // Browsers stop requestAnimationFrame in background tabs, which would freeze this
@@ -333,7 +338,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
         setUi({
           tick: game.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse, radar, options, queues, soundLocked: !sfx.unlocked, help: { available: helpAvailable(), open: helpOpen() },
           selection: first ? { name: (firstDef?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, deploy: sel.some(e => e.kind === 'unit' && !!(pack.units[e.type].deploysTo || pack.units[e.type].deployWeapon || pack.units[e.type].lure || e.passengers.length)), unload: sel.some(e => e.passengers.length > 0), own: first.owner === slot, structure: first.kind === 'structure' } : null,
-          status: conn.drops !== drops && status !== 'running' ? 'Connection to the match was lost — it cannot be rejoined'
+          status: conn.drops !== drops && status !== 'running' ? 'Connection lost — the match is holding your seat…'
             : status === 'waiting' ? `Waiting for ${(session.waitingFor?.() ?? []).map(s => game.players[s]?.name).filter(Boolean).join(', ') || 'other commanders'}…`
             : status === 'desync' ? 'Desynchronised — the match cannot continue' : '',
           over: game.over, won: game.over && game.winnerTeam === me.team, defeated: me.defeated, stats: { ...me.stats }, supers, costs,

@@ -6,6 +6,7 @@ export * from './map';
 export * from './game';
 export * from './session';
 export * from './mashup';
+export * from './persistent';
 import { RulePack } from './rules';
 import { CLASSIC_PACKS, dunePack, ra1Pack, ra2Pack, tdPack } from './packs';
 import { FUSIONS, conquerPack, holdoutPack, irregularPack, leviathanPack } from './fusions';

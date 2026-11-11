@@ -23,6 +23,9 @@ export class Rng {
   int(max: number): number { return max <= 0 ? 0 : this.next() % max; }
   chance(percent: number): boolean { return this.int(100) < percent; }
   get seed(): number { return this.state; }
+  /** Current xorshift state — snapshot/restore must carry this, not just the seed. */
+  getState(): number { return this.state; }
+  setState(state: number): void { this.state = state | 0; }
 }
 
 /** Integer square root (floor). Avoids Math.sqrt so results never depend on FPU rounding. */
