@@ -344,4 +344,18 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     );
     `,
   },
+  {
+    version: 2,
+    name: 'journal application receipts',
+    sql: `
+    -- Journal-first application tracking (PW06): a committed input is marked applied
+    -- exactly once, with its authoritative result, in the same transaction as any
+    -- PostgreSQL-side effects. Replays see applied_at and change nothing.
+    alter table region_event
+      add column applied_at timestamptz,
+      add column application_result jsonb;
+    create index region_event_unapplied_idx on region_event (region_id, event_seq)
+      where applied_at is null;
+    `,
+  },
 ];

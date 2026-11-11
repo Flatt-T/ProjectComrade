@@ -74,3 +74,35 @@ acceptance detail; this file is the resume point. Read it first in every session
   `pnpm test:unit` 339 pass, `pnpm typecheck` 0, `pnpm lint` 0.
 - Open: journal/event bus ordering across workers (PW06), scheduler/activation
   (PW07), engine snapshot/replay integration (PW21).
+
+### PW06 — THU-2230 — ordered authoritative mutations and transactional event bus — 2026-11-11
+
+- State: implemented on branch `thu-2230-pw06-event-bus`.
+- Deliverables: `apps/service/src/mmo/commands.ts` (contract-validated command
+  intake: intent + journal + outbox in one fenced transaction; stale-epoch and
+  duplicate/conflicting commandId rejection; `applyCommandEffects` writes the
+  economy_operation cause, asset ledger, applied receipt, intent completion and
+  outbox notification atomically and exactly once), `apps/service/src/mmo/bus.ts`
+  (leased transactional-outbox dispatcher: per-region head-of-line ordering via a
+  NOT EXISTS claim guard, publish→ack→reclaim loop, bounded exponential backoff,
+  parking after max attempts, at-least-once redelivery — no exactly-once claim),
+  migration v2 (region_event applied markers + operation_id), `assertRegionFence`
+  non-consuming fence check for outcome recording, `tests/integration/mmo-bus.test.ts`
+  (9 tests), `fileParallelism: false` in vitest config (integration files share one
+  real database).
+- Proven against disposable `postgres:16-alpine` (docker, localhost:55432):
+  `vitest run tests/integration` — 23/23 pass (14 store + 9 bus) covering atomic
+  intent+journal+outbox commit, replay dedupe with no second journal entry,
+  COMMAND_CONFLICT on payload reuse and protocol rejection, 3-way concurrent
+  identical submission → exactly 1 journal event, apply-once semantics with
+  Postgres side-effects running exactly once, OPERATION_CONFLICT on replayed
+  events with a different operation, expired-lease FENCE_LOST on submit, ordered
+  outbox delivery with single acknowledgement, crash-between-publish-and-ack
+  redelivery deduped by event id, failed-publish backoff with head-of-line
+  blocking of later same-region events, and one-winner concurrent trade-offer
+  resolution. `pnpm test:unit` 339 pass, `pnpm typecheck` 0, `pnpm lint` 0,
+  `pnpm --filter @comrade/service build` 0.
+- Open: the runner that consumes `mmo.command` journal entries and calls
+  `applyCommandEffects` at tick boundaries lands with the region worker (PW07/PW21);
+  client-facing commandResult emission over WS is part of PW09+; multi-dispatcher
+  live failover is exercised only via lease expiry in tests.
