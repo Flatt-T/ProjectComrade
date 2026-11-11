@@ -24,3 +24,27 @@ acceptance detail; this file is the resume point. Read it first in every session
 - Open: nothing blocking. Next unblocked issue per dependency order: PW02 (THU-2226,
   Proxmox beta container) and PW03 (THU-2227, beta Postgres) are infrastructure; PW04
   (THU-2228, versioned contracts) is unblocked code work and can proceed locally first.
+- Update: PR #13 merged to `main` (merge commit `39cbf2d`) after all required checks
+  passed; `dependency-check` remains FAILURE (continue-on-error job, dev-only
+  `minimatch` advisory GHSA-g3hv-75wg-m249) — recorded, not a code defect.
+
+### PW04 — THU-2228 — versioned persistent-world contracts — 2026-11-11
+
+- State: implemented on branch `thu-2228-pw04-mmo-contracts`.
+- Deliverables: `packages/contracts/src/mmo.ts` (exported via `src/index.ts`),
+  `tests/unit/mmo-contracts.test.ts` (19 tests).
+- Proven: `vitest run tests/unit` — 20 files / 339 tests pass;
+  `pnpm typecheck` exit 0; `pnpm lint` exit 0. Contract coverage: protocol-version
+  rejection, safe-integer decimal-string counters beyond 2^53, malformed/negative/
+  oversized payload rejection, intent/result separation (clients cannot assert
+  credits, ownership, HP, outcomes), distinct SELL_REFUND/PACK/BARTER/DEPLOY/
+  SELECT_PROTECTION operations, NEWCOMER/OFFLINE_EARNED/RECOVERY protection state
+  machine under controlled clocks (online-time-only newcomer immunity + 24h lapse,
+  manual offline-shield arming that cannot start mid-battle and preserves unused
+  time across login, recovery ending only on milestone/choice/attack), recovery
+  trigger whitelist (sell-all/defeat/grant only — pack and trade cannot trigger),
+  versioned capabilities + decision state with all COMRADE 18 §6 items `open` and
+  `MMO_CAPABILITIES_NONE`/`MILESTONE1` presets.
+- Open: contracts only — no service, journal or engine wiring yet (PW05+).
+  Classic `ClientMessage`/`PlayerOrder` untouched; `comrade.classic.v1` semantics
+  unchanged.

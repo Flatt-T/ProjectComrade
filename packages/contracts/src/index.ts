@@ -337,3 +337,5 @@ export function parseContentManifest(value: unknown): ContentManifest {
 // Paid platform vocabulary: tiers, quotas, billing payloads, accounts, history and voting.
 export * from './billing.js';
 export * from './account.js';
+// Persistent-world (MMO beta) protocol, rules profile, operations and protection states.
+export * from './mmo.js';
