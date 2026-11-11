@@ -3,8 +3,8 @@
 // sounds the classics never had (Prism, Tesla Trooper, sonic, chrono, psychic, sandworms,
 // thunder...) are synthesised here. Audio is presentation only: it reads Game.effects and
 // never touches the simulation, so it is safe in lockstep.
-import type { Effect, Entity, Game } from './game';
-import { SPEECH_LINES, SPEECH_VOICES, Speaker } from './speech';
+import type { Effect, Entity, Game } from './game.js';
+import { SPEECH_LINES, SPEECH_VOICES, Speaker } from './speech.js';
 
 // ------------------------------------------------------------------ Westwood AUD decoding
 

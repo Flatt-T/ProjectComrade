@@ -1,5 +1,5 @@
-import { MapData, passable } from './map';
-import { MoveClass, RulePack } from './rules';
+import { MapData, passable } from './map.js';
+import { MoveClass, RulePack } from './rules.js';
 
 const DIRS = [[0, -1, 10], [1, 0, 10], [0, 1, 10], [-1, 0, 10], [1, -1, 14], [1, 1, 14], [-1, 1, 14], [-1, -1, 14]] as const;
 

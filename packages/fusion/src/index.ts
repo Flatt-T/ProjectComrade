@@ -1,15 +1,15 @@
 // Comrade Fusion Engine — one deterministic, data-driven RTS engine for the
 // Dune-style and RA2-style games and for future fusion games built from both.
-export * from './core';
-export * from './rules';
-export * from './map';
-export * from './game';
-export * from './session';
-export * from './mashup';
-export * from './persistent';
-import { RulePack } from './rules';
-import { CLASSIC_PACKS, dunePack, ra1Pack, ra2Pack, tdPack } from './packs';
-import { FUSIONS, conquerPack, holdoutPack, irregularPack, leviathanPack } from './fusions';
+export * from './core.js';
+export * from './rules.js';
+export * from './map.js';
+export * from './game.js';
+export * from './session.js';
+export * from './mashup.js';
+export * from './persistent.js';
+import { RulePack } from './rules.js';
+import { CLASSIC_PACKS, dunePack, ra1Pack, ra2Pack, tdPack } from './packs/index.js';
+import { FUSIONS, conquerPack, holdoutPack, irregularPack, leviathanPack } from './fusions/index.js';
 
 export { dunePack, ra1Pack, ra2Pack, tdPack, leviathanPack, conquerPack, irregularPack, holdoutPack, FUSIONS, CLASSIC_PACKS };
 

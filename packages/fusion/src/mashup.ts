@@ -19,9 +19,9 @@
 import {
   FactionDef, MapPreset, Mechanics, QueueKind, RulePack, StructureDef, SuperweaponDef, UnitDef, UnitKind,
   WarheadDef, WeaponDef, factionCanUse,
-} from './rules';
-import { CLASSIC_PACKS } from './packs';
-import { FUSIONS } from './fusions';
+} from './rules.js';
+import { CLASSIC_PACKS } from './packs/index.js';
+import { FUSIONS } from './fusions/index.js';
 
 /**
  * The packs a mashup may draw on, in catalogue order: every classic and every fusion the

@@ -5,8 +5,8 @@
 // (ADR 007); this pack gives the same war a lockstep multiplayer home now, and makes every
 // Red Alert unit, structure and weapon available to fusion games as plain data.
 // Values approximate the classic from public knowledge and are tuned over time.
-import { MapFeature, MapField, MapPreset, RulePack } from '../rules';
-import { mirror, quad } from './mapkit';
+import { MapFeature, MapField, MapPreset, RulePack } from '../rules.js';
+import { mirror, quad } from './mapkit.js';
 
 const W = 64, H = 64;
 const mirror2 = <T extends MapFeature | MapField>(items: T[]) => mirror(items, W, H);

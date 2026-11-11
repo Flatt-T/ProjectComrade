@@ -1,7 +1,7 @@
 // RA2-style rule pack: an independent replication of Red Alert 2 skirmish gameplay.
 // Values approximate the classic game from public knowledge and are labelled for tuning.
-import { MapFeature, MapField, MapPreset, RulePack } from '../rules';
-import { mirror, quad } from './mapkit';
+import { MapFeature, MapField, MapPreset, RulePack } from '../rules.js';
+import { mirror, quad } from './mapkit.js';
 
 const W = 64, H = 64;
 const mirror2 = <T extends MapFeature | MapField>(items: T[]) => mirror(items, W, H);

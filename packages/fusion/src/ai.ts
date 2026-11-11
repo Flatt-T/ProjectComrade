@@ -1,9 +1,9 @@
 // Skirmish AI. It runs inside the deterministic simulation and acts only through the
 // same commands a human sends, so it is fair, replayable and identical on every client.
-import type { Entity, Game, Player } from './game';
-import { LEPTONS, toCell } from './core';
-import { buildableTerrain, terrainPassable } from './map';
-import { factionCanUse, prereqsMet } from './rules';
+import type { Entity, Game, Player } from './game.js';
+import { LEPTONS, toCell } from './core.js';
+import { buildableTerrain, terrainPassable } from './map.js';
+import { factionCanUse, prereqsMet } from './rules.js';
 
 export type AILevel = 'easy' | 'normal' | 'hard';
 

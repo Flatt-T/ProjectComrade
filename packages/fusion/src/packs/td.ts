@@ -6,8 +6,8 @@
 // Fusion map features so a commander fights the identical ground on either engine.
 // Unit and structure values approximate the classic from public knowledge and are tuned
 // over time. Every part of this pack is available to fusion games as plain data.
-import { MapFeature, MapField, MapPreset, RulePack } from '../rules';
-import { mirror, quad } from './mapkit';
+import { MapFeature, MapField, MapPreset, RulePack } from '../rules.js';
+import { mirror, quad } from './mapkit.js';
 
 /** The authored scenarios are 60x60 inside a 64-cell grid at an offset of 2. */
 const S = 60;
