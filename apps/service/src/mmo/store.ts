@@ -17,7 +17,7 @@ const uuid = () => randomUUID();
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 
 /** Key-sorted JSON so canonical payloads compare equal regardless of key order. */
-function canonicalize(value: unknown): string {
+export function canonicalize(value: unknown): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalize).join(',')}]`;
   const entries = Object.entries(value as Record<string, unknown>)
@@ -166,6 +166,24 @@ export async function fenceRegion(tx: PoolClient, args: {
     throw new MmoStoreError('FENCE_LOST', 'region authority lost or stale tick');
   }
   return rows[0].last_committed_seq;
+}
+
+/**
+ * Verify — without consuming a journal sequence — that the caller still holds region
+ * authority. Used by apply-side writes (operation receipts, inventory effects) which
+ * must not advance last_committed_seq.
+ */
+export async function assertRegionFence(tx: PoolClient, args: {
+  regionId: string; workerId: string; epoch: string | bigint;
+}): Promise<void> {
+  const { rows } = await tx.query(
+    `select region_id from region
+      where region_id = $1 and owner_worker_id = $2 and authority_epoch = $3
+        and lease_expires_at > clock_timestamp() for update`,
+    [args.regionId, args.workerId, args.epoch.toString()]);
+  if (rows.length !== 1) {
+    throw new MmoStoreError('FENCE_LOST', 'region authority lost');
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -580,10 +598,34 @@ export async function finishJob(jobId: string, state: 'done' | 'cancelled'): Pro
 }
 
 export async function listRegionEvents(regionId: string, afterSeq = 0, limit = 100) {
-  return mmoQuery<{ event_seq: string; event_kind: string; payload: unknown; operation_id: string | null }>(
-    `select event_seq, event_kind, payload, operation_id from region_event
+  return mmoQuery<{ event_seq: string; event_kind: string; payload: unknown; operation_id: string | null; applied_at: Date | null }>(
+    `select event_seq, event_kind, payload, operation_id, applied_at from region_event
       where region_id = $1 and event_seq > $2 order by event_seq limit $3`,
     [regionId, afterSeq, limit]);
+}
+
+/** Fetch one journal event for update inside a transaction. */
+export async function getRegionEventForUpdate(tx: PoolClient, regionId: string, eventSeq: string | bigint) {
+  const { rows } = await tx.query<{
+    event_seq: string; event_kind: string; payload: unknown; operation_id: string | null;
+    applied_at: Date | null; application_result: unknown; authority_epoch: string; simulation_tick: string;
+  }>(
+    `select event_seq, event_kind, payload, operation_id, applied_at, application_result, authority_epoch, simulation_tick
+       from region_event where region_id = $1 and event_seq = $2 for update`,
+    [regionId, eventSeq.toString()]);
+  return rows[0];
+}
+
+/** Mark a journal event applied exactly once; returns false if already applied. */
+export async function markRegionEventApplied(tx: PoolClient, args: {
+  regionId: string; eventSeq: string | bigint; result?: unknown; operationId?: string;
+}): Promise<boolean> {
+  const { rowCount } = await tx.query(
+    `update region_event set applied_at = clock_timestamp(), application_result = $3,
+       operation_id = coalesce(operation_id, $4)
+      where region_id = $1 and event_seq = $2 and applied_at is null`,
+    [args.regionId, args.eventSeq.toString(), args.result === undefined ? null : JSON.stringify(args.result), args.operationId ?? null]);
+  return rowCount === 1;
 }
 
 // Re-export for tests that drive the whole stack through one entry point.
