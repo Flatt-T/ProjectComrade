@@ -4,9 +4,9 @@
 // archipelago. Each home island holds too little ore to win on; the real wealth is a vast
 // deposit on the central island. Dune's sandworms hunt the open sea and the sands around every
 // resource field, so every harvester run and every naval push is a gamble.
-import { MapFeature, MapField, MapPreset, RulePack } from '../rules';
-import { quad } from '../packs/mapkit';
-import { ra2Pack } from '../packs/ra2';
+import { MapFeature, MapField, MapPreset, RulePack } from '../rules.js';
+import { quad } from '../packs/mapkit.js';
+import { ra2Pack } from '../packs/ra2.js';
 
 const S = 128;
 

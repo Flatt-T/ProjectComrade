@@ -1,8 +1,8 @@
 // Sessions drive a Game in real time. LocalSession steps it for skirmish against the AI;
 // LockstepSession synchronises human players over a relay: every client runs the same
 // deterministic simulation and only commands travel over the network.
-import { TICKS_PER_SECOND } from './core';
-import type { Command, Game } from './game';
+import { TICKS_PER_SECOND } from './core.js';
+import type { Command, Game } from './game.js';
 
 export type SessionStatus = 'running' | 'waiting' | 'desync';
 

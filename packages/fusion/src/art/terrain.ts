@@ -2,9 +2,9 @@
 // smooth, noise-perturbed terrain fields (so edges erode organically), is textured
 // procedurally (sand ripples, craggy rock, grass, water), and is lit by a height field
 // with cast shadows, giving raised rock plateaus and cliffs their relief.
-import type { MapData } from '../map';
-import type { RulePack } from '../rules';
-import { RGB, View } from './forge';
+import type { MapData } from '../map.js';
+import type { RulePack } from '../rules.js';
+import { RGB, View } from './forge.js';
 
 type Kind = 'sand' | 'dunes' | 'rock' | 'rough' | 'cliff' | 'grass' | 'road' | 'beach' | 'woods' | 'water' | 'snow';
 interface Material { base: RGB; alt: RGB; height: number; kind: Kind; edge: number }

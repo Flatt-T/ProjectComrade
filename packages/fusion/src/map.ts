@@ -1,4 +1,4 @@
-import { MapPreset, MoveClass, RulePack } from './rules';
+import { MapPreset, MoveClass, RulePack } from './rules.js';
 
 export interface MapData {
   w: number;

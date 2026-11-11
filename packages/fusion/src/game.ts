@@ -1,8 +1,8 @@
-import { Hasher, LEPTONS, Rng, cellCenter, dist, facingDelta, facingTo, toCell } from './core';
-import { MapData, buildableTerrain, generateMap, inBounds, isWater, passable, resourceIndex, terrainPassable } from './map';
-import { findPath, nearestCell } from './path';
-import { Doctrine, FactionDef, InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules';
-import { runAI, AIState, AILevel, AI_LEVELS, createAIState } from './ai';
+import { Hasher, LEPTONS, Rng, cellCenter, dist, facingDelta, facingTo, toCell } from './core.js';
+import { MapData, buildableTerrain, generateMap, inBounds, isWater, passable, resourceIndex, terrainPassable } from './map.js';
+import { findPath, nearestCell } from './path.js';
+import { Doctrine, FactionDef, InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules.js';
+import { runAI, AIState, AILevel, AI_LEVELS, createAIState } from './ai.js';
 
 export type Command =
   | { t: 'move'; ids: number[]; x: number; y: number }

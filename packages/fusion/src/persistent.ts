@@ -10,11 +10,11 @@
 // Region hooks are runtime functions and are NOT serialized; the caller reattaches
 // `game.hooks` after restore. The map's static layers are regenerated from
 // pack + preset + seed; only the mutable layers (occupied, res) are stored.
-import { Rng } from './core';
-import { Game, type Command, type Entity, type Player } from './game';
-import type { AIState } from './ai';
-import { generateMap, type MapData } from './map';
-import type { Doctrine, MapPreset, RulePack } from './rules';
+import { Rng } from './core.js';
+import { Game, type Command, type Entity, type Player } from './game.js';
+import type { AIState } from './ai.js';
+import { generateMap, type MapData } from './map.js';
+import type { Doctrine, MapPreset, RulePack } from './rules.js';
 
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 

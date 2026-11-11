@@ -10,6 +10,9 @@ import { configSummary, platformEnabled } from './config.js';
 import { databaseConfigured, migrate } from './db.js';
 import { handleApi } from './http.js';
 import { publicFileCandidates } from './static.js';
+import { mmoDatabaseConfigured, mmoMigrate } from './mmo/db.js';
+import { RegionService } from './mmo/regions.js';
+import { MmoGateway } from './mmo/gateway.js';
 // Importing the API module registers every route on the table in http.ts.
 import './api.js';
 
@@ -65,6 +68,15 @@ const server = createServer(async (req, res) => {
 const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 65536 });
 const rooms = new RoomCoordinator();
 
+// Persistent world (PW08): the /mmo endpoint exists only when MMO_DATABASE_URL is
+// configured. Without it there is no gateway, no runner and no schema — classic play
+// is completely untouched.
+const mmoGateway = mmoDatabaseConfigured() ? new MmoGateway(new RegionService({ log })) : undefined;
+server.on('upgrade', (req, socket, head) => {
+  const pathname = new URL(req.url || '/', 'http://localhost').pathname;
+  if (pathname === '/mmo' && mmoGateway) mmoGateway.handleUpgrade(req, socket, head);
+});
+
 wss.on('connection', (ws, req) => {
   // Receiver errors (oversized frames, invalid UTF-8) belong to this peer.
   ws.on('error', () => ws.terminate());
@@ -109,6 +121,16 @@ async function startup() {
       // Carrying on with a half-migrated schema would corrupt entitlements; stop instead.
       process.exitCode = 1;
       return;
+    }
+  }
+  if (mmoGateway) {
+    try {
+      await mmoMigrate();
+      mmoGateway.start();
+      log('mmo-start', { configured: true });
+    } catch (error) {
+      // A broken MMO schema must not take classic play down with it.
+      log('mmo-migrate-failed', { message: String(error).slice(0, 300) });
     }
   }
   server.listen(PORT, () => {

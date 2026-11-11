@@ -2,15 +2,15 @@
 // top-down 3/4 view (Dune) and 2:1 isometric (RA2). Terrain is painted per pixel with
 // relief lighting; buildings and vehicles are 3D-forged sprites (see ./art). All art is
 // original and procedural; sprites are chosen by `shape` key so they can be replaced.
-import { LEPTONS } from './core';
-import { WARP_TICKS } from './game';
-import type { Effect, Entity, Game, Projectile } from './game';
-import { FxLayer, bolt, missile } from './art/fx';
-import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge';
-import { infantryCostume } from './art/costume';
-import { ArtStyle, FLYING, ROTATING_DEFENCES, WALKER_GAIT, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models';
-import { ClassicArt, artPackFor, drawTileFrame, paintClassicTerrain } from './art/classic';
-import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain';
+import { LEPTONS } from './core.js';
+import { WARP_TICKS } from './game.js';
+import type { Effect, Entity, Game, Projectile } from './game.js';
+import { FxLayer, bolt, missile } from './art/fx.js';
+import { ISO_VIEW, ORTHO_VIEW, RGB, Sprite, View, bake, hexToRgb } from './art/forge.js';
+import { infantryCostume } from './art/costume.js';
+import { ArtStyle, FLYING, ROTATING_DEFENCES, WALKER_GAIT, buildingMesh, crateMesh, crystalMesh, defenseTurretMesh, hasTurret, hullMesh, styleFor, treeMesh, turretMesh, wallMesh } from './art/models.js';
+import { ClassicArt, artPackFor, drawTileFrame, paintClassicTerrain } from './art/classic.js';
+import { concreteTile, materials, paintTerrain, spiceSprite } from './art/terrain.js';
 
 export interface Camera { x: number; y: number; zoom: number }
 export interface Ghost { item: string; x: number; y: number }
@@ -1446,7 +1446,7 @@ export function shade(hex: string, amount: number): string {
   return `rgb(${f((n >> 16) & 255)},${f((n >> 8) & 255)},${f(n & 255)})`;
 }
 
-export { infantryCostume } from './art/costume';
+export { infantryCostume } from './art/costume.js';
 
 const iconCache = new Map<string, Sprite>();
 

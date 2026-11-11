@@ -480,6 +480,35 @@ export type MmoWorldAction =
 
 export type MmoAction = MmoSimAction | MmoWorldAction;
 
+// ---------------------------------------------------------------------------
+// Durable entity identity bridge (PW08)
+// ---------------------------------------------------------------------------
+//
+// Sim commands address live engine entity ids (small integers); the wire contract
+// requires uuids. The bridge embeds 64 bits of the region id plus the full sim id
+// into a uuid, so the durable id is stable for the entity's whole life (sim ids are
+// never reused), contract-valid, and invertible without a lookup table. Explicit
+// bound-asset ids (PW26) take precedence in the region runner; this bridge covers
+// every entity the sim knows about today.
+
+/** Durable uuid for a live sim entity inside one region. */
+export function mmoEntityId(regionId: MmoId, simId: number): MmoId {
+  const r = regionId.replace(/-/g, '').slice(0, 16).padEnd(16, '0');
+  const s = Math.max(0, Math.floor(simId)).toString(16).padStart(16, '0').slice(-16);
+  const h = (r + s).slice(0, 32);
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
+}
+
+/** Recover the sim entity id from a bridged durable id, or null when foreign/malformed. */
+export function mmoSimEntityId(regionId: MmoId, durableId: MmoId): number | null {
+  if (!isUuid(durableId)) return null;
+  const h = durableId.replace(/-/g, '').toLowerCase();
+  const rh = regionId.replace(/-/g, '').slice(0, 16).padEnd(16, '0');
+  if (h.slice(0, 16) !== rh) return null;
+  const sim = Number.parseInt(h.slice(16), 16);
+  return Number.isSafeInteger(sim) && sim >= 0 ? sim : null;
+}
+
 /** What one side puts into a barter. Free pricing is the rule: no valuation is imposed. */
 export interface BarterItem {
   kind: 'unit' | 'credits' | 'shieldSeconds' | 'powerUp' | 'packedBuilding';
@@ -577,6 +606,19 @@ export interface MmoWelcomeMessage {
   config: MmoWorldConfig;
   /** Regions this player currently has authority-visible presence in. */
   regions: MmoId[];
+  /** The player's slot in each subscribed region's sim (parallel to `regions`). */
+  slots?: (number | null)[];
+}
+
+/** Ephemeral authoritative observation pushed to subscribers (not journaled): the
+ *  client compares its own checksum at the same tick and resyncs on mismatch. */
+export interface MmoObservationMessage {
+  protocol: typeof MMO_PROTOCOL;
+  type: 'observation';
+  regionId: MmoId;
+  epoch: Counter;
+  tick: Counter;
+  checksum: number;
 }
 
 export type MmoServerMessage =
@@ -584,6 +626,7 @@ export type MmoServerMessage =
   | MmoSnapshotHeader
   | MmoEventMessage
   | MmoCommandResult
+  | MmoObservationMessage
   | { protocol: typeof MMO_PROTOCOL; type: 'error'; code: string; message: string };
 
 // ---------------------------------------------------------------------------

@@ -10,8 +10,8 @@
 // numbers against expensive quality, concealment against standoff, drones split by tier —
 // with the jokes aimed squarely at self-importance, paperwork and invoicing. The comedy is
 // in the committee, never in a casualty.
-import { MapFeature, MapField, MapPreset, RulePack } from '../rules';
-import { mirror, quad } from '../packs/mapkit';
+import { MapFeature, MapField, MapPreset, RulePack } from '../rules.js';
+import { mirror, quad } from '../packs/mapkit.js';
 
 const LOCALS = ['preppers', 'hoa', 'pirates'];
 const m2 = <T extends MapFeature | MapField>(items: T[], w: number, h: number) => mirror(items, w, h);

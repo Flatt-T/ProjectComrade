@@ -2,7 +2,7 @@
 // Dune 2000's rounded cream-metal structures with house accents, Red Alert 2's ribbed
 // silver Allied and brutal concrete Soviet buildings, light hulls with player markings.
 // All geometry is original; only the visual language follows the references.
-import { Mesh, RGB, Vec3, tint } from './forge';
+import { Mesh, RGB, Vec3, tint } from './forge.js';
 
 export type ArtStyle = 'dune' | 'allied' | 'soviet' | 'gdi' | 'nod' | 'rebel' | 'republic' | 'empire' | 'cis';
 

@@ -4,8 +4,8 @@
 // Confederacy). The building ladder is Red Alert's: Construction Yard, power, tibanna
 // refinery, barracks, vehicle works, comms, hangar, shipyard, tech lab, superweapons.
 // Geometry is original; names and silhouettes follow public Star Wars visual language.
-import { MapFeature, MapField, MapPreset, RulePack } from '../rules';
-import { mirror, quad } from '../packs/mapkit';
+import { MapFeature, MapField, MapPreset, RulePack } from '../rules.js';
+import { mirror, quad } from '../packs/mapkit.js';
 
 const LIGHT = ['rebels', 'republic'];
 const DARK = ['empire', 'cis'];

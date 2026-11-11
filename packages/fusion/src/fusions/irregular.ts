@@ -17,8 +17,8 @@
 //  * Protected sites conceal. An Aid Station shrouds the ground around it rather than
 //    shooting: a force that sites itself among protected structures is harder to see and
 //    harder to answer. That is the tactical fact, given as a mechanic and nothing more.
-import { MapFeature, MapField, MapPreset, RulePack } from '../rules';
-import { mirror, quad } from '../packs/mapkit';
+import { MapFeature, MapField, MapPreset, RulePack } from '../rules.js';
+import { mirror, quad } from '../packs/mapkit.js';
 
 const IRREGULAR = ['cadres', 'coastal', 'vanguard'];
 const m2 = <T extends MapFeature | MapField>(items: T[], w: number, h: number) => mirror(items, w, h);
