@@ -332,6 +332,25 @@ export class RegionRunner {
       this.opts.log('region-created', { regionId: this.opts.regionId, tick: 0, epoch: this.epoch });
     }
 
+    // PW20: snapshots are only written at hibernate/stop, so the durable journal
+    // tail can sit far ahead of the restored sim tick (a runner that never
+    // checkpointed journaled thousands of ticks the snapshot never saw). The
+    // monotone-tick fence would then reject every future journal write — the
+    // wake accrual included — bricking the region. Reconcile the fence down to
+    // the sim tick once, under the fresh lease: journal order (event_seq) is
+    // the recovery authority, not the tick column.
+    const tickRow = await mmoOne<{ last_committed_tick: string }>(
+      'select last_committed_tick from region where region_id = $1', [this.opts.regionId]);
+    const committedTick = tickRow ? BigInt(tickRow.last_committed_tick) : 0n;
+    if (committedTick > BigInt(this.game.tick)) {
+      await mmoQuery(
+        'update region set last_committed_tick = $2 where region_id = $1 and last_committed_tick > $2',
+        [this.opts.regionId, String(this.game.tick)]);
+      this.opts.log('region-tick-reconcile', {
+        regionId: this.opts.regionId, from: committedTick.toString(), to: this.game.tick,
+      });
+    }
+
     // PW24: capturable sites are placed deterministically from (pack, map, seed)
     // — identical on every runner, before any tick or accrual runs.
     this.ensureRegionSites();
