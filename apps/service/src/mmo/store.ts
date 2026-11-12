@@ -1027,6 +1027,7 @@ export async function playerDisconnected(playerId: string, nowMs: number): Promi
        online_count = greatest(0, online_count - 1),
        online_since_ms = case when online_count <= 1 then null else online_since_ms end,
        offline_since_ms = case when online_count <= 1 then $2 else offline_since_ms end,
+       last_offline_since_ms = case when online_count <= 1 then $2 else last_offline_since_ms end,
        last_seen_ms = $2
       where player_id = $1`, [playerId, nowMs]);
 }

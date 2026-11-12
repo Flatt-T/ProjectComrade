@@ -251,12 +251,14 @@ describe('world configuration and decisions', () => {
     const bad = (patch: Record<string, unknown>) =>
       parseMmoWorldConfig({ ...base, profile: { ...PERSISTENT_RULES_V1, ...patch } });
     // Every new tunable is required — no silent defaults inside a world config.
-    for (const key of ['structureHpMultiplier', 'powerScoreWeights', 'spawnRegionPowerBandRatio', 'spawnCohortBaselineScore', 'baseLevelMinutes', 'armySupply']) {
+    for (const key of ['structureHpMultiplier', 'powerScoreWeights', 'spawnRegionPowerBandRatio', 'spawnCohortBaselineScore', 'baseLevelMinutes', 'armySupply', 'notifications']) {
       const missing = { ...PERSISTENT_RULES_V1 } as Record<string, unknown>;
       delete missing[key];
       expect(() => parseMmoWorldConfig({ ...base, profile: missing })).toThrow(new RegExp(key));
     }
     expect(() => bad({ structureHpMultiplier: 0 })).toThrow();
+    expect(() => bad({ notifications: { delayMs: -1, windowMs: 1000, superweaponNearbyCells: 10 } })).toThrow();
+    expect(() => bad({ notifications: { delayMs: 0, windowMs: 0, superweaponNearbyCells: 10 } })).toThrow();
     expect(() => bad({ structureHpMultiplier: 101 })).toThrow();
     expect(() => bad({ powerScoreWeights: { structure: -1, unit: 1, tech: 1 } })).toThrow();
     expect(() => bad({ spawnRegionPowerBandRatio: 0.5 })).toThrow();

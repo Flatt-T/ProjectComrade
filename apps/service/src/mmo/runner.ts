@@ -35,6 +35,7 @@ import {
 } from './store.js';
 import { journalTail } from './commands.js';
 import { mmoQuery } from './db.js';
+import { raiseNotification } from './notify.js';
 
 const TICK_MS = 1000 / 15;
 const PACK_LIST = Object.values(PACKS) as RulePack[];
@@ -136,6 +137,9 @@ export class RegionRunner {
   private startedAtMs = 0;
   private bindings = new Map<string, number>();
   private slotByPlayer = new Map<string, number>();
+  /** Strike objects already reported by notifyEval; rebuilt each pass so resolved
+   *  strikes drop out and fresh launches diff cleanly. */
+  private notifyStrikesSeen = new Set<object>();
   private running = false;
   private busy = false;
   private failed = false;
@@ -319,6 +323,7 @@ export class RegionRunner {
     await this.syncCompoundsNow();
     await this.ensureProtectionEval();
     await this.ensureRecoveryEval();
+    await this.ensureNotifyEval();
     await setRegionLifecycle(this.opts.regionId, 'active');
 
     this.running = true;
@@ -895,6 +900,7 @@ export class RegionRunner {
     }
     if (job.kind === 'protection_eval') return this.protectionEval(tx, meta?.eventSeq ?? '0');
     if (job.kind === 'recovery_eval') return this.recoveryEval(tx, meta?.eventSeq ?? '0');
+    if (job.kind === 'notify_eval') return this.notifyEval(tx);
     return { ignored: `unknown job kind ${job.kind}` };
   }
 
@@ -1483,6 +1489,152 @@ export class RegionRunner {
       dedupeKey: `rec_eval:${this.opts.regionId}:poke:${Math.floor(now / 5000)}`,
       payload: { reason: 'boot' },
     }).catch(() => undefined);
+  }
+
+  /** Boot-time poke for the notification producers (PW25). */
+  private async ensureNotifyEval(): Promise<void> {
+    if (!this.slotByPlayer.size) return;
+    const now = this.opts.now();
+    await scheduleJob({
+      regionId: this.opts.regionId, kind: 'notify_eval', dueAtMs: now,
+      dedupeKey: `notify_eval:${this.opts.regionId}:poke:${Math.floor(now / 5000)}`,
+      payload: { reason: 'boot' },
+    }).catch(() => undefined);
+  }
+
+  /**
+   * PW25 notification producers (COMRADE 18 §3.10). Runs inside the fenced job
+   * transaction so a raised notification commits atomically with the eval;
+   * dedupe_key buckets by the profile's rate-limit window so repeated causes
+   * collapse to one row. Delivery itself is the gateway dispatcher's job —
+   * rows sit with deliver_after = now + notifications.delayMs until then.
+   *
+   * Producers: compound under attack (sim battleAt within battleWindowMs),
+   * shield ending inside the warning window, storage at cap, and superweapon
+   * strikes that appeared since the last pass. Trade-offer and ally-call kinds
+   * exist in the contract; their producers land with PW13/alliance chat.
+   */
+  private async notifyEval(tx: PoolClient): Promise<unknown> {
+    const now = this.opts.now();
+    const rules = this.opts.rules;
+    const g = this.game;
+    const stats = { raised: 0 };
+    const deliverAfter = new Date(now + rules.notifications.delayMs);
+    const bucket = Math.floor(now / Math.max(1, rules.notifications.windowMs));
+    const raise = async (
+      playerId: string, kind: Parameters<typeof raiseNotification>[1]['kind'],
+      dedupeKey: string, payload: Record<string, unknown> = {},
+    ) => {
+      const ok = await raiseNotification(tx, {
+        playerId, kind, dedupeKey, payload,
+        regionId: this.opts.regionId, deliverAfter,
+      });
+      if (ok) stats.raised++;
+    };
+    const battleTicks = Math.max(1, Math.ceil(rules.battleWindowMs / this.opts.tickMs));
+
+    if (g) {
+      // Compound under attack: durable compound roster joined to the sim's
+      // battle timestamp. Survives shieldless compounds — battle is engine state.
+      const { rows: comps } = await tx.query<{ compound_id: string; player_id: string }>(
+        `select compound_id, player_id from compound
+          where region_id = $1 and state = 'active'`, [this.opts.regionId]);
+      for (const c of comps) {
+        const simId = this.simIdFor(c.compound_id);
+        const e = simId !== null ? g.entities.get(simId) : undefined;
+        if (!e || e.hp <= 0 || e.battleAt < 0 || g.tick - e.battleAt > battleTicks) continue;
+        await raise(c.player_id, 'compound_under_attack',
+          `attack:${c.compound_id}:${bucket}`, { compoundId: c.compound_id });
+      }
+
+      // Storage full: credits pinned at the silo cap.
+      for (const [playerId, slot] of this.slotByPlayer) {
+        const p = g.players[slot];
+        if (p && p.storage > 0 && p.credits >= p.storage) {
+          await raise(playerId, 'storage_full', `storage:${playerId}:${bucket}`);
+        }
+      }
+
+      // Superweapon nearby: strikes scheduled since the last pass, grouped per
+      // launcher+weapon so a storm's bolt fan-out raises one notification.
+      const seen = this.notifyStrikesSeen;
+      const fresh = g.strikes.filter(s => !seen.has(s));
+      this.notifyStrikesSeen = new Set(g.strikes);
+      if (fresh.length) {
+        const groups = new Map<string, { owner: number; name: string; pts: [number, number][] }>();
+        for (const s of fresh) {
+          const key = `${s.owner}:${s.name}`;
+          const grp = groups.get(key) ?? { owner: s.owner, name: s.name, pts: [] };
+          grp.pts.push([s.x, s.y]);
+          groups.set(key, grp);
+        }
+        const near = rules.notifications.superweaponNearbyCells;
+        for (const grp of groups.values()) {
+          for (const [slot, playerId] of [...this.slotByPlayer.entries()].map(([pid, s]) => [s, pid] as const)) {
+            if (!g.isEnemy(grp.owner, slot)) continue;
+            let close = false;
+            for (const e of g.entities.values()) {
+              if (e.owner !== slot || e.hp <= 0 || e.kind !== 'structure') continue;
+              for (const [sx, sy] of grp.pts) {
+                if (Math.max(Math.abs(toCell(e.x) - toCell(sx)), Math.abs(toCell(e.y) - toCell(sy))) <= near) {
+                  close = true; break;
+                }
+              }
+              if (close) break;
+            }
+            if (close) {
+              await raise(playerId, 'superweapon_nearby',
+                `super:${playerId}:${bucket}`, { name: grp.name });
+            }
+          }
+        }
+      }
+    }
+
+    // Shield ending: any active protection record whose ends_at falls inside
+    // the warning window. Dedupe keys on the record's end instant so each
+    // shield warns exactly once.
+    const warnMs = rules.rewards.notificationShieldWarningMinutes * 60_000;
+    const { rows: shields } = await tx.query<{
+      compound_id: string; player_id: string; ends_at_ms: string | null;
+    }>(
+      `select pr.compound_id, pr.player_id, pr.ends_at_ms::text
+         from protection_record pr
+         join compound c on c.compound_id = pr.compound_id
+        where c.region_id = $1 and pr.kind = 'OFFLINE_EARNED'
+          and pr.status = 'active' and pr.ends_at_ms is not null
+          and pr.ends_at_ms > $2 and pr.ends_at_ms <= $3`,
+      [this.opts.regionId, now, now + warnMs]);
+    for (const s of shields) {
+      if (s.ends_at_ms === null) continue;
+      await raise(s.player_id, 'shield_ending',
+        `shieldend:${s.compound_id}:${s.ends_at_ms}`, { compoundId: s.compound_id });
+    }
+
+    // Chain only while someone is rostered-and-online, same rule as
+    // recovery_eval: an idle region must stay free to hibernate (PW22).
+    let anyOnline = false;
+    if (this.slotByPlayer.size) {
+      const ids = [...this.slotByPlayer.keys()];
+      const { rows: on } = await tx.query<{ n: string }>(
+        `select count(*)::text as n from player
+          where player_id = any($1::uuid[])
+            and (online_count > 0
+                 or (offline_since_ms is not null
+                     and $2::bigint - offline_since_ms < $3::bigint))`,
+        [ids, now, rules.offlineAfterMs]);
+      anyOnline = Number(on[0]?.n ?? 0) > 0;
+    }
+    if (anyOnline) {
+      const nextDue = now + 15_000;
+      await tx.query(
+        `insert into scheduled_job (job_id, region_id, kind, due_at_ms, generation, payload, dedupe_key)
+         values ($1,$2,'notify_eval',$3,0,$4,$5)
+         on conflict (region_id, dedupe_key) where dedupe_key is not null do nothing`,
+        [randomUUID(), this.opts.regionId, nextDue.toString(),
+         JSON.stringify({ reason: 'chain' }), `notify_eval:${this.opts.regionId}:chain:${nextDue}`]);
+    }
+    return stats;
   }
 
   /**
