@@ -132,7 +132,17 @@ def main():
             image = f'ghcr.io/flatt-t/projectcomrade:{commit}'
             image_id = subprocess.check_output(['docker', 'image', 'inspect', image, '--format', '{{.Id}}'], text=True).strip()
             if image_id != manifest['image_id']:
-                raise RuntimeError('Loaded image identity mismatch')
+                # buildx attestations can make `docker load` tag a sibling config while the
+                # manifest's image id lands as an untagged image. Find it and move the tag.
+                listing = subprocess.check_output(
+                    ['docker', 'images', '--no-trunc', '--format', '{{.ID}} {{.Repository}}:{{.Tag}}'],
+                    text=True)
+                match = next((line.split()[0] for line in listing.splitlines()
+                              if line.split()[0].removeprefix('sha256:') == manifest['image_id'].removeprefix('sha256:')), None)
+                if match is None:
+                    raise RuntimeError('Loaded image identity mismatch')
+                subprocess.run(['docker', 'tag', match, image], check=True)
+                image_id = manifest['image_id']
             try:
                 compose(image)
                 bind = deploy_env(image)['COMRADE_BIND_ADDRESS']
