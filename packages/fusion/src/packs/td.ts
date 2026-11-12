@@ -85,6 +85,27 @@ const maps: MapPreset[] = [
       { x: 30, y: 32, r: 3, resource: 'tiberium' },
     ], 72, 64),
   },
+  {
+    id: 'td-landing', name: 'The Landing', width: 72, height: 64, maxPlayers: 2, base: 'clear', roughness: 2,
+    description: 'A dry sea splits mainland from island. Only the landing craft reaches the far shore.',
+    starts: [{ x: 10, y: 32 }, { x: 60, y: 32 }],
+    features: [
+      // A sea fifteen cells wide: its centre is beyond unload reach of either
+      // shore, so a craft must come alongside to load or discharge cargo.
+      { terrain: 'water', shape: 'rect', x: 28, y: 0, w: 16, h: 64 },
+      { terrain: 'trees', shape: 'circle', x: 18, y: 14, r: 3 },
+      { terrain: 'trees', shape: 'circle', x: 16, y: 50, r: 3 },
+      { terrain: 'rough', shape: 'circle', x: 20, y: 30, r: 2 },
+      { terrain: 'trees', shape: 'circle', x: 52, y: 16, r: 3 },
+      { terrain: 'trees', shape: 'circle', x: 54, y: 48, r: 3 },
+      { terrain: 'rough', shape: 'circle', x: 50, y: 32, r: 2 },
+    ],
+    fields: [
+      { x: 14, y: 20, r: 4, resource: 'tiberium' },
+      { x: 56, y: 44, r: 4, resource: 'tiberium' },
+      { x: 58, y: 20, r: 3, resource: 'tiberium' },
+    ],
+  },
 ];
 
 export const tdPack: RulePack = {
@@ -173,6 +194,12 @@ export const tdPack: RulePack = {
     bomber: { id: 'bomber', name: 'Bomber', kind: 'aircraft', cost: 1400, hp: 150, armor: 'light', speed: 70, sight: 5, weapon: 'bombs', ammo: 1, prereqs: ['aflight'], factions: ['nod'], tech: 6, altitude: 3, shape: 'jet', role: 'siege' },
     chinook: { id: 'chinook', name: 'Transport Helicopter', kind: 'aircraft', cost: 1500, hp: 90, armor: 'light', speed: 50, sight: 4, prereqs: ['hpad'], tech: 7, altitude: 2, transport: 5, infantryOnly: true, shape: 'helicopter', role: 'support' },
     gunboat: { id: 'gunboat', name: 'Gunboat', kind: 'naval', cost: 500, hp: 400, armor: 'heavy', speed: 30, turn: 6, sight: 6, weapon: 'boatgun', prereqs: ['syrd'], tech: 5, shape: 'ship-patrol', role: 'siege' },
+    // PW15: the sea landing craft — every faction's answer to islands and
+    // other land no ground unit can reach. One MCV or one packed building
+    // carrier exclusively, or up to five vehicles (15 seats). Unarmed: it is
+    // meant to be escorted (D7). Lands on any shoreline; no receiving
+    // structure required.
+    'landing-craft': { id: 'landing-craft', name: 'Landing Craft', kind: 'naval', cost: 1000, hp: 350, armor: 'heavy', speed: 38, turn: 8, sight: 5, prereqs: ['syrd'], tech: 5, transport: 15, heavyCargo: true, shape: 'ship-patrol', role: 'support' },
   },
   structures: {
     fact: { id: 'fact', name: 'Construction Yard', cost: 5000, hp: 1000, armor: 'building', w: 3, h: 3, power: 0, sight: 5, prereqs: [], tech: 99, queue: 'structure', constructionYard: true, upgrades: 1, upgradeCost: 1500, shape: 'conyard' },
