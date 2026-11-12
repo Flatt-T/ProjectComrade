@@ -11,10 +11,11 @@ import {
   closeMmoDatabase, mmoOne, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import {
-  alliancePermission, allianceForPlayer, allianceMembers, createPlayer,
-  playerConnected, playerDisconnected, playerPresence, presenceIsOnline,
-  releaseRegionLease,
+  alliancePermission, allianceForPlayer, allianceMembers, bumpObjectiveProgress,
+  createPlayer, ensureObjectives, listObjectives, playerConnected, playerDisconnected,
+  playerPresence, presenceIsOnline, releaseRegionLease,
 } from '../../apps/service/src/mmo/store.js';
+import { mmoDb } from '../../apps/service/src/mmo/db.js';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
 import { journalTail } from '../../apps/service/src/mmo/commands.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
@@ -332,4 +333,69 @@ describeDb('mmo alliances, presence and caretaker (real PostgreSQL + runner)', (
     expect(pres?.online_since_ms).not.toBeNull();
     await playerDisconnected(pid, now + 6); // leave clean for other tests
   });
+
+  it('chat: region fan-out is journaled; alliance chat requires membership', async () => {
+    // p2 leaves any earlier alliance so the negative case is deterministic.
+    await worldAction(ctx, p2().playerId, { t: 'allianceLeave' });
+    const denied = await worldAction(ctx, p2().playerId, { t: 'chat', channel: 'alliance', text: 'hi' });
+    expect(denied.accepted).toBe(false);
+    expect(denied.reason).toBe('NOT_IN_ALLIANCE');
+
+    // Region channel: accepted and fanned out on mmo.chat at the event's seq.
+    const region = await worldAction(ctx, p0().playerId, { t: 'chat', channel: 'region', text: 'region hello' });
+    expect(region.accepted).toBe(true);
+    await waitFor(async () => !!(await mmoOne<{ topic: string }>(
+      `select topic from outbox where region_id = $1 and topic = 'mmo.chat'
+        and payload->>'text' = 'region hello'`, [ctx.fx.regionId])));
+
+    // Alliance channel: p0 founds a guild, p1 joins, chat carries allianceId.
+    const created = await worldAction(ctx, p0().playerId, { t: 'allianceCreate', name: 'ChatGuild' });
+    expect(created.accepted).toBe(true);
+    const found = await allianceForPlayer(ctx.fx.worldId, p0().playerId);
+    const guildId = found!.alliance.alliance_id;
+    await worldAction(ctx, p0().playerId, { t: 'allianceInvite', allianceId: guildId, playerId: p1().playerId });
+    await worldAction(ctx, p1().playerId, { t: 'allianceJoin', allianceId: guildId });
+
+    const ally = await worldAction(ctx, p0().playerId, { t: 'chat', channel: 'alliance', text: 'ally hello' });
+    expect(ally.accepted).toBe(true);
+    const fan = await mmoOne<{ payload: { channel: string; allianceId?: string; fromName?: string } }>(
+      `select payload from outbox where region_id = $1 and topic = 'mmo.chat'
+        and payload->>'text' = 'ally hello'`, [ctx.fx.regionId]);
+    expect(fan?.payload.channel).toBe('alliance');
+    expect(fan?.payload.allianceId).toBe(guildId);
+    expect(fan?.payload.fromName).toBe(p0().displayName);
+  }, 30_000);
+
+  it('objectives: journaled claim grants earned shield seconds exactly once', async () => {
+    const pid = p0().playerId;
+    const r = PERSISTENT_RULES_V1.rewards;
+    await ensureObjectives(mmoDb(), {
+      worldId: ctx.fx.worldId, playerId: pid,
+      dailyCount: r.dailyObjectives, dailySeconds: r.dailyObjectiveShieldSeconds,
+      weeklySeconds: r.weeklyObjectiveShieldSeconds,
+    });
+    // Complete every kind so at least one active objective is claimable.
+    for (const kind of ['site_capture', 'barter_complete', 'transfer_unit', 'unpack_building'] as const) {
+      await bumpObjectiveProgress(mmoDb(), { playerId: pid, kind });
+      await bumpObjectiveProgress(mmoDb(), { playerId: pid, kind });
+    }
+    const ready = (await listObjectives(pid)).find(o => o.status === 'active' && o.progress >= o.target);
+    expect(ready).toBeTruthy();
+    const before = await mmoOne<{ seconds_remaining: string }>(
+      `select seconds_remaining::text from shield_balance where player_id = $1 and kind = 'earned'`, [pid]);
+    const claim = await worldAction(ctx, pid, { t: 'objectiveClaim', objectiveId: ready!.objective_id });
+    expect(claim.accepted).toBe(true);
+    expect(claim.rewardSeconds).toBe(ready!.reward_seconds);
+    const after = await mmoOne<{ seconds_remaining: string }>(
+      `select seconds_remaining::text from shield_balance where player_id = $1 and kind = 'earned'`, [pid]);
+    expect(BigInt(after!.seconds_remaining) - BigInt(before?.seconds_remaining ?? '0'))
+      .toBe(BigInt(ready!.reward_seconds));
+    // Second claim of the same objective rejects.
+    const again = await worldAction(ctx, pid, { t: 'objectiveClaim', objectiveId: ready!.objective_id });
+    expect(again.accepted).toBe(false);
+    expect(again.reason).toBe('NOT_ACTIVE');
+    // Another player's objective id cannot be claimed.
+    const foreign = await worldAction(ctx, p1().playerId, { t: 'objectiveClaim', objectiveId: ready!.objective_id });
+    expect(foreign.accepted).toBe(false);
+  }, 30_000);
 });

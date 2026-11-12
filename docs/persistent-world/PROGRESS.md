@@ -981,3 +981,42 @@ preset 0 with a different seed.
   state is not preserved across the boundary (manifest carries identity +
   condition, not pending commands); transfer of an asset whose owner has
   no slot in the destination parks in RECOVERY_REQUIRED for ops.
+
+### PW19 (in progress) - THU-2243 - beta player flows - 2026-11-12
+
+- State: implemented on branch `pw19-beta-flows` (PR #46), commits bc80a33,
+  8ffb882, 00797f2, 0e54d0f on top of merged PW18 (`942caf2`).
+- Deliverables this increment:
+  - Read APIs: GET /api/mmo/players (roster + settlement region + self),
+    /regions (lifecycle, roster, settled flag), /transfers (live
+    region_transfer rows), /alliance (membership/roles/invites),
+    /objectives (lazy materialization), /ladder client binding.
+  - Store helpers: worldIdForPlayer, regionsForPlayerWorld,
+    liveTransfersForPlayer, worldPlayersForPlayer; objectives section
+    (schema v13 player_objective, ensureObjectives, listObjectives,
+    bumpObjectiveProgress, claimObjectiveTx).
+  - Chat: journaled `chat` world action -> WorldHandlerResult.fanout ->
+    outbox topic mmo.chat -> gateway eventKind 'chat'; alliance channel
+    resolves every member's settlement region; 5 msgs/10s per-player cap.
+  - Objectives: kinds site_capture/barter_complete/transfer_unit/
+    unpack_building; progress bumped inside the journaled transactions
+    that prove the act (site capture drain, barter settle, transfer
+    COMPLETED, unpack/redeploy); claims grant earned shield seconds via
+    effect-keyed grantShieldSeconds; materialized at settle + lazily on
+    GET /api/mmo/objectives.
+  - PersistentWorld UI: sell mode (V) with sell-all recovery hint,
+    barter composer (explicit give/want, entity refs from selection),
+    transfer panel (in-transit states + PREPARED cancel + destinations),
+    alliance panel (create/invite/join/leave/kick/disband), chat box
+    (region/alliance), objectives list with Claim, ladder top-10,
+    shield panel free-vs-earned hours + NEWCOMER/RECOVERY labels.
+- Proven: pnpm typecheck exit 0; pnpm lint exit 0;
+  tests/integration/mmo-world-panels.test.ts 5/5 (roster/regions/
+  transfers/objectives) and mmo-alliance.test.ts 12/12 (chat fan-out,
+  NOT_IN_ALLIANCE gate, journaled objectiveClaim granting earned shield
+  seconds exactly once, foreign-claim rejection) - real PostgreSQL +
+  live runner.
+- Open for PW19 acceptance: ping action, salvage-crate/site visual
+  polish beyond sim rendering, full two-browser scenario re-run with
+  engine hashes/command traces recorded, PW20 isolation/backup/load/
+  release evidence.

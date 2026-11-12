@@ -32,7 +32,7 @@ import {
   releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
   syncCompounds, updateMemberPowerScores, updateSettlementProtection,
   openRecoveryEpisode, closeRecoveryEpisode, awardLadderPoints,
-  inboundTransfers, preparedTransfers, transitionTransfer,
+  inboundTransfers, preparedTransfers, transitionTransfer, bumpObjectiveProgress,
   MmoStoreError, type ProtectionRow, type RegionRow, type TransferRow,
 } from './store.js';
 import { journalTail } from './commands.js';
@@ -72,6 +72,9 @@ export interface WorldHandlerResult {
   /** Extra engine commands this world action implies (e.g. PW09 alliance sync).
    *  They apply at the same tick boundary and fan out on mmo.sim like sim intents. */
   sim?: { slot: number; command: Command }[];
+  /** Cross-region fan-out (PW19 chat): outbox envelopes written at this event's
+   *  journal position, one per target region. The runner stamps epoch/eventSeq. */
+  fanout?: { regionId: string; topic: string; payload: unknown }[];
 }
 export type WorldActionHandler = (
   tx: PoolClient, action: MmoWorldAction,
@@ -875,6 +878,10 @@ export class RegionRunner {
              payload.ownerPid ?? null, payload.ownerPid ?? null,
              manifest.packedType ? 'packed' : 'deployed', String(simId),
              JSON.stringify({ transferId: t.transfer_id, sourceRegionId: t.source_region_id, simId })]);
+          // PW19: a completed crossing proves the owner's transfer objective.
+          if (payload.ownerPid) {
+            await bumpObjectiveProgress(tx, { playerId: payload.ownerPid, kind: 'transfer_unit' });
+          }
         });
       } catch (error) {
         g.unspawnTransfer(simId);
@@ -973,6 +980,8 @@ export class RegionRunner {
               refKey: `site-capture:${this.opts.regionId}:${ev.simId}:${ev.tick}`,
             });
           }
+          // PW19: the capture also proves the player's site_capture objective.
+          if (toId) await bumpObjectiveProgress(tx, { playerId: toId, kind: 'site_capture' });
           // Site-hold time pays out on transfer: the outgoing holder banks
           // their accumulated hold minutes exactly once, journaled here.
           const fromId = ev.fromOwner >= 0 ? playerIdBySlot.get(ev.fromOwner) : undefined;
@@ -1045,6 +1054,16 @@ export class RegionRunner {
               epoch: this.epoch,
             })]);
         }
+        // Cross-region fan-out (PW19 chat): one envelope per target region at
+        // this event's journal position; each region's subscribers get it.
+        for (const f of applied.fanout ?? []) {
+          await tx.query(
+            `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,$4,$5)`,
+            [randomUUID(), f.regionId, event.event_seq, f.topic, JSON.stringify({
+              ...(f.payload as Record<string, unknown>),
+              epoch: this.epoch, eventSeq: event.event_seq,
+            })]);
+        }
       }
     });
     this.stats.scheduleMs += performance.now() - t0;
@@ -1057,6 +1076,7 @@ export class RegionRunner {
   }): Promise<{
     result: unknown; intent?: { playerId: string; commandId: string };
     simCommands?: { slot: number; atTick: number; command: Command }[];
+    fanout?: { regionId: string; topic: string; payload: unknown }[];
   }> {
     const payload = event.payload as Record<string, unknown>;
     if (event.event_kind === 'accrual') {
@@ -1099,7 +1119,10 @@ export class RegionRunner {
           this.game!.enqueue(s.slot, s.command, atTick);
           return { slot: s.slot, atTick, command: s.command };
         });
-        return { result: handled.result ?? { accepted: true }, intent, simCommands };
+        return {
+          result: handled.result ?? { accepted: true }, intent, simCommands,
+          fanout: handled.fanout,
+        };
       }
       return { result: { accepted: false, reason: 'UNSUPPORTED_ACTION', action: action.t }, intent };
     }

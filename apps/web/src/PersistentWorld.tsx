@@ -14,10 +14,13 @@ import type {
   BarterItem, MmoAwayReport, MmoNotification, MmoNotificationKind, MmoNotificationPrefs, MmoNotifyChannel,
 } from '@comrade/contracts';
 import { api } from './api';
-import type { MmoProtectionResponse, MmoTradeOffersResponse } from './api';
+import type {
+  MmoAllianceResponse, MmoLadderResponse, MmoObjectivesResponse, MmoPlayersResponse,
+  MmoProtectionResponse, MmoRegionsResponse, MmoTradeOffersResponse, MmoTransfersResponse,
+} from './api';
 import { typingIn } from './help';
 
-type Mode = 'normal' | 'place' | 'repair' | 'attackMove' | 'super';
+type Mode = 'normal' | 'place' | 'repair' | 'attackMove' | 'super' | 'sell';
 const ALL_TABS: { id: QueueKind; label: string }[] = [
   { id: 'structure', label: 'Base' }, { id: 'defense', label: 'Defence' }, { id: 'infantry', label: 'Infantry' },
   { id: 'vehicle', label: 'Vehicles' }, { id: 'aircraft', label: 'Air' }, { id: 'naval', label: 'Navy' },
@@ -83,6 +86,30 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // this panel answers, cancels and lists them.
   const [offers, setOffers] = useState<MmoTradeOffersResponse | null>(null);
   const [showTrade, setShowTrade] = useState(false);
+  // PW19: world roster, region browser, live transfers and alliance state —
+  // every panel is read-only REST state plus journaled intents.
+  const [players, setPlayers] = useState<MmoPlayersResponse | null>(null);
+  const [regions, setRegions] = useState<MmoRegionsResponse | null>(null);
+  const [transfers, setTransfers] = useState<MmoTransfersResponse | null>(null);
+  const [alliance, setAlliance] = useState<MmoAllianceResponse | null>(null);
+  const [showPlayers, setShowPlayers] = useState(false);
+  const [showAlliance, setShowAlliance] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [barterTo, setBarterTo] = useState('');
+  const [barterGive, setBarterGive] = useState('credits');
+  const [barterGiveAmt, setBarterGiveAmt] = useState('100');
+  const [barterWant, setBarterWant] = useState('credits');
+  const [barterWantAmt, setBarterWantAmt] = useState('100');
+  const [allyName, setAllyName] = useState('');
+  // PW19: region/alliance chat — journaled world action, delivered back on the
+  // event stream; the client renders, never authors state.
+  const [chat, setChat] = useState<{ channel: string; fromId: string; fromName: string; text: string }[]>([]);
+  const [chatChannel, setChatChannel] = useState<'region' | 'alliance'>('region');
+  const [chatText, setChatText] = useState('');
+  // PW19: daily/weekly objectives — progress is server-bumped; claims are
+  // journaled world actions that grant earned shield seconds.
+  const [objectives, setObjectives] = useState<MmoObjectivesResponse | null>(null);
+  const [ladder, setLadder] = useState<MmoLadderResponse | null>(null);
 
   useEffect(() => {
     let game: Game | null = null;
@@ -142,6 +169,17 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     // PW25: live notifications arrive on the socket; the inbox, prefs and the
     // away report come from the durable API once per mount.
     const offNotes = conn.on(msg => {
+      if (msg.type === 'event' && msg.eventKind === 'chat') {
+        const p = msg.payload as { channel?: string; fromId?: string; fromName?: string; text?: string };
+        if (p.text) {
+          const text = p.text;
+          setChat(cs => [...cs.slice(-49), {
+            channel: p.channel ?? 'region', fromId: p.fromId ?? '',
+            fromName: p.fromName ?? 'Commander', text,
+          }]);
+        }
+        return;
+      }
       if (msg.type !== 'notification') return;
       const n: MmoNotification = {
         notificationId: msg.notificationId, playerId: '', kind: msg.kind,
@@ -161,6 +199,17 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     const loadOffers = () => void api.mmoTradeOffers().then(setOffers).catch(() => undefined);
     loadOffers();
     const offersTimer = window.setInterval(loadOffers, 15_000);
+    // PW19: roster/regions/transfers/alliance refresh alongside offers.
+    const loadWorld = () => {
+      void api.mmoPlayers().then(setPlayers).catch(() => undefined);
+      void api.mmoRegions().then(setRegions).catch(() => undefined);
+      void api.mmoTransfers().then(setTransfers).catch(() => undefined);
+      void api.mmoAlliance().then(setAlliance).catch(() => undefined);
+      void api.mmoObjectives().then(setObjectives).catch(() => undefined);
+      void api.mmoLadder().then(setLadder).catch(() => undefined);
+    };
+    loadWorld();
+    const worldTimer = window.setInterval(loadWorld, 15_000);
 
     const resize = () => {
       const el = stage.current!, c = canvas.current!;
@@ -266,6 +315,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       else if (key === 'd') { const ids = sel(); if (ids.length) session.issue({ t: 'deploy', ids }); }
       else if (key === 'a') { if (sel().length) { mode.current = 'attackMove'; setModeView('attackMove'); } }
       else if (key === 'r') { mode.current = 'repair'; setModeView('repair'); }
+      else if (key === 'v') { mode.current = 'sell'; setModeView('sell'); }
       else if (ev.key === 'Escape') { mode.current = 'normal'; setModeView('normal'); placing.current = null; superId.current = 0; renderer.selected = new Set(); }
     };
     const keyup = (ev: KeyboardEvent) => keys.current.delete(ev.key);
@@ -279,6 +329,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       session?.dispose(); conn.close(); rig.current = null;
       window.clearInterval(protTimer);
       window.clearInterval(offersTimer);
+      window.clearInterval(worldTimer);
     };
   }, [regionId]);
 
@@ -343,6 +394,84 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   }
   const barterItemText = (i: BarterItem) =>
     `${i.kind}${i.ref ? ` ${i.ref.slice(0, 8)}` : ''} ×${i.amount}`;
+
+  // PW19: author a barter offer. Both sides are explicit items; entity refs
+  // come from the current single selection. The offer is journaled — nothing
+  // is shown as traded until the recipient accepts and the commit lands.
+  function sendBarterOffer() {
+    const r = rig.current;
+    if (!r || !players?.self || !barterTo) { setNotice('Pick a player first'); return; }
+    const sel = ui?.selection;
+    const selRef = sel && sel.own && sel.count === 1 ? mmoEntityId(regionId, sel.id) : null;
+    const needSel = barterGive === 'unit' || barterGive === 'packedBuilding';
+    if (needSel && !selRef) { setNotice('Select the unit or packed building to give first'); return; }
+    const item = (kind: string, amt: string, ref?: string): BarterItem =>
+      kind === 'unit' || kind === 'packedBuilding'
+        ? { kind: kind as BarterItem['kind'], ref: ref as BarterItem['ref'], amount: 1 }
+        : { kind: kind as BarterItem['kind'], amount: Math.max(1, Math.floor(Number(amt) || 1)) };
+    const give: BarterItem[] = [item(barterGive, barterGiveAmt, selRef ?? undefined)];
+    const want: BarterItem[] = [item(barterWant, barterWantAmt)];
+    connRef.current?.command({
+      t: 'barterOffer',
+      offer: {
+        offerId: crypto.randomUUID(), regionId,
+        fromId: players.self, toId: barterTo,
+        give, want, createdAtMs: Date.now(), expiresAtMs: Date.now() + 24 * 3600_000,
+      },
+    });
+    setNotice('Offer sent — waiting for the other side.');
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoTradeOffers().then(setOffers).catch(() => undefined), 1500);
+  }
+
+  // PW19: cross-region transfer of the selected unit — it walks to the map
+  // edge, then the durable protocol carries it. Cancel is only possible while
+  // the transfer is still PREPARED.
+  function sendTransfer(destRegionId: string) {
+    const r = rig.current;
+    if (!r || !ui?.selection) { setNotice('Select a unit first'); return; }
+    const e = r.game.entities.get(ui.selection.id);
+    if (!e || e.owner !== r.session.slot || e.kind !== 'unit') { setNotice('Select one of your units'); return; }
+    connRef.current?.command({
+      t: 'regionTransfer', entityId: mmoEntityId(regionId, e.id), destRegionId,
+    });
+    setNotice('Transfer ordered — the unit is heading for the edge.');
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoTransfers().then(setTransfers).catch(() => undefined), 1500);
+  }
+  function cancelTransfer(entityId: string) {
+    connRef.current?.command({ t: 'regionTransferCancel', entityId });
+    setNotice('Cancelling transfer…');
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoTransfers().then(setTransfers).catch(() => undefined), 1500);
+  }
+
+  // PW19: chat is a journaled world action; the message appears for everyone
+  // only when the fan-out envelope comes back on the event stream.
+  function sendChat() {
+    const text = chatText.trim();
+    if (!text) return;
+    connRef.current?.command({ t: 'chat', channel: chatChannel, text });
+    setChatText('');
+  }
+
+  // PW19: objective claims are journaled; the reward lands as earned shield
+  // seconds only after the server accepts.
+  function claimObjective(objectiveId: string) {
+    connRef.current?.command({ t: 'objectiveClaim', objectiveId });
+    setNotice('Claim sent…');
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoObjectives().then(setObjectives).catch(() => undefined), 1500);
+  }
+
+  // PW19: alliance intents — create/invite/join/leave are journaled world
+  // actions; permission grants remain leader/officer-only server-side.
+  function allianceCommand(action: Parameters<NonNullable<typeof connRef.current>['command']>[0]) {
+    connRef.current?.command(action);
+    setNotice('Alliance update sent.');
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoAlliance().then(setAlliance).catch(() => undefined), 1500);
+  }
 
   // PW14: pack the selected structure into its dedicated carrier, or redeploy a
   // carrier centered on its own cell. Both are journaled world actions; the
@@ -457,6 +586,15 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     }
     if (mode.current === 'repair') {
       if (target && target.owner === session.slot && target.kind === 'structure') session.issue({ t: 'repair', id: target.id });
+      return;
+    }
+    if (mode.current === 'sell') {
+      // PW19: sell-for-credit is a journaled world action — the server
+      // validates bound assets and credits the refund; nothing is optimistic.
+      if (target && target.owner === session.slot && target.kind === 'structure' && target.hp > 0) {
+        connRef.current?.command({ t: 'sell', entityId: mmoEntityId(regionId, target.id) });
+        mark('#ffd24a');
+      }
       return;
     }
     const units = [...renderer.selected].map(id => game.entities.get(id)).filter((e): e is Entity => !!e && e.owner === session.slot && e.kind === 'unit');
@@ -588,10 +726,21 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         <button className="notify-bell" onClick={() => setShowTrade(v => !v)} title="Trade offers">
           {'\u{1F91D}'}{offers && offers.incoming.length ? ' •' : ''}
         </button>
+        <button className="notify-bell" onClick={() => setShowPlayers(v => !v)} title="Players & barter">
+          {'\u{1F465}'}
+        </button>
+        <button className="notify-bell" onClick={() => setShowAlliance(v => !v)} title="Alliance">
+          {'\u2691'}{alliance?.invites.length ? ' •' : ''}
+        </button>
+        <button className="notify-bell" onClick={() => setShowTransfer(v => !v)} title="Region transfer">
+          {'\u27A1'}{transfers && transfers.transfers.length ? ' •' : ''}
+        </button>
       </div>
       {showShield && <div className="notes-panel">
         <div className="notes-head"><b>Compound shield</b>
-          <span className="notes-prefs">{prot ? `${fmtDur(prot.availableSeconds)} available` : '…'}</span>
+          <span className="notes-prefs">{prot
+            ? `${fmtDur(prot.nightlySeconds)} free · ${fmtDur(prot.earnedSeconds)} earned`
+            : '…'}</span>
         </div>
         {!prot && <div className="notes-empty">Loading…</div>}
         {prot && prot.compounds.filter(c => c.regionId === regionId).map(c => {
@@ -600,6 +749,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
             ? Math.max(0, Math.round((Date.parse(rec.endsAt) - Date.now()) / 1000)) : rec?.remainingSeconds ?? null;
           return <div key={c.compoundId} className="note">
             <span>
+              {rec?.kind === 'NEWCOMER' ? 'Newcomer setup — ' : rec?.kind === 'RECOVERY' ? 'Recovery — ' : ''}
               {rec?.status === 'active' ? `Shielded — ${fmtDur(activeLeft)} left`
                 : rec?.status === 'armed' ? `Armed ${fmtDur(rec.armedSeconds)} — starts when you go offline`
                 : 'No shield'}
@@ -651,6 +801,192 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
             </span>
           </div>
         ))}
+        <div className="notes-head"><b>New offer</b></div>
+        <div className="note">
+          <span>
+            To{' '}
+            <select value={barterTo} onChange={ev => setBarterTo(ev.target.value)}>
+              <option value="">— pick player —</option>
+              {players?.players.filter(p => p.player_id !== players.self).map(p => (
+                <option key={p.player_id} value={p.player_id}>{p.display_name}</option>
+              ))}
+            </select>
+          </span>
+        </div>
+        <div className="note">
+          <span>
+            Give{' '}
+            <select value={barterGive} onChange={ev => setBarterGive(ev.target.value)}>
+              <option value="credits">credits</option>
+              <option value="shieldSeconds">shield seconds</option>
+              <option value="unit">selected unit</option>
+              <option value="packedBuilding">selected packed building</option>
+            </select>
+            {(barterGive === 'credits' || barterGive === 'shieldSeconds') &&
+              <input className="shield-custom" type="number" min={1} value={barterGiveAmt}
+                onChange={ev => setBarterGiveAmt(ev.target.value)} />}
+          </span>
+          <span className="notes-prefs">want</span>
+          <span>
+            <select value={barterWant} onChange={ev => setBarterWant(ev.target.value)}>
+              <option value="credits">credits</option>
+              <option value="shieldSeconds">shield seconds</option>
+            </select>
+            <input className="shield-custom" type="number" min={1} value={barterWantAmt}
+              onChange={ev => setBarterWantAmt(ev.target.value)} />
+            <button onClick={sendBarterOffer}>Send</button>
+          </span>
+        </div>
+        {(barterGive === 'unit' || barterGive === 'packedBuilding') &&
+          <div className="notes-empty">
+            {ui?.selection && ui.selection.own && ui.selection.count === 1
+              ? `Giving: ${ui.selection.name}` : 'Select one of your units or a packed carrier first.'}
+          </div>}
+      </div>}
+      {showPlayers && <div className="notes-panel">
+        <div className="notes-head"><b>Players</b>
+          <span className="notes-prefs">{players ? `${players.players.length} in world` : '…'}</span>
+        </div>
+        {!players && <div className="notes-empty">Loading…</div>}
+        {players?.players.filter(p => p.player_id !== players.self).map(p => (
+          <div key={p.player_id} className="note">
+            <span>
+              <b>{p.display_name}</b>
+              {p.region_id === regionId ? ' · in this region' : p.region_id ? ' · another region' : ' · not settled'}
+            </span>
+            <span className="notes-prefs">
+              {p.region_id === regionId &&
+                <button onClick={() => { setBarterTo(p.player_id); setShowTrade(true); }}>Trade</button>}
+            </span>
+          </div>
+        ))}
+        {players && players.players.length <= 1 &&
+          <div className="notes-empty">No other players in this world yet.</div>}
+        <div className="notes-head"><b>Objectives</b>
+          <span className="notes-prefs">{objectives ? `${objectives.objectives.filter(o => o.status === 'active').length} active` : '…'}</span>
+        </div>
+        {!objectives && <div className="notes-empty">Loading…</div>}
+        {objectives?.objectives.filter(o => o.status !== 'expired').map(o => (
+          <div key={o.objectiveId} className="note">
+            <span>
+              <b>{o.period === 'weekly' ? 'Weekly' : 'Daily'}</b> — {o.title}
+              {' '}({o.progress}/{o.target}) → {fmtDur(o.rewardSeconds)} earned shield
+              {o.status === 'claimed' ? ' · claimed' : ''}
+            </span>
+            <span className="notes-prefs">
+              {o.status === 'active' && o.progress >= o.target &&
+                <button onClick={() => claimObjective(o.objectiveId)}>Claim</button>}
+            </span>
+          </div>
+        ))}
+        {objectives && objectives.objectives.every(o => o.status === 'expired') &&
+          <div className="notes-empty">No objectives yet.</div>}
+        <div className="notes-head"><b>Ladder · 30d</b></div>
+        {!ladder && <div className="notes-empty">Loading…</div>}
+        {ladder?.rows.slice(0, 10).map((r, i) => (
+          <div key={r.subject_id} className="note">
+            <span>{i + 1}. {players?.players.find(p => p.player_id === r.subject_id)?.display_name
+              ?? r.subject_id.slice(0, 8)}</span>
+            <span className="notes-prefs">{Number(r.points).toLocaleString()} pts</span>
+          </div>
+        ))}
+        {ladder && ladder.rows.length === 0 &&
+          <div className="notes-empty">No scored play yet.</div>}
+      </div>}
+      {showAlliance && <div className="notes-panel">
+        <div className="notes-head"><b>Alliance</b>
+          <span className="notes-prefs">{alliance?.alliance ? alliance.alliance.name : ''}</span>
+        </div>
+        {!alliance && <div className="notes-empty">Loading…</div>}
+        {alliance?.invites.map(i => (
+          <div key={i.alliance_id} className="note">
+            <span>Invite to <b>{i.name}</b></span>
+            <span className="notes-prefs">
+              <button onClick={() => allianceCommand({ t: 'allianceJoin', allianceId: i.alliance_id })}>Join</button>
+            </span>
+          </div>
+        ))}
+        {alliance && !alliance.alliance && alliance.invites.length === 0 &&
+          <div className="notes-empty">You are not in an alliance.</div>}
+        {alliance && !alliance.alliance && (
+          <div className="note">
+            <span>
+              Found <input value={allyName} maxLength={32} placeholder="Alliance name"
+                onChange={ev => setAllyName(ev.target.value)} />
+              <button disabled={allyName.trim().length < 2}
+                onClick={() => allianceCommand({ t: 'allianceCreate', name: allyName.trim() })}>Create</button>
+            </span>
+          </div>
+        )}
+        {alliance?.alliance && (
+          <>
+            {alliance.members.map(m => (
+              <div key={m.playerId} className="note">
+                <span>
+                  {players?.players.find(p => p.player_id === m.playerId)?.display_name ?? m.playerId.slice(0, 8)}
+                  {' · '}{m.role}
+                </span>
+                {alliance.alliance!.role !== 'member' && m.role !== 'leader' && m.playerId !== players?.self &&
+                  <span className="notes-prefs">
+                    <button onClick={() => allianceCommand({ t: 'allianceKick', playerId: m.playerId })}>Kick</button>
+                  </span>}
+              </div>
+            ))}
+            {alliance.alliance!.role !== 'member' && (
+              <div className="note">
+                <span>
+                  Invite{' '}
+                  <select defaultValue="" onChange={ev => {
+                    if (ev.target.value) allianceCommand({ t: 'allianceInvite', allianceId: alliance.alliance!.allianceId, playerId: ev.target.value });
+                  }}>
+                    <option value="">— pick player —</option>
+                    {players?.players.filter(p => p.player_id !== players.self && !alliance.members.some(m => m.playerId === p.player_id)).map(p => (
+                      <option key={p.player_id} value={p.player_id}>{p.display_name}</option>
+                    ))}
+                  </select>
+                </span>
+              </div>
+            )}
+            <div className="note">
+              <span className="notes-prefs">
+                <button onClick={() => allianceCommand({ t: 'allianceLeave' })}>Leave alliance</button>
+                {alliance.alliance!.role === 'leader' &&
+                  <button onClick={() => allianceCommand({ t: 'allianceDisband' })}>Disband</button>}
+              </span>
+            </div>
+          </>
+        )}
+      </div>}
+      {showTransfer && <div className="notes-panel">
+        <div className="notes-head"><b>Region transfer</b>
+          <span className="notes-prefs">{transfers ? `${transfers.transfers.length} in transit` : '…'}</span>
+        </div>
+        {!transfers && <div className="notes-empty">Loading…</div>}
+        {transfers?.transfers.map(t => (
+          <div key={t.transferId} className="note">
+            <span>
+              Unit → {regions?.regions.find(r => r.region_id === t.destRegionId)?.label
+                || t.destRegionId.slice(0, 8)} — {t.state.replace(/_/g, ' ').toLowerCase()}
+            </span>
+            <span className="notes-prefs">
+              {t.state === 'PREPARED' &&
+                <button onClick={() => cancelTransfer(t.entityId)}>Cancel</button>}
+            </span>
+          </div>
+        ))}
+        {transfers && transfers.transfers.length === 0 &&
+          <div className="notes-empty">Nothing in transit — select a unit, then send it below.</div>}
+        <div className="notes-head"><b>Destinations</b></div>
+        {regions?.regions.filter(r => r.region_id !== regionId && r.lifecycle === 'active').map(r => (
+          <div key={r.region_id} className="note">
+            <span>{r.label || `Region ${r.region_id.slice(0, 8)}`} — {r.players} settled</span>
+            <span className="notes-prefs">
+              <button onClick={() => sendTransfer(r.region_id)}>Send selected unit</button>
+            </span>
+          </div>
+        ))}
+        {regions && regions.regions.filter(r => r.region_id !== regionId && r.lifecycle === 'active').length === 0 &&
+          <div className="notes-empty">No other active regions in this world.</div>}
       </div>}
       {showNotes && <div className="notes-panel">
         <div className="notes-head">
@@ -697,7 +1033,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         </div>}
       </div>}
       {ui?.recovering && <div className="recovery-banner">
-        <span>Rebuilding protected — yard, power, refinery and barracks only.</span>
+        <span>Rebuilding protected — yard, power, refinery and barracks only. Your MCV redeploys at the compound; other assets must be rebuilt or recovered.</span>
         <button onClick={endRecovery}>End recovery</button>
       </div>}
       {ui?.supers.length ? <div className="supers">
@@ -707,10 +1043,32 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         </div>)}
       </div> : null}
       {ui?.status && <div className="status-line">{ui.status}</div>}
+      <div className="chat-box">
+        <div className="chat-log">
+          {chat.map((c, i) => (
+            <div key={i} className={`chat-line ${c.channel}`}>
+              <b>[{c.channel === 'alliance' ? 'A' : '#'}] {c.fromName}:</b> {c.text}
+            </div>
+          ))}
+        </div>
+        <div className="chat-input">
+          <select value={chatChannel} onChange={ev => setChatChannel(ev.target.value as 'region' | 'alliance')}>
+            <option value="region">Region</option>
+            <option value="alliance">Alliance</option>
+          </select>
+          <input value={chatText} maxLength={500} placeholder="Message…"
+            onChange={ev => setChatText(ev.target.value)}
+            onKeyDown={ev => { if (ev.key === 'Enter') sendChat(); }} />
+          <button onClick={sendChat}>Send</button>
+        </div>
+      </div>
       <div className="modes">
         <button className={modeView === 'attackMove' ? 'on' : ''} onClick={() => setMode('attackMove')}>Attack-move (A)</button>
         <button className={modeView === 'repair' ? 'on' : ''} onClick={() => setMode('repair')}>Repair (R)</button>
+        <button className={modeView === 'sell' ? 'on' : ''} onClick={() => setMode('sell')}>Sell (V)</button>
       </div>
+      {modeView === 'sell' &&
+        <div className="status-line">Sell mode — click your buildings for credits. Selling your last building starts protected recovery: your MCV redeploys at the compound.</div>}
       <button className="leave" onClick={onExit}>Leave region</button>
     </aside>
   </div>;
