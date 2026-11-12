@@ -107,6 +107,10 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         renderer = new FusionRenderer(canvas.current!, game, slot);
         session = new PersistentSession(game, slot, conn, regionId);
         rig.current = { game, session, renderer };
+        // Read-only handle for beta scenario tooling: exposes the live rig so an
+        // external driver can translate map cells to screen coordinates. The beta
+        // contract already accepts modified clients, so this grants nothing new.
+        (window as unknown as { __comradeWorld?: unknown }).__comradeWorld = rig.current;
         const start = game.mapPreset.starts[slot] ?? { x: game.map.w >> 1, y: game.map.h >> 1 };
         renderer.centerOn(start.x, start.y);
       },
