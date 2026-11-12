@@ -354,10 +354,10 @@ acceptance detail; this file is the resume point. Read it first in every session
 ### PW11 - THU-2235 - newcomer settlement and one-hour setup protection - 2026-11-12
 
 - State: implemented on branch `thu-2235-pw11-newcomer-settlement`; verification
-  green locally (lint 0, typecheck 0, 407 unit, 67 integration — one
+  green locally (lint 0, typecheck 0, 407 unit, 67 integration ï¿½ one
   pre-existing hibernation timing flake passes standalone).
 - Deliverables: `spawnSeparationCells` (24) on `MmoRulesProfile`
-  (`packages/contracts/src/mmo.ts`); versioned newcomer starter grant —
+  (`packages/contracts/src/mmo.ts`); versioned newcomer starter grant ï¿½
   `starter.ts` `starterLoadout()` resolves the faction-equivalent pick per
   COMRADE 18 role (MCV, harvester, 4 battle tanks, 2 light vehicles, 8
   infantry) with explicit `FactionDef.starter` picks on the TD pack and a
@@ -365,7 +365,7 @@ acceptance detail; this file is the resume point. Read it first in every session
   explicit `cell`, `starter {credits, units}` and `newcomerProtected`
   (`PlayerSetup`), is idempotent on the durable pid, marks every granted unit
   `bound`, and a bound MCV deploys a bound construction yard so the grant
-  cannot be cashed out; player-scoped protection — `newcomerProtected`
+  cannot be cashed out; player-scoped protection ï¿½ `newcomerProtected`
   blocks all damage both directions and superweapon fire, mirrored by the
   journaled `setNewcomerProtection` command at tick boundaries
   (`packages/fusion/src/game.ts`, snapshot/restore covered);
@@ -374,13 +374,13 @@ acceptance detail; this file is the resume point. Read it first in every session
   ProtectionRecord, NULL = pre-tracking); `store.ts`
   `createSettlement`/`getSettlement`/`updateSettlementProtection`
   transaction-aware and one-settlement-per-player via `on conflict do
-  nothing`; `spawn.ts` `pickSpawnCell` — deterministic viable-cell picker
+  nothing`; `spawn.ts` `pickSpawnCell` ï¿½ deterministic viable-cell picker
   (vehicle-passable + buildable terrain + reachable resources) honouring a
   client preference only when it meets the separation band, otherwise
   maximising practical travel distance then resource richness;
   `ensureEntryRegion` returns the settlement region or the newest in-band
   frontier region / fresh empty-roster region; `world.ts` `settle` world
-  action — validates region/faction, builds keep-away cells from live
+  action ï¿½ validates region/faction, builds keep-away cells from live
   assets, writes the settlement + NEWCOMER protection + `NEWCOMER_SPAWN`
   economy_operation audit inside the journal transaction, returns the
   journaled `join` sim command (slot -1) with starter credits =
@@ -388,7 +388,7 @@ acceptance detail; this file is the resume point. Read it first in every session
   TD), pokes the protection evaluator; re-settle is idempotent and a
   settlement whose sim roster was lost re-joins at the recorded cell
   without re-granting; `runner.ts` `protectionEval` now also reconciles
-  rostered players' NEWCOMER records across the world — `owner_online`
+  rostered players' NEWCOMER records across the world ï¿½ `owner_online`
   accumulates the live stretch without settling (inter-eval online time is
   never lost), `owner_offline` commits it, end at
   `setupProtectionOnlineMs` online time or `setupProtectionLapseMs`
@@ -397,7 +397,7 @@ acceptance detail; this file is the resume point. Read it first in every session
   settlements.
 - Entry: `GET /api/mmo/enter` (`api.ts` + `mmo/entry.ts`) resolves the
   caller's durable identity (same guest guard as the gateway), provisions
-  the player, and returns `{regionId, playerId, settled}` — settled players
+  the player, and returns `{regionId, playerId, settled}` ï¿½ settled players
   return to their settlement region, newcomers get a frontier region and
   `settled:false`. `/world` without `?region=` renders `PersistentEntry`;
   `PersistentWorld` shows a faction picker, sends the journaled `settle`
@@ -409,12 +409,12 @@ acceptance detail; this file is the resume point. Read it first in every session
   rejection); `tests/unit/mmo-spawn.test.ts` 5/5 (determinism, preference
   honoured/rejected, max-separation pick, degenerate-map fallback);
   `tests/integration/mmo-settle.test.ts` 6/6 against real PostgreSQL +
-  runner + Fusion sim — first settlement end-to-end, retry idempotency,
+  runner + Fusion sim ï¿½ first settlement end-to-end, retry idempotency,
   24-cell separation between newcomers, online-hour end with flag mirror,
   absolute-lapse end fully offline, entry region resolution flipping to
   settled; full suite 407 unit + 67 integration.
 - Open: `transfer` does not yet check `bound` (barter/trade lands with
-  PW13 — the sell path is already bound-gated); spawn-cell picker does not
+  PW13 ï¿½ the sell path is already bound-gated); spawn-cell picker does not
   avoid live unit positions, only terrain/structures/resources; multi-map
   faction picks beyond TD derive automatically but are untested on other
   packs; client shows no protection countdown yet (PW25 surface).
@@ -673,26 +673,26 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 - Fixed faction: player.faction is stamped at join/settle and no command
   path mutates it (verified by test). Every entity now carries
-  `Entity.faction` — the faction it was CREATED under, stamped in blank()
+  `Entity.faction` ï¿½ the faction it was CREATED under, stamped in blank()
   and preserved through transfer, packing and redeploy. Pre-PW17 snapshots
   normalize it to the owner's faction.
 - Imported factories (COMRADE 18 amendment): production is now
   factory-scoped in persistent games. `factoryFaction()` resolves the
-  faction a building fields — faction-locked structures produce their own
+  faction a building fields ï¿½ faction-locked structures produce their own
   faction's units regardless of current owner; shared ones fall back to
   creator faction then owner. `eligibleFactories()` gates each candidate
   by factionCanUse(unitDef, factoryFaction) + owner prereqs.
 - Role-matched prerequisites: `structurePrereqRoles()` maps structures to
   role keys (power, refinery, infantry/vehicle/aircraft/naval-plant,
   tech-centre, superweapon, construction-yard) with a faction suffix for
-  faction-locked defs — 'nuke' accepts any power plant, 'pyle|hand' a
+  faction-locked defs ï¿½ 'nuke' accepts any power plant, 'pyle|hand' a
   barracks of either faction, 'tmpl' still requires the NOD superweapon
   (a GDI 'eye' does not substitute). '@level' matches the best upgrade
   level held for that role. Role-less prereq ids fall back to exact
-  type+level. Classic matches keep exact prereqsMet — deliberate
+  type+level. Classic matches keep exact prereqsMet ï¿½ deliberate
   persistent-only change, classic fidelity untouched.
 - Build menu: importing a factory never adds the donor faction's
-  structures — structure/defense items remain player-faction gated;
+  structures ï¿½ structure/defense items remain player-faction gated;
   unit queues offer whatever ANY owned eligible factory can produce
   (gdi player with an imported nod 'hand' sees flamethrower, not
   grenadier which still needs a gdi barracks).
@@ -703,7 +703,7 @@ acceptance detail; this file is the resume point. Read it first in every session
   (supported/retained/unsupported). The region runner refuses specs whose
   packId is not runnable; new worlds pin the manifest revision via
   entry.ts. 'td' is the supported baseline; future packs must prove
-  Fusion-mechanics compatibility before listing — unsupported combos are
+  Fusion-mechanics compatibility before listing ï¿½ unsupported combos are
   explicitly unavailable, never substituted. Retired revisions stay
   'retained' so existing worlds keep resolving; snapshots pin packId so
   restores never hot-reinterpret content.
@@ -717,7 +717,7 @@ acceptance detail; this file is the resume point. Read it first in every session
   faction gates verified live).
 - Full suite: 429 unit + 96 integration green; typecheck + lint clean.
 - Known gaps: cross-PACK mixed forces (units from a second rule pack in
-  one region) await an approved second pack + adapter proof — the manifest
+  one region) await an approved second pack + adapter proof ï¿½ the manifest
   is the gate; AI players do not exploit imported factories (they build
   for their own faction only); starport queue eligibility follows the same
   per-factory rule but no td starport structure exists to exercise it.
@@ -727,7 +727,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 Salvage (commit d568ce6) plus capturable sites and the ladder on
 `pw24-salvage-sites`:
 
-- Salvage crates (COMRADE 18 §3.9): every destroyed unit/building drops one
+- Salvage crates (COMRADE 18 ï¿½3.9): every destroyed unit/building drops one
   crate worth `salvage.percentOfCost` of build cost (default 25%), collectable
   by any player, decaying after `decaySeconds` (600s). Crates are real sim
   entities - journaled SALVAGE_SPAWN ops, DESTROY+SALVAGE asset-ledger rows,
@@ -779,7 +779,7 @@ Salvage (commit d568ce6) plus capturable sites and the ladder on
   structure rather than a chosen one; repelled defence points fire once
   per contested fade, not per attacker.
 
-## PW26 remainder — trade audit + signup signals (THU-2273)
+## PW26 remainder ï¿½ trade audit + signup signals (THU-2273)
 
 Audit of the remaining PW26 hardening items against the shipped code:
 
@@ -824,36 +824,36 @@ New work this pass:
   sessions): GET /api/mmo/trade-audit[?youngDays&minValue],
   GET /api/mmo/trade-audit/account?account=<uuid>,
   GET /api/mmo/signup-signals?account=<uuid>|?ip=<address>.
-- Tests: tests/integration/mmo-audit.test.ts 4/4 — signal insert-once +
+- Tests: tests/integration/mmo-audit.test.ts 4/4 ï¿½ signal insert-once +
   same-ip duplicate probe, settled barter queryable by account both
   directions, scripted one-sided funnel flagged (imbalance Infinity,
   both_young), balanced trades and aged accounts not flagged.
 
-## PW15 — Sea landing craft transport (THU-2239)
+## PW15 ï¿½ Sea landing craft transport (THU-2239)
 
 Transport choice recorded per the 11 Nov amendment: SEA first (milestone 2),
 heavy airlift deferred to milestone 3.
 
 - `UnitDef.heavyCargo` (rules.ts): a heavy-cargo transport carries ONE MCV
-  or ONE packed building carrier exclusively — no other cargo shares the
-  run — plus normal passenger seats for vehicles.
+  or ONE packed building carrier exclusively ï¿½ no other cargo shares the
+  run ï¿½ plus normal passenger seats for vehicles.
 - `landing-craft` added to the td pack for every faction: kind naval,
   unarmed (D7: meant to be escorted), transport 15 seats = five vehicles,
   prereq syrd (naval queue). Airlift deferred, recorded as deferred scope.
 - Boarding (game.ts canBoard/seatSize/cargoLocked): heavy cargo requires a
   heavyCargo transport and an EMPTY craft; once heavy cargo is aboard
   nothing else boards; vehicles fill seats as before. MCVs and packed
-  carriers are heavy cargo everywhere — they can no longer board ordinary
+  carriers are heavy cargo everywhere ï¿½ they can no longer board ordinary
   transports, only the landing craft.
-- Shoreline access (enterThink): transports board at REACH (288 leptons ˜
+- Shoreline access (enterThink): transports board at REACH (288 leptons ï¿½
   one cell) instead of 200 so a ship standing off the beach can be loaded;
   when the target cell is unpathable (water), the unit closes on the
-  nearest reachable cell beside the transport — the shoreline.
+  nearest reachable cell beside the transport ï¿½ the shoreline.
 - Unload: existing deploy->unload path; passengers disembark on the nearest
   passable cell within 3 cells. Over open water with no reachable cell the
-  unload is refused ('denied') and cargo stays aboard — recoverable, never
+  unload is refused ('denied') and cargo stays aboard ï¿½ recoverable, never
   duplicated. No receiving structure required: any valid shoreline works.
-- Protected cargo (D7 amendment): `transportCargoProtected` — a transport
+- Protected cargo (D7 amendment): `transportCargoProtected` ï¿½ a transport
   whose passengers are ALL newcomer- or recovery-protected shares the
   protection: damage() refuses it in both directions and aimAndFire blocks
   its weapons. Mixed or empty cargo is unprotected. (Newcomer protection
@@ -861,16 +861,16 @@ heavy airlift deferred to milestone 3.
 - Carrier death (D7): passengers die with the carrier and inherit its
   killer (`deadBy`), so cargo drops salvage under the PW24 rules instead of
   being an ownerless environmental kill.
-- Ownership safety: `transferOwner` refuses any entity with passengers —
+- Ownership safety: `transferOwner` refuses any entity with passengers ï¿½
   cargo must be unloaded before a transport can change hands, so barter can
   never split cargo from carrier or launder bound/protected units.
 - Snapshot/restore: passengers/carriedBy are entity fields and survive
-  captureGame/restoreGame unchanged (verified by test) — crash mid-crossing
+  captureGame/restoreGame unchanged (verified by test) ï¿½ crash mid-crossing
   cannot duplicate or orphan cargo.
 - New map preset `td-landing`: a 16-cell sea channel between mainland and
-  island — shore water AND water beyond unload reach, for transport and
+  island ï¿½ shore water AND water beyond unload reach, for transport and
   future frontier/island scenarios (PW16).
-- Tests: tests/unit/fusion-transport.test.ts 10/10 — def/queue, exclusive
+- Tests: tests/unit/fusion-transport.test.ts 10/10 ï¿½ def/queue, exclusive
   MCV run + far-bank yard deploy, five-vehicle capacity + sixth refused,
   vehicle-then-MCV refused, blocked unload recoverable, carrier death with
   dual salvage, protected-only cargo immunity, mixed cargo unprotected,
@@ -879,10 +879,10 @@ heavy airlift deferred to milestone 3.
   the unit 'landing-craft' (dash, quoted key).
 - Known gaps: heavy airlift (milestone 3, deferred per amendment); craft is
   unarmed so 'cannot attack while protected' is enforced in code but only
-  exercised via the damage path in tests; no client-specific UI needed —
+  exercised via the damage path in tests; no client-specific UI needed ï¿½
   build menu, enter and deploy flows are generic.
 
-## PW16 — Varied connected terrain + persistent frontier expansion (THU-2240)
+## PW16 ï¿½ Varied connected terrain + persistent frontier expansion (THU-2240)
 
 Frontier regions are now procedurally generated instead of reusing map
 preset 0 with a different seed.
@@ -890,7 +890,7 @@ preset 0 with a different seed.
 - `packages/fusion/src/worldgen.ts` (new, WORLDGEN_VERSION=1): versioned
   `WorldgenSpec` (width/height/seaLevel/terrain picks/rivers/resource
   clusters/spawn minimums/attempt budget) + `generateWorldMap(pack, spec,
-  seed)`. Spec + seed fully determine terrain, resources and spawn anchors —
+  seed)`. Spec + seed fully determine terrain, resources and spawn anchors ï¿½
   snapshots, restores and every runner replica regenerate identical land.
 - Generation: integer value-noise heightfield (3 octaves) ? land/water at
   seaLevel; coast-edge shore terrain, biome patches and impassable clumps
@@ -912,15 +912,15 @@ preset 0 with a different seed.
   generates spec+map diagnostics per new frontier region; `pickSpawnCell`
   and the settle path are worldgen-aware (map dims from spec).
 - Contracts: `MmoRulesProfile.worldgen` tuning (optional, defaults
-  96×96/seaLevel 118/3 rivers/14 clusters/min 8 sites/24 attempts) +
+  96ï¿½96/seaLevel 118/3 rivers/14 clusters/min 8 sites/24 attempts) +
   `MMO_WORLDGEN_DEFAULT`.
 - Frontier expansion was already append-only (new region per power band);
-  existing regions, coordinates and terrain are untouched — each region is
+  existing regions, coordinates and terrain are untouched ï¿½ each region is
   an independent deterministic map.
 - Tests: tests/unit/worldgen.test.ts 8/8 (determinism, variety, single
   naval component, spawn viability, resources, rejection diagnostics,
   snapshot round-trip); tests/integration/mmo-worldgen.test.ts 3/3 (spec +
-  diagnostics in region seed, runner boots 96×96 generated map and settles a
+  diagnostics in region seed, runner boots 96ï¿½96 generated map and settles a
   newcomer onto viable land with 16 bound units, out-of-band demand appends
   a distinct frontier region). Full unit 465 green; integration 109 green;
   lint + typecheck clean.
@@ -928,14 +928,14 @@ preset 0 with a different seed.
   draws MapData); choke-point metric is diagnostic-only (landBridges count);
   heavy airlift still deferred (milestone 3 scope per PW15).
 
-## PW18 — cross-region transfer (THU-2242)
+## PW18 ï¿½ cross-region transfer (THU-2242)
 
 - Engine (`packages/fusion/src/game.ts`): new `depart` order walks a unit to
   the nearest reachable map-edge cell, then `departNow` emits a
   `TransferManifestEntry` (type, owner durable pid, hp/maxHp, xp/rank, ammo,
   bound, packedType, faction, shield/protection flags, harvest state,
   cargoValue, facing/turret, cell, recursive `cargoUnits`) and removes the
-  entity via `removeUnitQuiet` — no death, no salvage, no kill credit.
+  entity via `removeUnitQuiet` ï¿½ no death, no salvage, no kill credit.
   `spawnTransfer(manifest, cell, durableId)` rebuilds the unit on the
   destination sim resolving the owner by durable player id (slots differ
   per region), restores cargo/passengers recursively, and assigns the
@@ -950,7 +950,7 @@ preset 0 with a different seed.
   lifecycle gates; `liveTransferForEntity` dedup that re-issues `depart`
   if the walk was interrupted; PREPARED row stores simId + ownerPid +
   order-time manifest; cancel only while PREPARED (post-release is
-  TOO_LATE — the asset is already in transit).
+  TOO_LATE ï¿½ the asset is already in transit).
 - Runner (`runner.ts`): `drainDepartEvents` matches depart events to
   PREPARED rows and releases SOURCE_RELEASED inside one fenced tx with a
   REGION_TRANSFER economy_operation + TRANSFER_OUT ledger row; a sweep
@@ -958,7 +958,7 @@ preset 0 with a different seed.
   order-time manifest. `drainInboundTransfers` picks up SOURCE_RELEASED
   rows, picks a deterministic arrival cell (pickSpawnCell seeded by
   transfer id, keep-away from live entities), spawnTransfers, then commits
-  DESTINATION_ACCEPTED?COMPLETED + TRANSFER_IN ledger in one tx — commit
+  DESTINATION_ACCEPTED?COMPLETED + TRANSFER_IN ledger in one tx ï¿½ commit
   failure or state race unspawns the entity (no ghosts, no duplicates).
   spawnTransfer returning null (owner has no slot) parks the row in
   RECOVERY_REQUIRED instead of dropping the asset. `depart` blocks
@@ -970,7 +970,7 @@ preset 0 with a different seed.
 - Tests: tests/unit/fusion-transfer.test.ts 8/8 (edge depart + manifest,
   cargo nesting, owner-by-pid slot resolution, null on missing owner,
   durableId snapshot round-trip, quiet unspawn); tests/integration/
-  mmo-transfer.test.ts 5/5 against two live runners — full crossing with
+  mmo-transfer.test.ts 5/5 against two live runners ï¿½ full crossing with
   ledger audit, transport cargo nesting, PREPARED cancel, invalid-action
   gates + dedup, and destination-runner restart mid-flight.
 - Verification: `pnpm typecheck` clean; `pnpm lint` clean; unit 473 green;
@@ -1020,3 +1020,50 @@ preset 0 with a different seed.
   polish beyond sim rendering, full two-browser scenario re-run with
   engine hashes/command traces recorded, PW20 isolation/backup/load/
   release evidence.
+- Two-browser scenario on deployed beta (2026-11-12, commit 9d9f45b):
+  two guest contexts settled the same region (GDI slot 3, Nod slot 4,
+  16 bound units each); region chat journaled and fanned out to both
+  subscribers (verified in both DOMs); Players panel showed the 42-row
+  world roster with settle status; Objectives showed 4 active dailies/
+  weekly with shield rewards; Ladder board loaded for settled players;
+  barter composer (To/Give/want/Send) and Sell (V) mode toggle verified.
+
+### PW20 (in progress) - THU-2244 - beta hardening, isolation, recovery, capacity - 2026-11-12
+
+- Isolation audit (verified): beta = LXC 283 projectcomrade-beta-01
+  (10.10.0.61) on prx-h4 vs live = LXC 280 projectcomrade-01
+  (10.10.0.60); domain beta.projectcomrade.co.uk vs
+  projectcomrade.co.uk; database comrade_beta + role comrade_beta_app
+  vs comrade + comrade_app; mmo schema grants scoped to the beta role;
+  comrade_beta_app can CONNECT to the live comrade database but has no
+  privileges on the live schema/tables (verified by direct probe);
+  separate cookie secrets and container env.
+- Backup/restore drill (verified): pg_dump of comrade_beta on the PG
+  VM -> /opt/comrade-backups/comrade_beta-20261112T192115Z.dump,
+  sha256 b12d911f21d4e4c0c5b0adae2d000ad1749f6ebb6f7e603b842ce0e21871402d;
+  restored into disposable comrade_beta_drill; key table counts and
+  journal tail matched source.
+- Fault injection on live beta found three real defects, all fixed in
+  PR #47 (merged 2e9e534):
+  1. Subscribe-burst lease orphaning: concurrent ensure() calls each
+     spawned a runner; loser's entries.delete could remove the winner's
+     registry entry, leaving a live lease-holding runner the service
+     could not re-attach -> permanent LEASE_HELD. ensure() is now
+     single-flight per region (regression test in mmo-gateway).
+  2. Hibernation under live subscribers: isQuiescent counted only
+     settled players (settlement join), so a connected newcomer choosing
+     a faction could be hibernated mid-onboarding -> REGION_UNAVAILABLE
+     / FENCE_LOST. RegionService now tracks subscriber sockets and the
+     runner treats any live subscriber as presence.
+  3. Stale-tick fence brick: snapshots are hibernate/stop-only, so
+     last_committed_tick can far exceed the restored sim tick; the
+     monotone fence then rejected every journal write including the wake
+     accrual -> region permanently unstartable. start() reconciles
+     last_committed_tick down to the sim tick once under the fresh
+     lease. Beta unbricked via the same reconcile applied manually.
+- Client fix in same PR: ladder poll gated on roster (was 400ing every
+  15 s for unsettled players).
+- Role connection limit raised 10 -> 30 for comrade_beta_app during
+  load probing (documented capacity note, not a code change).
+- Pending: post-deploy load/capacity rerun, rollback drill, final
+  evidence index + THU-2244 write-up.
