@@ -487,6 +487,19 @@ export type MmoSimAction =
   | { t: 'rally'; x: number; y: number }
   | { t: 'super'; entityId: MmoId; x: number; y: number; x2?: number; y2?: number };
 
+/** Explicit per-member alliance grants (PW09). Membership alone grants nothing;
+ *  the leader holds every permission implicitly. Construction is never grantable. */
+export interface AlliancePermissions {
+  station: boolean;
+  reinforce: boolean;
+  trade: boolean;
+  unitTransfer: boolean;
+}
+
+export const NO_ALLIANCE_PERMISSIONS: AlliancePermissions = {
+  station: false, reinforce: false, trade: false, unitTransfer: false,
+};
+
 /** Persistent-mode economic and social intents. */
 export type MmoWorldAction =
   | { t: 'sell'; entityId: MmoId }
@@ -502,7 +515,15 @@ export type MmoWorldAction =
   | { t: 'settle'; regionId: MmoId; faction: Faction; x: number; y: number }
   | { t: 'chat'; channel: 'region' | 'alliance'; text: string }
   | { t: 'ping'; x: number; y: number }
-  | { t: 'objectiveClaim'; objectiveId: MmoId };
+  | { t: 'objectiveClaim'; objectiveId: MmoId }
+  | { t: 'allianceCreate'; name: string }
+  | { t: 'allianceInvite'; allianceId: MmoId; playerId: MmoId }
+  | { t: 'allianceJoin'; allianceId: MmoId }
+  | { t: 'allianceLeave' }
+  | { t: 'allianceKick'; playerId: MmoId }
+  | { t: 'allianceSetPermissions'; playerId: MmoId; permissions: AlliancePermissions }
+  | { t: 'allianceDisband' }
+  | { t: 'setAutoRepair'; on: boolean };
 
 export type MmoAction = MmoSimAction | MmoWorldAction;
 
@@ -671,7 +692,9 @@ const faction = (x: unknown): x is Faction => typeof x === 'string' && /^[a-z0-9
 
 const SIM_KINDS = new Set(['move', 'attackMove', 'attack', 'fireAt', 'guard', 'scatter', 'stop', 'deploy', 'harvest', 'enter', 'build', 'cancel', 'place', 'repair', 'rally', 'super']);
 const WORLD_KINDS = new Set(['sell', 'pack', 'unpack', 'redeploy', 'barterOffer', 'barterAccept', 'barterDecline', 'barterCancel',
-  'selectShield', 'clearShield', 'endRecovery', 'settle', 'chat', 'ping', 'objectiveClaim']);
+  'selectShield', 'clearShield', 'endRecovery', 'settle', 'chat', 'ping', 'objectiveClaim',
+  'allianceCreate', 'allianceInvite', 'allianceJoin', 'allianceLeave', 'allianceKick',
+  'allianceSetPermissions', 'allianceDisband', 'setAutoRepair']);
 
 function ids(value: unknown, max = 64): value is MmoId[] {
   return Array.isArray(value) && value.length <= max && value.every(uuid);
@@ -694,6 +717,17 @@ export function parseBarterOffer(value: unknown): BarterOffer {
   if (!give.length && !want.length) throw new Error('Empty barter offer');
   if (v.fromId === v.toId) throw new Error('Cannot barter with yourself');
   return { offerId: v.offerId, regionId: v.regionId, fromId: v.fromId, toId: v.toId, give, want, createdAtMs: v.createdAtMs, expiresAtMs: v.expiresAtMs };
+}
+
+export function parseAlliancePermissions(value: unknown): AlliancePermissions {
+  const v = object(value);
+  for (const k of ['station', 'reinforce', 'trade', 'unitTransfer'] as const) {
+    if (typeof v[k] !== 'boolean') throw new Error(`Invalid alliance permission ${k}`);
+  }
+  return {
+    station: v.station as boolean, reinforce: v.reinforce as boolean,
+    trade: v.trade as boolean, unitTransfer: v.unitTransfer as boolean,
+  };
 }
 
 /** Validate one action payload. Returns the typed action or throws. */
@@ -728,6 +762,14 @@ export function parseMmoAction(value: unknown): MmoAction {
       return { t, channel: v.channel as 'region' | 'alliance', text: v.text as string } as MmoAction;
     case 'ping': needCell(); return { t, x: v.x as number, y: v.y as number } as MmoAction;
     case 'objectiveClaim': if (!uuid(v.objectiveId)) throw new Error('objectiveClaim requires an objective'); return { t, objectiveId: v.objectiveId } as MmoAction;
+    case 'allianceCreate': if (!str(v.name, 32) || !/^[A-Za-z0-9 _-]{2,32}$/.test(v.name as string)) throw new Error('Invalid alliance name'); return { t, name: v.name as string } as MmoAction;
+    case 'allianceInvite': if (!uuid(v.allianceId) || !uuid(v.playerId)) throw new Error('allianceInvite requires alliance and player'); return { t, allianceId: v.allianceId, playerId: v.playerId } as MmoAction;
+    case 'allianceJoin': if (!uuid(v.allianceId)) throw new Error('allianceJoin requires an alliance'); return { t, allianceId: v.allianceId } as MmoAction;
+    case 'allianceLeave': return { t } as MmoAction;
+    case 'allianceKick': if (!uuid(v.playerId)) throw new Error('allianceKick requires a player'); return { t, playerId: v.playerId } as MmoAction;
+    case 'allianceSetPermissions': if (!uuid(v.playerId)) throw new Error('allianceSetPermissions requires a player'); return { t, playerId: v.playerId, permissions: parseAlliancePermissions(v.permissions) } as MmoAction;
+    case 'allianceDisband': return { t } as MmoAction;
+    case 'setAutoRepair': if (typeof v.on !== 'boolean') throw new Error('setAutoRepair requires a boolean'); return { t, on: v.on } as MmoAction;
     default: throw new Error('Unknown MMO action');
   }
 }

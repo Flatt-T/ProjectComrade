@@ -107,6 +107,9 @@ const derPlayer = (raw: Record<string, unknown>): Player => ({
   ...(raw as unknown as Player),
   explored: u8d(raw.explored as string),
   visible: u8d(raw.visible as string),
+  // Snapshots predating PW09 lack these fields.
+  ally: (raw.ally as number) ?? -1,
+  autoRepair: raw.autoRepair === true,
 });
 
 interface GameInternals {

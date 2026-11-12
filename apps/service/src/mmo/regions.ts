@@ -4,9 +4,11 @@
 // need to submit commands. Everything here is inert unless MMO_DATABASE_URL is set.
 import { createHash, randomUUID } from 'node:crypto';
 import { mmoOne, mmoQuery } from './db.js';
-import { getRegion, joinWorld, createPlayer, type RegionRow } from './store.js';
+import { getRegion, joinWorld, createPlayer, MmoStoreError, type RegionRow } from './store.js';
 import { RegionRunner, type RegionRunnerOptions } from './runner.js';
-import { MMO_PROTOCOL, MMO_RULESET_VERSION, PERSISTENT_RULES_V1, type MmoSnapshotHeader } from '@comrade/contracts';
+import { createWorldHandler } from './world.js';
+import { authEnabled } from '../config.js';
+import { PERSISTENT_RULES_V1, MMO_PROTOCOL, MMO_RULESET_VERSION, type MmoSnapshotHeader } from '@comrade/contracts';
 
 export interface RegionIdentity {
   /** Stable account key: platform account uuid for registered users, a derived uuid for guests. */
@@ -82,7 +84,12 @@ export class RegionService {
     const region = await getRegion(regionId);
     if (!region) return undefined;
     const workerId = randomUUID();
-    const runner = new RegionRunner({ ...this.opts, regionId, workerId });
+    // PW09: durable world actions (alliances, caretaker flag, later protection
+    // and barter) resolve through the journaled world handler by default.
+    const runner = new RegionRunner({
+      ...this.opts, regionId, workerId,
+      worldHandler: this.opts.worldHandler ?? createWorldHandler(this.opts.rules ?? PERSISTENT_RULES_V1),
+    });
     const entry: RunnerEntry = { runner, workerId, startedAt: Date.now(), restarts: existing?.restarts ?? 0, nextRestartAt: 0 };
     this.entries.set(regionId, entry);
     try {
@@ -185,6 +192,12 @@ export class RegionService {
 
   /** Find or provision the durable player row for an authenticated identity. */
   async playerFor(identity: RegionIdentity, worldId: string) {
+    // COMRADE 18 PW09: guests cannot own a persistent base. The gateway rejects
+    // them earlier; this is the durable-layer guard so no path can provision one.
+    // Auth-disabled dev deployments treat the guest cookie as the only identity.
+    if (identity.kind === 'guest' && authEnabled() && process.env.MMO_ALLOW_GUESTS !== '1') {
+      throw new MmoStoreError('GUEST_NOT_ALLOWED', 'Persistent worlds require a registered account');
+    }
     let player = await mmoOne<{ player_id: string; display_name: string }>(
       'select player_id, display_name from player where account_id = $1', [identity.accountId]);
     if (!player) {

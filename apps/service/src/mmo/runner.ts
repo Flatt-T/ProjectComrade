@@ -34,7 +34,11 @@ import { mmoQuery } from './db.js';
 const TICK_MS = 1000 / 15;
 const PACK_LIST = Object.values(PACKS) as RulePack[];
 
-export interface SimPlayerSpec { playerId: string; name: string; faction: string }
+export interface SimPlayerSpec {
+  playerId: string; name: string; faction: string;
+  /** PW09: alliance key and caretaker flag at region birth (pre-existing state). */
+  ally?: number; autoRepair?: boolean;
+}
 export interface RegionSimSpec {
   packId: string; mapId: string; seed: number;
   players: SimPlayerSpec[];
@@ -47,10 +51,20 @@ export interface ClaimedJob {
   due_at_ms: string; attempts: number;
 }
 export type ScheduledJobHandler = (tx: PoolClient, job: ClaimedJob) => Promise<unknown>;
+export interface WorldHandlerResult {
+  result: unknown;
+  /** Extra engine commands this world action implies (e.g. PW09 alliance sync).
+   *  They apply at the same tick boundary and fan out on mmo.sim like sim intents. */
+  sim?: { slot: number; command: Command }[];
+}
 export type WorldActionHandler = (
   tx: PoolClient, action: MmoWorldAction,
-  ctx: { regionId: string; playerId: string; slot: number },
-) => Promise<unknown>;
+  ctx: {
+    regionId: string; playerId: string; slot: number;
+    /** Resolve another region member's sim slot, if present. */
+    slotOf: (playerId: string) => number | undefined;
+  },
+) => Promise<WorldHandlerResult>;
 
 export interface RegionRunnerOptions {
   regionId: string; workerId: string;
@@ -229,9 +243,15 @@ export class RegionRunner {
           upkeepPerPointPerMinute: this.opts.rules.armySupply.upkeepPerPointPerMinute,
           maxCompounds: this.opts.rules.maxCompounds,
         },
-        players: spec.players.map(p => ({ name: p.name, faction: p.faction, ai: false })),
+        players: spec.players.map(p => ({
+          name: p.name, faction: p.faction, ai: false,
+          ally: p.ally, autoRepair: p.autoRepair,
+        })),
       };
       this.game = new Game(setup);
+      // PW09: seed durable alliance/caretaker state for a fresh region. This is
+      // pre-tick initialization (the journal starts empty), not a mutation.
+      await this.syncPersistentPlayerFlags(spec);
       this.opts.log('region-created', { regionId: this.opts.regionId, tick: 0, epoch: this.epoch });
     }
 
@@ -542,6 +562,32 @@ export class RegionRunner {
     });
   }
 
+  /**
+   * PW09 fresh-start initialization: copy durable alliance keys and the caretaker
+   * flag onto the newborn players. Snapshot restores carry these fields already;
+   * this only runs when no snapshot exists, before the first tick.
+   */
+  private async syncPersistentPlayerFlags(spec: RegionSimSpec): Promise<void> {
+    const g = this.game;
+    if (!g?.persistent) return;
+    const ids = spec.players.map(p => p.playerId);
+    if (!ids.length) return;
+    const rows = await mmoQuery<{ player_id: string; ally_key: string | null; auto_repair: boolean }>(
+      `select p.player_id, a.ally_key::text as ally_key, p.auto_repair
+         from player p
+         left join alliance_member m on m.player_id = p.player_id and m.left_at is null
+         left join alliance a on a.alliance_id = m.alliance_id and a.disbanded_at is null
+        where p.player_id = any($1)`, [ids]);
+    const byId = new Map(rows.map(r => [r.player_id, r]));
+    for (const [i, p] of spec.players.entries()) {
+      const player = g.players[i];
+      if (!player) continue;
+      const row = byId.get(p.playerId);
+      player.ally = row?.ally_key != null ? Number(row.ally_key) : -1;
+      player.autoRepair = row?.auto_repair === true;
+    }
+  }
+
   /** Apply every unapplied command/scheduled journal event in seq order. */
   private async applyUnappliedEvents(): Promise<void> {
     for (;;) {
@@ -584,12 +630,13 @@ export class RegionRunner {
           })]);
         // Resolved sim command fan-out: subscribers run the same engine, so they need
         // the exact Fusion command (sim ids, apply tick) not the durable-id intent.
-        if (applied.simCommand) {
+        // World actions may imply several (PW09 alliance/caretaker sync).
+        for (const sc of applied.simCommands ?? []) {
           await tx.query(
             `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,'mmo.sim',$4)`,
             [randomUUID(), this.opts.regionId, event.event_seq, JSON.stringify({
-              eventSeq: event.event_seq, atTick: applied.simCommand.atTick,
-              slot: applied.simCommand.slot, command: applied.simCommand.command,
+              eventSeq: event.event_seq, atTick: sc.atTick,
+              slot: sc.slot, command: sc.command,
               epoch: this.epoch,
             })]);
         }
@@ -604,7 +651,7 @@ export class RegionRunner {
     event_kind: string; payload: unknown;
   }): Promise<{
     result: unknown; intent?: { playerId: string; commandId: string };
-    simCommand?: { slot: number; atTick: number; command: Command };
+    simCommands?: { slot: number; atTick: number; command: Command }[];
   }> {
     const payload = event.payload as Record<string, unknown>;
     if (event.event_kind === 'accrual') {
@@ -627,14 +674,20 @@ export class RegionRunner {
         this.game!.enqueue(slot, cmd, atTick);
         return {
           result: { accepted: true, via: 'sim', action: action.t }, intent,
-          simCommand: { slot, atTick, command: cmd },
+          simCommands: [{ slot, atTick, command: cmd }],
         };
       }
       if (this.opts.worldHandler) {
         const handled = await this.opts.worldHandler(tx, action as MmoWorldAction, {
           regionId: this.opts.regionId, playerId, slot,
+          slotOf: pid => this.slotByPlayer.get(pid),
         });
-        return { result: handled ?? { accepted: true }, intent };
+        const atTick = this.game!.tick + 1;
+        const simCommands = (handled.sim ?? []).map(s => {
+          this.game!.enqueue(s.slot, s.command, atTick);
+          return { slot: s.slot, atTick, command: s.command };
+        });
+        return { result: handled.result ?? { accepted: true }, intent, simCommands };
       }
       return { result: { accepted: false, reason: 'UNSUPPORTED_ACTION', action: action.t }, intent };
     }

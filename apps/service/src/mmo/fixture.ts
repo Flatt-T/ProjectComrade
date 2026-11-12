@@ -25,6 +25,8 @@ export interface FixtureWorld {
  */
 export async function seedFixtureWorld(args?: {
   workerId?: string; leaseMs?: number; playerCount?: number; capabilities?: MmoCapabilities;
+  /** Map preset for the embedded sim (default: the pack's first map). */
+  mapId?: string;
   /** Override the embedded Fusion sim spec; `null` skips embedding one. */
   sim?: import('./runner.js').RegionSimSpec | null;
 }): Promise<FixtureWorld> {
@@ -56,7 +58,7 @@ export async function seedFixtureWorld(args?: {
     const sim = args?.sim ?? (() => {
       const pack = PACKS['td'];
       return {
-        packId: pack.id, mapId: pack.maps[0].id, seed: randomInt(1, 0x7fffffff),
+        packId: pack.id, mapId: args?.mapId ?? pack.maps[0].id, seed: randomInt(1, 0x7fffffff),
         players: players.map((p, i) => ({
           playerId: p.playerId, name: p.displayName,
           faction: pack.factions[i % pack.factions.length].id,
