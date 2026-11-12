@@ -561,7 +561,17 @@ export class RegionRunner {
       `select count(*)::text as n from scheduled_job
         where region_id = $1 and state = 'pending' and due_at_ms <= $2`,
       [this.opts.regionId, now + this.opts.quiescence.lookaheadMs]);
-    return Number(due?.n ?? 0) === 0;
+    if (Number(due?.n ?? 0) !== 0) return false;
+    // Connected players keep the region awake: hibernating under live sockets
+    // strands them on a dead runner (commands fail REGION_UNAVAILABLE and no
+    // observations arrive to trigger resync). Only a truly unattended region
+    // may sleep — that is what the quiescent accrual is for.
+    const present = await mmoOne<{ n: string }>(
+      `select count(*)::text as n from player p
+         join settlement s on s.player_id = p.player_id
+        where s.region_id = $1 and p.online_count > 0`,
+      [this.opts.regionId]);
+    return Number(present?.n ?? 0) === 0;
   }
 
   private async onQuiescenceCheck(): Promise<void> {
