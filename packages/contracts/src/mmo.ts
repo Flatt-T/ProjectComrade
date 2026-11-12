@@ -87,6 +87,36 @@ export interface MmoRulesProfile {
   salvage: { percentOfCost: number; decaySeconds: number };
   /** Capturable sites per region (min/max neutral sites generated). */
   sitesPerRegion: { min: number; max: number };
+  /** Capturable sites (PW24): presence-based capture, hold perks and decay.
+   *  Optional for profiles pinned before PW24; consumers fall back to
+   *  MMO_SITES_DEFAULT. */
+  sites?: {
+    /** Hostile unit-ticks inside the radius needed to flip ownership. */
+    captureTicks: number;
+    captureRadiusCells: number;
+    /** Capture progress lost per tick without hostile presence. */
+    decayPerTick: number;
+    /** Credits per in-game minute paid to the income-site holder. */
+    incomeCreditsPerMinute: number;
+    /** HP restored per in-game minute to the holder's structures near a depot site. */
+    depotRepairHpPerMinute: number;
+    depotRadiusCells: number;
+    /** Ticks between tech-site upgrade grants to the holder. */
+    techGrantTicks: number;
+  };
+  /** Ladder points (PW24): awards derived from journaled sim events.
+   *  Optional for profiles pinned before PW24; consumers fall back to
+   *  MMO_LADDER_DEFAULT. */
+  ladder?: {
+    /** Points per 100 credits of salvage collected. */
+    salvagePointsPer100Credits: number;
+    /** Points per in-game minute a player or alliance holds a site. */
+    siteHoldPointsPerMinute: number;
+    /** Points awarded when a contested site capture is repelled. */
+    defencePoints: number;
+    /** Points awarded to the capturing player for taking a site (objectives). */
+    capturePoints: number;
+  };
   /** Transport capacities (COMRADE 18 §3.8). */
   transport: {
     seaLandingCraft: { capacityMcv: number; capacityCarrier: number; capacityVehicles: number };
@@ -146,6 +176,15 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
   recoveryMilestone: { power: 1, barracks: 1 },
   salvage: { percentOfCost: 25, decaySeconds: 600 },
   sitesPerRegion: { min: 2, max: 4 },
+  sites: {
+    captureTicks: 150, captureRadiusCells: 6, decayPerTick: 1,
+    incomeCreditsPerMinute: 100, depotRepairHpPerMinute: 50,
+    depotRadiusCells: 10, techGrantTicks: 13_500,
+  },
+  ladder: {
+    salvagePointsPer100Credits: 1, siteHoldPointsPerMinute: 2, defencePoints: 5,
+    capturePoints: 10,
+  },
   transport: {
     seaLandingCraft: { capacityMcv: 1, capacityCarrier: 1, capacityVehicles: 5 },
     heavyAirlift: { capacityMcv: 1, capacityCarrier: 1 },
@@ -173,6 +212,10 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
     superweaponNearbyCells: 60,
   },
 };
+
+/** Fallbacks for rules profiles pinned before PW24 added the sections. */
+export const MMO_SITES_DEFAULT: NonNullable<MmoRulesProfile['sites']> = PERSISTENT_RULES_V1.sites!;
+export const MMO_LADDER_DEFAULT: NonNullable<MmoRulesProfile['ladder']> = PERSISTENT_RULES_V1.ladder!;
 
 // ---------------------------------------------------------------------------
 // Capabilities and open decisions (COMRADE 18 §6)
@@ -262,6 +305,13 @@ function parseProfile(value: unknown): MmoRulesProfile {
     || !isPosInt(p.recoveryMilestone?.power) || !isPosInt(p.recoveryMilestone?.barracks)
     || !isPosInt(p.salvage?.percentOfCost) || p.salvage.percentOfCost > 100 || !isPosInt(p.salvage?.decaySeconds)
     || !isPosInt(p.sitesPerRegion?.min) || !isPosInt(p.sitesPerRegion?.max) || p.sitesPerRegion.min > p.sitesPerRegion.max
+    || (p.sites !== undefined && (!isPosInt(p.sites.captureTicks) || !isPosInt(p.sites.captureRadiusCells)
+      || !isNonNegInt(p.sites.decayPerTick) || !isPosInt(p.sites.incomeCreditsPerMinute)
+      || !isNonNegInt(p.sites.depotRepairHpPerMinute) || !isPosInt(p.sites.depotRadiusCells)
+      || !isPosInt(p.sites.techGrantTicks)))
+    || (p.ladder !== undefined && (!isNonNegInt(p.ladder.salvagePointsPer100Credits)
+      || !isNonNegInt(p.ladder.siteHoldPointsPerMinute) || !isNonNegInt(p.ladder.defencePoints)
+      || !isNonNegInt(p.ladder.capturePoints)))
     || !isPosInt(p.transport?.seaLandingCraft?.capacityMcv) || !isPosInt(p.transport?.seaLandingCraft?.capacityCarrier)
     || !isPosInt(p.transport?.seaLandingCraft?.capacityVehicles)
     || !isPosInt(p.transport?.heavyAirlift?.capacityMcv) || !isPosInt(p.transport?.heavyAirlift?.capacityCarrier)

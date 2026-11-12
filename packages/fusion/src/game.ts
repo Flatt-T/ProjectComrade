@@ -102,6 +102,19 @@ export interface GameSetup {
   /** Bonus-crate frequency, 0 (none) to 200; 100 drops about one a minute. */
   crates?: number;
   /**
+   * PW24 salvage in classic skirmish matches (optional setting): destroyed
+   * units/buildings drop credit crates worth a share of build cost. Persistent
+   * regions get the same mechanic through `mmo.salvage`, which adds the
+   * anti-snowball power-score floor.
+   */
+  salvage?: { percentOfCost: number; decaySeconds: number };
+  /**
+   * PW24 capturable sites as an optional classic-skirmish setting: neutral
+   * sites are placed deterministically and use the standard site tuning.
+   * Persistent regions get sites through `mmo.sites` + the runner's plan.
+   */
+  sites?: { min: number; max: number };
+  /**
    * Persistent-world profile (PW21): players may join and leave a running region,
    * entities change hands by command, and there is no match-over condition — the
    * region authority decides elimination, protection and recovery instead.
@@ -131,6 +144,33 @@ export interface MmoTuning {
   recoveryCreditCap?: number;
   /** Recovery: structure roles that may be rebuilt while recovering (PW12). */
   recoveryBuildRoles?: string[];
+  /**
+   * PW24 salvage (COMRADE 18 §3.9): share of build cost dropped as a crate,
+   * decay time, and the anti-snowball floor — a victim whose in-sim power
+   * score is below `mismatchFloorRatio` of the attacker's yields no crate.
+   * `scoreWeights` mirrors the profile's powerScoreWeights so the in-sim
+   * score matches the durable world_member score.
+   */
+  salvage?: {
+    percentOfCost: number;
+    decaySeconds: number;
+    mismatchFloorRatio: number;
+    scoreWeights: { structure: number; unit: number; tech: number };
+  };
+  /**
+   * PW24 capturable sites: presence-based capture radius/progress, hold perk
+   * rates, and the cadence perks pay out on. Absent means no site logic even
+   * if site entities exist.
+   */
+  sites?: {
+    captureTicks: number;
+    captureRadiusCells: number;
+    decayPerTick: number;
+    incomeCreditsPerMinute: number;
+    depotRepairHpPerMinute: number;
+    depotRadiusCells: number;
+    techGrantTicks: number;
+  };
 }
 
 /** Supply upkeep cadence: one in-game minute at the 15 Hz tick rate. */
@@ -259,6 +299,18 @@ export interface Entity {
    * '' on entities predating PW17; restoreGame falls back to the owner's.
    */
   faction: string;
+  /**
+   * PW24: player slot of the unit that dealt the killing damage, stamped when
+   * hp reaches 0 so removeEntity can apply the salvage mismatch rule. -1 for
+   * environmental/ownerless kills; transient — never serialized.
+   */
+  deadBy?: number;
+  /**
+   * PW24: capture progress for site structures. `by` is the slot currently
+   * contesting, `heldSince` the tick the current owner took it (-1 = never).
+   * Only meaningful while structDef(e).site is set.
+   */
+  siteState?: { progress: number; by: number; heldSince: number };
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -335,8 +387,43 @@ export interface Strike {
 export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number; /** Prowl destination (cell index), or -1. */ goal: number; /** Ticks spent on the surface this stint. */ up: number; /** Visual / biome form (worm, tusken, ewok, opee). */ form: string }
 
 /** A bonus crate waiting on the map. */
-export type CrateKind = 'money' | 'heal' | 'veteran' | 'reveal' | 'unit';
-export interface Crate { id: number; cell: number; kind: CrateKind }
+export type CrateKind = 'money' | 'heal' | 'veteran' | 'reveal' | 'unit' | 'salvage';
+export interface Crate {
+  id: number; cell: number; kind: CrateKind;
+  /** PW24: credit value for 'salvage' crates; absent on classic bonus crates. */
+  value?: number;
+  /** PW24: tick at which a salvage crate decays; absent means it never decays. */
+  expiresTick?: number;
+}
+
+/** One salvage crate spawn or collection, drained by the region runner for audit. */
+export interface SalvageEvent {
+  tick: number;
+  cell: number;
+  credits: number;
+  kind: 'spawn' | 'collect';
+  /** Sim entity id of the destroyed asset (spawn events only). */
+  simId: number;
+  victimOwner: number;
+  collectorOwner: number;
+  killerOwner: number;
+  victimType: string;
+  victimKind: string;
+}
+
+/** One capturable-site transition, drained by the region runner for audit. */
+export interface SiteEvent {
+  tick: number;
+  /** Sim entity id of the site. */
+  simId: number;
+  siteType: string;
+  siteKind: 'income' | 'tech' | 'depot';
+  kind: 'capture' | 'repelled';
+  fromOwner: number;
+  toOwner: number;
+  /** Ticks the outgoing owner held the site (capture events). */
+  heldTicks: number;
+}
 /** The renewal setting at which fields grow back at the pack's own rate (mirrors the lobby's). */
 export const RENEWAL_CLASSIC = 25;
 /** How often crates drop at 100%, and what each kind is worth. */
@@ -364,12 +451,96 @@ export function withPackedCarriers(pack: RulePack): RulePack {
     const id = `pack_${s.id}`;
     if (units[id]) continue;
     units[id] = {
-      id, name: `Packed ${s.name}`, kind: 'vehicle', cost: 0, hp: s.hp,
+      // PW24: a destroyed carrier salvages the packed building's build cost.
+      id, name: `Packed ${s.name}`, kind: 'vehicle', cost: s.cost, hp: s.hp,
       armor: 'heavy', speed: 18, turn: 6, sight: Math.max(3, s.sight),
       prereqs: [], tech: 99, shape: s.shape, role: 'support', packedCarrier: s.id,
     };
   }
   return { ...pack, units };
+}
+
+/**
+ * PW24: neutral capturable-site structure defs, injected into persistent packs
+ * only — classic matches and mashup composition never see them. Sites are
+ * added AFTER carriers so they never receive pack_ units (they cannot pack).
+ * The runner decides placement/count per region; these are just the defs.
+ */
+export function withRegionSites(pack: RulePack): RulePack {
+  const structures = { ...pack.structures };
+  const base = { cost: 0, power: 0, sight: 4, prereqs: [] as string[], tech: 99, queue: 'structure' as const };
+  if (!structures['site_income']) {
+    structures['site_income'] = { ...base, id: 'site_income', name: 'Resource Site', hp: 2000, armor: 'building', w: 2, h: 2, site: 'income', shape: 'conyard' };
+  }
+  if (!structures['site_tech']) {
+    structures['site_tech'] = { ...base, id: 'site_tech', name: 'Research Site', hp: 2000, armor: 'building', w: 2, h: 2, site: 'tech', shape: 'conyard' };
+  }
+  if (!structures['site_depot']) {
+    structures['site_depot'] = { ...base, id: 'site_depot', name: 'Repair Depot Site', hp: 2500, armor: 'building', w: 3, h: 3, site: 'depot', shape: 'conyard' };
+  }
+  return { ...pack, structures };
+}
+
+/** Persistent pack with every region-mechanic def layer applied (carriers + sites). */
+export function withPersistentStructures(pack: RulePack): RulePack {
+  return withRegionSites(withPackedCarriers(pack));
+}
+
+/** Standard site tuning for classic-skirmish sites (mirrors the persistent profile defaults). */
+export const CLASSIC_SITE_TUNING = {
+  captureTicks: 150, captureRadiusCells: 6, decayPerTick: 1,
+  incomeCreditsPerMinute: 100, depotRepairHpPerMinute: 50,
+  depotRadiusCells: 10, techGrantTicks: 13_500,
+} as const;
+
+export interface SitePlanEntry {
+  type: 'site_income' | 'site_tech' | 'site_depot';
+  /** Top-left footprint cell. */
+  cx: number;
+  cy: number;
+}
+
+/**
+ * PW24: deterministic capturable-site placement for a region. Pure function of
+ * (pack, map, seed, count range) so every runner derives the identical plan —
+ * no journal record is needed for placement itself. Sites keep clear of map
+ * edges, spawn points, occupied cells and each other.
+ */
+export function regionSitePlan(pack: RulePack, map: MapData, seed: number, min: number, max: number): SitePlanEntry[] {
+  const rng = new Rng((seed ^ 0x51e7a9) >>> 0);
+  const count = Math.min(max, Math.max(min, min + rng.int(Math.max(1, max - min + 1))));
+  const types: SitePlanEntry['type'][] = ['site_income', 'site_tech', 'site_depot'];
+  const footprints: Record<SitePlanEntry['type'], { w: number; h: number }> = {
+    site_income: { w: 2, h: 2 }, site_tech: { w: 2, h: 2 }, site_depot: { w: 3, h: 3 },
+  };
+  const out: SitePlanEntry[] = [];
+  let guard = 0;
+  while (out.length < count && guard++ < 8000) {
+    const type = types[rng.int(types.length)];
+    const { w, h } = footprints[type];
+    const cx = 3 + rng.int(Math.max(1, map.w - w - 6));
+    const cy = 3 + rng.int(Math.max(1, map.h - h - 6));
+    let ok = true;
+    for (let y = cy; y < cy + h && ok; y++) {
+      for (let x = cx; x < cx + w && ok; x++) {
+        const i = y * map.w + x;
+        if (map.occupied[i] || !buildableTerrain(pack, map, i)) ok = false;
+      }
+    }
+    if (!ok) continue;
+    // Clear of spawn points and previously placed sites.
+    for (const st of map.starts) {
+      if (Math.abs(st.x - cx) < 8 && Math.abs(st.y - cy) < 8) { ok = false; break; }
+    }
+    if (!ok) continue;
+    for (const s of out) {
+      const od = footprints[s.type];
+      if (cx < s.cx + od.w + 6 && cx + w + 6 > s.cx && cy < s.cy + od.h + 6 && cy + h + 6 > s.cy) { ok = false; break; }
+    }
+    if (!ok) continue;
+    out.push({ type, cx, cy });
+  }
+  return out;
 }
 
 export class Game {
@@ -405,6 +576,21 @@ export class Game {
   /** Bonus-crate frequency percent; 0 means no crates. */
   readonly crateRate: number;
   crates: Crate[] = [];
+  /** PW24: skirmish salvage setting (classic matches); persistent uses mmo.salvage. */
+  private classicSalvage?: { percentOfCost: number; decaySeconds: number };
+  /** PW24: skirmish capturable-site count range (classic matches). */
+  private classicSites?: { min: number; max: number };
+  /** PW24 audit feed: salvage spawns/collects; the region runner drains it. */
+  readonly salvageEvents: SalvageEvent[] = [];
+  /** PW24 audit feed: site captures and repelled contests; the runner drains it. */
+  readonly siteEvents: SiteEvent[] = [];
+
+  /** Effective salvage config: persistent regions read mmo.salvage (patchable post-restore). */
+  private salvageConfig() {
+    if (this.persistent) return this.mmo?.salvage;
+    const c = this.classicSalvage;
+    return c ? { ...c, mismatchFloorRatio: 0, scoreWeights: undefined } : undefined;
+  }
   private ai: (AIState | null)[] = [];
   readonly mapPreset: MapPreset;
   /** True under the persistent profile: join/leave/transfer commands and no match-over. */
@@ -417,8 +603,9 @@ export class Game {
   private startMoney = 0;
 
   constructor(setup: GameSetup) {
-    // PW14: persistent games resolve carriers; classic matches keep the raw pack.
-    this.pack = setup.persistent === true ? withPackedCarriers(setup.pack) : setup.pack;
+    // PW14/PW24: persistent games resolve carriers and site defs; classic matches keep the raw pack.
+    this.pack = setup.persistent === true ? withPersistentStructures(setup.pack)
+      : setup.sites ? withRegionSites(setup.pack) : setup.pack;
     const preset = setup.pack.maps.find(m => m.id === setup.mapId) ?? setup.pack.maps[0];
     this.mapPreset = preset;
     this.map = generateMap(setup.pack, preset, setup.seed);
@@ -432,10 +619,19 @@ export class Game {
     this.persistent = setup.persistent === true;
     // Tuning is a persistent-mode contract; classic matches ignore it entirely.
     this.mmo = this.persistent ? setup.mmo : undefined;
+    this.classicSalvage = setup.salvage ? { ...setup.salvage } : undefined;
+    this.classicSites = setup.sites ? { ...setup.sites } : undefined;
     const credits = setup.pack.startCredits[setup.credits ?? 'standard'];
     this.startMoney = credits;
     const size = this.map.w * this.map.h;
     setup.players.slice(0, preset.starts.length).forEach(p => this.addPlayer(p, credits, size));
+    // Classic skirmish sites spawn once at map gen; persistent regions place
+    // theirs through the runner so restores and fresh games agree.
+    if (this.classicSites) {
+      for (const s of regionSitePlan(this.pack, this.map, setup.seed, this.classicSites.min, this.classicSites.max)) {
+        this.spawnStructure(s.type, -1, s.cx, s.cy);
+      }
+    }
     this.updateFog();
   }
 
@@ -597,7 +793,8 @@ export class Game {
     if (cmd.t === 'setShield') {
       if (this.persistent && this.mmo?.shieldRadiusCells) {
         const c = this.entities.get(cmd.compound);
-        if (c && c.kind === 'structure') c.shielded = cmd.on;
+        // PW24: capturable sites are objectives — they can never be shielded.
+        if (c && c.kind === 'structure' && !this.structDef(c).site) c.shielded = cmd.on;
       }
       return;
     }
@@ -698,7 +895,7 @@ export class Game {
         const s = this.entities.get(cmd.id);
         // PW11/PW26: bound assets (starter grant, recovery MCV) cannot be sold
         // for value — they leave play only through the sanctioned transitions.
-        if (s && s.owner === slot && s.kind === 'structure' && s.hp > 0 && !s.bound) {
+        if (s && s.owner === slot && s.kind === 'structure' && s.hp > 0 && !s.bound && !this.structDef(s).site) {
           const def = this.pack.structures[s.type];
           player.credits += Math.floor((def.cost * this.pack.sellRefundPercent * s.hp) / (100 * s.maxHp));
           const fx = this.effect('sell', s.x, s.y, s.cx, s.cy, 24); fx.item = s.type; fx.owner = s.owner;
@@ -789,6 +986,7 @@ export class Game {
     this.updateProjectiles();
     this.resolveStrikes();
     this.mechanics();
+    this.siteTick();
     this.collectCrates();
     if (this.tick % 4 === 0) this.updateFog();
     this.cleanup();
@@ -2077,6 +2275,8 @@ export class Game {
 
   damage(e: Entity, amount: number, by: number, source = 0, quiet = false) {
     if (e.hp <= 0 || e.invulnUntil > this.tick && !quiet) return;
+    // PW24: capturable sites are objectives, not assets — they take no damage.
+    if (e.kind === 'structure' && this.structDef(e).site) return;
     // PW10: an active compound shield is a hard boundary — no damage crosses it.
     if (this.shieldBlocksDamage(e, by, source)) return;
     // PW11: newcomer setup protection is player-scoped — a protected player's
@@ -2103,6 +2303,7 @@ export class Game {
     e.hp -= amount;
     if (e.hp <= 0) {
       e.hp = 0;
+      e.deadBy = by;
       const killer = this.players[by];
       if (killer && by !== e.owner) killer.stats.killed++;
       const victim = this.players[e.owner];
@@ -2336,8 +2537,104 @@ export class Game {
     }
   }
 
+  /**
+   * PW24 capturable sites (COMRADE 18 §3.9): neutral site structures are taken
+   * by presence — hostile units inside the capture radius accumulate progress
+   * per unit per tick until the threshold flips ownership; without hostiles the
+   * progress decays. Holders are paid per in-game minute: income sites credit
+   * the owner, depot sites repair the holder's nearby structures, tech sites
+   * grant upgrade levels. Sites are indestructible, unpackable and unshielded
+   * — they are objectives, not assets.
+   */
+  private siteTick() {
+    // Persistent regions use the pinned profile; classic skirmish sites use
+    // the standard tuning when the optional setting is on.
+    const cfg = this.mmo?.sites ?? (this.classicSites ? CLASSIC_SITE_TUNING : undefined);
+    if (!cfg) return;
+    const r2 = (cfg.captureRadiusCells * LEPTONS) * (cfg.captureRadiusCells * LEPTONS);
+    for (const s of this.entities.values()) {
+      if (s.kind !== 'structure' || s.hp <= 0) continue;
+      const kind = this.structDef(s).site;
+      if (!kind) continue;
+      if (!s.siteState) s.siteState = { progress: 0, by: -1, heldSince: -1 };
+      const st = s.siteState;
+      if (st.heldSince < 0) st.heldSince = this.tick;
+      const cx = (s.cx + s.w / 2) * LEPTONS, cy = (s.cy + s.h / 2) * LEPTONS;
+      const counts = new Map<number, number>();
+      for (const u of this.entities.values()) {
+        if (u.kind !== 'unit' || u.hp <= 0 || u.carriedBy || u.owner < 0 || this.isAircraft(u)) continue;
+        const dx = u.x - cx, dy = u.y - cy;
+        if (dx * dx + dy * dy > r2) continue;
+        if (s.owner >= 0 && !this.isEnemy(u.owner, s.owner)) continue;
+        counts.set(u.owner, (counts.get(u.owner) ?? 0) + 1);
+      }
+      let best = -1, bestN = 0;
+      for (const [o, n] of counts) {
+        if (n > bestN || (n === bestN && (best < 0 || o < best))) { best = o; bestN = n; }
+      }
+      if (bestN > 0) {
+        st.progress = Math.min(cfg.captureTicks, st.progress + bestN);
+        st.by = best;
+        if (st.progress >= cfg.captureTicks) {
+          const from = s.owner;
+          const heldTicks = from >= 0 && st.heldSince >= 0 ? this.tick - st.heldSince : 0;
+          s.owner = best; s.originalOwner = best;
+          st.progress = 0; st.by = -1; st.heldSince = this.tick;
+          this.powerDirty = true;
+          const fx = this.effect('capture', s.x, s.y, 0, 0, 30); fx.owner = best; fx.item = s.type;
+          this.siteEvents.push({
+            tick: this.tick, simId: s.id, siteType: s.type, siteKind: kind,
+            kind: 'capture', fromOwner: from, toOwner: best, heldTicks,
+          });
+          this.hooks.siteCapture?.(this, s.type, best);
+        }
+      } else {
+        const wasContested = st.progress > 0;
+        st.progress = Math.max(0, st.progress - cfg.decayPerTick);
+        st.by = -1;
+        if (wasContested && st.progress === 0 && s.owner >= 0) {
+          this.siteEvents.push({
+            tick: this.tick, simId: s.id, siteType: s.type, siteKind: kind,
+            kind: 'repelled', fromOwner: s.owner, toOwner: -1,
+            heldTicks: st.heldSince >= 0 ? this.tick - st.heldSince : 0,
+          });
+        }
+      }
+      // Hold perks on the supply-upkeep cadence (one in-game minute).
+      if (s.owner >= 0 && this.tick % SUPPLY_UPKEEP_TICKS === 0) {
+        const holder = this.players[s.owner];
+        if (!holder) continue;
+        if (kind === 'income') {
+          holder.credits += cfg.incomeCreditsPerMinute;
+        } else if (kind === 'depot') {
+          const dr2 = (cfg.depotRadiusCells * LEPTONS) * (cfg.depotRadiusCells * LEPTONS);
+          for (const t of this.entities.values()) {
+            if (t.kind !== 'structure' || t.owner !== s.owner || t.hp <= 0 || t.hp >= t.maxHp) continue;
+            const dx = t.x - cx, dy = t.y - cy;
+            if (dx * dx + dy * dy <= dr2) t.hp = Math.min(t.maxHp, t.hp + cfg.depotRepairHpPerMinute);
+          }
+        } else if (kind === 'tech' && this.tick % cfg.techGrantTicks === 0) {
+          // Grant one upgrade level to the holder's most valuable production
+          // building that still has upgrade headroom.
+          let bestS: Entity | undefined, bestCost = -1;
+          for (const t of this.entities.values()) {
+            if (t.kind !== 'structure' || t.owner !== s.owner || t.hp <= 0) continue;
+            const d = this.structDef(t);
+            if (!d.upgrades || (holder.upgrades[t.type] ?? 0) >= d.upgrades) continue;
+            if (d.cost > bestCost) { bestCost = d.cost; bestS = t; }
+          }
+          if (bestS) holder.upgrades[bestS.type] = (holder.upgrades[bestS.type] ?? 0) + 1;
+        }
+      }
+    }
+  }
+
   /** A ground unit standing on a crate opens it. */
   private collectCrates() {
+    // PW24: salvage crates decay on their own clock, collector or not.
+    if (this.crates.some(c => c.expiresTick !== undefined && c.expiresTick <= this.tick)) {
+      this.crates = this.crates.filter(c => c.expiresTick === undefined || c.expiresTick > this.tick);
+    }
     if (!this.crates.length) return;
     for (const e of this.entities.values()) {
       if (e.kind !== 'unit' || e.hp <= 0 || e.carriedBy || this.isAircraft(e) || e.owner < 0) continue;
@@ -2372,6 +2669,17 @@ export class Game {
       case 'reveal':
         this.reveals.push({ owner: finder.owner, x, y, r: Math.max(this.map.w, this.map.h), until: this.tick + 450 });
         break;
+      case 'salvage': {
+        // PW24: credit crates pay out directly; the runner audits the spawn.
+        const value = crate.value ?? 0;
+        p.credits += value;
+        this.salvageEvents.push({
+          tick: this.tick, cell: crate.cell, credits: value, kind: 'collect', simId: 0,
+          victimOwner: -1, collectorOwner: finder.owner, killerOwner: -1,
+          victimType: '', victimKind: '',
+        });
+        break;
+      }
       case 'unit': {
         // A crew is already aboard: the free unit is whatever this side rolls out first.
         const faction = this.pack.factions.find(f => f.id === p.faction);
@@ -2655,7 +2963,52 @@ export class Game {
         this.effect('convert', v.x, v.y, 0, 0, 20);
       }
     }
+    if (died) this.maybeSalvage(e);
     this.entities.delete(e.id);
+  }
+
+  /**
+   * PW24 (COMRADE 18 §3.9): a destroyed unit or building drops a salvage crate
+   * worth a share of its build cost, collectable by anyone, decaying after the
+   * configured time. Sold buildings never reach here with died=true; packed
+   * carriers carry the packed structure's cost. The anti-snowball floor
+   * suppresses crates when the victim's in-sim power score is far below the
+   * killer's — the same rule the ladder applies to points.
+   */
+  private maybeSalvage(e: Entity) {
+    const cfg = this.salvageConfig();
+    if (!cfg || e.owner < 0) return;
+    const by = e.deadBy ?? -1;
+    if (by < 0 || by === e.owner) return;
+    const def = e.kind === 'unit' ? this.unitDef(e) : this.structDef(e);
+    const value = Math.floor(((def?.cost ?? 0) * cfg.percentOfCost) / 100);
+    if (value <= 0) return;
+    if (cfg.scoreWeights && cfg.mismatchFloorRatio > 0) {
+      const atk = this.players[by], vic = this.players[e.owner];
+      if (atk && vic) {
+        const w = cfg.scoreWeights;
+        const score = (p: Player) => {
+          const t = this.assetTotals(p);
+          return t.structureCost * w.structure + t.unitCost * w.unit + t.techLevels * w.tech;
+        };
+        if (score(vic) < score(atk) * cfg.mismatchFloorRatio) return;
+      }
+    }
+    const cell = e.kind === 'structure'
+      ? e.cy * this.map.w + e.cx
+      : this.cellOf(e);
+    const near = nearestCell(this.map, cell, 4,
+      i => passable(this.pack, this.map, i, 'infantry') && !this.unitInCell(i));
+    const spot = near >= 0 ? near : cell;
+    this.crates.push({
+      id: this.nextId++, cell: spot, kind: 'salvage', value,
+      expiresTick: cfg.decaySeconds > 0 ? this.tick + Math.round(cfg.decaySeconds * 15) : undefined,
+    });
+    this.salvageEvents.push({
+      tick: this.tick, cell: spot, credits: value, kind: 'spawn', simId: e.id,
+      victimOwner: e.owner, collectorOwner: -1, killerOwner: by,
+      victimType: e.type, victimKind: e.kind,
+    });
   }
 
   private cleanup() {
@@ -2950,7 +3303,7 @@ export class Game {
     for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
     for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden).add(worm.goal).add(worm.up).addString(worm.form);
-    for (const crate of this.crates) h.add(crate.cell).add(CRATE_KINDS.indexOf(crate.kind));
+    for (const crate of this.crates) h.add(crate.cell).add(CRATE_KINDS.indexOf(crate.kind)).add(crate.value ?? 0).add(crate.expiresTick ?? 0);
     return h.value;
   }
 }

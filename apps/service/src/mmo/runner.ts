@@ -14,11 +14,12 @@
 import type { PoolClient } from 'pg';
 import { randomUUID } from 'node:crypto';
 import {
-  Game, PACKS, captureGame, restoreGame, isMcvUnit, nearestCell, passable, starterPicks, structureRoles, toCell,
+  Game, PACKS, SUPPLY_UPKEEP_TICKS, captureGame, restoreGame, isMcvUnit, nearestCell, passable, regionSitePlan, starterPicks, structureRoles, toCell,
   type Command, type Entity, type GameSetup, type RulePack,
 } from '@comrade/fusion';
 import {
   computePowerScore, mmoEntityId, mmoSimEntityId, newProtection, PERSISTENT_RULES_V1,
+  MMO_LADDER_DEFAULT, MMO_SITES_DEFAULT,
   parseProtectionRecord, protectionTransition,
   type MmoAction, type MmoRulesProfile, type MmoSimAction, type MmoWorldAction,
   type ProtectionEvent, type ProtectionRecord,
@@ -30,7 +31,7 @@ import {
   markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot,
   releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
   syncCompounds, updateMemberPowerScores, updateSettlementProtection,
-  openRecoveryEpisode, closeRecoveryEpisode,
+  openRecoveryEpisode, closeRecoveryEpisode, awardLadderPoints,
   MmoStoreError, type ProtectionRow, type RegionRow,
 } from './store.js';
 import { journalTail } from './commands.js';
@@ -256,6 +257,20 @@ export class RegionRunner {
       hib = payload.hib;
       this.simSeed = payload.seed;
       this.game = restoreGame(payload.snapshot, PACK_LIST);
+      // PW24: snapshots written before salvage shipped lack mmo.salvage; the
+      // profile is pinned per world, so backfill it deterministically here.
+      if (this.game.mmo && !this.game.mmo.salvage) {
+        this.game.mmo.salvage = {
+          percentOfCost: this.opts.rules.salvage.percentOfCost,
+          decaySeconds: this.opts.rules.salvage.decaySeconds,
+          mismatchFloorRatio: this.opts.rules.powerScoreSalvageFloorRatio,
+          scoreWeights: this.opts.rules.powerScoreWeights,
+        };
+      }
+      // PW24: same backfill for site tuning on pre-PW24 snapshots.
+      if (this.game.mmo && !this.game.mmo.sites) {
+        this.game.mmo.sites = this.opts.rules.sites ?? MMO_SITES_DEFAULT;
+      }
       this.bindings = new Map(payload.bindings);
       this.lastAppliedSeq = BigInt(snap.last_applied_seq);
       this.opts.log('region-restored', { regionId: this.opts.regionId, tick: this.game.tick, epoch: this.epoch });
@@ -281,6 +296,16 @@ export class RegionRunner {
           shieldRadiusCells: this.opts.rules.shieldRadiusCells,
           recoveryCreditCap: this.opts.rules.recoveryCreditCap,
           recoveryBuildRoles: this.opts.rules.recoveryBuildRoles,
+          // PW24: salvage share/decay from the pinned profile plus the
+          // anti-snowball floor and the same weights persistPowerScores uses.
+          salvage: {
+            percentOfCost: this.opts.rules.salvage.percentOfCost,
+            decaySeconds: this.opts.rules.salvage.decaySeconds,
+            mismatchFloorRatio: this.opts.rules.powerScoreSalvageFloorRatio,
+            scoreWeights: this.opts.rules.powerScoreWeights,
+          },
+          // PW24: site capture/hold tuning from the pinned profile.
+          sites: this.opts.rules.sites ?? MMO_SITES_DEFAULT,
         },
         players: spec.players.map(p => ({
           name: p.name, faction: p.faction, ai: false,
@@ -295,6 +320,10 @@ export class RegionRunner {
       await this.syncPersistentPlayerFlags(spec);
       this.opts.log('region-created', { regionId: this.opts.regionId, tick: 0, epoch: this.epoch });
     }
+
+    // PW24: capturable sites are placed deterministically from (pack, map, seed)
+    // — identical on every runner, before any tick or accrual runs.
+    this.ensureRegionSites();
 
     // PW22 wake: a hibernated region accounts for its quiescent interval as one
     // journaled 'accrual' event, then re-anchors wall-clock so real-time resumes —
@@ -367,6 +396,7 @@ export class RegionRunner {
   private async catchUpTo(tick: number): Promise<void> {
     const before = this.game!.tick;
     this.advanceTo(tick);
+    await this.drainSalvageEvents();
     this.stats.catchUpTicks += this.game!.tick - before;
     if (this.game!.tick !== before) this.opts.log('region-catchup', { from: before, to: this.game!.tick });
   }
@@ -377,6 +407,7 @@ export class RegionRunner {
     try {
       const expected = this.tickFor(this.opts.now());
       if (this.game.tick < expected) this.advanceTo(Math.min(expected, this.game.tick + 600));
+      await this.drainSalvageEvents();
       if (this.opts.checkpointEveryTicks > 0
         && this.game.tick - this.lastCheckpointTick >= this.opts.checkpointEveryTicks) {
         await this.checkpoint('interval');
@@ -653,9 +684,170 @@ export class RegionRunner {
   private async applyUnappliedEvents(): Promise<void> {
     for (;;) {
       const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual'], 64);
-      if (!events.length) return;
+      if (!events.length) { await this.drainSalvageEvents(); return; }
       for (const event of events) await this.applyEvent(event);
     }
+  }
+
+  /**
+   * PW24: persist salvage crate spawns as audited operations. The sim stays
+   * authoritative for the crate itself (snapshot + journal replay reproduce it
+   * exactly); these rows are the durable audit trail — one SALVAGE_SPAWN
+   * operation per drop plus DESTROY/SALVAGE asset-ledger entries for the killed
+   * asset. Collect events are sim-side credit grants already covered by the
+   * snapshot; the ladder stage reads them for points.
+   *
+   * Crash note: a crash between the sim step and this drain can lose the audit
+   * row while the crate survives in the next snapshot — audit is best-effort at
+   * tick cadence, never state-corrupting. Deterministic operation ids are not
+   * required because the drain empties the queue exactly once per process.
+   */
+  private async drainSalvageEvents(): Promise<void> {
+    const g = this.game;
+    if (!g || this.epoch === undefined) {
+      if (g) { g.salvageEvents.length = 0; g.siteEvents.length = 0; }
+      return;
+    }
+    // Spawns become SALVAGE_SPAWN ops; collect events stay queued for
+    // drainGameEvents, which turns them into ladder awards.
+    const pending = g.salvageEvents.splice(0);
+    const spawns = pending.filter(e => e.kind === 'spawn');
+    const collects = pending.filter(e => e.kind === 'collect');
+    if (collects.length) g.salvageEvents.push(...collects);
+    if (spawns.length) {
+    const playerIdBySlot = new Map<number, string>();
+    for (const [playerId, slot] of this.slotByPlayer) playerIdBySlot.set(slot, playerId);
+    await mmoTransaction(async tx => {
+      await assertRegionFence(tx, {
+        regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+      });
+      for (const ev of spawns) {
+        const opId = randomUUID();
+        const x = ev.cell % g.map.w, y = Math.floor(ev.cell / g.map.w);
+        const victimId = playerIdBySlot.get(ev.victimOwner) ?? null;
+        const killerId = playerIdBySlot.get(ev.killerOwner) ?? null;
+        await tx.query(
+          `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+           values ($1,$2,$3,$4,'SALVAGE_SPAWN',$5,$6)`,
+          [opId, this.opts.regionId, this.epoch, String(ev.tick),
+           JSON.stringify({ kind: 'SALVAGE_SPAWN', regionId: this.opts.regionId, x, y, credits: String(ev.credits) }),
+           JSON.stringify({ simId: ev.simId, victimOwner: ev.victimOwner, killerOwner: ev.killerOwner, victimType: ev.victimType, victimKind: ev.victimKind })]);
+        const entityId = mmoEntityId(this.opts.regionId, ev.simId);
+        const detail = JSON.stringify({ killerPlayerId: killerId, type: ev.victimType, simKind: ev.victimKind, cell: ev.cell });
+        await tx.query(
+          `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+           values ($1,$2,$3,'DESTROY',$4,null,'destroyed',$5,$6)`,
+          [opId, entityId, this.opts.regionId, victimId, String(ev.simId), detail]);
+        await tx.query(
+          `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+           values ($1,$2,$3,'SALVAGE',$4,null,'salvaged',$5,$6)`,
+          [opId, entityId, this.opts.regionId, victimId, String(ev.simId),
+           JSON.stringify({ credits: ev.credits, cell: ev.cell, killerPlayerId: killerId })]);
+      }
+    });
+    }
+    await this.drainGameEvents();
+  }
+
+  /**
+   * PW24: spawn the region's capturable sites. The plan is a pure function of
+   * (pack, map, seed, profile count) so every runner derives the same sites;
+   * only missing ones spawn, making this safe on fresh games and restores.
+   * Sites are neutral (owner -1), indestructible and unshielded.
+   */
+  private ensureRegionSites(): void {
+    const g = this.game;
+    if (!g || !g.persistent || !g.mmo?.sites) return;
+    const sp = this.opts.rules.sitesPerRegion;
+    const plan = regionSitePlan(g.pack, g.map, this.simSeed ?? 0, sp.min, sp.max);
+    for (const s of plan) {
+      const exists = [...g.entities.values()].some(e =>
+        e.kind === 'structure' && e.hp > 0 && g.structDef(e).site
+        && Math.abs(e.cx - s.cx) <= 1 && Math.abs(e.cy - s.cy) <= 1);
+      if (!exists) g.spawnStructure(s.type, -1, s.cx, s.cy);
+    }
+  }
+
+  /**
+   * PW24: drain the sim's site and salvage-collect feeds into durable audit —
+   * SITE_CAPTURE operations for ownership flips, LADDER_AWARD operations for
+   * salvage collected, site-hold time paid out on transfer, and repelled
+   * defences. Same best-effort crash semantics as drainSalvageEvents.
+   */
+  private async drainGameEvents(): Promise<void> {
+    const g = this.game;
+    if (!g || this.epoch === undefined || !this.region?.world_id) {
+      if (g) { g.siteEvents.length = 0; g.salvageEvents.length = 0; }
+      return;
+    }
+    const siteEvents = g.siteEvents.splice(0);
+    const collects = g.salvageEvents.splice(0).filter(e => e.kind === 'collect');
+    if (!siteEvents.length && !collects.length) return;
+    const worldId = this.region.world_id;
+    const ladder = this.opts.rules.ladder ?? MMO_LADDER_DEFAULT;
+    const playerIdBySlot = new Map<number, string>();
+    for (const [playerId, slot] of this.slotByPlayer) playerIdBySlot.set(slot, playerId);
+    await mmoTransaction(async tx => {
+      await assertRegionFence(tx, {
+        regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+      });
+      for (const ev of collects) {
+        const collectorId = playerIdBySlot.get(ev.collectorOwner);
+        if (!collectorId) continue;
+        const points = Math.floor(ev.credits / 100) * ladder.salvagePointsPer100Credits;
+        await awardLadderPoints(tx, {
+          worldId, playerId: collectorId, points,
+          reason: `salvage:${ev.tick}:${ev.cell}`,
+          regionId: this.opts.regionId, tick: ev.tick, epoch: this.epoch!,
+          refKey: `salvage-collect:${this.opts.regionId}:${ev.tick}:${ev.cell}:${ev.collectorOwner}`,
+        });
+      }
+      for (const ev of siteEvents) {
+        const siteId = mmoEntityId(this.opts.regionId, ev.simId);
+        if (ev.kind === 'capture') {
+          const toId = playerIdBySlot.get(ev.toOwner);
+          await tx.query(
+            `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+             values ($1,$2,$3,$4,'SITE_CAPTURE',$5,$6)`,
+            [randomUUID(), this.opts.regionId, this.epoch, String(ev.tick),
+             JSON.stringify({ kind: 'SITE_CAPTURE', siteId, regionId: this.opts.regionId, ownerId: toId ?? null }),
+             JSON.stringify({ siteType: ev.siteType, siteKind: ev.siteKind, fromOwner: ev.fromOwner, toOwner: ev.toOwner, heldTicks: ev.heldTicks })]);
+          // Objective points for taking the site (neutral first capture counts).
+          if (toId && ladder.capturePoints > 0) {
+            await awardLadderPoints(tx, {
+              worldId, playerId: toId, points: ladder.capturePoints,
+              reason: `site_capture:${ev.simId}`,
+              regionId: this.opts.regionId, tick: ev.tick, epoch: this.epoch!,
+              refKey: `site-capture:${this.opts.regionId}:${ev.simId}:${ev.tick}`,
+            });
+          }
+          // Site-hold time pays out on transfer: the outgoing holder banks
+          // their accumulated hold minutes exactly once, journaled here.
+          const fromId = ev.fromOwner >= 0 ? playerIdBySlot.get(ev.fromOwner) : undefined;
+          if (fromId && ev.heldTicks > 0) {
+            const points = Math.floor(ev.heldTicks / SUPPLY_UPKEEP_TICKS) * ladder.siteHoldPointsPerMinute;
+            await awardLadderPoints(tx, {
+              worldId, playerId: fromId, points,
+              reason: `site_hold:${ev.simId}`,
+              regionId: this.opts.regionId, tick: ev.tick, epoch: this.epoch!,
+              refKey: `site-hold:${this.opts.regionId}:${ev.simId}:${ev.tick}`,
+            });
+          }
+        } else {
+          // 'repelled': the defender kept the site — defence points, once per
+          // repelled contest (the engine emits exactly one event per reset).
+          const defId = ev.fromOwner >= 0 ? playerIdBySlot.get(ev.fromOwner) : undefined;
+          if (defId) {
+            await awardLadderPoints(tx, {
+              worldId, playerId: defId, points: ladder.defencePoints,
+              reason: `site_defence:${ev.simId}`,
+              regionId: this.opts.regionId, tick: ev.tick, epoch: this.epoch!,
+              refKey: `site-repel:${this.opts.regionId}:${ev.simId}:${ev.tick}`,
+            });
+          }
+        }
+      }
+    });
   }
 
   private async applyEvent(event: {

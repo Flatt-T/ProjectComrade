@@ -89,14 +89,28 @@ describeDb('mmo region runner (real PostgreSQL + real Fusion sim)', () => {
     await runner.start();
     try {
       const row = await regionRow(fx.regionId);
-      const tick = BigInt(row!.last_committed_tick);
       const epoch = row!.authority_epoch;
       const commandId = randomUUID();
       const msg: MmoCommandMessage = {
         ...commandMessage(fx, { t: 'ping', x: 12, y: 34 }, epoch), commandId,
       };
-      const res = await submitCommand({ playerId: fx.players[0].playerId, rawMessage: msg, fence: { workerId: fx.workerId, epoch }, tick });
-      expect(res.status).toBe('committed');
+      // Scheduled eval jobs journal events at the live sim tick concurrently;
+      // submit at a freshly-read tick and retry if one lands in between.
+      let res!: Awaited<ReturnType<typeof submitCommand>>;
+      for (let attempt = 0; attempt < 50; attempt++) {
+        const r = await regionRow(fx.regionId);
+        try {
+          res = await submitCommand({
+            playerId: fx.players[0].playerId, rawMessage: msg,
+            fence: { workerId: fx.workerId, epoch }, tick: BigInt(r!.last_committed_tick) + 1n,
+          });
+          break;
+        } catch (e) {
+          if (!(e instanceof Error && e.message.includes('stale tick'))) throw e;
+          await sleep(20);
+        }
+      }
+      expect(res!.status).toBe('committed');
       expect(res.eventSeq).toBeDefined();
 
       await waitFor(async () => {
@@ -115,7 +129,7 @@ describeDb('mmo region runner (real PostgreSQL + real Fusion sim)', () => {
       expect(event?.application_result).toMatchObject({ pong: true });
 
       // Re-submitting the same command deduplicates; the effect does not repeat.
-      const again = await submitCommand({ playerId: fx.players[0].playerId, rawMessage: msg, fence: { workerId: fx.workerId, epoch }, tick });
+      const again = await submitCommand({ playerId: fx.players[0].playerId, rawMessage: msg, fence: { workerId: fx.workerId, epoch }, tick: BigInt(row!.last_committed_tick) });
       expect(again.status).toBe('deduplicated');
       await sleep(120);
       expect(seen).toHaveLength(1);
@@ -132,22 +146,32 @@ describeDb('mmo region runner (real PostgreSQL + real Fusion sim)', () => {
     await runner.start();
     try {
       const row = await regionRow(fx.regionId);
-      const tick = BigInt(row!.last_committed_tick);
       const epoch = row!.authority_epoch;
+      // The fence requires tick >= last_committed_tick, but scheduled eval
+      // jobs journal events at the live sim tick concurrently — submit at a
+      // freshly-read tick and retry if one lands in between.
+      const submitFresh = async (playerId: string, action: MmoCommandMessage['action'], commandId: string) => {
+        for (let attempt = 0; attempt < 50; attempt++) {
+          const r = await regionRow(fx.regionId);
+          try {
+            return await submitCommand({
+              playerId,
+              rawMessage: { ...commandMessage(fx, action, epoch), commandId },
+              fence: { workerId: fx.workerId, epoch }, tick: BigInt(r!.last_committed_tick) + 1n,
+            });
+          } catch (e) {
+            if (!(e instanceof Error && e.message.includes('stale tick'))) throw e;
+            await sleep(20);
+          }
+        }
+        throw new Error('submitFresh exhausted retries');
+      };
       // rally needs no entity binding — it is accepted into the sim queue.
       const okId = randomUUID();
-      await submitCommand({
-        playerId: fx.players[1].playerId,
-        rawMessage: { ...commandMessage(fx, { t: 'rally', x: 5, y: 6 }, epoch), commandId: okId },
-        fence: { workerId: fx.workerId, epoch }, tick,
-      });
+      await submitFresh(fx.players[1].playerId, { t: 'rally', x: 5, y: 6 }, okId);
       // move with an unbound durable id is journaled then rejected at apply time.
       const badId = randomUUID();
-      await submitCommand({
-        playerId: fx.players[1].playerId,
-        rawMessage: { ...commandMessage(fx, { t: 'move', entityIds: [randomUUID()], x: 1, y: 1 }, epoch), commandId: badId },
-        fence: { workerId: fx.workerId, epoch }, tick: tick + 1n,
-      });
+      await submitFresh(fx.players[1].playerId, { t: 'move', entityIds: [randomUUID()], x: 1, y: 1 }, badId);
       await waitFor(async () => {
         const rows = await mmoQuery<{ status: string }>(
           `select status from command_intent where player_id = $1 and command_id = any($2::uuid[])`,

@@ -232,6 +232,13 @@ export interface StructureDef {
   cloning?: boolean;
   /** Extra percent on every harvester load (Ore Purifier). */
   incomeBonus?: number;
+  /**
+   * PW24 capturable site kind (persistent profile only): neutral structures
+   * generated per region that players contest by presence. They are
+   * indestructible, cannot be packed, sold or shielded, and produce no
+   * salvage — the hold perks live in MmoTuning.sites.
+   */
+  site?: 'income' | 'tech' | 'depot';
   /** Shrouds the area from enemies (Gap Generator), radius in cells. */
   gap?: number;
   /** Reveals the whole map to its owner (Spy Satellite Uplink). */

@@ -11,7 +11,7 @@
 // `game.hooks` after restore. The map's static layers are regenerated from
 // pack + preset + seed; only the mutable layers (occupied, res) are stored.
 import { Rng } from './core.js';
-import { Game, withPackedCarriers, type Command, type Entity, type MmoTuning, type Player } from './game.js';
+import { Game, withPersistentStructures, type Command, type Entity, type MmoTuning, type Player } from './game.js';
 import type { AIState } from './ai.js';
 import { generateMap, type MapData } from './map.js';
 import type { Doctrine, MapPreset, RulePack } from './rules.js';
@@ -182,7 +182,7 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   const g = game as unknown as Record<string, unknown>;
   // PW14: restored persistent games get the same carrier-augmented pack the
   // constructor would have produced — captures store only the pack id.
-  g.pack = snap.setup.persistent ? withPackedCarriers(pack) : pack;
+  g.pack = snap.setup.persistent ? withPersistentStructures(pack) : pack;
   g.map = map;
   g.mapPreset = preset;
   const rng = new Rng(0);
@@ -202,12 +202,21 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
     // owner's faction — the best available approximation for old assets.
     e.faction = typeof e.faction === 'string' && e.faction ? e.faction
       : ((g.players as Player[])[e.owner]?.faction ?? '');
+    // Snapshots predating PW24 lack the site capture state.
+    const ss = (e as { siteState?: unknown }).siteState as { progress?: number; by?: number; heldSince?: number } | undefined;
+    e.siteState = ss && typeof ss === 'object'
+      ? { progress: ss.progress ?? 0, by: ss.by ?? -1, heldSince: ss.heldSince ?? -1 }
+      : undefined;
   }
   g.projectiles = snap.state.projectiles;
   g.worms = snap.state.worms;
   g.strikes = snap.state.strikes;
   g.reveals = snap.state.reveals;
   g.crates = snap.state.crates;
+  // Audit feeds are transient (the runner drains them); Object.create skips
+  // field initializers, so re-arm them empty on every restore.
+  (g as unknown as { salvageEvents: unknown[] }).salvageEvents = [];
+  (g as unknown as { siteEvents: unknown[] }).siteEvents = [];
   g.effects = [];
   g.tick = snap.state.tick;
   g.market = snap.state.market;
