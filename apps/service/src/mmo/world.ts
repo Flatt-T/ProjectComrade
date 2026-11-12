@@ -17,6 +17,8 @@ import { MmoStoreError } from './store.js';
 import {
   allianceCreate, allianceInvite, allianceJoin, allianceLeave, allianceKick,
   allianceSetPermissions, allianceDisband, setAutoRepair,
+  availableShieldSeconds, committedShieldSeconds, armShieldRecord, clearShieldRecord,
+  compoundForPlayer, scheduleJob, type Queryable,
 } from './store.js';
 
 interface HandlerCtx {
@@ -128,12 +130,45 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           };
         }
         case 'setAutoRepair': {
-          await setAutoRepair(ctx.playerId, action.on);
+          await setAutoRepair(ctx.playerId, action.on, tx);
           const slot = ctx.slotOf(ctx.playerId);
           return {
             result: { accepted: true, on: action.on },
             sim: slot === undefined ? [] : [{ slot, command: { t: 'setAutoRepair', slot, on: action.on } }],
           };
+        }
+        case 'selectShield': {
+          // PW10: explicit owner selection only — nothing activates here. The
+          // armed record waits for the offline transition the region's
+          // protection_eval job applies under the fence.
+          const compound = await compoundForPlayer(action.compoundId, ctx.playerId);
+          if (!compound || compound.state !== 'active' || compound.region_id !== ctx.regionId) {
+            return { result: { accepted: false, reason: 'NO_COMPOUND' } };
+          }
+          const now = Date.now();
+          const available = await availableShieldSeconds(tx, {
+            playerId: ctx.playerId, nightlyGrantSeconds: rules.nightlyShieldSeconds, nowMs: now,
+          });
+          const committed = await committedShieldSeconds(ctx.playerId, now, tx);
+          if (BigInt(action.seconds) > available - committed) {
+            return { result: { accepted: false, reason: 'INSUFFICIENT_SHIELD' } };
+          }
+          await armShieldRecord(tx, { compoundId: action.compoundId, playerId: ctx.playerId, seconds: action.seconds, nowMs: now });
+          await pokeProtectionEval(ctx.regionId, now, tx);
+          return { result: { accepted: true, compoundId: action.compoundId, seconds: action.seconds } };
+        }
+        case 'clearShield': {
+          const cleared = await clearShieldRecord(tx, { compoundId: action.compoundId, playerId: ctx.playerId });
+          if (!cleared) {
+            const { rows } = await tx.query<{ status: string }>(
+              `select status from protection_record
+                where compound_id = $1 and player_id = $2 and kind = 'OFFLINE_EARNED'`,
+              [action.compoundId, ctx.playerId]);
+            const reason = rows[0]?.status === 'active' ? 'SHIELD_ACTIVE' : 'NO_SELECTION';
+            return { result: { accepted: false, reason } };
+          }
+          await pokeProtectionEval(ctx.regionId, Date.now(), tx);
+          return { result: { accepted: true, compoundId: action.compoundId } };
         }
         default:
           return { result: { accepted: false, reason: 'UNSUPPORTED_ACTION', action: action.t } };
@@ -142,6 +177,19 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
       return fail(error);
     }
   };
+}
+
+/**
+ * PW10: nudge the region's protection evaluator. Dedupe is bucketed to one poke
+ * per region per 5 s; the eval itself is idempotent and reschedules its own chain
+ * at real deadlines (shield expiry, battle-clear recheck).
+ */
+export async function pokeProtectionEval(regionId: string, nowMs: number, q?: Queryable): Promise<void> {
+  await scheduleJob({
+    regionId, kind: 'protection_eval', dueAtMs: nowMs,
+    dedupeKey: `prot_eval:${regionId}:poke:${Math.floor(nowMs / 5000)}`,
+    payload: { reason: 'poke' },
+  }, q).catch(() => undefined);
 }
 
 async function allianceIdOf(tx: PoolClient, ctx: HandlerCtx): Promise<string> {

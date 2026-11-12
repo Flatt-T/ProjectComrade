@@ -109,6 +109,8 @@ export interface MmoRulesProfile {
     weeklyObjectiveShieldSeconds: number;
     notificationShieldWarningMinutes: number;
   };
+  /** Shield boundary radius in map cells around each construction yard (PW10). */
+  shieldRadiusCells: number;
   /** Hibernation look-ahead for inbound transfers, milliseconds. */
   hibernateInboundLookaheadMs: number;
   /** Minimum time a region stays awake before it may hibernate again (anti-thrash). */
@@ -151,6 +153,7 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
     weeklyObjectiveShieldSeconds: 10 * 3600,
     notificationShieldWarningMinutes: 30,
   },
+  shieldRadiusCells: 18,
   hibernateInboundLookaheadMs: 120_000,
   hibernateMinAwakeMs: 300_000,
 };
@@ -252,7 +255,8 @@ function parseProfile(value: unknown): MmoRulesProfile {
     || typeof p.powerScoreWeights?.unit !== 'number' || p.powerScoreWeights.unit < 0
     || typeof p.powerScoreWeights?.tech !== 'number' || p.powerScoreWeights.tech < 0
     || typeof p.spawnRegionPowerBandRatio !== 'number' || p.spawnRegionPowerBandRatio < 1
-    || !isNonNegInt(p.spawnCohortBaselineScore)) {
+    || !isNonNegInt(p.spawnCohortBaselineScore)
+    || (v.shieldRadiusCells !== undefined && !isPosInt(v.shieldRadiusCells))) {
     throw new Error('Invalid rules profile values');
   }
   return p;

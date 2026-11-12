@@ -5,9 +5,9 @@
 // event, its outbox row and any economy_operation/asset_ledger effects commit in one
 // transaction, and retries deduplicate on stable IDs rather than double-applying.
 import { createHash, randomUUID } from 'node:crypto';
-import type { PoolClient } from 'pg';
-import { mmoExec, mmoOne, mmoQuery, mmoTransaction } from './db.js';
-import { parseBarterOffer, type AlliancePermissions, type BarterOffer, type MmoOperation } from '@comrade/contracts';
+import type { PoolClient, QueryResult, QueryResultRow } from 'pg';
+import { mmoDb, mmoExec, mmoOne, mmoQuery, mmoTransaction } from './db.js';
+import { parseBarterOffer, type AlliancePermissions, type BarterOffer, type MmoOperation, type ProtectionRecord } from '@comrade/contracts';
 
 export class MmoStoreError extends Error {
   constructor(public code: string, message: string) { super(message); }
@@ -405,7 +405,7 @@ export async function saveProtectionRecord(tx: PoolClient, record: ProtectionRow
     `insert into protection_record (compound_id, player_id, kind, status, generation, armed_seconds,
         online_ms, online_since_ms, lapse_at_ms, started_at_ms, ends_at_ms, milestone_power, milestone_barracks)
      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-     on conflict (compound_id) do update set
+     on conflict (compound_id, kind) do update set
        status = excluded.status, generation = excluded.generation, armed_seconds = excluded.armed_seconds,
        online_ms = excluded.online_ms, online_since_ms = excluded.online_since_ms, lapse_at_ms = excluded.lapse_at_ms,
        started_at_ms = excluded.started_at_ms, ends_at_ms = excluded.ends_at_ms,
@@ -593,26 +593,30 @@ export async function latestSnapshot(regionId: string) {
 export async function scheduleJob(args: {
   jobId?: string; regionId: string; kind: string; dueAtMs: number | bigint;
   generation?: number | bigint; payload?: unknown; dedupeKey?: string;
-}): Promise<string> {
+}, q: Queryable = mmoDb()): Promise<string> {
   const id = args.jobId ?? uuid();
   if (args.dedupeKey) {
     // Duplicate suppression: the same logical deadline scheduled twice resolves to
-    // the one durable job, so a retried transaction cannot double-fire it.
-    const existing = await mmoOne<{ job_id: string }>(
-      'select job_id from scheduled_job where region_id = $1 and dedupe_key = $2',
+    // the one durable job, so a retried transaction cannot double-fire it. Only
+    // live jobs dedupe — a finished job with the same key must not swallow a
+    // legitimately rescheduled one (PW10 protection_eval chains).
+    const { rows: existing } = await q.query<{ job_id: string }>(
+      `select job_id from scheduled_job where region_id = $1 and dedupe_key = $2
+        and state in ('pending','claimed')`,
       [args.regionId, args.dedupeKey]);
-    if (existing) return existing.job_id;
+    if (existing.length) return existing[0].job_id;
   }
-  await mmoQuery(
+  await q.query(
     `insert into scheduled_job (job_id, region_id, kind, due_at_ms, generation, payload, dedupe_key)
      values ($1,$2,$3,$4,$5,$6,$7) on conflict (region_id, dedupe_key) where dedupe_key is not null do nothing`,
     [id, args.regionId, args.kind, args.dueAtMs.toString(), (args.generation ?? 0).toString(),
      JSON.stringify(args.payload ?? {}), args.dedupeKey ?? null]);
   if (args.dedupeKey) {
-    const row = await mmoOne<{ job_id: string }>(
-      'select job_id from scheduled_job where region_id = $1 and dedupe_key = $2',
+    const { rows } = await q.query<{ job_id: string }>(
+      `select job_id from scheduled_job where region_id = $1 and dedupe_key = $2
+        and state in ('pending','claimed')`,
       [args.regionId, args.dedupeKey]);
-    if (row) return row.job_id;
+    if (rows.length) return rows[0].job_id;
   }
   return id;
 }
@@ -654,7 +658,9 @@ export async function finishJob(jobId: string, state: 'done' | 'cancelled'): Pro
 
 /** finishJob inside a caller's transaction (journal + effects + completion atomic). */
 export async function finishJobTx(tx: PoolClient, jobId: string, state: 'done' | 'cancelled'): Promise<void> {
-  await tx.query(`update scheduled_job set state = $2 where job_id = $1 and state = 'claimed'`, [jobId, state]);
+  // Freeing dedupe_key lets a later scheduleJob reuse the logical deadline; the
+  // pre-check in scheduleJob only matches live (pending/claimed) jobs anyway.
+  await tx.query(`update scheduled_job set state = $2, dedupe_key = null where job_id = $1 and state = 'claimed'`, [jobId, state]);
 }
 
 /**
@@ -1028,8 +1034,8 @@ export function presenceIsOnline(p: PlayerPresence | undefined, nowMs: number, o
   return nowMs - Number(p.offline_since_ms) < offlineAfterMs;
 }
 
-export async function setAutoRepair(playerId: string, on: boolean): Promise<void> {
-  await mmoQuery('update player set auto_repair = $2 where player_id = $1', [playerId, on]);
+export async function setAutoRepair(playerId: string, on: boolean, q: Queryable = mmoDb()): Promise<void> {
+  await q.query('update player set auto_repair = $2 where player_id = $1', [playerId, on]);
 }
 
 /** Heartbeat touch: refresh last_seen for a connection's subscribed players. */
@@ -1040,3 +1046,300 @@ export async function playersSeen(playerIds: string[], nowMs: number): Promise<v
 
 // Re-export for tests that drive the whole stack through one entry point.
 export { mmoTransaction };
+
+// ---------------------------------------------------------------------------
+// PW10: shield inventory accounting, compounds and protection reconciliation
+// ---------------------------------------------------------------------------
+
+/** UTC day key for the fixed daily reset (COMRADE 18 §3.2: refreshed daily, no carry-over). */
+export function utcShieldDay(nowMs: number): string {
+  return new Date(nowMs).toISOString().slice(0, 10);
+}
+
+export interface ShieldBalances {
+  nightly: { seconds: bigint; day: string | null };
+  earned: { seconds: bigint; day: string | null; todaySeconds: bigint };
+}
+
+/** Anything that can run a parameterised query: the pool or a transaction client. */
+export interface Queryable {
+  query<R extends QueryResultRow = QueryResultRow>(text: string, values?: unknown[]): Promise<QueryResult<R>>;
+}
+
+async function shieldBalancesQ(q: Queryable, playerId: string): Promise<ShieldBalances> {
+  const { rows } = await q.query<{
+    kind: 'nightly' | 'earned'; seconds_remaining: string;
+    nightly_day: string | null; earned_day: string | null; earned_today_seconds: string;
+  }>(
+    `select kind, seconds_remaining::text, nightly_day::text, earned_day::text, earned_today_seconds::text
+       from shield_balance where player_id = $1`, [playerId]);
+  const nightly = rows.find(r => r.kind === 'nightly');
+  const earned = rows.find(r => r.kind === 'earned');
+  return {
+    nightly: { seconds: BigInt(nightly?.seconds_remaining ?? '0'), day: nightly?.nightly_day ?? null },
+    earned: {
+      seconds: BigInt(earned?.seconds_remaining ?? '0'), day: earned?.earned_day ?? null,
+      todaySeconds: BigInt(earned?.earned_today_seconds ?? '0'),
+    },
+  };
+}
+
+export async function shieldBalances(playerId: string): Promise<ShieldBalances> {
+  return shieldBalancesQ(mmoDb(), playerId);
+}
+
+/** Total shield hours a player may commit: free nightly (consumed first) + earned. */
+export async function availableShieldSeconds(tx: PoolClient, args: {
+  playerId: string; nightlyGrantSeconds: number; nowMs: number;
+}): Promise<bigint> {
+  const b = await shieldBalancesQ(tx, args.playerId);
+  const nightly = b.nightly.day === utcShieldDay(args.nowMs) ? b.nightly.seconds : BigInt(args.nightlyGrantSeconds);
+  return nightly + b.earned.seconds;
+}
+
+/**
+ * Consume shield seconds nightly-first, then earned (COMRADE 18 §3.2). The daily
+ * reset is lazy: a stale nightly_day means the full grant is available again and
+ * the remainder is written back under today's anchor. Returns what was actually
+ * drawn; a shortfall means the balance was spent elsewhere after arming.
+ */
+export async function consumeShieldSecondsAuto(tx: PoolClient, args: {
+  playerId: string; seconds: number | bigint; nowMs: number; nightlyGrantSeconds: number;
+}): Promise<{ nightly: bigint; earned: bigint; shortfall: bigint }> {
+  let remaining = BigInt(args.seconds);
+  const today = utcShieldDay(args.nowMs);
+  const grant = BigInt(args.nightlyGrantSeconds);
+
+  const nrow = await tx.query<{ seconds_remaining: string; nightly_day: string | null }>(
+    `select seconds_remaining::text, nightly_day::text from shield_balance
+      where player_id = $1 and kind = 'nightly' for update`, [args.playerId]);
+  const n = nrow.rows[0];
+  const nightlyAvail = n?.nightly_day === today ? BigInt(n.seconds_remaining) : grant;
+  const nightlyTake = nightlyAvail < remaining ? nightlyAvail : remaining;
+  const nightlyLeft = (n?.nightly_day === today ? BigInt(n.seconds_remaining) : grant) - nightlyTake;
+  await tx.query(
+    `insert into shield_balance (player_id, kind, seconds_remaining, nightly_day)
+     values ($1,'nightly',$2,$3)
+     on conflict (player_id, kind) do update
+       set seconds_remaining = excluded.seconds_remaining, nightly_day = excluded.nightly_day,
+           generation = shield_balance.generation + 1, updated_at = clock_timestamp()`,
+    [args.playerId, nightlyLeft.toString(), today]);
+  remaining -= nightlyTake;
+
+  let earnedTake = 0n;
+  if (remaining > 0n) {
+    const erow = await tx.query<{ seconds_remaining: string }>(
+      `select seconds_remaining::text from shield_balance
+        where player_id = $1 and kind = 'earned' for update`, [args.playerId]);
+    const avail = BigInt(erow.rows[0]?.seconds_remaining ?? '0');
+    earnedTake = avail < remaining ? avail : remaining;
+    if (earnedTake > 0n) {
+      await tx.query(
+        `update shield_balance set seconds_remaining = seconds_remaining - $2,
+           generation = generation + 1, updated_at = clock_timestamp()
+          where player_id = $1 and kind = 'earned'`,
+        [args.playerId, earnedTake.toString()]);
+    }
+    remaining -= earnedTake;
+  }
+  return { nightly: nightlyTake, earned: earnedTake, shortfall: remaining };
+}
+
+/**
+ * Grant earned shield seconds under the daily income cap (COMRADE 18 §3.4:
+ * objectives + crates combined, 12 h/day default). Idempotent on effectKey.
+ * Free nightly hours can never arrive here — kind is 'earned' only.
+ */
+export async function grantEarnedShieldSeconds(tx: PoolClient, args: {
+  playerId: string; seconds: number | bigint; effectKey: string;
+  operationId?: string; dailyCapSeconds: number; nowMs: number;
+}): Promise<'granted' | 'capped' | 'duplicate'> {
+  const want = BigInt(args.seconds);
+  if (want <= 0n) throw new MmoStoreError('BAD_AMOUNT', 'shield grant must be positive');
+  const receipt = await tx.query(
+    `insert into effect_receipt (effect_key, operation_id, kind) values ($1,$2,'shield') on conflict do nothing returning effect_key`,
+    [args.effectKey, args.operationId ?? null]);
+  if (!receipt.rowCount) return 'duplicate';
+  const today = utcShieldDay(args.nowMs);
+  const row = await tx.query<{ seconds_remaining: string; earned_day: string | null; earned_today_seconds: string }>(
+    `select seconds_remaining::text, earned_day::text, earned_today_seconds::text from shield_balance
+      where player_id = $1 and kind = 'earned' for update`, [args.playerId]);
+  const r = row.rows[0];
+  const todaySoFar = r?.earned_day === today ? BigInt(r.earned_today_seconds) : 0n;
+  const room = BigInt(args.dailyCapSeconds) - todaySoFar;
+  const award = want < room ? want : room > 0n ? room : 0n;
+  if (award <= 0n) return 'capped';
+  await tx.query(
+    `insert into shield_balance (player_id, kind, seconds_remaining, earned_day, earned_today_seconds)
+     values ($1,'earned',$2,$3,$4)
+     on conflict (player_id, kind) do update
+       set seconds_remaining = shield_balance.seconds_remaining + $2,
+           earned_day = $3, earned_today_seconds = $4,
+           generation = shield_balance.generation + 1, updated_at = clock_timestamp()`,
+    [args.playerId, award.toString(), today, (todaySoFar + award).toString()]);
+  return 'granted';
+}
+
+// --- compounds -------------------------------------------------------------
+
+export interface CompoundRow {
+  compound_id: string; player_id: string; region_id: string;
+  state: 'active' | 'packed' | 'in_transit' | 'destroyed';
+}
+
+/**
+ * Reconcile the compound table with the live sim roster: every standing
+ * construction yard becomes (or refreshes) an active compound row; active rows
+ * whose yard is gone become 'destroyed'. compound_id IS the durable entity id
+ * (mmoEntityId of the yard's sim id), so protection records join directly.
+ */
+export async function syncCompounds(tx: PoolClient, args: {
+  regionId: string; live: { compoundId: string; playerId: string }[];
+}): Promise<void> {
+  for (const c of args.live) {
+    await tx.query(
+      `insert into compound (compound_id, player_id, region_id, state)
+       values ($1,$2,$3,'active')
+       on conflict (compound_id) do update
+         set player_id = excluded.player_id, region_id = excluded.region_id,
+             state = case when compound.state = 'destroyed' then 'active' else compound.state end,
+             updated_at = clock_timestamp()`,
+      [c.compoundId, c.playerId, args.regionId]);
+  }
+  const liveIds = args.live.map(c => c.compoundId);
+  await tx.query(
+    `update compound set state = 'destroyed', updated_at = clock_timestamp()
+      where region_id = $1 and state = 'active' and not (compound_id = any($2))`,
+    [args.regionId, liveIds]);
+}
+
+export async function compoundsForRegion(regionId: string): Promise<CompoundRow[]> {
+  return mmoQuery<CompoundRow>(
+    `select compound_id, player_id, region_id, state from compound where region_id = $1`, [regionId]);
+}
+
+export async function compoundForPlayer(compoundId: string, playerId: string): Promise<CompoundRow | undefined> {
+  return mmoOne<CompoundRow>(
+    `select compound_id, player_id, region_id, state from compound
+      where compound_id = $1 and player_id = $2`, [compoundId, playerId]);
+}
+
+/** Regions where this player has a live compound or an open protection record —
+ *  the set a presence transition must poke so shields evaluate promptly. */
+export async function protectionRegionsForPlayer(playerId: string): Promise<string[]> {
+  const rows = await mmoQuery<{ region_id: string }>(
+    `select distinct region_id from (
+       select region_id from compound where player_id = $1 and state = 'active'
+       union
+       select c.region_id from protection_record pr join compound c on c.compound_id = pr.compound_id
+        where pr.player_id = $1 and pr.status in ('armed','active')) t`, [playerId]);
+  return rows.map(r => r.region_id);
+}
+
+// --- protection records ----------------------------------------------------
+
+export interface ProtectionRecordRow {
+  compound_id: string; player_id: string; kind: 'NEWCOMER' | 'OFFLINE_EARNED' | 'RECOVERY';
+  status: 'armed' | 'active' | 'ended'; generation: string;
+  armed_seconds: string; online_ms: string; online_since_ms: string | null;
+  lapse_at_ms: string | null; started_at_ms: string | null; ends_at_ms: string | null;
+  milestone_power: string; milestone_barracks: string;
+  armed_at_ms?: string | null;
+}
+
+/** OFFLINE_EARNED records for compounds in this region that are not yet ended. */
+export async function openShieldRecords(regionId: string, q: Queryable = mmoDb()): Promise<(ProtectionRecordRow & { region_id: string })[]> {
+  const { rows } = await q.query<ProtectionRecordRow & { region_id: string }>(
+    `select pr.*, c.region_id from protection_record pr
+       join compound c on c.compound_id = pr.compound_id
+      where c.region_id = $1 and pr.kind = 'OFFLINE_EARNED' and pr.status in ('armed','active')`,
+    [regionId]);
+  return rows;
+}
+
+/** Seconds a player has already committed to open shield selections. */
+export async function committedShieldSeconds(playerId: string, nowMs: number, q: Queryable = mmoDb()): Promise<bigint> {
+  const { rows } = await q.query<{ armed_seconds: string; status: string; ends_at_ms: string | null; started_at_ms: string | null }>(
+    `select armed_seconds::text, status, ends_at_ms::text, started_at_ms::text
+       from protection_record where player_id = $1 and kind = 'OFFLINE_EARNED' and status in ('armed','active')`,
+    [playerId]);
+  let total = 0n;
+  for (const r of rows) {
+    if (r.status === 'armed') total += BigInt(r.armed_seconds);
+    else {
+      const remaining = r.ends_at_ms !== null && r.started_at_ms !== null
+        ? BigInt(Math.max(0, Number(r.ends_at_ms) - Math.max(Number(r.started_at_ms), nowMs)))
+        : 0n;
+      total += remaining / 1000n + (remaining % 1000n > 0n ? 1n : 0n);
+    }
+  }
+  return total;
+}
+
+/** Arm (or re-arm) a compound's earned-shield selection. armed_at_ms stamps the
+ *  instant this selection began so activation can start at
+ *  max(offline grace end, armed_at) — never before the selection existed. */
+export async function armShieldRecord(tx: PoolClient, args: {
+  compoundId: string; playerId: string; seconds: number | bigint; nowMs: number;
+}): Promise<void> {
+  const seconds = BigInt(args.seconds);
+  if (seconds <= 0n) throw new MmoStoreError('BAD_AMOUNT', 'shield selection must be positive');
+  const res = await tx.query(
+    `insert into protection_record (compound_id, player_id, kind, status, generation, armed_seconds, online_ms, armed_at_ms)
+     values ($1,$2,'OFFLINE_EARNED','armed',1,$3,0,$4)
+     on conflict (compound_id, kind) do update
+       set status = 'armed', armed_seconds = $3, armed_at_ms = $4,
+           generation = protection_record.generation + 1,
+           started_at_ms = null, ends_at_ms = null, updated_at = clock_timestamp()
+       where protection_record.player_id = $2`,
+    [args.compoundId, args.playerId, seconds.toString(), args.nowMs]);
+  if (res.rowCount !== 1) {
+    throw new MmoStoreError('RECORD_CONFLICT', 'protection record exists for another player or kind');
+  }
+}
+
+/** Disarm an armed selection; active records are untouched (owner is online then). */
+export async function clearShieldRecord(tx: PoolClient, args: {
+  compoundId: string; playerId: string;
+}): Promise<boolean> {
+  const { rowCount } = await tx.query(
+    `update protection_record set status = 'ended', armed_seconds = 0,
+        generation = generation + 1, updated_at = clock_timestamp()
+      where compound_id = $1 and player_id = $2 and kind = 'OFFLINE_EARNED' and status = 'armed'`,
+    [args.compoundId, args.playerId]);
+  return rowCount === 1;
+}
+
+/**
+ * Persist a protection transition computed by the contract state machine, and
+ * draw the just-elapsed active seconds from the inventory in the same transaction.
+ * Returns the seconds consumed (0 for armed-side transitions).
+ */
+export async function applyShieldTransition(tx: PoolClient, args: {
+  record: ProtectionRecordRow & { region_id?: string };
+  next: ProtectionRecord;
+  consumedSeconds: bigint;
+  nowMs: number; nightlyGrantSeconds: number;
+}): Promise<{ consumed: { nightly: bigint; earned: bigint; shortfall: bigint } }> {
+  const n = args.next;
+  await tx.query(
+    `update protection_record set
+       status = $2, generation = $3, armed_seconds = $4, online_ms = $5,
+       online_since_ms = $6, lapse_at_ms = $7, started_at_ms = $8, ends_at_ms = $9,
+       milestone_power = $10, milestone_barracks = $11, updated_at = clock_timestamp(),
+       armed_at_ms = case
+         when $2 = 'armed' and $13 <> 'armed' then $14
+         when $2 <> 'armed' then null
+         else armed_at_ms end
+      where compound_id = $1 and kind = $12`,
+    [args.record.compound_id, n.status, n.generation.toString(), n.armedSeconds,
+     n.onlineMs, n.onlineSinceMs, n.lapseAtMs, n.startedAtMs, n.endsAtMs,
+     n.milestonePower, n.milestoneBarracks, args.record.kind,
+     args.record.status, args.nowMs]);
+  if (args.consumedSeconds <= 0n) return { consumed: { nightly: 0n, earned: 0n, shortfall: 0n } };
+  const consumed = await consumeShieldSecondsAuto(tx, {
+    playerId: args.record.player_id, seconds: args.consumedSeconds,
+    nowMs: args.nowMs, nightlyGrantSeconds: args.nightlyGrantSeconds,
+  });
+  return { consumed };
+}

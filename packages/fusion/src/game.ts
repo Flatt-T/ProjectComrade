@@ -34,7 +34,9 @@ export type Command =
   /** Persistent profile only: journaled alliance sync — allied players do not fight. */
   | { t: 'setAlly'; slot: number; ally: number }
   /** Persistent profile only: owner-enabled caretaker auto-repair (bounded). */
-  | { t: 'setAutoRepair'; slot: number; on: boolean };
+  | { t: 'setAutoRepair'; slot: number; on: boolean }
+  /** Persistent profile only: journaled shield boundary on/off for a compound (PW10). */
+  | { t: 'setShield'; compound: number; on: boolean };
 
 export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number; level?: AILevel; ally?: number; autoRepair?: boolean }
 
@@ -97,6 +99,8 @@ export interface MmoTuning {
   upkeepPerPointPerMinute: number;
   /** Maximum standing construction yards (compounds) per player; 0 disables. */
   maxCompounds: number;
+  /** Compound shield boundary radius in cells (PW10); 0 disables shield enforcement. */
+  shieldRadiusCells?: number;
 }
 
 /** Supply upkeep cadence: one in-game minute at the 15 Hz tick rate. */
@@ -198,6 +202,10 @@ export interface Entity {
    * 2 = recovery grant. Always 0 in classic matches.
    */
   bound: number;
+  /** Persistent profile (PW10): compound shield boundary active on this construction yard. */
+  shielded: boolean;
+  /** Persistent profile (PW10): last tick PvP damage was exchanged inside this compound's radius. */
+  battleAt: number;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -417,6 +425,13 @@ export class Game {
     if (cmd.t === 'transfer') { if (this.persistent) this.transferOwner(cmd.ids, cmd.to, slot); return; }
     if (cmd.t === 'setAlly') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.ally = cmd.ally; } return; }
     if (cmd.t === 'setAutoRepair') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.autoRepair = cmd.on; } return; }
+    if (cmd.t === 'setShield') {
+      if (this.persistent && this.mmo?.shieldRadiusCells) {
+        const c = this.entities.get(cmd.compound);
+        if (c && c.kind === 'structure') c.shielded = cmd.on;
+      }
+      return;
+    }
     const player = this.players[slot];
     if (!player || player.defeated || !player.connected) return;
     const own = (ids: number[]) => ids.map(id => this.entities.get(id)).filter((e): e is Entity => !!e && e.owner === slot && e.kind === 'unit' && e.hp > 0 && !e.carriedBy);
@@ -639,7 +654,7 @@ export class Game {
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
-      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0,
+      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1,
     };
   }
 
@@ -704,6 +719,86 @@ export class Game {
     // their spawn team is. -1 means no alliance.
     if (pa.ally >= 0 && pa.ally === pb.ally) return false;
     return true;
+  }
+
+  // ---------------------------------------------------------------- compound shields (PW10)
+
+  /** Construction yards carrying an active shield boundary (persistent profile only). */
+  private shieldCompounds(): Entity[] {
+    if (!this.persistent || !this.mmo?.shieldRadiusCells) return [];
+    const out: Entity[] = [];
+    for (const e of this.entities.values()) {
+      if (e.shielded && e.hp > 0 && e.kind === 'structure') out.push(e);
+    }
+    return out;
+  }
+
+  private shieldRadiusLepton(): number {
+    return (this.mmo?.shieldRadiusCells ?? 0) * LEPTONS;
+  }
+
+  private pointInCompound(x: number, y: number, c: Entity): boolean {
+    return dist(x, y, c.x, c.y) <= this.shieldRadiusLepton();
+  }
+
+  /** The compound whose protection covers this owner at this point, if any. */
+  compoundProtecting(x: number, y: number, owner: number): Entity | undefined {
+    for (const c of this.shieldCompounds()) {
+      if (!this.pointInCompound(x, y, c)) continue;
+      if (owner === c.owner) return c;
+      const po = this.players[owner], pc = this.players[c.owner];
+      if (po && pc && po.ally >= 0 && po.ally === pc.ally) return c;
+    }
+    return undefined;
+  }
+
+  /**
+   * Whether `e` (owned by `owner`) may damage `target` under the shield boundary.
+   * The boundary is closed to hostile interference in both directions: enemies of
+   * the compound owner cannot damage anything inside, and protected units inside
+   * (owner or qualifying allies) cannot damage anything outside. Units already
+   * inside when the shield activates are not ejected; an enemy insider simply can
+   * no longer hurt protected assets, while defenders inside can still finish them.
+   */
+  private shieldBlocksDamage(e: Entity, by: number, source: number): boolean {
+    if (!this.persistent || !this.mmo?.shieldRadiusCells) return false;
+    const src = source ? this.entities.get(source) : undefined;
+    for (const c of this.shieldCompounds()) {
+      const eIn = this.pointInCompound(e.x, e.y, c);
+      const sIn = !!src && this.pointInCompound(src.x, src.y, c);
+      if (!eIn && !sIn) continue;
+      // Hostile fire into the compound is blocked for enemies of its owner.
+      if (eIn && by >= 0 && by !== c.owner && this.isEnemy(by, c.owner)) return true;
+      // Protected units inside cannot fire outward through the boundary.
+      if (sIn && !eIn && src && this.compoundProtecting(src.x, src.y, src.owner) === c) return true;
+    }
+    return false;
+  }
+
+  /** Same boundary applied at fire time so blocked shots never leave the muzzle. */
+  private shieldBlocksFire(a: Entity, t: Entity | undefined, gx: number, gy: number): boolean {
+    if (!this.persistent || !this.mmo?.shieldRadiusCells) return false;
+    const tx = t ? t.x : gx, ty = t ? t.y : gy;
+    for (const c of this.shieldCompounds()) {
+      const aIn = this.pointInCompound(a.x, a.y, c);
+      const tIn = this.pointInCompound(tx, ty, c);
+      if (!aIn && !tIn) continue;
+      if (aIn && this.compoundProtecting(a.x, a.y, a.owner) === c && !tIn) return true;
+      if (!aIn && tIn && a.owner !== c.owner && this.isEnemy(a.owner, c.owner)) return true;
+    }
+    return false;
+  }
+
+  /** Stamp every compound whose boundary contains this PvP damage exchange. */
+  private noteCompoundBattle(x: number, y: number, by: number, defender: number) {
+    if (!this.persistent || !this.mmo?.shieldRadiusCells) return;
+    for (const c of this.entities.values()) {
+      if (c.kind !== 'structure' || c.hp <= 0 || !this.structDef(c).constructionYard) continue;
+      if (!this.pointInCompound(x, y, c)) continue;
+      if (by === c.owner || defender === c.owner || this.isEnemy(c.owner, by) || this.isEnemy(c.owner, defender)) {
+        c.battleAt = this.tick;
+      }
+    }
   }
 
   private effect(kind: string, x: number, y: number, x2: number, y2: number, dur: number, color?: string): Effect {
@@ -1098,6 +1193,15 @@ export class Game {
         return;
       }
       const kind = this.targetKind(t);
+      // PW10: a protected unit ordered against a target outside its compound's
+      // shield must leave protection to engage — walk out, then fight.
+      if (this.persistent && this.mmo?.shieldRadiusCells) {
+        const prot = this.compoundProtecting(u.x, u.y, u.owner);
+        if (prot && !this.pointInCompound(t.x, t.y, prot)) {
+          u.order = 'attackMove'; u.path = this.pathFor(u, this.cellOf(t)); u.repathTick = this.tick + 20;
+          this.move(u, def); return;
+        }
+      }
       const used = this.weaponFor(u, t);
       if (def.c4 && (kind === 'structure' || !weapon) || def.terror && kind === 'vehicle') {
         // Hands-on abilities: walk up and plant the charge, or jump inside the vehicle.
@@ -1186,12 +1290,26 @@ export class Game {
     const terrainSpeed = cls === 'aircraft' ? 100 : this.pack.terrains[this.map.terrain[this.cellOf(u)]].speed || 100;
     const step = Math.max(1, Math.floor((def.speed * terrainSpeed) / 100));
     const d = dist(u.x, u.y, tx, ty);
+    let nx = u.x, ny = u.y;
+    if (d <= step) { nx = tx; ny = ty; } else {
+      nx = u.x + Math.trunc((dx * step) / d);
+      ny = u.y + Math.trunc((dy * step) / d);
+    }
+    // PW10: an active compound shield admits only its owner — allies, enemies and
+    // carriers are all turned back at the boundary. Units already inside (either
+    // side) move freely, so protected troops can withdraw but never re-enter.
+    if (this.persistent && this.mmo?.shieldRadiusCells && u.owner >= 0) {
+      for (const c of this.shieldCompounds()) {
+        if (u.owner === c.owner) continue;
+        if (this.pointInCompound(nx, ny, c) && !this.pointInCompound(u.x, u.y, c)) {
+          u.path = []; return;
+        }
+      }
+    }
+    u.x = nx; u.y = ny;
     if (d <= step) {
-      u.x = tx; u.y = ty; u.path.shift();
+      u.path.shift();
       if (def.crusher && def.kind === 'vehicle') this.crush(u, next);
-    } else {
-      u.x += Math.trunc((dx * step) / d);
-      u.y += Math.trunc((dy * step) / d);
     }
   }
 
@@ -1423,6 +1541,9 @@ export class Game {
   // ---------------------------------------------------------------- weapons
 
   private aimAndFire(a: Entity, t: Entity | undefined, w: WeaponDef, gx = t?.x ?? 0, gy = t?.y ?? 0) {
+    // PW10: the compound shield boundary applies at the muzzle — a blocked shot
+    // never exists, so projectiles, shells and beams cannot cross it.
+    if (this.shieldBlocksFire(a, t, gx, gy)) { a.cooldown = Math.max(a.cooldown, 15); return; }
     const want = facingTo(gx - a.x, gy - a.y);
     const udef = a.kind === 'unit' ? this.unitDef(a) : undefined;
     if (udef && (udef.kind === 'infantry' || udef.kind === 'aircraft')) a.facing = want;
@@ -1553,6 +1674,12 @@ export class Game {
 
   damage(e: Entity, amount: number, by: number, source = 0, quiet = false) {
     if (e.hp <= 0 || e.invulnUntil > this.tick && !quiet) return;
+    // PW10: an active compound shield is a hard boundary — no damage crosses it.
+    if (this.shieldBlocksDamage(e, by, source)) return;
+    // D5: player-vs-player damage inside a compound's radius marks it in battle.
+    if (by >= 0 && e.owner >= 0 && by !== e.owner && this.isEnemy(by, e.owner)) {
+      this.noteCompoundBattle(e.x, e.y, by, e.owner);
+    }
     e.hp -= amount;
     if (e.hp <= 0) {
       e.hp = 0;
@@ -2147,6 +2274,17 @@ export class Game {
     const sw = this.superweaponOf(s);
     if (!sw || s.charge < this.chargeFor(sw)) return;
     if (sw.kind === 'chrono' && (x2 === undefined || y2 === undefined)) return;
+    // PW10: superweapons cannot target inside an enemy compound's active shield.
+    if (this.persistent && this.mmo?.shieldRadiusCells) {
+      const cx = (v: number) => cellCenter(Math.max(0, Math.min(this.map.w - 1, v)));
+      const cy = (v: number) => cellCenter(Math.max(0, Math.min(this.map.h - 1, v)));
+      const pts: [number, number][] = [[cx(x), cy(y)]];
+      if (x2 !== undefined && y2 !== undefined) pts.push([cx(x2), cy(y2)]);
+      for (const c of this.shieldCompounds()) {
+        if (p.slot === c.owner || !this.isEnemy(p.slot, c.owner)) continue;
+        if (pts.some(([px, py]) => this.pointInCompound(px, py, c))) return;
+      }
+    }
     s.charge = 0;
     const cx = (v: number) => cellCenter(Math.max(0, Math.min(this.map.w - 1, v)));
     const cy = (v: number) => cellCenter(Math.max(0, Math.min(this.map.h - 1, v)));
@@ -2245,6 +2383,13 @@ export class Game {
       if (!def) continue;
       const cell = nearestCell(this.map, origin, 6, i => passable(this.pack, this.map, i, this.moveClass(def)) && !this.unitInCell(i));
       if (cell < 0) continue;
+      // PW10: paradrops and reinforcements cannot materialise inside an active
+      // compound shield — the same admission rule as ground entry (owner only).
+      if (this.persistent && this.mmo?.shieldRadiusCells) {
+        const cx = cellCenter(cell % this.map.w), cy = cellCenter(Math.floor(cell / this.map.w));
+        const blocked = this.shieldCompounds().some(c => s.owner !== c.owner && this.pointInCompound(cx, cy, c));
+        if (blocked) continue;
+      }
       const u = this.spawnUnit(type, s.owner, cell);
       const fx = this.effect('parachute', u.x, u.y, 0, 0, 20); fx.owner = s.owner; fx.item = type;
     }
@@ -2266,6 +2411,12 @@ export class Game {
       const cls = this.moveClass(def);
       const cell = inBounds(this.map, cxx, cyy) ? nearestCell(this.map, this.cellIndex(cxx, cyy), 2, i => passable(this.pack, this.map, i, cls) && !this.unitInCell(i, e.id)) : -1;
       if (cell < 0) { this.damage(e, e.hp, s.owner); continue; }
+      // PW10: chronoshift cannot materialise a unit inside a compound shield it
+      // does not belong to — same admission rule as walking or paradropping in.
+      if (this.persistent && this.mmo?.shieldRadiusCells) {
+        const cx = cellCenter(cell % this.map.w), cy = cellCenter(Math.floor(cell / this.map.w));
+        if (this.shieldCompounds().some(c => e.owner !== c.owner && this.pointInCompound(cx, cy, c))) continue;
+      }
       e.x = e.px = cellCenter(cell % this.map.w); e.y = e.py = cellCenter(Math.floor(cell / this.map.w));
       e.path = []; e.order = 'idle'; e.target = 0;
     }
@@ -2302,7 +2453,11 @@ export class Game {
         e.x = e.px = s.x; e.y = e.py = s.y;
       } else {
         const cell = nearestCell(this.map, this.cellIndex(toCell(s.x), toCell(s.y)), 3, i => passable(this.pack, this.map, i, this.moveClass(def)) && !this.unitInCell(i, e.id));
-        if (cell >= 0) { e.x = e.px = cellCenter(cell % this.map.w); e.y = e.py = cellCenter(Math.floor(cell / this.map.w)); }
+        // PW10: the beam cannot drag a unit into a compound shield it does not own.
+        const shieldedCell = cell >= 0 && this.persistent && this.mmo?.shieldRadiusCells
+          && this.shieldCompounds().some(c =>
+            e.owner !== c.owner && this.pointInCompound(cellCenter(cell % this.map.w), cellCenter(Math.floor(cell / this.map.w)), c));
+        if (cell >= 0 && !shieldedCell) { e.x = e.px = cellCenter(cell % this.map.w); e.y = e.py = cellCenter(Math.floor(cell / this.map.w)); }
       }
       e.heldUntil = hold; e.path = []; e.order = 'idle'; e.target = 0;
     }

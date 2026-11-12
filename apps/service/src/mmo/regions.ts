@@ -4,9 +4,9 @@
 // need to submit commands. Everything here is inert unless MMO_DATABASE_URL is set.
 import { createHash, randomUUID } from 'node:crypto';
 import { mmoOne, mmoQuery } from './db.js';
-import { getRegion, joinWorld, createPlayer, MmoStoreError, type RegionRow } from './store.js';
+import { getRegion, joinWorld, createPlayer, protectionRegionsForPlayer, MmoStoreError, type RegionRow } from './store.js';
 import { RegionRunner, type RegionRunnerOptions } from './runner.js';
-import { createWorldHandler } from './world.js';
+import { createWorldHandler, pokeProtectionEval } from './world.js';
 import { authEnabled } from '../config.js';
 import { PERSISTENT_RULES_V1, MMO_PROTOCOL, MMO_RULESET_VERSION, type MmoSnapshotHeader } from '@comrade/contracts';
 
@@ -206,6 +206,24 @@ export class RegionService {
     }
     await joinWorld(worldId, player.player_id);
     return player;
+  }
+
+  /**
+   * PW10: a presence transition can arm, pause or end earned shields. Poke the
+   * protection evaluator in every region where this player has a live compound
+   * or an open protection record; quiescent regions wake through the job poller.
+   */
+  async notifyPresence(playerId: string): Promise<void> {
+    const regions = await protectionRegionsForPlayer(playerId).catch(() => [] as string[]);
+    const now = Date.now();
+    const graceMs = this.opts.rules?.offlineAfterMs ?? PERSISTENT_RULES_V1.offlineAfterMs;
+    for (const regionId of regions) {
+      // Now: pause an active shield on login. At grace expiry: activate an armed
+      // selection once the owner is truly offline (the immediate poke still sees
+      // the grace window as online and correctly does nothing).
+      await pokeProtectionEval(regionId, now);
+      await pokeProtectionEval(regionId, now + graceMs);
+    }
   }
 
   /** Region row for gateway validation (exists? which world?). */
