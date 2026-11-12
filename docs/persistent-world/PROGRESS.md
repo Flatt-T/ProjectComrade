@@ -668,3 +668,56 @@ acceptance detail; this file is the resume point. Read it first in every session
   (rides the existing unit-death path until PW24), charge-progress
   announcement beyond the deploy notice, offer-authoring UI for
   packedBuilding (wire-protocol works).
+
+## PW17 - fixed factions, mixed forces, pack availability (THU-2241)
+
+- Fixed faction: player.faction is stamped at join/settle and no command
+  path mutates it (verified by test). Every entity now carries
+  `Entity.faction` — the faction it was CREATED under, stamped in blank()
+  and preserved through transfer, packing and redeploy. Pre-PW17 snapshots
+  normalize it to the owner's faction.
+- Imported factories (COMRADE 18 amendment): production is now
+  factory-scoped in persistent games. `factoryFaction()` resolves the
+  faction a building fields — faction-locked structures produce their own
+  faction's units regardless of current owner; shared ones fall back to
+  creator faction then owner. `eligibleFactories()` gates each candidate
+  by factionCanUse(unitDef, factoryFaction) + owner prereqs.
+- Role-matched prerequisites: `structurePrereqRoles()` maps structures to
+  role keys (power, refinery, infantry/vehicle/aircraft/naval-plant,
+  tech-centre, superweapon, construction-yard) with a faction suffix for
+  faction-locked defs — 'nuke' accepts any power plant, 'pyle|hand' a
+  barracks of either faction, 'tmpl' still requires the NOD superweapon
+  (a GDI 'eye' does not substitute). '@level' matches the best upgrade
+  level held for that role. Role-less prereq ids fall back to exact
+  type+level. Classic matches keep exact prereqsMet — deliberate
+  persistent-only change, classic fidelity untouched.
+- Build menu: importing a factory never adds the donor faction's
+  structures — structure/defense items remain player-faction gated;
+  unit queues offer whatever ANY owned eligible factory can produce
+  (gdi player with an imported nod 'hand' sees flamethrower, not
+  grenadier which still needs a gdi barracks).
+- Production routing picks an eligible factory per item (preferring the
+  prereq-named one); ineligible queues stall rather than misproduce.
+- Pack compatibility manifest (apps/service/src/mmo/packs.ts):
+  PERSISTENT_PACK_MANIFEST declares per-pack revision + status
+  (supported/retained/unsupported). The region runner refuses specs whose
+  packId is not runnable; new worlds pin the manifest revision via
+  entry.ts. 'td' is the supported baseline; future packs must prove
+  Fusion-mechanics compatibility before listing — unsupported combos are
+  explicitly unavailable, never substituted. Retired revisions stay
+  'retained' so existing worlds keep resolving; snapshots pin packId so
+  restores never hot-reinterpret content.
+- Tests: tests/unit/fusion-mixed.test.ts 8/8 (creator-faction stamp +
+  transfer preservation, fixed-faction invariant, imported factory roster,
+  real production of a nod unit for the gdi owner, faction-specific tech
+  gating incl. eye?tmpl, nuk2 satisfies power role, donor structures stay
+  out of the build menu, manifest accept/reject); tests/integration/
+  mmo-mixed.test.ts 1/1 (real PG + runner: packed nod 'hand' bartered to
+  gdi player via PW13/PW14 path, redeployed, mixed-force buildOptions and
+  faction gates verified live).
+- Full suite: 429 unit + 96 integration green; typecheck + lint clean.
+- Known gaps: cross-PACK mixed forces (units from a second rule pack in
+  one region) await an approved second pack + adapter proof — the manifest
+  is the gate; AI players do not exploit imported factories (they build
+  for their own faction only); starport queue eligibility follows the same
+  per-factory rule but no td starport structure exists to exercise it.

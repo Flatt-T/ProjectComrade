@@ -198,6 +198,10 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
     e.recoveryProtected = e.recoveryProtected === true;
     // Snapshots predating PW14 lack the packed-building carrier marker.
     e.packedType = typeof e.packedType === 'string' ? e.packedType : '';
+    // Snapshots predating PW17 lack the creator-faction stamp; fall back to the
+    // owner's faction — the best available approximation for old assets.
+    e.faction = typeof e.faction === 'string' && e.faction ? e.faction
+      : ((g.players as Player[])[e.owner]?.faction ?? '');
   }
   g.projectiles = snap.state.projectiles;
   g.worms = snap.state.worms;

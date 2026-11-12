@@ -36,6 +36,7 @@ import {
 import { journalTail } from './commands.js';
 import { mmoQuery } from './db.js';
 import { raiseNotification } from './notify.js';
+import { persistentPackRunnable } from './packs.js';
 
 const TICK_MS = 1000 / 15;
 const PACK_LIST = Object.values(PACKS) as RulePack[];
@@ -261,7 +262,10 @@ export class RegionRunner {
     } else {
       this.simSeed = spec.seed;
       const pack = PACK_LIST.find(p => p.id === spec.packId);
-      if (!pack) throw new MmoStoreError('NO_PACK', `unknown rule pack ${spec.packId}`);
+      // PW17: only manifest-approved packs may run a persistent region.
+      if (!pack || !persistentPackRunnable(spec.packId)) {
+        throw new MmoStoreError('NO_PACK', `rule pack ${spec.packId} is not approved for the persistent profile`);
+      }
       const setup: GameSetup = {
         pack,
         mapId: spec.mapId, seed: spec.seed, persistent: true,
