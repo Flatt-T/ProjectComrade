@@ -21,14 +21,30 @@ services:
       COGNITO_CLIENT_SECRET: ${COGNITO_CLIENT_SECRET:-}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-      STRIPE_AUTOMATIC_TAX: ${STRIPE_AUTOMATIC_TAX:-false}
+      STRIPE_AUTOMATIC_TAX: ${STRIPE_AUTOMATIC_TAX:-true}
       STRIPE_PROMOTION_CODES: ${STRIPE_PROMOTION_CODES:-true}
+      # Ordered advertising waterfall, highest paying first (JSON). Empty runs the house ad.
+      COMRADE_AD_TAGS: ${COMRADE_AD_TAGS:-}
       # House-fallback length when AdSense does not fill. AdSense itself is in the web app.
       COMRADE_AD_SECONDS: ${COMRADE_AD_SECONDS:-30}
+      COMRADE_AD_TIMEOUT_MS: ${COMRADE_AD_TIMEOUT_MS:-8000}
       COMRADE_PUBLIC_URL: ${COMRADE_PUBLIC_URL:-}
       COMRADE_TERMS_VERSION: ${COMRADE_TERMS_VERSION:-}
       # Signs the guest cookie. Set it, or guest allowances reset on every deploy.
       COMRADE_GUEST_SECRET: ${COMRADE_GUEST_SECRET:-}
+      # Persistent world (PW08+). Without MMO_DATABASE_URL the /mmo endpoint is absent and the
+      # service behaves exactly as before; the beta channel sets it to the isolated beta DB.
+      MMO_DATABASE_URL: ${MMO_DATABASE_URL:-}
+      MMO_DATABASE_SSL_VERIFY: ${MMO_DATABASE_SSL_VERIFY:-}
+      MMO_DATABASE_POOL_MAX: ${MMO_DATABASE_POOL_MAX:-8}
+      # Guests are refused on /mmo when accounts are enabled unless this is explicitly "1".
+      MMO_ALLOW_GUESTS: ${MMO_ALLOW_GUESTS:-}
+      # PW25 notification email via SES (SigV4, no SDK). Inert until all are set.
+      COMRADE_SES_REGION: ${COMRADE_SES_REGION:-}
+      COMRADE_SES_FROM: ${COMRADE_SES_FROM:-}
+      COMRADE_SES_FROM_NAME: ${COMRADE_SES_FROM_NAME:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
     read_only: true
     tmpfs:
       - /tmp

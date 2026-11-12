@@ -30,8 +30,10 @@ def request(url):
     }), timeout=180)
 
 
-def compose(image):
-    env = {**os.environ, 'COMRADE_IMAGE': image, 'COMRADE_BIND_ADDRESS': '10.1.0.60', 'COMRADE_HOST_PORT': PORT}
+def deploy_env(image):
+    env = {**os.environ, 'COMRADE_IMAGE': image,
+           'COMRADE_BIND_ADDRESS': os.environ.get('COMRADE_BIND_ADDRESS', '10.10.0.60'),
+           'COMRADE_HOST_PORT': PORT}
     # Secrets live beside the state file, never in the repo or the image: the database URL,
     # the Cognito pool, the Stripe keys and the log-export token. Only
     # names the service actually reads are passed through, so a stray line cannot inject
@@ -40,10 +42,16 @@ def compose(image):
         'COMRADE_OPS_TOKEN', 'DATABASE_URL', 'DATABASE_SSL_VERIFY', 'DATABASE_POOL_MAX',
         'COGNITO_REGION', 'COGNITO_USER_POOL_ID', 'COGNITO_CLIENT_ID', 'COGNITO_CLIENT_SECRET',
         'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_AUTOMATIC_TAX', 'STRIPE_PROMOTION_CODES',
-        'COMRADE_AD_SECONDS',
+        'COMRADE_AD_TAGS', 'COMRADE_AD_SECONDS', 'COMRADE_AD_TIMEOUT_MS',
         'COMRADE_HOUSE_HEADLINE', 'COMRADE_HOUSE_BODY', 'COMRADE_HOUSE_CTA', 'COMRADE_HOUSE_HREF',
         'COMRADE_PUBLIC_URL', 'COMRADE_TERMS_VERSION', 'COMRADE_GUEST_SECRET', 'COMRADE_REPO',
-        'COMRADE_GITHUB_TOKEN',
+        'COMRADE_GITHUB_TOKEN', 'COMRADE_BIND_ADDRESS', 'COMRADE_HOST_PORT',
+        # Persistent world (PW27 beta): the isolated MMO database and its pool bounds.
+        'MMO_DATABASE_URL', 'MMO_DATABASE_SSL_VERIFY', 'MMO_DATABASE_POOL_MAX', 'MMO_ALLOW_GUESTS',
+        # Notification email (PW25): SES via SigV4; inert until COMRADE_SES_FROM
+        # and AWS credentials are set. Web push needs no server secret.
+        'COMRADE_SES_REGION', 'COMRADE_SES_FROM', 'COMRADE_SES_FROM_NAME',
+        'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
     }
     # `service.env` is the current name; `ops.env` is still read so an existing host keeps working.
     for name in ('ops.env', 'service.env'):
@@ -57,9 +65,13 @@ def compose(image):
             key = key.strip()
             if key in allowed:
                 env[key] = value.strip()
+    return env
+
+
+def compose(image):
     subprocess.run(['docker', 'compose', '-p', 'comrade-beta' if BETA else 'comrade', '-f', str(ROOT / 'compose.yml'),
                     'up', '-d', '--pull', 'never', '--wait', '--wait-timeout', '90'],
-                   env=env, check=True)
+                   env=deploy_env(image), check=True)
 
 
 def main():
@@ -123,7 +135,8 @@ def main():
                 raise RuntimeError('Loaded image identity mismatch')
             try:
                 compose(image)
-                with request(f'http://10.1.0.60:{PORT}/health') as response:
+                bind = deploy_env(image)['COMRADE_BIND_ADDRESS']
+                with request(f'http://{bind}:{PORT}/health') as response:
                     if json.load(response).get('status') != 'ok':
                         raise RuntimeError('Health response failed')
             except Exception:
