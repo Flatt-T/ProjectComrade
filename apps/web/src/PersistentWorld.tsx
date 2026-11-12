@@ -14,6 +14,7 @@ import type {
   MmoAwayReport, MmoNotification, MmoNotificationKind, MmoNotificationPrefs, MmoNotifyChannel,
 } from '@comrade/contracts';
 import { api } from './api';
+import type { MmoProtectionResponse } from './api';
 import { typingIn } from './help';
 
 type Mode = 'normal' | 'place' | 'repair' | 'attackMove' | 'super';
@@ -22,6 +23,13 @@ const ALL_TABS: { id: QueueKind; label: string }[] = [
   { id: 'vehicle', label: 'Vehicles' }, { id: 'aircraft', label: 'Air' }, { id: 'naval', label: 'Navy' },
 ];
 const RANKS = ['', ' · Veteran', ' · Elite'];
+/** Shield durations offered in the panel (seconds). */
+const SHIELD_PRESETS = [3600, 4 * 3600, 8 * 3600, 24 * 3600];
+function fmtDur(seconds: number | null | undefined): string {
+  if (seconds === null || seconds === undefined) return '—';
+  const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60);
+  return h ? `${h}h ${m}m` : `${m}m`;
+}
 const NOTE_TEXT: Record<MmoNotificationKind, string> = {
   compound_under_attack: 'Your compound is under attack',
   shield_ending: 'Your shield is ending soon',
@@ -66,6 +74,11 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   const [prefs, setPrefs] = useState<MmoNotificationPrefs | null>(null);
   const [away, setAway] = useState<MmoAwayReport | null>(null);
   const [showNotes, setShowNotes] = useState(false);
+  // PW27: earned-shield selection — armed records activate on the offline
+  // transition; the panel shows live remaining hours from the durable record.
+  const [prot, setProt] = useState<MmoProtectionResponse | null>(null);
+  const [showShield, setShowShield] = useState(false);
+  const [shieldCustom, setShieldCustom] = useState('');
 
   useEffect(() => {
     let game: Game | null = null;
@@ -94,6 +107,10 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         renderer = new FusionRenderer(canvas.current!, game, slot);
         session = new PersistentSession(game, slot, conn, regionId);
         rig.current = { game, session, renderer };
+        // Read-only handle for beta scenario tooling: exposes the live rig so an
+        // external driver can translate map cells to screen coordinates. The beta
+        // contract already accepts modified clients, so this grants nothing new.
+        (window as unknown as { __comradeWorld?: unknown }).__comradeWorld = rig.current;
         const start = game.mapPreset.starts[slot] ?? { x: game.map.w >> 1, y: game.map.h >> 1 };
         renderer.centerOn(start.x, start.y);
       },
@@ -134,6 +151,9 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       setNotes(r.notifications.slice(0, 30));
     }).catch(() => undefined);
     void api.mmoAwayReport().then(r => { if (r.entries.length) setAway(r); }).catch(() => undefined);
+    const loadProt = () => void api.mmoProtection().then(setProt).catch(() => undefined);
+    loadProt();
+    const protTimer = window.setInterval(loadProt, 15_000);
 
     const resize = () => {
       const el = stage.current!, c = canvas.current!;
@@ -247,6 +267,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       offNotes();
       window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup);
       session?.dispose(); conn.close(); rig.current = null;
+      window.clearInterval(protTimer);
     };
   }, [regionId]);
 
@@ -283,6 +304,22 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     connRef.current?.command({ t: 'endRecovery', compoundId });
     setNotice('Ending recovery…');
     window.setTimeout(() => setNotice(''), 4000);
+  }
+
+  // PW27: arm/clear an earned-shield selection on a live compound. The action is
+  // journaled; the armed record activates when the offline eval sees the owner
+  // leave — nothing is applied optimistically here.
+  function armShield(compoundId: string, seconds: number) {
+    connRef.current?.command({ t: 'selectShield', compoundId, seconds });
+    setNotice(`Shield selection sent (${fmtDur(seconds)}).`);
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoProtection().then(setProt).catch(() => undefined), 1500);
+  }
+  function disarmShield(compoundId: string) {
+    connRef.current?.command({ t: 'clearShield', compoundId });
+    setNotice('Shield selection cleared.');
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoProtection().then(setProt).catch(() => undefined), 1500);
   }
 
   // PW11: send the journaled settle intent; the server picks the spawn cell and
@@ -498,7 +535,42 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         <button className="notify-bell" onClick={openNotes} title="Notifications">
           {'\u{1F514}'}{notes.some(n => n.readAt === null) ? ' •' : ''}
         </button>
+        <button className="notify-bell" onClick={() => setShowShield(v => !v)} title="Compound shield">
+          {'\u{1F6E1}'}
+        </button>
       </div>
+      {showShield && <div className="notes-panel">
+        <div className="notes-head"><b>Compound shield</b>
+          <span className="notes-prefs">{prot ? `${fmtDur(prot.availableSeconds)} available` : '…'}</span>
+        </div>
+        {!prot && <div className="notes-empty">Loading…</div>}
+        {prot && prot.compounds.filter(c => c.regionId === regionId).map(c => {
+          const rec = c.record;
+          const activeLeft = rec?.status === 'active' && rec.endsAt
+            ? Math.max(0, Math.round((Date.parse(rec.endsAt) - Date.now()) / 1000)) : rec?.remainingSeconds ?? null;
+          return <div key={c.compoundId} className="note">
+            <span>
+              {rec?.status === 'active' ? `Shielded — ${fmtDur(activeLeft)} left`
+                : rec?.status === 'armed' ? `Armed ${fmtDur(rec.armedSeconds)} — starts when you go offline`
+                : 'No shield'}
+            </span>
+            <span className="notes-prefs">
+              {SHIELD_PRESETS.map(s => (
+                <button key={s} disabled={!prot || s > prot.availableSeconds}
+                  onClick={() => armShield(c.compoundId, s)}>{fmtDur(s)}</button>
+              ))}
+              <input className="shield-custom" type="number" min={60} step={60}
+                placeholder="sec" value={shieldCustom}
+                onChange={ev => setShieldCustom(ev.target.value)} />
+              <button disabled={!prot || !shieldCustom || Number(shieldCustom) <= 0 || Number(shieldCustom) > prot.availableSeconds}
+                onClick={() => { const s = Math.floor(Number(shieldCustom)); if (s > 0) armShield(c.compoundId, s); }}>Set</button>
+              {rec?.status === 'armed' && <button onClick={() => disarmShield(c.compoundId)}>Clear</button>}
+            </span>
+          </div>;
+        })}
+        {prot && prot.compounds.filter(c => c.regionId === regionId).length === 0 &&
+          <div className="notes-empty">No standing construction yard — build one first.</div>}
+      </div>}
       {showNotes && <div className="notes-panel">
         <div className="notes-head">
           <b>Notifications</b>
