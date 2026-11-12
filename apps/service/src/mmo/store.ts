@@ -651,6 +651,59 @@ export async function preparedTransfers(sourceRegionId: string, q: Queryable = m
      order by created_at`, [sourceRegionId])).rows;
 }
 
+/** The player's world id — settlement first, then bare world membership. */
+export async function worldIdForPlayer(playerId: string, q: Queryable = mmoDb()): Promise<string | undefined> {
+  const { rows } = await q.query<{ world_id: string }>(
+    `select world_id from (
+       select world_id from settlement where player_id = $1
+       union all
+       select world_id from world_member where player_id = $1 limit 1
+     ) w limit 1`, [playerId]);
+  return rows[0]?.world_id;
+}
+
+/** Every region in the player's world with roster size and the caller's
+ *  settlement flag — the transfer destination picker (PW19). */
+export async function regionsForPlayerWorld(playerId: string, q: Queryable = mmoDb()): Promise<{
+  region_id: string; label: string; lifecycle: string; settled: boolean; players: number;
+}[]> {
+  return (await q.query<{
+    region_id: string; label: string; lifecycle: string; settled: boolean; players: number;
+  }>(
+    `select r.region_id, r.label, r.lifecycle,
+       exists(select 1 from settlement s where s.region_id = r.region_id and s.player_id = $1) as settled,
+       (select count(*)::int from settlement s2 where s2.region_id = r.region_id) as players
+     from region r
+     where r.world_id = $2
+     order by r.created_at`,
+    [playerId, (await worldIdForPlayer(playerId, q)) ?? ''])).rows;
+}
+
+/** Live transfers owned by a player (any leg of the crossing) — powers the
+ *  in-transit list and cancel affordance (PW19). */
+export async function liveTransfersForPlayer(playerId: string, q: Queryable = mmoDb()): Promise<TransferRow[]> {
+  return (await q.query<TransferRow>(
+    `select * from region_transfer
+      where state in ('PREPARED','SOURCE_RELEASED','DESTINATION_ACCEPTED','RECOVERY_REQUIRED')
+        and payload->>'ownerPid' = $1 order by created_at`, [playerId])).rows;
+}
+
+/** The world roster with display names and each member's settlement region —
+ *  needed to address barter offers and alliance invites by name (PW19). */
+export async function worldPlayersForPlayer(playerId: string, q: Queryable = mmoDb()): Promise<{
+  player_id: string; display_name: string; region_id: string | null;
+}[]> {
+  const worldId = await worldIdForPlayer(playerId, q);
+  if (!worldId) return [];
+  return (await q.query<{
+    player_id: string; display_name: string; region_id: string | null;
+  }>(
+    `select p.player_id, p.display_name,
+       (select s.region_id from settlement s where s.player_id = p.player_id) as region_id
+     from world_member m join player p on p.player_id = m.player_id
+     where m.world_id = $1 order by lower(p.display_name)`, [worldId])).rows;
+}
+
 // ---------------------------------------------------------------------------
 // Recovery episodes and settlements (at-most-once)
 // ---------------------------------------------------------------------------

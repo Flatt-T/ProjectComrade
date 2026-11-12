@@ -44,9 +44,11 @@ import {
   pushSubscribe, pushUnsubscribe, setNotificationPref,
 } from './mmo/notify.js';
 import {
-  bartersForAccount, committedShieldSeconds, compoundsForPlayer, ladderBoard, MmoStoreError,
-  openShieldRecordsForPlayer, openTradeOffersForPlayer, shieldBalances, signupSignalsForAccount,
-  signupSignalsSharingIp, tradeAuditReport, utcShieldDay,
+  allianceForPlayer, allianceInvitesFor, allianceMembers, bartersForAccount, committedShieldSeconds,
+  compoundsForPlayer, ladderBoard, liveTransfersForPlayer, MmoStoreError,
+  openShieldRecordsForPlayer, openTradeOffersForPlayer, regionsForPlayerWorld, shieldBalances,
+  signupSignalsForAccount, signupSignalsSharingIp, tradeAuditReport, utcShieldDay,
+  worldIdForPlayer, worldPlayersForPlayer,
 } from './mmo/store.js';
 
 const str = (value: unknown, max = 200): string => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -819,6 +821,68 @@ get('/api/mmo/trade-offers', async (ctx: Ctx) => {
 });
 
 /**
+ * GET /api/mmo/players â€” the caller's world roster with display names and
+ * settlement regions. Read-only; used to address barter offers and alliance
+ * invites by name (PW19).
+ */
+get('/api/mmo/players', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-players', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  return { self: playerId, players: await worldPlayersForPlayer(playerId) };
+});
+
+/**
+ * GET /api/mmo/regions â€” every region in the caller's world with roster size
+ * and the caller's settlement flag â€” the transfer destination picker (PW19).
+ */
+get('/api/mmo/regions', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-regions', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  return { regions: await regionsForPlayerWorld(playerId) };
+});
+
+/**
+ * GET /api/mmo/transfers â€” the caller's live cross-region transfers with
+ * state, powering the in-transit list and cancel affordance (PW19).
+ */
+get('/api/mmo/transfers', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-transfers', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const rows = await liveTransfersForPlayer(playerId);
+  return {
+    transfers: rows.map(t => ({
+      transferId: t.transfer_id, entityId: t.entity_id,
+      sourceRegionId: t.source_region_id, destRegionId: t.dest_region_id,
+      state: t.state, createdAt: t.created_at,
+    })),
+  };
+});
+
+/**
+ * GET /api/mmo/alliance â€” the caller's alliance, its members with roles and
+ * permission grants, and pending invites addressed to them (PW19).
+ */
+get('/api/mmo/alliance', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-alliance', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const worldId = await worldIdForPlayer(playerId);
+  if (!worldId) return { alliance: null, members: [], invites: [] };
+  const found = await allianceForPlayer(worldId, playerId);
+  if (!found) return { alliance: null, members: [], invites: await allianceInvitesFor(playerId) };
+  const members = await allianceMembers(found.alliance.alliance_id);
+  return {
+    alliance: {
+      allianceId: found.alliance.alliance_id, name: found.alliance.name,
+      role: found.member.role, maxMembers: found.alliance.max_members,
+    },
+    members: members.map(m => ({
+      playerId: m.player_id, role: m.role, permissions: m.permissions,
+    })),
+    invites: await allianceInvitesFor(playerId),
+  };
+});
+
+/**
  * GET /api/mmo/ladder?board=player|alliance&period=30d|all â€” the top of a
  * ladder board (PW24). Player boards default to the caller; the alliance
  * board shows the caller's alliance. Boards are materialized from journaled
@@ -846,7 +910,7 @@ get('/api/mmo/ladder', async (ctx: Ctx) => {
 });
 
 // ---------------------------------------------------------------------------
-// Persistent world trade audit + signup signals (PW26) — ops-only endpoints.
+// Persistent world trade audit + signup signals (PW26) ï¿½ ops-only endpoints.
 // ---------------------------------------------------------------------------
 
 /** Ops gate: the report exposes other players' trades, so it requires the
@@ -867,7 +931,7 @@ async function auditWorldId(): Promise<string> {
 }
 
 /**
- * GET /api/mmo/trade-audit — settled barters flagged as high-value one-sided
+ * GET /api/mmo/trade-audit ï¿½ settled barters flagged as high-value one-sided
  * trades between young accounts (the scripted-funnelling pattern). Every
  * settled barter is queryable by account at /api/mmo/trade-audit/account.
  */
@@ -885,7 +949,7 @@ get('/api/mmo/trade-audit', async (ctx: Ctx) => {
   };
 });
 
-/** GET /api/mmo/trade-audit/account?account=<uuid> — every settled barter for an account. */
+/** GET /api/mmo/trade-audit/account?account=<uuid> ï¿½ every settled barter for an account. */
 get('/api/mmo/trade-audit/account', async (ctx: Ctx) => {
   limit(ctx, 'mmo-trade-audit-account', 30, 60_000);
   requireAudit(ctx);
@@ -896,7 +960,7 @@ get('/api/mmo/trade-audit/account', async (ctx: Ctx) => {
 });
 
 /**
- * GET /api/mmo/signup-signals?account=<uuid> or ?ip=<address> — the sign-up
+ * GET /api/mmo/signup-signals?account=<uuid> or ?ip=<address> ï¿½ the sign-up
  * signals recorded at first persistent-world entry, for duplicate-account
  * investigation. Raw IPs are hashed before storage; pass the address and the
  * same hash is computed here.

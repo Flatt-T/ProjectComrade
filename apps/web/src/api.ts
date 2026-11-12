@@ -175,7 +175,51 @@ export const api = {
   mmoAwayReport: () => get<MmoAwayReport>('/api/mmo/away-report'),
   mmoProtection: () => get<MmoProtectionResponse>('/api/mmo/protection'),
   mmoTradeOffers: () => get<MmoTradeOffersResponse>('/api/mmo/trade-offers'),
+  mmoPlayers: () => get<MmoPlayersResponse>('/api/mmo/players'),
+  mmoRegions: () => get<MmoRegionsResponse>('/api/mmo/regions'),
+  mmoTransfers: () => get<MmoTransfersResponse>('/api/mmo/transfers'),
+  mmoAlliance: () => get<MmoAllianceResponse>('/api/mmo/alliance'),
 };
+
+export interface MmoPlayerRow {
+  player_id: string;
+  display_name: string;
+  region_id: string | null;
+}
+export interface MmoPlayersResponse { self: string; players: MmoPlayerRow[] }
+
+export interface MmoRegionRow {
+  region_id: string;
+  label: string;
+  lifecycle: string;
+  settled: boolean;
+  players: number;
+}
+export interface MmoRegionsResponse { regions: MmoRegionRow[] }
+
+export interface MmoTransferRow {
+  transferId: string;
+  entityId: string;
+  sourceRegionId: string;
+  destRegionId: string;
+  state: string;
+  createdAt: string;
+}
+export interface MmoTransfersResponse { transfers: MmoTransferRow[] }
+
+export interface MmoAllianceMember {
+  playerId: string;
+  role: 'leader' | 'officer' | 'member';
+  permissions: { station: boolean; reinforce: boolean; trade: boolean; unitTransfer: boolean };
+}
+export interface MmoAllianceResponse {
+  alliance: {
+    allianceId: string; name: string;
+    role: 'leader' | 'officer' | 'member'; maxMembers: number;
+  } | null;
+  members: MmoAllianceMember[];
+  invites: { alliance_id: string; name: string; invited_by: string }[];
+}
 
 export interface MmoProtectionResponse {
   now: number;
