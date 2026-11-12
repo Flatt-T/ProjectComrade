@@ -144,6 +144,14 @@ export interface MmoRulesProfile {
   };
   /** Shield boundary radius in map cells around each construction yard (PW10). */
   shieldRadiusCells: number;
+  /** Frontier world generation tuning (PW16). Optional for profiles pinned
+   *  before PW16; consumers fall back to MMO_WORLDGEN_DEFAULT. Terrain ids are
+   *  resolved from the pack — the profile carries sizes and densities only. */
+  worldgen?: {
+    width: number; height: number; seaLevel: number;
+    rivers: number; resourceClusters: number; resourceRadius: number;
+    spawnSitesMin: number; maxAttempts: number;
+  };
   /** Hibernation look-ahead for inbound transfers, milliseconds. */
   hibernateInboundLookaheadMs: number;
   /** Minimum time a region stays awake before it may hibernate again (anti-thrash). */
@@ -211,11 +219,13 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
     windowMs: 900_000,
     superweaponNearbyCells: 60,
   },
+  worldgen: { width: 96, height: 96, seaLevel: 118, rivers: 3, resourceClusters: 14, resourceRadius: 6, spawnSitesMin: 8, maxAttempts: 24 },
 };
 
-/** Fallbacks for rules profiles pinned before PW24 added the sections. */
+/** Fallbacks for rules profiles pinned before PW24/PW16 added the sections. */
 export const MMO_SITES_DEFAULT: NonNullable<MmoRulesProfile['sites']> = PERSISTENT_RULES_V1.sites!;
 export const MMO_LADDER_DEFAULT: NonNullable<MmoRulesProfile['ladder']> = PERSISTENT_RULES_V1.ladder!;
+export const MMO_WORLDGEN_DEFAULT: NonNullable<MmoRulesProfile['worldgen']> = PERSISTENT_RULES_V1.worldgen!;
 
 // ---------------------------------------------------------------------------
 // Capabilities and open decisions (COMRADE 18 §6)
@@ -325,7 +335,15 @@ function parseProfile(value: unknown): MmoRulesProfile {
     || !isNonNegInt(p.spawnCohortBaselineScore)
     || (v.shieldRadiusCells !== undefined && !isPosInt(v.shieldRadiusCells))
     || !isNonNegInt(p.notifications?.delayMs) || !isPosInt(p.notifications?.windowMs)
-    || !isPosInt(p.notifications?.superweaponNearbyCells)) {
+    || !isPosInt(p.notifications?.superweaponNearbyCells)
+    || (p.worldgen !== undefined && (!isPosInt(p.worldgen.width) || p.worldgen.width < 32 || p.worldgen.width > 256
+      || !isPosInt(p.worldgen.height) || p.worldgen.height < 32 || p.worldgen.height > 256
+      || !isNonNegInt(p.worldgen.seaLevel) || p.worldgen.seaLevel > 255
+      || !isNonNegInt(p.worldgen.rivers) || p.worldgen.rivers > 32
+      || !isNonNegInt(p.worldgen.resourceClusters) || p.worldgen.resourceClusters > 512
+      || !isPosInt(p.worldgen.resourceRadius) || p.worldgen.resourceRadius > 32
+      || !isNonNegInt(p.worldgen.spawnSitesMin)
+      || !isPosInt(p.worldgen.maxAttempts) || p.worldgen.maxAttempts > 256))) {
     throw new Error('Invalid rules profile values');
   }
   return p;

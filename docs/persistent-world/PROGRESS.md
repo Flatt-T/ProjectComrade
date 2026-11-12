@@ -881,3 +881,49 @@ heavy airlift deferred to milestone 3.
   unarmed so 'cannot attack while protected' is enforced in code but only
   exercised via the damage path in tests; no client-specific UI needed —
   build menu, enter and deploy flows are generic.
+
+## PW16 — Varied connected terrain + persistent frontier expansion (THU-2240)
+
+Frontier regions are now procedurally generated instead of reusing map
+preset 0 with a different seed.
+
+- `packages/fusion/src/worldgen.ts` (new, WORLDGEN_VERSION=1): versioned
+  `WorldgenSpec` (width/height/seaLevel/terrain picks/rivers/resource
+  clusters/spawn minimums/attempt budget) + `generateWorldMap(pack, spec,
+  seed)`. Spec + seed fully determine terrain, resources and spawn anchors —
+  snapshots, restores and every runner replica regenerate identical land.
+- Generation: integer value-noise heightfield (3 octaves) ? land/water at
+  seaLevel; coast-edge shore terrain, biome patches and impassable clumps
+  rotated per seed from pack terrain categories (works for every pack, no
+  pack-specific ids in the profile). Rivers carve inland channels to water;
+  isolated water bodies get carved straits until ONE naval component remains
+  (8-connected, matching findPath). Resource clusters scatter on buildable
+  land; spawn anchors are greedy max-min over viable cells on the main land
+  component (islands stay reachable by PW15 sea craft / air).
+- Diagnostics: every attempt records land fraction, component counts,
+  viable spawn cells and reject reasons; `generateWorldMap` throws with the
+  full per-attempt reason list when maxAttempts fail. Region seed stores
+  `{ version, acceptedAttempt, landBridges, rejected[] }` for audit.
+- Game/persistence: `GameSetup.worldgen` branches the constructor;
+  `captureGame`/`restoreGame` carry `setup.worldgen` so crash recovery
+  regenerates the same map. Synthetic preset exposes real width/height and
+  spawn anchors for preset-shaped consumers.
+- Service: `RegionSimSpec.worldgen` ? runner GameSetup; `ensureSpawnRegion`
+  generates spec+map diagnostics per new frontier region; `pickSpawnCell`
+  and the settle path are worldgen-aware (map dims from spec).
+- Contracts: `MmoRulesProfile.worldgen` tuning (optional, defaults
+  96×96/seaLevel 118/3 rivers/14 clusters/min 8 sites/24 attempts) +
+  `MMO_WORLDGEN_DEFAULT`.
+- Frontier expansion was already append-only (new region per power band);
+  existing regions, coordinates and terrain are untouched — each region is
+  an independent deterministic map.
+- Tests: tests/unit/worldgen.test.ts 8/8 (determinism, variety, single
+  naval component, spawn viability, resources, rejection diagnostics,
+  snapshot round-trip); tests/integration/mmo-worldgen.test.ts 3/3 (spec +
+  diagnostics in region seed, runner boots 96×96 generated map and settles a
+  newcomer onto viable land with 16 bound units, out-of-band demand appends
+  a distinct frontier region). Full unit 465 green; integration 109 green;
+  lint + typecheck clean.
+- Known gaps: no client map preview of generated terrain (renderer already
+  draws MapData); choke-point metric is diagnostic-only (landBridges count);
+  heavy airlift still deferred (milestone 3 scope per PW15).

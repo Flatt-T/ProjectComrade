@@ -1,5 +1,6 @@
 import { Hasher, LEPTONS, Rng, cellCenter, dist, facingDelta, facingTo, toCell } from './core.js';
 import { MapData, buildableTerrain, generateMap, inBounds, isWater, passable, resourceIndex, terrainPassable } from './map.js';
+import { generateWorldMap, type WorldgenReport, type WorldgenSpec } from './worldgen.js';
 import { findPath, nearestCell } from './path.js';
 import { Doctrine, FactionDef, InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, structurePrereqRoles, weaponCanTarget } from './rules.js';
 import { runAI, AIState, AILevel, AI_LEVELS, createAIState } from './ai.js';
@@ -120,6 +121,12 @@ export interface GameSetup {
    * region authority decides elimination, protection and recovery instead.
    */
   persistent?: boolean;
+  /**
+   * PW16 frontier worldgen: when present the map is procedurally generated from
+   * this spec + `seed` instead of a hand-authored preset. The spec is stored in
+   * the region seed and snapshot so every replica regenerates identical land.
+   */
+  worldgen?: WorldgenSpec;
   /**
    * Persistent pacing tuning (PW23), mapped from the region's MmoRulesProfile by
    * the service. Absent means classic pacing — classic matches are unaffected.
@@ -599,6 +606,10 @@ export class Game {
   readonly mmo?: MmoTuning;
   /** Region extension points; classic matches leave this empty. */
   hooks: RegionHooks = {};
+  /** PW16: the worldgen spec this region was generated from, if any. */
+  worldgenSpec?: WorldgenSpec;
+  /** PW16: generation diagnostics (accepted attempt + rejected candidates). */
+  worldgenReport?: WorldgenReport;
   /** Starting credits for late joiners (the setup preset, resolved once). */
   private startMoney = 0;
 
@@ -606,9 +617,20 @@ export class Game {
     // PW14/PW24: persistent games resolve carriers and site defs; classic matches keep the raw pack.
     this.pack = setup.persistent === true ? withPersistentStructures(setup.pack)
       : setup.sites ? withRegionSites(setup.pack) : setup.pack;
-    const preset = setup.pack.maps.find(m => m.id === setup.mapId) ?? setup.pack.maps[0];
+    let preset: MapPreset;
+    let map: MapData;
+    if (setup.worldgen) {
+      // PW16: deterministic frontier generation — spec + seed reproduce the map.
+      const gen = generateWorldMap(setup.pack, setup.worldgen, setup.seed);
+      preset = gen.preset; map = gen.map;
+      this.worldgenSpec = setup.worldgen;
+      this.worldgenReport = gen.report;
+    } else {
+      preset = setup.pack.maps.find(m => m.id === setup.mapId) ?? setup.pack.maps[0];
+      map = generateMap(setup.pack, preset, setup.seed);
+    }
     this.mapPreset = preset;
-    this.map = generateMap(setup.pack, preset, setup.seed);
+    this.map = map;
     this.rng = new Rng(setup.seed);
     this.techCap = Math.ceil(((setup.techLevel ?? 15) * 10) / 15);
     this.doctrine = setup.doctrine ?? 'irregular';

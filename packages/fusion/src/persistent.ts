@@ -14,6 +14,7 @@ import { Rng } from './core.js';
 import { Game, withPersistentStructures, type Command, type Entity, type MmoTuning, type Player } from './game.js';
 import type { AIState } from './ai.js';
 import { generateMap, type MapData } from './map.js';
+import { generateWorldMap, type WorldgenSpec } from './worldgen.js';
 import type { Doctrine, MapPreset, RulePack } from './rules.js';
 
 const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -80,7 +81,7 @@ export interface SnapshotMeta {
 
 export interface GameSnapshotV1 {
   v: 1;
-  setup: { packId: string; mapId: string; seed: number; persistent: boolean; mmo?: MmoTuning };
+  setup: { packId: string; mapId: string; seed: number; persistent: boolean; mmo?: MmoTuning; worldgen?: WorldgenSpec };
   state: {
     tick: number; market: number; over: boolean; winnerTeam: number;
     rngState: number; nextId: number; powerDirty: boolean; startMoney: number;
@@ -132,7 +133,7 @@ export function captureGame(game: Game, meta: SnapshotMeta): string {
     v: 1,
     setup: {
       packId: game.pack.id, mapId: game.mapPreset.id, seed: meta.seed,
-      persistent: game.persistent, mmo: game.mmo,
+      persistent: game.persistent, mmo: game.mmo, worldgen: game.worldgenSpec,
     },
     state: {
       tick: game.tick, market: game.market, over: game.over, winnerTeam: game.winnerTeam,
@@ -162,8 +163,14 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   if (snap.v !== 1) throw new Error(`Unsupported snapshot version ${snap.v}`);
   const pack = packs.find(p => p.id === snap.setup.packId);
   if (!pack) throw new Error(`Unknown rule pack ${snap.setup.packId}`);
-  const preset: MapPreset = pack.maps.find(m => m.id === snap.setup.mapId) ?? pack.maps[0];
-  const map: MapData = generateMap(pack, preset, snap.setup.seed);
+  // PW16: worldgen regions regenerate from the stored spec + seed; preset maps
+  // regenerate from pack + preset + seed as before.
+  const generated = snap.setup.worldgen
+    ? generateWorldMap(pack, snap.setup.worldgen, snap.setup.seed)
+    : undefined;
+  const preset: MapPreset = generated?.preset
+    ?? pack.maps.find(m => m.id === snap.setup.mapId) ?? pack.maps[0];
+  const map: MapData = generated?.map ?? generateMap(pack, preset, snap.setup.seed);
   map.occupied.set(b64ToI32(snap.state.map.occupied));
   map.res.set(b64ToU16(snap.state.map.res));
   // resKind is dynamic: cells deplete to 0 and regrowth/spread restore it.
@@ -230,6 +237,7 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   g.crateRate = snap.state.crateRate;
   g.persistent = snap.setup.persistent;
   g.mmo = g.persistent ? snap.setup.mmo : undefined;
+  g.worldgenSpec = snap.setup.worldgen;
   g.hooks = {};
   return game;
 }
