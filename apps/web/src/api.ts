@@ -180,7 +180,12 @@ export const api = {
   mmoTransfers: () => get<MmoTransfersResponse>('/api/mmo/transfers'),
   mmoAlliance: () => get<MmoAllianceResponse>('/api/mmo/alliance'),
   mmoObjectives: () => get<MmoObjectivesResponse>('/api/mmo/objectives'),
+  mmoLadder: (board: 'player' | 'alliance' = 'player', period: '30d' | 'all' = '30d') =>
+    get<MmoLadderResponse>(`/api/mmo/ladder?board=${board}&period=${period}`),
 };
+
+export interface MmoLadderRow { board: string; subject_id: string; period: string; points: string }
+export interface MmoLadderResponse { board: string; period: string; rows: MmoLadderRow[] }
 
 export interface MmoObjectiveRow {
   objectiveId: string;

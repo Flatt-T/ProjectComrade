@@ -15,8 +15,8 @@ import type {
 } from '@comrade/contracts';
 import { api } from './api';
 import type {
-  MmoAllianceResponse, MmoObjectivesResponse, MmoPlayersResponse, MmoProtectionResponse,
-  MmoRegionsResponse, MmoTradeOffersResponse, MmoTransfersResponse,
+  MmoAllianceResponse, MmoLadderResponse, MmoObjectivesResponse, MmoPlayersResponse,
+  MmoProtectionResponse, MmoRegionsResponse, MmoTradeOffersResponse, MmoTransfersResponse,
 } from './api';
 import { typingIn } from './help';
 
@@ -109,6 +109,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // PW19: daily/weekly objectives — progress is server-bumped; claims are
   // journaled world actions that grant earned shield seconds.
   const [objectives, setObjectives] = useState<MmoObjectivesResponse | null>(null);
+  const [ladder, setLadder] = useState<MmoLadderResponse | null>(null);
 
   useEffect(() => {
     let game: Game | null = null;
@@ -205,6 +206,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       void api.mmoTransfers().then(setTransfers).catch(() => undefined);
       void api.mmoAlliance().then(setAlliance).catch(() => undefined);
       void api.mmoObjectives().then(setObjectives).catch(() => undefined);
+      void api.mmoLadder().then(setLadder).catch(() => undefined);
     };
     loadWorld();
     const worldTimer = window.setInterval(loadWorld, 15_000);
@@ -879,6 +881,17 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         ))}
         {objectives && objectives.objectives.every(o => o.status === 'expired') &&
           <div className="notes-empty">No objectives yet.</div>}
+        <div className="notes-head"><b>Ladder · 30d</b></div>
+        {!ladder && <div className="notes-empty">Loading…</div>}
+        {ladder?.rows.slice(0, 10).map((r, i) => (
+          <div key={r.subject_id} className="note">
+            <span>{i + 1}. {players?.players.find(p => p.player_id === r.subject_id)?.display_name
+              ?? r.subject_id.slice(0, 8)}</span>
+            <span className="notes-prefs">{Number(r.points).toLocaleString()} pts</span>
+          </div>
+        ))}
+        {ladder && ladder.rows.length === 0 &&
+          <div className="notes-empty">No scored play yet.</div>}
       </div>}
       {showAlliance && <div className="notes-panel">
         <div className="notes-head"><b>Alliance</b>
