@@ -9,9 +9,9 @@ import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
 import {
-  closeMmoDatabase, mmoOne, resetMmoDatabase,
+  closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
-import { releaseRegionLease } from '../../apps/service/src/mmo/store.js';
+import { createRegion, releaseRegionLease } from '../../apps/service/src/mmo/store.js';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
 import { MmoGateway } from '../../apps/service/src/mmo/gateway.js';
 import { RegionService } from '../../apps/service/src/mmo/regions.js';
@@ -252,4 +252,33 @@ describeDb('mmo gateway (real PostgreSQL + real WebSocket)', () => {
       second.close();
     }
   });
+
+  it('single-flights concurrent ensure() calls so a subscribe burst cannot orphan the lease', async () => {
+    // A second region with no owner: every concurrent ensure() used to race
+    // acquireRegionLease, and a loser's entries.delete could orphan the winner.
+    const regionId = randomUUID();
+    await createRegion({
+      regionId, worldId: fx.worldId, label: 'burst-region', seed: { fixture: true },
+      rulesetVersion: MMO_PROTOCOL, engineArtifactSha256: 'fixture-engine-sha',
+    });
+    await mmoQuery(
+      `update region set seed = seed || $2::jsonb, lifecycle = 'active' where region_id = $1`,
+      [regionId, JSON.stringify({
+        sim: {
+          packId: 'td', mapId: 'td-tiberium-gardens', seed: 12345,
+          players: fx.players.map(p => ({ playerId: p.playerId, name: p.displayName, faction: 'gdi' })),
+        },
+      })]);
+
+    const runners = await Promise.all(Array.from({ length: 12 }, () => service.ensure(regionId)));
+    expect(runners.every(r => r !== undefined)).toBe(true);
+    expect(new Set(runners.map(r => r!.constructor)).size).toBe(1);
+    // All callers resolved to the same live runner entry.
+    const fence = await service.fenceFor(regionId);
+    expect(fence).toBeDefined();
+    const row = await mmoOne<{ owner_worker_id: string; lifecycle: string }>(
+      'select owner_worker_id, lifecycle from region where region_id = $1', [regionId]);
+    expect(row?.lifecycle).toBe('active');
+    expect(row?.owner_worker_id).toBe(fence!.workerId);
+  }, 30_000);
 });

@@ -46,6 +46,9 @@ const WAKE_POLL_MS = 5_000;
 
 export class RegionService {
   private entries = new Map<string, RunnerEntry>();
+  // Single-flight: concurrent ensure() calls share one start attempt so a
+  // burst of subscribers cannot race acquireRegionLease and orphan a winner.
+  private pending = new Map<string, Promise<RunnerEntry | undefined>>();
   private readonly opts: Omit<RegionRunnerOptions, 'regionId' | 'workerId'>;
   private readonly log: (event: string, data?: Record<string, unknown>) => void;
   private readonly wakePollMs: number;
@@ -68,7 +71,17 @@ export class RegionService {
     this.wakePollMs = options?.wakePollMs ?? WAKE_POLL_MS;
   }
 
-  private async entryFor(regionId: string, startIfMissing = true): Promise<RunnerEntry | undefined> {
+  private entryFor(regionId: string, startIfMissing = true): Promise<RunnerEntry | undefined> {
+    const inflight = this.pending.get(regionId);
+    if (inflight) return inflight;
+    const p = this.entryForInner(regionId, startIfMissing).finally(() => {
+      if (this.pending.get(regionId) === p) this.pending.delete(regionId);
+    });
+    this.pending.set(regionId, p);
+    return p;
+  }
+
+  private async entryForInner(regionId: string, startIfMissing: boolean): Promise<RunnerEntry | undefined> {
     const existing = this.entries.get(regionId);
     if (existing) {
       if (!existing.runner.isFailed && existing.runner.isRunning) return existing;
@@ -102,7 +115,9 @@ export class RegionService {
         if (this.metrics.wakeLatenciesMs.length > 512) this.metrics.wakeLatenciesMs.shift();
       }
     } catch (error) {
-      this.entries.delete(regionId);
+      // Only remove the entry if it is still ours — a concurrent start may
+      // have already registered a healthy runner for this region.
+      if (this.entries.get(regionId) === entry) this.entries.delete(regionId);
       this.log('region-start-failed', { regionId, error: String(error) });
       throw error;
     }
