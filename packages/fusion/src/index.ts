@@ -8,6 +8,7 @@ export * from './game.js';
 export * from './session.js';
 export * from './mashup.js';
 export * from './persistent.js';
+export * from './worldgen.js';
 export * from './starter.js';
 export * from './recovery.js';
 import { RulePack } from './rules.js';

@@ -3,8 +3,8 @@
 // region qualifies a new frontier region is generated. Power scores are the
 // world_member read model the region runner refreshes at checkpoints.
 import { randomInt, randomUUID } from 'node:crypto';
-import { PACKS, buildableTerrain, generateMap, passable, type RulePack } from '@comrade/fusion';
-import { PERSISTENT_RULES_V1, spawnRegionInBand, type MmoRulesProfile } from '@comrade/contracts';
+import { PACKS, WORLDGEN_VERSION, buildableTerrain, generateMap, generateWorldMap, passable, worldgenSpecFor, type RulePack, type WorldgenSpec } from '@comrade/fusion';
+import { MMO_WORLDGEN_DEFAULT, PERSISTENT_RULES_V1, spawnRegionInBand, type MmoRulesProfile } from '@comrade/contracts';
 import { mmoOne, mmoQuery } from './db.js';
 import { createRegion, getRegion, getSettlement, joinWorld, memberPowerScores, type RegionRow } from './store.js';
 
@@ -68,13 +68,28 @@ export async function ensureSpawnRegion(args: {
     playerId: args.playerId, name: args.displayName,
     faction: args.faction ?? pack.factions[0].id,
   }];
+  // PW16: frontier regions are procedurally generated, not preset maps. The
+  // spec + seed are stored in the region seed; the runner and every snapshot
+  // regenerate identical terrain. Diagnostics record which attempts were
+  // rejected so bad generations are explainable after the fact.
+  const seed = randomInt(1, 0x7fffffff);
+  const worldgen = worldgenSpecFor(pack, rules.worldgen ?? MMO_WORLDGEN_DEFAULT, seed);
+  const gen = generateWorldMap(pack, worldgen, seed);
   const sim = {
-    packId: pack.id, mapId: pack.maps[0].id, seed: randomInt(1, 0x7fffffff),
-    players,
+    packId: pack.id, mapId: 'worldgen', seed, worldgen, players,
   };
   const region = await createRegion({
     regionId, worldId: args.worldId, label: `frontier-${regionId.slice(0, 8)}`,
-    seed: { sim }, rulesetVersion: 'persistent_world', engineArtifactSha256: 'persistent-engine',
+    seed: {
+      sim,
+      worldgen: {
+        version: WORLDGEN_VERSION,
+        acceptedAttempt: gen.report.attempts.length - 1,
+        landBridges: gen.report.landBridges,
+        rejected: gen.report.attempts.filter(a => a.reasons.length),
+      },
+    },
+    rulesetVersion: 'persistent_world', engineArtifactSha256: 'persistent-engine',
   });
   return { region, created: true };
 }
@@ -93,9 +108,10 @@ export async function worldHasRegions(worldId: string): Promise<boolean> {
 /** Cells within this radius must hold reachable resources for a viable spawn. */
 const RESOURCE_RADIUS_CELLS = 14;
 
-function spawnMap(packId: string, mapId: string, seed: number): { pack: RulePack; map: ReturnType<typeof generateMap> } {
+function spawnMap(packId: string, mapId: string, seed: number, worldgen?: WorldgenSpec): { pack: RulePack; map: ReturnType<typeof generateMap> } {
   const pack = PACKS[packId];
   if (!pack) throw new Error(`unknown pack ${packId}`);
+  if (worldgen) return { pack, map: generateWorldMap(pack, worldgen, seed).map };
   const preset = pack.maps.find(m => m.id === mapId) ?? pack.maps[0];
   return { pack, map: generateMap(pack, preset, seed) };
 }
@@ -143,10 +159,10 @@ export interface SpawnPick { cell: number; x: number; y: number; adjusted: boole
  * minimum; when no cell reaches it the maximum available separation wins.
  */
 export function pickSpawnCell(args: {
-  packId: string; mapId: string; seed: number;
+  packId: string; mapId: string; seed: number; worldgen?: WorldgenSpec;
   keepAwayCells?: number[]; separationCells?: number; preferCell?: number;
 }): SpawnPick {
-  const { pack, map } = spawnMap(args.packId, args.mapId, args.seed);
+  const { pack, map } = spawnMap(args.packId, args.mapId, args.seed, args.worldgen);
   const keepAway = args.keepAwayCells ?? [];
   const separation = args.separationCells ?? PERSISTENT_RULES_V1.spawnSeparationCells;
   const finish = (cell: number, adjusted: boolean): SpawnPick => ({

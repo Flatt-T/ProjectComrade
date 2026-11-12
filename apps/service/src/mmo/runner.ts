@@ -15,7 +15,7 @@ import type { PoolClient } from 'pg';
 import { randomUUID } from 'node:crypto';
 import {
   Game, PACKS, SUPPLY_UPKEEP_TICKS, captureGame, restoreGame, isMcvUnit, nearestCell, passable, regionSitePlan, starterPicks, structureRoles, toCell,
-  type Command, type Entity, type GameSetup, type RulePack,
+  type Command, type Entity, type GameSetup, type RulePack, type WorldgenSpec,
 } from '@comrade/fusion';
 import {
   computePowerScore, mmoEntityId, mmoSimEntityId, newProtection, PERSISTENT_RULES_V1,
@@ -51,6 +51,8 @@ export interface SimPlayerSpec {
 }
 export interface RegionSimSpec {
   packId: string; mapId: string; seed: number;
+  /** PW16: frontier regions carry a worldgen spec instead of a preset mapId. */
+  worldgen?: WorldgenSpec;
   players: SimPlayerSpec[];
   credits?: 'low' | 'standard' | 'high'; techLevel?: number; worms?: number;
   renewal?: number; superCharge?: number; crates?: number; doctrine?: 'irregular' | 'regular';
@@ -283,7 +285,7 @@ export class RegionRunner {
       }
       const setup: GameSetup = {
         pack,
-        mapId: spec.mapId, seed: spec.seed, persistent: true,
+        mapId: spec.mapId, seed: spec.seed, persistent: true, worldgen: spec.worldgen,
         credits: spec.credits, techLevel: spec.techLevel, worms: spec.worms,
         renewal: spec.renewal, superCharge: spec.superCharge, crates: spec.crates,
         doctrine: spec.doctrine,

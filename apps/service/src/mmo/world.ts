@@ -11,7 +11,7 @@
 // until an accepted trade (PW13) transfers them.
 import type { PoolClient } from 'pg';
 import { randomUUID } from 'node:crypto';
-import type { Command, Game } from '@comrade/fusion';
+import type { Command, Game, WorldgenSpec } from '@comrade/fusion';
 import { PACKS, starterLoadout, toCell } from '@comrade/fusion';
 import {
   PERSISTENT_RULES_V1, newProtection, parseProtectionRecord, protectionTransition,
@@ -358,12 +358,15 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           const worldId = await worldIdFor(tx, ctx.regionId);
           const { rows: regionRows } = await tx.query<{ seed: unknown }>(
             'select seed from region where region_id = $1', [ctx.regionId]);
-          const simSpec = (regionRows[0]?.seed as { sim?: { packId?: string; mapId?: string; seed?: number } } | null)?.sim;
+          const simSpec = (regionRows[0]?.seed as { sim?: { packId?: string; mapId?: string; seed?: number; worldgen?: WorldgenSpec } } | null)?.sim;
           const packId = simSpec?.packId ?? 'td';
           const pack = PACKS[packId];
           if (!pack) return { result: { accepted: false, reason: 'BAD_PACK' } };
           const mapId = simSpec?.mapId ?? pack.maps[0].id;
           const preset = pack.maps.find(m => m.id === mapId) ?? pack.maps[0];
+          // PW16: worldgen regions size their map from the spec, not a preset.
+          const mapW = simSpec?.worldgen?.width ?? preset.width;
+          const mapH = simSpec?.worldgen?.height ?? preset.height;
           const mapSeed = Number(simSpec?.seed ?? 0);
 
           const existing = await getSettlement(ctx.playerId, tx);
@@ -386,7 +389,7 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             // only if the snapshot lost them, and a second grant would dupe.
             let prot: ProtectionRecord | null = null;
             try { prot = existing.protection ? parseProtectionRecord(existing.protection) : null; } catch { prot = null; }
-            const cell = existing.cell_y * preset.width + existing.cell_x;
+            const cell = existing.cell_y * mapW + existing.cell_x;
             return {
               result: { accepted: true, settled: true, rejoin: true },
               sim: [{
@@ -413,13 +416,13 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             for (const e of game.entities.values()) {
               if (e.hp <= 0 || e.owner < 0) continue;
               if (game.players[e.owner]?.pid === ctx.playerId) continue;
-              keepAway.push(toCell(e.y) * preset.width + toCell(e.x));
+              keepAway.push(toCell(e.y) * mapW + toCell(e.x));
             }
           }
-          const preferCell = action.x >= 0 && action.y >= 0 && action.x < preset.width && action.y < preset.height
-            ? action.y * preset.width + action.x : undefined;
+          const preferCell = action.x >= 0 && action.y >= 0 && action.x < mapW && action.y < mapH
+            ? action.y * mapW + action.x : undefined;
           const pick = pickSpawnCell({
-            packId, mapId, seed: mapSeed, keepAwayCells: keepAway,
+            packId, mapId, seed: mapSeed, worldgen: simSpec?.worldgen, keepAwayCells: keepAway,
             separationCells: rules.spawnSeparationCells, preferCell,
           });
           const loadout = starterLoadout(pack, faction);
