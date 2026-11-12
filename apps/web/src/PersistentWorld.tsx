@@ -101,6 +101,11 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   const [barterWant, setBarterWant] = useState('credits');
   const [barterWantAmt, setBarterWantAmt] = useState('100');
   const [allyName, setAllyName] = useState('');
+  // PW19: region/alliance chat — journaled world action, delivered back on the
+  // event stream; the client renders, never authors state.
+  const [chat, setChat] = useState<{ channel: string; fromId: string; fromName: string; text: string }[]>([]);
+  const [chatChannel, setChatChannel] = useState<'region' | 'alliance'>('region');
+  const [chatText, setChatText] = useState('');
 
   useEffect(() => {
     let game: Game | null = null;
@@ -160,6 +165,17 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     // PW25: live notifications arrive on the socket; the inbox, prefs and the
     // away report come from the durable API once per mount.
     const offNotes = conn.on(msg => {
+      if (msg.type === 'event' && msg.eventKind === 'chat') {
+        const p = msg.payload as { channel?: string; fromId?: string; fromName?: string; text?: string };
+        if (p.text) {
+          const text = p.text;
+          setChat(cs => [...cs.slice(-49), {
+            channel: p.channel ?? 'region', fromId: p.fromId ?? '',
+            fromName: p.fromName ?? 'Commander', text,
+          }]);
+        }
+        return;
+      }
       if (msg.type !== 'notification') return;
       const n: MmoNotification = {
         notificationId: msg.notificationId, playerId: '', kind: msg.kind,
@@ -422,6 +438,15 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     setNotice('Cancelling transfer…');
     window.setTimeout(() => setNotice(''), 4000);
     window.setTimeout(() => void api.mmoTransfers().then(setTransfers).catch(() => undefined), 1500);
+  }
+
+  // PW19: chat is a journaled world action; the message appears for everyone
+  // only when the fan-out envelope comes back on the event stream.
+  function sendChat() {
+    const text = chatText.trim();
+    if (!text) return;
+    connRef.current?.command({ t: 'chat', channel: chatChannel, text });
+    setChatText('');
   }
 
   // PW19: alliance intents — create/invite/join/leave are journaled world
@@ -973,6 +998,25 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         </div>)}
       </div> : null}
       {ui?.status && <div className="status-line">{ui.status}</div>}
+      <div className="chat-box">
+        <div className="chat-log">
+          {chat.map((c, i) => (
+            <div key={i} className={`chat-line ${c.channel}`}>
+              <b>[{c.channel === 'alliance' ? 'A' : '#'}] {c.fromName}:</b> {c.text}
+            </div>
+          ))}
+        </div>
+        <div className="chat-input">
+          <select value={chatChannel} onChange={ev => setChatChannel(ev.target.value as 'region' | 'alliance')}>
+            <option value="region">Region</option>
+            <option value="alliance">Alliance</option>
+          </select>
+          <input value={chatText} maxLength={500} placeholder="Message…"
+            onChange={ev => setChatText(ev.target.value)}
+            onKeyDown={ev => { if (ev.key === 'Enter') sendChat(); }} />
+          <button onClick={sendChat}>Send</button>
+        </div>
+      </div>
       <div className="modes">
         <button className={modeView === 'attackMove' ? 'on' : ''} onClick={() => setMode('attackMove')}>Attack-move (A)</button>
         <button className={modeView === 'repair' ? 'on' : ''} onClick={() => setMode('repair')}>Repair (R)</button>

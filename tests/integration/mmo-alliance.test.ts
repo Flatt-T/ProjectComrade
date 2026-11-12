@@ -332,4 +332,36 @@ describeDb('mmo alliances, presence and caretaker (real PostgreSQL + runner)', (
     expect(pres?.online_since_ms).not.toBeNull();
     await playerDisconnected(pid, now + 6); // leave clean for other tests
   });
+
+  it('chat: region fan-out is journaled; alliance chat requires membership', async () => {
+    // p2 leaves any earlier alliance so the negative case is deterministic.
+    await worldAction(ctx, p2().playerId, { t: 'allianceLeave' });
+    const denied = await worldAction(ctx, p2().playerId, { t: 'chat', channel: 'alliance', text: 'hi' });
+    expect(denied.accepted).toBe(false);
+    expect(denied.reason).toBe('NOT_IN_ALLIANCE');
+
+    // Region channel: accepted and fanned out on mmo.chat at the event's seq.
+    const region = await worldAction(ctx, p0().playerId, { t: 'chat', channel: 'region', text: 'region hello' });
+    expect(region.accepted).toBe(true);
+    await waitFor(async () => !!(await mmoOne<{ topic: string }>(
+      `select topic from outbox where region_id = $1 and topic = 'mmo.chat'
+        and payload->>'text' = 'region hello'`, [ctx.fx.regionId])));
+
+    // Alliance channel: p0 founds a guild, p1 joins, chat carries allianceId.
+    const created = await worldAction(ctx, p0().playerId, { t: 'allianceCreate', name: 'ChatGuild' });
+    expect(created.accepted).toBe(true);
+    const found = await allianceForPlayer(ctx.fx.worldId, p0().playerId);
+    const guildId = found!.alliance.alliance_id;
+    await worldAction(ctx, p0().playerId, { t: 'allianceInvite', allianceId: guildId, playerId: p1().playerId });
+    await worldAction(ctx, p1().playerId, { t: 'allianceJoin', allianceId: guildId });
+
+    const ally = await worldAction(ctx, p0().playerId, { t: 'chat', channel: 'alliance', text: 'ally hello' });
+    expect(ally.accepted).toBe(true);
+    const fan = await mmoOne<{ payload: { channel: string; allianceId?: string; fromName?: string } }>(
+      `select payload from outbox where region_id = $1 and topic = 'mmo.chat'
+        and payload->>'text' = 'ally hello'`, [ctx.fx.regionId]);
+    expect(fan?.payload.channel).toBe('alliance');
+    expect(fan?.payload.allianceId).toBe(guildId);
+    expect(fan?.payload.fromName).toBe(p0().displayName);
+  }, 30_000);
 });

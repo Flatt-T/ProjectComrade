@@ -281,6 +281,13 @@ export class MmoGateway {
         eventKind: 'sim', payload,
       };
     }
+    if (envelope.topic === 'mmo.chat') {
+      return {
+        protocol: MMO_PROTOCOL, type: 'event', regionId: envelope.regionId,
+        eventSeq: envelope.eventSeq, epoch, tick: '0',
+        eventKind: 'chat', payload,
+      };
+    }
     if (envelope.topic === 'mmo.result') {
       const result: MmoCommandResult = {
         protocol: MMO_PROTOCOL, type: 'commandResult',

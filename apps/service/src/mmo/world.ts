@@ -21,7 +21,7 @@ import type { WorldActionHandler, WorldHandlerResult } from './runner.js';
 import { MmoStoreError } from './store.js';
 import {
   allianceCreate, allianceInvite, allianceJoin, allianceLeave, allianceKick,
-  allianceSetPermissions, allianceDisband, setAutoRepair,
+  allianceSetPermissions, allianceDisband, allianceForPlayer, allianceMembers, setAutoRepair,
   availableShieldSeconds, committedShieldSeconds, armShieldRecord, clearShieldRecord,
   compoundForPlayer, createSettlement, getSettlement, scheduleJob,
   closeRecoveryEpisode, saveProtectionRecord,
@@ -943,6 +943,52 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           return {
             result: { accepted: true, transferId: existing.transfer_id, state: 'CANCELLED' },
             sim: e && e.hp > 0 ? [{ slot: e.owner, command: { t: 'stop', ids: [sim!] } }] : [],
+          };
+        }
+        case 'chat': {
+          // PW19: journaled chat. The region channel fans out to this region's
+          // subscribers; the alliance channel resolves every member's settlement
+          // region so allies elsewhere in the world still receive it. Rate-limited
+          // per player; length is already capped by the contract parser.
+          const text = action.text.trim();
+          if (!text) return { result: { accepted: false, reason: 'EMPTY' } };
+          const { rows: recent } = await tx.query<{ n: string }>(
+            `select count(*)::text as n from region_event
+              where region_id = $1 and event_kind = 'command'
+                and payload->>'playerId' = $2
+                and payload->'action'->>'t' = 'chat'
+                and created_at > clock_timestamp() - interval '10 seconds'`,
+            [ctx.regionId, ctx.playerId]);
+          if (Number(recent[0]?.n ?? 0) >= 5) {
+            return { result: { accepted: false, reason: 'RATE_LIMITED' } };
+          }
+          const { rows: who } = await tx.query<{ display_name: string }>(
+            'select display_name from player where player_id = $1', [ctx.playerId]);
+          const fromName = who[0]?.display_name ?? 'Commander';
+          let targets = [ctx.regionId];
+          let allianceId: string | undefined;
+          if (action.channel === 'alliance') {
+            const { rows: reg } = await tx.query<{ world_id: string }>(
+              'select world_id from region where region_id = $1', [ctx.regionId]);
+            const found = reg[0] ? await allianceForPlayer(reg[0].world_id, ctx.playerId) : undefined;
+            if (!found) return { result: { accepted: false, reason: 'NOT_IN_ALLIANCE' } };
+            allianceId = found.alliance.alliance_id;
+            const members = await allianceMembers(allianceId);
+            const { rows: settled } = await tx.query<{ region_id: string }>(
+              'select distinct region_id from settlement where player_id = any($1::uuid[])',
+              [members.map(m => m.player_id)]);
+            targets = [...new Set(settled.map(r => r.region_id))];
+            if (!targets.length) targets = [ctx.regionId];
+          }
+          return {
+            result: { accepted: true, channel: action.channel },
+            fanout: targets.map(regionId => ({
+              regionId, topic: 'mmo.chat',
+              payload: {
+                channel: action.channel, allianceId,
+                fromId: ctx.playerId, fromName, text,
+              },
+            })),
           };
         }
         default:

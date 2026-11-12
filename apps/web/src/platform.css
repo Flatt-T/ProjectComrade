@@ -270,3 +270,12 @@
 .away-entry{display:flex;gap:10px;font-size:13px;color:#cfdcc0}
 .away-entry time{color:#7d8a6e;font-size:11px;white-space:nowrap}
 
+
+.chat-box{margin:6px 8px;padding:6px;background:#10150e;border:1px solid #2c3a22;border-radius:8px;color:#dfe8d2;font-size:12px}
+.chat-log{max-height:120px;overflow-y:auto;margin-bottom:4px}
+.chat-line{padding:1px 0;word-break:break-word}
+.chat-line.alliance{color:#9fd0ff}
+.chat-input{display:flex;gap:4px}
+.chat-input select{background:#1a2413;color:#dfe8d2;border:1px solid #3a4a2e;border-radius:4px}
+.chat-input input{flex:1;background:#0c100a;color:#e8f0e0;border:1px solid #3a4a2e;border-radius:4px;padding:2px 6px}
+.chat-input button{background:#22341a;color:#cfe8b8;border:1px solid #3a4a2e;border-radius:4px;padding:2px 8px;cursor:pointer}
