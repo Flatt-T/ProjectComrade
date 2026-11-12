@@ -4,7 +4,7 @@
 // need to submit commands. Everything here is inert unless MMO_DATABASE_URL is set.
 import { createHash, randomUUID } from 'node:crypto';
 import { mmoOne, mmoQuery } from './db.js';
-import { getRegion, getSettlement, joinWorld, createPlayer, protectionRegionsForPlayer, MmoStoreError, type RegionRow } from './store.js';
+import { getRegion, getSettlement, joinWorld, createPlayer, protectionRegionsForPlayer, recordSignupSignal, MmoStoreError, type RegionRow } from './store.js';
 import { RegionRunner, type RegionRunnerOptions } from './runner.js';
 import { createWorldHandler, pokeProtectionEval, pokeRecoveryEval } from './world.js';
 import { authEnabled } from '../config.js';
@@ -15,6 +15,8 @@ export interface RegionIdentity {
   accountId: string;
   displayName: string;
   kind: 'account' | 'guest';
+  /** PW26: request signals captured at first persistent-world entry (hashed IP, UA). */
+  signup?: { ipHash?: string; userAgent?: string };
 }
 
 const sha256 = (v: string) => createHash('sha256').update(v).digest('hex');
@@ -203,6 +205,11 @@ export class RegionService {
     if (!player) {
       const created = await createPlayer({ accountId: identity.accountId, displayName: identity.displayName });
       player = { player_id: created.player_id, display_name: created.display_name };
+      // PW26: capture sign-up signals once, at durable-player creation.
+      await recordSignupSignal({
+        playerId: player.player_id, accountId: identity.accountId, kind: identity.kind,
+        ipHash: identity.signup?.ipHash, userAgent: identity.signup?.userAgent,
+      }).catch(() => undefined);
     }
     await joinWorld(worldId, player.player_id);
     return player;

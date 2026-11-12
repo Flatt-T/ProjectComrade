@@ -1611,3 +1611,154 @@ export async function rebuildLadderBoards(worldId: string): Promise<void> {
       [worldId]);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Trade audit + signup signals (PW26, COMRADE 18)
+// ---------------------------------------------------------------------------
+
+export interface SignupSignalArgs {
+  playerId: string;
+  accountId: string;
+  kind: 'account' | 'guest';
+  ipHash?: string;
+  userAgent?: string;
+}
+
+/**
+ * Record sign-up signals once per durable player (PW26). Insert-if-absent:
+ * the first entry wins, later entries never overwrite the original signals.
+ */
+export async function recordSignupSignal(args: SignupSignalArgs, q: Queryable = mmoDb()): Promise<void> {
+  await q.query(
+    `insert into signup_signal (player_id, account_id, kind, ip_hash, user_agent)
+     values ($1,$2,$3,$4,$5) on conflict (player_id) do nothing`,
+    [args.playerId, args.accountId, args.kind, args.ipHash ?? null, args.userAgent?.slice(0, 500) ?? null]);
+}
+
+export interface SignupSignalRow {
+  player_id: string; account_id: string; kind: string;
+  ip_hash: string | null; user_agent: string | null; created_at: string;
+}
+
+export async function signupSignalsForAccount(accountId: string): Promise<SignupSignalRow[]> {
+  return mmoQuery<SignupSignalRow>(
+    `select player_id, account_id, kind, ip_hash, user_agent, created_at::text
+       from signup_signal where account_id = $1 order by created_at`, [accountId]);
+}
+
+/** All sign-up signals sharing a client-IP hash — the duplicate-account probe. */
+export async function signupSignalsSharingIp(ipHash: string): Promise<SignupSignalRow[]> {
+  return mmoQuery<SignupSignalRow>(
+    `select player_id, account_id, kind, ip_hash, user_agent, created_at::text
+       from signup_signal where ip_hash = $1 order by created_at`, [ipHash]);
+}
+
+export interface BarterAuditRow {
+  offer_id: string; region_id: string; status: string;
+  from_player_id: string; from_account_id: string; from_created_at: string;
+  to_player_id: string; to_account_id: string; to_created_at: string;
+  created_at: string; resolved_at: string | null;
+  give: unknown; want: unknown;
+}
+
+/** Every settled barter touching an account, in either direction (PW26 audit). */
+export async function bartersForAccount(worldId: string, accountId: string): Promise<BarterAuditRow[]> {
+  return mmoQuery<BarterAuditRow>(
+    `select o.offer_id, o.region_id, o.status,
+            o.from_player_id, fp.account_id as from_account_id, fp.created_at::text as from_created_at,
+            o.to_player_id,   tp.account_id as to_account_id,   tp.created_at::text as to_created_at,
+            o.created_at::text, o.resolved_at::text,
+            o.payload->'give' as give, o.payload->'want' as want
+       from trade_offer o
+       join region r on r.region_id = o.region_id
+       join player fp on fp.player_id = o.from_player_id
+       join player tp on tp.player_id = o.to_player_id
+      where r.world_id = $1 and o.status = 'settled'
+        and (fp.account_id = $2 or tp.account_id = $2)
+      order by o.resolved_at`, [worldId, accountId]);
+}
+
+/** Rough credit-equivalent of one side of a barter, for imbalance reporting. */
+export interface BarterValueWeights {
+  unitValue?: number;
+  packedBuildingValue?: number;
+  shieldSecondValue?: number;
+  powerUpValue?: number;
+}
+export function barterSideValue(items: unknown, w: BarterValueWeights = {}): number {
+  const weights = {
+    unitValue: w.unitValue ?? 1_000,
+    packedBuildingValue: w.packedBuildingValue ?? 2_500,
+    shieldSecondValue: w.shieldSecondValue ?? 0.05,
+    powerUpValue: w.powerUpValue ?? 500,
+  };
+  if (!Array.isArray(items)) return 0;
+  let total = 0;
+  for (const raw of items) {
+    const item = raw as { kind?: string; amount?: number };
+    const amount = typeof item.amount === 'number' ? item.amount : 0;
+    switch (item.kind) {
+      case 'credits': total += amount; break;
+      case 'shieldSeconds': total += amount * weights.shieldSecondValue; break;
+      case 'powerUp': total += amount * weights.powerUpValue; break;
+      case 'unit': total += amount * weights.unitValue; break;
+      case 'packedBuilding': total += amount * weights.packedBuildingValue; break;
+      default: break;
+    }
+  }
+  return total;
+}
+
+export interface TradeAuditConfig {
+  /** Accounts younger than this many days count as "young". Default 14. */
+  youngAccountDays?: number;
+  /** Minimum larger-side value to consider. Default 10_000. */
+  minValue?: number;
+  /** Larger side must be at least this many times the smaller (0 counts). Default 4. */
+  imbalanceRatio?: number;
+  limit?: number;
+}
+
+export interface TradeAuditFlag extends BarterAuditRow {
+  give_value: number; want_value: number; imbalance: number; both_young: boolean;
+}
+
+/**
+ * PW26 trade audit: every settled barter is queryable by account
+ * (bartersForAccount), and this report flags high-value one-sided trades
+ * between young accounts — the scripted-funnelling pattern. Account age is
+ * the durable player's creation time (first persistent-world entry).
+ */
+export async function tradeAuditReport(worldId: string, cfg: TradeAuditConfig = {}): Promise<TradeAuditFlag[]> {
+  const youngDays = cfg.youngAccountDays ?? 14;
+  const minValue = cfg.minValue ?? 10_000;
+  const ratio = cfg.imbalanceRatio ?? 4;
+  const rows = await mmoQuery<BarterAuditRow>(
+    `select o.offer_id, o.region_id, o.status,
+            o.from_player_id, fp.account_id as from_account_id, fp.created_at::text as from_created_at,
+            o.to_player_id,   tp.account_id as to_account_id,   tp.created_at::text as to_created_at,
+            o.created_at::text, o.resolved_at::text,
+            o.payload->'give' as give, o.payload->'want' as want
+       from trade_offer o
+       join region r on r.region_id = o.region_id
+       join player fp on fp.player_id = o.from_player_id
+       join player tp on tp.player_id = o.to_player_id
+      where r.world_id = $1 and o.status = 'settled'
+      order by o.resolved_at desc limit 5000`, [worldId]);
+  const cutoff = Date.now() - youngDays * 86_400_000;
+  const flags: TradeAuditFlag[] = [];
+  for (const row of rows) {
+    const giveValue = barterSideValue(row.give);
+    const wantValue = barterSideValue(row.want);
+    const larger = Math.max(giveValue, wantValue);
+    const smaller = Math.min(giveValue, wantValue);
+    if (larger < minValue) continue;
+    const imbalance = smaller === 0 ? Infinity : larger / smaller;
+    if (imbalance < ratio) continue;
+    const bothYoung = Date.parse(row.from_created_at) > cutoff && Date.parse(row.to_created_at) > cutoff;
+    if (!bothYoung) continue;
+    flags.push({ ...row, give_value: giveValue, want_value: wantValue, imbalance, both_young: true });
+    if (flags.length >= (cfg.limit ?? 100)) break;
+  }
+  return flags;
+}

@@ -560,4 +560,25 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     create index ladder_board_rank_idx on ladder_board (world_id, board, period, points desc);
     `,
   },
+  {
+    version: 11,
+    name: 'signup signals',
+    sql: `
+    -- PW26 (COMRADE 18): one persistent-world owner per registered account
+    -- already holds via player.account_id unique; this table records the
+    -- sign-up signals ops needs to investigate duplicate accounts — hashed
+    -- client IP, user agent, and entry channel, captured once at first mmo
+    -- player creation. Raw IPs are never stored.
+    create table signup_signal (
+      player_id   uuid primary key references player(player_id),
+      account_id  uuid not null,
+      kind        text not null check (kind in ('account', 'guest')),
+      ip_hash     text,
+      user_agent  text,
+      created_at  timestamptz not null default clock_timestamp()
+    );
+    create index signup_signal_account_idx on signup_signal (account_id);
+    create index signup_signal_ip_idx on signup_signal (ip_hash) where ip_hash is not null;
+    `,
+  },
 ];

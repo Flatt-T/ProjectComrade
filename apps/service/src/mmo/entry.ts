@@ -7,7 +7,7 @@ import {
   MMO_RULESET_VERSION, PERSISTENT_RULES_V1,
 } from '@comrade/contracts';
 import { mmoOne } from './db.js';
-import { createPlayer, createWorld, MmoStoreError } from './store.js';
+import { createPlayer, createWorld, MmoStoreError, recordSignupSignal } from './store.js';
 import { persistentPackRevision } from './packs.js';
 import { ensureEntryRegion } from './spawn.js';
 import type { RegionIdentity } from './regions.js';
@@ -44,6 +44,11 @@ export async function enterPersistentWorld(identity: RegionIdentity): Promise<{
   if (!player) {
     const created = await createPlayer({ accountId: identity.accountId, displayName: identity.displayName });
     player = { player_id: created.player_id, display_name: created.display_name };
+    // PW26: capture sign-up signals once, at durable-player creation.
+    await recordSignupSignal({
+      playerId: player.player_id, accountId: identity.accountId, kind: identity.kind,
+      ipHash: identity.signup?.ipHash, userAgent: identity.signup?.userAgent,
+    }).catch(() => undefined);
   }
   const { region, settled } = await ensureEntryRegion({
     worldId, playerId: player.player_id, displayName: player.display_name,
