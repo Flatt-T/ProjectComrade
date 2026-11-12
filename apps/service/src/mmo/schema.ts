@@ -581,4 +581,19 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     create index signup_signal_ip_idx on signup_signal (ip_hash) where ip_hash is not null;
     `,
   },
+  {
+    version: 12,
+    name: 'region transfer operations',
+    sql: `
+    -- PW18: cross-region asset movement is one durable protocol. A single
+    -- REGION_TRANSFER economy_operation anchors the transfer; the source and
+    -- destination runners each append their TRANSFER_OUT / TRANSFER_IN asset
+    -- ledger rows against it (those kind values already exist in the ledger).
+    alter table economy_operation drop constraint if exists economy_operation_kind_check;
+    alter table economy_operation add constraint economy_operation_kind_check check (kind in
+      ('SELL_REFUND', 'PACK', 'UNPACK', 'DEPLOY', 'BARTER', 'SELECT_PROTECTION',
+       'SHIELD_CONSUME', 'NEWCOMER_SPAWN', 'RECOVERY_GRANT', 'RECOVERY_TRANSITION',
+       'SALVAGE_SPAWN', 'SITE_CAPTURE', 'LADDER_AWARD', 'DEFEAT', 'REGION_TRANSFER'));
+    `,
+  },
 ];

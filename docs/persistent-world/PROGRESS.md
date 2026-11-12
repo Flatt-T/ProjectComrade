@@ -927,3 +927,57 @@ preset 0 with a different seed.
 - Known gaps: no client map preview of generated terrain (renderer already
   draws MapData); choke-point metric is diagnostic-only (landBridges count);
   heavy airlift still deferred (milestone 3 scope per PW15).
+
+## PW18 — cross-region transfer (THU-2242)
+
+- Engine (`packages/fusion/src/game.ts`): new `depart` order walks a unit to
+  the nearest reachable map-edge cell, then `departNow` emits a
+  `TransferManifestEntry` (type, owner durable pid, hp/maxHp, xp/rank, ammo,
+  bound, packedType, faction, shield/protection flags, harvest state,
+  cargoValue, facing/turret, cell, recursive `cargoUnits`) and removes the
+  entity via `removeUnitQuiet` — no death, no salvage, no kill credit.
+  `spawnTransfer(manifest, cell, durableId)` rebuilds the unit on the
+  destination sim resolving the owner by durable player id (slots differ
+  per region), restores cargo/passengers recursively, and assigns the
+  cross-region `durableId`. `unspawnTransfer` rolls back a spawn whose
+  durable commit failed. `Entity.durableId` + `SalvageEvent.durableId`
+  carry the stable identity through death audit; snapshots re-arm
+  `departEvents` (pending drains are recovered via the PREPARED sweep).
+- Contracts (`packages/contracts/src/mmo.ts`): `regionTransfer` and
+  `regionTransferCancel` world actions, parser validation (uuid entity +
+  destination region), WORLD_KINDS entries.
+- World handler (`world.ts`): ownership/live-state/foreign-world/dest
+  lifecycle gates; `liveTransferForEntity` dedup that re-issues `depart`
+  if the walk was interrupted; PREPARED row stores simId + ownerPid +
+  order-time manifest; cancel only while PREPARED (post-release is
+  TOO_LATE — the asset is already in transit).
+- Runner (`runner.ts`): `drainDepartEvents` matches depart events to
+  PREPARED rows and releases SOURCE_RELEASED inside one fenced tx with a
+  REGION_TRANSFER economy_operation + TRANSFER_OUT ledger row; a sweep
+  recovers the crash window between sim removal and drain using the
+  order-time manifest. `drainInboundTransfers` picks up SOURCE_RELEASED
+  rows, picks a deterministic arrival cell (pickSpawnCell seeded by
+  transfer id, keep-away from live entities), spawnTransfers, then commits
+  DESTINATION_ACCEPTED?COMPLETED + TRANSFER_IN ledger in one tx — commit
+  failure or state race unspawns the entity (no ghosts, no duplicates).
+  spawnTransfer returning null (owner has no slot) parks the row in
+  RECOVERY_REQUIRED instead of dropping the asset. `depart` blocks
+  hibernation quiescence like other timed orders.
+- Store/schema: `createTransfer`/`transitionTransfer` accept a tx;
+  `liveTransferForEntity`, `inboundTransfers`, `preparedTransfers`;
+  schema v12 widens `economy_operation.kind` with REGION_TRANSFER
+  (TRANSFER_OUT/IN ledger kinds already existed).
+- Tests: tests/unit/fusion-transfer.test.ts 8/8 (edge depart + manifest,
+  cargo nesting, owner-by-pid slot resolution, null on missing owner,
+  durableId snapshot round-trip, quiet unspawn); tests/integration/
+  mmo-transfer.test.ts 5/5 against two live runners — full crossing with
+  ledger audit, transport cargo nesting, PREPARED cancel, invalid-action
+  gates + dedup, and destination-runner restart mid-flight.
+- Verification: `pnpm typecheck` clean; `pnpm lint` clean; unit 473 green;
+  integration 114 green (19 files).
+- Known gaps: only units transfer (structures/compounds stay put by
+  design); a unit whose depart order is interrupted keeps its PREPARED row
+  until cancelled or re-requested (dedup re-issues depart); orders/aim
+  state is not preserved across the boundary (manifest carries identity +
+  condition, not pending commands); transfer of an asset whose owner has
+  no slot in the destination parks in RECOVERY_REQUIRED for ops.

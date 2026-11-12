@@ -214,6 +214,8 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
     e.siteState = ss && typeof ss === 'object'
       ? { progress: ss.progress ?? 0, by: ss.by ?? -1, heldSince: ss.heldSince ?? -1 }
       : undefined;
+    // Snapshots predating PW18 lack the cross-region asset identity.
+    e.durableId = typeof e.durableId === 'string' ? e.durableId : '';
   }
   g.projectiles = snap.state.projectiles;
   g.worms = snap.state.worms;
@@ -224,6 +226,7 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   // field initializers, so re-arm them empty on every restore.
   (g as unknown as { salvageEvents: unknown[] }).salvageEvents = [];
   (g as unknown as { siteEvents: unknown[] }).siteEvents = [];
+  (g as unknown as { departEvents: unknown[] }).departEvents = [];
   g.effects = [];
   g.tick = snap.state.tick;
   g.market = snap.state.market;
