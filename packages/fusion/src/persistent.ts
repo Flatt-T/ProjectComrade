@@ -183,6 +183,11 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   g.rng = rng;
   g.players = snap.state.players.map(p => derPlayer(p as Record<string, unknown>));
   g.entities = new Map((snap.state.entities as { id: number }[]).map(e => [e.id, e as unknown as Entity]));
+  // Snapshots predating PW10 lack the shield fields.
+  for (const e of (g.entities as Map<number, Entity>).values()) {
+    e.shielded = e.shielded === true;
+    e.battleAt = typeof e.battleAt === 'number' ? e.battleAt : -1;
+  }
   g.projectiles = snap.state.projectiles;
   g.worms = snap.state.worms;
   g.strikes = snap.state.strikes;

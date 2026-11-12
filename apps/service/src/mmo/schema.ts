@@ -441,4 +441,28 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     create index alliance_invite_player_idx on alliance_invite (player_id);
     `,
   },
+  {
+    version: 7,
+    name: 'shield daily accounting',
+    sql: `
+    -- PW10: the free nightly allowance refreshes at a fixed daily reset and never
+    -- carries over; earned income is capped per day (COMRADE 18 §3.2/§3.4). The day
+    -- anchors make both lazy-resettable without a cron: an absent or stale anchor
+    -- means the full daily grant is available again.
+    alter table shield_balance
+      add column nightly_day date,
+      add column earned_day date,
+      add column earned_today_seconds bigint not null default 0 check (earned_today_seconds >= 0);
+
+    -- One compound can hold a NEWCOMER record and an OFFLINE_EARNED record at
+    -- once (PW10 shields + PW11 settlement protection); key on both.
+    alter table protection_record drop constraint protection_record_pkey;
+    alter table protection_record add primary key (compound_id, kind);
+
+    -- Wall-clock instant the current armed selection began. A shield can only
+    -- start at max(offline grace end, armed_at): a player who has been offline
+    -- for hours must still get the full selected duration from when they armed.
+    alter table protection_record add column armed_at_ms bigint check (armed_at_ms >= 0);
+    `,
+  },
 ];

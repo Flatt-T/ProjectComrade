@@ -264,6 +264,8 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
       expect(service.metrics.wakeLatenciesMs.length).toBeGreaterThanOrEqual(1);
       expect(service.metrics.wakeLatenciesMs[0]).toBeGreaterThanOrEqual(0);
     } finally {
+      // stop() only clears the wake poller — the ensured runner needs stopAll().
+      await service.stopAll().catch(() => undefined);
       service.stop();
     }
   });

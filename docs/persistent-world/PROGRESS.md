@@ -261,8 +261,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW09 - THU-2233 - persistent identity, alliances and limited caretaker - 2026-11-12
 
-- State: implemented on branch `thu-2233-pw09-identity-alliances`; verification
-  green locally (lint 0, typecheck 0, 386 unit, 56 integration).
+- State: merged to `main` (PR #22, squash `0fd60cc`); THU-2233 Done.
 - Deliverables: `MmoWorldAction` alliance + caretaker union and parser
   validation (`packages/contracts/src/mmo.ts`); `AlliancePermissions` grant set
   (station/reinforce/trade/unitTransfer — membership grants nothing, leader
@@ -294,3 +293,60 @@ acceptance detail; this file is the resume point. Read it first in every session
   actions that consume `trade`/`unitTransfer` grants land in PW13/PW17, and
   shield-gated reinforcement boundary completes with PW10 protection. Client UI
   for alliances/presence is not part of this issue.
+
+### PW10 - THU-2234 - manual offline shields and allied protection boundary - 2026-11-12
+
+- State: implemented on branch `thu-2234-pw10-offline-shields`; verification
+  green locally (lint 0, typecheck 0, 395 unit, 61 integration).
+- Deliverables: `shieldRadiusCells` on `MmoRulesProfile`; Fusion persistent
+  shield state — `shielded` entity flag, journaled `setShield` command applied
+  at tick boundaries, enforcement across movement, damage, fire, superweapons,
+  paradrops and `battleAt` tracking (`packages/fusion/src/game.ts`);
+  `packages/contracts/src/mmo.ts` action/profile surface; schema v7 —
+  `shield_balance` nightly/earned kinds with `nightly_day`/`earned_day`/
+  `earned_today_seconds` lazy daily accounting, composite
+  `protection_record (compound_id, kind)` PK for PW10+PW11 coexistence,
+  `armed_at_ms`; store layer — `armShieldRecord`, `clearShieldRecord`,
+  `applyShieldTransition`, `consumeShieldSecondsAuto` (nightly-first),
+  `grantEarnedShieldSeconds` (daily income cap, idempotent effect keys),
+  `availableShieldSeconds`/`committedShieldSeconds` over a generic `Queryable`,
+  transaction-aware `scheduleJob`/`pokeProtectionEval`/`setAutoRepair`;
+  world actions `selectShield`/`clearShield` (explicit selection only,
+  `compoundForPlayer` ownership, `INSUFFICIENT_SHIELD`/`SHIELD_ACTIVE`/
+  `NO_SELECTION` reasons); runner `protectionEval` scheduled job — reconciles
+  open `OFFLINE_EARNED` records against durable presence inside the fenced
+  job transaction, applies contract `protectionTransition`, consumes elapsed
+  seconds, chains evals only to real deadlines, mirrors the active set into
+  the sim via journaled `setShield` plus `mmo.sim` outbox rows;
+  `syncCompoundsNow` durable compound reconciliation; presence connect/
+  disconnect pokes including a grace-expiry poke (`regions.ts`, `gateway.ts`).
+- Semantics: selection only arms — activation requires the owner offline past
+  `offlineAfterMs` and the compound out of battle; shield start is
+  `max(offline grace end, armed_at_ms)` so a long-offline owner still gets the
+  full selected duration; online presence pauses and preserves unused time;
+  expiry is authoritative on absolute `ends_at_ms`; consumption is
+  nightly-first then earned, drawn in the same transaction as the transition.
+- Proven: `tests/unit/fusion-shield.test.ts` 9/9 (movement boundary, owner/
+  ally/outsider admission oracle, hostile-fire immunity inside, allies
+  protected, protected units leave to engage, snapshot/restore + pre-PW10
+  default, classic-mode isolation, `battleAt` stamping);
+  `tests/integration/mmo-shield.test.ts` 5/5 against real PostgreSQL + runner
+  + Fusion sim — explicit arm-only selection, offline activation after grace,
+  authoritative expiry with nightly-first consumption, pause preserving unused
+  time, foreign-compound/overdraft/duplicate-command rejection, earned
+  stacking + post-nightly consumption, snapshot/restart persistence;
+  full integration suite 61/61, unit 395/395.
+- Fixes found in verification: journal-transaction self-deadlock — pool-side
+  `scheduleJob` inside the fenced world-handler tx needed `FOR KEY SHARE` on
+  the `region` row locked `FOR UPDATE` by `assertRegionFence`; resolved by
+  running pokes/jobs writes on the transaction client; `battleAt = -1`
+  sentinel read as in-battle for the first `battleWindowMs`; long-offline
+  owners got instantly-expired shields because activation backdated to grace
+  end regardless of arm time — fixed with `armed_at_ms`; test isolation —
+  file-scoped presence leaks closed via `afterEach` disconnect and
+  `RegionService.stopAll()` in hibernation teardown.
+- Open: `RegionService.stop()` stops only the wake poller — callers needing
+  runner shutdown must use `stopAll()` (production has no shutdown path yet);
+  pg@8 logs a deprecation warning for the `pool.on('connect')` search_path
+  pattern in both db pools (pre-existing, queries still queue); shield
+  selection client UI lands with the PW25 notification/away-report surface.

@@ -140,7 +140,9 @@ export class MmoGateway {
       // live sockets for the same account keep the player online.
       const now = Date.now();
       for (const playerId of conn.present) {
-        void playerDisconnected(playerId, now).catch(() => undefined);
+        void playerDisconnected(playerId, now)
+          .then(() => this.service.notifyPresence(playerId))
+          .catch(() => undefined);
       }
       log('mmo-disconnect', { peer: conn.id, presence: conn.present.size });
     });
@@ -191,6 +193,7 @@ export class MmoGateway {
       conn.present.add(player.player_id);
       const now = Date.now();
       await playerConnected(player.player_id, now).catch(() => undefined);
+      void this.service.notifyPresence(player.player_id).catch(() => undefined);
       conn.lastPresenceSweep = now;
     }
 
