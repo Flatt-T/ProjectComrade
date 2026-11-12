@@ -110,6 +110,8 @@ const derPlayer = (raw: Record<string, unknown>): Player => ({
   // Snapshots predating PW09 lack these fields.
   ally: (raw.ally as number) ?? -1,
   autoRepair: raw.autoRepair === true,
+  // Snapshots predating PW11 lack newcomer protection.
+  newcomerProtected: raw.newcomerProtected === true,
 });
 
 interface GameInternals {

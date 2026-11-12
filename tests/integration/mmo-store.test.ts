@@ -253,7 +253,8 @@ describeDb('mmo durable store (real PostgreSQL)', () => {
     expect(s1.created).toBe(true);
     const s2 = await createSettlement({ playerId: p, worldId: fx.worldId, regionId: fx.regionId, faction: 'nod', cellX: 1, cellY: 1 });
     expect(s2.created).toBe(false);
-    expect(s2.settlementId).toBe(s1.settlementId);
+    expect(s2.settlement.settlement_id).toBe(s1.settlement.settlement_id);
+    expect(s2.settlement.faction).toBe('gdi');
   });
 
   it('snapshots record applied vs committed positions distinctly', async () => {

@@ -282,6 +282,13 @@ export interface FactionDef {
   startUnits: string[];
   /** What this faction starts a regular-doctrine match with; defaults to `startUnits`. */
   regularStart?: string[];
+  /**
+   * Persistent-world newcomer starter picks (PW11): the faction-equivalent unit
+   * for each COMRADE 18 grant role. Counts are fixed by the rules profile; this
+   * only names WHICH unit fills each role. Omitted factions fall back to the
+   * derived picks in starterLoadout().
+   */
+  starter?: { mcv: string; harvester: string; battleTank: string; lightVehicle: string; infantry: string };
 }
 
 export interface MapField { x: number; y: number; r: number; resource: string; amount?: number }

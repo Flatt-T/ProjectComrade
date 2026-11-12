@@ -68,6 +68,9 @@ export interface MmoRulesProfile {
   setupProtectionLapseMs: number;
   /** Credits multiplier over the pack's standard skirmish start for the starter grant. */
   starterCreditsMultiplier: number;
+  /** Minimum cell distance between a newcomer spawn and every existing player's
+   *  live assets (PW11 practical travel separation). */
+  spawnSeparationCells: number;
   /** Maximum compounds (deployed construction yards) one player may hold. */
   maxCompounds: number;
   /** Target minutes of sustained assault to level a developed base (lower/upper bound). */
@@ -127,6 +130,7 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
   setupProtectionOnlineMs: 3_600_000,
   setupProtectionLapseMs: 86_400_000,
   starterCreditsMultiplier: 2,
+  spawnSeparationCells: 24,
   maxCompounds: 3,
   baseLevelMinutes: { min: 20, max: 30 },
   armySupply: { cap: 100, upkeepPerPointPerMinute: 1 },
@@ -223,7 +227,7 @@ function parseProfile(value: unknown): MmoRulesProfile {
   const p = { ...PERSISTENT_RULES_V1, ...v } as MmoRulesProfile;
   if (!isPosInt(v.version)) throw new Error('Invalid rules profile version');
   for (const key of ['offlineAfterMs', 'battleWindowMs', 'setupProtectionOnlineMs', 'setupProtectionLapseMs',
-    'starterCreditsMultiplier', 'maxCompounds', 'recoveryCreditCap', 'earnedShieldDailyCapSeconds',
+    'starterCreditsMultiplier', 'spawnSeparationCells', 'maxCompounds', 'recoveryCreditCap', 'earnedShieldDailyCapSeconds',
     'nightlyShieldSeconds', 'armySupply', 'baseLevelMinutes', 'recoveryMilestone', 'salvage',
     'sitesPerRegion', 'transport', 'rewards', 'hibernateInboundLookaheadMs', 'hibernateMinAwakeMs', 'powerScoreSalvageFloorRatio',
     'structureHpMultiplier', 'powerScoreWeights', 'spawnRegionPowerBandRatio', 'spawnCohortBaselineScore',
@@ -232,7 +236,7 @@ function parseProfile(value: unknown): MmoRulesProfile {
   }
   if (!isNonNegInt(p.offlineAfterMs) || !isNonNegInt(p.battleWindowMs)
     || !isNonNegInt(p.setupProtectionOnlineMs) || !isNonNegInt(p.setupProtectionLapseMs)
-    || !isPosInt(p.starterCreditsMultiplier) || !isPosInt(p.maxCompounds)
+    || !isPosInt(p.starterCreditsMultiplier) || !isPosInt(p.spawnSeparationCells) || !isPosInt(p.maxCompounds)
     || !isNonNegInt(p.recoveryCreditCap) || !isNonNegInt(p.nightlyShieldSeconds)
     || !isNonNegInt(p.earnedShieldDailyCapSeconds) || !isNonNegInt(p.hibernateInboundLookaheadMs)
     || !isNonNegInt(p.hibernateMinAwakeMs)

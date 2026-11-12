@@ -61,7 +61,7 @@ function sendError(ws: WebSocket, code: string, message: string) {
 }
 
 /** Resolve the connection's durable identity from its upgrade cookies. */
-async function resolveIdentity(header: string | undefined): Promise<RegionIdentity | undefined> {
+export async function resolveIdentity(header: string | undefined): Promise<RegionIdentity | undefined> {
   const sessionRaw = /(?:^|;\s*)cmrd_session=([^;]+)/.exec(header ?? '')?.[1];
   if (sessionRaw && authEnabled()) {
     try {

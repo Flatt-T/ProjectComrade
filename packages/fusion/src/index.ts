@@ -7,6 +7,7 @@ export * from './game.js';
 export * from './session.js';
 export * from './mashup.js';
 export * from './persistent.js';
+export * from './starter.js';
 import { RulePack } from './rules.js';
 import { CLASSIC_PACKS, dunePack, ra1Pack, ra2Pack, tdPack } from './packs/index.js';
 import { FUSIONS, conquerPack, holdoutPack, irregularPack, leviathanPack } from './fusions/index.js';

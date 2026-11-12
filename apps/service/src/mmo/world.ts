@@ -10,20 +10,31 @@
 // there is no permission key for it. Reinforcements keep the sender's ownership
 // until an accepted trade (PW13) transfers them.
 import type { PoolClient } from 'pg';
-import type { Command } from '@comrade/fusion';
-import { PERSISTENT_RULES_V1, type MmoRulesProfile, type MmoWorldAction } from '@comrade/contracts';
+import { randomUUID } from 'node:crypto';
+import type { Command, Game } from '@comrade/fusion';
+import { PACKS, starterLoadout, toCell } from '@comrade/fusion';
+import {
+  PERSISTENT_RULES_V1, newProtection, parseProtectionRecord,
+  type MmoRulesProfile, type MmoWorldAction, type ProtectionRecord,
+} from '@comrade/contracts';
 import type { WorldActionHandler, WorldHandlerResult } from './runner.js';
 import { MmoStoreError } from './store.js';
 import {
   allianceCreate, allianceInvite, allianceJoin, allianceLeave, allianceKick,
   allianceSetPermissions, allianceDisband, setAutoRepair,
   availableShieldSeconds, committedShieldSeconds, armShieldRecord, clearShieldRecord,
-  compoundForPlayer, scheduleJob, type Queryable,
+  compoundForPlayer, createSettlement, getSettlement, scheduleJob,
+  type Queryable,
 } from './store.js';
+import { pickSpawnCell } from './spawn.js';
 
 interface HandlerCtx {
-  regionId: string; playerId: string; slot: number;
+  regionId: string; playerId: string; slot: number | undefined;
   slotOf: (playerId: string) => number | undefined;
+  /** Live sim access for spawn placement and roster checks (read-only). */
+  game?: () => Game | undefined;
+  /** Fence epoch and sim tick for durable operation audit rows. */
+  epoch?: string; tick?: number;
 }
 
 async function worldIdFor(tx: PoolClient, regionId: string): Promise<string> {
@@ -156,6 +167,125 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           await armShieldRecord(tx, { compoundId: action.compoundId, playerId: ctx.playerId, seconds: action.seconds, nowMs: now });
           await pokeProtectionEval(ctx.regionId, now, tx);
           return { result: { accepted: true, compoundId: action.compoundId, seconds: action.seconds } };
+        }
+        case 'settle': {
+          // PW11 newcomer settlement: first world-entry creates the one-ever
+          // settlement row (faction, spawn cell, starter grant, NEWCOMER
+          // protection state) and joins the player into the sim. Repeated
+          // settles are idempotent — they never duplicate assets or restart
+          // the protection clock.
+          const worldId = await worldIdFor(tx, ctx.regionId);
+          const { rows: regionRows } = await tx.query<{ seed: unknown }>(
+            'select seed from region where region_id = $1', [ctx.regionId]);
+          const simSpec = (regionRows[0]?.seed as { sim?: { packId?: string; mapId?: string; seed?: number } } | null)?.sim;
+          const packId = simSpec?.packId ?? 'td';
+          const pack = PACKS[packId];
+          if (!pack) return { result: { accepted: false, reason: 'BAD_PACK' } };
+          const mapId = simSpec?.mapId ?? pack.maps[0].id;
+          const preset = pack.maps.find(m => m.id === mapId) ?? pack.maps[0];
+          const mapSeed = Number(simSpec?.seed ?? 0);
+
+          const existing = await getSettlement(ctx.playerId, tx);
+          const game = ctx.game?.();
+          const inSim = ctx.slotOf(ctx.playerId) !== undefined
+            || (game?.players.some(pl => pl.pid === ctx.playerId) ?? false);
+
+          const { rows: nameRows } = await tx.query<{ display_name: string }>(
+            'select display_name from player where player_id = $1', [ctx.playerId]);
+          const displayName = nameRows[0]?.display_name ?? 'Commander';
+
+          if (existing) {
+            if (existing.region_id !== ctx.regionId) {
+              return { result: { accepted: false, reason: 'SETTLED_ELSEWHERE', regionId: existing.region_id } };
+            }
+            if (inSim) return { result: { accepted: true, settled: true, alreadySettled: true } };
+            // The durable settlement stands but the sim lost the player (region
+            // rebuilt from an older spec): re-join at the recorded cell WITHOUT
+            // re-granting the starter army — assets already granted stay gone
+            // only if the snapshot lost them, and a second grant would dupe.
+            let prot: ProtectionRecord | null = null;
+            try { prot = existing.protection ? parseProtectionRecord(existing.protection) : null; } catch { prot = null; }
+            const cell = existing.cell_y * preset.width + existing.cell_x;
+            return {
+              result: { accepted: true, settled: true, rejoin: true },
+              sim: [{
+                slot: -1,
+                command: {
+                  t: 'join',
+                  player: {
+                    name: displayName, faction: existing.faction, ai: false,
+                    playerId: ctx.playerId, cell,
+                    newcomerProtected: prot?.status === 'active',
+                  },
+                },
+              }],
+            };
+          }
+
+          const faction = pack.factions.find(f => f.id === action.faction);
+          if (!faction) return { result: { accepted: false, reason: 'BAD_FACTION' } };
+
+          // Keep-away cells: every live asset of every other player, so the
+          // spawn lands the configured practical travel distance away.
+          const keepAway: number[] = [];
+          if (game) {
+            for (const e of game.entities.values()) {
+              if (e.hp <= 0 || e.owner < 0) continue;
+              if (game.players[e.owner]?.pid === ctx.playerId) continue;
+              keepAway.push(toCell(e.y) * preset.width + toCell(e.x));
+            }
+          }
+          const preferCell = action.x >= 0 && action.y >= 0 && action.x < preset.width && action.y < preset.height
+            ? action.y * preset.width + action.x : undefined;
+          const pick = pickSpawnCell({
+            packId, mapId, seed: mapSeed, keepAwayCells: keepAway,
+            separationCells: rules.spawnSeparationCells, preferCell,
+          });
+          const loadout = starterLoadout(pack, faction);
+          const credits = pack.startCredits.standard * rules.starterCreditsMultiplier;
+          const settlementId = randomUUID();
+          const nowMs = Date.now();
+          const protection = newProtection('NEWCOMER', settlementId, ctx.playerId, nowMs, rules);
+          const { settlement, created } = await createSettlement({
+            settlementId, playerId: ctx.playerId, worldId, regionId: ctx.regionId,
+            faction: faction.id, cellX: pick.x, cellY: pick.y, protection,
+          }, tx);
+          if (!created) {
+            // A concurrent settle won the insert — behave exactly like the
+            // already-settled path above.
+            return { result: { accepted: true, settled: true, alreadySettled: true } };
+          }
+          // Durable audit: the settle command is the journaled cause; this row
+          // records the grant for the asset ledger's NEWCOMER_SPAWN kind.
+          if (ctx.epoch !== undefined) {
+            await tx.query(
+              `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+               values ($1,$2,$3,$4,'NEWCOMER_SPAWN',$5,$6)`,
+              [randomUUID(), ctx.regionId, ctx.epoch, String(ctx.tick ?? 0),
+               JSON.stringify({ kind: 'NEWCOMER_SPAWN', playerId: ctx.playerId, regionId: ctx.regionId, faction: faction.id, x: pick.x, y: pick.y }),
+               JSON.stringify({ settlementId: settlement.settlement_id, cellX: pick.x, cellY: pick.y })]);
+          }
+          // Schedule the durable evaluator so the online-hour/lapse deadlines are
+          // journaled even if no further pokes arrive (PW11).
+          await pokeProtectionEval(ctx.regionId, nowMs, tx);
+          return {
+            result: {
+              accepted: true, settled: true, settlementId: settlement.settlement_id,
+              faction: faction.id, cellX: pick.x, cellY: pick.y, adjusted: pick.adjusted,
+            },
+            sim: [{
+              slot: -1,
+              command: {
+                t: 'join',
+                player: {
+                  name: displayName, faction: faction.id, ai: false,
+                  playerId: ctx.playerId, cell: pick.cell,
+                  starter: { credits, units: loadout.units },
+                  newcomerProtected: true,
+                },
+              },
+            }],
+          };
         }
         case 'clearShield': {
           const cleared = await clearShieldRecord(tx, { compoundId: action.compoundId, playerId: ctx.playerId });
