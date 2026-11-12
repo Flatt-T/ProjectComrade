@@ -476,4 +476,67 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table settlement add column protection jsonb;
     `,
   },
+  {
+    version: 9,
+    name: 'notifications and away report',
+    sql: `
+    -- PW25 (COMRADE 18 §3.10): opt-in, rate-limited notifications plus the
+    -- offline timeline. A notification row is the durable event; delivery is
+    -- per-channel and recorded separately so unsubscribing is auditable.
+    create table notification (
+      notification_id uuid primary key,
+      player_id       uuid not null references player(player_id),
+      region_id       uuid references region(region_id),
+      kind            text not null,
+      payload         jsonb not null default '{}'::jsonb,
+      -- Producer-chosen dedupe scope (e.g. 'attack:<compound>:<window>'). The
+      -- unique index makes raise idempotent: repeated damage in one window
+      -- produces exactly one row.
+      dedupe_key      text not null,
+      deliver_after   timestamptz not null,
+      created_at      timestamptz not null default clock_timestamp(),
+      delivered_at    timestamptz,
+      read_at         timestamptz
+    );
+    create unique index notification_dedupe_idx on notification (player_id, dedupe_key);
+    create index notification_pending_idx on notification (deliver_after) where delivered_at is null;
+    create index notification_player_idx on notification (player_id, created_at desc);
+
+    -- One row per channel the player has an explicit preference for; a missing
+    -- row means the channel default (off — nothing sends without opt-in).
+    create table notification_pref (
+      player_id  uuid not null references player(player_id),
+      channel    text not null check (channel in ('inapp','email','push')),
+      enabled    boolean not null,
+      updated_at timestamptz not null default clock_timestamp(),
+      primary key (player_id, channel)
+    );
+
+    -- Web-push subscriptions (PW25 placeholder transport: stored now, sender
+    -- lands when VAPID credentials are provisioned).
+    create table push_subscription (
+      subscription_id uuid primary key,
+      player_id        uuid not null references player(player_id),
+      endpoint         text not null unique,
+      keys             jsonb not null,
+      created_at       timestamptz not null default clock_timestamp()
+    );
+    create index push_subscription_player_idx on push_subscription (player_id);
+
+    -- Per-channel delivery audit: one row per attempted channel delivery.
+    create table notification_delivery (
+      delivery_id     bigserial primary key,
+      notification_id uuid not null references notification(notification_id),
+      channel         text not null check (channel in ('inapp','email','push')),
+      status          text not null check (status in ('sent','skipped','failed')),
+      detail          text not null default '',
+      attempted_at    timestamptz not null default clock_timestamp()
+    );
+    create index notification_delivery_idx on notification_delivery (notification_id);
+
+    -- The start of the most recent offline stretch. offline_since_ms clears on
+    -- reconnect, but the away report needs the window after the player returns.
+    alter table player add column last_offline_since_ms bigint check (last_offline_since_ms >= 0);
+    `,
+  },
 ];

@@ -10,6 +10,10 @@ import {
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import { MmoConnection, PersistentSession, SnapshotState } from './mmo';
 import { mmoEntityId } from '@comrade/contracts';
+import type {
+  MmoAwayReport, MmoNotification, MmoNotificationKind, MmoNotificationPrefs, MmoNotifyChannel,
+} from '@comrade/contracts';
+import { api } from './api';
 import { typingIn } from './help';
 
 type Mode = 'normal' | 'place' | 'repair' | 'attackMove' | 'super';
@@ -18,6 +22,16 @@ const ALL_TABS: { id: QueueKind; label: string }[] = [
   { id: 'vehicle', label: 'Vehicles' }, { id: 'aircraft', label: 'Air' }, { id: 'naval', label: 'Navy' },
 ];
 const RANKS = ['', ' · Veteran', ' · Elite'];
+const NOTE_TEXT: Record<MmoNotificationKind, string> = {
+  compound_under_attack: 'Your compound is under attack',
+  shield_ending: 'Your shield is ending soon',
+  storage_full: 'Storage is full',
+  superweapon_nearby: 'A superweapon was deployed near you',
+  trade_offer: 'You have a trade offer',
+  ally_call: 'An ally is calling for help',
+  objective_done: 'Objective complete',
+  system: 'Notification',
+};
 
 interface UiState {
   tick: number; credits: number; storage: number; powerGen: number; powerUse: number;
@@ -47,6 +61,11 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // PW11: newcomers pick a faction, then the journaled `settle` action grants
   // the starter army and the one-hour setup protection window.
   const [needSettle, setNeedSettle] = useState(!settled);
+  // PW25: notification inbox, channel opt-ins and the offline timeline.
+  const [notes, setNotes] = useState<MmoNotification[]>([]);
+  const [prefs, setPrefs] = useState<MmoNotificationPrefs | null>(null);
+  const [away, setAway] = useState<MmoAwayReport | null>(null);
+  const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
     let game: Game | null = null;
@@ -98,6 +117,23 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       onStatus: connected => setUi(u => u ? { ...u, connected } : { tick: 0, credits: 0, storage: 0, powerGen: 0, powerUse: 0, options: {}, costs: {}, selection: null, status: connected ? '' : 'Reconnecting…', connected, slot, supers: [], recovering: false }),
     });
     conn.subscribe(regionId);
+
+    // PW25: live notifications arrive on the socket; the inbox, prefs and the
+    // away report come from the durable API once per mount.
+    const offNotes = conn.on(msg => {
+      if (msg.type !== 'notification') return;
+      const n: MmoNotification = {
+        notificationId: msg.notificationId, playerId: '', kind: msg.kind,
+        payload: msg.payload ?? {}, createdAt: msg.createdAt, readAt: null,
+      };
+      setNotes(ns => [n, ...ns].slice(0, 30));
+      flash(NOTE_TEXT[msg.kind] ?? 'New notification');
+    });
+    void api.mmoNotifications().then(r => {
+      setPrefs(r.prefs);
+      setNotes(r.notifications.slice(0, 30));
+    }).catch(() => undefined);
+    void api.mmoAwayReport().then(r => { if (r.entries.length) setAway(r); }).catch(() => undefined);
 
     const resize = () => {
       const el = stage.current!, c = canvas.current!;
@@ -208,10 +244,28 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
 
     return () => {
       cancelAnimationFrame(raf); observer.disconnect(); ticker?.terminate();
+      offNotes();
       window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup);
       session?.dispose(); conn.close(); rig.current = null;
     };
   }, [regionId]);
+
+  function toggleNotifyPref(channel: MmoNotifyChannel) {
+    if (!prefs) return;
+    const enabled = !prefs[channel];
+    setPrefs({ ...prefs, [channel]: enabled });
+    void api.mmoSetNotifyPref(channel, enabled)
+      .then(r => setPrefs(r.prefs)).catch(() => setPrefs(p => p ? { ...p, [channel]: !enabled } : p));
+  }
+
+  function openNotes() {
+    setShowNotes(v => !v);
+    const unread = notes.filter(n => n.readAt === null).map(n => n.notificationId);
+    if (unread.length) {
+      setNotes(ns => ns.map(n => ({ ...n, readAt: n.readAt ?? new Date().toISOString() })));
+      void api.mmoMarkNotificationsRead(unread).catch(() => undefined);
+    }
+  }
 
   function setMode(m: Mode) {
     mode.current = m; setModeView(m);
@@ -399,6 +453,21 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       <canvas ref={minimap} className="minimap" width={180} height={180} />
       {notice && <div className="notice">{notice}</div>}
       {!ui && <div className="notice">Entering the persistent world…</div>}
+      {away && <div className="settle-overlay">
+        <div className="settle-card away-card">
+          <h2>Away report</h2>
+          <p className="away-since">While you were offline since {new Date(away.since ?? '').toLocaleString()}:</p>
+          <div className="away-list">
+            {away.entries.map((e, i) => (
+              <div key={i} className="away-entry">
+                <time>{new Date(e.at).toLocaleString()}</time>
+                <span>{e.summary}</span>
+              </div>
+            ))}
+          </div>
+          <button className="settle-faction" onClick={() => setAway(null)}>Dismiss</button>
+        </div>
+      </div>}
       {needSettle && ui && (
         <div className="settle-overlay">
           <div className="settle-card">
@@ -426,7 +495,30 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         </>}
         <span className={`conn ${ui?.connected ? 'ok' : 'bad'}`}>{ui?.connected ? 'LIVE' : 'OFFLINE'}</span>
         {ui?.recovering && <span className="res recovering">RECOVERY</span>}
+        <button className="notify-bell" onClick={openNotes} title="Notifications">
+          {'\u{1F514}'}{notes.some(n => n.readAt === null) ? ' •' : ''}
+        </button>
       </div>
+      {showNotes && <div className="notes-panel">
+        <div className="notes-head">
+          <b>Notifications</b>
+          <span className="notes-prefs">
+            {(['inapp', 'email', 'push'] as MmoNotifyChannel[]).map(ch => (
+              <label key={ch}>
+                <input type="checkbox" checked={prefs?.[ch] === true}
+                  onChange={() => toggleNotifyPref(ch)} />{ch}
+              </label>
+            ))}
+          </span>
+        </div>
+        {notes.length === 0 && <div className="notes-empty">Nothing yet.</div>}
+        {notes.map(n => (
+          <div key={n.notificationId} className={`note ${n.readAt ? '' : 'unread'}`}>
+            <span>{NOTE_TEXT[n.kind] ?? n.kind}</span>
+            <time>{new Date(n.createdAt).toLocaleString()}</time>
+          </div>
+        ))}
+      </div>}
       <div className="tabs">
         {ALL_TABS.map(t => <button key={t.id} className={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>{t.label}</button>)}
       </div>

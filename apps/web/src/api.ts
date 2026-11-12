@@ -4,7 +4,8 @@
 // page could read it. The long-lived refresh token lives in an httpOnly cookie the page
 // cannot touch, so a reload calls /api/auth/refresh to get a new access token and carries on.
 import type {
-  AdBreak, ConsentState, Entitlements, HistoryPage, InvoiceSummary, MatchRecord, Me, PackPrice, PlanPrice, PlayDecision,
+  AdBreak, ConsentState, Entitlements, HistoryPage, InvoiceSummary, MatchRecord, Me, MmoAwayReport,
+  MmoNotification, MmoNotificationPrefs, MmoNotifyChannel, PackPrice, PlanPrice, PlayDecision,
   PlayKind, PlayerRecord, ProposalPage, ReleaseInfo, SubscriptionState, Tier, TierPlan,
 } from '@comrade/contracts';
 
@@ -164,7 +165,21 @@ export const api = {
   unvote: (id: string) => remove<ProposalPage>(`/api/proposals/${encodeURIComponent(id)}/vote`),
 
   earlyAccess: () => get<{ items: Record<string, ReleaseInfo> }>('/api/content/early-access'),
+
+  // Persistent world (PW25): notification prefs, inbox and the offline timeline.
+  mmoNotifications: () => get<MmoNotificationsResponse>('/api/mmo/notifications'),
+  mmoSetNotifyPref: (channel: MmoNotifyChannel, enabled: boolean) =>
+    request<MmoNotificationsResponse>('/api/mmo/notifications/prefs', { method: 'PUT', body: { channel, enabled } }),
+  mmoMarkNotificationsRead: (ids?: string[]) =>
+    post<{ marked: number }>('/api/mmo/notifications/read', ids ? { ids } : {}),
+  mmoAwayReport: () => get<MmoAwayReport>('/api/mmo/away-report'),
 };
+
+export interface MmoNotificationsResponse {
+  prefs: MmoNotificationPrefs;
+  notifications: MmoNotification[];
+  unread: number;
+}
 
 export interface CommanderResponse extends PlayerRecord {
   profile: {

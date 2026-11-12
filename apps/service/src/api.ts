@@ -4,8 +4,9 @@
 // that need a database or an identity provider say so with a 503 when the deployment has
 // none, rather than failing in some obscure way, so the site degrades to free open play.
 import {
-  AVATAR_MAX_BYTES, AVATAR_TYPES, CREDIT_PACK, GameStyle, HANDLE_MAX, PAID_TIERS, PlayDecision, PlayKind, STYLES, Tier,
-  allowance, handleValid, playKind, plan, tierRank,
+  AVATAR_MAX_BYTES, AVATAR_TYPES, CREDIT_PACK, GameStyle, HANDLE_MAX, MMO_NOTIFY_CHANNELS, PAID_TIERS, PlayDecision,
+  PlayKind, STYLES, Tier, allowance, handleValid, playKind, plan, tierRank,
+  type MmoNotifyChannel,
 } from '@comrade/contracts';
 import {
   accountBySub, accountByHandle, activateAccount, applyEmailChange, avatarOf, clearAvatar, consentFor,
@@ -33,9 +34,13 @@ import { log } from './ops.js';
 import { earlyAccessItems, lockFor } from './releases.js';
 import { meFor, resolve, resolveAccount } from './viewer.js';
 import { castVote, proposalPage, withdrawVote } from './votes.js';
-import { mmoDatabaseConfigured } from './mmo/db.js';
+import { mmoDatabaseConfigured, mmoOne } from './mmo/db.js';
 import { resolveIdentity } from './mmo/gateway.js';
 import { enterPersistentWorld } from './mmo/entry.js';
+import {
+  awayReportFor, listNotifications, markNotificationsRead, notificationPrefs,
+  pushSubscribe, pushUnsubscribe, setNotificationPref,
+} from './mmo/notify.js';
 import { MmoStoreError } from './mmo/store.js';
 
 const str = (value: unknown, max = 200): string => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -650,4 +655,89 @@ get('/api/mmo/enter', async (ctx: Ctx) => {
     }
     throw error;
   }
+});
+
+// ---------------------------------------------------------------------------
+// Persistent world notifications and away report (PW25)
+// ---------------------------------------------------------------------------
+
+/** The durable player row behind the request's identity, or null for guests
+ *  who never entered a region. */
+async function mmoPlayerId(ctx: Ctx): Promise<string | null> {
+  const identity = await resolveIdentity(String(ctx.req.headers.cookie ?? ''));
+  if (!identity) return null;
+  const row = await mmoOne<{ player_id: string }>(
+    'select player_id from player where account_id = $1', [identity.accountId]);
+  return row?.player_id ?? null;
+}
+
+async function requireMmoPlayer(ctx: Ctx): Promise<string> {
+  if (!mmoDatabaseConfigured()) throw unavailable('Persistent world is not enabled');
+  const playerId = await mmoPlayerId(ctx);
+  if (!playerId) throw unauthorised('Enter the persistent world first');
+  return playerId;
+}
+
+get('/api/mmo/notifications', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-notifications', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const [prefs, notifications] = await Promise.all([
+    notificationPrefs(playerId), listNotifications(playerId),
+  ]);
+  return {
+    prefs,
+    notifications,
+    unread: notifications.filter(n => n.readAt === null).length,
+  };
+});
+
+put('/api/mmo/notifications/prefs', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-notify-prefs', 30, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const body = await ctx.body() as Record<string, unknown>;
+  const channel = String(body.channel ?? '');
+  if (!MMO_NOTIFY_CHANNELS.includes(channel as MmoNotifyChannel)) {
+    throw badRequest('channel must be inapp, email or push');
+  }
+  if (typeof body.enabled !== 'boolean') throw badRequest('enabled must be a boolean');
+  await setNotificationPref(playerId, channel as MmoNotifyChannel, body.enabled);
+  return { prefs: await notificationPrefs(playerId) };
+});
+
+post('/api/mmo/notifications/read', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-notify-read', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const body = (await ctx.body().catch(() => ({}))) as Record<string, unknown>;
+  const ids = Array.isArray(body.ids)
+    ? body.ids.filter((x): x is string => typeof x === 'string').slice(0, 200)
+    : undefined;
+  const marked = await markNotificationsRead(playerId, ids);
+  return { marked };
+});
+
+post('/api/mmo/push-subscriptions', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-push-sub', 20, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const body = await ctx.body() as Record<string, unknown>;
+  const endpoint = str(body.endpoint, 2048);
+  if (!endpoint.startsWith('https://')) throw badRequest('Invalid push endpoint');
+  const keys = body.keys && typeof body.keys === 'object' ? body.keys : {};
+  await pushSubscribe(playerId, endpoint, keys);
+  return { subscribed: true };
+});
+
+del('/api/mmo/push-subscriptions', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-push-unsub', 20, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const body = await ctx.body() as Record<string, unknown>;
+  const endpoint = str(body.endpoint, 2048);
+  if (!endpoint) throw badRequest('endpoint is required');
+  await pushUnsubscribe(playerId, endpoint);
+  return { subscribed: false };
+});
+
+get('/api/mmo/away-report', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-away-report', 20, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  return awayReportFor(playerId);
 });

@@ -51,6 +51,15 @@ export const ads = {
   }),
 };
 
+/** SES for PW25 notification email. Requires AWS credentials in the environment —
+ *  the service deliberately holds no SDK; calls are SigV4-signed fetch requests. */
+export const ses = {
+  region: () => text('COMRADE_SES_REGION', cognito.region()),
+  fromAddress: () => text('COMRADE_SES_FROM'),
+  fromName: () => text('COMRADE_SES_FROM_NAME', 'COMRADE'),
+  configured: () => !!(text('COMRADE_SES_FROM') && text('AWS_ACCESS_KEY_ID') && text('AWS_SECRET_ACCESS_KEY')),
+};
+
 /** Bumped whenever the terms change, so acceptance can be re-requested. */
 export function termsVersion(): string { return text('COMRADE_TERMS_VERSION', '2026-10-30'); }
 

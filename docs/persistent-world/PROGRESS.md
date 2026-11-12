@@ -485,3 +485,49 @@ acceptance detail; this file is the resume point. Read it first in every session
   rostered here with assets only in another region's sim could false-
   positive (mitigated: compounds are world-checked, roster co-locates
   with assets until inter-region movement exists).
+
+### PW25 (milestone 1) - THU-2272 - opt-in notifications and away report - 2026-11-12
+- Contracts (`packages/contracts/src/mmo.ts`): `NotificationKind`
+  (compound_under_attack, shield_ending, storage_full,
+  superweapon_nearby, trade_offer, ally_call), `NotificationPrefs`
+  per-channel opt-in (inApp / webPush / email) all default OFF,
+  `notificationRules` profile block (dedupe window, shield-warning
+  horizon, max per window), `awayReport` server message + REST shapes,
+  capability keys notifications / notificationsEmail / awayReport.
+- Schema v9: `player_notification_prefs` (one row per player+channel,
+  opt-in only), `player_notification` (durable, dedupe_key unique per
+  player, read_at nullable), `player_offline_since` presence marker.
+- Store (`apps/service/src/mmo/store.ts`): pref get/upsert, insert
+  notification ON CONFLICT dedupe, list unread/all, mark-read,
+  away-report query joining notifications + region journal tail.
+- Producer (`apps/service/src/mmo/runner.ts` + `notify.ts`):
+  `notify_eval` scheduled job (same fenced-journal pattern as
+  protection/recovery eval) detects: compound in battle
+  (`battleAt` within window), active shield ending inside
+  `shieldWarningMs`, storage at cap, superweapon strike nearby;
+  emits durable notifications with `dedupe_key` = kind+subject+window
+  so repeated damage/conditions cannot spam; delivery honours per-
+  channel opt-in via the existing outbox/gateway path (in-app push
+  message now; web-push/SES adapters in `ses.ts`/`notify.ts` wired to
+  config and gated on credentials).
+- API (`apps/service/src/api.ts`): GET/PUT notification prefs,
+  GET notifications, POST mark-read, GET away-report.
+- Web: `apps/web/src/api.ts` typed methods; `PersistentWorld.tsx`
+  notification panel (unread badge, kind icons, mark-read), per-channel
+  opt-in toggles, away-report modal listing offline-window entries with
+  region/event_seq replay references into the journal.
+- Proven: `tests/unit/mmo-contracts.test.ts` 20/20 (pref validation,
+  capability parsing, defaults off); `tests/integration/
+  mmo-notify.test.ts` 6/6 real PG + runner + sim - attack dedupe per
+  window, shield-ending once, storage-full + superweapon_nearby,
+  opt-in/unsubscribe stops all channels, defaults off + mark-read,
+  away report contains durable notifications inside the offline
+  window; full suite 413 unit + 79 integration green; lint + typecheck
+  clean; service + web builds pass.
+- Open: trade_offer / ally_call producers land with PW13/PW25-M2
+  (no trade/alliance-chat surface yet); web-push VAPID + SES send are
+  config-gated and need owner credentials to go live; away-report
+  replay parity (journal checksum match) asserted structurally via
+  event_seq references, not yet a dedicated checksum test;
+  milestone-2 items (objectives, daily/weekly rewards, alliance chat,
+  mute/report, map pings) remain.

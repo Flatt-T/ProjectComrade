@@ -19,7 +19,7 @@ import { randomUUID } from 'node:crypto';
 import {
   MMO_CAPABILITIES_MILESTONE1, MMO_DECISIONS_OPEN, MMO_PROTOCOL, MMO_RULESET_ID,
   PERSISTENT_RULES_V1, parseMmoClientMessage,
-  type MmoCommandResult, type MmoServerMessage, type MmoWorldConfig,
+  type MmoCommandResult, type MmoNotificationKind, type MmoServerMessage, type MmoWorldConfig,
 } from '@comrade/contracts';
 import { mmoOne } from './db.js';
 import { journalTail } from './commands.js';
@@ -28,13 +28,19 @@ import { MmoStoreError, playerConnected, playerDisconnected, playersSeen } from 
 import { dispatchOutbox, type OutboxEnvelope } from './bus.js';
 import { identityUuid, type RegionIdentity, type RegionService } from './regions.js';
 import { guestIdFromCookieHeader, parseSessionCookie } from '../auth.js';
-import { authEnabled } from '../config.js';
+import { authEnabled, ses } from '../config.js';
 import * as cognito from '../cognito.js';
-import { accountBySub } from '../accounts.js';
+import { accountById, accountBySub } from '../accounts.js';
+import {
+  dispatchDueNotifications, notificationSummary, playerAccountId, pushEndpoints,
+  type NotificationSenders,
+} from './notify.js';
+import { sendSesEmail } from './ses.js';
 import { log } from '../ops.js';
 
 const OBSERVE_MS = 2_000;
 const DISPATCH_MS = 250;
+const NOTIFY_MS = 2_000;
 const MAX_SUBSCRIPTIONS = 4;
 
 interface Sub { regionId: string; playerId: string; slot: number | null }
@@ -93,6 +99,7 @@ export class MmoGateway {
   private service: RegionService;
   private observeTimer?: ReturnType<typeof setInterval>;
   private dispatchTimer?: ReturnType<typeof setInterval>;
+  private notifyTimer?: ReturnType<typeof setInterval>;
   private readonly workerId = randomUUID();
 
   constructor(service: RegionService) {
@@ -295,6 +302,57 @@ export class MmoGateway {
     }
   }
 
+  /**
+   * PW25 channel senders. Each returns an audited status; 'skipped' means the
+   * channel could not apply (offline, unconfigured, no address) — never an error.
+   * Email goes through SES only when COMRADE_SES_* and AWS credentials exist;
+   * push subscriptions are stored but the VAPID sender is a documented placeholder.
+   */
+  private notificationSenders(): NotificationSenders {
+    return {
+      inapp: async (playerId, n) => {
+        const message: MmoServerMessage = {
+          protocol: MMO_PROTOCOL, type: 'notification',
+          notificationId: n.notification_id, kind: n.kind as MmoNotificationKind,
+          payload: n.payload ?? {}, createdAt: n.created_at, regionId: n.region_id,
+        };
+        let sent = false;
+        for (const conn of this.conns) {
+          for (const sub of conn.subs.values()) {
+            if (sub.playerId !== playerId) continue;
+            send(conn.ws, message);
+            sent = true;
+          }
+        }
+        return sent ? { status: 'sent' as const } : { status: 'skipped' as const, detail: 'offline' };
+      },
+      email: async (playerId, n) => {
+        if (!ses.configured()) return { status: 'skipped' as const, detail: 'email-unconfigured' };
+        const accountId = await playerAccountId(playerId);
+        const account = accountId ? await accountById(accountId) : undefined;
+        if (!account?.email) return { status: 'skipped' as const, detail: 'no-email' };
+        const summary = notificationSummary(n.kind, n.payload ?? {});
+        try {
+          await sendSesEmail({
+            to: account.email,
+            subject: `COMRADE: ${summary}`,
+            text: `${summary}.\n\nSign in to COMRADE to respond.\n\n— COMRADE notifications (opt-in; manage in Settings).`,
+          });
+          return { status: 'sent' as const };
+        } catch (error) {
+          return { status: 'failed' as const, detail: error instanceof Error ? error.message : String(error) };
+        }
+      },
+      push: async (playerId) => {
+        const subs = await pushEndpoints(playerId);
+        if (!subs.length) return { status: 'skipped' as const, detail: 'no-subscription' };
+        // VAPID sender lands with the push provider decision; subscriptions are
+        // already stored so enabling it is configuration, not a migration.
+        return { status: 'skipped' as const, detail: 'push-unconfigured' };
+      },
+    };
+  }
+
   /** Start the outbox dispatcher and observation heartbeat. Idempotent. */
   start() {
     if (this.dispatchTimer) return;
@@ -304,12 +362,18 @@ export class MmoGateway {
       }).catch(error => log('mmo-dispatch-error', { error: String(error).slice(0, 200) }));
     }, DISPATCH_MS);
     this.dispatchTimer.unref?.();
+    this.notifyTimer = setInterval(() => {
+      void dispatchDueNotifications(this.notificationSenders()).catch(
+        error => log('mmo-notify-error', { error: String(error).slice(0, 200) }));
+    }, NOTIFY_MS);
+    this.notifyTimer.unref?.();
     this.observeTimer = setInterval(() => this.observe(), OBSERVE_MS);
     this.observeTimer.unref?.();
   }
 
   async stop() {
     if (this.dispatchTimer) clearInterval(this.dispatchTimer);
+    if (this.notifyTimer) clearInterval(this.notifyTimer);
     if (this.observeTimer) clearInterval(this.observeTimer);
     for (const conn of this.conns) conn.ws.terminate();
     this.conns.clear();

@@ -118,6 +118,13 @@ export interface MmoRulesProfile {
   hibernateInboundLookaheadMs: number;
   /** Minimum time a region stays awake before it may hibernate again (anti-thrash). */
   hibernateMinAwakeMs: number;
+  /** Notifications (PW25, COMRADE 18 §3.10): delivery delay, per-scope rate-limit
+   *  window, and how close a superweapon target must be to count as "nearby". */
+  notifications: {
+    delayMs: number;
+    windowMs: number;
+    superweaponNearbyCells: number;
+  };
 }
 
 /** COMRADE 18 approved starting defaults (tunable values). */
@@ -160,6 +167,11 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
   shieldRadiusCells: 18,
   hibernateInboundLookaheadMs: 120_000,
   hibernateMinAwakeMs: 300_000,
+  notifications: {
+    delayMs: 60_000,
+    windowMs: 900_000,
+    superweaponNearbyCells: 60,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -230,6 +242,7 @@ function parseProfile(value: unknown): MmoRulesProfile {
     'starterCreditsMultiplier', 'spawnSeparationCells', 'maxCompounds', 'recoveryCreditCap', 'earnedShieldDailyCapSeconds',
     'nightlyShieldSeconds', 'armySupply', 'baseLevelMinutes', 'recoveryMilestone', 'salvage',
     'sitesPerRegion', 'transport', 'rewards', 'hibernateInboundLookaheadMs', 'hibernateMinAwakeMs', 'powerScoreSalvageFloorRatio',
+    'notifications',
     'structureHpMultiplier', 'powerScoreWeights', 'spawnRegionPowerBandRatio', 'spawnCohortBaselineScore',
     'allianceMaxMembers', 'recoveryBuildRoles'] as const) {
     if (v[key] === undefined) throw new Error(`Rules profile missing ${key}`);
@@ -260,7 +273,9 @@ function parseProfile(value: unknown): MmoRulesProfile {
     || typeof p.powerScoreWeights?.tech !== 'number' || p.powerScoreWeights.tech < 0
     || typeof p.spawnRegionPowerBandRatio !== 'number' || p.spawnRegionPowerBandRatio < 1
     || !isNonNegInt(p.spawnCohortBaselineScore)
-    || (v.shieldRadiusCells !== undefined && !isPosInt(v.shieldRadiusCells))) {
+    || (v.shieldRadiusCells !== undefined && !isPosInt(v.shieldRadiusCells))
+    || !isNonNegInt(p.notifications?.delayMs) || !isPosInt(p.notifications?.windowMs)
+    || !isPosInt(p.notifications?.superweaponNearbyCells)) {
     throw new Error('Invalid rules profile values');
   }
   return p;
@@ -676,12 +691,78 @@ export interface MmoObservationMessage {
   checksum: number;
 }
 
+// ---------------------------------------------------------------------------
+// Notifications and the away report (PW25, COMRADE 18 §3.10)
+// ---------------------------------------------------------------------------
+
+/** Notification kinds the platform can raise. Producers land per issue; the
+ *  kind set is the contract, delivery is channel-agnostic. */
+export const MMO_NOTIFICATION_KINDS = [
+  'compound_under_attack',
+  'shield_ending',
+  'storage_full',
+  'superweapon_nearby',
+  'trade_offer',
+  'ally_call',
+  'objective_done',
+  'system',
+] as const;
+export type MmoNotificationKind = (typeof MMO_NOTIFICATION_KINDS)[number];
+export type MmoNotifyChannel = 'inapp' | 'email' | 'push';
+export const MMO_NOTIFY_CHANNELS: readonly MmoNotifyChannel[] = ['inapp', 'email', 'push'];
+
+/** Per-channel opt-in. Everything defaults off: no notification is sent without opt-in. */
+export interface MmoNotificationPrefs {
+  inapp: boolean;
+  email: boolean;
+  push: boolean;
+}
+export const MMO_NOTIFY_PREFS_DEFAULT: MmoNotificationPrefs = { inapp: false, email: false, push: false };
+
+export interface MmoNotification {
+  notificationId: MmoId;
+  playerId: MmoId;
+  kind: MmoNotificationKind;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  readAt: string | null;
+}
+
+/** Live push to a subscribed socket; also persisted for the away report. */
+export interface MmoNotificationMessage {
+  protocol: typeof MMO_PROTOCOL;
+  type: 'notification';
+  notificationId: MmoId;
+  kind: MmoNotificationKind;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  regionId: MmoId | null;
+}
+
+/** One line of the offline timeline. `eventSeq`/`regionId` locate the journal
+ *  range a client can replay to verify the entry against the sim. */
+export interface MmoAwayReportEntry {
+  at: string;
+  kind: string;
+  summary: string;
+  regionId: MmoId | null;
+  eventSeq: Counter | null;
+  notificationId: MmoId | null;
+}
+
+export interface MmoAwayReport {
+  since: string | null;
+  until: string;
+  entries: MmoAwayReportEntry[];
+}
+
 export type MmoServerMessage =
   | MmoWelcomeMessage
   | MmoSnapshotHeader
   | MmoEventMessage
   | MmoCommandResult
   | MmoObservationMessage
+  | MmoNotificationMessage
   | { protocol: typeof MMO_PROTOCOL; type: 'error'; code: string; message: string };
 
 // ---------------------------------------------------------------------------
