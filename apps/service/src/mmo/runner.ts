@@ -1340,7 +1340,9 @@ export class RegionRunner {
           let hasMcv = false, hasStruct = false;
           for (const e of g.entities.values()) {
             if (e.owner !== slot || e.hp <= 0) continue;
-            if (e.kind === 'structure') hasStruct = true;
+            // PW14: a packed carrier is still a building asset — it blocks a
+            // duplicate recovery grant exactly like a deployed structure.
+            if (e.kind === 'structure' || e.packedType) hasStruct = true;
             else if (e.kind === 'unit' && isMcvUnit(g.unitDef(e))) hasMcv = true;
           }
           if (!hasMcv && !hasStruct) {
@@ -1381,7 +1383,7 @@ export class RegionRunner {
         let hasAnchor = false;
         for (const e of g.entities.values()) {
           if (e.owner !== slot || e.hp <= 0) continue;
-          if (e.kind === 'structure' || (e.kind === 'unit' && isMcvUnit(g.unitDef(e)))) {
+          if (e.kind === 'structure' || e.packedType || (e.kind === 'unit' && isMcvUnit(g.unitDef(e)))) {
             hasAnchor = true; break;
           }
         }
@@ -1657,12 +1659,18 @@ export class RegionRunner {
     if (!g?.persistent) return;
     const slotToPlayer = new Map<number, string>();
     for (const [pid, slot] of this.slotByPlayer) slotToPlayer.set(slot, pid);
-    const live: { compoundId: string; playerId: string }[] = [];
+    const live: { compoundId: string; playerId: string; state: 'active' | 'packed' }[] = [];
     for (const e of g.entities.values()) {
-      if (e.kind !== 'structure' || e.hp <= 0 || !g.structDef(e).constructionYard) continue;
+      if (e.hp <= 0) continue;
+      // PW14: a packed yard keeps its compound identity in 'packed' state — the
+      // entity id (and durable compound id) is unchanged across the morph.
+      const structType = e.packedType || (e.kind === 'structure' ? e.type : '');
+      if (!structType) continue;
+      const sdef = g.pack.structures[structType];
+      if (!sdef?.constructionYard) continue;
       const playerId = slotToPlayer.get(e.owner);
       if (!playerId) continue;
-      live.push({ compoundId: mmoEntityId(this.opts.regionId, e.id), playerId });
+      live.push({ compoundId: mmoEntityId(this.opts.regionId, e.id), playerId, state: e.packedType ? 'packed' : 'active' });
     }
     await mmoTransaction(async tx => {
       await assertRegionFence(tx, {

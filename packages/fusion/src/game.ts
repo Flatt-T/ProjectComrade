@@ -24,6 +24,10 @@ export type Command =
   | { t: 'place'; item: string; x: number; y: number }
   | { t: 'sell'; id: number }
   | { t: 'repair'; id: number }
+  /** Persistent profile only (PW14): pack an owned structure into its dedicated carrier. */
+  | { t: 'pack'; id: number }
+  /** Persistent profile only (PW14): redeploy a packed carrier at a footprint's top-left cell. */
+  | { t: 'unpack'; id: number; x: number; y: number }
   | { t: 'rally'; x: number; y: number }
   | { t: 'super'; id: number; x: number; y: number; x2?: number; y2?: number }
   | { t: 'surrender' }
@@ -239,6 +243,14 @@ export interface Entity {
    * so surviving unprotected units keep fighting.
    */
   recoveryProtected: boolean;
+  /**
+   * Persistent profile (PW14): while this entity is a packed-building carrier it
+   * is a unit whose type is `pack_<structure>` and this field names the structure
+   * type it redeploys into. The entity id — and therefore the durable asset id —
+   * is unchanged across pack/deploy, so one asset survives every form. '' = not
+   * packed. Snapshots predating PW14 lack the field; restoreGame normalizes it.
+   */
+  packedType: string;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -327,6 +339,31 @@ const UPGRADE = 'upgrade:', STARPORT = 'starport:';
 /** Arm's length from a building's edge: any cell touching it, diagonals included. */
 const REACH = 288;
 
+/**
+ * PW14: every packable structure gets a dedicated packed-building carrier unit.
+ * The carrier is a real UnitDef (`pack_<structure>`) so every entity-type lookup —
+ * AI, renderer, audio, combat — resolves it without special-casing. tech 99 keeps
+ * it out of every build menu (techCap tops out at 10); carriers only ever come
+ * from the pack transition. Walls, floors and water-only structures have no
+ * carrier: a packed wall is meaningless and a land carrier cannot redeploy a
+ * shipyard. Returns a NEW pack — classic matches and mashup composition never
+ * see carriers; only persistent games get the augmented copy.
+ */
+export function withPackedCarriers(pack: RulePack): RulePack {
+  const units = { ...pack.units };
+  for (const s of Object.values(pack.structures)) {
+    if (s.wall || s.floor || s.onWater) continue;
+    const id = `pack_${s.id}`;
+    if (units[id]) continue;
+    units[id] = {
+      id, name: `Packed ${s.name}`, kind: 'vehicle', cost: 0, hp: s.hp,
+      armor: 'heavy', speed: 18, turn: 6, sight: Math.max(3, s.sight),
+      prereqs: [], tech: 99, shape: s.shape, role: 'support', packedCarrier: s.id,
+    };
+  }
+  return { ...pack, units };
+}
+
 export class Game {
   readonly pack: RulePack;
   readonly map: MapData;
@@ -372,7 +409,8 @@ export class Game {
   private startMoney = 0;
 
   constructor(setup: GameSetup) {
-    this.pack = setup.pack;
+    // PW14: persistent games resolve carriers; classic matches keep the raw pack.
+    this.pack = setup.persistent === true ? withPackedCarriers(setup.pack) : setup.pack;
     const preset = setup.pack.maps.find(m => m.id === setup.mapId) ?? setup.pack.maps[0];
     this.mapPreset = preset;
     this.map = generateMap(setup.pack, preset, setup.seed);
@@ -661,6 +699,20 @@ export class Game {
         }
         break;
       }
+      case 'pack': {
+        if (this.persistent) {
+          const e = this.entities.get(cmd.id);
+          if (e && e.owner === slot && e.kind === 'structure' && e.hp > 0 && !e.bound && this.packableStructure(e)) this.packStructure(e);
+        }
+        break;
+      }
+      case 'unpack': {
+        if (this.persistent) {
+          const e = this.entities.get(cmd.id);
+          if (e && e.owner === slot && e.kind === 'unit' && e.packedType && e.hp > 0) this.unpackStructure(e, cmd.x, cmd.y);
+        }
+        break;
+      }
       case 'repair': {
         const s = this.entities.get(cmd.id);
         if (s && s.owner === slot && s.kind === 'structure') s.repairing = !s.repairing;
@@ -781,7 +833,7 @@ export class Game {
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
-      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1, recoveryProtected: false,
+      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1, recoveryProtected: false, packedType: '',
     };
   }
 
@@ -1304,6 +1356,83 @@ export class Game {
     const yard = this.spawnStructure(def.deploysTo, u.owner, cx, cy, 100);
     yard.bound = u.bound;
     yard.recoveryProtected = u.recoveryProtected;
+  }
+
+  // ---------------------------------------------------------------- packed buildings (PW14)
+
+  /** Structures with a synthesized carrier: everything except walls, floors and water-only builds. */
+  private packableStructure(e: Entity): boolean {
+    if (e.kind !== 'structure') return false;
+    const def = this.pack.structures[e.type];
+    return !!def && !def.wall && !def.floor && !def.onWater && !!this.pack.units[`pack_${e.type}`];
+  }
+
+  /**
+   * PW14 pack: the deployed structure becomes its dedicated carrier — same entity
+   * id (so the same durable asset id), same health, zero superweapon charge (D6).
+   * The footprint frees, storage and power drop, docked harvesters are turned
+   * away, and the entity moves as an unarmed vehicle until unpacked.
+   */
+  private packStructure(e: Entity) {
+    const sdef = this.pack.structures[e.type];
+    const p = this.players[e.owner];
+    for (let y = e.cy; y < e.cy + e.h; y++) for (let x = e.cx; x < e.cx + e.w; x++) {
+      const i = y * this.map.w + x;
+      if (this.map.occupied[i] === e.id) this.map.occupied[i] = 0;
+    }
+    if (p && sdef.storage) p.storage -= sdef.storage;
+    this.powerDirty = true;
+    for (const o of this.entities.values()) {
+      if (o.dockedBy !== e.id) continue;
+      o.dockedBy = 0; o.dock = 0;
+      if (o.order === 'enter') { o.order = 'idle'; o.path = []; o.target = 0; }
+    }
+    e.kind = 'unit';
+    e.packedType = sdef.id;
+    e.type = `pack_${sdef.id}`;
+    e.charge = 0;
+    e.order = 'idle'; e.path = []; e.goal = -1; e.target = 0; e.resume = -1;
+    e.cooldown = 0; e.repathTick = 0;
+    e.dockedBy = 0; e.repairing = false;
+    e.hstate = 'seek'; e.cargo = 0; e.cargoValue = 0; e.harvestCell = -1; e.homeField = -1; e.dock = 0; e.timer = 0;
+    e.deployed = false; e.disguised = false; e.stillTicks = 0;
+    const fx = this.effect('pack', e.x, e.y, 0, 0, 30); fx.item = e.packedType; fx.owner = e.owner;
+  }
+
+  /**
+   * PW14 unpack: the carrier becomes its structure again at the requested
+   * top-left cell. The carrier must be standing on or beside the footprint.
+   * Validation runs before any mutation, so an illegal site leaves the carrier
+   * exactly as it was — no loss, no duplicate.
+   */
+  private unpackStructure(e: Entity, x: number, y: number) {
+    const structType = e.packedType;
+    const sdef = this.pack.structures[structType];
+    const p = this.players[e.owner];
+    if (!sdef || !p) return;
+    const cc = this.cellOf(e);
+    const ccx = cc % this.map.w, ccy = Math.floor(cc / this.map.w);
+    if (ccx < x - 1 || ccx > x + sdef.w || ccy < y - 1 || ccy > y + sdef.h) {
+      this.effect('denied', e.x, e.y, 0, 0, 10);
+      return;
+    }
+    if (!this.canPlace(p, structType, x, y, true, e.id)) { this.effect('denied', e.x, e.y, 0, 0, 10); return; }
+    e.type = structType;
+    e.packedType = '';
+    e.kind = 'structure';
+    e.cx = x; e.cy = y; e.w = sdef.w; e.h = sdef.h;
+    for (let cy = y; cy < y + sdef.h; cy++) for (let cx = x; cx < x + sdef.w; cx++) this.map.occupied[cy * this.map.w + cx] = e.id;
+    if (sdef.storage) p.storage += sdef.storage;
+    this.powerDirty = true;
+    e.x = x * LEPTONS + (sdef.w * LEPTONS) / 2;
+    e.y = y * LEPTONS + (sdef.h * LEPTONS) / 2;
+    e.px = e.x; e.py = e.y;
+    e.order = 'idle'; e.path = []; e.goal = -1; e.target = 0; e.resume = -1;
+    e.cooldown = 0; e.repathTick = 0; e.hstate = 'seek';
+    // D6: charge is zero while packed and starts fresh on redeploy — packing
+    // can never preserve, move or duplicate a charged shot.
+    e.charge = 0;
+    const fx = this.effect('deploy', e.x, e.y, 0, 0, 30); fx.item = structType; fx.owner = e.owner;
   }
 
   private updatePower() {

@@ -44,7 +44,7 @@ const NOTE_TEXT: Record<MmoNotificationKind, string> = {
 interface UiState {
   tick: number; credits: number; storage: number; powerGen: number; powerUse: number;
   options: Record<string, string[]>; costs: Record<string, number>;
-  selection: { name: string; hp: number; max: number; count: number; own: boolean; structure: boolean } | null;
+  selection: { name: string; hp: number; max: number; count: number; own: boolean; structure: boolean; id: number; packed: boolean; packable: boolean } | null;
   status: string; connected: boolean; slot: number;
   supers: { id: number; name: string; frac: number; ready: boolean }[];
   recovering: boolean;
@@ -228,6 +228,9 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
             const sel = [...r.renderer.selected].map(id => g.entities.get(id)).filter((e): e is Entity => !!e);
             const first = sel[0];
             const fd = first ? (first.kind === 'unit' ? g.pack.units[first.type] : g.pack.structures[first.type]) : undefined;
+            const fsdef = first?.kind === 'structure' ? g.pack.structures[first.type] : undefined;
+            const packable = !!first && first.kind === 'structure' && first.owner === r.session.slot && first.bound === 0
+              && !!g.pack.units[`pack_${first.type}`] && !fsdef?.wall && !fsdef?.floor && !fsdef?.onWater;
             const supers: UiState['supers'] = [];
             for (const e of g.entities.values()) {
               if (e.owner !== r.session.slot || e.hp <= 0) continue;
@@ -239,7 +242,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
             setUi({
               tick: g.tick, credits: me.credits, storage: me.storage, powerGen: me.powerGen, powerUse: me.powerUse,
               options, costs,
-              selection: first ? { name: (fd?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, own: first.owner === r.session.slot, structure: first.kind === 'structure' } : null,
+              selection: first ? { name: (fd?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, own: first.owner === r.session.slot, structure: first.kind === 'structure', id: first.id, packed: !!first.packedType, packable } : null,
               status: conn.connected ? '' : 'Reconnecting…', connected: conn.connected, slot: r.session.slot, supers,
               recovering: me.recovering === true,
             });
@@ -340,6 +343,31 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   }
   const barterItemText = (i: BarterItem) =>
     `${i.kind}${i.ref ? ` ${i.ref.slice(0, 8)}` : ''} ×${i.amount}`;
+
+  // PW14: pack the selected structure into its dedicated carrier, or redeploy a
+  // carrier centered on its own cell. Both are journaled world actions; the
+  // durable entity id is identical in every form, so barter refs stay stable.
+  function packBuilding() {
+    const r = rig.current; if (!r || !ui?.selection) return;
+    connRef.current?.command({ t: 'pack', entityId: mmoEntityId(regionId, ui.selection.id) });
+    setNotice('Packing…');
+    window.setTimeout(() => setNotice(''), 4000);
+  }
+  function unpackBuilding() {
+    const r = rig.current; if (!r || !ui?.selection) return;
+    const e = r.game.entities.get(ui.selection.id);
+    if (!e?.packedType) return;
+    const sdef = r.game.pack.structures[e.packedType];
+    if (!sdef) return;
+    const c = r.game.cellOf(e);
+    const cx = c % r.game.map.w, cy = Math.floor(c / r.game.map.w);
+    connRef.current?.command({
+      t: 'unpack', entityId: mmoEntityId(regionId, e.id),
+      x: Math.max(0, cx - (sdef.w >> 1)), y: Math.max(0, cy - (sdef.h >> 1)),
+    });
+    setNotice('Redeploying…');
+    window.setTimeout(() => setNotice(''), 4000);
+  }
 
   // PW11: send the journaled settle intent; the server picks the spawn cell and
   // grants the starter army + one-hour setup protection. x/y are a preference —
@@ -663,6 +691,10 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         <b>{ui.selection.name}</b>
         <span>{Math.max(0, Math.round(ui.selection.hp))}/{ui.selection.max} · ×{ui.selection.count}</span>
         <div className="hp"><i style={{ width: `${ui.selection.max ? (ui.selection.hp / ui.selection.max) * 100 : 0}%` }} /></div>
+        {ui.selection.own && ui.selection.count === 1 && (ui.selection.packable || ui.selection.packed) && <div className="sel-actions">
+          {ui.selection.packable && <button onClick={packBuilding}>Pack</button>}
+          {ui.selection.packed && <button onClick={unpackBuilding}>Redeploy here</button>}
+        </div>}
       </div>}
       {ui?.recovering && <div className="recovery-banner">
         <span>Rebuilding protected — yard, power, refinery and barracks only.</span>
