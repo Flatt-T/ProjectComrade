@@ -45,10 +45,22 @@ export async function submitCommand(args: {
 
   return mmoTransaction(async tx => {
     // Lock the intent row first: stable lock order is intent → region fence → event.
-    const existing = await tx.query<{ payload_sha256: string; status: string; result: { eventSeq?: string } | null }>(
+    const selectIntent = () => tx.query<{ payload_sha256: string; status: string; result: { eventSeq?: string } | null }>(
       `select payload_sha256, status, result from command_intent
         where player_id = $1 and command_id = $2 for update`,
       [args.playerId, commandId]);
+    let existing = await selectIntent();
+    if (!existing.rows.length) {
+      // Concurrent identical submissions race here: both see no row, both insert.
+      // ON CONFLICT waits out the in-flight twin, then we lock and dedup-check.
+      const ins = await tx.query(
+        `insert into command_intent (player_id, command_id, region_id, payload_sha256, command_kind, request, status)
+         values ($1,$2,$3,$4,'command',$5,'received')
+         on conflict (player_id, command_id) do nothing
+         returning player_id`,
+        [args.playerId, commandId, regionId, payloadHash, JSON.stringify(action)]);
+      if (!ins.rows.length) existing = await selectIntent();
+    }
     if (existing.rows.length) {
       const prior = existing.rows[0];
       if (prior.payload_sha256 !== payloadHash) {
@@ -59,11 +71,6 @@ export async function submitCommand(args: {
       }
       // 'received'/'accepted'/'rejected' cannot survive a committed transaction; treat
       // as a fresh submission (the previous attempt rolled back).
-    } else {
-      await tx.query(
-        `insert into command_intent (player_id, command_id, region_id, payload_sha256, command_kind, request, status)
-         values ($1,$2,$3,$4,'command',$5,'received')`,
-        [args.playerId, commandId, regionId, payloadHash, JSON.stringify(action)]);
     }
 
     // Reject commands issued against a stale connection/authority epoch.
