@@ -465,4 +465,15 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table protection_record add column armed_at_ms bigint check (armed_at_ms >= 0);
     `,
   },
+  {
+    version: 8,
+    name: 'newcomer settlement protection state',
+    sql: `
+    -- PW11: the one-hour setup protection is player-scoped (it must cover the
+    -- starter force before any construction yard exists), so its durable state
+    -- lives on the settlement row as a serialized comrade.mmo.v1 ProtectionRecord
+    -- (kind NEWCOMER). NULL means the settlement predates protection tracking.
+    alter table settlement add column protection jsonb;
+    `,
+  },
 ];

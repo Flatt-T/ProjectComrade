@@ -212,8 +212,8 @@ export const tdPack: RulePack = {
     brik: { id: 'brik', name: 'Concrete Wall', cost: 100, hp: 600, armor: 'building', w: 1, h: 1, power: 0, sight: 0, prereqs: ['pyle|hand'], tech: 4, queue: 'defense', wall: true, shape: 'wall' },
   },
   factions: [
-    { id: 'gdi', name: 'GDI', side: 'gdi', color: '#d8b63a', accent: '#fff0a8', blurb: 'Global Defense Initiative. Heavy armour, the Ion Cannon and the Mammoth Tank.', startUnits: ['mcv', 'minigunner', 'minigunner', 'minigunner', 'humvee'] },
-    { id: 'nod', name: 'Nod', side: 'nod', color: '#c8362c', accent: '#ff9e94', blurb: 'Brotherhood of Nod. Speed, stealth, the Obelisk and the Temple.', startUnits: ['mcv', 'minigunner', 'minigunner', 'minigunner', 'buggy'] },
+    { id: 'gdi', name: 'GDI', side: 'gdi', color: '#d8b63a', accent: '#fff0a8', blurb: 'Global Defense Initiative. Heavy armour, the Ion Cannon and the Mammoth Tank.', startUnits: ['mcv', 'minigunner', 'minigunner', 'minigunner', 'humvee'], starter: { mcv: 'mcv', harvester: 'harvester', battleTank: 'mediumtank', lightVehicle: 'humvee', infantry: 'minigunner' } },
+    { id: 'nod', name: 'Nod', side: 'nod', color: '#c8362c', accent: '#ff9e94', blurb: 'Brotherhood of Nod. Speed, stealth, the Obelisk and the Temple.', startUnits: ['mcv', 'minigunner', 'minigunner', 'minigunner', 'buggy'], starter: { mcv: 'mcv', harvester: 'harvester', battleTank: 'lighttank', lightVehicle: 'buggy', infantry: 'minigunner' } },
   ],
   maps,
   startCredits: { low: 3000, standard: 6000, high: 12000 },

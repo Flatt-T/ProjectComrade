@@ -36,9 +36,22 @@ export type Command =
   /** Persistent profile only: owner-enabled caretaker auto-repair (bounded). */
   | { t: 'setAutoRepair'; slot: number; on: boolean }
   /** Persistent profile only: journaled shield boundary on/off for a compound (PW10). */
-  | { t: 'setShield'; compound: number; on: boolean };
+  | { t: 'setShield'; compound: number; on: boolean }
+  /** Persistent profile only: newcomer setup protection on/off for a player slot (PW11). */
+  | { t: 'setNewcomerProtection'; slot: number; on: boolean };
 
-export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number; level?: AILevel; ally?: number; autoRepair?: boolean }
+export interface PlayerSetup {
+  name: string; faction: string; ai: boolean; team?: number; level?: AILevel; ally?: number; autoRepair?: boolean;
+  /** Durable account player id (persistent regions only) — makes joins idempotent. */
+  playerId?: string;
+  /** Explicit spawn cell index; overrides the spawnCell hook and start positions. */
+  cell?: number;
+  /** Versioned newcomer starter grant: credits plus the expanded unit list (PW11).
+   *  Every unit spawns bound — it cannot be sold or traded for value. */
+  starter?: { credits: number; units: string[] };
+  /** Spawn already inside the one-hour newcomer protection window (PW11). */
+  newcomerProtected?: boolean;
+}
 
 /**
  * Persistent-region extension points (PW21). Classic matches leave this empty; the
@@ -244,6 +257,14 @@ export interface Player {
   ally: number;
   /** Persistent profile: caretaker auto-repair of own damaged structures. */
   autoRepair: boolean;
+  /** Persistent profile (PW11): durable account player id, when the join supplied one. */
+  pid?: string;
+  /**
+   * Persistent profile (PW11): newcomer setup protection is active — this
+   * player's entities can neither deal nor receive damage, and they cannot
+   * launch superweapons. Set at spawn and mirrored by journaled commands.
+   */
+  newcomerProtected: boolean;
 }
 
 export interface Projectile { id: number; owner: number; weapon: string; x: number; y: number; sx: number; sy: number; tx: number; ty: number; target: number; source: number }
@@ -351,7 +372,7 @@ export class Game {
     const slot = this.players.length;
     const faction = this.pack.factions.find(f => f.id === p.faction) ?? this.pack.factions[slot % this.pack.factions.length];
     const queue = (): ProductionQueue => ({ items: [], paid: 0, acc: 0, ready: false, hold: false });
-    const startCredits = credits;
+    const startCredits = p.starter?.credits ?? credits;
     const mapSize = size;
     const player: Player = {
       slot, name: p.name, faction: faction.id, side: faction.side, color: faction.color, accent: faction.accent,
@@ -362,27 +383,38 @@ export class Game {
       upgrades: {}, blackoutUntil: 0, veteranQueues: [], incomeBonus: 0, costReduction: 0,
       connected: true,
       ally: p.ally ?? -1, autoRepair: p.autoRepair === true,
+      newcomerProtected: p.newcomerProtected === true,
     };
+    if (p.playerId) player.pid = p.playerId;
     this.players.push(player);
     this.ai.push(p.ai ? createAIState(slot, p.level) : null);
     // The MCV sits on the spawn cell; the escort forms up outside its deploy footprint.
-    const cell = this.hooks.spawnCell?.(this, player) ?? this.defaultSpawnCell(slot);
+    // A journaled cell wins over the hook so every replica places identically.
+    const cell = (p.cell !== undefined && p.cell >= 0 && p.cell < this.map.w * this.map.h)
+      ? p.cell
+      : this.hooks.spawnCell?.(this, player) ?? this.defaultSpawnCell(slot);
     const cx = cell % this.map.w, cy = Math.floor(cell / this.map.w);
     const startCell = cy * this.map.w + cx;
-    const starting = this.startUnitsFor(faction);
-    const mcvType = starting.find(t => this.pack.units[t].deploysTo);
+    const starting = p.starter?.units ?? this.startUnitsFor(faction);
+    const bound = p.starter ? 1 : 0;
+    const mcvType = starting.find(t => this.pack.units[t]?.deploysTo);
     const yard = mcvType ? this.pack.structures[this.pack.units[mcvType].deploysTo!] : undefined;
     const fx = cx - ((yard?.w ?? 1) >> 1), fy = cy - ((yard?.h ?? 1) >> 1);
     const inFootprint = (i: number) => {
       const x = i % this.map.w, y = Math.floor(i / this.map.w);
       return !!yard && x >= fx - 1 && x <= fx + yard.w && y >= fy - 1 && y <= fy + yard.h;
     };
-    if (mcvType) this.spawnUnit(mcvType, slot, startCell);
+    const spawnBound = (type: string, at: number) => {
+      const e = this.spawnUnit(type, slot, at);
+      e.bound = bound;
+      return e;
+    };
+    if (mcvType) spawnBound(mcvType, startCell);
     starting.filter(t => t !== mcvType).forEach(type => {
       const origin = (Math.min(this.map.h - 1, fy + (yard?.h ?? 1) + 1)) * this.map.w + cx;
       const spot = nearestCell(this.map, origin, 8,
         i => passable(this.pack, this.map, i, this.moveClass(this.pack.units[type])) && !this.unitInCell(i) && !inFootprint(i));
-      if (spot >= 0) this.spawnUnit(type, slot, spot);
+      if (spot >= 0) spawnBound(type, spot);
     });
     return player;
   }
@@ -420,7 +452,18 @@ export class Game {
     // Persistent-profile roster and ownership commands. They are journaled inputs
     // like any other command; classic matches reject them here and in parseCommand.
     // Enqueue them with slot -1 so they sort ahead of that tick's unit commands.
-    if (cmd.t === 'join') { if (this.persistent) this.addPlayer(cmd.player); return; }
+    if (cmd.t === 'join') {
+      if (!this.persistent) return;
+      // Idempotent on the durable player id: a retried or duplicated join
+      // intent must never spawn a second base (PW11).
+      if (cmd.player.playerId && this.players.some(pl => pl.pid === cmd.player.playerId)) return;
+      this.addPlayer(cmd.player);
+      return;
+    }
+    if (cmd.t === 'setNewcomerProtection') {
+      if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.newcomerProtected = cmd.on; }
+      return;
+    }
     if (cmd.t === 'leave') { const p = this.players[cmd.slot]; if (this.persistent && p) p.connected = false; return; }
     if (cmd.t === 'transfer') { if (this.persistent) this.transferOwner(cmd.ids, cmd.to, slot); return; }
     if (cmd.t === 'setAlly') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.ally = cmd.ally; } return; }
@@ -527,7 +570,9 @@ export class Game {
       case 'place': this.place(player, cmd.item, cmd.x, cmd.y); break;
       case 'sell': {
         const s = this.entities.get(cmd.id);
-        if (s && s.owner === slot && s.kind === 'structure' && s.hp > 0) {
+        // PW11/PW26: bound assets (starter grant, recovery MCV) cannot be sold
+        // for value — they leave play only through the sanctioned transitions.
+        if (s && s.owner === slot && s.kind === 'structure' && s.hp > 0 && !s.bound) {
           const def = this.pack.structures[s.type];
           player.credits += Math.floor((def.cost * this.pack.sellRefundPercent * s.hp) / (100 * s.maxHp));
           const fx = this.effect('sell', s.x, s.y, s.cx, s.cy, 24); fx.item = s.type; fx.owner = s.owner;
@@ -1136,7 +1181,10 @@ export class Game {
     u.hp = 0;
     this.entities.delete(u.id);
     const fx = this.effect('deploy', u.x, u.y, 0, 0, 30); fx.item = u.type; fx.owner = u.owner;
-    this.spawnStructure(def.deploysTo, u.owner, cx, cy, 100);
+    // A bound MCV (newcomer starter grant, PW11) deploys a bound yard — the
+    // grant cannot be cashed out by deploying and selling.
+    const yard = this.spawnStructure(def.deploysTo, u.owner, cx, cy, 100);
+    yard.bound = u.bound;
   }
 
   private updatePower() {
@@ -1544,6 +1592,8 @@ export class Game {
     // PW10: the compound shield boundary applies at the muzzle — a blocked shot
     // never exists, so projectiles, shells and beams cannot cross it.
     if (this.shieldBlocksFire(a, t, gx, gy)) { a.cooldown = Math.max(a.cooldown, 15); return; }
+    // PW11: a protected newcomer's weapons never fire — they cannot attack.
+    if (this.persistent && this.players[a.owner]?.newcomerProtected) { a.cooldown = Math.max(a.cooldown, 15); return; }
     const want = facingTo(gx - a.x, gy - a.y);
     const udef = a.kind === 'unit' ? this.unitDef(a) : undefined;
     if (udef && (udef.kind === 'infantry' || udef.kind === 'aircraft')) a.facing = want;
@@ -1676,6 +1726,14 @@ export class Game {
     if (e.hp <= 0 || e.invulnUntil > this.tick && !quiet) return;
     // PW10: an active compound shield is a hard boundary — no damage crosses it.
     if (this.shieldBlocksDamage(e, by, source)) return;
+    // PW11: newcomer setup protection is player-scoped — a protected player's
+    // entities can neither deal nor receive damage. Covers every damage path
+    // (fire, artillery, crush, strikes) because they all funnel through here.
+    if (this.persistent) {
+      const def = this.players[e.owner];
+      const atk = by >= 0 ? this.players[by] : undefined;
+      if (def?.newcomerProtected || atk?.newcomerProtected) return;
+    }
     // D5: player-vs-player damage inside a compound's radius marks it in battle.
     if (by >= 0 && e.owner >= 0 && by !== e.owner && this.isEnemy(by, e.owner)) {
       this.noteCompoundBattle(e.x, e.y, by, e.owner);
@@ -2271,6 +2329,8 @@ export class Game {
   private launchSuper(p: Player, id: number, x: number, y: number, x2?: number, y2?: number) {
     const s = this.entities.get(id);
     if (!s || s.owner !== p.slot || s.hp <= 0) return;
+    // PW11: a newcomer under setup protection cannot launch superweapons.
+    if (this.persistent && p.newcomerProtected) return;
     const sw = this.superweaponOf(s);
     if (!sw || s.charge < this.chargeFor(sw)) return;
     if (sw.kind === 'chrono' && (x2 === undefined || y2 === undefined)) return;

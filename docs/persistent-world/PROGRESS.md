@@ -350,3 +350,71 @@ acceptance detail; this file is the resume point. Read it first in every session
   pg@8 logs a deprecation warning for the `pool.on('connect')` search_path
   pattern in both db pools (pre-existing, queries still queue); shield
   selection client UI lands with the PW25 notification/away-report surface.
+
+### PW11 - THU-2235 - newcomer settlement and one-hour setup protection - 2026-11-12
+
+- State: implemented on branch `thu-2235-pw11-newcomer-settlement`; verification
+  green locally (lint 0, typecheck 0, 407 unit, 67 integration — one
+  pre-existing hibernation timing flake passes standalone).
+- Deliverables: `spawnSeparationCells` (24) on `MmoRulesProfile`
+  (`packages/contracts/src/mmo.ts`); versioned newcomer starter grant —
+  `starter.ts` `starterLoadout()` resolves the faction-equivalent pick per
+  COMRADE 18 role (MCV, harvester, 4 battle tanks, 2 light vehicles, 8
+  infantry) with explicit `FactionDef.starter` picks on the TD pack and a
+  derived fallback for every other pack; Fusion `join` accepts `playerId`,
+  explicit `cell`, `starter {credits, units}` and `newcomerProtected`
+  (`PlayerSetup`), is idempotent on the durable pid, marks every granted unit
+  `bound`, and a bound MCV deploys a bound construction yard so the grant
+  cannot be cashed out; player-scoped protection — `newcomerProtected`
+  blocks all damage both directions and superweapon fire, mirrored by the
+  journaled `setNewcomerProtection` command at tick boundaries
+  (`packages/fusion/src/game.ts`, snapshot/restore covered);
+  `packages/fusion/src/persistent.ts` carries the flag through snapshots.
+- Service: schema v8 `settlement.protection` (serialized NEWCOMER
+  ProtectionRecord, NULL = pre-tracking); `store.ts`
+  `createSettlement`/`getSettlement`/`updateSettlementProtection`
+  transaction-aware and one-settlement-per-player via `on conflict do
+  nothing`; `spawn.ts` `pickSpawnCell` — deterministic viable-cell picker
+  (vehicle-passable + buildable terrain + reachable resources) honouring a
+  client preference only when it meets the separation band, otherwise
+  maximising practical travel distance then resource richness;
+  `ensureEntryRegion` returns the settlement region or the newest in-band
+  frontier region / fresh empty-roster region; `world.ts` `settle` world
+  action — validates region/faction, builds keep-away cells from live
+  assets, writes the settlement + NEWCOMER protection + `NEWCOMER_SPAWN`
+  economy_operation audit inside the journal transaction, returns the
+  journaled `join` sim command (slot -1) with starter credits =
+  `pack.startCredits.standard * starterCreditsMultiplier` (2x = 12,000 for
+  TD), pokes the protection evaluator; re-settle is idempotent and a
+  settlement whose sim roster was lost re-joins at the recorded cell
+  without re-granting; `runner.ts` `protectionEval` now also reconciles
+  rostered players' NEWCOMER records across the world — `owner_online`
+  accumulates the live stretch without settling (inter-eval online time is
+  never lost), `owner_offline` commits it, end at
+  `setupProtectionOnlineMs` online time or `setupProtectionLapseMs`
+  absolute, flag mirrored via `setNewcomerProtection`, eval chain reschedules
+  only to real deadlines; `ensureProtectionEval` counts open newcomer
+  settlements.
+- Entry: `GET /api/mmo/enter` (`api.ts` + `mmo/entry.ts`) resolves the
+  caller's durable identity (same guest guard as the gateway), provisions
+  the player, and returns `{regionId, playerId, settled}` — settled players
+  return to their settlement region, newcomers get a frontier region and
+  `settled:false`. `/world` without `?region=` renders `PersistentEntry`;
+  `PersistentWorld` shows a faction picker, sends the journaled `settle`
+  intent, and adopts its sim slot when the join lands on the sim stream
+  (slot, fog viewer and HUD all follow the durable pid).
+- Proven: `tests/unit/fusion-newcomer.test.ts` 7/7 (grant composition,
+  bound units, explicit cell, pid idempotent join, bound yard unsellable,
+  two-way damage block, protection toggle, snapshot/restore, classic
+  rejection); `tests/unit/mmo-spawn.test.ts` 5/5 (determinism, preference
+  honoured/rejected, max-separation pick, degenerate-map fallback);
+  `tests/integration/mmo-settle.test.ts` 6/6 against real PostgreSQL +
+  runner + Fusion sim — first settlement end-to-end, retry idempotency,
+  24-cell separation between newcomers, online-hour end with flag mirror,
+  absolute-lapse end fully offline, entry region resolution flipping to
+  settled; full suite 407 unit + 67 integration.
+- Open: `transfer` does not yet check `bound` (barter/trade lands with
+  PW13 — the sell path is already bound-gated); spawn-cell picker does not
+  avoid live unit positions, only terrain/structures/resources; multi-map
+  faction picks beyond TD derive automatically but are untested on other
+  packs; client shows no protection countdown yet (PW25 surface).

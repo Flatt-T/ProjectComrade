@@ -158,6 +158,31 @@ function Shell() {
   </main>;
 }
 
+/** PW11: resolve the player's persistent-world entry, then render the region. */
+function PersistentEntry({ onExit }: { onExit: () => void }) {
+  const [entry, setEntry] = useState<{ regionId: string; settled: boolean } | null>(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let live = true;
+    fetch('/api/mmo/enter', { credentials: 'same-origin' })
+      .then(async res => {
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`);
+        return body as { regionId: string; settled: boolean };
+      })
+      .then(e => { if (live) setEntry(e); })
+      .catch(err => { if (live) setError(err instanceof Error ? err.message : String(err)); });
+    return () => { live = false; };
+  }, []);
+  if (error) return <section className="page">
+    <h1>Persistent world unavailable</h1>
+    <p>{error}</p>
+    <p><Link to="/">Back to the war room</Link></p>
+  </section>;
+  if (!entry) return <section className="page"><p>Entering the persistent world…</p></section>;
+  return <PersistentWorld regionId={entry.regionId} settled={entry.settled} onExit={onExit} />;
+}
+
 function Routes({ conn, onLaunch, requests, showRequests, navigate }: {
   conn: RoomConnection;
   onLaunch: (launch: LaunchRequest, mapName: string) => void;
@@ -169,10 +194,9 @@ function Routes({ conn, onLaunch, requests, showRequests, navigate }: {
 
   if (path === '/world') {
     const regionId = search.get('region') ?? '';
-    if (!regionId) return <section className="page">
-      <h1>No region selected</h1>
-      <p>The persistent world needs a region. <Link to="/">Back to the war room</Link>.</p>
-    </section>;
+    // PW11: no explicit region means "enter the persistent world" — the service
+    // resolves the player's settlement region or provisions a frontier one.
+    if (!regionId) return <PersistentEntry onExit={() => navigate('/')} />;
     return <PersistentWorld regionId={regionId} onExit={() => navigate('/')} />;
   }
   if (path === '/tiers') return <Tiers />;

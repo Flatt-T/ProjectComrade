@@ -26,11 +26,12 @@ interface UiState {
   supers: { id: number; name: string; frac: number; ready: boolean }[];
 }
 
-export default function PersistentWorld({ regionId, onExit }: { regionId: string; onExit: () => void }) {
+export default function PersistentWorld({ regionId, settled = true, onExit }: { regionId: string; settled?: boolean; onExit: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const minimap = useRef<HTMLCanvasElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const rig = useRef<{ game: Game; session: PersistentSession; renderer: FusionRenderer } | null>(null);
+  const connRef = useRef<MmoConnection | null>(null);
   const mode = useRef<Mode>('normal');
   const placing = useRef<string | null>(null);
   const superId = useRef(0);
@@ -41,6 +42,9 @@ export default function PersistentWorld({ regionId, onExit }: { regionId: string
   const [ui, setUi] = useState<UiState | null>(null);
   const [modeView, setModeView] = useState<Mode>('normal');
   const [notice, setNotice] = useState('');
+  // PW11: newcomers pick a faction, then the journaled `settle` action grants
+  // the starter army and the one-hour setup protection window.
+  const [needSettle, setNeedSettle] = useState(!settled);
 
   useEffect(() => {
     let game: Game | null = null;
@@ -54,7 +58,11 @@ export default function PersistentWorld({ regionId, onExit }: { regionId: string
     const flash = (text: string) => { setNotice(text); window.setTimeout(() => setNotice(''), 4000); };
 
     const conn = new MmoConnection({
-      onWelcome: info => { if (info.slot !== null) slot = info.slot; },
+      onWelcome: info => {
+        connRef.current = conn;
+        if (info.slot !== null) slot = info.slot;
+        else setNeedSettle(true); // rostered nowhere yet — settle (or rejoin) first
+      },
       onSnapshot: header => {
         const state = header.state as SnapshotState | undefined;
         if (!state?.snapshot) { flash('Region snapshot unavailable'); return; }
@@ -114,6 +122,16 @@ export default function PersistentWorld({ regionId, onExit }: { regionId: string
       const dt = Math.min(2000, now - last); last = now;
       const r = rig.current;
       if (r) {
+        const sim = r.game;
+        // PW11: the journaled join lands on the sim stream; once our durable pid
+        // owns a slot, adopt it for orders, fog-of-war and the HUD.
+        const mine = conn.playerId ? sim.players.findIndex(pl => pl.pid === conn.playerId) : -1;
+        if (mine >= 0 && r.session.slot !== mine) {
+          r.session.setSlot(mine); r.renderer.viewer = mine; slot = mine;
+          setNeedSettle(false);
+          const home = [...sim.entities.values()].find(e => e.owner === mine && e.hp > 0);
+          if (home) { const c = sim.cellOf(home); r.renderer.centerOn(c % sim.map.w, Math.floor(c / sim.map.w)); }
+        }
         const alpha = r.session.update(dt);
         const p = pointer.current, c = canvas.current!;
         const speed = (Math.min(dt, 50) * 0.9) / r.renderer.camera.zoom;
@@ -196,6 +214,15 @@ export default function PersistentWorld({ regionId, onExit }: { regionId: string
     mode.current = m; setModeView(m);
     if (m !== 'place') placing.current = null;
     if (m !== 'super') { superId.current = 0; superFrom.current = null; }
+  }
+
+  // PW11: send the journaled settle intent; the server picks the spawn cell and
+  // grants the starter army + one-hour setup protection. x/y are a preference —
+  // 0,0 asks the authority for its own valid frontier cell.
+  function chooseFaction(factionId: string) {
+    connRef.current?.command({ t: 'settle', regionId, faction: factionId, x: 0, y: 0 });
+    setNotice('Settling into the persistent world…');
+    window.setTimeout(() => setNotice(''), 4000);
   }
 
   const local = (ev: React.MouseEvent) => { const r = canvas.current!.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
@@ -357,6 +384,22 @@ export default function PersistentWorld({ regionId, onExit }: { regionId: string
       <canvas ref={minimap} className="minimap" width={180} height={180} />
       {notice && <div className="notice">{notice}</div>}
       {!ui && <div className="notice">Entering the persistent world…</div>}
+      {needSettle && ui && (
+        <div className="settle-overlay">
+          <div className="settle-card">
+            <h2>Found your settlement</h2>
+            <p>Choose your faction. You will receive a starter army and one hour of setup protection.</p>
+            <div className="settle-factions">
+              {rig.current?.game.pack.factions.map(f => (
+                <button key={f.id} className="settle-faction" style={{ borderColor: f.color }}
+                  onClick={() => chooseFaction(f.id)}>
+                  <strong>{f.name}</strong><span>{f.blurb}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     <aside className="sidebar">
       <div className="res-bar">

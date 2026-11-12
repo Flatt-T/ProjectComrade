@@ -165,15 +165,20 @@ export class PersistentSession implements Session {
   private readonly conn: MmoConnection;
   private readonly regionId: string;
   private unsub?: () => void;
+  /** Live sim slot — starts null-ish for newcomers and is set when their journaled join lands (PW11). */
+  slot: number;
 
   constructor(
-    readonly game: Game, readonly slot: number,
+    readonly game: Game, slot: number,
     conn: MmoConnection, regionId: string,
   ) {
+    this.slot = slot;
     this.conn = conn;
     this.regionId = regionId;
     this.unsub = conn.on(() => undefined); // keep the socket's listener set warm
   }
+
+  setSlot(slot: number) { this.slot = slot; }
 
   /** Player orders leave as durable intents; the sim stream applies them back. */
   issue(cmd: Command) {

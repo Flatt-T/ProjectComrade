@@ -33,6 +33,10 @@ import { log } from './ops.js';
 import { earlyAccessItems, lockFor } from './releases.js';
 import { meFor, resolve, resolveAccount } from './viewer.js';
 import { castVote, proposalPage, withdrawVote } from './votes.js';
+import { mmoDatabaseConfigured } from './mmo/db.js';
+import { resolveIdentity } from './mmo/gateway.js';
+import { enterPersistentWorld } from './mmo/entry.js';
+import { MmoStoreError } from './mmo/store.js';
 
 const str = (value: unknown, max = 200): string => (typeof value === 'string' ? value.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]{1,64}@[^\s@.]+(?:\.[^\s@.]+)+$/;
@@ -621,3 +625,29 @@ get('/api/tiers', async () => ({
   // Privacy and cookies pages name AdSense while this is true.
   adsConfigured: adsConfig.configured(),
 }));
+
+// ---------------------------------------------------------------------------
+// Persistent world entry (PW11)
+// ---------------------------------------------------------------------------
+
+/**
+ * GET /api/mmo/enter — which region should this player enter?
+ * Settled players return to their settlement region; newcomers get a frontier
+ * region id and must still send the journaled `settle` action (settled:false).
+ */
+get('/api/mmo/enter', async (ctx: Ctx) => {
+  if (!mmoDatabaseConfigured()) throw unavailable('Persistent world is not enabled');
+  limit(ctx, 'mmo-enter', 30, 60_000);
+  const identity = await resolveIdentity(String(ctx.req.headers.cookie ?? ''));
+  if (!identity) throw unauthorised('Sign in to enter the persistent world');
+  try {
+    const entry = await enterPersistentWorld(identity);
+    return { regionId: entry.regionId, playerId: entry.playerId, settled: entry.settled };
+  } catch (error) {
+    if (error instanceof MmoStoreError) {
+      if (error.code === 'GUEST_NOT_ALLOWED') throw forbidden(error.message);
+      throw badRequest(error.message, error.code);
+    }
+    throw error;
+  }
+});

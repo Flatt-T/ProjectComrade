@@ -548,18 +548,39 @@ export async function closeRecoveryEpisode(episodeId: string, status: 'completed
     [episodeId, status]);
 }
 
+export interface SettlementRow {
+  settlement_id: string; player_id: string; world_id: string; region_id: string;
+  faction: string; cell_x: number; cell_y: number; protection: unknown | null;
+}
+
+/** The player's one-ever newcomer settlement, or null before first spawn (PW11). */
+export async function getSettlement(playerId: string, q: Queryable = mmoDb()): Promise<SettlementRow | null> {
+  const { rows } = await q.query<SettlementRow>('select * from settlement where player_id = $1', [playerId]);
+  return rows[0] ?? null;
+}
+
 export async function createSettlement(args: {
   settlementId?: string; playerId: string; worldId: string; regionId: string;
-  faction: string; cellX: number; cellY: number;
-}): Promise<{ settlementId: string; created: boolean }> {
+  faction: string; cellX: number; cellY: number; protection?: unknown;
+}, q: Queryable = mmoDb()): Promise<{ settlement: SettlementRow; created: boolean }> {
   const id = args.settlementId ?? uuid();
-  const { rowCount } = await mmoExec(
-    `insert into settlement (settlement_id, player_id, world_id, region_id, faction, cell_x, cell_y)
-     values ($1,$2,$3,$4,$5,$6,$7) on conflict (player_id) do nothing`,
-    [id, args.playerId, args.worldId, args.regionId, args.faction, args.cellX, args.cellY]);
-  if (rowCount) return { settlementId: id, created: true };
-  const existing = await mmoOne<{ settlement_id: string }>('select settlement_id from settlement where player_id = $1', [args.playerId]);
-  return { settlementId: existing?.settlement_id ?? id, created: false };
+  const { rowCount } = await q.query(
+    `insert into settlement (settlement_id, player_id, world_id, region_id, faction, cell_x, cell_y, protection)
+     values ($1,$2,$3,$4,$5,$6,$7,$8) on conflict (player_id) do nothing`,
+    [id, args.playerId, args.worldId, args.regionId, args.faction, args.cellX, args.cellY,
+     args.protection === undefined ? null : JSON.stringify(args.protection)]);
+  const existing = await getSettlement(args.playerId, q);
+  if (!existing) throw new MmoStoreError('SETTLEMENT_CONFLICT', 'settlement insert conflicted');
+  return { settlement: existing, created: rowCount === 1 };
+}
+
+/** Persist a NEWCOMER protection transition inside the journal transaction (PW11). */
+export async function updateSettlementProtection(
+  tx: PoolClient, settlementId: string, protection: unknown,
+): Promise<void> {
+  await tx.query(
+    'update settlement set protection = $2 where settlement_id = $1',
+    [settlementId, JSON.stringify(protection)]);
 }
 
 // ---------------------------------------------------------------------------
@@ -1232,7 +1253,10 @@ export async function protectionRegionsForPlayer(playerId: string): Promise<stri
        select region_id from compound where player_id = $1 and state = 'active'
        union
        select c.region_id from protection_record pr join compound c on c.compound_id = pr.compound_id
-        where pr.player_id = $1 and pr.status in ('armed','active')) t`, [playerId]);
+        where pr.player_id = $1 and pr.status in ('armed','active')
+       union
+       select region_id from settlement
+        where player_id = $1 and coalesce(protection->>'status', 'active') <> 'ended') t`, [playerId]);
   return rows.map(r => r.region_id);
 }
 

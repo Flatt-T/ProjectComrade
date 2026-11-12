@@ -19,7 +19,7 @@ import {
 } from '@comrade/fusion';
 import {
   computePowerScore, mmoEntityId, mmoSimEntityId, PERSISTENT_RULES_V1,
-  protectionTransition,
+  parseProtectionRecord, protectionTransition,
   type MmoAction, type MmoRulesProfile, type MmoSimAction, type MmoWorldAction,
   type ProtectionEvent, type ProtectionRecord,
 } from '@comrade/contracts';
@@ -29,7 +29,7 @@ import {
   claimDueJobs, finishJobTx, getRegion, latestSnapshot, listUnappliedRegionEvents,
   markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot,
   releaseJobClaim, releaseRegionLease, scheduleJob, setRegionLifecycle, setRegionSimStart,
-  syncCompounds, updateMemberPowerScores, MmoStoreError, type RegionRow,
+  syncCompounds, updateMemberPowerScores, updateSettlementProtection, MmoStoreError, type RegionRow,
 } from './store.js';
 import { journalTail } from './commands.js';
 import { mmoQuery } from './db.js';
@@ -41,6 +41,8 @@ export interface SimPlayerSpec {
   playerId: string; name: string; faction: string;
   /** PW09: alliance key and caretaker flag at region birth (pre-existing state). */
   ally?: number; autoRepair?: boolean;
+  /** PW11: journaled spawn cell, starter grant and protection flag for newcomers. */
+  cell?: number; starter?: { credits: number; units: string[] }; newcomerProtected?: boolean;
 }
 export interface RegionSimSpec {
   packId: string; mapId: string; seed: number;
@@ -65,9 +67,13 @@ export interface WorldHandlerResult {
 export type WorldActionHandler = (
   tx: PoolClient, action: MmoWorldAction,
   ctx: {
-    regionId: string; playerId: string; slot: number;
+    regionId: string; playerId: string; slot: number | undefined;
     /** Resolve another region member's sim slot, if present. */
     slotOf: (playerId: string) => number | undefined;
+    /** Live sim access (read-only) for spawn placement and roster checks. */
+    game?: () => Game | undefined;
+    /** Fence epoch and sim tick for durable operation audit rows. */
+    epoch?: string; tick?: number;
   },
 ) => Promise<WorldHandlerResult>;
 
@@ -196,8 +202,18 @@ export class RegionRunner {
   /** Map a durable entity id to its live sim entity id (persistent asset identity). */
   bindEntity(durableId: string, simId: number) { this.bindings.set(durableId, simId); }
   durableBindings(): [string, number][] { return [...this.bindings.entries()]; }
-  /** The sim slot a durable player occupies, for subscription welcomes. */
-  slotForPlayer(playerId: string): number | undefined { return this.slotByPlayer.get(playerId); }
+  /** The sim slot a durable player occupies, for subscription welcomes.
+   *  Falls back to scanning live players by durable pid — covers players who
+   *  joined via the journaled `join` command after the spec roster was fixed. */
+  slotForPlayer(playerId: string): number | undefined {
+    const known = this.slotByPlayer.get(playerId);
+    if (known !== undefined) return known;
+    const g = this.game;
+    if (!g) return undefined;
+    const p = g.players.find(pl => pl.pid === playerId);
+    if (p) { this.slotByPlayer.set(playerId, p.slot); return p.slot; }
+    return undefined;
+  }
 
   private tickFor(wallMs: number): number {
     return Math.max(0, Math.floor((wallMs - this.startedAtMs) / this.opts.tickMs));
@@ -255,6 +271,8 @@ export class RegionRunner {
         players: spec.players.map(p => ({
           name: p.name, faction: p.faction, ai: false,
           ally: p.ally, autoRepair: p.autoRepair,
+          playerId: p.playerId, cell: p.cell, starter: p.starter,
+          newcomerProtected: p.newcomerProtected,
         })),
       };
       this.game = new Game(setup);
@@ -681,10 +699,15 @@ export class RegionRunner {
       const playerId = String(payload.playerId ?? '');
       const commandId = String(payload.commandId ?? '');
       const action = payload.action as MmoAction;
-      const slot = this.slotByPlayer.get(playerId);
+      const slot = this.slotForPlayer(playerId);
       const intent = { playerId, commandId };
-      if (slot === undefined) return { result: { accepted: false, reason: 'UNKNOWN_PLAYER' }, intent };
+      // 'settle' is the world-entry intent (PW11): the player may not occupy a
+      // sim slot yet — the handler decides join vs already-settled itself.
+      if (slot === undefined && action.t !== 'settle') {
+        return { result: { accepted: false, reason: 'UNKNOWN_PLAYER' }, intent };
+      }
       if (SIM_ACTIONS.has(action.t)) {
+        if (slot === undefined) return { result: { accepted: false, reason: 'UNKNOWN_PLAYER' }, intent };
         const cmd = this.toFusionCommand(action as MmoSimAction);
         if (!cmd) return { result: { accepted: false, reason: 'UNKNOWN_ENTITY' }, intent };
         const atTick = this.game!.tick + 1;
@@ -697,7 +720,8 @@ export class RegionRunner {
       if (this.opts.worldHandler) {
         const handled = await this.opts.worldHandler(tx, action as MmoWorldAction, {
           regionId: this.opts.regionId, playerId, slot,
-          slotOf: pid => this.slotByPlayer.get(pid),
+          slotOf: pid => this.slotForPlayer(pid),
+          game: () => this.game, epoch: this.epoch, tick: this.game?.tick ?? 0,
         });
         const atTick = this.game!.tick + 1;
         const simCommands = (handled.sim ?? []).map(s => {
@@ -992,6 +1016,97 @@ export class RegionRunner {
       }
     }
 
+    // --------------------------------------------------------------
+    // PW11: newcomer setup protection — player-scoped, so it lives on the
+    // settlement row (it must cover the starter force before any construction
+    // yard exists). Evaluated for every rostered player whose protection has
+    // not ended, in this region or any other region of the same world.
+    // --------------------------------------------------------------
+    const newcomerProtectedSlots = new Map<number, boolean>();
+    {
+      const rosterIds = [...this.slotByPlayer.keys()];
+      for (const pl of g?.players ?? []) {
+        if (pl.pid && !rosterIds.includes(pl.pid)) rosterIds.push(pl.pid);
+      }
+      if (rosterIds.length) {
+        const { rows: newcomers } = await tx.query<{
+          settlement_id: string; player_id: string; protection: unknown;
+          online_count: number; p_online_since: string | null;
+          offline_since_ms: string | null; last_seen_ms: string | null;
+        }>(
+          `select s.settlement_id, s.player_id, s.protection,
+                  p.online_count, p.online_since_ms as p_online_since,
+                  p.offline_since_ms, p.last_seen_ms
+             from settlement s
+             join player p on p.player_id = s.player_id
+             join region r on r.region_id = s.region_id
+            where r.world_id = (select world_id from region where region_id = $1)
+              and s.player_id = any($2::uuid[])
+              and coalesce(s.protection->>'status', 'ended') <> 'ended'`,
+          [this.opts.regionId, rosterIds]);
+        for (const row of newcomers) {
+          let rec: ProtectionRecord;
+          try { rec = parseProtectionRecord(row.protection); } catch { continue; }
+          if (rec.kind !== 'NEWCOMER' || rec.status === 'ended') continue;
+          const online = presenceIsOnline({
+            online_count: row.online_count, online_since_ms: row.p_online_since,
+            offline_since_ms: row.offline_since_ms, last_seen_ms: row.last_seen_ms,
+            auto_repair: false,
+          }, now, rules.offlineAfterMs);
+          // One event per eval: owner_online accumulates the live stretch
+          // without settling it (inter-eval online time is never lost); only
+          // owner_offline commits onlineMs. 'tick' is never emitted while
+          // online — it would clear the stretch and lose the interval.
+          const ev: ProtectionEvent = online
+            ? { t: 'owner_online', atMs: now }
+            : { t: 'owner_offline', atMs: now, inBattle: false };
+          const nxt = protectionTransition(rec, ev, rules);
+          const dirty = nxt.status !== rec.status || nxt.generation !== rec.generation
+            || nxt.onlineMs !== rec.onlineMs || nxt.onlineSinceMs !== rec.onlineSinceMs;
+          if (dirty) {
+            await updateSettlementProtection(tx, row.settlement_id, nxt);
+            changed++;
+          }
+          const cur = nxt;
+          const slot = this.slotForPlayer(row.player_id);
+          if (slot !== undefined) newcomerProtectedSlots.set(slot, cur.status === 'active');
+          if (cur.status === 'active') {
+            // The protection ends at the earlier of the online-time threshold
+            // (only reachable while online) and the absolute lapse instant.
+            const candidates: number[] = [];
+            if (online && cur.onlineSinceMs !== null) {
+              const onlineAt = cur.onlineMs + Math.max(0, now - cur.onlineSinceMs);
+              const remain = rules.setupProtectionOnlineMs - onlineAt;
+              if (remain > 0) candidates.push(now + remain);
+            }
+            if (cur.lapseAtMs !== null) candidates.push(cur.lapseAtMs);
+            if (candidates.length) {
+              nextDue = Math.min(nextDue ?? Infinity, Math.min(...candidates));
+            }
+          }
+        }
+      }
+    }
+
+    // Mirror newcomer protection flags into the sim at the next tick boundary —
+    // journaled like every other world→sim sync so replicas stay identical.
+    if (g && newcomerProtectedSlots.size) {
+      const atTick = g.tick + 1;
+      for (const [slot, want] of newcomerProtectedSlots) {
+        const p = g.players[slot];
+        if (!p || p.newcomerProtected === want) continue;
+        g.enqueue(-1, { t: 'setNewcomerProtection', slot, on: want }, atTick);
+        await tx.query(
+          `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,'mmo.sim',$4)`,
+          [randomUUID(), this.opts.regionId, eventSeq, JSON.stringify({
+            eventSeq, atTick, slot: -1,
+            command: { t: 'setNewcomerProtection', slot, on: want },
+            epoch: this.epoch,
+          })]);
+        changed++;
+      }
+    }
+
     // Mirror the authoritative active set into the sim at the next tick boundary —
     // the same journaled setShield command subscribers apply, so runner and client
     // sims stay bit-identical. The durable record (not the flag) is the truth the
@@ -1039,10 +1154,17 @@ export class RegionRunner {
    */
   private async ensureProtectionEval(): Promise<void> {
     const row = await mmoOne<{ n: string }>(
-      `select count(*)::text as n from protection_record pr
-         join compound c on c.compound_id = pr.compound_id
-        where c.region_id = $1 and pr.kind = 'OFFLINE_EARNED' and pr.status in ('armed','active')`,
-      [this.opts.regionId]);
+      `select count(*)::text as n from (
+         select 1 from protection_record pr
+           join compound c on c.compound_id = pr.compound_id
+          where c.region_id = $1 and pr.kind = 'OFFLINE_EARNED' and pr.status in ('armed','active')
+         union all
+         select 1 from settlement s
+           join region r on r.region_id = s.region_id
+          where r.world_id = (select world_id from region where region_id = $1)
+            and coalesce(s.protection->>'status', 'ended') <> 'ended'
+            and s.player_id = any($2::uuid[])) t`,
+      [this.opts.regionId, [...this.slotByPlayer.keys()]]);
     if (Number(row?.n ?? 0) === 0) return;
     const now = this.opts.now();
     await scheduleJob({
