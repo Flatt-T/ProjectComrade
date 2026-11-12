@@ -78,6 +78,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // transition; the panel shows live remaining hours from the durable record.
   const [prot, setProt] = useState<MmoProtectionResponse | null>(null);
   const [showShield, setShowShield] = useState(false);
+  const [shieldCustom, setShieldCustom] = useState('');
 
   useEffect(() => {
     let game: Game | null = null;
@@ -554,6 +555,11 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
                 <button key={s} disabled={!prot || s > prot.availableSeconds}
                   onClick={() => armShield(c.compoundId, s)}>{fmtDur(s)}</button>
               ))}
+              <input className="shield-custom" type="number" min={60} step={60}
+                placeholder="sec" value={shieldCustom}
+                onChange={ev => setShieldCustom(ev.target.value)} />
+              <button disabled={!prot || !shieldCustom || Number(shieldCustom) <= 0 || Number(shieldCustom) > prot.availableSeconds}
+                onClick={() => { const s = Math.floor(Number(shieldCustom)); if (s > 0) armShield(c.compoundId, s); }}>Set</button>
               {rec?.status === 'armed' && <button onClick={() => disarmShield(c.compoundId)}>Clear</button>}
             </span>
           </div>;
