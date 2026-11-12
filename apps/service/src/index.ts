@@ -65,7 +65,9 @@ const server = createServer(async (req, res) => {
   }
 });
 
-const wss = new WebSocketServer({ server, path: '/ws', maxPayload: 65536 });
+// Both WebSocket endpoints share one upgrade router: a `server`-bound ws would
+// abort every upgrade that is not its own path, so /mmo must be routed before it.
+const wss = new WebSocketServer({ noServer: true, maxPayload: 65536 });
 const rooms = new RoomCoordinator();
 
 // Persistent world (PW08): the /mmo endpoint exists only when MMO_DATABASE_URL is
@@ -75,7 +77,12 @@ const mmoService = mmoDatabaseConfigured() ? new RegionService({ log }) : undefi
 const mmoGateway = mmoService ? new MmoGateway(mmoService) : undefined;
 server.on('upgrade', (req, socket, head) => {
   const pathname = new URL(req.url || '/', 'http://localhost').pathname;
-  if (pathname === '/mmo' && mmoGateway) mmoGateway.handleUpgrade(req, socket, head);
+  if (pathname === '/mmo' && mmoGateway) { mmoGateway.handleUpgrade(req, socket, head); return; }
+  if (pathname === '/ws') {
+    wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws, req));
+    return;
+  }
+  socket.destroy();
 });
 
 wss.on('connection', (ws, req) => {
