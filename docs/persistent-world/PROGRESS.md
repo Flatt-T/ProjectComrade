@@ -721,3 +721,60 @@ acceptance detail; this file is the resume point. Read it first in every session
   is the gate; AI players do not exploit imported factories (they build
   for their own faction only); starport queue eligibility follows the same
   per-factory rule but no td starport structure exists to exercise it.
+
+## PW24 (THU-2271) - salvage, capturable sites, ladder (in progress)
+
+Salvage (commit d568ce6) plus capturable sites and the ladder on
+`pw24-salvage-sites`:
+
+- Salvage crates (COMRADE 18 §3.9): every destroyed unit/building drops one
+  crate worth `salvage.percentOfCost` of build cost (default 25%), collectable
+  by any player, decaying after `decaySeconds` (600s). Crates are real sim
+  entities - journaled SALVAGE_SPAWN ops, DESTROY+SALVAGE asset-ledger rows,
+  snapshot/hash participants. Sold buildings drop nothing (died=false path).
+  The anti-snowball floor suppresses drops when the victim's in-sim power
+  score is below `powerScoreSalvageFloorRatio` of the killer's. Classic
+  skirmish gets the same mechanic via optional `GameSetup.salvage`.
+- Capturable sites: `withRegionSites` injects site_income/site_tech/
+  site_depot defs into persistent packs only; `regionSitePlan(pack, map,
+  seed, min, max)` is a pure function so every runner places identical
+  neutral (owner -1) sites - 2-4 per region per `sitesPerRegion`. Presence-
+  based capture: hostile units inside `captureRadiusCells` fill progress at
+  `bestN` per tick up to `captureTicks`; decay on absence; contested fades
+  emit 'repelled'. Hold perks on the 900-tick upkeep cadence: income credits
+  the holder, depot repairs the holder's structures in radius, tech grants
+  an upgrade level to the holder's costliest upgradable structure. Sites
+  are objectives: damage(), sell, pack, setShield all refuse them; they
+  yield no salvage. Site state (progress/by/heldSince) survives
+  snapshot/restore with backward-compatible defaults. Classic skirmish
+  sites via optional `GameSetup.sites` + CLASSIC_SITE_TUNING.
+- Ladder: schema v10 `ladder_board` (player+alliance x 30d+all). Every award
+  is a journaled LADDER_AWARD economy_operation (points, reason, refKey);
+  the board table is a materialized read model - 'all' accumulates, '30d'
+  is rebuilt per-subject from the journal window on each award, and
+  `rebuildLadderBoards` re-derives everything from economy_operation alone
+  (verified by test). Awards: salvage collected (per 100 credits), site
+  capture (objective points to the taker), site-hold minutes paid to the
+  outgoing holder on loss, defence points on repelled contests. Positional
+  awards are not victim-relative; the mismatch floor already gates salvage
+  at the crate level. Read API: GET /api/mmo/ladder?board=&period=.
+- Runner: `ensureRegionSites` places the deterministic plan on fresh games
+  and restores (idempotent); `drainGameEvents` (inside the salvage drain)
+  writes SITE_CAPTURE ops and LADDER_AWARD ops under the region fence -
+  best-effort crash semantics identical to salvage spawns.
+- Tests: tests/unit/fusion-sites.test.ts 10/10 (plan determinism/count/
+  non-overlap, neutral spawn, capture, recapture heldTicks, repelled-once,
+  income payout, depot repair, damage/sell/shield refusal, snapshot
+  restore, classic skirmish setting, off-by-default); tests/integration/
+  mmo-sites.test.ts 4/4 (2-4 neutral unshieldable sites live, capture
+  journaled exactly once, boards materialize + rebuild identically from
+  the journal, hold-time points on loss). Also fixed a latent mmo-runner
+  test race: submits now retry on FENCE_LOST 'stale tick' because scheduled
+  eval jobs journal at the live sim tick concurrently.
+- Full suite: 447 unit + 102 integration green; typecheck + lint clean.
+- Known gaps: no client ladder UI yet (API only); alliance board rows
+  accrue only while the scorer is in an alliance at award time; '30d'
+  refresh is per-subject (a full-board rebuild is O(awards) via
+  rebuildLadderBoards); site 'tech' perk grants the costliest upgradable
+  structure rather than a chosen one; repelled defence points fire once
+  per contested fade, not per attacker.

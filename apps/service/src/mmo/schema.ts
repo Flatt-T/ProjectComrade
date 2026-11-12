@@ -539,4 +539,25 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table player add column last_offline_since_ms bigint check (last_offline_since_ms >= 0);
     `,
   },
+  {
+    version: 10,
+    name: 'ladder boards',
+    sql: `
+    -- PW24 (COMRADE 18 §3.9): individual and alliance ladder boards. Points are
+    -- never stored by formula outside the sim — every award is a journaled
+    -- LADDER_AWARD economy_operation, and this table is the materialized read
+    -- model. 'all' is all-time; '30d' is the rolling window, refreshed per
+    -- subject from the journal on each award so it can never drift.
+    create table ladder_board (
+      world_id    uuid not null references world(world_id),
+      board       text not null check (board in ('player', 'alliance')),
+      subject_id  uuid not null,
+      period      text not null check (period in ('30d', 'all')),
+      points      bigint not null default 0 check (points >= 0),
+      updated_at  timestamptz not null default clock_timestamp(),
+      primary key (world_id, board, subject_id, period)
+    );
+    create index ladder_board_rank_idx on ladder_board (world_id, board, period, points desc);
+    `,
+  },
 ];

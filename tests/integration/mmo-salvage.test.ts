@@ -3,7 +3,6 @@
 // operation plus DESTROY/SALVAGE asset-ledger rows, and the crate must be a
 // real sim entity that pays out on collection. Requires
 // MMO_TEST_DATABASE_URL (disposable database).
-import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   closeMmoDatabase, mmoOne, resetMmoDatabase,

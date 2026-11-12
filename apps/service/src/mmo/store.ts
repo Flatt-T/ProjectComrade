@@ -1495,3 +1495,119 @@ export async function applyShieldTransition(tx: PoolClient, args: {
   });
   return { consumed };
 }
+
+// ---------------------------------------------------------------------------
+// Ladder boards (PW24)
+// ---------------------------------------------------------------------------
+
+/**
+ * Record one ladder award: a journaled LADDER_AWARD economy_operation plus
+ * materialized board upserts. 'all' accumulates forever; '30d' is refreshed
+ * for the awarded subjects from the journal window on every call, so the
+ * rolling board can be rebuilt from operations alone and never drifts.
+ * Callers must dedupe (sim events fire once; hold/capture accounting is
+ * event-driven, not polled).
+ */
+export async function awardLadderPoints(tx: PoolClient, args: {
+  worldId: string; playerId: string; points: number; reason: string;
+  regionId: string; tick: number; epoch: string; refKey: string;
+}): Promise<void> {
+  if (args.points <= 0) return;
+  // Alliance at award time, resolved inside the same transaction.
+  const { rows: al } = await tx.query<{ alliance_id: string }>(
+    `select m.alliance_id from alliance_member m
+       join alliance a on a.alliance_id = m.alliance_id
+      where a.world_id = $1 and a.disbanded_at is null and m.player_id = $2 and m.left_at is null`,
+    [args.worldId, args.playerId]);
+  const allianceId = al[0]?.alliance_id ?? null;
+  const opId = randomUUID();
+  await tx.query(
+    `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+     values ($1,$2,$3,$4,'LADDER_AWARD',$5,$6)`,
+    [opId, args.regionId, args.epoch, String(args.tick),
+     JSON.stringify({ kind: 'LADDER_AWARD', playerId: args.playerId, points: String(args.points), reason: args.reason }),
+     JSON.stringify({ allianceId, refKey: args.refKey })]);
+  for (const period of ['all', '30d'] as const) {
+    await tx.query(
+      `insert into ladder_board (world_id, board, subject_id, period, points)
+       values ($1,'player',$2,$3,$4)
+       on conflict (world_id, board, subject_id, period)
+       do update set points = ladder_board.points + $4, updated_at = clock_timestamp()`,
+      [args.worldId, args.playerId, period, args.points]);
+    if (allianceId) {
+      await tx.query(
+        `insert into ladder_board (world_id, board, subject_id, period, points)
+         values ($1,'alliance',$2,$3,$4)
+         on conflict (world_id, board, subject_id, period)
+         do update set points = ladder_board.points + $4, updated_at = clock_timestamp()`,
+        [args.worldId, allianceId, period, args.points]);
+    }
+  }
+  // Refresh the rolling window for the awarded subjects from the journal �
+  // this is also the rebuild path: deleting and re-aggregating proves totals
+  // derive from economy_operation alone.
+  await tx.query(
+    `delete from ladder_board where world_id = $1 and board = 'player' and subject_id = $2 and period = '30d'`,
+    [args.worldId, args.playerId]);
+  await tx.query(
+    `insert into ladder_board (world_id, board, subject_id, period, points)
+     select $1, 'player', $2::uuid, '30d', coalesce(sum((o.canonical_action->>'points')::bigint), 0)
+       from economy_operation o
+      where o.kind = 'LADDER_AWARD' and o.canonical_action->>'playerId' = $2::text
+        and o.committed_at > clock_timestamp() - interval '30 days'`,
+    [args.worldId, args.playerId]);
+  if (allianceId) {
+    await tx.query(
+      `delete from ladder_board where world_id = $1 and board = 'alliance' and subject_id = $2 and period = '30d'`,
+      [args.worldId, allianceId]);
+    await tx.query(
+      `insert into ladder_board (world_id, board, subject_id, period, points)
+       select $1, 'alliance', $2::uuid, '30d', coalesce(sum((o.canonical_action->>'points')::bigint), 0)
+         from economy_operation o
+        where o.kind = 'LADDER_AWARD' and o.authoritative_result->>'allianceId' = $2::text
+          and o.committed_at > clock_timestamp() - interval '30 days'`,
+      [args.worldId, allianceId]);
+  }
+}
+
+export interface LadderBoardRow {
+  board: 'player' | 'alliance'; subject_id: string; period: '30d' | 'all'; points: string;
+}
+
+/** Top of a ladder board, highest points first. */
+export async function ladderBoard(worldId: string, board: 'player' | 'alliance', period: '30d' | 'all', limit = 50): Promise<LadderBoardRow[]> {
+  return mmoQuery<LadderBoardRow>(
+    `select board, subject_id, period, points::text from ladder_board
+      where world_id = $1 and board = $2 and period = $3
+      order by points desc, subject_id limit $4`,
+    [worldId, board, period, limit]);
+}
+
+/**
+ * Rebuild every materialized board row from the economy_operation journal.
+ * Proves ladder totals derive from journaled events alone; used by tests and
+ * disaster recovery. 'all' sums everything; '30d' sums the rolling window.
+ */
+export async function rebuildLadderBoards(worldId: string): Promise<void> {
+  await mmoQuery(`delete from ladder_board where world_id = $1`, [worldId]);
+  for (const period of ['all', '30d'] as const) {
+    const window = period === '30d' ? `and o.committed_at > clock_timestamp() - interval '30 days'` : '';
+    await mmoQuery(
+      `insert into ladder_board (world_id, board, subject_id, period, points)
+       select r.world_id, 'player', (o.canonical_action->>'playerId')::uuid, '${period}',
+              sum((o.canonical_action->>'points')::bigint)
+         from economy_operation o join region r on r.region_id = o.region_id
+        where o.kind = 'LADDER_AWARD' and r.world_id = $1 ${window}
+        group by 1, 3`,
+      [worldId]);
+    await mmoQuery(
+      `insert into ladder_board (world_id, board, subject_id, period, points)
+       select r.world_id, 'alliance', (o.authoritative_result->>'allianceId')::uuid, '${period}',
+              sum((o.canonical_action->>'points')::bigint)
+         from economy_operation o join region r on r.region_id = o.region_id
+        where o.kind = 'LADDER_AWARD' and r.world_id = $1
+          and o.authoritative_result->>'allianceId' is not null ${window}
+        group by 1, 3`,
+      [worldId]);
+  }
+}

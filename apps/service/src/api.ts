@@ -43,7 +43,7 @@ import {
   pushSubscribe, pushUnsubscribe, setNotificationPref,
 } from './mmo/notify.js';
 import {
-  committedShieldSeconds, compoundsForPlayer, MmoStoreError, openShieldRecordsForPlayer,
+  committedShieldSeconds, compoundsForPlayer, ladderBoard, MmoStoreError, openShieldRecordsForPlayer,
   openTradeOffersForPlayer,
   shieldBalances, utcShieldDay,
 } from './mmo/store.js';
@@ -807,4 +807,31 @@ get('/api/mmo/trade-offers', async (ctx: Ctx) => {
     incoming: offers.filter(o => o.to_player_id === playerId),
     outgoing: offers.filter(o => o.from_player_id === playerId),
   };
+});
+
+/**
+ * GET /api/mmo/ladder?board=player|alliance&period=30d|all — the top of a
+ * ladder board (PW24). Player boards default to the caller; the alliance
+ * board shows the caller's alliance. Boards are materialized from journaled
+ * LADDER_AWARD operations, so totals are rebuildable from the journal.
+ */
+get('/api/mmo/ladder', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-ladder', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const board = ctx.url.searchParams.get('board') === 'alliance' ? 'alliance' : 'player';
+  const period = ctx.url.searchParams.get('period') === 'all' ? 'all' : '30d';
+  const row = await mmoOne<{ world_id: string; alliance_id: string | null }>(
+    `select s.world_id,
+            (select m.alliance_id from alliance_member m
+               join alliance a on a.alliance_id = m.alliance_id
+              where a.world_id = s.world_id and a.disbanded_at is null
+                and m.player_id = s.player_id and m.left_at is null) as alliance_id
+       from settlement s where s.player_id = $1`,
+    [playerId]);
+  if (!row) throw badRequest('Settle in the persistent world first');
+  if (board === 'player') {
+    return { board, period, rows: await ladderBoard(row.world_id, 'player', period) };
+  }
+  if (!row.alliance_id) return { board, period, rows: [] };
+  return { board, period, rows: await ladderBoard(row.world_id, 'alliance', period) };
 });
