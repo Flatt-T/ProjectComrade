@@ -67,6 +67,7 @@ export class MmoConnection {
       if (message.type === 'snapshot') {
         this.epoch = message.epoch;
         this.lastAppliedSeq = message.lastAppliedSeq;
+        this.handlers.onSnapshot?.(message);
       }
       if (message.type === 'event' && message.eventKind === 'sim') {
         const p = message.payload as { atTick?: number; slot?: number; command?: Command };
