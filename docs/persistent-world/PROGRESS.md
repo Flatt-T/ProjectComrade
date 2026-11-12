@@ -622,3 +622,49 @@ acceptance detail; this file is the resume point. Read it first in every session
   harvest-gate rejection, power-up exchange.
 - Also fixed latent adjustPowerup bug: negative deltas violated the
   count>=0 check on the INSERT path before ON CONFLICT resolved.
+
+## PW14 - packed buildings, barter carriers, superweapon redeployment (THU-2238)
+
+- One stable asset identity: pack morphs the SAME entity in place
+  (kind structure->unit, type -> `pack_<structure>`), so the sim id and
+  therefore the durable entity id never change across pack, barter and
+  redeploy. `Entity.packedType` marks the carrier form; snapshots
+  predating PW14 normalize it to ''.
+- Carrier defs are synthesized per pack by `withPackedCarriers()` and
+  injected ONLY into persistent games (Game constructor when
+  persistent:true, restoreGame for persistent snapshots) - classic
+  matches, mashup composition, audio catalogs and pack-integrity tests
+  never see them. tech 99 keeps carriers out of every build menu.
+- packStructure frees the footprint, drops storage/power, turns docked
+  harvesters away and zeroes superweapon charge; unpackStructure
+  re-validates adjacency + canPlace BEFORE mutating, so an illegal site
+  can never lose or duplicate the asset (D6: charge restarts from zero
+  on redeploy, no extra delay).
+- World actions pack/unpack/redeploy journaled with PACK/UNPACK/DEPLOY
+  economy_operation + asset_ledger rows ('packed'/'deployed' physical
+  states). Bound assets, walls, floors and water builds reject
+  NOT_PACKABLE; non-owners and non-carriers reject cleanly.
+- packedBuilding barter items now settle through PW13: validation
+  requires a live unbound carrier owned by the giver; the ledger row
+  records physical_state 'packed' so payment and carrier ownership move
+  atomically in one journal transaction.
+- Compounds: a packed construction yard keeps its compound identity in
+  state 'packed' (syncCompounds carries the state through); recovery
+  anchors count deployed structures AND carriers so packing the last
+  building never triggers a duplicate recovery grant.
+- Superweapon redeployment notifies every settled player in the region
+  (system notification, deduped per operation).
+- Client: selection panel gains Pack / Redeploy-here actions for owned
+  packable structures and carriers (PersistentWorld.tsx).
+- Tests: tests/unit/fusion-packed.test.ts 8/8 (morph identity/HP/
+  ownership, footprint+storage release, valid/invalid/unreachable
+  sites, superweapon charge reset, snapshot round-trip, classic-match
+  rejection); tests/integration/mmo-packed.test.ts 5/5 (real PG +
+  runner: pack->audit->redeploy, invalid-site safety, packedBuilding
+  barter end-to-end with 'packed' ledger state, compound packed->active
+  cycle, bound/wall/non-owner rejection).
+- Known gaps (explicit decision gates, not implemented): dedicated
+  transport rules between regions, carrier-destroyed salvage detail
+  (rides the existing unit-death path until PW24), charge-progress
+  announcement beyond the deploy notice, offer-authoring UI for
+  packedBuilding (wire-protocol works).

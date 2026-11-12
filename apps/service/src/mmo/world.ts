@@ -89,6 +89,8 @@ interface BarterGive {
   credits: number;
   shieldSeconds: bigint;
   units: { ref: string; simId: number }[];
+  /** PW14: packed-building carriers — same entity/transfer path, 'packed' ledger state. */
+  packed: { ref: string; simId: number }[];
   powerUps: { kind: string; amount: number }[];
   hasAssets: boolean;
 }
@@ -105,7 +107,7 @@ async function barterReservations(
     for (const item of o.payload?.give ?? []) {
       if (item.kind === 'credits') out.credits += item.amount;
       else if (item.kind === 'shieldSeconds') out.shieldSeconds += BigInt(item.amount);
-      else if (item.kind === 'unit' && item.ref) out.units.add(item.ref);
+      else if ((item.kind === 'unit' || item.kind === 'packedBuilding') && item.ref) out.units.add(item.ref);
       else if (item.kind === 'powerUp' && item.ref) out.powerUps.set(item.ref, (out.powerUps.get(item.ref) ?? 0) + item.amount);
     }
   }
@@ -169,6 +171,7 @@ async function validateBarterGive(
   let credits = 0;
   let shieldSeconds = 0n;
   const units: { ref: string; simId: number }[] = [];
+  const packed: { ref: string; simId: number }[] = [];
   const powerUps = new Map<string, number>();
   const seenUnits = new Set<string>();
 
@@ -176,14 +179,30 @@ async function validateBarterGive(
     switch (item.kind) {
       case 'credits': credits += item.amount; break;
       case 'shieldSeconds': shieldSeconds += BigInt(item.amount); break;
-      case 'packedBuilding': return { ok: false, reason: 'UNSUPPORTED_ITEM' };
+      case 'packedBuilding': {
+        // PW14: only a live packed carrier is tradable — the same entity keeps
+        // its durable id through pack/deploy, so the ref never changes form.
+        if (item.amount !== 1 || !item.ref) return { ok: false, reason: 'BAD_ITEM' };
+        if (seenUnits.has(item.ref) || reserved.units.has(item.ref)) return { ok: false, reason: 'UNIT_RESERVED' };
+        seenUnits.add(item.ref);
+        const simId = ctx.simIdFor?.(item.ref);
+        const e = simId != null ? g.entities.get(simId) : undefined;
+        if (simId == null || !e || e.kind !== 'unit' || !e.packedType || e.hp <= 0 || e.carriedBy
+          || e.owner !== side.slot || e.bound !== 0) {
+          return { ok: false, reason: 'UNIT_NOT_TRANSFERABLE' };
+        }
+        packed.push({ ref: item.ref, simId });
+        break;
+      }
       case 'unit': {
         if (item.amount !== 1 || !item.ref) return { ok: false, reason: 'BAD_ITEM' };
         if (seenUnits.has(item.ref) || reserved.units.has(item.ref)) return { ok: false, reason: 'UNIT_RESERVED' };
         seenUnits.add(item.ref);
         const simId = ctx.simIdFor?.(item.ref);
         const e = simId != null ? g.entities.get(simId) : undefined;
-        if (simId == null || !e || e.kind !== 'unit' || e.hp <= 0 || e.carriedBy
+        // A packed carrier is a building in transport, not a unit — it trades
+        // only through the packedBuilding kind so the ledger records 'packed'.
+        if (simId == null || !e || e.kind !== 'unit' || e.packedType || e.hp <= 0 || e.carriedBy
           || e.owner !== side.slot || e.bound !== 0) {
           return { ok: false, reason: 'UNIT_NOT_TRANSFERABLE' };
         }
@@ -220,7 +239,7 @@ async function validateBarterGive(
   return {
     ok: true,
     give: {
-      credits, shieldSeconds, units,
+      credits, shieldSeconds, units, packed,
       powerUps: [...powerUps.entries()].map(([kind, amount]) => ({ kind, amount })),
       hasAssets: items.length > 0,
     },
@@ -587,8 +606,9 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           if (expiresAtMs <= now + 1000) return { result: { accepted: false, reason: 'BAD_EXPIRY' } };
 
           const worldId = await worldIdFor(tx, ctx.regionId);
+          const unitCargo = (items: BarterItem[]) => items.some(i => i.kind === 'unit' || i.kind === 'packedBuilding');
           const permError = await barterAllianceCheck(tx, worldId, offer.fromId, offer.toId,
-            offer.give.some(i => i.kind === 'unit'), offer.want.some(i => i.kind === 'unit'));
+            unitCargo(offer.give), unitCargo(offer.want));
           if (permError) return { result: { accepted: false, reason: permError } };
 
           const check = await validateBarterGive(tx, ctx, rules,
@@ -637,8 +657,9 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           // Revalidate everything fresh: units may have died, moved, been sold
           // or shield-armed since the offer was created.
           const worldId = await worldIdFor(tx, ctx.regionId);
+          const unitCargo = (items: BarterItem[]) => items.some(i => i.kind === 'unit' || i.kind === 'packedBuilding');
           const permError = await barterAllianceCheck(tx, worldId, offer.fromId, offer.toId,
-            offer.give.some(i => i.kind === 'unit'), offer.want.some(i => i.kind === 'unit'));
+            unitCargo(offer.give), unitCargo(offer.want));
           if (permError) return { result: { accepted: false, reason: permError } };
 
           const now = Date.now();
@@ -710,6 +731,20 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
                 [operationId, u.ref, ctx.regionId, offer.toId, offer.fromId, String(u.simId),
                  JSON.stringify({ offerId: row.offer_id, direction: 'want' })]);
             }
+            for (const u of fromCheck.give.packed) {
+              await tx.query(
+                `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+                 values ($1,$2,$3,'BARTER',$4,$5,'packed',$6,$7)`,
+                [operationId, u.ref, ctx.regionId, offer.fromId, offer.toId, String(u.simId),
+                 JSON.stringify({ offerId: row.offer_id, direction: 'give' })]);
+            }
+            for (const u of toCheck.give.packed) {
+              await tx.query(
+                `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+                 values ($1,$2,$3,'BARTER',$4,$5,'packed',$6,$7)`,
+                [operationId, u.ref, ctx.regionId, offer.toId, offer.fromId, String(u.simId),
+                 JSON.stringify({ offerId: row.offer_id, direction: 'want' })]);
+            }
           }
 
           const giveCredits = fromCheck.give.credits;
@@ -719,15 +754,111 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             sim.push({ slot: -1, command: { t: 'adjustCredits', slot: fromSlot, delta: wantCredits - giveCredits } });
             sim.push({ slot: -1, command: { t: 'adjustCredits', slot: toSlot, delta: giveCredits - wantCredits } });
           }
-          if (fromCheck.give.units.length) {
-            sim.push({ slot: fromSlot, command: { t: 'transfer', ids: fromCheck.give.units.map(u => u.simId), to: toSlot } });
+          const fromIds = [...fromCheck.give.units, ...fromCheck.give.packed].map(u => u.simId);
+          const toIds = [...toCheck.give.units, ...toCheck.give.packed].map(u => u.simId);
+          if (fromIds.length) {
+            sim.push({ slot: fromSlot, command: { t: 'transfer', ids: fromIds, to: toSlot } });
           }
-          if (toCheck.give.units.length) {
-            sim.push({ slot: toSlot, command: { t: 'transfer', ids: toCheck.give.units.map(u => u.simId), to: fromSlot } });
+          if (toIds.length) {
+            sim.push({ slot: toSlot, command: { t: 'transfer', ids: toIds, to: fromSlot } });
           }
           return {
             result: { accepted: true, settled: true, offerId: row.offer_id, operationId },
             sim,
+          };
+        }
+        case 'pack': {
+          // PW14: a deployed structure becomes its dedicated carrier — same
+          // entity and durable id, no refund, no recovery trigger by itself.
+          // Bound assets and non-packable types (walls, floors, water builds)
+          // reject; the engine re-checks at apply.
+          if (ctx.slot === undefined) return { result: { accepted: false, reason: 'UNKNOWN_PLAYER' } };
+          const simId = ctx.simIdFor?.(action.entityId);
+          const g = ctx.game?.();
+          const e = simId != null ? g?.entities.get(simId) : undefined;
+          const sdef = e ? g?.pack.structures[e.type] : undefined;
+          const carrierDef = e ? g?.pack.units[`pack_${e.type}`] : undefined;
+          if (simId == null || !g || !e || !sdef || !carrierDef || e.kind !== 'structure' || e.hp <= 0
+            || e.carriedBy || e.owner !== ctx.slot || e.bound !== 0
+            || sdef.wall || sdef.floor || sdef.onWater) {
+            return { result: { accepted: false, reason: 'NOT_PACKABLE' } };
+          }
+          const operationId = randomUUID();
+          if (ctx.epoch !== undefined) {
+            await tx.query(
+              `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+               values ($1,$2,$3,$4,'PACK',$5,$6)`,
+              [operationId, ctx.regionId, ctx.epoch, String(ctx.tick ?? 0),
+               JSON.stringify({ kind: 'PACK', entityId: action.entityId }),
+               JSON.stringify({ structure: e.type, simId })]);
+            await tx.query(
+              `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+               values ($1,$2,$3,'PACK',$4,$4,'packed',$5,$6)`,
+              [operationId, action.entityId, ctx.regionId, ctx.playerId, String(simId),
+               JSON.stringify({ structure: e.type })]);
+          }
+          return {
+            result: { accepted: true, packed: action.entityId, operationId },
+            sim: [{ slot: ctx.slot, command: { t: 'pack', id: simId } }],
+          };
+        }
+        case 'unpack':
+        case 'redeploy': {
+          // PW14: carrier → deployed building at a valid site (x,y = footprint
+          // top-left cell). Pre-validated against the live sim so an illegal
+          // site rejects here; the engine re-validates atomically at apply and
+          // an invalid site can never lose or duplicate the asset.
+          if (ctx.slot === undefined) return { result: { accepted: false, reason: 'UNKNOWN_PLAYER' } };
+          const simId = ctx.simIdFor?.(action.entityId);
+          const g = ctx.game?.();
+          const e = simId != null ? g?.entities.get(simId) : undefined;
+          if (simId == null || !g || !e || e.kind !== 'unit' || !e.packedType || e.hp <= 0
+            || e.carriedBy || e.owner !== ctx.slot) {
+            return { result: { accepted: false, reason: 'NOT_A_CARRIER' } };
+          }
+          const structType = e.packedType;
+          const sdef = g.pack.structures[structType];
+          const p = g.players[ctx.slot];
+          if (!sdef || !p) return { result: { accepted: false, reason: 'UNKNOWN_STRUCTURE' } };
+          const cc = g.cellOf(e);
+          const ccx = cc % g.map.w, ccy = Math.floor(cc / g.map.w);
+          if (ccx < action.x - 1 || ccx > action.x + sdef.w || ccy < action.y - 1 || ccy > action.y + sdef.h
+            || !g.canPlace(p, structType, action.x, action.y, true, simId)) {
+            return { result: { accepted: false, reason: 'INVALID_SITE' } };
+          }
+          const operationId = randomUUID();
+          const opKind = action.t === 'redeploy' ? 'DEPLOY' : 'UNPACK';
+          if (ctx.epoch !== undefined) {
+            await tx.query(
+              `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+               values ($1,$2,$3,$4,$5,$6,$7)`,
+              [operationId, ctx.regionId, ctx.epoch, String(ctx.tick ?? 0), opKind,
+               JSON.stringify({ kind: opKind, entityId: action.entityId, x: action.x, y: action.y }),
+               JSON.stringify({ structure: structType, simId })]);
+            await tx.query(
+              `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+               values ($1,$2,$3,$4,$5,$5,'deployed',$6,$7)`,
+              [operationId, action.entityId, ctx.regionId, opKind, ctx.playerId, String(simId),
+               JSON.stringify({ structure: structType, x: action.x, y: action.y })]);
+          }
+          // D6/COMRADE 18 §3.7: a superweapon facility coming back online is
+          // announced to everyone settled in the region. Charge itself restarts
+          // from zero inside the engine — the announcement is the only extra.
+          if (sdef.superweapon) {
+            const { rows: roster } = await tx.query<{ player_id: string }>(
+              'select player_id from settlement where region_id = $1', [ctx.regionId]);
+            for (const r of roster) {
+              await raiseNotification(tx, {
+                playerId: r.player_id, kind: 'system',
+                dedupeKey: `swdeploy:${action.entityId}:${operationId}`,
+                payload: { event: 'superweapon_deployed', structure: structType, ownerId: ctx.playerId },
+                regionId: ctx.regionId, deliverAfter: new Date(),
+              });
+            }
+          }
+          return {
+            result: { accepted: true, deployed: action.entityId, operationId },
+            sim: [{ slot: ctx.slot, command: { t: 'unpack', id: simId, x: action.x, y: action.y } }],
           };
         }
         case 'barterDecline':

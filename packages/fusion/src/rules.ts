@@ -145,6 +145,12 @@ export interface UnitDef {
   altitude?: number;
   /** Dune Carryall: automatically airlifts harvesters. */
   carrier?: boolean;
+  /**
+   * Persistent profile (PW14): this unit is the packed-building carrier for the
+   * named structure type. Carrier defs are synthesized per packable structure in
+   * packs/index.ts; they are never buildable (tech 99) and only come from packing.
+   */
+  packedCarrier?: string;
   /** Carries this many passenger slots (infantry take 1, vehicles 3). */
   transport?: number;
   /** Only infantry may board (Night Hawk). */

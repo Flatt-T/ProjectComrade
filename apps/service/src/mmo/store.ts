@@ -1328,22 +1328,23 @@ export interface CompoundRow {
  * (mmoEntityId of the yard's sim id), so protection records join directly.
  */
 export async function syncCompounds(tx: PoolClient, args: {
-  regionId: string; live: { compoundId: string; playerId: string }[];
+  regionId: string; live: { compoundId: string; playerId: string; state?: 'active' | 'packed' }[];
 }): Promise<void> {
   for (const c of args.live) {
+    const state = c.state ?? 'active';
     await tx.query(
       `insert into compound (compound_id, player_id, region_id, state)
-       values ($1,$2,$3,'active')
+       values ($1,$2,$3,$4)
        on conflict (compound_id) do update
          set player_id = excluded.player_id, region_id = excluded.region_id,
-             state = case when compound.state = 'destroyed' then 'active' else compound.state end,
+             state = case when compound.state = 'in_transit' then compound.state else excluded.state end,
              updated_at = clock_timestamp()`,
-      [c.compoundId, c.playerId, args.regionId]);
+      [c.compoundId, c.playerId, args.regionId, state]);
   }
   const liveIds = args.live.map(c => c.compoundId);
   await tx.query(
     `update compound set state = 'destroyed', updated_at = clock_timestamp()
-      where region_id = $1 and state = 'active' and not (compound_id = any($2))`,
+      where region_id = $1 and state in ('active', 'packed') and not (compound_id = any($2))`,
     [args.regionId, liveIds]);
 }
 
