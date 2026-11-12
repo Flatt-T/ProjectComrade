@@ -115,6 +115,15 @@ export class MmoGateway {
 
   private onConnection(ws: WebSocket, req: IncomingMessage) {
     ws.on('error', () => ws.terminate());
+    // PW20 admission limit: bound concurrent persistent-world sockets so a
+    // connection flood cannot exhaust the runner fleet or the DB pool. The
+    // default mirrors the classic /ws cap; MMO_MAX_CONNECTIONS overrides it.
+    const maxConnections = Number(process.env.MMO_MAX_CONNECTIONS || 128);
+    if (this.conns.size >= maxConnections) {
+      log('mmo-capacity', { clients: this.conns.size, max: maxConnections });
+      ws.close(1013, 'Connection capacity reached');
+      return;
+    }
     const conn: Conn = {
       ws, id: randomUUID().slice(0, 8), sessionId: randomUUID(),
       subs: new Map(), present: new Set(), lastPresenceSweep: 0, messages: 0,
