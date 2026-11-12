@@ -5,9 +5,10 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { closeMmoDatabase, mmoQuery, resetMmoDatabase } from '../../apps/service/src/mmo/db.js';
 import {
-  createRegion, createTransfer, liveTransfersForPlayer, regionsForPlayerWorld,
-  worldIdForPlayer, worldPlayersForPlayer,
+  bumpObjectiveProgress, createRegion, createTransfer, ensureObjectives, listObjectives,
+  liveTransfersForPlayer, regionsForPlayerWorld, worldIdForPlayer, worldPlayersForPlayer,
 } from '../../apps/service/src/mmo/store.js';
+import { mmoDb } from '../../apps/service/src/mmo/db.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
 import { PACKS } from '../../packages/fusion/src/index.js';
 import { MMO_PROTOCOL } from '../../packages/contracts/src/index.js';
@@ -91,5 +92,32 @@ describeDb('mmo world panels (roster, regions, transfers)', () => {
     await transitionTransfer(made.transfer_id, 'COMPLETED');
     const after = await liveTransfersForPlayer(p0);
     expect(after.map(t => t.transfer_id)).not.toContain(made.transfer_id);
+  });
+
+  it('objectives: deterministic generation, idempotent ensure, progress bump', async () => {
+    const p0 = fx.players[0].playerId;
+    const args = {
+      worldId: fx.worldId, playerId: p0,
+      dailyCount: 3, dailySeconds: 7200, weeklySeconds: 36000,
+    };
+    await ensureObjectives(mmoDb(), args);
+    await ensureObjectives(mmoDb(), args); // idempotent — no duplicates
+    const rows = await listObjectives(p0);
+    expect(rows.length).toBe(4); // 3 daily + 1 weekly
+    expect(rows.filter(r => r.period === 'daily').length).toBe(3);
+    expect(rows.filter(r => r.period === 'weekly').length).toBe(1);
+    expect(new Set(rows.map(r => r.kind)).size).toBe(4); // distinct kinds per period set... daily may share with weekly
+    // Bump every kind; only current-period active rows move, capped at target.
+    for (const kind of ['site_capture', 'barter_complete', 'transfer_unit', 'unpack_building'] as const) {
+      await bumpObjectiveProgress(mmoDb(), { playerId: p0, kind });
+      await bumpObjectiveProgress(mmoDb(), { playerId: p0, kind });
+    }
+    const after = await listObjectives(p0);
+    for (const r of after.filter(r => r.status === 'active')) {
+      expect(r.progress).toBe(r.target);
+    }
+    // A different player has their own independent set.
+    const other = await listObjectives(fx.players[1].playerId);
+    expect(other.length).toBe(0);
   });
 });

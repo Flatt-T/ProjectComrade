@@ -28,6 +28,7 @@ import {
   adjustPowerup, createTradeOfferTx, openTradeOffersForPlayer, powerupBalance, resolveTradeOfferTx,
   shieldBalancesTx, tradeOfferById, transferEarnedShieldSeconds, utcShieldDay,
   createTransfer, liveTransferForEntity, transitionTransfer,
+  bumpObjectiveProgress, claimObjectiveTx, ensureObjectives,
   type ProtectionRow, type Queryable,
 } from './store.js';
 import { raiseNotification } from './notify.js';
@@ -453,6 +454,18 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           // Schedule the durable evaluator so the online-hour/lapse deadlines are
           // journaled even if no further pokes arrive (PW11).
           await pokeProtectionEval(ctx.regionId, nowMs, tx);
+          // PW19: materialize the newcomer's first objective set in the same tx —
+          // progress bumps only count against rows that already exist.
+          const { rows: reg } = await tx.query<{ world_id: string }>(
+            'select world_id from region where region_id = $1', [ctx.regionId]);
+          if (reg[0]) {
+            const rw = rules.rewards;
+            await ensureObjectives(tx, {
+              worldId: reg[0].world_id, playerId: ctx.playerId,
+              dailyCount: rw.dailyObjectives, dailySeconds: rw.dailyObjectiveShieldSeconds,
+              weeklySeconds: rw.weeklyObjectiveShieldSeconds,
+            });
+          }
           return {
             result: {
               accepted: true, settled: true, settlementId: settlement.settlement_id,
@@ -766,6 +779,9 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           if (toIds.length) {
             sim.push({ slot: toSlot, command: { t: 'transfer', ids: toIds, to: fromSlot } });
           }
+          // PW19: a settled barter proves the act for both sides' objectives.
+          await bumpObjectiveProgress(tx, { playerId: offer.fromId, kind: 'barter_complete' });
+          await bumpObjectiveProgress(tx, { playerId: offer.toId, kind: 'barter_complete' });
           return {
             result: { accepted: true, settled: true, offerId: row.offer_id, operationId },
             sim,
@@ -860,10 +876,19 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
               });
             }
           }
+          await bumpObjectiveProgress(tx, { playerId: ctx.playerId, kind: 'unpack_building' });
           return {
             result: { accepted: true, deployed: action.entityId, operationId },
             sim: [{ slot: ctx.slot, command: { t: 'unpack', id: simId, x: action.x, y: action.y } }],
           };
+        }
+        case 'objectiveClaim': {
+          // PW19: claim a completed objective — the reward lands as earned
+          // shield seconds inside this same journal transaction.
+          if (ctx.slot === undefined) return { result: { accepted: false, reason: 'UNKNOWN_PLAYER' } };
+          const claimed = await claimObjectiveTx(tx, { objectiveId: action.objectiveId, playerId: ctx.playerId });
+          if ('error' in claimed) return { result: { accepted: false, reason: claimed.error } };
+          return { result: { accepted: true, rewardSeconds: claimed.rewardSeconds } };
         }
         case 'barterDecline':
         case 'barterCancel': {

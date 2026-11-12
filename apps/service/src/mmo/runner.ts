@@ -32,7 +32,7 @@ import {
   releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
   syncCompounds, updateMemberPowerScores, updateSettlementProtection,
   openRecoveryEpisode, closeRecoveryEpisode, awardLadderPoints,
-  inboundTransfers, preparedTransfers, transitionTransfer,
+  inboundTransfers, preparedTransfers, transitionTransfer, bumpObjectiveProgress,
   MmoStoreError, type ProtectionRow, type RegionRow, type TransferRow,
 } from './store.js';
 import { journalTail } from './commands.js';
@@ -878,6 +878,10 @@ export class RegionRunner {
              payload.ownerPid ?? null, payload.ownerPid ?? null,
              manifest.packedType ? 'packed' : 'deployed', String(simId),
              JSON.stringify({ transferId: t.transfer_id, sourceRegionId: t.source_region_id, simId })]);
+          // PW19: a completed crossing proves the owner's transfer objective.
+          if (payload.ownerPid) {
+            await bumpObjectiveProgress(tx, { playerId: payload.ownerPid, kind: 'transfer_unit' });
+          }
         });
       } catch (error) {
         g.unspawnTransfer(simId);
@@ -976,6 +980,8 @@ export class RegionRunner {
               refKey: `site-capture:${this.opts.regionId}:${ev.simId}:${ev.tick}`,
             });
           }
+          // PW19: the capture also proves the player's site_capture objective.
+          if (toId) await bumpObjectiveProgress(tx, { playerId: toId, kind: 'site_capture' });
           // Site-hold time pays out on transfer: the outgoing holder banks
           // their accumulated hold minutes exactly once, journaled here.
           const fromId = ev.fromOwner >= 0 ? playerIdBySlot.get(ev.fromOwner) : undefined;

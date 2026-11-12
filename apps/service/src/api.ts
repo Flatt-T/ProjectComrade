@@ -36,7 +36,7 @@ import { log } from './ops.js';
 import { earlyAccessItems, lockFor } from './releases.js';
 import { meFor, resolve, resolveAccount } from './viewer.js';
 import { castVote, proposalPage, withdrawVote } from './votes.js';
-import { mmoDatabaseConfigured, mmoOne } from './mmo/db.js';
+import { mmoDatabaseConfigured, mmoDb, mmoOne } from './mmo/db.js';
 import { resolveIdentity } from './mmo/gateway.js';
 import { enterPersistentWorld } from './mmo/entry.js';
 import {
@@ -48,7 +48,7 @@ import {
   compoundsForPlayer, ladderBoard, liveTransfersForPlayer, MmoStoreError,
   openShieldRecordsForPlayer, openTradeOffersForPlayer, regionsForPlayerWorld, shieldBalances,
   signupSignalsForAccount, signupSignalsSharingIp, tradeAuditReport, utcShieldDay,
-  worldIdForPlayer, worldPlayersForPlayer,
+  ensureObjectives, listObjectives, worldIdForPlayer, worldPlayersForPlayer,
 } from './mmo/store.js';
 
 const str = (value: unknown, max = 200): string => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -879,6 +879,33 @@ get('/api/mmo/alliance', async (ctx: Ctx) => {
       playerId: m.player_id, role: m.role, permissions: m.permissions,
     })),
     invites: await allianceInvitesFor(playerId),
+  };
+});
+
+/**
+ * GET /api/mmo/objectives — the caller's daily/weekly objectives. Rows are
+ * materialized lazily here (idempotent per period); progress is bumped by the
+ * journaled systems, claims go through the objectiveClaim world action.
+ */
+get('/api/mmo/objectives', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-objectives', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const worldId = await worldIdForPlayer(playerId);
+  if (worldId) {
+    const r = PERSISTENT_RULES_V1.rewards;
+    await ensureObjectives(mmoDb(), {
+      worldId, playerId,
+      dailyCount: r.dailyObjectives, dailySeconds: r.dailyObjectiveShieldSeconds,
+      weeklySeconds: r.weeklyObjectiveShieldSeconds,
+    });
+  }
+  const rows = await listObjectives(playerId);
+  return {
+    objectives: rows.map(o => ({
+      objectiveId: o.objective_id, kind: o.kind, period: o.period, periodKey: o.period_key,
+      title: o.title, target: o.target, progress: o.progress, status: o.status,
+      rewardSeconds: o.reward_seconds, claimedAt: o.claimed_at,
+    })),
   };
 });
 

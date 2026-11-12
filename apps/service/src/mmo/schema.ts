@@ -596,4 +596,31 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
        'SALVAGE_SPAWN', 'SITE_CAPTURE', 'LADDER_AWARD', 'DEFEAT', 'REGION_TRANSFER'));
     `,
   },
+  {
+    version: 13,
+    name: 'player objectives',
+    sql: `
+    -- PW19: daily/weekly objectives. Rows are generated lazily per player per
+    -- period; progress is bumped by the journaled systems that prove the act
+    -- (site capture, settled barter, completed transfer, packed-building
+    -- redeploy). Claims grant earned shield seconds via effect-keyed receipts.
+    create table player_objective (
+      objective_id  uuid primary key,
+      world_id      uuid not null references world(world_id),
+      player_id     uuid not null,
+      kind          text not null,
+      period        text not null check (period in ('daily', 'weekly')),
+      period_key    text not null,
+      title         text not null,
+      target        integer not null check (target > 0),
+      progress      integer not null default 0 check (progress >= 0),
+      status        text not null default 'active' check (status in ('active', 'claimed', 'expired')),
+      reward_seconds integer not null check (reward_seconds > 0),
+      created_at    timestamptz not null default clock_timestamp(),
+      claimed_at    timestamptz,
+      unique (player_id, period, period_key, kind)
+    );
+    create index player_objective_player_idx on player_objective (player_id, status);
+    `,
+  },
 ];

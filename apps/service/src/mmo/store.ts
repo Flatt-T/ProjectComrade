@@ -1839,3 +1839,124 @@ export async function tradeAuditReport(worldId: string, cfg: TradeAuditConfig = 
   }
   return flags;
 }
+
+// ---------------------------------------------------------------------------
+// Player objectives (PW19)
+// ---------------------------------------------------------------------------
+
+export type ObjectiveKind = 'site_capture' | 'barter_complete' | 'transfer_unit' | 'unpack_building';
+export type ObjectivePeriod = 'daily' | 'weekly';
+
+export interface ObjectiveRow {
+  objective_id: string; world_id: string; player_id: string;
+  kind: ObjectiveKind; period: ObjectivePeriod; period_key: string;
+  title: string; target: number; progress: number;
+  status: 'active' | 'claimed' | 'expired';
+  reward_seconds: number; created_at: Date; claimed_at: Date | null;
+}
+
+const OBJECTIVE_DEFS: Record<ObjectiveKind, { title: string; target: number }> = {
+  site_capture: { title: 'Capture a capturable site', target: 1 },
+  barter_complete: { title: 'Complete barter trades', target: 2 },
+  transfer_unit: { title: 'Transfer a unit to another region', target: 1 },
+  unpack_building: { title: 'Redeploy a packed building', target: 1 },
+};
+const OBJECTIVE_KINDS = Object.keys(OBJECTIVE_DEFS) as ObjectiveKind[];
+
+/** UTC day key and ISO-week key for objective periods. */
+export function objectivePeriodKeys(now: Date): { daily: string; weekly: string } {
+  const daily = now.toISOString().slice(0, 10);
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((d.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7);
+  return { daily, weekly: `${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}` };
+}
+
+function objectiveSeed(playerId: string, periodKey: string): number {
+  let h = 0;
+  for (const c of playerId + ':' + periodKey) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h;
+}
+
+/**
+ * Lazily materialize the player's objectives for the current periods: expire
+ * stale rows, then insert the deterministic daily set plus one weekly row.
+ * Idempotent via the (player, period, period_key, kind) unique key.
+ */
+export async function ensureObjectives(q: Queryable, args: {
+  worldId: string; playerId: string; now?: Date;
+  dailyCount: number; dailySeconds: number; weeklySeconds: number;
+}): Promise<void> {
+  const now = args.now ?? new Date();
+  const keys = objectivePeriodKeys(now);
+  await q.query(
+    `update player_objective set status = 'expired'
+      where player_id = $1 and status = 'active'
+        and ((period = 'daily' and period_key <> $2) or (period = 'weekly' and period_key <> $3))`,
+    [args.playerId, keys.daily, keys.weekly]);
+  const start = objectiveSeed(args.playerId, keys.daily) % OBJECTIVE_KINDS.length;
+  const rows: { kind: ObjectiveKind; period: ObjectivePeriod; period_key: string; reward: number }[] = [];
+  for (let i = 0; i < Math.min(args.dailyCount, OBJECTIVE_KINDS.length); i++) {
+    rows.push({
+      kind: OBJECTIVE_KINDS[(start + i) % OBJECTIVE_KINDS.length],
+      period: 'daily', period_key: keys.daily, reward: args.dailySeconds,
+    });
+  }
+  rows.push({
+    kind: OBJECTIVE_KINDS[(start + args.dailyCount) % OBJECTIVE_KINDS.length],
+    period: 'weekly', period_key: keys.weekly, reward: args.weeklySeconds,
+  });
+  for (const r of rows) {
+    const def = OBJECTIVE_DEFS[r.kind];
+    await q.query(
+      `insert into player_objective
+         (objective_id, world_id, player_id, kind, period, period_key, title, target, reward_seconds)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9) on conflict do nothing`,
+      [uuid(), args.worldId, args.playerId, r.kind, r.period, r.period_key, def.title, def.target, r.reward]);
+  }
+}
+
+export async function listObjectives(playerId: string, q: Queryable = mmoDb()): Promise<ObjectiveRow[]> {
+  return (await q.query<ObjectiveRow>(
+    `select * from player_objective where player_id = $1
+      order by period, period_key, created_at`, [playerId])).rows;
+}
+
+/** Progress bump for a proven act; only current-period active rows move. */
+export async function bumpObjectiveProgress(q: Queryable, args: {
+  playerId: string; kind: ObjectiveKind; now?: Date;
+}): Promise<number> {
+  const keys = objectivePeriodKeys(args.now ?? new Date());
+  const { rowCount } = await q.query(
+    `update player_objective
+        set progress = least(progress + 1, target)
+      where player_id = $1 and kind = $2 and status = 'active'
+        and ((period = 'daily' and period_key = $3) or (period = 'weekly' and period_key = $4))`,
+    [args.playerId, args.kind, keys.daily, keys.weekly]);
+  return rowCount ?? 0;
+}
+
+/**
+ * Claim a completed objective: marks it claimed and grants the reward as
+ * earned shield seconds under an effect-keyed receipt, atomically in tx.
+ */
+export async function claimObjectiveTx(tx: PoolClient, args: {
+  objectiveId: string; playerId: string;
+}): Promise<{ rewardSeconds: number } | { error: string }> {
+  const { rows } = await tx.query<ObjectiveRow>(
+    `select * from player_objective where objective_id = $1 for update`, [args.objectiveId]);
+  const obj = rows[0];
+  if (!obj || obj.player_id !== args.playerId) return { error: 'NOT_FOUND' };
+  if (obj.status !== 'active') return { error: 'NOT_ACTIVE' };
+  if (obj.progress < obj.target) return { error: 'INCOMPLETE' };
+  await tx.query(
+    `update player_objective set status = 'claimed', claimed_at = clock_timestamp()
+      where objective_id = $1`, [obj.objective_id]);
+  await grantShieldSeconds(tx, {
+    playerId: args.playerId, kind: 'earned', seconds: obj.reward_seconds,
+    effectKey: `objective:${obj.objective_id}`,
+  });
+  return { rewardSeconds: obj.reward_seconds };
+}

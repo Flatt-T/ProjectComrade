@@ -179,7 +179,22 @@ export const api = {
   mmoRegions: () => get<MmoRegionsResponse>('/api/mmo/regions'),
   mmoTransfers: () => get<MmoTransfersResponse>('/api/mmo/transfers'),
   mmoAlliance: () => get<MmoAllianceResponse>('/api/mmo/alliance'),
+  mmoObjectives: () => get<MmoObjectivesResponse>('/api/mmo/objectives'),
 };
+
+export interface MmoObjectiveRow {
+  objectiveId: string;
+  kind: string;
+  period: 'daily' | 'weekly';
+  periodKey: string;
+  title: string;
+  target: number;
+  progress: number;
+  status: 'active' | 'claimed' | 'expired';
+  rewardSeconds: number;
+  claimedAt: string | null;
+}
+export interface MmoObjectivesResponse { objectives: MmoObjectiveRow[] }
 
 export interface MmoPlayerRow {
   player_id: string;

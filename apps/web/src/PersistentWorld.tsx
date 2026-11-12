@@ -15,8 +15,8 @@ import type {
 } from '@comrade/contracts';
 import { api } from './api';
 import type {
-  MmoAllianceResponse, MmoPlayersResponse, MmoProtectionResponse, MmoRegionsResponse,
-  MmoTradeOffersResponse, MmoTransfersResponse,
+  MmoAllianceResponse, MmoObjectivesResponse, MmoPlayersResponse, MmoProtectionResponse,
+  MmoRegionsResponse, MmoTradeOffersResponse, MmoTransfersResponse,
 } from './api';
 import { typingIn } from './help';
 
@@ -106,6 +106,9 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   const [chat, setChat] = useState<{ channel: string; fromId: string; fromName: string; text: string }[]>([]);
   const [chatChannel, setChatChannel] = useState<'region' | 'alliance'>('region');
   const [chatText, setChatText] = useState('');
+  // PW19: daily/weekly objectives — progress is server-bumped; claims are
+  // journaled world actions that grant earned shield seconds.
+  const [objectives, setObjectives] = useState<MmoObjectivesResponse | null>(null);
 
   useEffect(() => {
     let game: Game | null = null;
@@ -201,6 +204,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       void api.mmoRegions().then(setRegions).catch(() => undefined);
       void api.mmoTransfers().then(setTransfers).catch(() => undefined);
       void api.mmoAlliance().then(setAlliance).catch(() => undefined);
+      void api.mmoObjectives().then(setObjectives).catch(() => undefined);
     };
     loadWorld();
     const worldTimer = window.setInterval(loadWorld, 15_000);
@@ -447,6 +451,15 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     if (!text) return;
     connRef.current?.command({ t: 'chat', channel: chatChannel, text });
     setChatText('');
+  }
+
+  // PW19: objective claims are journaled; the reward lands as earned shield
+  // seconds only after the server accepts.
+  function claimObjective(objectiveId: string) {
+    connRef.current?.command({ t: 'objectiveClaim', objectiveId });
+    setNotice('Claim sent…');
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoObjectives().then(setObjectives).catch(() => undefined), 1500);
   }
 
   // PW19: alliance intents — create/invite/join/leave are journaled world
@@ -847,6 +860,25 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         ))}
         {players && players.players.length <= 1 &&
           <div className="notes-empty">No other players in this world yet.</div>}
+        <div className="notes-head"><b>Objectives</b>
+          <span className="notes-prefs">{objectives ? `${objectives.objectives.filter(o => o.status === 'active').length} active` : '…'}</span>
+        </div>
+        {!objectives && <div className="notes-empty">Loading…</div>}
+        {objectives?.objectives.filter(o => o.status !== 'expired').map(o => (
+          <div key={o.objectiveId} className="note">
+            <span>
+              <b>{o.period === 'weekly' ? 'Weekly' : 'Daily'}</b> — {o.title}
+              {' '}({o.progress}/{o.target}) → {fmtDur(o.rewardSeconds)} earned shield
+              {o.status === 'claimed' ? ' · claimed' : ''}
+            </span>
+            <span className="notes-prefs">
+              {o.status === 'active' && o.progress >= o.target &&
+                <button onClick={() => claimObjective(o.objectiveId)}>Claim</button>}
+            </span>
+          </div>
+        ))}
+        {objectives && objectives.objectives.every(o => o.status === 'expired') &&
+          <div className="notes-empty">No objectives yet.</div>}
       </div>}
       {showAlliance && <div className="notes-panel">
         <div className="notes-head"><b>Alliance</b>

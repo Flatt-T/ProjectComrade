@@ -11,10 +11,11 @@ import {
   closeMmoDatabase, mmoOne, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import {
-  alliancePermission, allianceForPlayer, allianceMembers, createPlayer,
-  playerConnected, playerDisconnected, playerPresence, presenceIsOnline,
-  releaseRegionLease,
+  alliancePermission, allianceForPlayer, allianceMembers, bumpObjectiveProgress,
+  createPlayer, ensureObjectives, listObjectives, playerConnected, playerDisconnected,
+  playerPresence, presenceIsOnline, releaseRegionLease,
 } from '../../apps/service/src/mmo/store.js';
+import { mmoDb } from '../../apps/service/src/mmo/db.js';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
 import { journalTail } from '../../apps/service/src/mmo/commands.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
@@ -363,5 +364,38 @@ describeDb('mmo alliances, presence and caretaker (real PostgreSQL + runner)', (
     expect(fan?.payload.channel).toBe('alliance');
     expect(fan?.payload.allianceId).toBe(guildId);
     expect(fan?.payload.fromName).toBe(p0().displayName);
+  }, 30_000);
+
+  it('objectives: journaled claim grants earned shield seconds exactly once', async () => {
+    const pid = p0().playerId;
+    const r = PERSISTENT_RULES_V1.rewards;
+    await ensureObjectives(mmoDb(), {
+      worldId: ctx.fx.worldId, playerId: pid,
+      dailyCount: r.dailyObjectives, dailySeconds: r.dailyObjectiveShieldSeconds,
+      weeklySeconds: r.weeklyObjectiveShieldSeconds,
+    });
+    // Complete every kind so at least one active objective is claimable.
+    for (const kind of ['site_capture', 'barter_complete', 'transfer_unit', 'unpack_building'] as const) {
+      await bumpObjectiveProgress(mmoDb(), { playerId: pid, kind });
+      await bumpObjectiveProgress(mmoDb(), { playerId: pid, kind });
+    }
+    const ready = (await listObjectives(pid)).find(o => o.status === 'active' && o.progress >= o.target);
+    expect(ready).toBeTruthy();
+    const before = await mmoOne<{ seconds_remaining: string }>(
+      `select seconds_remaining::text from shield_balance where player_id = $1 and kind = 'earned'`, [pid]);
+    const claim = await worldAction(ctx, pid, { t: 'objectiveClaim', objectiveId: ready!.objective_id });
+    expect(claim.accepted).toBe(true);
+    expect(claim.rewardSeconds).toBe(ready!.reward_seconds);
+    const after = await mmoOne<{ seconds_remaining: string }>(
+      `select seconds_remaining::text from shield_balance where player_id = $1 and kind = 'earned'`, [pid]);
+    expect(BigInt(after!.seconds_remaining) - BigInt(before?.seconds_remaining ?? '0'))
+      .toBe(BigInt(ready!.reward_seconds));
+    // Second claim of the same objective rejects.
+    const again = await worldAction(ctx, pid, { t: 'objectiveClaim', objectiveId: ready!.objective_id });
+    expect(again.accepted).toBe(false);
+    expect(again.reason).toBe('NOT_ACTIVE');
+    // Another player's objective id cannot be claimed.
+    const foreign = await worldAction(ctx, p1().playerId, { t: 'objectiveClaim', objectiveId: ready!.objective_id });
+    expect(foreign.accepted).toBe(false);
   }, 30_000);
 });
