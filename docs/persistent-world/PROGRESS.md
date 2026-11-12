@@ -230,3 +230,30 @@ acceptance detail; this file is the resume point. Read it first in every session
   relative imports now carry `.js` (commit on the PW08 branch).
 - Open: hibernation look-ahead covers scheduled jobs and pending journal
   input; cross-region inbound transfers waking a region land with PW10+.
+
+### PW23 - THU-2275 - persistent pacing profile and anti-snowball rules - 2026-11-11
+
+- State: implemented on branch `thu-2275-pw23-pacing-profile` (PR pending).
+- Deliverables: `MmoRulesProfile` extended with every COMRADE 18 §2.4/§3 tunable
+  in one validated place (`structureHpMultiplier`, `armySupply`, `maxCompounds`,
+  `baseLevelMinutes`, `powerScoreWeights`, `spawnRegionPowerBandRatio`,
+  `spawnCohortBaselineScore`); engine `MmoTuning` carried through
+  `GameSetup`/snapshot/restore and ignored entirely outside persistent mode;
+  structure HP scaling at spawn; supply cap gating queue admission and production;
+  per-minute supply upkeep inside `step()` and `fastForwardQuiescent`;
+  compound cap inside `canPlace` (ghost, AI and place command share the gate);
+  `computePowerScore`/`powerScoreMismatch`/`spawnRegionInBand` contracts;
+  runner persists member power scores at every checkpoint (schema v5
+  `world_member.power_score`); `apps/service/src/mmo/spawn.ts` frontier
+  selection + frontier-region generation.
+- Proven: `vitest run tests/unit/fusion-pacing.test.ts` 14/14 incl. balance
+  harness `[pw23-balance] small: 14.0 min, medium: 24.7 min, large: 30.0 min vs
+  20 tanks` (developed-base band 20-30 min met at multiplier 25);
+  `tests/unit/mmo-contracts.test.ts` profile validation cases;
+  `vitest run tests/integration/mmo-pacing.test.ts` 4/4 against real
+  PostgreSQL + real Fusion (checkpoint power-score persistence, in-band frontier
+  join, out-of-band frontier generation, empty-world first spawn).
+- Open: anti-snowball reward suppression is contracted and unit-tested; wiring it
+  into salvage/ladder payouts lands with PW24/PW26. Frontier join places the
+  newcomer in the world + region roster selection; the join command into a live
+  region sim is exercised by PW11 settlement work.

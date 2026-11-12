@@ -18,7 +18,7 @@ import {
   type Command, type Entity, type GameSetup, type RulePack,
 } from '@comrade/fusion';
 import {
-  mmoSimEntityId, PERSISTENT_RULES_V1,
+  computePowerScore, mmoSimEntityId, PERSISTENT_RULES_V1,
   type MmoAction, type MmoRulesProfile, type MmoSimAction, type MmoWorldAction,
 } from '@comrade/contracts';
 import { mmoOne, mmoTransaction } from './db.js';
@@ -26,7 +26,7 @@ import {
   acquireRegionLease, appendRegionEvent, assertRegionFence, claimDueJobs, finishJobTx,
   getRegion, latestSnapshot, listUnappliedRegionEvents, markRegionEventApplied,
   reclaimExpiredJobs, recordSnapshot, releaseJobClaim, releaseRegionLease, setRegionLifecycle,
-  setRegionSimStart, MmoStoreError, type RegionRow,
+  setRegionSimStart, updateMemberPowerScores, MmoStoreError, type RegionRow,
 } from './store.js';
 import { journalTail } from './commands.js';
 import { mmoQuery } from './db.js';
@@ -222,6 +222,13 @@ export class RegionRunner {
         credits: spec.credits, techLevel: spec.techLevel, worms: spec.worms,
         renewal: spec.renewal, superCharge: spec.superCharge, crates: spec.crates,
         doctrine: spec.doctrine,
+        // PW23 pacing: every tunable comes from the pinned rules profile.
+        mmo: {
+          structureHpMultiplier: this.opts.rules.structureHpMultiplier,
+          supplyCap: this.opts.rules.armySupply.cap,
+          upkeepPerPointPerMinute: this.opts.rules.armySupply.upkeepPerPointPerMinute,
+          maxCompounds: this.opts.rules.maxCompounds,
+        },
         players: spec.players.map(p => ({ name: p.name, faction: p.faction, ai: false })),
       };
       this.game = new Game(setup);
@@ -813,9 +820,28 @@ export class RegionRunner {
       this.lastCheckpointTick = this.game.tick;
       this.stats.checkpoints++;
       this.opts.log('region-checkpoint', { regionId: this.opts.regionId, tick: this.game.tick, reason });
+      await this.persistPowerScores();
     } finally {
       if (this.running) await setRegionLifecycle(this.opts.regionId, 'active');
     }
+  }
+
+  /**
+   * Recompute and persist every member's power score from live asset totals
+   * (PW23). Runs at each checkpoint — asset changes are journaled, so checkpoint
+   * cadence bounds staleness without per-tick writes.
+   */
+  private async persistPowerScores(): Promise<void> {
+    if (!this.game || !this.region?.world_id) return;
+    const playerIdBySlot = new Map<number, string>();
+    for (const [playerId, slot] of this.slotByPlayer) playerIdBySlot.set(slot, playerId);
+    const w = this.opts.rules.powerScoreWeights;
+    const scores = this.game.players.flatMap((p, slot) => {
+      const playerId = playerIdBySlot.get(slot);
+      if (!playerId) return [];
+      return [{ playerId, score: computePowerScore(this.game!.assetTotals(p), w) }];
+    });
+    if (scores.length) await updateMemberPowerScores(this.region.world_id, scores);
   }
 
   /** Checkpoint, release the lease and stop. Safe to call twice. */

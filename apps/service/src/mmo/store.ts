@@ -87,6 +87,29 @@ export async function joinWorld(worldId: string, playerId: string): Promise<void
     [worldId, playerId]);
 }
 
+/**
+ * Persist recomputed power scores for a world's members (PW23). Called by the
+ * region runner at checkpoints; scores are derived read-model state, so a plain
+ * upsert is correct — the journal remains the authority for asset changes.
+ */
+export async function updateMemberPowerScores(
+  worldId: string, scores: { playerId: string; score: number }[],
+): Promise<void> {
+  for (const s of scores) {
+    await mmoQuery(
+      `update world_member set power_score = $3
+        where world_id = $1 and player_id = $2`,
+      [worldId, s.playerId, Math.max(0, Math.round(s.score))]);
+  }
+}
+
+/** Power scores of a world's members, for frontier spawn-band checks (PW23). */
+export async function memberPowerScores(worldId: string): Promise<{ playerId: string; score: number }[]> {
+  const rows = await mmoQuery<{ player_id: string; power_score: string }>(
+    `select player_id, power_score from world_member where world_id = $1`, [worldId]);
+  return rows.map(r => ({ playerId: r.player_id, score: Number(r.power_score) }));
+}
+
 export async function createRegion(args: {
   regionId?: string; worldId: string; label?: string; seed?: unknown;
   rulesetVersion: string; engineArtifactSha256: string;

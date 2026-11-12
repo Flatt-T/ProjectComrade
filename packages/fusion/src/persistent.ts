@@ -11,7 +11,7 @@
 // `game.hooks` after restore. The map's static layers are regenerated from
 // pack + preset + seed; only the mutable layers (occupied, res) are stored.
 import { Rng } from './core.js';
-import { Game, type Command, type Entity, type Player } from './game.js';
+import { Game, type Command, type Entity, type MmoTuning, type Player } from './game.js';
 import type { AIState } from './ai.js';
 import { generateMap, type MapData } from './map.js';
 import type { Doctrine, MapPreset, RulePack } from './rules.js';
@@ -80,7 +80,7 @@ export interface SnapshotMeta {
 
 export interface GameSnapshotV1 {
   v: 1;
-  setup: { packId: string; mapId: string; seed: number; persistent: boolean };
+  setup: { packId: string; mapId: string; seed: number; persistent: boolean; mmo?: MmoTuning };
   state: {
     tick: number; market: number; over: boolean; winnerTeam: number;
     rngState: number; nextId: number; powerDirty: boolean; startMoney: number;
@@ -124,7 +124,7 @@ export function captureGame(game: Game, meta: SnapshotMeta): string {
     v: 1,
     setup: {
       packId: game.pack.id, mapId: game.mapPreset.id, seed: meta.seed,
-      persistent: game.persistent,
+      persistent: game.persistent, mmo: game.mmo,
     },
     state: {
       tick: game.tick, market: game.market, over: game.over, winnerTeam: game.winnerTeam,
@@ -197,6 +197,7 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   g.superCharge = snap.state.superCharge;
   g.crateRate = snap.state.crateRate;
   g.persistent = snap.setup.persistent;
+  g.mmo = g.persistent ? snap.setup.mmo : undefined;
   g.hooks = {};
   return game;
 }

@@ -246,6 +246,26 @@ describe('world configuration and decisions', () => {
     expect(() => parseMmoWorldConfig({ ...base, profile: { ...PERSISTENT_RULES_V1, maxCompounds: -1 } })).toThrow();
     expect(() => parseMmoWorldConfig({ ...base, profile: { ...PERSISTENT_RULES_V1, powerScoreSalvageFloorRatio: 4 } })).toThrow();
   });
+
+  it('rules profile validates the PW23 pacing tunables', () => {
+    const bad = (patch: Record<string, unknown>) =>
+      parseMmoWorldConfig({ ...base, profile: { ...PERSISTENT_RULES_V1, ...patch } });
+    // Every new tunable is required — no silent defaults inside a world config.
+    for (const key of ['structureHpMultiplier', 'powerScoreWeights', 'spawnRegionPowerBandRatio', 'spawnCohortBaselineScore', 'baseLevelMinutes', 'armySupply']) {
+      const missing = { ...PERSISTENT_RULES_V1 } as Record<string, unknown>;
+      delete missing[key];
+      expect(() => parseMmoWorldConfig({ ...base, profile: missing })).toThrow(new RegExp(key));
+    }
+    expect(() => bad({ structureHpMultiplier: 0 })).toThrow();
+    expect(() => bad({ structureHpMultiplier: 101 })).toThrow();
+    expect(() => bad({ powerScoreWeights: { structure: -1, unit: 1, tech: 1 } })).toThrow();
+    expect(() => bad({ spawnRegionPowerBandRatio: 0.5 })).toThrow();
+    expect(() => bad({ spawnCohortBaselineScore: -1 })).toThrow();
+    expect(() => bad({ baseLevelMinutes: { min: 30, max: 20 } })).toThrow();
+    expect(() => bad({ armySupply: { cap: 10, upkeepPerPointPerMinute: -1 } })).toThrow();
+    // The shipped defaults parse cleanly.
+    expect(parseMmoWorldConfig(base).profile.structureHpMultiplier).toBe(PERSISTENT_RULES_V1.structureHpMultiplier);
+  });
 });
 
 describe('identities', () => {

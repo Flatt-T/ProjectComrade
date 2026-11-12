@@ -93,6 +93,15 @@ export interface MmoRulesProfile {
   allianceMaxMembers: number;
   /** Anti-snowball: power-score ratio below which a victim yields no salvage or ladder points. */
   powerScoreSalvageFloorRatio: number;
+  /** Structure durability multiplier against unit damage (persistent pacing, PW23). */
+  structureHpMultiplier: number;
+  /** Power-score weights: asset build cost is weighted per kind; tech counts upgrade levels. */
+  powerScoreWeights: { structure: number; unit: number; tech: number };
+  /** Frontier spawn: a region is a valid newcomer spawn while its strongest member's
+   *  power score stays within this ratio of the joiner's baseline score. */
+  spawnRegionPowerBandRatio: number;
+  /** Baseline power score assumed for a player with no scored assets yet (starter grant). */
+  spawnCohortBaselineScore: number;
   /** Reward catalogue (COMRADE 18 §3.4/§3.10). */
   rewards: {
     dailyObjectives: number;
@@ -130,6 +139,12 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
   },
   allianceMaxMembers: 10,
   powerScoreSalvageFloorRatio: 0.5,
+  // Calibrated by the PW23 balance harness: a developed (medium) base vs a
+  // sustained 20-tank assault takes ~25 min at 25x (small ~14, large ~30).
+  structureHpMultiplier: 25,
+  powerScoreWeights: { structure: 1, unit: 1, tech: 25 },
+  spawnRegionPowerBandRatio: 4,
+  spawnCohortBaselineScore: 20_000,
   rewards: {
     dailyObjectives: 3,
     dailyObjectiveShieldSeconds: 2 * 3600,
@@ -208,6 +223,7 @@ function parseProfile(value: unknown): MmoRulesProfile {
     'starterCreditsMultiplier', 'maxCompounds', 'recoveryCreditCap', 'earnedShieldDailyCapSeconds',
     'nightlyShieldSeconds', 'armySupply', 'baseLevelMinutes', 'recoveryMilestone', 'salvage',
     'sitesPerRegion', 'transport', 'rewards', 'hibernateInboundLookaheadMs', 'hibernateMinAwakeMs', 'powerScoreSalvageFloorRatio',
+    'structureHpMultiplier', 'powerScoreWeights', 'spawnRegionPowerBandRatio', 'spawnCohortBaselineScore',
     'allianceMaxMembers', 'recoveryBuildRoles'] as const) {
     if (v[key] === undefined) throw new Error(`Rules profile missing ${key}`);
   }
@@ -230,7 +246,13 @@ function parseProfile(value: unknown): MmoRulesProfile {
     || !isPosInt(p.transport?.seaLandingCraft?.capacityVehicles)
     || !isPosInt(p.transport?.heavyAirlift?.capacityMcv) || !isPosInt(p.transport?.heavyAirlift?.capacityCarrier)
     || !isPosInt(p.rewards?.dailyObjectives) || !isPosInt(p.rewards?.dailyObjectiveShieldSeconds)
-    || !isPosInt(p.rewards?.weeklyObjectiveShieldSeconds) || !isPosInt(p.rewards?.notificationShieldWarningMinutes)) {
+    || !isPosInt(p.rewards?.weeklyObjectiveShieldSeconds) || !isPosInt(p.rewards?.notificationShieldWarningMinutes)
+    || typeof p.structureHpMultiplier !== 'number' || p.structureHpMultiplier < 1 || p.structureHpMultiplier > 100
+    || typeof p.powerScoreWeights?.structure !== 'number' || p.powerScoreWeights.structure < 0
+    || typeof p.powerScoreWeights?.unit !== 'number' || p.powerScoreWeights.unit < 0
+    || typeof p.powerScoreWeights?.tech !== 'number' || p.powerScoreWeights.tech < 0
+    || typeof p.spawnRegionPowerBandRatio !== 'number' || p.spawnRegionPowerBandRatio < 1
+    || !isNonNegInt(p.spawnCohortBaselineScore)) {
     throw new Error('Invalid rules profile values');
   }
   return p;
@@ -798,4 +820,52 @@ export function parseMmoOperation(value: unknown): MmoOperation {
     case 'DEFEAT': uuidField('compoundId'); return { kind, compoundId: v.compoundId } as MmoOperation;
     default: throw new Error('Unknown MMO operation');
   }
+}
+
+// ---------------------------------------------------------------------------
+// Power score and anti-snowball rules (PW23, COMRADE 18 §2.4/§3.9)
+// ---------------------------------------------------------------------------
+
+/** Raw asset totals the engine reports per player; the profile weights turn them
+ *  into the power score stored on world membership. */
+export interface PowerScoreAssets {
+  /** Sum of structure build costs owned. */
+  structureCost: number;
+  /** Sum of unit build costs owned. */
+  unitCost: number;
+  /** Total upgrade levels purchased. */
+  techLevels: number;
+}
+
+export interface PowerScoreWeights {
+  structure: number;
+  unit: number;
+  tech: number;
+}
+
+/** Power score = weighted asset and tech worth. Recomputed by the region runner
+ *  whenever the asset mix changes and persisted on world_member. */
+export function computePowerScore(assets: PowerScoreAssets, weights: PowerScoreWeights): number {
+  return Math.max(0, Math.round(
+    assets.structureCost * weights.structure
+    + assets.unitCost * weights.unit
+    + assets.techLevels * weights.tech));
+}
+
+/** True when attacking `victimScore` yields no salvage and no ladder points:
+ *  the victim is far below the attacker's power score. Not blocked — only the
+ *  rewards are suppressed (COMRADE 18 §2.4). A zero-score victim counts as far
+ *  below any positive attacker score. */
+export function powerScoreMismatch(attackerScore: number, victimScore: number, floorRatio: number): boolean {
+  if (attackerScore <= 0) return false;
+  return victimScore < attackerScore * floorRatio;
+}
+
+/** Whether `region` may host a newcomer whose baseline score is `baselineScore`:
+ *  every scored member must stay within the configured power band. Unscored
+ *  members (score 0 — not yet computed) do not disqualify the region. */
+export function spawnRegionInBand(memberScores: number[], baselineScore: number, bandRatio: number): boolean {
+  const baseline = baselineScore > 0 ? baselineScore : 1;
+  const ceiling = baseline * bandRatio;
+  return memberScores.every(s => s <= 0 || s <= ceiling);
 }
