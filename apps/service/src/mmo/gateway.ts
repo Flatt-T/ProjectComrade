@@ -146,6 +146,7 @@ export class MmoGateway {
       // PW09: dropping the last socket starts the offline grace period; other
       // live sockets for the same account keep the player online.
       const now = Date.now();
+      for (const regionId of conn.subs.keys()) this.service.removeSubscriber(regionId, conn.id);
       for (const playerId of conn.present) {
         void playerDisconnected(playerId, now)
           .then(() => this.service.notifyPresence(playerId))
@@ -194,6 +195,9 @@ export class MmoGateway {
     const player = await this.service.playerFor(conn.identity, region.world_id);
     const slot = runner.slotForPlayer(player.player_id) ?? null;
     conn.subs.set(regionId, { regionId, playerId: player.player_id, slot });
+    // A live socket is presence even before settlement: the runner's
+    // quiescence check reads this set so newcomers aren't hibernated out.
+    this.service.addSubscriber(regionId, conn.id);
     // PW09 presence: one authenticated socket with a live heartbeat per count.
     // Re-subscribing on the same socket does not double-count.
     if (!conn.present.has(player.player_id)) {

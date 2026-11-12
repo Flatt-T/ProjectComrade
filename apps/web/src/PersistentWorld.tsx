@@ -72,6 +72,9 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // PW11: newcomers pick a faction, then the journaled `settle` action grants
   // the starter army and the one-hour setup protection window.
   const [needSettle, setNeedSettle] = useState(!settled);
+  // Mirrors "the durable player owns a roster slot" for the polling effect,
+  // which cannot see state updates. The ladder endpoint 400s pre-settlement.
+  const rosteredRef = useRef(settled);
   // PW25: notification inbox, channel opt-ins and the offline timeline.
   const [notes, setNotes] = useState<MmoNotification[]>([]);
   const [prefs, setPrefs] = useState<MmoNotificationPrefs | null>(null);
@@ -126,7 +129,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       onWelcome: info => {
         connRef.current = conn;
         if (info.slot !== null) slot = info.slot;
-        else setNeedSettle(true); // rostered nowhere yet — settle (or rejoin) first
+        else { rosteredRef.current = false; setNeedSettle(true); } // rostered nowhere yet — settle (or rejoin) first
       },
       onSnapshot: header => {
         const state = header.state as SnapshotState | undefined;
@@ -206,7 +209,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       void api.mmoTransfers().then(setTransfers).catch(() => undefined);
       void api.mmoAlliance().then(setAlliance).catch(() => undefined);
       void api.mmoObjectives().then(setObjectives).catch(() => undefined);
-      void api.mmoLadder().then(setLadder).catch(() => undefined);
+      if (rosteredRef.current) void api.mmoLadder().then(setLadder).catch(() => undefined);
     };
     loadWorld();
     const worldTimer = window.setInterval(loadWorld, 15_000);
@@ -242,6 +245,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         const mine = conn.playerId ? sim.players.findIndex(pl => pl.pid === conn.playerId) : -1;
         if (mine >= 0 && r.session.slot !== mine) {
           r.session.setSlot(mine); r.renderer.viewer = mine; slot = mine;
+          rosteredRef.current = true;
           setNeedSettle(false);
           const home = [...sim.entities.values()].find(e => e.owner === mine && e.hp > 0);
           if (home) { const c = sim.cellOf(home); r.renderer.centerOn(c % sim.map.w, Math.floor(c / sim.map.w)); }

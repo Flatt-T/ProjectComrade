@@ -46,6 +46,13 @@ const WAKE_POLL_MS = 5_000;
 
 export class RegionService {
   private entries = new Map<string, RunnerEntry>();
+  // Single-flight: concurrent ensure() calls share one start attempt so a
+  // burst of subscribers cannot race acquireRegionLease and orphan a winner.
+  private pending = new Map<string, Promise<RunnerEntry | undefined>>();
+  // Live subscriber sockets per region (conn id -> presence). Quiescence must
+  // see these: a connected newcomer has no settlement row yet, so the durable
+  // presence join alone would hibernate the region out from under them.
+  private subs = new Map<string, Set<string>>();
   private readonly opts: Omit<RegionRunnerOptions, 'regionId' | 'workerId'>;
   private readonly log: (event: string, data?: Record<string, unknown>) => void;
   private readonly wakePollMs: number;
@@ -68,7 +75,17 @@ export class RegionService {
     this.wakePollMs = options?.wakePollMs ?? WAKE_POLL_MS;
   }
 
-  private async entryFor(regionId: string, startIfMissing = true): Promise<RunnerEntry | undefined> {
+  private entryFor(regionId: string, startIfMissing = true): Promise<RunnerEntry | undefined> {
+    const inflight = this.pending.get(regionId);
+    if (inflight) return inflight;
+    const p = this.entryForInner(regionId, startIfMissing).finally(() => {
+      if (this.pending.get(regionId) === p) this.pending.delete(regionId);
+    });
+    this.pending.set(regionId, p);
+    return p;
+  }
+
+  private async entryForInner(regionId: string, startIfMissing: boolean): Promise<RunnerEntry | undefined> {
     const existing = this.entries.get(regionId);
     if (existing) {
       if (!existing.runner.isFailed && existing.runner.isRunning) return existing;
@@ -90,6 +107,7 @@ export class RegionService {
     // and barter) resolve through the journaled world handler by default.
     const runner = new RegionRunner({
       ...this.opts, regionId, workerId,
+      liveSubscribers: this.opts.liveSubscribers ?? (rid => this.hasSubscribers(rid)),
       worldHandler: this.opts.worldHandler ?? createWorldHandler(this.opts.rules ?? PERSISTENT_RULES_V1),
     });
     const entry: RunnerEntry = { runner, workerId, startedAt: Date.now(), restarts: existing?.restarts ?? 0, nextRestartAt: 0 };
@@ -102,7 +120,9 @@ export class RegionService {
         if (this.metrics.wakeLatenciesMs.length > 512) this.metrics.wakeLatenciesMs.shift();
       }
     } catch (error) {
-      this.entries.delete(regionId);
+      // Only remove the entry if it is still ours — a concurrent start may
+      // have already registered a healthy runner for this region.
+      if (this.entries.get(regionId) === entry) this.entries.delete(regionId);
       this.log('region-start-failed', { regionId, error: String(error) });
       throw error;
     }
@@ -112,6 +132,24 @@ export class RegionService {
   /** Ensure the region's runner is live; returns it or undefined when it cannot start. */
   async ensure(regionId: string): Promise<RegionRunner | undefined> {
     return (await this.entryFor(regionId))?.runner;
+  }
+
+  /** Register/unregister a live subscriber socket for quiescence checks. */
+  addSubscriber(regionId: string, connId: string): void {
+    let set = this.subs.get(regionId);
+    if (!set) { set = new Set(); this.subs.set(regionId, set); }
+    set.add(connId);
+  }
+
+  removeSubscriber(regionId: string, connId: string): void {
+    const set = this.subs.get(regionId);
+    if (!set) return;
+    set.delete(connId);
+    if (!set.size) this.subs.delete(regionId);
+  }
+
+  hasSubscribers(regionId: string): boolean {
+    return (this.subs.get(regionId)?.size ?? 0) > 0;
   }
 
   /** The fence a subscriber must present on submitCommand for this region. */
