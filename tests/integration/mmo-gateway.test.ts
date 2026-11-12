@@ -141,9 +141,15 @@ describeDb('mmo gateway (real PostgreSQL + real WebSocket)', () => {
       const obs = ofType(client.messages, 'observation')[0];
       expect(obs.regionId).toBe(fx.regionId);
       expect(typeof obs.checksum).toBe('number');
+
+      // Live subscribers are registered for the quiescence check — a connected
+      // newcomer has no settlement row, so the durable presence join alone
+      // would hibernate the region out from under them.
+      expect(service.hasSubscribers(fx.regionId)).toBe(true);
     } finally {
       client.close();
     }
+    await waitFor(() => !service.hasSubscribers(fx.regionId), 5_000);
   });
 
   it('streams resolved sim commands and applied results to subscribers in order', async () => {

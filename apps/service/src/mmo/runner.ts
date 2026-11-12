@@ -114,6 +114,9 @@ export interface RegionRunnerOptions {
   log?: (event: string, data?: Record<string, unknown>) => void;
   /** Persistent rules profile; hibernation tunables come from here (PW22). */
   rules?: MmoRulesProfile;
+  /** Live-subscriber probe for quiescence: a connected socket (settled or not)
+   *  keeps the region awake. Supplied by RegionService; tests may inject. */
+  liveSubscribers?: (regionId: string) => boolean;
   /** Quiescence watchdog. Enabled by default for persistent regions. */
   quiescence?: {
     enabled?: boolean;
@@ -171,10 +174,11 @@ export class RegionRunner {
     ticksStepped: 0, simMs: 0, scheduleMs: 0, eventsApplied: 0, jobsApplied: 0,
     jobErrors: 0, checkpoints: 0, catchUpTicks: 0,
   };
-  private readonly opts: Required<Omit<RegionRunnerOptions, 'now' | 'sim' | 'worldHandler' | 'jobHandlers' | 'log' | 'rules' | 'quiescence' | 'compoundSyncMs'>> & {
+  private readonly opts: Required<Omit<RegionRunnerOptions, 'now' | 'sim' | 'worldHandler' | 'jobHandlers' | 'log' | 'rules' | 'quiescence' | 'compoundSyncMs' | 'liveSubscribers'>> & {
     now: () => number; sim?: RegionSimSpec; worldHandler?: WorldActionHandler;
     jobHandlers: Record<string, ScheduledJobHandler>; log: (e: string, d?: Record<string, unknown>) => void;
     rules: MmoRulesProfile; compoundSyncMs: number;
+    liveSubscribers?: (regionId: string) => boolean;
     quiescence: { enabled: boolean; checkMs: number; minAwakeMs: number; lookaheadMs: number };
   };
 
@@ -610,8 +614,10 @@ export class RegionRunner {
     if (Number(due?.n ?? 0) !== 0) return false;
     // Connected players keep the region awake: hibernating under live sockets
     // strands them on a dead runner (commands fail REGION_UNAVAILABLE and no
-    // observations arrive to trigger resync). Only a truly unattended region
-    // may sleep — that is what the quiescent accrual is for.
+    // observations arrive to trigger resync). The durable join below only sees
+    // settled players — a newcomer choosing a faction has no settlement row —
+    // so the service's live-subscriber set counts too.
+    if (this.opts.liveSubscribers?.(this.opts.regionId)) return false;
     const present = await mmoOne<{ n: string }>(
       `select count(*)::text as n from player p
          join settlement s on s.player_id = p.player_id
