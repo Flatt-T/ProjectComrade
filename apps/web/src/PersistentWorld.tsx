@@ -9,6 +9,7 @@ import {
 } from '../../../packages/fusion/src/index';
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import { MmoConnection, PersistentSession, SnapshotState } from './mmo';
+import { mmoEntityId } from '@comrade/contracts';
 import { typingIn } from './help';
 
 type Mode = 'normal' | 'place' | 'repair' | 'attackMove' | 'super';
@@ -24,6 +25,7 @@ interface UiState {
   selection: { name: string; hp: number; max: number; count: number; own: boolean; structure: boolean } | null;
   status: string; connected: boolean; slot: number;
   supers: { id: number; name: string; frac: number; ready: boolean }[];
+  recovering: boolean;
 }
 
 export default function PersistentWorld({ regionId, settled = true, onExit }: { regionId: string; settled?: boolean; onExit: () => void }) {
@@ -93,7 +95,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         if (status !== 'applied' || r?.accepted === false) flash(`Order rejected${r?.reason ? `: ${r.reason}` : ''}`);
       },
       onError: (code, message) => flash(`${code}: ${message}`),
-      onStatus: connected => setUi(u => u ? { ...u, connected } : { tick: 0, credits: 0, storage: 0, powerGen: 0, powerUse: 0, options: {}, costs: {}, selection: null, status: connected ? '' : 'Reconnecting…', connected, slot, supers: [] }),
+      onStatus: connected => setUi(u => u ? { ...u, connected } : { tick: 0, credits: 0, storage: 0, powerGen: 0, powerUse: 0, options: {}, costs: {}, selection: null, status: connected ? '' : 'Reconnecting…', connected, slot, supers: [], recovering: false }),
     });
     conn.subscribe(regionId);
 
@@ -176,6 +178,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
               options, costs,
               selection: first ? { name: (fd?.name ?? first.type) + (first.kind === 'unit' ? RANKS[first.rank] ?? '' : ''), hp: first.hp, max: first.maxHp, count: sel.length, own: first.owner === r.session.slot, structure: first.kind === 'structure' } : null,
               status: conn.connected ? '' : 'Reconnecting…', connected: conn.connected, slot: r.session.slot, supers,
+              recovering: me.recovering === true,
             });
           }
         }
@@ -214,6 +217,18 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     mode.current = m; setModeView(m);
     if (m !== 'place') placing.current = null;
     if (m !== 'super') { superId.current = 0; superFrom.current = null; }
+  }
+
+  // PW12: the player's choice ends recovery early — ordinary vulnerability
+  // returns at the next journal boundary. compoundId is advisory: the region
+  // resolves the active recovery episode itself.
+  function endRecovery() {
+    const r = rig.current; if (!r) return;
+    const own = [...r.game.entities.values()].find(e => e.owner === r.session.slot && e.hp > 0);
+    const compoundId = own ? mmoEntityId(regionId, own.id) : mmoEntityId(regionId, 0);
+    connRef.current?.command({ t: 'endRecovery', compoundId });
+    setNotice('Ending recovery…');
+    window.setTimeout(() => setNotice(''), 4000);
   }
 
   // PW11: send the journaled settle intent; the server picks the spawn cell and
@@ -410,6 +425,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
           <span className="res tick">t{ui.tick}</span>
         </>}
         <span className={`conn ${ui?.connected ? 'ok' : 'bad'}`}>{ui?.connected ? 'LIVE' : 'OFFLINE'}</span>
+        {ui?.recovering && <span className="res recovering">RECOVERY</span>}
       </div>
       <div className="tabs">
         {ALL_TABS.map(t => <button key={t.id} className={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>{t.label}</button>)}
@@ -430,6 +446,10 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         <b>{ui.selection.name}</b>
         <span>{Math.max(0, Math.round(ui.selection.hp))}/{ui.selection.max} · ×{ui.selection.count}</span>
         <div className="hp"><i style={{ width: `${ui.selection.max ? (ui.selection.hp / ui.selection.max) * 100 : 0}%` }} /></div>
+      </div>}
+      {ui?.recovering && <div className="recovery-banner">
+        <span>Rebuilding protected — yard, power, refinery and barracks only.</span>
+        <button onClick={endRecovery}>End recovery</button>
       </div>}
       {ui?.supers.length ? <div className="supers">
         {ui.supers.map(s => <div key={s.id} className={`super ${s.ready ? 'ready' : ''}`}>

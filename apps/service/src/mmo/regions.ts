@@ -4,9 +4,9 @@
 // need to submit commands. Everything here is inert unless MMO_DATABASE_URL is set.
 import { createHash, randomUUID } from 'node:crypto';
 import { mmoOne, mmoQuery } from './db.js';
-import { getRegion, joinWorld, createPlayer, protectionRegionsForPlayer, MmoStoreError, type RegionRow } from './store.js';
+import { getRegion, getSettlement, joinWorld, createPlayer, protectionRegionsForPlayer, MmoStoreError, type RegionRow } from './store.js';
 import { RegionRunner, type RegionRunnerOptions } from './runner.js';
-import { createWorldHandler, pokeProtectionEval } from './world.js';
+import { createWorldHandler, pokeProtectionEval, pokeRecoveryEval } from './world.js';
 import { authEnabled } from '../config.js';
 import { PERSISTENT_RULES_V1, MMO_PROTOCOL, MMO_RULESET_VERSION, type MmoSnapshotHeader } from '@comrade/contracts';
 
@@ -223,6 +223,16 @@ export class RegionService {
       // the grace window as online and correctly does nothing).
       await pokeProtectionEval(regionId, now);
       await pokeProtectionEval(regionId, now + graceMs);
+      // PW12: a returning player may need a recovery grant, milestone check or
+      // attack-end — poke the recovery evaluator in the same regions.
+      await pokeRecoveryEval(regionId, now);
+    }
+    // A wiped player has no compound, so protectionRegionsForPlayer misses
+    // their settlement region — poke it explicitly so a returning evacuee is
+    // granted the recovery MCV promptly.
+    const settlement = await getSettlement(playerId).catch(() => null);
+    if (settlement && !regions.includes(settlement.region_id)) {
+      await pokeRecoveryEval(settlement.region_id, now);
     }
   }
 

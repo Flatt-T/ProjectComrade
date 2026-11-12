@@ -14,11 +14,11 @@
 import type { PoolClient } from 'pg';
 import { randomUUID } from 'node:crypto';
 import {
-  Game, PACKS, captureGame, restoreGame,
+  Game, PACKS, captureGame, restoreGame, isMcvUnit, nearestCell, passable, starterPicks, structureRoles, toCell,
   type Command, type Entity, type GameSetup, type RulePack,
 } from '@comrade/fusion';
 import {
-  computePowerScore, mmoEntityId, mmoSimEntityId, PERSISTENT_RULES_V1,
+  computePowerScore, mmoEntityId, mmoSimEntityId, newProtection, PERSISTENT_RULES_V1,
   parseProtectionRecord, protectionTransition,
   type MmoAction, type MmoRulesProfile, type MmoSimAction, type MmoWorldAction,
   type ProtectionEvent, type ProtectionRecord,
@@ -28,8 +28,10 @@ import {
   acquireRegionLease, appendRegionEvent, applyShieldTransition, assertRegionFence,
   claimDueJobs, finishJobTx, getRegion, latestSnapshot, listUnappliedRegionEvents,
   markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot,
-  releaseJobClaim, releaseRegionLease, scheduleJob, setRegionLifecycle, setRegionSimStart,
-  syncCompounds, updateMemberPowerScores, updateSettlementProtection, MmoStoreError, type RegionRow,
+  releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
+  syncCompounds, updateMemberPowerScores, updateSettlementProtection,
+  openRecoveryEpisode, closeRecoveryEpisode,
+  MmoStoreError, type ProtectionRow, type RegionRow,
 } from './store.js';
 import { journalTail } from './commands.js';
 import { mmoQuery } from './db.js';
@@ -72,6 +74,8 @@ export type WorldActionHandler = (
     slotOf: (playerId: string) => number | undefined;
     /** Live sim access (read-only) for spawn placement and roster checks. */
     game?: () => Game | undefined;
+    /** Resolve a durable entity id to a live sim id (bound assets, then the bridge). */
+    simIdFor?: (durableId: string) => number | null;
     /** Fence epoch and sim tick for durable operation audit rows. */
     epoch?: string; tick?: number;
   },
@@ -267,6 +271,8 @@ export class RegionRunner {
           upkeepPerPointPerMinute: this.opts.rules.armySupply.upkeepPerPointPerMinute,
           maxCompounds: this.opts.rules.maxCompounds,
           shieldRadiusCells: this.opts.rules.shieldRadiusCells,
+          recoveryCreditCap: this.opts.rules.recoveryCreditCap,
+          recoveryBuildRoles: this.opts.rules.recoveryBuildRoles,
         },
         players: spec.players.map(p => ({
           name: p.name, faction: p.faction, ai: false,
@@ -312,6 +318,7 @@ export class RegionRunner {
     // current before the first live tick — a restored snapshot may predate them.
     await this.syncCompoundsNow();
     await this.ensureProtectionEval();
+    await this.ensureRecoveryEval();
     await setRegionLifecycle(this.opts.regionId, 'active');
 
     this.running = true;
@@ -721,7 +728,8 @@ export class RegionRunner {
         const handled = await this.opts.worldHandler(tx, action as MmoWorldAction, {
           regionId: this.opts.regionId, playerId, slot,
           slotOf: pid => this.slotForPlayer(pid),
-          game: () => this.game, epoch: this.epoch, tick: this.game?.tick ?? 0,
+          game: () => this.game, simIdFor: id => this.simIdFor(id),
+          epoch: this.epoch, tick: this.game?.tick ?? 0,
         });
         const atTick = this.game!.tick + 1;
         const simCommands = (handled.sim ?? []).map(s => {
@@ -886,6 +894,7 @@ export class RegionRunner {
       return { expired: rowCount === 1, compoundId };
     }
     if (job.kind === 'protection_eval') return this.protectionEval(tx, meta?.eventSeq ?? '0');
+    if (job.kind === 'recovery_eval') return this.recoveryEval(tx, meta?.eventSeq ?? '0');
     return { ignored: `unknown job kind ${job.kind}` };
   }
 
@@ -1170,6 +1179,308 @@ export class RegionRunner {
     await scheduleJob({
       regionId: this.opts.regionId, kind: 'protection_eval', dueAtMs: now,
       dedupeKey: `prot_eval:${this.opts.regionId}:poke:${Math.floor(now / 5000)}`,
+      payload: { reason: 'boot' },
+    }).catch(() => undefined);
+  }
+
+  // ------------------------------------------------------------------
+  // PW12: sell-for-credit evacuation defeat and protected MCV recovery
+  // ------------------------------------------------------------------
+
+  /**
+   * Recovery evaluation (COMRADE 18 §3.5). Runs as a journaled scheduled job so
+   * every durable transition — episode open/close, protection record, grant and
+   * end operations — commits atomically with the sim mirrors it fans out.
+   *
+   * Two directions per pass:
+   *  - ACTIVE episodes: count the milestone (power + barracks structures),
+   *    honour the engine's recoveryAttacked flag, persist transitions, mirror
+   *    setRecovery, and close the episode exactly once.
+   *  - DETECTION: a rostered player with no live compound anywhere in the
+   *    world and no deployed building, packed carrier or MCV in this region's
+   *    sim qualifies for the bound recovery MCV. openRecoveryEpisode's partial
+   *    unique index makes concurrent grants impossible.
+   *
+   * The eval reschedules itself every 15 s while the region has players;
+   * quiescent regions hold the chain as a pending job until wake.
+   */
+  private async recoveryEval(tx: PoolClient, eventSeq: string): Promise<unknown> {
+    const now = this.opts.now();
+    const rules = this.opts.rules;
+    const g = this.game;
+    const stats = { active: 0, granted: 0, ended: 0, mirrored: 0 };
+
+    const { rows: worldRows } = await tx.query<{ world_id: string }>(
+      'select world_id from region where region_id = $1', [this.opts.regionId]);
+    const worldId = worldRows[0]?.world_id;
+    if (!worldId) return { error: 'NO_WORLD' };
+
+    interface ActiveRow {
+      episode_id: string; compound_id: string; player_id: string;
+      status: 'active'; generation: string; armed_seconds: string;
+      online_ms: string; online_since_ms: string | null; lapse_at_ms: string | null;
+      started_at_ms: string | null; ends_at_ms: string | null;
+      milestone_power: string; milestone_barracks: string;
+    }
+    const { rows: active } = await tx.query<ActiveRow>(
+      `select re.episode_id, pr.compound_id, pr.player_id, pr.status, pr.generation::text,
+              pr.armed_seconds::text, pr.online_ms::text, pr.online_since_ms::text,
+              pr.lapse_at_ms::text, pr.started_at_ms::text, pr.ends_at_ms::text,
+              pr.milestone_power::text, pr.milestone_barracks::text
+         from recovery_episode re
+         join protection_record pr on pr.compound_id = re.episode_id and pr.kind = 'RECOVERY'
+        where re.region_id = $1 and re.status = 'active' and pr.status = 'active'`,
+      [this.opts.regionId]);
+    stats.active = active.length;
+    const activePlayerIds = new Set(active.map(r => r.player_id));
+
+    const toRow = (rec: ProtectionRecord, playerId: string): ProtectionRow => ({
+      compound_id: rec.compoundId, player_id: playerId, kind: 'RECOVERY',
+      status: rec.status, generation: String(rec.generation), armed_seconds: String(rec.armedSeconds),
+      online_ms: String(rec.onlineMs),
+      online_since_ms: rec.onlineSinceMs !== null ? String(rec.onlineSinceMs) : null,
+      lapse_at_ms: rec.lapseAtMs !== null ? String(rec.lapseAtMs) : null,
+      started_at_ms: rec.startedAtMs !== null ? String(rec.startedAtMs) : null,
+      ends_at_ms: rec.endsAtMs !== null ? String(rec.endsAtMs) : null,
+      milestone_power: String(rec.milestonePower), milestone_barracks: String(rec.milestoneBarracks),
+    });
+    const fromRow = (row: ActiveRow): ProtectionRecord => ({
+      kind: 'RECOVERY', status: 'active', compoundId: row.compound_id, ownerId: row.player_id,
+      generation: row.generation, onlineMs: Number(row.online_ms),
+      onlineSinceMs: row.online_since_ms !== null ? Number(row.online_since_ms) : null,
+      lapseAtMs: row.lapse_at_ms !== null ? Number(row.lapse_at_ms) : null,
+      armedSeconds: Number(row.armed_seconds),
+      startedAtMs: row.started_at_ms !== null ? Number(row.started_at_ms) : null,
+      endsAtMs: row.ends_at_ms !== null ? Number(row.ends_at_ms) : null,
+      milestonePower: Number(row.milestone_power), milestoneBarracks: Number(row.milestone_barracks),
+    });
+    /** Journaled sim mirror for a recovery flag flip (same pattern as setShield). */
+    const mirrorRecovery = async (slot: number, on: boolean) => {
+      if (!g) return;
+      const atTick = g.tick + 1;
+      g.enqueue(-1, { t: 'setRecovery', slot, on }, atTick);
+      await tx.query(
+        `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,'mmo.sim',$4)`,
+        [randomUUID(), this.opts.regionId, eventSeq, JSON.stringify({
+          eventSeq, atTick, slot: -1,
+          command: { t: 'setRecovery', slot, on },
+          epoch: this.epoch,
+        })]);
+      stats.mirrored++;
+    };
+
+    for (const row of active) {
+      const slot = this.slotForPlayer(row.player_id);
+      const p = slot !== undefined ? g?.players[slot] : undefined;
+      let rec = fromRow(row);
+      let dirty = false;
+      let endStatus: 'completed' | 'abandoned' | null = null;
+
+      if (p?.recoveryAttacked) {
+        // Attacking another player ends recovery at once (COMRADE 18 §2.6).
+        rec = protectionTransition(rec, { t: 'player_attack', atMs: now }, rules);
+        endStatus = 'abandoned';
+        dirty = true;
+      } else if (g && slot !== undefined) {
+        // Milestone: one power structure + one barracks-equivalent standing.
+        let power = 0, barracks = 0;
+        for (const e of g.entities.values()) {
+          if (e.owner !== slot || e.hp <= 0 || e.kind !== 'structure') continue;
+          const roles = structureRoles(g.structDef(e));
+          if (roles.includes('power')) power++;
+          if (roles.includes('barracks')) barracks++;
+        }
+        if (power !== rec.milestonePower || barracks !== rec.milestoneBarracks) {
+          rec = protectionTransition(rec, { t: 'milestone', power, barracks, atMs: now }, rules);
+          dirty = true;
+          if (rec.status === 'ended') endStatus = 'completed';
+        }
+      }
+
+      if (rec.status === 'ended') {
+        await saveProtectionRecord(tx, toRow(rec, row.player_id));
+        await closeRecoveryEpisode(row.episode_id, endStatus ?? 'completed', tx);
+        if (slot !== undefined && p && p.recovering) await mirrorRecovery(slot, false);
+        if (this.epoch !== undefined) {
+          await tx.query(
+            `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+             values ($1,$2,$3,$4,'RECOVERY_TRANSITION',$5,$6)`,
+            [randomUUID(), this.opts.regionId, this.epoch, String(g?.tick ?? 0),
+             JSON.stringify({ kind: 'RECOVERY_TRANSITION', compoundId: row.compound_id, enter: false }),
+             JSON.stringify({ episodeId: row.episode_id, reason: endStatus ?? 'milestone' })]);
+        }
+        stats.ended++;
+      } else {
+        if (dirty) { await saveProtectionRecord(tx, toRow(rec, row.player_id)); stats.mirrored++; }
+        // Self-heal the sim mirror: a restored snapshot or missed fan-out must
+        // not leave the flag off while the durable record says active.
+        if (g && p && slot !== undefined && !p.recovering) await mirrorRecovery(slot, true);
+        // Crash safety: the recovery MCV is recoveryProtected and cannot be
+        // destroyed or sold, so under an active episode a missing MCV AND a
+        // missing deployed structure means the grant command was lost between
+        // commit and apply. Re-issue it — grantRecovery is idempotent in the
+        // engine, so a duplicate is harmless.
+        if (g && slot !== undefined) {
+          let hasMcv = false, hasStruct = false;
+          for (const e of g.entities.values()) {
+            if (e.owner !== slot || e.hp <= 0) continue;
+            if (e.kind === 'structure') hasStruct = true;
+            else if (e.kind === 'unit' && isMcvUnit(g.unitDef(e))) hasMcv = true;
+          }
+          if (!hasMcv && !hasStruct) {
+            const cell = await this.recoverySpawnCell(g, slot, row.player_id, tx);
+            const atTick = g.tick + 1;
+            g.enqueue(-1, { t: 'grantRecovery', slot, cell }, atTick);
+            await tx.query(
+              `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,'mmo.sim',$4)`,
+              [randomUUID(), this.opts.regionId, eventSeq, JSON.stringify({
+                eventSeq, atTick, slot: -1,
+                command: { t: 'grantRecovery', slot, cell },
+                epoch: this.epoch,
+              })]);
+            stats.granted++;
+          }
+        }
+      }
+    }
+
+    // --------------------------------------------------------------
+    // Detection: qualifying players with no active episode get the grant.
+    // --------------------------------------------------------------
+    if (g && this.slotByPlayer.size) {
+      for (const [playerId, slot] of this.slotByPlayer) {
+        if (activePlayerIds.has(playerId)) continue;
+        const p = g.players[slot];
+        if (!p) continue;
+        // No deployed building anywhere in the world: the durable compound
+        // roster covers every region (active, packed or in-transit yards).
+        const { rows: comp } = await tx.query<{ n: string }>(
+          `select count(*)::text as n from compound c
+             join region r on r.region_id = c.region_id
+            where r.world_id = $1 and c.player_id = $2 and c.state <> 'destroyed'`,
+          [worldId, playerId]);
+        if (Number(comp[0]?.n ?? 0) > 0) continue;
+        // No deployed building, packed building carrier or MCV in this sim.
+        // Surviving units do not block recovery — they are kept, unprotected.
+        let hasAnchor = false;
+        for (const e of g.entities.values()) {
+          if (e.owner !== slot || e.hp <= 0) continue;
+          if (e.kind === 'structure' || (e.kind === 'unit' && isMcvUnit(g.unitDef(e)))) {
+            hasAnchor = true; break;
+          }
+        }
+        if (hasAnchor) continue;
+        // Recovery replaces defeat — a rostered player who never settled (no
+        // starter grant, no assets ever) is not defeated and gets nothing.
+        const { rows: settled } = await tx.query<{ n: string }>(
+          'select count(*)::text as n from settlement where player_id = $1', [playerId]);
+        if (Number(settled[0]?.n ?? 0) === 0) continue;
+
+        const episode = await openRecoveryEpisode({ playerId, worldId, regionId: this.opts.regionId }, tx);
+        if (!episode.created) continue; // A concurrent eval won; it owns the grant.
+        const episodeId = episode.episodeId;
+        const rec = newProtection('RECOVERY', episodeId, playerId, now, rules);
+        await saveProtectionRecord(tx, toRow(rec, playerId));
+        const cell = await this.recoverySpawnCell(g, slot, playerId, tx);
+        if (this.epoch !== undefined) {
+          await tx.query(
+            `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+             values ($1,$2,$3,$4,'RECOVERY_GRANT',$5,$6)`,
+            [randomUUID(), this.opts.regionId, this.epoch, String(g.tick),
+             JSON.stringify({ kind: 'RECOVERY_GRANT', playerId, regionId: this.opts.regionId, x: cell % g.map.w, y: Math.floor(cell / g.map.w) }),
+             JSON.stringify({ episodeId, cell })]);
+        }
+        // Journaled sim mirrors: the bound MCV spawns and the player enters
+        // recovery at the same tick boundary on every replica.
+        const atTick = g.tick + 1;
+        g.enqueue(-1, { t: 'grantRecovery', slot, cell }, atTick);
+        g.enqueue(-1, { t: 'setRecovery', slot, on: true }, atTick);
+        for (const command of [
+          { t: 'grantRecovery', slot, cell },
+          { t: 'setRecovery', slot, on: true },
+        ] as Command[]) {
+          await tx.query(
+            `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,'mmo.sim',$4)`,
+            [randomUUID(), this.opts.regionId, eventSeq, JSON.stringify({
+              eventSeq, atTick, slot: -1, command, epoch: this.epoch,
+            })]);
+        }
+        stats.granted++;
+      }
+    }
+
+    // Chain the eval only while someone is actually playing: an all-offline
+    // region must be free to hibernate (PW21/PW22), and offline evacuees are
+    // covered by the connect poke, the sell poke and the boot ensure. Active
+    // episodes with everyone offline need no prompt pass — milestones require
+    // building and attacks require a live aggressor, both of which mean someone
+    // is online somewhere in the roster.
+    let anyOnline = false;
+    if (this.slotByPlayer.size) {
+      const ids = [...this.slotByPlayer.keys()];
+      const { rows: on } = await tx.query<{ n: string }>(
+        `select count(*)::text as n from player
+          where player_id = any($1::uuid[])
+            and (online_count > 0
+                 or (offline_since_ms is not null
+                     and $2::bigint - offline_since_ms < $3::bigint))`,
+        [ids, now, rules.offlineAfterMs]);
+      anyOnline = Number(on[0]?.n ?? 0) > 0;
+    }
+    if (anyOnline) {
+      const nextDue = now + 15_000;
+      await tx.query(
+        `insert into scheduled_job (job_id, region_id, kind, due_at_ms, generation, payload, dedupe_key)
+         values ($1,$2,'recovery_eval',$3,0,$4,$5)
+         on conflict (region_id, dedupe_key) where dedupe_key is not null do nothing`,
+        [randomUUID(), this.opts.regionId, nextDue.toString(),
+         JSON.stringify({ reason: 'chain' }), `rec_eval:${this.opts.regionId}:chain:${nextDue}`]);
+    }
+    return stats;
+  }
+
+  /**
+   * Spawn cell for the recovery MCV: beside the player's surviving units when
+   * any remain, else their settlement site, else a scan from the map centre —
+   * the same fallback order a fresh settlement would use.
+   */
+  private async recoverySpawnCell(g: Game, slot: number, playerId: string, tx: PoolClient): Promise<number> {
+    const { w, h } = g.map;
+    let sx = 0, sy = 0, n = 0;
+    for (const e of g.entities.values()) {
+      if (e.owner !== slot || e.hp <= 0 || e.kind !== 'unit' || e.carriedBy) continue;
+      sx += e.x; sy += e.y; n++;
+    }
+    let origin: number | null = null;
+    if (n > 0) origin = g.cellIndex(toCell(sx / n), toCell(sy / n));
+    if (origin === null) {
+      const { rows } = await tx.query<{ cell_x: number; cell_y: number }>(
+        'select cell_x, cell_y from settlement where player_id = $1', [playerId]);
+      if (rows[0]) origin = rows[0].cell_y * w + rows[0].cell_x;
+    }
+    if (origin === null) origin = (h >> 1) * w + (w >> 1);
+    const mcvType = this.packMcvType(g, slot);
+    const cls = mcvType ? g.moveClass(g.pack.units[mcvType]) : 'vehicle';
+    const spot = nearestCell(g.map, origin, 16,
+      i => passable(g.pack, g.map, i, cls) && !g.unitInCell(i));
+    return spot >= 0 ? spot : origin;
+  }
+
+  private packMcvType(g: Game, slot: number): string | undefined {
+    const p = g.players[slot];
+    if (!p) return undefined;
+    const faction = g.pack.factions.find(f => f.id === p.faction);
+    if (!faction) return undefined;
+    try { return starterPicks(g.pack, faction).mcv; } catch { return undefined; }
+  }
+
+  /** Boot-time poke: rostered players may need recovery evaluation after a restart. */
+  private async ensureRecoveryEval(): Promise<void> {
+    if (!this.slotByPlayer.size) return;
+    const now = this.opts.now();
+    await scheduleJob({
+      regionId: this.opts.regionId, kind: 'recovery_eval', dueAtMs: now,
+      dedupeKey: `rec_eval:${this.opts.regionId}:poke:${Math.floor(now / 5000)}`,
       payload: { reason: 'boot' },
     }).catch(() => undefined);
   }

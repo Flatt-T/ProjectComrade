@@ -418,3 +418,70 @@ acceptance detail; this file is the resume point. Read it first in every session
   avoid live unit positions, only terrain/structures/resources; multi-map
   faction picks beyond TD derive automatically but are untested on other
   packs; client shows no protection countdown yet (PW25 surface).
+
+### PW12 - THU-2236 - sell-for-credit evacuation defeat and protected MCV recovery - 2026-11-12
+
+- State: implemented on branch `thu-2236-pw12-recovery`; verification green
+  locally (lint 0, typecheck 0, 413 unit, 73 integration).
+- Engine (`packages/fusion/src/game.ts`, `recovery.ts`): `structureRoles`
+  derives recovery roles from StructureDef flags (construction-yard, power,
+  refinery, barracks = produces infantry) so every pack qualifies without
+  per-pack data; `isMcvUnit`/`isHarvesterUnit` helpers; `Command` gains
+  journaled `grantRecovery` (bound `bound=2`, `recoveryProtected` MCV,
+  idempotent on the live roster, faction-equivalent pick via
+  `starterPicks`) and `setRecovery` (entering clears `defeated`, leaving
+  clears every entity `recoveryProtected` flag); `Player` gains
+  `recovering`/`recoveryAttacked`; `Entity` gains `recoveryProtected`.
+  Recovery build gate: `canBuild`/`place` allow only whitelisted roles and
+  one harvester (live + queued counted), upgrades/starport denied;
+  structures placed during recovery carry the flag; the flag blocks damage
+  both ways and superweapon fire; a recovering player's damaging another
+  player sets `recoveryAttacked`; `deploy` propagates `recoveryProtected`
+  (and `bound`) MCV -> yard; `MmoTuning.recoveryCreditCap` stops banked
+  credits accruing above the cap (5,000) while recovering. Snapshot/restore
+  carries all new fields (`persistent.ts`).
+- Service: `world.ts` `sell` world action - validates ownership/structure/
+  `bound===0`, computes the engine refund rule, writes `SELL_REFUND`
+  economy_operation + asset_ledger (`physical_state='destroyed'`, no
+  salvage) inside the journal transaction, pokes `recovery_eval`, returns
+  the journaled sim `sell`; `endRecovery` - loads the active RECOVERY
+  record, `protectionTransition(player_end_recovery)`, closes the episode,
+  writes `RECOVERY_TRANSITION`, mirrors `setRecovery off`. `runner.ts`
+  `recovery_eval` scheduled job (dispatched via `defaultJobHandler`):
+  ACTIVE episodes - milestone counts (power + barracks structures),
+  `recoveryAttacked` -> 'abandoned', milestone -> 'completed', protection
+  record + episode + outbox + sim mirror all in one fenced transaction,
+  self-heals a lost `setRecovery` mirror AND re-issues a lost
+  `grantRecovery` (protected MCV cannot be destroyed, so missing = lost
+  grant); DETECTION - rostered+settled player with zero non-destroyed
+  compounds world-wide, no structure, no MCV and no packed carrier in the
+  sim gets `openRecoveryEpisode` (global partial-unique index = one active
+  episode per player), RECOVERY protection record, `RECOVERY_GRANT` +
+  `RECOVERY_TRANSITION` economy ops, journaled `grantRecovery` +
+  `setRecovery` sim mirrors; never-settled roster placeholders excluded.
+  Eval chain reschedules every 15 s ONLY while a rostered player is online
+  (presence query) - quiescent regions stay hibernatable; pokes on sell,
+  on presence notify (`pokeRecoveryEval`, incl. settlement region for
+  wiped players with no compound), and a boot ensure cover the rest.
+- Client: `commandToMmo` maps Fusion `sell` to the durable world action;
+  `PersistentWorld` shows a RECOVERY badge + banner with an "End recovery"
+  button sending the journaled `endRecovery` intent.
+- Proven: `tests/unit/fusion-recovery.test.ts` 6/6 (grant idempotency,
+  explicit cell, snapshot/restore, role whitelist + single-harvester cap,
+  placement-time gate + flag propagation, attack flag, unsellable bound
+  MCV); `tests/integration/mmo-recovery.test.ts` 6/6 real PG + runner +
+  sim - SELL_REFUND op+ledger, bound refusal, sale-under-attack allowed,
+  wipeout grant idempotent, attack end 'abandoned', last-building sale
+  grant + power/barracks milestone 'completed', endRecovery close;
+  full suite 413 unit + 73 integration (hibernation CPU scaling still
+  0 ms across 8 quiescent regions).
+- Open: PACK/BARTER remain unimplemented engine ops (PW13/PW26) - the
+  contract already excludes them from `operationMayTriggerRecovery` and
+  bound=2 blocks the sell path; `transfer` bound-check still owed to
+  PW26; packed-building-carrier detection is vacuous until transport
+  lands (MCV/compound checks already cover today's carriers); recovery
+  credit cap is engine-side only (durable accrual journal doesn't cap
+  yet); multi-region MCV/units visibility is region-local - a player
+  rostered here with assets only in another region's sim could false-
+  positive (mitigated: compounds are world-checked, roster co-locates
+  with assets until inter-region movement exists).

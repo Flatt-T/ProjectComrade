@@ -14,7 +14,7 @@ import { randomUUID } from 'node:crypto';
 import type { Command, Game } from '@comrade/fusion';
 import { PACKS, starterLoadout, toCell } from '@comrade/fusion';
 import {
-  PERSISTENT_RULES_V1, newProtection, parseProtectionRecord,
+  PERSISTENT_RULES_V1, newProtection, parseProtectionRecord, protectionTransition,
   type MmoRulesProfile, type MmoWorldAction, type ProtectionRecord,
 } from '@comrade/contracts';
 import type { WorldActionHandler, WorldHandlerResult } from './runner.js';
@@ -24,7 +24,8 @@ import {
   allianceSetPermissions, allianceDisband, setAutoRepair,
   availableShieldSeconds, committedShieldSeconds, armShieldRecord, clearShieldRecord,
   compoundForPlayer, createSettlement, getSettlement, scheduleJob,
-  type Queryable,
+  closeRecoveryEpisode, saveProtectionRecord,
+  type ProtectionRow, type Queryable,
 } from './store.js';
 import { pickSpawnCell } from './spawn.js';
 
@@ -33,6 +34,8 @@ interface HandlerCtx {
   slotOf: (playerId: string) => number | undefined;
   /** Live sim access for spawn placement and roster checks (read-only). */
   game?: () => Game | undefined;
+  /** Resolve a durable entity id to a live sim id (bound assets, then the bridge). */
+  simIdFor?: (durableId: string) => number | null;
   /** Fence epoch and sim tick for durable operation audit rows. */
   epoch?: string; tick?: number;
 }
@@ -287,6 +290,115 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             }],
           };
         }
+        case 'sell': {
+          // PW12: ordinary SELL_REFUND — remove the structure and credit its
+          // owner exactly once. Bound assets (starter grant, recovery MCV/yard)
+          // cannot be sold; the engine re-checks `bound` at apply time. There
+          // is deliberately no attack lockout: selling under fire is the
+          // approved escape-and-rebuild rule, and the recovery evaluator (not
+          // this handler) decides whether the sale qualified for recovery.
+          if (ctx.slot === undefined) return { result: { accepted: false, reason: 'UNKNOWN_PLAYER' } };
+          const simId = ctx.simIdFor?.(action.entityId);
+          const g = ctx.game?.();
+          const e = simId != null ? g?.entities.get(simId) : undefined;
+          if (simId == null || !g || !e || e.kind !== 'structure' || e.hp <= 0 || e.carriedBy
+            || e.owner !== ctx.slot || e.bound !== 0) {
+            return { result: { accepted: false, reason: 'NOT_SELLABLE' } };
+          }
+          const sdef = g.pack.structures[e.type];
+          const refund = Math.floor((sdef.cost * g.pack.sellRefundPercent * e.hp) / (100 * e.maxHp));
+          const { rows: compRows } = await tx.query<{ compound_id: string }>(
+            `select compound_id from compound
+              where player_id = $1 and region_id = $2 and state <> 'destroyed'
+              order by created_at limit 1`, [ctx.playerId, ctx.regionId]);
+          const compoundId = compRows[0]?.compound_id;
+          const operationId = randomUUID();
+          if (ctx.epoch !== undefined) {
+            await tx.query(
+              `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+               values ($1,$2,$3,$4,'SELL_REFUND',$5,$6)`,
+              [operationId, ctx.regionId, ctx.epoch, String(ctx.tick ?? 0),
+               JSON.stringify({
+                 kind: 'SELL_REFUND', entityId: action.entityId,
+                 ...(compoundId ? { compoundId } : {}),
+               }),
+               JSON.stringify({ refund, structure: e.type, simId })]);
+            await tx.query(
+              `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+               values ($1,$2,$3,'SELL_REFUND',$4,null,'destroyed',$5,$6)`,
+              [operationId, action.entityId, ctx.regionId, ctx.playerId, String(simId),
+               JSON.stringify({ refund, structure: e.type })]);
+          }
+          // A sale can be the qualifying last building — nudge the recovery
+          // evaluator so the grant lands promptly after the sim applies.
+          await scheduleJob({
+            regionId: ctx.regionId, kind: 'recovery_eval', dueAtMs: Date.now(),
+            dedupeKey: `rec_eval:${ctx.regionId}:sell:${operationId}`,
+            payload: { reason: 'sell' },
+          }, tx).catch(() => undefined);
+          return {
+            result: { accepted: true, sold: action.entityId, refund },
+            sim: [{ slot: ctx.slot, command: { t: 'sell', id: simId } }],
+          };
+        }
+        case 'endRecovery': {
+          // PW12: the player's choice ends recovery early. The durable RECOVERY
+          // record (keyed by episode id) is the authority; the sim mirror
+          // drops the protection flags at the same journal boundary.
+          if (ctx.slot === undefined) return { result: { accepted: false, reason: 'UNKNOWN_PLAYER' } };
+          const { rows } = await tx.query<{
+            episode_id: string; compound_id: string; player_id: string; kind: 'RECOVERY';
+            status: 'active'; generation: string; armed_seconds: string;
+            online_ms: string; online_since_ms: string | null; lapse_at_ms: string | null;
+            started_at_ms: string | null; ends_at_ms: string | null;
+            milestone_power: string; milestone_barracks: string;
+          }>(
+            `select re.episode_id, pr.compound_id, pr.player_id, pr.kind, pr.status, pr.generation::text,
+                    pr.armed_seconds::text, pr.online_ms::text, pr.online_since_ms::text,
+                    pr.lapse_at_ms::text, pr.started_at_ms::text, pr.ends_at_ms::text,
+                    pr.milestone_power::text, pr.milestone_barracks::text
+               from recovery_episode re
+               join protection_record pr on pr.compound_id = re.episode_id and pr.kind = 'RECOVERY'
+              where re.player_id = $1 and re.region_id = $2 and re.status = 'active' and pr.status = 'active'`,
+            [ctx.playerId, ctx.regionId]);
+          const row = rows[0];
+          if (!row) return { result: { accepted: false, reason: 'NO_RECOVERY' } };
+          const rec: ProtectionRecord = {
+            kind: 'RECOVERY', status: 'active', compoundId: row.compound_id, ownerId: row.player_id,
+            generation: row.generation, onlineMs: Number(row.online_ms),
+            onlineSinceMs: row.online_since_ms !== null ? Number(row.online_since_ms) : null,
+            lapseAtMs: row.lapse_at_ms !== null ? Number(row.lapse_at_ms) : null,
+            armedSeconds: Number(row.armed_seconds),
+            startedAtMs: row.started_at_ms !== null ? Number(row.started_at_ms) : null,
+            endsAtMs: row.ends_at_ms !== null ? Number(row.ends_at_ms) : null,
+            milestonePower: Number(row.milestone_power), milestoneBarracks: Number(row.milestone_barracks),
+          };
+          const nxt = protectionTransition(rec, { t: 'player_end_recovery', atMs: Date.now() }, rules);
+          const record: ProtectionRow = {
+            compound_id: row.compound_id, player_id: row.player_id, kind: 'RECOVERY',
+            status: nxt.status, generation: String(nxt.generation), armed_seconds: String(nxt.armedSeconds),
+            online_ms: String(nxt.onlineMs),
+            online_since_ms: nxt.onlineSinceMs !== null ? String(nxt.onlineSinceMs) : null,
+            lapse_at_ms: nxt.lapseAtMs !== null ? String(nxt.lapseAtMs) : null,
+            started_at_ms: nxt.startedAtMs !== null ? String(nxt.startedAtMs) : null,
+            ends_at_ms: nxt.endsAtMs !== null ? String(nxt.endsAtMs) : null,
+            milestone_power: String(nxt.milestonePower), milestone_barracks: String(nxt.milestoneBarracks),
+          };
+          await saveProtectionRecord(tx, record);
+          await closeRecoveryEpisode(row.episode_id, 'completed', tx);
+          if (ctx.epoch !== undefined) {
+            await tx.query(
+              `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+               values ($1,$2,$3,$4,'RECOVERY_TRANSITION',$5,$6)`,
+              [randomUUID(), ctx.regionId, ctx.epoch, String(ctx.tick ?? 0),
+               JSON.stringify({ kind: 'RECOVERY_TRANSITION', compoundId: row.compound_id, enter: false }),
+               JSON.stringify({ episodeId: row.episode_id, reason: 'player_end_recovery' })]);
+          }
+          return {
+            result: { accepted: true, ended: true, episodeId: row.episode_id },
+            sim: [{ slot: ctx.slot, command: { t: 'setRecovery', slot: ctx.slot, on: false } }],
+          };
+        }
         case 'clearShield': {
           const cleared = await clearShieldRecord(tx, { compoundId: action.compoundId, playerId: ctx.playerId });
           if (!cleared) {
@@ -318,6 +430,19 @@ export async function pokeProtectionEval(regionId: string, nowMs: number, q?: Qu
   await scheduleJob({
     regionId, kind: 'protection_eval', dueAtMs: nowMs,
     dedupeKey: `prot_eval:${regionId}:poke:${Math.floor(nowMs / 5000)}`,
+    payload: { reason: 'poke' },
+  }, q).catch(() => undefined);
+}
+
+/**
+ * PW12: nudge the region's recovery evaluator — a returning player may need a
+ * grant (evacuated while offline), a milestone check, or an attack-end. Same
+ * 5 s bucket dedupe as the protection poke.
+ */
+export async function pokeRecoveryEval(regionId: string, nowMs: number, q?: Queryable): Promise<void> {
+  await scheduleJob({
+    regionId, kind: 'recovery_eval', dueAtMs: nowMs,
+    dedupeKey: `rec_eval:${regionId}:poke:${Math.floor(nowMs / 5000)}`,
     payload: { reason: 'poke' },
   }, q).catch(() => undefined);
 }
