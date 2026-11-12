@@ -220,7 +220,7 @@ describeDb('mmo recovery (real PostgreSQL + runner + Fusion sim)', () => {
     const g = live(ctx);
     // The grantRecovery sim mirror applies at the next tick boundary after the
     // episode commits — wait for the bound MCV rather than racing the tick.
-    let mcvs: { bound: number; hp: number; recoveryProtected?: boolean }[] = [];
+    let mcvs: { bound?: number; hp: number; recoveryProtected?: boolean }[] = [];
     await waitFor(() => {
       mcvs = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.bound === 2 && e.hp > 0);
       return mcvs.length === 1;
@@ -296,7 +296,7 @@ describeDb('mmo recovery (real PostgreSQL + runner + Fusion sim)', () => {
     });
     // The grantRecovery sim mirror applies at the next tick boundary after the
     // episode commits — wait for the bound MCV rather than racing the tick.
-    let mcvs: { bound: number; hp: number; recoveryProtected?: boolean }[] = [];
+    let mcvs: { bound?: number; hp: number; recoveryProtected?: boolean }[] = [];
     await waitFor(() => {
       mcvs = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.bound === 2 && e.hp > 0);
       return mcvs.length === 1;
