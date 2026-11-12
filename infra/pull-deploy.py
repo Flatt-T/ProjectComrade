@@ -81,8 +81,14 @@ def main():
         try:
             if BETA:
                 # Pre-releases never become "latest": take the newest beta- one.
+                # The releases list is not reliably ordered, so pick explicitly
+                # by publish time rather than trusting list position.
                 with request(BASE + '/releases?per_page=30') as response:
-                    release = next((r for r in json.load(response) if r['prerelease'] and r['tag_name'].startswith('beta-')), None)
+                    candidates = [r for r in json.load(response)
+                                  if r['prerelease'] and r['tag_name'].startswith('beta-')]
+                    release = max(candidates,
+                                  key=lambda r: r.get('published_at') or r['created_at'],
+                                  default=None)
                 if release is None:
                     print('Waiting for the first beta release.')
                     return
