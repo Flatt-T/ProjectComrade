@@ -27,6 +27,7 @@ import {
   closeRecoveryEpisode, saveProtectionRecord,
   adjustPowerup, createTradeOfferTx, openTradeOffersForPlayer, powerupBalance, resolveTradeOfferTx,
   shieldBalancesTx, tradeOfferById, transferEarnedShieldSeconds, utcShieldDay,
+  createTransfer, liveTransferForEntity, transitionTransfer,
   type ProtectionRow, type Queryable,
 } from './store.js';
 import { raiseNotification } from './notify.js';
@@ -881,6 +882,68 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           const done = await resolveTradeOfferTx(tx, row.offer_id, status);
           if (!done) return { result: { accepted: false, reason: 'OFFER_NOT_OPEN' } };
           return { result: { accepted: true, offerId: row.offer_id, status } };
+        }
+        case 'regionTransfer': {
+          // PW18: cross-region unit handoff. The region_transfer row is the
+          // durable protocol; the unit walks to the edge under a journaled
+          // 'depart' command, the source runner releases it (SOURCE_RELEASED)
+          // and the destination runner materializes the manifest — exactly
+          // one live copy exists at every phase.
+          const game = ctx.game?.();
+          const sim = ctx.simIdFor?.(action.entityId);
+          if (!game || sim === null || sim === undefined) return { result: { accepted: false, reason: 'UNKNOWN_ENTITY' } };
+          const e = game.entities.get(sim);
+          if (!e || e.hp <= 0 || e.kind !== 'unit') return { result: { accepted: false, reason: 'NOT_TRANSFERABLE' } };
+          if (e.carriedBy) return { result: { accepted: false, reason: 'CARGO_ABOARD' } };
+          const ownerPid = game.players[e.owner]?.pid;
+          if (!ownerPid || ownerPid !== ctx.playerId) return { result: { accepted: false, reason: 'NOT_OWNER' } };
+          if (action.destRegionId === ctx.regionId) return { result: { accepted: false, reason: 'SAME_REGION' } };
+          const { rows: destRows } = await tx.query<{ world_id: string; lifecycle: string }>(
+            'select world_id, lifecycle from region where region_id = $1', [action.destRegionId]);
+          const dest = destRows[0];
+          if (!dest) return { result: { accepted: false, reason: 'NO_REGION' } };
+          if (dest.world_id !== (await worldIdFor(tx, ctx.regionId))) return { result: { accepted: false, reason: 'FOREIGN_WORLD' } };
+          if (dest.lifecycle === 'failed') return { result: { accepted: false, reason: 'DEST_UNAVAILABLE' } };
+          const existing = await liveTransferForEntity(action.entityId, tx);
+          if (existing) {
+            // Dedup: same live asset, same transfer — but if its depart walk was
+            // interrupted (stop order, teleport), re-issue depart so the row
+            // cannot wedge in PREPARED forever.
+            const sim2 = ctx.simIdFor?.(action.entityId);
+            const e2 = sim2 !== null && sim2 !== undefined ? game.entities.get(sim2) : undefined;
+            const redepart = !!e2 && e2.hp > 0 && e2.order !== 'depart';
+            return {
+              result: { accepted: true, transferId: existing.transfer_id, state: existing.state, deduplicated: true },
+              sim: redepart ? [{ slot: e2!.owner, command: { t: 'depart', ids: [sim2!] } }] : [],
+            };
+          }
+          const transferId = randomUUID();
+          const manifest = game.transferManifest(e);
+          const row = await createTransfer({
+            transferId, entityId: action.entityId, sourceRegionId: ctx.regionId,
+            destRegionId: action.destRegionId, sourceEpoch: ctx.epoch,
+            payload: { simId: sim, ownerPid, manifest },
+          }, tx);
+          return {
+            result: { accepted: true, transferId: row.transfer_id, state: row.state },
+            sim: [{ slot: e.owner, command: { t: 'depart', ids: [sim] } }],
+          };
+        }
+        case 'regionTransferCancel': {
+          const existing = await liveTransferForEntity(action.entityId, tx);
+          if (!existing || existing.source_region_id !== ctx.regionId) {
+            return { result: { accepted: false, reason: 'NO_LIVE_TRANSFER' } };
+          }
+          if (existing.state !== 'PREPARED') {
+            return { result: { accepted: false, reason: 'TOO_LATE', state: existing.state } };
+          }
+          const sim = ctx.simIdFor?.(action.entityId);
+          const e = sim !== null && sim !== undefined ? ctx.game?.()?.entities.get(sim) : undefined;
+          await transitionTransfer(existing.transfer_id, 'CANCELLED', tx);
+          return {
+            result: { accepted: true, transferId: existing.transfer_id, state: 'CANCELLED' },
+            sim: e && e.hp > 0 ? [{ slot: e.owner, command: { t: 'stop', ids: [sim!] } }] : [],
+          };
         }
         default:
           return { result: { accepted: false, reason: 'UNSUPPORTED_ACTION', action: action.t } };

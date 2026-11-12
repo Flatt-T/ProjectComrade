@@ -15,7 +15,7 @@ import type { PoolClient } from 'pg';
 import { randomUUID } from 'node:crypto';
 import {
   Game, PACKS, SUPPLY_UPKEEP_TICKS, captureGame, restoreGame, isMcvUnit, nearestCell, passable, regionSitePlan, starterPicks, structureRoles, toCell,
-  type Command, type Entity, type GameSetup, type RulePack, type WorldgenSpec,
+  type Command, type Entity, type GameSetup, type RulePack, type TransferManifestEntry, type WorldgenSpec,
 } from '@comrade/fusion';
 import {
   computePowerScore, mmoEntityId, mmoSimEntityId, newProtection, PERSISTENT_RULES_V1,
@@ -32,9 +32,11 @@ import {
   releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
   syncCompounds, updateMemberPowerScores, updateSettlementProtection,
   openRecoveryEpisode, closeRecoveryEpisode, awardLadderPoints,
-  MmoStoreError, type ProtectionRow, type RegionRow,
+  inboundTransfers, preparedTransfers, transitionTransfer,
+  MmoStoreError, type ProtectionRow, type RegionRow, type TransferRow,
 } from './store.js';
 import { journalTail } from './commands.js';
+import { pickSpawnCell } from './spawn.js';
 import { mmoQuery } from './db.js';
 import { raiseNotification } from './notify.js';
 import { persistentPackRunnable } from './packs.js';
@@ -399,6 +401,8 @@ export class RegionRunner {
     const before = this.game!.tick;
     this.advanceTo(tick);
     await this.drainSalvageEvents();
+    await this.drainDepartEvents();
+    await this.drainInboundTransfers();
     this.stats.catchUpTicks += this.game!.tick - before;
     if (this.game!.tick !== before) this.opts.log('region-catchup', { from: before, to: this.game!.tick });
   }
@@ -410,6 +414,8 @@ export class RegionRunner {
       const expected = this.tickFor(this.opts.now());
       if (this.game.tick < expected) this.advanceTo(Math.min(expected, this.game.tick + 600));
       await this.drainSalvageEvents();
+      await this.drainDepartEvents();
+      await this.drainInboundTransfers();
       if (this.opts.checkpointEveryTicks > 0
         && this.game.tick - this.lastCheckpointTick >= this.opts.checkpointEveryTicks) {
         await this.checkpoint('interval');
@@ -558,7 +564,7 @@ export class RegionRunner {
         // Timed actions (deploy, rearm, boarding, ferry) would freeze mid-progress
         // if the tick loop stopped, so they block quiescence like movement orders.
         case 'move': case 'attackMove': case 'attack': case 'attackGround':
-        case 'enter': case 'rearm': case 'ferry': case 'deploy':
+        case 'enter': case 'rearm': case 'ferry': case 'deploy': case 'depart':
           return false;
         default: break; // idle, harvest: quiescent-compatible
       }
@@ -686,7 +692,12 @@ export class RegionRunner {
   private async applyUnappliedEvents(): Promise<void> {
     for (;;) {
       const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual'], 64);
-      if (!events.length) { await this.drainSalvageEvents(); return; }
+      if (!events.length) {
+        await this.drainSalvageEvents();
+        await this.drainDepartEvents();
+        await this.drainInboundTransfers();
+        return;
+      }
       for (const event of events) await this.applyEvent(event);
     }
   }
@@ -707,7 +718,7 @@ export class RegionRunner {
   private async drainSalvageEvents(): Promise<void> {
     const g = this.game;
     if (!g || this.epoch === undefined) {
-      if (g) { g.salvageEvents.length = 0; g.siteEvents.length = 0; }
+      if (g) { g.salvageEvents.length = 0; g.siteEvents.length = 0; g.departEvents.length = 0; }
       return;
     }
     // Spawns become SALVAGE_SPAWN ops; collect events stay queued for
@@ -734,7 +745,9 @@ export class RegionRunner {
           [opId, this.opts.regionId, this.epoch, String(ev.tick),
            JSON.stringify({ kind: 'SALVAGE_SPAWN', regionId: this.opts.regionId, x, y, credits: String(ev.credits) }),
            JSON.stringify({ simId: ev.simId, victimOwner: ev.victimOwner, killerOwner: ev.killerOwner, victimType: ev.victimType, victimKind: ev.victimKind })]);
-        const entityId = mmoEntityId(this.opts.regionId, ev.simId);
+        // PW18: a unit that arrived via transfer keeps its cross-region id in
+        // the ledger; everything else uses the region/sim-id bridge.
+        const entityId = ev.durableId || mmoEntityId(this.opts.regionId, ev.simId);
         const detail = JSON.stringify({ killerPlayerId: killerId, type: ev.victimType, simKind: ev.victimKind, cell: ev.cell });
         await tx.query(
           `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
@@ -749,6 +762,143 @@ export class RegionRunner {
     });
     }
     await this.drainGameEvents();
+  }
+
+  /**
+   * PW18 (outbound): finalize departures. The sim removes the entity the tick
+   * its 'depart' order completes and queues a DepartEvent carrying the live
+   * manifest; here each event is matched to its PREPARED region_transfer row
+   * and released (SOURCE_RELEASED) inside one fenced transaction — the
+   * destination runner can then materialize exactly one copy.
+   *
+   * Crash windows: a crash between sim removal and this drain leaves a
+   * PREPARED row whose entity is already gone; the sweep re-issues the release
+   * with the order-time manifest stored on the row. A crash after
+   * SOURCE_RELEASED but before destination pickup is safe — the destination
+   * drain owns completion from there.
+   */
+  private async drainDepartEvents(): Promise<void> {
+    const g = this.game;
+    if (!g || this.epoch === undefined) {
+      if (g) g.departEvents.length = 0;
+      return;
+    }
+    for (const ev of g.departEvents.splice(0)) {
+      await this.releaseTransfer(ev.simId, ev.manifest);
+    }
+    for (const t of await preparedTransfers(this.opts.regionId)) {
+      const simId = Number((t.payload as { simId?: unknown }).simId);
+      if (!Number.isFinite(simId) || g.entities.has(simId)) continue;
+      const manifest = (t.payload as { manifest?: TransferManifestEntry }).manifest;
+      if (!manifest) {
+        await transitionTransfer(t.transfer_id, 'CANCELLED').catch(() => undefined);
+        continue;
+      }
+      await this.releaseTransfer(simId, manifest, t);
+    }
+  }
+
+  /** Move one departed entity's transfer PREPARED -> SOURCE_RELEASED, audited. */
+  private async releaseTransfer(simId: number, manifest: TransferManifestEntry, known?: TransferRow): Promise<void> {
+    await mmoTransaction(async tx => {
+      await assertRegionFence(tx, {
+        regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+      });
+      const t = known ?? (await tx.query<TransferRow>(
+        `select * from region_transfer
+          where source_region_id = $1 and state = 'PREPARED' and (payload->>'simId')::int = $2
+          order by created_at limit 1 for update`,
+        [this.opts.regionId, simId])).rows[0];
+      if (!t || t.state !== 'PREPARED') return;
+      const payload: Record<string, unknown> = { ...((t.payload ?? {}) as Record<string, unknown>), manifest };
+      await tx.query(
+        `update region_transfer set payload = $2, updated_at = clock_timestamp() where transfer_id = $1`,
+        [t.transfer_id, JSON.stringify(payload)]);
+      // One durable operation anchors the whole crossing; the destination
+      // runner appends TRANSFER_IN against the same operation_id.
+      await tx.query(
+        `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+         values ($1,$2,$3,$4,'REGION_TRANSFER',$5,$6)`,
+        [t.transfer_id, this.opts.regionId, this.epoch, String(this.game?.tick ?? 0),
+         JSON.stringify({ kind: 'REGION_TRANSFER', transferId: t.transfer_id, entityId: t.entity_id, sourceRegionId: t.source_region_id, destRegionId: t.dest_region_id }),
+         JSON.stringify({ simId, departedTick: this.game?.tick ?? 0 })]);
+      await transitionTransfer(t.transfer_id, 'SOURCE_RELEASED', tx);
+      const ownerPid = String(payload.ownerPid ?? '');
+      await tx.query(
+        `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+         values ($1,$2,$3,'TRANSFER_OUT',$4,null,'in_transit',$5,$6)`,
+        [t.transfer_id, t.transfer_id, this.opts.regionId, ownerPid || null, String(simId),
+         JSON.stringify({ transferId: t.transfer_id, destRegionId: t.dest_region_id, ownerPid })]);
+    });
+  }
+
+  /**
+   * PW18 (inbound): pick up transfers other regions released. The manifest is
+   * spawned into the live sim first, then the durable transitions and ledger
+   * commit in one fenced transaction; a commit failure unspawns the entity so
+   * no ghost survives. spawnTransfer resolving no owner slot parks the row in
+   * RECOVERY_REQUIRED rather than silently dropping the asset.
+   */
+  private async drainInboundTransfers(): Promise<void> {
+    const g = this.game;
+    if (!g || this.epoch === undefined) return;
+    for (const t of await inboundTransfers(this.opts.regionId)) {
+      const payload = t.payload as { manifest?: TransferManifestEntry; ownerPid?: string };
+      const manifest = payload.manifest;
+      if (!manifest) {
+        await transitionTransfer(t.transfer_id, 'RECOVERY_REQUIRED').catch(() => undefined);
+        continue;
+      }
+      const cell = this.transferEntryCell(t);
+      const simId = g.spawnTransfer(manifest, cell, t.transfer_id);
+      if (simId === null) {
+        await transitionTransfer(t.transfer_id, 'RECOVERY_REQUIRED').catch(() => undefined);
+        continue;
+      }
+      let raced = false;
+      try {
+        await mmoTransaction(async tx => {
+          await assertRegionFence(tx, {
+            regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+          });
+          const fresh = (await tx.query<TransferRow>(
+            'select * from region_transfer where transfer_id = $1 for update', [t.transfer_id])).rows[0];
+          if (!fresh || fresh.state !== 'SOURCE_RELEASED') { raced = true; return; }
+          await transitionTransfer(t.transfer_id, 'DESTINATION_ACCEPTED', tx);
+          await transitionTransfer(t.transfer_id, 'COMPLETED', tx);
+          this.bindEntity(t.transfer_id, simId);
+          this.bindEntity(t.entity_id, simId);
+          await tx.query(
+            `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+             values ($1,$2,$3,'TRANSFER_IN',$4,$5,$6,$7,$8)`,
+            [t.transfer_id, t.transfer_id, this.opts.regionId,
+             payload.ownerPid ?? null, payload.ownerPid ?? null,
+             manifest.packedType ? 'packed' : 'deployed', String(simId),
+             JSON.stringify({ transferId: t.transfer_id, sourceRegionId: t.source_region_id, simId })]);
+        });
+      } catch (error) {
+        g.unspawnTransfer(simId);
+        throw error;
+      }
+      if (raced) g.unspawnTransfer(simId);
+    }
+  }
+
+  /** Deterministic arrival cell: far from live entities, on vehicle-passable
+   *  terrain, seeded by the transfer id so retries pick the same region. */
+  private transferEntryCell(t: TransferRow): number {
+    const g = this.game!;
+    const spec = this.simSpecFromRegion();
+    const keepAway = [...g.entities.values()]
+      .filter(e => e.hp > 0 && !e.carriedBy)
+      .map(e => toCell(e.y) * g.map.w + toCell(e.x));
+    let hash = 0;
+    for (const ch of t.transfer_id) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    const pick = pickSpawnCell({
+      packId: spec?.packId ?? g.pack.id, mapId: spec?.mapId ?? '', seed: hash,
+      worldgen: spec?.worldgen, keepAwayCells: keepAway, separationCells: 8,
+    });
+    return pick.cell;
   }
 
   /**
@@ -779,7 +929,7 @@ export class RegionRunner {
   private async drainGameEvents(): Promise<void> {
     const g = this.game;
     if (!g || this.epoch === undefined || !this.region?.world_id) {
-      if (g) { g.siteEvents.length = 0; g.salvageEvents.length = 0; }
+      if (g) { g.siteEvents.length = 0; g.salvageEvents.length = 0; g.departEvents.length = 0; }
       return;
     }
     const siteEvents = g.siteEvents.splice(0);

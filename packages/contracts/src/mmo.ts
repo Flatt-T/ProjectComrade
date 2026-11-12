@@ -614,7 +614,12 @@ export type MmoWorldAction =
   | { t: 'allianceKick'; playerId: MmoId }
   | { t: 'allianceSetPermissions'; playerId: MmoId; permissions: AlliancePermissions }
   | { t: 'allianceDisband' }
-  | { t: 'setAutoRepair'; on: boolean };
+  | { t: 'setAutoRepair'; on: boolean }
+  /** PW18: hand a unit (cargo included) to another region of the same world.
+   *  The entity walks to the region edge, then the durable transfer protocol
+   *  carries its full state — one stable identity, never duplicated. */
+  | { t: 'regionTransfer'; entityId: MmoId; destRegionId: MmoId }
+  | { t: 'regionTransferCancel'; entityId: MmoId };
 
 export type MmoAction = MmoSimAction | MmoWorldAction;
 
@@ -851,7 +856,8 @@ const SIM_KINDS = new Set(['move', 'attackMove', 'attack', 'fireAt', 'guard', 's
 const WORLD_KINDS = new Set(['sell', 'pack', 'unpack', 'redeploy', 'barterOffer', 'barterAccept', 'barterDecline', 'barterCancel',
   'selectShield', 'clearShield', 'endRecovery', 'settle', 'chat', 'ping', 'objectiveClaim',
   'allianceCreate', 'allianceInvite', 'allianceJoin', 'allianceLeave', 'allianceKick',
-  'allianceSetPermissions', 'allianceDisband', 'setAutoRepair']);
+  'allianceSetPermissions', 'allianceDisband', 'setAutoRepair',
+  'regionTransfer', 'regionTransferCancel']);
 
 function ids(value: unknown, max = 64): value is MmoId[] {
   return Array.isArray(value) && value.length <= max && value.every(uuid);
@@ -927,6 +933,8 @@ export function parseMmoAction(value: unknown): MmoAction {
     case 'allianceSetPermissions': if (!uuid(v.playerId)) throw new Error('allianceSetPermissions requires a player'); return { t, playerId: v.playerId, permissions: parseAlliancePermissions(v.permissions) } as MmoAction;
     case 'allianceDisband': return { t } as MmoAction;
     case 'setAutoRepair': if (typeof v.on !== 'boolean') throw new Error('setAutoRepair requires a boolean'); return { t, on: v.on } as MmoAction;
+    case 'regionTransfer': if (!uuid(v.entityId) || !uuid(v.destRegionId)) throw new Error('regionTransfer requires entity and destination region'); return { t, entityId: v.entityId, destRegionId: v.destRegionId } as MmoAction;
+    case 'regionTransferCancel': if (!uuid(v.entityId)) throw new Error('regionTransferCancel requires an entity'); return { t, entityId: v.entityId } as MmoAction;
     default: throw new Error('Unknown MMO action');
   }
 }

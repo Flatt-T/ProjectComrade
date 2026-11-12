@@ -51,6 +51,7 @@ export interface ProtectionRow {
 export interface TransferRow {
   transfer_id: string; entity_id: string; source_region_id: string; dest_region_id: string;
   state: 'PREPARED' | 'SOURCE_RELEASED' | 'DESTINATION_ACCEPTED' | 'COMPLETED' | 'CANCELLED' | 'RECOVERY_REQUIRED';
+  payload: unknown; source_epoch: string | null; created_at: string; updated_at: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -596,10 +597,10 @@ const TRANSFER_TRANSITIONS: Record<string, string[]> = {
 export async function createTransfer(args: {
   transferId?: string; entityId: string; sourceRegionId: string; destRegionId: string;
   payload?: unknown; sourceEpoch?: string | bigint;
-}): Promise<TransferRow> {
+}, q: Queryable = mmoDb()): Promise<TransferRow> {
   const id = args.transferId ?? uuid();
   try {
-    await mmoQuery(
+    await q.query(
       `insert into region_transfer (transfer_id, entity_id, source_region_id, dest_region_id, payload, source_epoch)
        values ($1,$2,$3,$4,$5,$6)`,
       [id, args.entityId, args.sourceRegionId, args.destRegionId, JSON.stringify(args.payload ?? {}), args.sourceEpoch?.toString() ?? null]);
@@ -609,22 +610,45 @@ export async function createTransfer(args: {
     }
     throw error;
   }
-  return (await mmoOne<TransferRow>('select * from region_transfer where transfer_id = $1', [id]))!;
+  return (await q.query<TransferRow>('select * from region_transfer where transfer_id = $1', [id])).rows[0]!;
 }
 
-export async function transitionTransfer(transferId: string, to: TransferRow['state']): Promise<TransferRow> {
-  const current = await mmoOne<TransferRow>('select * from region_transfer where transfer_id = $1 for update', [transferId]);
+export async function transitionTransfer(transferId: string, to: TransferRow['state'], q: Queryable = mmoDb()): Promise<TransferRow> {
+  const current = (await q.query<TransferRow>('select * from region_transfer where transfer_id = $1 for update', [transferId])).rows[0];
   if (!current) throw new MmoStoreError('NO_TRANSFER', 'unknown transfer');
   const allowed = TRANSFER_TRANSITIONS[current.state] ?? [];
   if (!allowed.includes(to)) {
     throw new MmoStoreError('BAD_TRANSITION', `cannot move transfer ${current.state} -> ${to}`);
   }
-  await mmoQuery(
+  await q.query(
     `update region_transfer set state = $2, updated_at = clock_timestamp(),
        completed_at = case when $2 in ('COMPLETED','CANCELLED') then clock_timestamp() else completed_at end
      where transfer_id = $1`,
     [transferId, to]);
-  return (await mmoOne<TransferRow>('select * from region_transfer where transfer_id = $1', [transferId]))!;
+  return (await q.query<TransferRow>('select * from region_transfer where transfer_id = $1', [transferId])).rows[0]!;
+}
+
+/** The live transfer for a durable asset id, if any (PREPARED..RECOVERY_REQUIRED). */
+export async function liveTransferForEntity(entityId: string, q: Queryable = mmoDb()): Promise<TransferRow | undefined> {
+  return (await q.query<TransferRow>(
+    `select * from region_transfer where entity_id = $1
+       and state in ('PREPARED','SOURCE_RELEASED','DESTINATION_ACCEPTED','RECOVERY_REQUIRED')`,
+    [entityId])).rows[0];
+}
+
+/** Transfers awaiting pickup by a destination region (SOURCE_RELEASED inbound). */
+export async function inboundTransfers(destRegionId: string, q: Queryable = mmoDb()): Promise<TransferRow[]> {
+  return (await q.query<TransferRow>(
+    `select * from region_transfer where dest_region_id = $1 and state = 'SOURCE_RELEASED'
+     order by created_at`, [destRegionId])).rows;
+}
+
+/** PREPARED transfers owned by a source region â€” used to recover the crash
+ *  window between sim departure and the SOURCE_RELEASED commit. */
+export async function preparedTransfers(sourceRegionId: string, q: Queryable = mmoDb()): Promise<TransferRow[]> {
+  return (await q.query<TransferRow>(
+    `select * from region_transfer where source_region_id = $1 and state = 'PREPARED'
+     order by created_at`, [sourceRegionId])).rows;
 }
 
 // ---------------------------------------------------------------------------
@@ -1646,7 +1670,7 @@ export async function signupSignalsForAccount(accountId: string): Promise<Signup
        from signup_signal where account_id = $1 order by created_at`, [accountId]);
 }
 
-/** All sign-up signals sharing a client-IP hash — the duplicate-account probe. */
+/** All sign-up signals sharing a client-IP hash ï¿½ the duplicate-account probe. */
 export async function signupSignalsSharingIp(ipHash: string): Promise<SignupSignalRow[]> {
   return mmoQuery<SignupSignalRow>(
     `select player_id, account_id, kind, ip_hash, user_agent, created_at::text
@@ -1726,7 +1750,7 @@ export interface TradeAuditFlag extends BarterAuditRow {
 /**
  * PW26 trade audit: every settled barter is queryable by account
  * (bartersForAccount), and this report flags high-value one-sided trades
- * between young accounts — the scripted-funnelling pattern. Account age is
+ * between young accounts ï¿½ the scripted-funnelling pattern. Account age is
  * the durable player's creation time (first persistent-world entry).
  */
 export async function tradeAuditReport(worldId: string, cfg: TradeAuditConfig = {}): Promise<TradeAuditFlag[]> {

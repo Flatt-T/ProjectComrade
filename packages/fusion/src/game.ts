@@ -52,7 +52,10 @@ export type Command =
   | { t: 'grantRecovery'; slot: number; cell: number }
   /** Journaled credit movement between players (PW13 barter settlement). The
    *  durable layer validates balances; the engine clamps at zero defensively. */
-  | { t: 'adjustCredits'; slot: number; delta: number };
+  | { t: 'adjustCredits'; slot: number; delta: number }
+  /** Persistent profile only (PW18): units walk to the region edge and depart
+   *  into the cross-region transfer pipeline. */
+  | { t: 'depart'; ids: number[] };
 
 export interface PlayerSetup {
   name: string; faction: string; ai: boolean; team?: number; level?: AILevel; ally?: number; autoRepair?: boolean;
@@ -188,7 +191,7 @@ export const AUTO_REPAIR_PERCENT = 1;
 /** Queue kinds that produce units (subject to the PW23 supply cap). */
 const UNIT_QUEUES = new Set<QueueKind>(['infantry', 'vehicle', 'aircraft', 'naval', 'starport']);
 
-export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy' | 'enter' | 'rearm' | 'ferry';
+export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy' | 'enter' | 'rearm' | 'ferry' | 'depart';
 export type HarvestState = 'seek' | 'gather' | 'toRefinery' | 'unload' | 'warp';
 /** Ticks a Chrono Miner spends charging before it jumps to the refinery. */
 export const WARP_TICKS = 18;
@@ -307,6 +310,13 @@ export interface Entity {
    */
   faction: string;
   /**
+   * Persistent profile (PW18): cross-region asset identity. '' for ordinary
+   * entities — their durable id is the region/sim-id bridge. A transferred
+   * entity carries its region_transfer id here so ledger and commands keep
+   * one stable identity across regions. '' in classic matches.
+   */
+  durableId: string;
+  /**
    * PW24: player slot of the unit that dealt the killing damage, stamped when
    * hp reaches 0 so removeEntity can apply the salvage mismatch rule. -1 for
    * environmental/ownerless kills; transient — never serialized.
@@ -416,6 +426,8 @@ export interface SalvageEvent {
   killerOwner: number;
   victimType: string;
   victimKind: string;
+  /** Cross-region asset identity when the victim arrived via PW18 transfer. */
+  durableId?: string;
 }
 
 /** One capturable-site transition, drained by the region runner for audit. */
@@ -431,6 +443,45 @@ export interface SiteEvent {
   /** Ticks the outgoing owner held the site (capture events). */
   heldTicks: number;
 }
+/**
+ * PW18 cross-region transfer manifest: every behaviour-affecting field a unit
+ * carries across a region boundary. Cargo (transport passengers) nests
+ * recursively. Plain JSON — it crosses the durable layer and replays
+ * deterministically on the destination runner.
+ */
+export interface TransferManifestEntry {
+  type: string;
+  kind: 'unit';
+  /** Durable player id of the owner — slots differ per region. */
+  ownerPid: string;
+  hp: number;
+  maxHp: number;
+  facing: number;
+  turret: number;
+  bound: number;
+  packedType: string;
+  faction: string;
+  shielded: boolean;
+  battleAt: number;
+  recoveryProtected: boolean;
+  xp: number;
+  rank: number;
+  ammo: number;
+  deployed: boolean;
+  disguised: boolean;
+  hstate: string;
+  cargo: number;
+  cargoValue: number;
+  harvestCell: number;
+  homeField: number;
+  /** Cell the entity occupied when the manifest was captured. */
+  cell: { x: number; y: number };
+  /** Transport passengers, recursively manifested. */
+  cargoUnits?: TransferManifestEntry[];
+  /** Cross-region asset identity (region_transfer id) once assigned. */
+  durableId?: string;
+}
+
 /** The renewal setting at which fields grow back at the pack's own rate (mirrors the lobby's). */
 export const RENEWAL_CLASSIC = 25;
 /** How often crates drop at 100%, and what each kind is worth. */
@@ -591,6 +642,10 @@ export class Game {
   readonly salvageEvents: SalvageEvent[] = [];
   /** PW24 audit feed: site captures and repelled contests; the runner drains it. */
   readonly siteEvents: SiteEvent[] = [];
+  /** PW18 audit feed: units that reached the region edge under a depart order;
+   *  the runner pairs each with its region_transfer row. Transient like the
+   *  other feeds — a lost event is recovered from the stored manifest. */
+  readonly departEvents: { simId: number; manifest: TransferManifestEntry }[] = [];
 
   /** Effective salvage config: persistent regions read mmo.salvage (patchable post-restore). */
   private salvageConfig() {
@@ -852,6 +907,20 @@ export class Game {
         for (const u of own(cmd.ids)) if (this.weaponOf(u)) { u.order = 'attackGround'; u.fireCell = cell; u.target = 0; u.path = []; u.repathTick = 0; u.resume = -1; }
         break;
       }
+      case 'depart': {
+        // PW18: cross-region exit. The unit walks to the nearest reachable
+        // map-edge cell, then leaves with a full state manifest. Units that
+        // cannot reach the edge (islands, blocked paths) simply never depart.
+        for (const u of own(cmd.ids)) {
+          if (u.carrying || u.drone || u.controls || u.carriedBy) continue;
+          const kind = this.moveClass(this.unitDef(u));
+          const goal = this.edgeGoalCell(u, kind);
+          if (goal < 0) continue;
+          u.order = 'depart'; u.target = 0; u.force = false; u.goal = goal; u.path = this.pathFor(u, goal); u.repathTick = 0;
+          if (u.hstate) u.hstate = 'seek';
+        }
+        break;
+      }
       case 'guard':
         // Hold this spot: engage whatever comes in range, then return to it.
         for (const u of own(cmd.ids)) { u.order = 'idle'; u.target = 0; u.force = false; u.path = []; u.goal = u.resume = this.cellOf(u); }
@@ -1065,7 +1134,7 @@ export class Game {
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
       xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1, recoveryProtected: false, packedType: '',
-      faction: this.players[owner]?.faction ?? '',
+      faction: this.players[owner]?.faction ?? '', durableId: '',
     };
   }
 
@@ -1799,6 +1868,7 @@ export class Game {
     if (def.ammo && u.ammo <= 0 && u.order !== 'rearm' && u.order !== 'move') { u.order = 'rearm'; u.dock = 0; u.path = []; }
     if (u.order === 'rearm') { this.rearm(u, def); return; }
     if (u.order === 'enter') { this.enterThink(u, def); return; }
+    if (u.order === 'depart') { this.departThink(u, def); return; }
     const weapon = this.weaponOf(u);
     if (u.order === 'attack') {
       const t = this.entities.get(u.target);
@@ -2217,6 +2287,136 @@ export class Game {
     if (!drone || drone.hp <= 0) { v.drone = 0; return; }
     drone.px = drone.x; drone.py = drone.y; drone.x = v.x; drone.y = v.y;
     if (this.tick % 15 === 0) this.damage(v, this.unitDef(drone).terror ?? 0, drone.owner, drone.id);
+  }
+
+  // ---------------------------------------------------------------- PW18 region-edge transfer
+
+  /** Nearest passable unoccupied map-edge cell for this unit, or -1. */
+  private edgeGoalCell(u: Entity, kind: MoveClass): number {
+    const { w, h } = this.map;
+    const ux = Math.floor(u.x / LEPTONS), uy = Math.floor(u.y / LEPTONS);
+    let best = -1, bestD = Infinity;
+    const tryCell = (x: number, y: number) => {
+      const i = y * w + x;
+      if (!passable(this.pack, this.map, i, kind) || this.map.occupied[i]) return;
+      const d = Math.abs(x - ux) + Math.abs(y - uy);
+      if (d < bestD) { bestD = d; best = i; }
+    };
+    for (let x = 0; x < w; x++) { tryCell(x, 0); tryCell(x, h - 1); }
+    for (let y = 0; y < h; y++) { tryCell(0, y); tryCell(w - 1, y); }
+    return best;
+  }
+
+  /** Walk the depart order to the edge, then leave with a full manifest. */
+  private departThink(u: Entity, def: UnitDef) {
+    const { w, h } = this.map;
+    const cx = Math.floor(u.x / LEPTONS), cy = Math.floor(u.y / LEPTONS);
+    // On the edge or the cell beside it — depart. Units that cannot reach the
+    // boundary (islands, blocked paths) never leave the region.
+    if (Math.min(cx, w - 1 - cx, cy, h - 1 - cy) <= 1) { this.departNow(u); return; }
+    if (!u.path.length) {
+      if (u.goal < 0 || this.tick >= u.repathTick) {
+        const goal = this.edgeGoalCell(u, this.moveClass(def));
+        if (goal < 0) { u.order = 'idle'; return; }
+        u.goal = goal; u.path = this.pathFor(u, goal); u.repathTick = this.tick + 20;
+      }
+      if (!u.path.length) { u.order = 'idle'; return; }
+    }
+    this.move(u, def);
+  }
+
+  /** Serialize every behaviour-affecting field, cargo included, recursively. */
+  transferManifest(e: Entity): TransferManifestEntry {
+    const m: TransferManifestEntry = {
+      type: e.type, kind: 'unit', ownerPid: this.players[e.owner]?.pid ?? '',
+      hp: e.hp, maxHp: e.maxHp, facing: e.facing, turret: e.turret,
+      bound: e.bound, packedType: e.packedType, faction: e.faction,
+      shielded: e.shielded, battleAt: e.battleAt, recoveryProtected: e.recoveryProtected,
+      xp: e.xp, rank: e.rank, ammo: e.ammo, deployed: e.deployed, disguised: e.disguised,
+      hstate: e.hstate, cargo: e.cargo, cargoValue: e.cargoValue,
+      harvestCell: e.harvestCell, homeField: e.homeField,
+      cell: { x: Math.floor(e.x / LEPTONS), y: Math.floor(e.y / LEPTONS) },
+      durableId: e.durableId || undefined,
+    };
+    const cargo: TransferManifestEntry[] = [];
+    for (const id of e.passengers) {
+      const c = this.entities.get(id);
+      if (c && c.hp > 0) cargo.push(this.transferManifest(c));
+    }
+    if (cargo.length) m.cargoUnits = cargo;
+    return m;
+  }
+
+  /** The unit reached the edge: emit the manifest event and leave quietly —
+   *  no death, no salvage, no kill credit. Cargo leaves inside the manifest. */
+  private departNow(e: Entity) {
+    this.departEvents.push({ simId: e.id, manifest: this.transferManifest(e) });
+    this.removeUnitQuiet(e);
+  }
+
+  /** Remove a unit without any death semantics (transfer departure). */
+  private removeUnitQuiet(e: Entity) {
+    for (const id of [...e.passengers]) {
+      const c = this.entities.get(id);
+      if (c) this.removeUnitQuiet(c);
+    }
+    e.passengers = [];
+    if (e.carrying) { const c = this.entities.get(e.carrying); if (c) { c.carriedBy = 0; c.hp = 0; } }
+    if (e.drone) { const d = this.entities.get(e.drone); if (d) { d.carriedBy = 0; d.hp = 0; } }
+    if (e.carriedBy) {
+      const c = this.entities.get(e.carriedBy);
+      if (c) {
+        c.passengers = c.passengers.filter(id => id !== e.id);
+        if (c.carrying === e.id) c.carrying = 0;
+        if (c.drone === e.id) c.drone = 0;
+      }
+    }
+    if (e.controls) {
+      const v = this.entities.get(e.controls);
+      if (v && v.hp > 0) { v.owner = v.originalOwner; v.order = 'idle'; v.target = 0; v.path = []; }
+    }
+    this.entities.delete(e.id);
+  }
+
+  /**
+   * PW18: materialize a transferred unit from its manifest at `cell`. The owner
+   * resolves by durable player id (slots differ per region); returns the new
+   * sim id, or null when the owner has no slot here — the durable layer keeps
+   * the transfer pending until they do.
+   */
+  spawnTransfer(m: TransferManifestEntry, cell: number, durableId = ''): number | null {
+    const slot = this.players.findIndex(p => p.pid === m.ownerPid);
+    if (slot < 0 || !this.pack.units[m.type]) return null;
+    const kind = this.moveClass(this.pack.units[m.type]);
+    const spot = nearestCell(this.map, cell, 8,
+      i => passable(this.pack, this.map, i, kind) && !this.unitInCell(i));
+    const target = spot >= 0 ? spot : cell;
+    const e = this.spawnUnit(m.type, slot, target);
+    e.order = 'idle'; e.hp = Math.max(1, Math.min(m.hp, m.maxHp)); e.maxHp = m.maxHp;
+    e.facing = m.facing; e.turret = m.turret;
+    e.bound = m.bound; e.packedType = m.packedType; e.faction = m.faction || e.faction;
+    e.shielded = m.shielded; e.battleAt = m.battleAt; e.recoveryProtected = m.recoveryProtected;
+    e.xp = m.xp; e.rank = m.rank; e.ammo = m.ammo;
+    e.deployed = m.deployed; e.disguised = m.disguised;
+    e.hstate = m.hstate as HarvestState;
+    e.cargo = m.cargo; e.cargoValue = m.cargoValue;
+    e.harvestCell = m.harvestCell; e.homeField = m.homeField;
+    e.durableId = durableId || m.durableId || '';
+    for (const c of m.cargoUnits ?? []) {
+      const cid = this.spawnTransfer(c, target);
+      if (cid !== null) {
+        const cent = this.entities.get(cid);
+        if (cent) { cent.carriedBy = e.id; e.passengers.push(cid); cent.x = e.x; cent.y = e.y; }
+      }
+    }
+    return e.id;
+  }
+
+  /** Remove a unit (and its cargo) spawned by spawnTransfer after a failed
+   *  durable commit — same quiet semantics as departNow, no death/salvage. */
+  unspawnTransfer(id: number) {
+    const e = this.entities.get(id);
+    if (e && e.kind === 'unit') this.removeUnitQuiet(e);
   }
 
   // ---------------------------------------------------------------- weapons
@@ -3097,7 +3297,7 @@ export class Game {
     this.salvageEvents.push({
       tick: this.tick, cell: spot, credits: value, kind: 'spawn', simId: e.id,
       victimOwner: e.owner, collectorOwner: -1, killerOwner: by,
-      victimType: e.type, victimKind: e.kind,
+      victimType: e.type, victimKind: e.kind, durableId: e.durableId || undefined,
     });
   }
 
