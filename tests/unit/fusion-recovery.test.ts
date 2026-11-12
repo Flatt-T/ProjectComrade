@@ -162,15 +162,21 @@ describe('PW12 recovery combat and assets', () => {
     expect(g.players[0].recoveryAttacked).toBe(true);
   });
 
-  it('bound recovery assets cannot be sold', () => {
-    const g = new Game(setup());
+  it('bound recovery assets cannot be sold or transferred', () => {
+    const g = new Game(setup(TUNING, 2));
     wipeSlot(g, 0);
-    grantRecovery(g);
+    grantRecovery(g, 0);
     const mcv = ownEntities(g, 0, 'unit').find(u => u.bound === 2)!;
     const credits = g.players[0].credits;
     g.enqueue(0, { t: 'sell', id: mcv.id });
     g.step();
     expect(g.entities.get(mcv.id)?.hp).toBeGreaterThan(0);
     expect(g.players[0].credits).toBe(credits);
+    // PW26: a transfer would launder the binding onto another account.
+    const free = g.spawnUnit('humvee', 0, 40 * PACK.maps[0].width + 70);
+    g.enqueue(0, { t: 'transfer', ids: [mcv.id, free.id], to: 1 });
+    g.step();
+    expect(g.entities.get(mcv.id)?.owner).toBe(0);
+    expect(g.entities.get(free.id)?.owner).toBe(1);
   });
 });

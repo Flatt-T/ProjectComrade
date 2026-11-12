@@ -675,7 +675,9 @@ export class Game {
     if (!target || to === from) return;
     for (const id of ids) {
       const e = this.entities.get(id);
-      if (!e || e.hp <= 0 || e.carriedBy || e.owner !== from) continue;
+      // PW26: bound assets (starter grant, recovery MCV) cannot change hands —
+      // a transfer would launder the binding onto a different account.
+      if (!e || e.hp <= 0 || e.carriedBy || e.owner !== from || e.bound !== 0) continue;
       e.owner = to;
     }
   }
