@@ -151,16 +151,36 @@ function viableCell(pack: RulePack, map: ReturnType<typeof generateMap>, i: numb
 
 export interface SpawnPick { cell: number; x: number; y: number; adjusted: boolean }
 
+/** FNV-1a over seed+salt: deterministic per-player "random" index for spawn spread. */
+function pickHash(seed: number, salt: string): number {
+  let h = (0x811c9dc5 ^ seed) >>> 0;
+  for (let i = 0; i < salt.length; i++) {
+    h ^= salt.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h >>> 0;
+}
+
+/** How many top-resource max-separation candidates the salted pick chooses among. */
+const SPREAD_CANDIDATES = 24;
+
 /**
  * Choose the newcomer's spawn cell (PW11): the client's requested cell when it
  * is viable, otherwise the best valid cell — maximum practical travel
  * separation from every existing player's assets, then richest nearby
  * resources, deterministic scan order. `separationCells` is the profile's
  * minimum; when no cell reaches it the maximum available separation wins.
+ *
+ * With `salt` (the settling player's id) the pick is still deterministic but
+ * spreads newcomers: instead of always the single richest max-separation
+ * cell, it chooses among the top SPREAD_CANDIDATES resource cells by a
+ * seed+salt hash, so players land at varied positions across the far side of
+ * the map rather than piling onto one spot.
  */
 export function pickSpawnCell(args: {
   packId: string; mapId: string; seed: number; worldgen?: WorldgenSpec;
   keepAwayCells?: number[]; separationCells?: number; preferCell?: number;
+  salt?: string;
 }): SpawnPick {
   const { pack, map } = spawnMap(args.packId, args.mapId, args.seed, args.worldgen);
   const keepAway = args.keepAwayCells ?? [];
@@ -174,6 +194,7 @@ export function pickSpawnCell(args: {
     return finish(prefer, false);
   }
   let best = -1, bestSep = -1, bestRes = -1;
+  const tied: { i: number; res: number }[] = [];
   for (let i = 0; i < map.w * map.h; i++) {
     if (!viableCell(pack, map, i)) continue;
     const sep = minSeparation(map, i, keepAway);
@@ -181,9 +202,21 @@ export function pickSpawnCell(args: {
     // Primary: separation (capped at the required distance so ties break on
     // resources); secondary: reachable resources; tertiary: scan order.
     const sepScore = Math.min(sep, separation);
-    if (sepScore > bestSep || (sepScore === bestSep && res > bestRes)) {
+    if (sepScore > bestSep) {
       best = i; bestSep = sepScore; bestRes = res;
+      tied.length = 0; tied.push({ i, res });
+    } else if (sepScore === bestSep) {
+      tied.push({ i, res });
+      if (res > bestRes) { bestRes = res; best = i; }
     }
+  }
+  if (args.salt !== undefined && tied.length > 1) {
+    // Deterministic per-player spread: richest max-separation cells first,
+    // then a seed+salt hash picks one — replay-safe because the salt is the
+    // durable player id.
+    tied.sort((a, b) => b.res - a.res || a.i - b.i);
+    const top = tied.slice(0, SPREAD_CANDIDATES);
+    best = top[pickHash(args.seed, args.salt) % top.length].i;
   }
   if (best < 0) {
     // No cell satisfies every constraint (tiny or resource-poor map): fall back

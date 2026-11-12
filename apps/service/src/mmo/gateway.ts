@@ -28,7 +28,7 @@ import { MmoStoreError, playerConnected, playerDisconnected, playersSeen } from 
 import { dispatchOutbox, type OutboxEnvelope } from './bus.js';
 import { identityUuid, type RegionIdentity, type RegionService } from './regions.js';
 import { guestIdFromCookieHeader, parseSessionCookie } from '../auth.js';
-import { authEnabled, ses } from '../config.js';
+import { authEnabled, mmoGuestPolicy, ses } from '../config.js';
 import * as cognito from '../cognito.js';
 import { accountById, accountBySub } from '../accounts.js';
 import {
@@ -56,6 +56,8 @@ interface Conn {
   lastPresenceSweep: number;
   messages: number;
   interval?: ReturnType<typeof setInterval>;
+  /** Set when this connection holds one of the capped guest slots. */
+  guestCounted?: boolean;
 }
 
 function send(ws: WebSocket, message: MmoServerMessage) {
@@ -101,6 +103,8 @@ export class MmoGateway {
   private dispatchTimer?: ReturnType<typeof setInterval>;
   private notifyTimer?: ReturnType<typeof setInterval>;
   private readonly workerId = randomUUID();
+  /** Live guest connections when MMO_ALLOW_GUESTS is a numeric cap. */
+  private guestConns = 0;
 
   constructor(service: RegionService) {
     this.service = service;
@@ -142,7 +146,22 @@ export class MmoGateway {
 
     void resolveIdentity(req.headers.cookie).then(identity => {
       conn.identity = identity;
-      if (!identity) sendError(ws, 'UNAUTHENTICATED', 'Sign in or allow guest play to enter the persistent world');
+      if (!identity) { sendError(ws, 'UNAUTHENTICATED', 'Sign in or allow guest play to enter the persistent world'); return; }
+      // Numeric MMO_ALLOW_GUESTS caps concurrent guest sockets; 'open' is the
+      // legacy uncapped beta mode. The socket may already be gone — only count
+      // live connections so the tally cannot leak.
+      const policy = mmoGuestPolicy();
+      if (identity.kind === 'guest' && typeof policy === 'number') {
+        if (ws.readyState !== ws.OPEN) return;
+        if (this.guestConns >= policy) {
+          log('mmo-guest-cap', { guests: this.guestConns, max: policy });
+          sendError(ws, 'GUEST_LIMIT', 'Guest capacity reached — sign in or try again later');
+          ws.close(1013, 'Guest capacity reached');
+          return;
+        }
+        this.guestConns++;
+        conn.guestCounted = true;
+      }
     });
 
     ws.on('message', data => {
@@ -152,6 +171,7 @@ export class MmoGateway {
     ws.on('close', () => {
       if (conn.interval) clearInterval(conn.interval);
       this.conns.delete(conn);
+      if (conn.guestCounted) this.guestConns--;
       // PW09: dropping the last socket starts the offline grace period; other
       // live sockets for the same account keep the player online.
       const now = Date.now();
@@ -183,7 +203,7 @@ export class MmoGateway {
     // PW09 / COMRADE 18: guests cannot own a persistent base. When platform auth
     // is configured the derived guest identity is rejected; auth-disabled dev
     // deployments (and MMO_ALLOW_GUESTS=1) keep guest subscriptions for testing.
-    if (conn.identity.kind === 'guest' && authEnabled() && process.env.MMO_ALLOW_GUESTS !== '1') {
+    if (conn.identity.kind === 'guest' && authEnabled() && mmoGuestPolicy() === 'disabled') {
       sendError(conn.ws, 'GUEST_NOT_ALLOWED', 'Persistent worlds require a registered account');
       return;
     }

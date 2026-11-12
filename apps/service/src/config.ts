@@ -71,6 +71,21 @@ const bootSecret = Math.random().toString(36).slice(2) + Date.now().toString(36)
 /** Cookies are Secure unless explicitly relaxed for local http development. */
 export function cookieSecure(): boolean { return text('COMRADE_COOKIE_INSECURE') !== 'true'; }
 
+/**
+ * Persistent-world guest policy (MMO_ALLOW_GUESTS):
+ *  - unset / '0' / 'false' → guests disabled when platform auth is on;
+ *  - '1' / 'true' → guests allowed, no connection cap (legacy beta behaviour);
+ *  - integer ≥ 2 → guests allowed with at most that many concurrent guest
+ *    WebSocket connections (the gateway closes extras with 1013).
+ */
+export function mmoGuestPolicy(): 'disabled' | 'open' | number {
+  const raw = text('MMO_ALLOW_GUESTS').toLowerCase();
+  if (raw === '' || raw === '0' || raw === 'false') return 'disabled';
+  if (raw === '1' || raw === 'true') return 'open';
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 2 ? n : 'disabled';
+}
+
 /** Accounts, quotas and billing all need the database; without it the platform stays open. */
 export function platformEnabled(): boolean { return databaseConfigured(); }
 export function authEnabled(): boolean { return platformEnabled() && cognito.configured(); }

@@ -11,7 +11,7 @@ import { createPlayer, createWorld, MmoStoreError, recordSignupSignal } from './
 import { persistentPackRevision } from './packs.js';
 import { ensureEntryRegion } from './spawn.js';
 import type { RegionIdentity } from './regions.js';
-import { authEnabled } from '../config.js';
+import { authEnabled, mmoGuestPolicy } from '../config.js';
 
 /** The single beta world: the oldest row, created on first entry when absent. */
 async function betaWorldId(): Promise<string> {
@@ -35,7 +35,7 @@ export async function enterPersistentWorld(identity: RegionIdentity): Promise<{
   regionId: string; playerId: string; settled: boolean;
 }> {
   // Same durable-layer guest guard as RegionService.playerFor (PW09).
-  if (identity.kind === 'guest' && authEnabled() && process.env.MMO_ALLOW_GUESTS !== '1') {
+  if (identity.kind === 'guest' && authEnabled() && mmoGuestPolicy() === 'disabled') {
     throw new MmoStoreError('GUEST_NOT_ALLOWED', 'Persistent worlds require a registered account');
   }
   const worldId = await betaWorldId();
