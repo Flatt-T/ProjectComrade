@@ -218,7 +218,13 @@ describeDb('mmo recovery (real PostgreSQL + runner + Fusion sim)', () => {
       return !!r;
     });
     const g = live(ctx);
-    const mcvs = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.bound === 2 && e.hp > 0);
+    // The grantRecovery sim mirror applies at the next tick boundary after the
+    // episode commits — wait for the bound MCV rather than racing the tick.
+    let mcvs: { bound: number; hp: number; recoveryProtected?: boolean }[] = [];
+    await waitFor(() => {
+      mcvs = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.bound === 2 && e.hp > 0);
+      return mcvs.length === 1;
+    });
     expect(mcvs.length).toBe(1);
     expect(mcvs[0].recoveryProtected).toBe(true);
     const p = g.players.find(pl => (pl as { pid?: string }).pid === p0().playerId);
@@ -288,7 +294,13 @@ describeDb('mmo recovery (real PostgreSQL + runner + Fusion sim)', () => {
       const r = await mmoOne('select 1 as x from recovery_episode where player_id = $1 and status = $2', [p1().playerId, 'active']);
       return !!r;
     });
-    const mcvs = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.bound === 2 && e.hp > 0);
+    // The grantRecovery sim mirror applies at the next tick boundary after the
+    // episode commits — wait for the bound MCV rather than racing the tick.
+    let mcvs: { bound: number; hp: number; recoveryProtected?: boolean }[] = [];
+    await waitFor(() => {
+      mcvs = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.bound === 2 && e.hp > 0);
+      return mcvs.length === 1;
+    });
     expect(mcvs.length).toBe(1);
     // Milestone: one power + one barracks-equivalent standing ends recovery.
     await spawnStructure(ctx, slot, 'nuke');
