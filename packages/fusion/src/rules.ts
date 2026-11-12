@@ -411,3 +411,23 @@ export function prereqsMet(prereqs: string[], owned: Map<string, number> | Set<s
 export function weaponCanTarget(w: WeaponDef, kind: TargetKind): boolean {
   return w.targets ? w.targets.includes(kind) : kind !== 'aircraft';
 }
+
+/**
+ * PW17: prerequisite role keys a structure provides. Persistent mixed forces
+ * match prereqs by ROLE, not by exact type: 'nuke' means any power plant,
+ * 'pyle|hand' means a barracks of either faction, 'hq' the tech centre. A
+ * faction-locked structure suffixes its roles (`infantry-plant:nod`) so
+ * faction-specific tech still requires that faction's building — which a
+ * buyer can also satisfy by importing it. Shared structures carry bare roles.
+ */
+export function structurePrereqRoles(def: StructureDef): string[] {
+  const suffix = def.factions?.length ? ':' + [...def.factions].sort().join('+') : '';
+  const roles: string[] = [];
+  if (def.constructionYard) roles.push(`construction-yard${suffix}`);
+  if (def.power > 0) roles.push(`power${suffix}`);
+  if (def.refinery) roles.push(`refinery${suffix}`);
+  if (def.superweapon) roles.push(`superweapon${suffix}`);
+  else if (def.radar) roles.push(`tech-centre${suffix}`);
+  if (def.produces) roles.push(`${def.produces}-plant${suffix}`);
+  return roles;
+}

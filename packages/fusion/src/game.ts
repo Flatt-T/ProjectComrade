@@ -1,7 +1,7 @@
 import { Hasher, LEPTONS, Rng, cellCenter, dist, facingDelta, facingTo, toCell } from './core.js';
 import { MapData, buildableTerrain, generateMap, inBounds, isWater, passable, resourceIndex, terrainPassable } from './map.js';
 import { findPath, nearestCell } from './path.js';
-import { Doctrine, FactionDef, InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules.js';
+import { Doctrine, FactionDef, InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, structurePrereqRoles, weaponCanTarget } from './rules.js';
 import { runAI, AIState, AILevel, AI_LEVELS, createAIState } from './ai.js';
 import { isHarvesterUnit, isMcvUnit, structureRoles } from './recovery.js';
 import { starterPicks } from './starter.js';
@@ -251,6 +251,14 @@ export interface Entity {
    * packed. Snapshots predating PW14 lack the field; restoreGame normalizes it.
    */
   packedType: string;
+  /**
+   * Persistent profile (PW17): the faction this asset was CREATED under —
+   * stamped at spawn from the creator's faction and never rewritten by
+   * transfers, packing or redeploys. An imported production building keeps its
+   * donor faction here, which is what makes it produce that faction's units.
+   * '' on entities predating PW17; restoreGame falls back to the owner's.
+   */
+  faction: string;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -834,6 +842,7 @@ export class Game {
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
       xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1, recoveryProtected: false, packedType: '',
+      faction: this.players[owner]?.faction ?? '',
     };
   }
 
@@ -1035,6 +1044,80 @@ export class Game {
     return list;
   }
 
+  // ------------------------------------------------------------ mixed forces (PW17)
+
+  /** Best upgrade level the player holds per prerequisite role key. */
+  private ownedRoleLevels(p: Player): Map<string, number> {
+    const roles = new Map<string, number>();
+    for (const e of this.entities.values()) {
+      if (e.owner !== p.slot || e.kind !== 'structure' || e.hp <= 0) continue;
+      const def = this.pack.structures[e.type];
+      if (!def) continue;
+      const level = p.upgrades[e.type] ?? 0;
+      for (const r of structurePrereqRoles(def)) roles.set(r, Math.max(roles.get(r) ?? 0, level));
+    }
+    return roles;
+  }
+
+  /**
+   * PW17: prerequisites matched by ROLE, not exact type. 'nuke' is satisfied by
+   * any power plant, 'pyle|hand' by a barracks of either faction, and a
+   * faction-locked prereq ('tmpl', 'afld@1') still needs that faction's
+   * building — importable, but never substitutable. Prereq ids with no role
+   * signature fall back to exact type+level.
+   */
+  private prereqsSatisfied(p: Player, prereqs: string[], owned = this.owned(p)): boolean {
+    // Classic matches keep exact type+level prereqs — role matching is a
+    // deliberate persistent-mode change, not a fidelity tweak.
+    if (!this.persistent) return prereqsMet(prereqs, owned);
+    if (!prereqs.length) return true;
+    const roles = this.ownedRoleLevels(p);
+    return prereqs.every(entry => entry.split('|').some(alt => {
+      const [id, need] = alt.split('@');
+      const n = Number(need ?? 0);
+      const sdef = this.pack.structures[id];
+      const rs = sdef ? structurePrereqRoles(sdef) : [];
+      if (rs.length) return rs.some(r => (roles.get(r) ?? -1) >= n);
+      const have = owned.get(id);
+      return have !== undefined && have >= n;
+    }));
+  }
+
+  /**
+   * PW17: the faction a production building fields. A faction-locked factory
+   * produces its own faction's units no matter who owns it now; a shared one
+   * falls back to the faction it was created under, then the current owner's.
+   */
+  private factoryFaction(e: Entity): { faction: string; side: string } {
+    const sdef = this.pack.structures[e.type];
+    if (sdef?.factions?.length) {
+      const f = this.pack.factions.find(f => factionCanUse(sdef, f.id, f.side));
+      if (f) return { faction: f.id, side: f.side };
+    }
+    const facId = e.faction || this.players[e.owner]?.faction || '';
+    const f = this.pack.factions.find(x => x.id === facId);
+    return { faction: facId, side: f?.side ?? facId };
+  }
+
+  /**
+   * PW17: the factories allowed to build `item`. Unit production is scoped per
+   * building: the factory's own faction gates the roster and the OWNER's
+   * role-matched prerequisites must hold. An imported factory therefore offers
+   * the donor faction's units — and only those.
+   */
+  eligibleFactories(p: Player, kind: QueueKind, item: string): Entity[] {
+    const def = this.pack.units[this.baseItem(item)];
+    if (!def) return [];
+    const out: Entity[] = [];
+    for (const e of this.factories(p, kind)) {
+      const ff = this.factoryFaction(e);
+      if (!factionCanUse(def, ff.faction, ff.side)) continue;
+      if (!item.startsWith(STARPORT) && !this.prereqsSatisfied(p, def.prereqs)) continue;
+      out.push(e);
+    }
+    return out;
+  }
+
   // ------------------------------------------------------- persistent pacing
 
   /** Live units a player fields — the supply points the PW23 cap and upkeep use. */
@@ -1137,8 +1220,18 @@ export class Game {
     if (!queue) return false;
     if (p.recovering && !this.recoveryBuildAllowed(p, item)) return false;
     const base = this.baseItem(item);
-    const def: UnitDef | StructureDef | undefined = this.pack.structures[base] ?? this.pack.units[base];
-    if (!def || !factionCanUse(def, p.faction, p.side)) return false;
+    const sdef = this.pack.structures[base];
+    const udef = this.pack.units[base];
+    const def: UnitDef | StructureDef | undefined = sdef ?? udef;
+    if (!def) return false;
+    // Buildings stay player-faction gated (PW17): importing a production
+    // building never adds the donor faction's structures to the build menu.
+    // Unit items are gated per-factory in eligibleFactories instead.
+    const structureItem = !!sdef && (queue === 'structure' || queue === 'defense');
+    // Classic matches gate every item by the player's faction; persistent
+    // gates buildings the same way but units per-factory (PW17).
+    const playerGated = structureItem || item.startsWith(UPGRADE) || !this.persistent;
+    if (playerGated && !factionCanUse(def, p.faction, p.side)) return false;
     // The tech level caps what may be built, but not the improvement of a building already
     // standing: Construction Yards are never built directly (tech 99) yet can be upgraded.
     if (!item.startsWith(UPGRADE) && def.tech > this.techCap) return false;
@@ -1148,8 +1241,12 @@ export class Game {
       // Upgrades are bought once the building stands, up to its number of levels.
       const level = owned.get(base);
       if (level === undefined || level >= ((def as StructureDef).upgrades ?? 0) || p.queues.structure.items.includes(item)) return false;
-    } else if (!item.startsWith(STARPORT) && !prereqsMet(def.prereqs, owned)) return false;
-    return this.factories(p, queue).length > 0;
+    } else if (!item.startsWith(STARPORT) && !this.prereqsSatisfied(p, def.prereqs, owned)) return false;
+    if (structureItem || item.startsWith(UPGRADE)) return this.factories(p, queue).length > 0;
+    // Classic matches gate units by the player's own faction exactly as before;
+    // persistent mixed forces gate per-factory (PW17).
+    if (!this.persistent) return this.factories(p, queue).length > 0;
+    return this.eligibleFactories(p, queue, item).length > 0;
   }
 
   buildOptions(p: Player, queue: QueueKind): string[] {
@@ -1238,9 +1335,15 @@ export class Game {
       if (kind === 'structure' || kind === 'defense') { q.ready = true; continue; }
       const unitId = this.baseItem(item);
       const def = this.pack.units[unitId];
+      // PW17: roll out of a factory actually allowed to build this item — an
+      // imported building produces its own faction's units, so eligibility is
+      // per-factory, not per-player. (structure/defense kinds already continued
+      // above via q.ready, so `kind` here is always a unit queue.)
+      const eligible = this.persistent ? this.eligibleFactories(p, kind, item) : factories;
+      if (!eligible.length) continue;
       // Roll out of the factory the unit actually requires (tanks from the Heavy Factory).
       const named = new Set(def.prereqs.flatMap(r => r.split('|').map(a => a.split('@')[0])));
-      const factory = kind === 'starport' ? factories[0] : factories.find(f => named.has(f.type)) ?? factories[0];
+      const factory = kind === 'starport' ? eligible[0] : eligible.find(f => named.has(f.type)) ?? eligible[0];
       const exit = this.exitCell(factory, def);
       if (exit < 0) continue;
       const unit = this.spawnUnit(unitId, p.slot, exit);
