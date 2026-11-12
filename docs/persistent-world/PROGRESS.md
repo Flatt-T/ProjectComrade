@@ -531,3 +531,60 @@ acceptance detail; this file is the resume point. Read it first in every session
   event_seq references, not yet a dedicated checksum test;
   milestone-2 items (objectives, daily/weekly rewards, alliance chat,
   mute/report, map pings) remain.
+
+### PW27 - THU-2274 - isolated beta deployment and three-browser scenario - 2026-11-12
+
+- Beta environment: pull-deployer on Proxmox guest 10.10.0.60
+  (`/opt/comrade-beta`, compose + service.env), image
+  `ghcr.io/flatt-t/projectcomrade:<sha>` selected from the newest
+  `beta-*` prerelease by `published_at` (PR #31). Guest Postgres at
+  10.10.0.35 (`comrade_beta`, sslmode=require), `MMO_ALLOW_GUESTS=1`
+  for the scenario. Served at beta.projectcomrade.co.uk; local verify
+  via SSH tunnel to 10.10.0.60:3002.
+- Client/transport fixes found only by live browser testing:
+  `/world` added to SPA routes (PR #32); single `server.on('upgrade')`
+  dispatcher for `/mmo` + `/ws` (PR #33 - the separate
+  `WebSocketServer({server})` swallowed `/mmo` upgrades with 400);
+  `onSnapshot` dispatch wired so `__comradeWorld` builds (PR #34 -
+  the settle overlay appeared but the rig never did); integer-ms
+  region sim-start anchor (PR #35 - float tick broke restore);
+  presence-aware quiescence + command-path wake (PR #36 - regions
+  hibernated under connected-but-idle players, stranding commands
+  with REGION_UNAVAILABLE).
+- Shield surface for the scenario (PR #30): `GET
+  /api/mmo/protection` read model (compounds, OFFLINE_EARNED
+  records, available/earned/nightly seconds) and the shield panel -
+  presets 1h/4h/8h/24h + custom seconds, remaining-hours display,
+  arm/clear via the journaled selectShield/clearShield actions.
+- Live scenario on beta commit 853b225 (three independent browser
+  contexts, guests, region 3417e60a):
+  - Spawn: three players settled same region (GDI/GDI/Nod, slots
+    3/4/5 after six total), 16 bound starter units each, credits
+    12000->~10656, newcomerProtected on.
+  - Build: each MCV moved to open ground, deployed bound `fact`
+    yard, built+placed `nuke` (power), `proc` (refinery + free
+    harvester), faction barracks (`pyle` GDI / `hand` Nod);
+    powerGen 100 / powerUse 40-60, queues drained, credits ~8.6k.
+  - Alliance + shield: A created alliance, invited+accepted B;
+    B PUT notification prefs {inapp:true} (200); B armed a 3600s
+    OFFLINE_EARNED shield through the real panel UI ("Armed 1h 0m -
+    starts when you go offline", 7h available).
+  - Orders: A unit move observed en route; C lighttank attacked A's
+    `nuke` - HP 10000 -> 7348 over ~30s once newcomer protection
+    lapsed (protected players cannot fire or be damaged, verified
+    both directions during the window).
+  - Offline cycle: B disconnected ~100s - away-report endpoint
+    returned the window (empty entries, nobody attacked B);
+    protection record consumed ~30s armed->active->paused; second
+    ~95s absence observed from A's replica with B's `fact` yard
+    `shielded=true` mid-absence, then paused back to `armed` on
+    reconnect with armedSeconds preserved (3600 -> 3535 across both
+    absences). Reconnect restored same playerId/slot - guest
+    identity persists across disconnect.
+- Open: beta DNS/Let's Encrypt cert remains owner-blocked (currently
+  plain-HTTP tunnel verification); stray browser contexts/pages from
+  earlier runs accumulate - scenario scripts discover pages by
+  playerId across all contexts; MCP evaluate kills multi-minute
+  in-page waits, so long phases are driven as short issue/poll
+  steps; dependency-check CI advisory still fails (pre-existing,
+  non-blocking).
