@@ -11,10 +11,10 @@ import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import { MmoConnection, PersistentSession, SnapshotState } from './mmo';
 import { mmoEntityId } from '@comrade/contracts';
 import type {
-  MmoAwayReport, MmoNotification, MmoNotificationKind, MmoNotificationPrefs, MmoNotifyChannel,
+  BarterItem, MmoAwayReport, MmoNotification, MmoNotificationKind, MmoNotificationPrefs, MmoNotifyChannel,
 } from '@comrade/contracts';
 import { api } from './api';
-import type { MmoProtectionResponse } from './api';
+import type { MmoProtectionResponse, MmoTradeOffersResponse } from './api';
 import { typingIn } from './help';
 
 type Mode = 'normal' | 'place' | 'repair' | 'attackMove' | 'super';
@@ -79,6 +79,10 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   const [prot, setProt] = useState<MmoProtectionResponse | null>(null);
   const [showShield, setShowShield] = useState(false);
   const [shieldCustom, setShieldCustom] = useState('');
+  // PW13: barter inbox/outbox — offers are authored via the wire protocol;
+  // this panel answers, cancels and lists them.
+  const [offers, setOffers] = useState<MmoTradeOffersResponse | null>(null);
+  const [showTrade, setShowTrade] = useState(false);
 
   useEffect(() => {
     let game: Game | null = null;
@@ -154,6 +158,9 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     const loadProt = () => void api.mmoProtection().then(setProt).catch(() => undefined);
     loadProt();
     const protTimer = window.setInterval(loadProt, 15_000);
+    const loadOffers = () => void api.mmoTradeOffers().then(setOffers).catch(() => undefined);
+    loadOffers();
+    const offersTimer = window.setInterval(loadOffers, 15_000);
 
     const resize = () => {
       const el = stage.current!, c = canvas.current!;
@@ -268,6 +275,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       window.removeEventListener('keydown', keydown); window.removeEventListener('keyup', keyup);
       session?.dispose(); conn.close(); rig.current = null;
       window.clearInterval(protTimer);
+      window.clearInterval(offersTimer);
     };
   }, [regionId]);
 
@@ -321,6 +329,17 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     window.setTimeout(() => setNotice(''), 4000);
     window.setTimeout(() => void api.mmoProtection().then(setProt).catch(() => undefined), 1500);
   }
+
+  // PW13: answer, cancel or accept barter offers. Settlement is journaled and
+  // atomic — the UI only sends the intent and refreshes the offer list.
+  function barterAction(kind: 'barterAccept' | 'barterDecline' | 'barterCancel', offerId: string) {
+    connRef.current?.command({ t: kind, offerId });
+    setNotice(kind === 'barterAccept' ? 'Acceptance sent…' : 'Offer update sent.');
+    window.setTimeout(() => setNotice(''), 4000);
+    window.setTimeout(() => void api.mmoTradeOffers().then(setOffers).catch(() => undefined), 1500);
+  }
+  const barterItemText = (i: BarterItem) =>
+    `${i.kind}${i.ref ? ` ${i.ref.slice(0, 8)}` : ''} ×${i.amount}`;
 
   // PW11: send the journaled settle intent; the server picks the spawn cell and
   // grants the starter army + one-hour setup protection. x/y are a preference —
@@ -538,6 +557,9 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         <button className="notify-bell" onClick={() => setShowShield(v => !v)} title="Compound shield">
           {'\u{1F6E1}'}
         </button>
+        <button className="notify-bell" onClick={() => setShowTrade(v => !v)} title="Trade offers">
+          {'\u{1F91D}'}{offers && offers.incoming.length ? ' •' : ''}
+        </button>
       </div>
       {showShield && <div className="notes-panel">
         <div className="notes-head"><b>Compound shield</b>
@@ -570,6 +592,37 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         })}
         {prot && prot.compounds.filter(c => c.regionId === regionId).length === 0 &&
           <div className="notes-empty">No standing construction yard — build one first.</div>}
+      </div>}
+      {showTrade && <div className="notes-panel">
+        <div className="notes-head"><b>Trade offers</b>
+          <span className="notes-prefs">{offers ? `${offers.incoming.length} in · ${offers.outgoing.length} out` : '…'}</span>
+        </div>
+        {!offers && <div className="notes-empty">Loading…</div>}
+        {offers && offers.incoming.length === 0 && offers.outgoing.length === 0 &&
+          <div className="notes-empty">No open offers.</div>}
+        {offers?.incoming.map(o => (
+          <div key={o.offer_id} className="note">
+            <span>
+              <b>From {o.from_player_id.slice(0, 8)}</b> gives {o.payload.give.map(barterItemText).join(', ') || 'nothing'}
+              {' → '}wants {o.payload.want.map(barterItemText).join(', ') || 'nothing'}
+            </span>
+            <span className="notes-prefs">
+              <button onClick={() => barterAction('barterAccept', o.offer_id)}>Accept</button>
+              <button onClick={() => barterAction('barterDecline', o.offer_id)}>Decline</button>
+            </span>
+          </div>
+        ))}
+        {offers?.outgoing.map(o => (
+          <div key={o.offer_id} className="note">
+            <span>
+              <b>To {o.to_player_id.slice(0, 8)}</b> — you give {o.payload.give.map(barterItemText).join(', ') || 'nothing'}
+              {' → '}want {o.payload.want.map(barterItemText).join(', ') || 'nothing'}
+            </span>
+            <span className="notes-prefs">
+              <button onClick={() => barterAction('barterCancel', o.offer_id)}>Cancel</button>
+            </span>
+          </div>
+        ))}
       </div>}
       {showNotes && <div className="notes-panel">
         <div className="notes-head">
