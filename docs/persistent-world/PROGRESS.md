@@ -233,7 +233,8 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW23 - THU-2275 - persistent pacing profile and anti-snowball rules - 2026-11-11
 
-- State: implemented on branch `thu-2275-pw23-pacing-profile` (PR pending).
+- State: merged to main as `d5456d3` (PR #21, commits `745b891` + `cb12e68`
+  command-intent race fix); THU-2275 Done.
 - Deliverables: `MmoRulesProfile` extended with every COMRADE 18 §2.4/§3 tunable
   in one validated place (`structureHpMultiplier`, `armySupply`, `maxCompounds`,
   `baseLevelMinutes`, `powerScoreWeights`, `spawnRegionPowerBandRatio`,
