@@ -83,6 +83,30 @@ describe('pickSpawnCell', () => {
     expect(viable(pick.cell)).toBe(true);
   });
 
+  it('salted picks stay deterministic per player but spread across candidates', () => {
+    const args = {
+      packId: 'td', mapId: PRESET.id, seed: SEED,
+      keepAwayCells: [] as number[], separationCells: 8,
+    };
+    const a1 = pickSpawnCell({ ...args, salt: 'player-a' });
+    const a2 = pickSpawnCell({ ...args, salt: 'player-a' });
+    const b1 = pickSpawnCell({ ...args, salt: 'player-b' });
+    const c1 = pickSpawnCell({ ...args, salt: 'player-c' });
+    // Same salt → identical cell (journal replay safety); different salts
+    // spread over the top candidate set rather than always argmax.
+    expect(a1.cell).toBe(a2.cell);
+    const cells = new Set([a1.cell, b1.cell, c1.cell]);
+    expect(cells.size).toBeGreaterThan(1);
+    for (const p of [a1, b1, c1]) expect(viable(p.cell)).toBe(true);
+    // Every salted pick still achieves the best capped separation.
+    let best = -1;
+    for (let i = 0; i < MAP.w * MAP.h; i++) {
+      if (!viable(i)) continue;
+      best = Math.max(best, Math.min(sepFrom(i, args.keepAwayCells), 8));
+    }
+    for (const p of [a1, b1, c1]) expect(Math.min(sepFrom(p.cell, args.keepAwayCells), 8)).toBe(best);
+  });
+
   it('still returns a cell when every constraint is unsatisfiable', () => {
     const keep: number[] = [];
     for (let i = 0; i < MAP.w * MAP.h; i++) keep.push(i);

@@ -175,7 +175,7 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
   setupProtectionOnlineMs: 3_600_000,
   setupProtectionLapseMs: 86_400_000,
   starterCreditsMultiplier: 2,
-  spawnSeparationCells: 24,
+  spawnSeparationCells: 48,
   maxCompounds: 3,
   baseLevelMinutes: { min: 20, max: 30 },
   armySupply: { cap: 100, upkeepPerPointPerMinute: 1 },
@@ -219,7 +219,7 @@ export const PERSISTENT_RULES_V1: MmoRulesProfile = {
     windowMs: 900_000,
     superweaponNearbyCells: 60,
   },
-  worldgen: { width: 96, height: 96, seaLevel: 118, rivers: 3, resourceClusters: 14, resourceRadius: 6, spawnSitesMin: 8, maxAttempts: 24 },
+  worldgen: { width: 192, height: 192, seaLevel: 118, rivers: 6, resourceClusters: 56, resourceRadius: 8, spawnSitesMin: 16, maxAttempts: 64 },
 };
 
 /** Fallbacks for rules profiles pinned before PW24/PW16 added the sections. */

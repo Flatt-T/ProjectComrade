@@ -7,7 +7,7 @@ import { mmoOne, mmoQuery } from './db.js';
 import { getRegion, getSettlement, joinWorld, createPlayer, protectionRegionsForPlayer, recordSignupSignal, MmoStoreError, type RegionRow } from './store.js';
 import { RegionRunner, type RegionRunnerOptions } from './runner.js';
 import { createWorldHandler, pokeProtectionEval, pokeRecoveryEval } from './world.js';
-import { authEnabled } from '../config.js';
+import { authEnabled, mmoGuestPolicy } from '../config.js';
 import { PERSISTENT_RULES_V1, MMO_PROTOCOL, MMO_RULESET_VERSION, type MmoSnapshotHeader } from '@comrade/contracts';
 
 export interface RegionIdentity {
@@ -235,7 +235,7 @@ export class RegionService {
     // COMRADE 18 PW09: guests cannot own a persistent base. The gateway rejects
     // them earlier; this is the durable-layer guard so no path can provision one.
     // Auth-disabled dev deployments treat the guest cookie as the only identity.
-    if (identity.kind === 'guest' && authEnabled() && process.env.MMO_ALLOW_GUESTS !== '1') {
+    if (identity.kind === 'guest' && authEnabled() && mmoGuestPolicy() === 'disabled') {
       throw new MmoStoreError('GUEST_NOT_ALLOWED', 'Persistent worlds require a registered account');
     }
     let player = await mmoOne<{ player_id: string; display_name: string }>(

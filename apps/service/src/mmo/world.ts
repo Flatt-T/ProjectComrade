@@ -425,7 +425,7 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             ? action.y * mapW + action.x : undefined;
           const pick = pickSpawnCell({
             packId, mapId, seed: mapSeed, worldgen: simSpec?.worldgen, keepAwayCells: keepAway,
-            separationCells: rules.spawnSeparationCells, preferCell,
+            separationCells: rules.spawnSeparationCells, preferCell, salt: ctx.playerId,
           });
           const loadout = starterLoadout(pack, faction);
           const credits = pack.startCredits.standard * rules.starterCreditsMultiplier;
