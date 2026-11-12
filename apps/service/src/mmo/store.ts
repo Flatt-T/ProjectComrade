@@ -727,7 +727,10 @@ export async function listUnappliedRegionEvents(regionId: string, kinds: string[
 
 /** Record the wall-clock instant the region's sim epoch zero corresponds to. */
 export async function setRegionSimStart(regionId: string, startedAtMs: number | bigint): Promise<void> {
-  await mmoQuery('update region set started_at_ms = $2 where region_id = $1', [regionId, startedAtMs.toString()]);
+  // The wall-clock↔tick anchor can be fractional (tickMs = 1000/15); bigint
+  // columns reject decimals, and sub-millisecond precision is meaningless here.
+  await mmoQuery('update region set started_at_ms = $2 where region_id = $1',
+    [regionId, BigInt(Math.round(Number(startedAtMs))).toString()]);
 }
 
 /** Hand the region back to the pool: lease cleared, lifecycle quiescent. */
