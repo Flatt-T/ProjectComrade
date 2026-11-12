@@ -149,6 +149,10 @@ export function commandToMmo(regionId: string, cmd: Command): MmoAction | null {
       return { t: 'place', item: cmd.item, x: cmd.x, y: cmd.y };
     case 'repair':
       return { t: 'repair', entityId: one(cmd.id) };
+    case 'sell':
+      // PW12: sale for credit is a journaled world action (SELL_REFUND), not a
+      // bare sim command — the durable side audits it and may trigger recovery.
+      return { t: 'sell', entityId: one(cmd.id) };
     case 'rally':
       return { t: 'rally', x: cmd.x, y: cmd.y };
     case 'super': {

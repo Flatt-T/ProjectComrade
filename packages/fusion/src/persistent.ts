@@ -112,6 +112,9 @@ const derPlayer = (raw: Record<string, unknown>): Player => ({
   autoRepair: raw.autoRepair === true,
   // Snapshots predating PW11 lack newcomer protection.
   newcomerProtected: raw.newcomerProtected === true,
+  // Snapshots predating PW12 lack recovery state.
+  recovering: raw.recovering === true,
+  recoveryAttacked: raw.recoveryAttacked === true,
 });
 
 interface GameInternals {
@@ -189,6 +192,8 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   for (const e of (g.entities as Map<number, Entity>).values()) {
     e.shielded = e.shielded === true;
     e.battleAt = typeof e.battleAt === 'number' ? e.battleAt : -1;
+    // Snapshots predating PW12 lack the recovery protection flag.
+    e.recoveryProtected = e.recoveryProtected === true;
   }
   g.projectiles = snap.state.projectiles;
   g.worms = snap.state.worms;

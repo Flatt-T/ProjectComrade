@@ -529,21 +529,21 @@ export async function transitionTransfer(transferId: string, to: TransferRow['st
 
 export async function openRecoveryEpisode(args: {
   episodeId?: string; playerId: string; worldId: string; regionId: string; compoundId?: string;
-}): Promise<{ episodeId: string; created: boolean }> {
+}, q: Queryable = mmoDb()): Promise<{ episodeId: string; created: boolean }> {
   const id = args.episodeId ?? uuid();
-  const { rowCount } = await mmoExec(
+  const { rowCount } = await q.query(
     `insert into recovery_episode (episode_id, player_id, world_id, region_id, compound_id)
      values ($1,$2,$3,$4,$5) on conflict do nothing`,
     [id, args.playerId, args.worldId, args.regionId, args.compoundId ?? null]);
   if (rowCount) return { episodeId: id, created: true };
-  const existing = await mmoOne<{ episode_id: string }>(
+  const { rows: existing } = await q.query<{ episode_id: string }>(
     `select episode_id from recovery_episode where player_id = $1 and status = 'active'`, [args.playerId]);
-  if (existing) return { episodeId: existing.episode_id, created: false };
+  if (existing[0]) return { episodeId: existing[0].episode_id, created: false };
   throw new MmoStoreError('EPISODE_CONFLICT', 'recovery episode id conflict');
 }
 
-export async function closeRecoveryEpisode(episodeId: string, status: 'completed' | 'abandoned'): Promise<void> {
-  await mmoQuery(
+export async function closeRecoveryEpisode(episodeId: string, status: 'completed' | 'abandoned', q: Queryable = mmoDb()): Promise<void> {
+  await q.query(
     `update recovery_episode set status = $2, ended_at = clock_timestamp() where episode_id = $1 and status = 'active'`,
     [episodeId, status]);
 }

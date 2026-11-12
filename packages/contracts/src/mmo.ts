@@ -459,7 +459,7 @@ export type MmoOperationKind =
   | 'DEFEAT';          // base destroyed: recovery evaluation
 
 export type MmoOperation =
-  | { kind: 'SELL_REFUND'; entityId: MmoId; compoundId: MmoId }
+  | { kind: 'SELL_REFUND'; entityId: MmoId; compoundId?: MmoId }
   | { kind: 'PACK'; entityId: MmoId }
   | { kind: 'UNPACK'; entityId: MmoId; x: number; y: number }
   | { kind: 'BARTER'; offerId: MmoId }

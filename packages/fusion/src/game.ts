@@ -3,6 +3,8 @@ import { MapData, buildableTerrain, generateMap, inBounds, isWater, passable, re
 import { findPath, nearestCell } from './path.js';
 import { Doctrine, FactionDef, InfiltrationEffect, MapPreset, MoveClass, QueueKind, RulePack, StructureDef, SuperweaponDef, TargetKind, UnitDef, WeaponDef, factionCanUse, prereqsMet, weaponCanTarget } from './rules.js';
 import { runAI, AIState, AILevel, AI_LEVELS, createAIState } from './ai.js';
+import { isHarvesterUnit, isMcvUnit, structureRoles } from './recovery.js';
+import { starterPicks } from './starter.js';
 
 export type Command =
   | { t: 'move'; ids: number[]; x: number; y: number }
@@ -38,7 +40,11 @@ export type Command =
   /** Persistent profile only: journaled shield boundary on/off for a compound (PW10). */
   | { t: 'setShield'; compound: number; on: boolean }
   /** Persistent profile only: newcomer setup protection on/off for a player slot (PW11). */
-  | { t: 'setNewcomerProtection'; slot: number; on: boolean };
+  | { t: 'setNewcomerProtection'; slot: number; on: boolean }
+  /** Persistent profile only: recovery protection on/off for a player slot (PW12). */
+  | { t: 'setRecovery'; slot: number; on: boolean }
+  /** Persistent profile only: spawn the bound recovery MCV for a player slot (PW12). */
+  | { t: 'grantRecovery'; slot: number; cell: number };
 
 export interface PlayerSetup {
   name: string; faction: string; ai: boolean; team?: number; level?: AILevel; ally?: number; autoRepair?: boolean;
@@ -114,6 +120,10 @@ export interface MmoTuning {
   maxCompounds: number;
   /** Compound shield boundary radius in cells (PW10); 0 disables shield enforcement. */
   shieldRadiusCells?: number;
+  /** Recovery: banked credits stop accruing above this cap (PW12); 0 disables. */
+  recoveryCreditCap?: number;
+  /** Recovery: structure roles that may be rebuilt while recovering (PW12). */
+  recoveryBuildRoles?: string[];
 }
 
 /** Supply upkeep cadence: one in-game minute at the 15 Hz tick rate. */
@@ -219,6 +229,13 @@ export interface Entity {
   shielded: boolean;
   /** Persistent profile (PW10): last tick PvP damage was exchanged inside this compound's radius. */
   battleAt: number;
+  /**
+   * Persistent profile (PW12): recovery protection on this entity — the bound
+   * recovery MCV and the permitted rebuild structures. Protected entities can
+   * neither deal nor receive damage, like newcomer protection but entity-scoped
+   * so surviving unprotected units keep fighting.
+   */
+  recoveryProtected: boolean;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -265,6 +282,16 @@ export interface Player {
    * launch superweapons. Set at spawn and mirrored by journaled commands.
    */
   newcomerProtected: boolean;
+  /**
+   * Persistent profile (PW12): the player is inside a recovery episode —
+   * rebuilding is restricted to the profile's recovery roles, one harvester,
+   * and banked credits stop accruing above the cap. Mirrored by journaled
+   * setRecovery commands from the durable protection record.
+   */
+  recovering: boolean;
+  /** Persistent profile (PW12): a recovering player's forces dealt damage to
+   *  another player — the durable evaluator ends recovery on this flag. */
+  recoveryAttacked: boolean;
 }
 
 export interface Projectile { id: number; owner: number; weapon: string; x: number; y: number; sx: number; sy: number; tx: number; ty: number; target: number; source: number }
@@ -384,6 +411,7 @@ export class Game {
       connected: true,
       ally: p.ally ?? -1, autoRepair: p.autoRepair === true,
       newcomerProtected: p.newcomerProtected === true,
+      recovering: false, recoveryAttacked: false,
     };
     if (p.playerId) player.pid = p.playerId;
     this.players.push(player);
@@ -462,6 +490,51 @@ export class Game {
     }
     if (cmd.t === 'setNewcomerProtection') {
       if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.newcomerProtected = cmd.on; }
+      return;
+    }
+    if (cmd.t === 'setRecovery') {
+      // PW12: recovery replaces defeat — entering recovery revives the player
+      // (their base is gone; the protected MCV is the restart). Leaving clears
+      // the entity-scoped protection flags so vulnerability returns at once.
+      if (this.persistent) {
+        const p = this.players[cmd.slot];
+        if (p) {
+          p.recovering = cmd.on;
+          p.recoveryAttacked = false;
+          if (cmd.on) p.defeated = false;
+          else for (const e of this.entities.values()) {
+            if (e.owner === cmd.slot) e.recoveryProtected = false;
+          }
+        }
+      }
+      return;
+    }
+    if (cmd.t === 'grantRecovery') {
+      // PW12: the bound recovery MCV. Idempotent on the live roster — the
+      // durable episode guarantees one grant, and this guard makes a replayed
+      // command harmless even if the episode row were ever duplicated.
+      if (this.persistent) {
+        const p = this.players[cmd.slot];
+        let hasMcv = false;
+        if (p) for (const e of this.entities.values()) {
+          if (e.owner === cmd.slot && e.hp > 0 && e.kind === 'unit' && isMcvUnit(this.unitDef(e))) { hasMcv = true; break; }
+        }
+        if (p && !hasMcv) {
+          const faction = this.pack.factions.find(f => f.id === p.faction) ?? this.pack.factions[p.slot % this.pack.factions.length];
+          // starterPicks throws on packs that cannot fill every role — a grant
+          // must never crash the deterministic step, so degrade to no spawn.
+          let mcvType = '';
+          try { mcvType = starterPicks(this.pack, faction).mcv; } catch { mcvType = ''; }
+          if (mcvType) {
+            const cell = cmd.cell >= 0 && cmd.cell < this.map.w * this.map.h ? cmd.cell : this.defaultSpawnCell(cmd.slot);
+            const spot = nearestCell(this.map, cell, 10,
+              i => passable(this.pack, this.map, i, this.moveClass(this.pack.units[mcvType])) && !this.unitInCell(i));
+            const e = this.spawnUnit(mcvType, cmd.slot, spot >= 0 ? spot : cell);
+            e.bound = 2;
+            e.recoveryProtected = true;
+          }
+        }
+      }
       return;
     }
     if (cmd.t === 'leave') { const p = this.players[cmd.slot]; if (this.persistent && p) p.connected = false; return; }
@@ -699,7 +772,7 @@ export class Game {
       order: 'idle', path: [], goal: -1, resume: -1, target: 0, cooldown: 0, repathTick: 0,
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
-      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1,
+      xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1, recoveryProtected: false,
     };
   }
 
@@ -970,9 +1043,38 @@ export class Game {
     return start.filter(type => !!this.pack.units[type]);
   }
 
+  /**
+   * PW12 recovery build rules: while recovering, only structures whose derived
+   * role is in the profile's recoveryBuildRoles may be queued or placed, and
+   * the only unit production allowed is a single harvester. Upgrades and
+   * starport purchases are not rebuilding and are denied outright.
+   */
+  private recoveryBuildAllowed(p: Player, item: string): boolean {
+    const roles = this.mmo?.recoveryBuildRoles;
+    if (!roles?.length) return true; // No tuning (pre-PW12 snapshot): unrestricted.
+    if (item.startsWith(UPGRADE) || item.startsWith(STARPORT)) return false;
+    const base = this.baseItem(item);
+    const sdef = this.pack.structures[base];
+    if (sdef) return structureRoles(sdef).some(r => roles.includes(r));
+    const udef = this.pack.units[base];
+    if (!udef || !isHarvesterUnit(udef)) return false;
+    // One harvester operates during recovery: count live units plus anything
+    // already queued so a stacked production order cannot bypass the cap.
+    let harvesters = 0;
+    for (const e of this.entities.values()) {
+      if (e.owner === p.slot && e.hp > 0 && !e.carriedBy && e.kind === 'unit' && isHarvesterUnit(this.unitDef(e))) harvesters++;
+    }
+    for (const it of p.queues.vehicle.items) {
+      const d = this.pack.units[this.baseItem(it)];
+      if (d && isHarvesterUnit(d)) harvesters++;
+    }
+    return harvesters < 1;
+  }
+
   canBuild(p: Player, item: string, owned = this.owned(p)): boolean {
     const queue = this.queueFor(item);
     if (!queue) return false;
+    if (p.recovering && !this.recoveryBuildAllowed(p, item)) return false;
     const base = this.baseItem(item);
     const def: UnitDef | StructureDef | undefined = this.pack.structures[base] ?? this.pack.units[base];
     if (!def || !factionCanUse(def, p.faction, p.side)) return false;
@@ -1142,6 +1244,9 @@ export class Game {
   private place(p: Player, item: string, x: number, y: number) {
     const kind = this.queueFor(item);
     if (!kind || (kind !== 'structure' && kind !== 'defense')) return;
+    // PW12: an item queued before recovery began still cannot be placed after —
+    // the recovery role gate applies at placement, not only at queue time.
+    if (p.recovering && !this.recoveryBuildAllowed(p, item)) return;
     const q = p.queues[kind];
     if (!q.ready || q.items[0] !== item || !this.canPlace(p, item, x, y)) return;
     const def = this.pack.structures[item];
@@ -1153,6 +1258,9 @@ export class Game {
     }
     const start = this.startHealth(def, x, y);
     const s = this.spawnStructure(item, p.slot, x, y, start);
+    // PW12: every structure placed during recovery is a permitted rebuild and
+    // carries the recovery protection flag until the episode ends.
+    if (p.recovering) s.recoveryProtected = true;
     const fx = this.effect('place', s.x, s.y, 0, 0, 10); fx.item = item; fx.owner = p.slot;
     s.exposed = start < 100;
   }
@@ -1182,9 +1290,11 @@ export class Game {
     this.entities.delete(u.id);
     const fx = this.effect('deploy', u.x, u.y, 0, 0, 30); fx.item = u.type; fx.owner = u.owner;
     // A bound MCV (newcomer starter grant, PW11) deploys a bound yard — the
-    // grant cannot be cashed out by deploying and selling.
+    // grant cannot be cashed out by deploying and selling. The recovery MCV
+    // (PW12) likewise passes its protection onto the yard it becomes.
     const yard = this.spawnStructure(def.deploysTo, u.owner, cx, cy, 100);
     yard.bound = u.bound;
+    yard.recoveryProtected = u.recoveryProtected;
   }
 
   private updatePower() {
@@ -1594,6 +1704,8 @@ export class Game {
     if (this.shieldBlocksFire(a, t, gx, gy)) { a.cooldown = Math.max(a.cooldown, 15); return; }
     // PW11: a protected newcomer's weapons never fire — they cannot attack.
     if (this.persistent && this.players[a.owner]?.newcomerProtected) { a.cooldown = Math.max(a.cooldown, 15); return; }
+    // PW12: a recovery-protected entity's weapons never fire either.
+    if (this.persistent && a.recoveryProtected) { a.cooldown = Math.max(a.cooldown, 15); return; }
     const want = facingTo(gx - a.x, gy - a.y);
     const udef = a.kind === 'unit' ? this.unitDef(a) : undefined;
     if (udef && (udef.kind === 'infantry' || udef.kind === 'aircraft')) a.facing = want;
@@ -1733,10 +1845,19 @@ export class Game {
       const def = this.players[e.owner];
       const atk = by >= 0 ? this.players[by] : undefined;
       if (def?.newcomerProtected || atk?.newcomerProtected) return;
+      // PW12: recovery protection is entity-scoped — the bound MCV and the
+      // permitted rebuild structures can neither deal nor receive damage,
+      // while the player's surviving unprotected units fight normally.
+      const src = source ? this.entities.get(source) : undefined;
+      if (e.recoveryProtected || src?.recoveryProtected) return;
     }
     // D5: player-vs-player damage inside a compound's radius marks it in battle.
     if (by >= 0 && e.owner >= 0 && by !== e.owner && this.isEnemy(by, e.owner)) {
       this.noteCompoundBattle(e.x, e.y, by, e.owner);
+      // PW12: a recovering player who attacks another player ends recovery at
+      // once — the durable evaluator reads this flag on its next pass.
+      const bp = this.players[by];
+      if (bp?.recovering) bp.recoveryAttacked = true;
     }
     e.hp -= amount;
     if (e.hp <= 0) {
@@ -1856,7 +1977,12 @@ export class Game {
       u.cargo--; u.cargoValue -= each;
       // With storage rules (Dune silos), anything above capacity is lost; starting
       // credits above capacity are never reduced. Packs without storage are unlimited.
-      const next = p.credits + each + Math.floor((each * p.incomeBonus) / 100);
+      let next = p.credits + each + Math.floor((each * p.incomeBonus) / 100);
+      // PW12: during recovery, banked credits stop accruing above the profile
+      // cap — income still flows up to it, then stalls. Credits already above
+      // the cap neither grow nor shrink.
+      const cap = this.mmo?.recoveryCreditCap ?? 0;
+      if (p.recovering && cap > 0) next = Math.min(next, Math.max(p.credits, cap));
       p.credits = p.storage > 0 && next > p.storage ? Math.max(p.credits, p.storage) : next;
       p.stats.harvested += each;
     }
@@ -2331,6 +2457,8 @@ export class Game {
     if (!s || s.owner !== p.slot || s.hp <= 0) return;
     // PW11: a newcomer under setup protection cannot launch superweapons.
     if (this.persistent && p.newcomerProtected) return;
+    // PW12: a recovery-protected structure cannot launch either.
+    if (this.persistent && s.recoveryProtected) return;
     const sw = this.superweaponOf(s);
     if (!sw || s.charge < this.chargeFor(sw)) return;
     if (sw.kind === 'chrono' && (x2 === undefined || y2 === undefined)) return;
