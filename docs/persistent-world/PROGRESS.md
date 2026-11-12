@@ -1065,5 +1065,45 @@ preset 0 with a different seed.
   15 s for unsettled players).
 - Role connection limit raised 10 -> 30 for comrade_beta_app during
   load probing (documented capacity note, not a code change).
-- Pending: post-deploy load/capacity rerun, rollback drill, final
-  evidence index + THU-2244 write-up.
+- Rollback drill (verified 2026-11-12 ~22:10Z): deploy timer stopped,
+  `docker compose --env-file service.env` pinned COMRADE_IMAGE to the
+  previous release 9d9f45b -> container healthy, public /health reported
+  commit 9d9f45b with database:true, /world 200, /api/me 200,
+  /api/mmo/enter 200 (ladder 400 = expected unsettled-guest response).
+  Restored forward to 3384342 and re-enabled comrade-deploy.timer;
+  /health confirmed 3384342 healthy afterwards.
+  - Runbook gotcha found: service.env is NOT POSIX-sourceable — the
+    DATABASE_URL/MMO_DATABASE_URL values contain `&` (uselibpqcompat),
+    so `. service.env` backgrounds the assignments and the container
+    boots with database:false and no /mmo. Always use
+    `docker compose --env-file service.env` (or the pull-deploy script,
+    which parses the file itself).
+- Load/capacity on deployed 2e9f45b+ (beta target: 50 concurrent):
+  - 24 clients: subscribe p50 1044ms p95 1095ms max 1096ms, 0 errors;
+    12 holders x 60s -> 727 observation msgs, 0 errors.
+  - 50 clients x2 runs: all 50 snapshots, 0 errors; run A p50 1485ms
+    p95 1831ms max 1936ms wall 3.1s; run B (all 50 holding 45s) p50
+    1719ms p95 2028ms max 2054ms wall 2.8s; ~24-25 observation msgs/s
+    aggregate during holds.
+  - Mid-load container stats: CPU 3.91%, mem 66.93MiB/512MiB,
+    NetIO 12.6MB/28.4MB, PIDs 12.
+  - Mid-load PG: 13 connections for comrade_beta_app (12 idle + 1
+    active), only AccessShareLock — no lock pressure at 50 conns.
+- DB capacity snapshot (mmo schema, comrade_beta): 1 region (active,
+  owned, 29095 committed ticks, 8 settlers), 96 players / 4 online,
+  journal 2978 events / 1.9MB total, 6 snapshots avg 88kB max 117kB,
+  outbox 0 pending / 3098 delivered (p50 lag 0.045-0.226s by topic,
+  max 1.66s on mmo.scheduled), 2916 scheduled jobs done / 1 pending,
+  56 command intents applied, 8 NEWCOMER_SPAWN operations, shields
+  25198s nightly remaining, 0 transfers/notifications/ledger rows.
+- Admission limit: /mmo had per-connection subscription and per-second
+  message caps but no global connection bound. PR #48 adds
+  MMO_MAX_CONNECTIONS (default 128, close 1013 + mmo-capacity log) —
+  ~2.5x headroom over the 50-concurrent target; derived limit, not yet
+  load-tested at the cap.
+- Wake latency: no natural hibernation occurred during the evidence
+  window (region stayed active; min-awake 300s + 120s lookahead), so
+  beta wakeMs is unmeasured — covered by integration tests; region-wake
+  log event carries wakeMs when it next occurs naturally.
+- Pending: PR #48 CI/merge/deploy, final evidence index + runbook +
+  THU-2244 write-up.
