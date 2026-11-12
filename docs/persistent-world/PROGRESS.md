@@ -778,3 +778,53 @@ Salvage (commit d568ce6) plus capturable sites and the ladder on
   rebuildLadderBoards); site 'tech' perk grants the costliest upgradable
   structure rather than a chosen one; repelled defence points fire once
   per contested fade, not per attacker.
+
+## PW26 remainder — trade audit + signup signals (THU-2273)
+
+Audit of the remaining PW26 hardening items against the shipped code:
+
+- Bound assets: starter units + starter MCV bound=1 via the journaled
+  `starter` grant; the deployed yard inherits `u.bound`; the recovery MCV
+  is bound=2. Barter rejects `bound !== 0` on both unit and packedBuilding
+  items; sell refuses bound structures. Verified in code, no change needed.
+- Barter lock: `barterStarterGrant` + `barterHarvestGateOk` gate
+  barterOffer (HARVEST_GATE) and barterAccept re-validates both sides
+  (GIVE_/WANT_HARVEST_GATE). Receiving is unrestricted.
+- Recovery limits: recoveryEval only opens an episode when the player has
+  no live MCV, no deployed structure and no packed carrier anywhere in
+  the world; the engine enforces recoveryBuildRoles, one harvester and
+  the banked-credit cap; recoveryAttacked + milestone + endRecovery close
+  episodes. No timeout/lockout/stacking cap added, per spec.
+- Combat logging: shield activation checks compound battleAt within the
+  battle window; armed-while-battling selections stay armed and a prompt
+  recheck starts them when the battle clears (disconnect-safe).
+- Nightly shields: only earned hours are tradable (committed-shield math
+  in validateBarterGive); nightly grants are consumed first and cannot be
+  offered.
+- One owner per account: player.account_id is unique; signup signals
+  below close the duplicate-account investigation gap.
+
+New work this pass:
+
+- Schema v11 `signup_signal`: player_id PK -> player, account_id, kind,
+  ip_hash (sha256 of client IP, never raw), user_agent, created_at.
+  `recordSignupSignal` is insert-once at durable-player creation in both
+  entry paths (enterPersistentWorld + RegionService.playerFor); the HTTP
+  entry route populates ip_hash/user_agent from x-forwarded-for/socket +
+  user-agent.
+- Trade audit store functions: `bartersForAccount` (every settled barter
+  queryable by account, both directions, joined to account ids and player
+  ages), `barterSideValue` (credit-equivalent heuristic over
+  credits/units/packedBuildings/shieldSeconds/powerUps), and
+  `tradeAuditReport` flagging high-value one-sided settled trades where
+  both durable players are younger than `youngAccountDays` (default 14),
+  larger side >= `minValue` (default 10k) and >= `imbalanceRatio`x the
+  smaller (default 4, zero-side = infinite imbalance).
+- Ops endpoints gated by MMO_AUDIT_KEY shared secret (not player
+  sessions): GET /api/mmo/trade-audit[?youngDays&minValue],
+  GET /api/mmo/trade-audit/account?account=<uuid>,
+  GET /api/mmo/signup-signals?account=<uuid>|?ip=<address>.
+- Tests: tests/integration/mmo-audit.test.ts 4/4 — signal insert-once +
+  same-ip duplicate probe, settled barter queryable by account both
+  directions, scripted one-sided funnel flagged (imbalance Infinity,
+  both_young), balanced trades and aged accounts not flagged.

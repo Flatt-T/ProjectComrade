@@ -3,6 +3,7 @@
 // Each route is a few lines because the work lives in the modules beside this one. Routes
 // that need a database or an identity provider say so with a 503 when the deployment has
 // none, rather than failing in some obscure way, so the site degrades to free open play.
+import { createHash } from 'node:crypto';
 import {
   AVATAR_MAX_BYTES, AVATAR_TYPES, CREDIT_PACK, GameStyle, HANDLE_MAX, MMO_NOTIFY_CHANNELS,
   PAID_TIERS, PERSISTENT_RULES_V1, PlayDecision,
@@ -43,9 +44,9 @@ import {
   pushSubscribe, pushUnsubscribe, setNotificationPref,
 } from './mmo/notify.js';
 import {
-  committedShieldSeconds, compoundsForPlayer, ladderBoard, MmoStoreError, openShieldRecordsForPlayer,
-  openTradeOffersForPlayer,
-  shieldBalances, utcShieldDay,
+  bartersForAccount, committedShieldSeconds, compoundsForPlayer, ladderBoard, MmoStoreError,
+  openShieldRecordsForPlayer, openTradeOffersForPlayer, shieldBalances, signupSignalsForAccount,
+  signupSignalsSharingIp, tradeAuditReport, utcShieldDay,
 } from './mmo/store.js';
 
 const str = (value: unknown, max = 200): string => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -650,6 +651,14 @@ get('/api/mmo/enter', async (ctx: Ctx) => {
   limit(ctx, 'mmo-enter', 30, 60_000);
   const identity = await resolveIdentity(String(ctx.req.headers.cookie ?? ''));
   if (!identity) throw unauthorised('Sign in to enter the persistent world');
+  // PW26: sign-up signals for duplicate-account investigation, captured once
+  // at durable-player creation. The client IP is stored only as a sha256 hash.
+  const forwarded = String(ctx.req.headers['x-forwarded-for'] ?? '').split(',')[0].trim();
+  const ip = forwarded || String(ctx.req.socket?.remoteAddress ?? '');
+  identity.signup = {
+    ipHash: ip ? createHash('sha256').update(ip).digest('hex') : undefined,
+    userAgent: String(ctx.req.headers['user-agent'] ?? '').slice(0, 500) || undefined,
+  };
   try {
     const entry = await enterPersistentWorld(identity);
     return { regionId: entry.regionId, playerId: entry.playerId, settled: entry.settled };
@@ -834,4 +843,77 @@ get('/api/mmo/ladder', async (ctx: Ctx) => {
   }
   if (!row.alliance_id) return { board, period, rows: [] };
   return { board, period, rows: await ladderBoard(row.world_id, 'alliance', period) };
+});
+
+// ---------------------------------------------------------------------------
+// Persistent world trade audit + signup signals (PW26) — ops-only endpoints.
+// ---------------------------------------------------------------------------
+
+/** Ops gate: the report exposes other players' trades, so it requires the
+ *  deployment's MMO_AUDIT_KEY shared secret rather than a player session. */
+function requireAudit(ctx: Ctx): void {
+  const key = process.env.MMO_AUDIT_KEY;
+  if (!key) throw unavailable('Trade audit is not enabled on this deployment');
+  if (String(ctx.req.headers['x-mmo-audit-key'] ?? '') !== key) {
+    throw unauthorised('Audit key required');
+  }
+}
+
+async function auditWorldId(): Promise<string> {
+  const row = await mmoOne<{ world_id: string }>(
+    'select world_id from world order by created_at limit 1');
+  if (!row) throw notFound('No persistent world');
+  return row.world_id;
+}
+
+/**
+ * GET /api/mmo/trade-audit — settled barters flagged as high-value one-sided
+ * trades between young accounts (the scripted-funnelling pattern). Every
+ * settled barter is queryable by account at /api/mmo/trade-audit/account.
+ */
+get('/api/mmo/trade-audit', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-trade-audit', 10, 60_000);
+  requireAudit(ctx);
+  if (!mmoDatabaseConfigured()) throw unavailable('Persistent world is not enabled');
+  const young = Number(ctx.url.searchParams.get('youngDays') ?? '');
+  const minValue = Number(ctx.url.searchParams.get('minValue') ?? '');
+  return {
+    flags: await tradeAuditReport(await auditWorldId(), {
+      youngAccountDays: Number.isFinite(young) && young > 0 ? young : undefined,
+      minValue: Number.isFinite(minValue) && minValue > 0 ? minValue : undefined,
+    }),
+  };
+});
+
+/** GET /api/mmo/trade-audit/account?account=<uuid> — every settled barter for an account. */
+get('/api/mmo/trade-audit/account', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-trade-audit-account', 30, 60_000);
+  requireAudit(ctx);
+  if (!mmoDatabaseConfigured()) throw unavailable('Persistent world is not enabled');
+  const account = ctx.url.searchParams.get('account') ?? '';
+  if (!/^[0-9a-f-]{36}$/i.test(account)) throw badRequest('account must be a uuid');
+  return { trades: await bartersForAccount(await auditWorldId(), account) };
+});
+
+/**
+ * GET /api/mmo/signup-signals?account=<uuid> or ?ip=<address> — the sign-up
+ * signals recorded at first persistent-world entry, for duplicate-account
+ * investigation. Raw IPs are hashed before storage; pass the address and the
+ * same hash is computed here.
+ */
+get('/api/mmo/signup-signals', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-signup-signals', 30, 60_000);
+  requireAudit(ctx);
+  if (!mmoDatabaseConfigured()) throw unavailable('Persistent world is not enabled');
+  const account = ctx.url.searchParams.get('account') ?? '';
+  const ip = ctx.url.searchParams.get('ip') ?? '';
+  if (account) {
+    if (!/^[0-9a-f-]{36}$/i.test(account)) throw badRequest('account must be a uuid');
+    return { signals: await signupSignalsForAccount(account) };
+  }
+  if (ip) {
+    const ipHash = createHash('sha256').update(ip).digest('hex');
+    return { signals: await signupSignalsSharingIp(ipHash) };
+  }
+  throw badRequest('Pass account=<uuid> or ip=<address>');
 });
