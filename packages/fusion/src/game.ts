@@ -941,7 +941,10 @@ export class Game {
       const e = this.entities.get(id);
       // PW26: bound assets (starter grant, recovery MCV) cannot change hands —
       // a transfer would launder the binding onto a different account.
-      if (!e || e.hp <= 0 || e.carriedBy || e.owner !== from || e.bound !== 0) continue;
+      // PW15: a transport with cargo aboard cannot change hands either — the
+      // cargo must be unloaded first, so ownership can never split cargo from
+      // carrier or smuggle bound/protected units across accounts.
+      if (!e || e.hp <= 0 || e.carriedBy || e.owner !== from || e.bound !== 0 || e.passengers.length > 0) continue;
       e.owner = to;
     }
   }
@@ -2019,8 +2022,23 @@ export class Game {
   private enterThink(u: Entity, def: UnitDef) {
     const t = this.entities.get(u.target);
     if (!t || t.hp <= 0) { u.order = 'idle'; u.target = 0; u.path = []; return; }
-    if (this.distTo(u.x, u.y, t) <= (t.kind === 'unit' ? 200 : REACH)) { u.path = []; this.enterAct(u, def, t); return; }
-    if (!u.path.length || this.tick >= u.repathTick) { u.path = this.pathFor(u, this.cellOf(t)); u.repathTick = this.tick + 20; }
+    // PW15: transports board at REACH — a ship stands off the shoreline and
+    // cargo still reaches it; ordinary units keep the tighter 200.
+    const boardRange = t.kind === 'unit' && this.unitDef(t).transport ? REACH : t.kind === 'unit' ? 200 : REACH;
+    if (this.distTo(u.x, u.y, t) <= boardRange) { u.path = []; this.enterAct(u, def, t); return; }
+    if (!u.path.length || this.tick >= u.repathTick) {
+      u.path = this.pathFor(u, this.cellOf(t));
+      if (!u.path.length && t.kind === 'unit') {
+        // PW15: a naval transport rides on water no land unit can path onto —
+        // close on the nearest reachable cell beside it (the shoreline) so
+        // boarding can happen once the craft pulls alongside.
+        const cls = this.moveClass(def);
+        const near = nearestCell(this.map, this.cellOf(t), 8,
+          i => passable(this.pack, this.map, i, cls) && !this.unitInCell(i));
+        if (near >= 0 && near !== this.cellOf(u)) u.path = this.pathFor(u, near);
+      }
+      u.repathTick = this.tick + 20;
+    }
     if (!u.path.length) { u.order = 'idle'; u.target = 0; return; }
     this.move(u, def);
   }
@@ -2046,11 +2064,55 @@ export class Game {
     const cap = this.unitDef(t).transport ?? 0;
     return cap - t.passengers.reduce((n, id) => n + this.seatSize(this.entities.get(id)), 0);
   }
-  private seatSize(e?: Entity) { return e && this.unitDef(e).kind === 'infantry' ? 1 : 3; }
+  private seatSize(e?: Entity) {
+    // PW15: an MCV or packed building carrier fills a heavy-cargo craft
+    // completely — it is exclusive cargo, never seat-counted.
+    if (e) { const d = this.unitDef(e); if (d.deploysTo || d.packedCarrier) return 999; }
+    return e && this.unitDef(e).kind === 'infantry' ? 1 : 3;
+  }
+  /**
+   * PW15 (D7 amendment): a transport carrying ONLY newcomer- or
+   * recovery-protected cargo shares that protection — it can neither deal
+   * nor receive damage while every passenger is protected. Mixed or empty
+   * cargo leaves the transport unprotected. Cargo ownership never changes
+   * in transit, so protection is evaluated per passenger.
+   */
+  private transportCargoProtected(e: Entity | undefined): boolean {
+    if (!e || e.kind !== 'unit' || e.hp <= 0 || e.passengers.length === 0) return false;
+    let sawProtected = false;
+    for (const id of e.passengers) {
+      const p = this.entities.get(id);
+      if (!p || p.hp <= 0) continue;
+      const protectedCargo = p.recoveryProtected || this.players[p.owner]?.newcomerProtected === true;
+      if (!protectedCargo) return false; // mixed cargo: unprotected
+      sawProtected = true;
+    }
+    return sawProtected;
+  }
+
+  /** True when this entity is heavy cargo: an MCV or a packed building carrier. */
+  private isHeavyCargo(e: Entity): boolean {
+    const d = this.unitDef(e);
+    return !!d && (!!d.deploysTo || !!d.packedCarrier);
+  }
+  /**
+   * PW15 heavy-cargo rules: a craft carrying an MCV or packed carrier takes
+   * nothing else (exclusive run); heavy cargo only boards an empty craft.
+   */
+  private cargoLocked(t: Entity): boolean {
+    return t.passengers.some(id => { const c = this.entities.get(id); return !!c && this.isHeavyCargo(c); });
+  }
   canBoard(u: Entity, t: Entity): boolean {
     const td = this.unitDef(t), ud = this.unitDef(u);
     if (t.kind !== 'unit' || !td?.transport || t.owner !== u.owner || u.kind !== 'unit' || ud.transport) return false;
-    if (ud.kind === 'aircraft' || ud.kind === 'naval' || td.infantryOnly && ud.kind !== 'infantry') return false;
+    if (ud.kind === 'aircraft' || ud.kind === 'naval') return false;
+    if (this.isHeavyCargo(u)) {
+      // Exclusive: only a heavy-cargo transport, and only while completely empty.
+      return td.heavyCargo === true && t.passengers.length === 0;
+    }
+    // Nothing boards a craft already carrying heavy cargo.
+    if (td.heavyCargo && this.cargoLocked(t)) return false;
+    if (td.infantryOnly && ud.kind !== 'infantry') return false;
     return this.seats(t) >= this.seatSize(u);
   }
 
@@ -2145,6 +2207,9 @@ export class Game {
     if (this.persistent && this.players[a.owner]?.newcomerProtected) { a.cooldown = Math.max(a.cooldown, 15); return; }
     // PW12: a recovery-protected entity's weapons never fire either.
     if (this.persistent && a.recoveryProtected) { a.cooldown = Math.max(a.cooldown, 15); return; }
+    // PW15: a transport carrying only protected cargo shares the protection —
+    // it cannot attack while the cargo is aboard.
+    if (this.persistent && this.transportCargoProtected(a)) { a.cooldown = Math.max(a.cooldown, 15); return; }
     const want = facingTo(gx - a.x, gy - a.y);
     const udef = a.kind === 'unit' ? this.unitDef(a) : undefined;
     if (udef && (udef.kind === 'infantry' || udef.kind === 'aircraft')) a.facing = want;
@@ -2290,7 +2355,8 @@ export class Game {
       // permitted rebuild structures can neither deal nor receive damage,
       // while the player's surviving unprotected units fight normally.
       const src = source ? this.entities.get(source) : undefined;
-      if (e.recoveryProtected || src?.recoveryProtected) return;
+      if (e.recoveryProtected || src?.recoveryProtected
+        || this.transportCargoProtected(e) || this.transportCargoProtected(src)) return;
     }
     // D5: player-vs-player damage inside a compound's radius marks it in battle.
     if (by >= 0 && e.owner >= 0 && by !== e.owner && this.isEnemy(by, e.owner)) {
@@ -2950,7 +3016,9 @@ export class Game {
     }
     // Untangle riders: carried cargo falls with its carrier, drones hop out, minds are freed.
     if (e.carrying) { const c = this.entities.get(e.carrying); if (c) { c.carriedBy = 0; this.damage(c, c.hp, -1); } }
-    for (const id of e.passengers) { const c = this.entities.get(id); if (c) { c.carriedBy = 0; this.damage(c, c.hp, -1); } }
+    // PW15 (D7): cargo is lost with its transport — passengers die with the
+    // carrier's killer credited so the salvage rule still applies.
+    for (const id of e.passengers) { const c = this.entities.get(id); if (c) { c.carriedBy = 0; this.damage(c, c.hp, e.deadBy ?? -1); } }
     if (e.drone) { const d = this.entities.get(e.drone); if (d) d.carriedBy = 0; }
     if (e.carriedBy) {
       const c = this.entities.get(e.carriedBy);

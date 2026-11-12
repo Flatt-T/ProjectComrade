@@ -155,6 +155,12 @@ export interface UnitDef {
   transport?: number;
   /** Only infantry may board (Night Hawk). */
   infantryOnly?: boolean;
+  /**
+   * Persistent profile (PW15): a heavy-cargo transport (landing craft). It
+   * carries ONE MCV or ONE packed building carrier exclusively — no other
+   * cargo may share the run — plus normal passenger seats for vehicles.
+   */
+  heavyCargo?: boolean;
   // ---- abilities
   /** Captures enemy buildings or fully repairs friendly ones, and is used up. */
   engineer?: boolean;

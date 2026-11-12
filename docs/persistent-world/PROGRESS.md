@@ -828,3 +828,56 @@ New work this pass:
   same-ip duplicate probe, settled barter queryable by account both
   directions, scripted one-sided funnel flagged (imbalance Infinity,
   both_young), balanced trades and aged accounts not flagged.
+
+## PW15 — Sea landing craft transport (THU-2239)
+
+Transport choice recorded per the 11 Nov amendment: SEA first (milestone 2),
+heavy airlift deferred to milestone 3.
+
+- `UnitDef.heavyCargo` (rules.ts): a heavy-cargo transport carries ONE MCV
+  or ONE packed building carrier exclusively — no other cargo shares the
+  run — plus normal passenger seats for vehicles.
+- `landing-craft` added to the td pack for every faction: kind naval,
+  unarmed (D7: meant to be escorted), transport 15 seats = five vehicles,
+  prereq syrd (naval queue). Airlift deferred, recorded as deferred scope.
+- Boarding (game.ts canBoard/seatSize/cargoLocked): heavy cargo requires a
+  heavyCargo transport and an EMPTY craft; once heavy cargo is aboard
+  nothing else boards; vehicles fill seats as before. MCVs and packed
+  carriers are heavy cargo everywhere — they can no longer board ordinary
+  transports, only the landing craft.
+- Shoreline access (enterThink): transports board at REACH (288 leptons ˜
+  one cell) instead of 200 so a ship standing off the beach can be loaded;
+  when the target cell is unpathable (water), the unit closes on the
+  nearest reachable cell beside the transport — the shoreline.
+- Unload: existing deploy->unload path; passengers disembark on the nearest
+  passable cell within 3 cells. Over open water with no reachable cell the
+  unload is refused ('denied') and cargo stays aboard — recoverable, never
+  duplicated. No receiving structure required: any valid shoreline works.
+- Protected cargo (D7 amendment): `transportCargoProtected` — a transport
+  whose passengers are ALL newcomer- or recovery-protected shares the
+  protection: damage() refuses it in both directions and aimAndFire blocks
+  its weapons. Mixed or empty cargo is unprotected. (Newcomer protection
+  is already player-scoped; the rule matters for recovery-protected MCVs.)
+- Carrier death (D7): passengers die with the carrier and inherit its
+  killer (`deadBy`), so cargo drops salvage under the PW24 rules instead of
+  being an ownerless environmental kill.
+- Ownership safety: `transferOwner` refuses any entity with passengers —
+  cargo must be unloaded before a transport can change hands, so barter can
+  never split cargo from carrier or launder bound/protected units.
+- Snapshot/restore: passengers/carriedBy are entity fields and survive
+  captureGame/restoreGame unchanged (verified by test) — crash mid-crossing
+  cannot duplicate or orphan cargo.
+- New map preset `td-landing`: a 16-cell sea channel between mainland and
+  island — shore water AND water beyond unload reach, for transport and
+  future frontier/island scenarios (PW16).
+- Tests: tests/unit/fusion-transport.test.ts 10/10 — def/queue, exclusive
+  MCV run + far-bank yard deploy, five-vehicle capacity + sixth refused,
+  vehicle-then-MCV refused, blocked unload recoverable, carrier death with
+  dual salvage, protected-only cargo immunity, mixed cargo unprotected,
+  laden-craft transfer refused / empty craft transfers, snapshot round-trip.
+- Full suite: 464 unit green; mashup id-charset regression fixed by naming
+  the unit 'landing-craft' (dash, quoted key).
+- Known gaps: heavy airlift (milestone 3, deferred per amendment); craft is
+  unarmed so 'cannot attack while protected' is enforced in code but only
+  exercised via the damage path in tests; no client-specific UI needed —
+  build menu, enter and deploy flows are generic.
