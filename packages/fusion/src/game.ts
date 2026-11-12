@@ -75,7 +75,30 @@ export interface GameSetup {
    * region authority decides elimination, protection and recovery instead.
    */
   persistent?: boolean;
+  /**
+   * Persistent pacing tuning (PW23), mapped from the region's MmoRulesProfile by
+   * the service. Absent means classic pacing — classic matches are unaffected.
+   * All values are tunable profile data, never literals in code paths.
+   */
+  mmo?: MmoTuning;
 }
+
+/** Engine-facing subset of the persistent rules profile (PW23). */
+export interface MmoTuning {
+  /** Structure max-HP multiplier vs unit damage (persistent bases level slower). */
+  structureHpMultiplier: number;
+  /** Live-unit supply cap per player; 0 disables the cap. */
+  supplyCap: number;
+  /** Credits of upkeep per supply point per in-game minute. */
+  upkeepPerPointPerMinute: number;
+  /** Maximum standing construction yards (compounds) per player; 0 disables. */
+  maxCompounds: number;
+}
+
+/** Supply upkeep cadence: one in-game minute at the 15 Hz tick rate. */
+export const SUPPLY_UPKEEP_TICKS = 900;
+/** Queue kinds that produce units (subject to the PW23 supply cap). */
+const UNIT_QUEUES = new Set<QueueKind>(['infantry', 'vehicle', 'aircraft', 'naval', 'starport']);
 
 export type OrderKind = 'idle' | 'move' | 'attackMove' | 'attack' | 'attackGround' | 'harvest' | 'deploy' | 'enter' | 'rearm' | 'ferry';
 export type HarvestState = 'seek' | 'gather' | 'toRefinery' | 'unload' | 'warp';
@@ -271,6 +294,8 @@ export class Game {
   readonly mapPreset: MapPreset;
   /** True under the persistent profile: join/leave/transfer commands and no match-over. */
   readonly persistent: boolean;
+  /** Persistent pacing tuning (PW23); undefined in classic matches. */
+  readonly mmo?: MmoTuning;
   /** Region extension points; classic matches leave this empty. */
   hooks: RegionHooks = {};
   /** Starting credits for late joiners (the setup preset, resolved once). */
@@ -289,6 +314,8 @@ export class Game {
     this.superCharge = Math.max(100, Math.min(200, Math.trunc(setup.superCharge ?? 100)));
     this.crateRate = Math.max(0, Math.min(200, Math.trunc(setup.crates ?? 0)));
     this.persistent = setup.persistent === true;
+    // Tuning is a persistent-mode contract; classic matches ignore it entirely.
+    this.mmo = this.persistent ? setup.mmo : undefined;
     const credits = setup.pack.startCredits[setup.credits ?? 'standard'];
     this.startMoney = credits;
     const size = this.map.w * this.map.h;
@@ -525,7 +552,11 @@ export class Game {
     const market = this.pack.mechanics.market;
     if (market && this.tick % market.every === 0) this.market = market.min + this.rng.int(market.max - market.min + 1);
     if (this.powerDirty) this.updatePower();
-    for (const p of this.players) if (!p.defeated) this.production(p);
+    for (const p of this.players) {
+      if (p.defeated) continue;
+      this.production(p);
+      if (this.mmo && this.tick % SUPPLY_UPKEEP_TICKS === 0) this.mmoUpkeep(p);
+    }
     for (const e of this.entities.values()) {
       e.px = e.x; e.py = e.y;
       if (e.hp <= 0) continue;
@@ -609,7 +640,13 @@ export class Game {
   spawnStructure(type: string, owner: number, cx: number, cy: number, hpPercent = 100): Entity {
     const def = this.pack.structures[type];
     const e = this.blank(type, 'structure', owner, cx * LEPTONS + (def.w * LEPTONS) / 2, cy * LEPTONS + (def.h * LEPTONS) / 2, def.hp);
-    e.hp = Math.max(1, Math.floor((def.hp * hpPercent) / 100));
+    // Persistent pacing (PW23): structure durability scales so levelling a
+    // developed base takes the profile's target assault time. maxHp carries the
+    // multiplier; hpPercent (concrete-start damage) applies on top, exactly as
+    // before. Classic games have no tuning and are byte-identical.
+    const mult = this.mmo?.structureHpMultiplier ?? 1;
+    e.maxHp = Math.max(1, Math.round(def.hp * mult));
+    e.hp = Math.max(1, Math.floor((e.maxHp * hpPercent) / 100));
     e.cx = cx; e.cy = cy; e.w = def.w; e.h = def.h;
     this.entities.set(e.id, e);
     for (let y = cy; y < cy + def.h; y++) for (let x = cx; x < cx + def.w; x++) this.map.occupied[y * this.map.w + x] = e.id;
@@ -703,6 +740,54 @@ export class Game {
     return list;
   }
 
+  // ------------------------------------------------------- persistent pacing
+
+  /** Live units a player fields — the supply points the PW23 cap and upkeep use. */
+  supplyPoints(p: Player): number {
+    let n = 0;
+    for (const e of this.entities.values()) {
+      if (e.owner === p.slot && e.kind === 'unit' && e.hp > 0) n++;
+    }
+    return n;
+  }
+
+  /** Standing construction yards — the player's compounds under the PW23 cap. */
+  compoundCount(p: Player): number {
+    let n = 0;
+    for (const e of this.entities.values()) {
+      if (e.owner === p.slot && e.kind === 'structure' && e.hp > 0 && this.structDef(e).constructionYard) n++;
+    }
+    return n;
+  }
+
+  /**
+   * Supply upkeep (PW23): every in-game minute each player pays
+   * upkeepPerPointPerMinute credits per supply point, floored at zero. Runs in
+   * step() and inside fastForwardQuiescent so quiescent intervals drain the
+   * same way live ticks do.
+   */
+  private mmoUpkeep(p: Player) {
+    const t = this.mmo;
+    if (!t || t.upkeepPerPointPerMinute <= 0) return;
+    const due = t.upkeepPerPointPerMinute * this.supplyPoints(p);
+    if (due > 0) p.credits = Math.max(0, p.credits - due);
+  }
+
+  /**
+   * Raw asset totals for the world power score (PW23): build-cost sums plus
+   * purchased upgrade levels. The service weights them via computePowerScore.
+   */
+  assetTotals(p: Player): { structureCost: number; unitCost: number; techLevels: number } {
+    let structureCost = 0, unitCost = 0, techLevels = 0;
+    for (const e of this.entities.values()) {
+      if (e.owner !== p.slot || e.hp <= 0) continue;
+      if (e.kind === 'structure') structureCost += this.pack.structures[e.type]?.cost ?? 0;
+      else unitCost += this.pack.units[e.type]?.cost ?? 0;
+    }
+    for (const level of Object.values(p.upgrades)) techLevels += level;
+    return { structureCost, unitCost, techLevels };
+  }
+
   /** What a faction takes the field with, which the regular doctrine may change. */
   startUnitsFor(faction: FactionDef): string[] {
     const start = this.doctrine === 'regular' && faction.regularStart ? faction.regularStart : faction.startUnits;
@@ -789,6 +874,10 @@ export class Game {
       }
       if (!factories.length) continue;
       const item = q.items[0];
+      // Supply cap (PW23): unit production stalls while the army is at cap.
+      // Already-paid progress is kept; the queue resumes when supply frees.
+      if (this.mmo && this.mmo.supplyCap > 0 && UNIT_QUEUES.has(kind)
+        && this.supplyPoints(p) >= this.mmo.supplyCap) continue;
       const cost = this.costOf(item, p);
       const speed = fast ? (fast.speed.get(kind) ?? this.productionSpeed(p, factories)) : this.productionSpeed(p, factories);
       if (fast && !fast.speed.has(kind)) fast.speed.set(kind, speed);
@@ -846,6 +935,11 @@ export class Game {
   canPlace(p: Player, item: string, x: number, y: number, ignoreRadius = false, ignoreUnit = 0): boolean {
     const def = this.pack.structures[item];
     if (!def) return false;
+    // Compound cap (PW23): a player may hold at most maxCompounds construction
+    // yards. Checked here so the placement ghost, the AI and the place command
+    // all see the same answer.
+    if (this.mmo && def.constructionYard && this.mmo.maxCompounds > 0
+      && this.compoundCount(p) >= this.mmo.maxCompounds) return false;
     for (let cy = y; cy < y + def.h; cy++) for (let cx = x; cx < x + def.w; cx++) {
       if (!inBounds(this.map, cx, cy)) return false;
       const i = cy * this.map.w + cx;
@@ -2211,6 +2305,10 @@ export class Game {
         let cache = caches.get(p);
         if (!cache) { cache = { factories: new Map(), speed: new Map() }; caches.set(p, cache); }
         this.production(p, cache);
+        // Supply upkeep parity: slept tick i+1 lands on absolute tick
+        // this.tick+i+1, so the per-minute drain fires on the same cadence a
+        // live step() would have used across the interval.
+        if (this.mmo && (this.tick + i + 1) % SUPPLY_UPKEEP_TICKS === 0) this.mmoUpkeep(p);
       }
       // Effects are cosmetic and tick-frozen here; keep the same bound step() uses.
       if (this.effects.length > 400) this.effects = this.effects.slice(-300);

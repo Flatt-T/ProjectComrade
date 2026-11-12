@@ -391,4 +391,15 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
         ('command', 'scheduled', 'protection', 'operation', 'transfer', 'accrual', 'world'));
     `,
   },
+  {
+    version: 5,
+    name: 'player power score',
+    sql: `
+    -- PW23: per-world-member power score, recomputed by the region runner from
+    -- live asset totals at each checkpoint. Drives frontier spawn bands and the
+    -- anti-snowball mismatch rule; 0 means not yet scored.
+    alter table world_member
+      add column power_score bigint not null default 0 check (power_score >= 0);
+    `,
+  },
 ];
