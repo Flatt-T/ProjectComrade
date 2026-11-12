@@ -256,6 +256,16 @@ export class RegionRunner {
       hib = payload.hib;
       this.simSeed = payload.seed;
       this.game = restoreGame(payload.snapshot, PACK_LIST);
+      // PW24: snapshots written before salvage shipped lack mmo.salvage; the
+      // profile is pinned per world, so backfill it deterministically here.
+      if (this.game.mmo && !this.game.mmo.salvage) {
+        this.game.mmo.salvage = {
+          percentOfCost: this.opts.rules.salvage.percentOfCost,
+          decaySeconds: this.opts.rules.salvage.decaySeconds,
+          mismatchFloorRatio: this.opts.rules.powerScoreSalvageFloorRatio,
+          scoreWeights: this.opts.rules.powerScoreWeights,
+        };
+      }
       this.bindings = new Map(payload.bindings);
       this.lastAppliedSeq = BigInt(snap.last_applied_seq);
       this.opts.log('region-restored', { regionId: this.opts.regionId, tick: this.game.tick, epoch: this.epoch });
@@ -281,6 +291,14 @@ export class RegionRunner {
           shieldRadiusCells: this.opts.rules.shieldRadiusCells,
           recoveryCreditCap: this.opts.rules.recoveryCreditCap,
           recoveryBuildRoles: this.opts.rules.recoveryBuildRoles,
+          // PW24: salvage share/decay from the pinned profile plus the
+          // anti-snowball floor and the same weights persistPowerScores uses.
+          salvage: {
+            percentOfCost: this.opts.rules.salvage.percentOfCost,
+            decaySeconds: this.opts.rules.salvage.decaySeconds,
+            mismatchFloorRatio: this.opts.rules.powerScoreSalvageFloorRatio,
+            scoreWeights: this.opts.rules.powerScoreWeights,
+          },
         },
         players: spec.players.map(p => ({
           name: p.name, faction: p.faction, ai: false,
@@ -367,6 +385,7 @@ export class RegionRunner {
   private async catchUpTo(tick: number): Promise<void> {
     const before = this.game!.tick;
     this.advanceTo(tick);
+    await this.drainSalvageEvents();
     this.stats.catchUpTicks += this.game!.tick - before;
     if (this.game!.tick !== before) this.opts.log('region-catchup', { from: before, to: this.game!.tick });
   }
@@ -377,6 +396,7 @@ export class RegionRunner {
     try {
       const expected = this.tickFor(this.opts.now());
       if (this.game.tick < expected) this.advanceTo(Math.min(expected, this.game.tick + 600));
+      await this.drainSalvageEvents();
       if (this.opts.checkpointEveryTicks > 0
         && this.game.tick - this.lastCheckpointTick >= this.opts.checkpointEveryTicks) {
         await this.checkpoint('interval');
@@ -653,9 +673,62 @@ export class RegionRunner {
   private async applyUnappliedEvents(): Promise<void> {
     for (;;) {
       const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual'], 64);
-      if (!events.length) return;
+      if (!events.length) { await this.drainSalvageEvents(); return; }
       for (const event of events) await this.applyEvent(event);
     }
+  }
+
+  /**
+   * PW24: persist salvage crate spawns as audited operations. The sim stays
+   * authoritative for the crate itself (snapshot + journal replay reproduce it
+   * exactly); these rows are the durable audit trail — one SALVAGE_SPAWN
+   * operation per drop plus DESTROY/SALVAGE asset-ledger entries for the killed
+   * asset. Collect events are sim-side credit grants already covered by the
+   * snapshot; the ladder stage reads them for points.
+   *
+   * Crash note: a crash between the sim step and this drain can lose the audit
+   * row while the crate survives in the next snapshot — audit is best-effort at
+   * tick cadence, never state-corrupting. Deterministic operation ids are not
+   * required because the drain empties the queue exactly once per process.
+   */
+  private async drainSalvageEvents(): Promise<void> {
+    const g = this.game;
+    if (!g || !g.salvageEvents.length || this.epoch === undefined) {
+      if (g) g.salvageEvents.length = 0;
+      return;
+    }
+    const spawns = g.salvageEvents.splice(0).filter(e => e.kind === 'spawn');
+    if (!spawns.length) return;
+    const playerIdBySlot = new Map<number, string>();
+    for (const [playerId, slot] of this.slotByPlayer) playerIdBySlot.set(slot, playerId);
+    await mmoTransaction(async tx => {
+      await assertRegionFence(tx, {
+        regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+      });
+      for (const ev of spawns) {
+        const opId = randomUUID();
+        const x = ev.cell % g.map.w, y = Math.floor(ev.cell / g.map.w);
+        const victimId = playerIdBySlot.get(ev.victimOwner) ?? null;
+        const killerId = playerIdBySlot.get(ev.killerOwner) ?? null;
+        await tx.query(
+          `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+           values ($1,$2,$3,$4,'SALVAGE_SPAWN',$5,$6)`,
+          [opId, this.opts.regionId, this.epoch, String(ev.tick),
+           JSON.stringify({ kind: 'SALVAGE_SPAWN', regionId: this.opts.regionId, x, y, credits: String(ev.credits) }),
+           JSON.stringify({ simId: ev.simId, victimOwner: ev.victimOwner, killerOwner: ev.killerOwner, victimType: ev.victimType, victimKind: ev.victimKind })]);
+        const entityId = mmoEntityId(this.opts.regionId, ev.simId);
+        const detail = JSON.stringify({ killerPlayerId: killerId, type: ev.victimType, simKind: ev.victimKind, cell: ev.cell });
+        await tx.query(
+          `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+           values ($1,$2,$3,'DESTROY',$4,null,'destroyed',$5,$6)`,
+          [opId, entityId, this.opts.regionId, victimId, String(ev.simId), detail]);
+        await tx.query(
+          `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+           values ($1,$2,$3,'SALVAGE',$4,null,'salvaged',$5,$6)`,
+          [opId, entityId, this.opts.regionId, victimId, String(ev.simId),
+           JSON.stringify({ credits: ev.credits, cell: ev.cell, killerPlayerId: killerId })]);
+      }
+    });
   }
 
   private async applyEvent(event: {

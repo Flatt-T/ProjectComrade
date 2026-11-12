@@ -102,6 +102,13 @@ export interface GameSetup {
   /** Bonus-crate frequency, 0 (none) to 200; 100 drops about one a minute. */
   crates?: number;
   /**
+   * PW24 salvage in classic skirmish matches (optional setting): destroyed
+   * units/buildings drop credit crates worth a share of build cost. Persistent
+   * regions get the same mechanic through `mmo.salvage`, which adds the
+   * anti-snowball power-score floor.
+   */
+  salvage?: { percentOfCost: number; decaySeconds: number };
+  /**
    * Persistent-world profile (PW21): players may join and leave a running region,
    * entities change hands by command, and there is no match-over condition — the
    * region authority decides elimination, protection and recovery instead.
@@ -131,6 +138,19 @@ export interface MmoTuning {
   recoveryCreditCap?: number;
   /** Recovery: structure roles that may be rebuilt while recovering (PW12). */
   recoveryBuildRoles?: string[];
+  /**
+   * PW24 salvage (COMRADE 18 §3.9): share of build cost dropped as a crate,
+   * decay time, and the anti-snowball floor — a victim whose in-sim power
+   * score is below `mismatchFloorRatio` of the attacker's yields no crate.
+   * `scoreWeights` mirrors the profile's powerScoreWeights so the in-sim
+   * score matches the durable world_member score.
+   */
+  salvage?: {
+    percentOfCost: number;
+    decaySeconds: number;
+    mismatchFloorRatio: number;
+    scoreWeights: { structure: number; unit: number; tech: number };
+  };
 }
 
 /** Supply upkeep cadence: one in-game minute at the 15 Hz tick rate. */
@@ -259,6 +279,12 @@ export interface Entity {
    * '' on entities predating PW17; restoreGame falls back to the owner's.
    */
   faction: string;
+  /**
+   * PW24: player slot of the unit that dealt the killing damage, stamped when
+   * hp reaches 0 so removeEntity can apply the salvage mismatch rule. -1 for
+   * environmental/ownerless kills; transient — never serialized.
+   */
+  deadBy?: number;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -335,8 +361,29 @@ export interface Strike {
 export interface Worm { id: number; x: number; y: number; px: number; py: number; target: number; hidden: number; hp: number; facing: number; wander: number; /** Prowl destination (cell index), or -1. */ goal: number; /** Ticks spent on the surface this stint. */ up: number; /** Visual / biome form (worm, tusken, ewok, opee). */ form: string }
 
 /** A bonus crate waiting on the map. */
-export type CrateKind = 'money' | 'heal' | 'veteran' | 'reveal' | 'unit';
-export interface Crate { id: number; cell: number; kind: CrateKind }
+export type CrateKind = 'money' | 'heal' | 'veteran' | 'reveal' | 'unit' | 'salvage';
+export interface Crate {
+  id: number; cell: number; kind: CrateKind;
+  /** PW24: credit value for 'salvage' crates; absent on classic bonus crates. */
+  value?: number;
+  /** PW24: tick at which a salvage crate decays; absent means it never decays. */
+  expiresTick?: number;
+}
+
+/** One salvage crate spawn or collection, drained by the region runner for audit. */
+export interface SalvageEvent {
+  tick: number;
+  cell: number;
+  credits: number;
+  kind: 'spawn' | 'collect';
+  /** Sim entity id of the destroyed asset (spawn events only). */
+  simId: number;
+  victimOwner: number;
+  collectorOwner: number;
+  killerOwner: number;
+  victimType: string;
+  victimKind: string;
+}
 /** The renewal setting at which fields grow back at the pack's own rate (mirrors the lobby's). */
 export const RENEWAL_CLASSIC = 25;
 /** How often crates drop at 100%, and what each kind is worth. */
@@ -364,7 +411,8 @@ export function withPackedCarriers(pack: RulePack): RulePack {
     const id = `pack_${s.id}`;
     if (units[id]) continue;
     units[id] = {
-      id, name: `Packed ${s.name}`, kind: 'vehicle', cost: 0, hp: s.hp,
+      // PW24: a destroyed carrier salvages the packed building's build cost.
+      id, name: `Packed ${s.name}`, kind: 'vehicle', cost: s.cost, hp: s.hp,
       armor: 'heavy', speed: 18, turn: 6, sight: Math.max(3, s.sight),
       prereqs: [], tech: 99, shape: s.shape, role: 'support', packedCarrier: s.id,
     };
@@ -405,6 +453,17 @@ export class Game {
   /** Bonus-crate frequency percent; 0 means no crates. */
   readonly crateRate: number;
   crates: Crate[] = [];
+  /** PW24: skirmish salvage setting (classic matches); persistent uses mmo.salvage. */
+  private classicSalvage?: { percentOfCost: number; decaySeconds: number };
+  /** PW24 audit feed: salvage spawns/collects; the region runner drains it. */
+  readonly salvageEvents: SalvageEvent[] = [];
+
+  /** Effective salvage config: persistent regions read mmo.salvage (patchable post-restore). */
+  private salvageConfig() {
+    if (this.persistent) return this.mmo?.salvage;
+    const c = this.classicSalvage;
+    return c ? { ...c, mismatchFloorRatio: 0, scoreWeights: undefined } : undefined;
+  }
   private ai: (AIState | null)[] = [];
   readonly mapPreset: MapPreset;
   /** True under the persistent profile: join/leave/transfer commands and no match-over. */
@@ -432,6 +491,7 @@ export class Game {
     this.persistent = setup.persistent === true;
     // Tuning is a persistent-mode contract; classic matches ignore it entirely.
     this.mmo = this.persistent ? setup.mmo : undefined;
+    this.classicSalvage = setup.salvage ? { ...setup.salvage } : undefined;
     const credits = setup.pack.startCredits[setup.credits ?? 'standard'];
     this.startMoney = credits;
     const size = this.map.w * this.map.h;
@@ -2103,6 +2163,7 @@ export class Game {
     e.hp -= amount;
     if (e.hp <= 0) {
       e.hp = 0;
+      e.deadBy = by;
       const killer = this.players[by];
       if (killer && by !== e.owner) killer.stats.killed++;
       const victim = this.players[e.owner];
@@ -2338,6 +2399,10 @@ export class Game {
 
   /** A ground unit standing on a crate opens it. */
   private collectCrates() {
+    // PW24: salvage crates decay on their own clock, collector or not.
+    if (this.crates.some(c => c.expiresTick !== undefined && c.expiresTick <= this.tick)) {
+      this.crates = this.crates.filter(c => c.expiresTick === undefined || c.expiresTick > this.tick);
+    }
     if (!this.crates.length) return;
     for (const e of this.entities.values()) {
       if (e.kind !== 'unit' || e.hp <= 0 || e.carriedBy || this.isAircraft(e) || e.owner < 0) continue;
@@ -2372,6 +2437,17 @@ export class Game {
       case 'reveal':
         this.reveals.push({ owner: finder.owner, x, y, r: Math.max(this.map.w, this.map.h), until: this.tick + 450 });
         break;
+      case 'salvage': {
+        // PW24: credit crates pay out directly; the runner audits the spawn.
+        const value = crate.value ?? 0;
+        p.credits += value;
+        this.salvageEvents.push({
+          tick: this.tick, cell: crate.cell, credits: value, kind: 'collect', simId: 0,
+          victimOwner: -1, collectorOwner: finder.owner, killerOwner: -1,
+          victimType: '', victimKind: '',
+        });
+        break;
+      }
       case 'unit': {
         // A crew is already aboard: the free unit is whatever this side rolls out first.
         const faction = this.pack.factions.find(f => f.id === p.faction);
@@ -2655,7 +2731,52 @@ export class Game {
         this.effect('convert', v.x, v.y, 0, 0, 20);
       }
     }
+    if (died) this.maybeSalvage(e);
     this.entities.delete(e.id);
+  }
+
+  /**
+   * PW24 (COMRADE 18 §3.9): a destroyed unit or building drops a salvage crate
+   * worth a share of its build cost, collectable by anyone, decaying after the
+   * configured time. Sold buildings never reach here with died=true; packed
+   * carriers carry the packed structure's cost. The anti-snowball floor
+   * suppresses crates when the victim's in-sim power score is far below the
+   * killer's — the same rule the ladder applies to points.
+   */
+  private maybeSalvage(e: Entity) {
+    const cfg = this.salvageConfig();
+    if (!cfg || e.owner < 0) return;
+    const by = e.deadBy ?? -1;
+    if (by < 0 || by === e.owner) return;
+    const def = e.kind === 'unit' ? this.unitDef(e) : this.structDef(e);
+    const value = Math.floor(((def?.cost ?? 0) * cfg.percentOfCost) / 100);
+    if (value <= 0) return;
+    if (cfg.scoreWeights && cfg.mismatchFloorRatio > 0) {
+      const atk = this.players[by], vic = this.players[e.owner];
+      if (atk && vic) {
+        const w = cfg.scoreWeights;
+        const score = (p: Player) => {
+          const t = this.assetTotals(p);
+          return t.structureCost * w.structure + t.unitCost * w.unit + t.techLevels * w.tech;
+        };
+        if (score(vic) < score(atk) * cfg.mismatchFloorRatio) return;
+      }
+    }
+    const cell = e.kind === 'structure'
+      ? e.cy * this.map.w + e.cx
+      : this.cellOf(e);
+    const near = nearestCell(this.map, cell, 4,
+      i => passable(this.pack, this.map, i, 'infantry') && !this.unitInCell(i));
+    const spot = near >= 0 ? near : cell;
+    this.crates.push({
+      id: this.nextId++, cell: spot, kind: 'salvage', value,
+      expiresTick: cfg.decaySeconds > 0 ? this.tick + Math.round(cfg.decaySeconds * 15) : undefined,
+    });
+    this.salvageEvents.push({
+      tick: this.tick, cell: spot, credits: value, kind: 'spawn', simId: e.id,
+      victimOwner: e.owner, collectorOwner: -1, killerOwner: by,
+      victimType: e.type, victimKind: e.kind,
+    });
   }
 
   private cleanup() {
@@ -2950,7 +3071,7 @@ export class Game {
     for (const s of this.strikes) h.add(s.tick).add(s.x).add(s.y);
     for (const pr of this.projectiles) h.add(pr.x).add(pr.y);
     for (const worm of this.worms) h.add(worm.x).add(worm.y).add(worm.hidden).add(worm.goal).add(worm.up).addString(worm.form);
-    for (const crate of this.crates) h.add(crate.cell).add(CRATE_KINDS.indexOf(crate.kind));
+    for (const crate of this.crates) h.add(crate.cell).add(CRATE_KINDS.indexOf(crate.kind)).add(crate.value ?? 0).add(crate.expiresTick ?? 0);
     return h.value;
   }
 }
