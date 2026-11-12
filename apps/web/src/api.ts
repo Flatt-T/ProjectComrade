@@ -4,7 +4,7 @@
 // page could read it. The long-lived refresh token lives in an httpOnly cookie the page
 // cannot touch, so a reload calls /api/auth/refresh to get a new access token and carries on.
 import type {
-  AdBreak, ConsentState, Entitlements, HistoryPage, InvoiceSummary, MatchRecord, Me, MmoAwayReport,
+  AdBreak, BarterOffer, ConsentState, Entitlements, HistoryPage, InvoiceSummary, MatchRecord, Me, MmoAwayReport,
   MmoNotification, MmoNotificationPrefs, MmoNotifyChannel, PackPrice, PlanPrice, PlayDecision,
   PlayKind, PlayerRecord, ProposalPage, ReleaseInfo, SubscriptionState, Tier, TierPlan,
 } from '@comrade/contracts';
@@ -174,6 +174,7 @@ export const api = {
     post<{ marked: number }>('/api/mmo/notifications/read', ids ? { ids } : {}),
   mmoAwayReport: () => get<MmoAwayReport>('/api/mmo/away-report'),
   mmoProtection: () => get<MmoProtectionResponse>('/api/mmo/protection'),
+  mmoTradeOffers: () => get<MmoTradeOffersResponse>('/api/mmo/trade-offers'),
 };
 
 export interface MmoProtectionResponse {
@@ -199,6 +200,22 @@ export interface MmoNotificationsResponse {
   prefs: MmoNotificationPrefs;
   notifications: MmoNotification[];
   unread: number;
+}
+
+export interface MmoTradeOfferRow {
+  offer_id: string;
+  region_id: string;
+  from_player_id: string;
+  to_player_id: string;
+  payload: BarterOffer;
+  status: string;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface MmoTradeOffersResponse {
+  incoming: MmoTradeOfferRow[];
+  outgoing: MmoTradeOfferRow[];
 }
 
 export interface CommanderResponse extends PlayerRecord {

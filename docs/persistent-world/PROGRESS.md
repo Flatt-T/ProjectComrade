@@ -588,3 +588,37 @@ acceptance detail; this file is the resume point. Read it first in every session
   in-page waits, so long phases are driven as short issue/poll
   steps; dependency-check CI advisory still fails (pre-existing,
   non-blocking).
+
+## PW13 - allied barter (THU-2237)
+
+- Journaled barterOffer/barterAccept/barterDecline/barterCancel in the
+  world handler (world.ts): free-priced bilateral packages over units,
+  credits, earned shield seconds and power-ups; packedBuilding items
+  reject UNSUPPORTED_ITEM until PW14.
+- Settlement is one journal transaction: offer claimed via
+  status='open' guard (duplicate/competing accepts lose with zero side
+  effects), BARTER economy_operation + asset_ledger rows per transferred
+  unit, earned-shield and power-up balances moved in-tx, then sim
+  commands (transfer + new adjustCredits engine command) apply at the
+  same journal boundary.
+- Reservations: open outgoing offers lock credits/shield seconds/power-up
+  counts and unit refs so the same asset cannot be offered twice;
+  acceptance revalidates EVERYTHING fresh (unit alive/owned/unbound/
+  uncarried, balances, permissions, harvest gate) so death or state
+  change before settlement rejects cleanly (GIVE_* reasons).
+- PW26 gates: bound assets untransferable, nightly shield hours never
+  enter the tradable pool (earned only, minus shield-armed commitments),
+  starter-grant harvest gate on both sides, every settlement audited.
+- Alliance model: both parties need 'trade'; unit-carrying sides need
+  'unitTransfer'; leader implicit.
+- REST: GET /api/mmo/trade-offers (incoming/outgoing inbox); /world UI
+  lists offers with Accept/Decline/Cancel (offer authoring stays
+  wire-protocol for now - noted gap).
+- Tests: tests/integration/mmo-barter.test.ts 11/11 (real PG + runner):
+  credits settle + audit, mid-battle unit handover preserving
+  hp/position/orders with old-owner authority loss, duplicate accept,
+  decline/cancel, unit reservation, death-before-settle,
+  insufficient-at-accept, earned-only shield transfer, bound-unit and
+  harvest-gate rejection, power-up exchange.
+- Also fixed latent adjustPowerup bug: negative deltas violated the
+  count>=0 check on the INSERT path before ON CONFLICT resolved.

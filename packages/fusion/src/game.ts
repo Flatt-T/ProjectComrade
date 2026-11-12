@@ -44,7 +44,10 @@ export type Command =
   /** Persistent profile only: recovery protection on/off for a player slot (PW12). */
   | { t: 'setRecovery'; slot: number; on: boolean }
   /** Persistent profile only: spawn the bound recovery MCV for a player slot (PW12). */
-  | { t: 'grantRecovery'; slot: number; cell: number };
+  | { t: 'grantRecovery'; slot: number; cell: number }
+  /** Journaled credit movement between players (PW13 barter settlement). The
+   *  durable layer validates balances; the engine clamps at zero defensively. */
+  | { t: 'adjustCredits'; slot: number; delta: number };
 
 export interface PlayerSetup {
   name: string; faction: string; ai: boolean; team?: number; level?: AILevel; ally?: number; autoRepair?: boolean;
@@ -538,6 +541,10 @@ export class Game {
       return;
     }
     if (cmd.t === 'leave') { const p = this.players[cmd.slot]; if (this.persistent && p) p.connected = false; return; }
+    if (cmd.t === 'adjustCredits') {
+      if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.credits = Math.max(0, p.credits + cmd.delta); }
+      return;
+    }
     if (cmd.t === 'transfer') { if (this.persistent) this.transferOwner(cmd.ids, cmd.to, slot); return; }
     if (cmd.t === 'setAlly') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.ally = cmd.ally; } return; }
     if (cmd.t === 'setAutoRepair') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.autoRepair = cmd.on; } return; }

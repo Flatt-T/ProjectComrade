@@ -388,11 +388,15 @@ export async function adjustPowerup(tx: PoolClient, args: {
     if (!receipt.rowCount) return;
   }
   const delta = BigInt(args.delta);
+  // The proposed INSERT row is check-constrained before ON CONFLICT resolves,
+  // so a negative delta would violate count >= 0 even when the update path is
+  // legal. Clamp only the inserted literal; the conflict update still applies
+  // the true signed delta and keeps its own non-negative guard.
   await tx.query(
-    `insert into powerup_balance (player_id, kind, count) values ($1,$2,$3)
+    `insert into powerup_balance (player_id, kind, count) values ($1,$2,greatest($3::bigint,0))
      on conflict (player_id, kind) do update
-       set count = powerup_balance.count + $3, updated_at = clock_timestamp()
-     where powerup_balance.count + $3 >= 0`,
+       set count = powerup_balance.count + $3::bigint, updated_at = clock_timestamp()
+     where powerup_balance.count + $3::bigint >= 0`,
     [args.playerId, args.kind, delta.toString()]);
 }
 
@@ -442,6 +446,106 @@ export async function resolveTradeOffer(offerId: string, status: 'accepted' | 'd
       where offer_id = $1 and status = 'open'`,
     [offerId, status, operationId ?? null]);
   return rowCount === 1;
+}
+
+export interface TradeOfferRow {
+  offer_id: string; region_id: string; from_player_id: string; to_player_id: string;
+  payload: BarterOffer; status: 'open' | 'accepted' | 'declined' | 'cancelled' | 'expired' | 'settled';
+  expires_at: string; created_at: string; resolved_at: string | null; operation_id: string | null;
+}
+
+const OFFER_COLS = `offer_id, region_id::text, from_player_id, to_player_id, payload,
+  status, expires_at::text, created_at::text, resolved_at::text, operation_id::text`;
+
+/** Fetch one offer inside the caller's transaction (or the pool). */
+export async function tradeOfferById(offerId: string, q: Queryable = mmoDb()): Promise<TradeOfferRow | undefined> {
+  const { rows } = await q.query<TradeOfferRow>(
+    `select ${OFFER_COLS} from trade_offer where offer_id = $1`, [offerId]);
+  return rows[0];
+}
+
+/** Open, unexpired offers where the player is either party — the reservation
+ *  and inbox read model. */
+export async function openTradeOffersForPlayer(playerId: string, q: Queryable = mmoDb()): Promise<TradeOfferRow[]> {
+  const { rows } = await q.query<TradeOfferRow>(
+    `select ${OFFER_COLS} from trade_offer
+      where status = 'open' and expires_at > clock_timestamp()
+        and (from_player_id = $1 or to_player_id = $1)
+      order by created_at`, [playerId]);
+  return rows;
+}
+
+/**
+ * Transition an open offer inside the journal transaction. The `status = 'open'`
+ * guard makes the claim atomic: a second accept/decline/cancel loses and must
+ * not write settlement rows.
+ */
+export async function resolveTradeOfferTx(
+  tx: PoolClient, offerId: string,
+  status: 'accepted' | 'declined' | 'cancelled' | 'expired' | 'settled',
+  operationId?: string,
+): Promise<boolean> {
+  const { rowCount } = await tx.query(
+    `update trade_offer set status = $2, resolved_at = clock_timestamp(), operation_id = coalesce($3, operation_id)
+      where offer_id = $1 and status = 'open'`,
+    [offerId, status, operationId ?? null]);
+  return rowCount === 1;
+}
+
+/** Insert an offer inside the journal transaction; false when the id is taken. */
+export async function createTradeOfferTx(tx: PoolClient, args: {
+  offerId: string; regionId: string; offer: BarterOffer; expiresAtMs: number;
+}): Promise<boolean> {
+  const offer = parseBarterOffer(args.offer);
+  const { rowCount } = await tx.query(
+    `insert into trade_offer (offer_id, region_id, from_player_id, to_player_id, payload, expires_at)
+     values ($1,$2,$3,$4,$5,to_timestamp($6 / 1000.0))
+     on conflict (offer_id) do nothing`,
+    [args.offerId, args.regionId, offer.fromId, offer.toId, JSON.stringify(offer), args.expiresAtMs]);
+  return rowCount === 1;
+}
+
+/** Count of a power-up kind held by a player (0 when no row). */
+export async function powerupBalance(tx: PoolClient, playerId: string, kind: string): Promise<bigint> {
+  const { rows } = await tx.query<{ count: string }>(
+    'select count::text from powerup_balance where player_id = $1 and kind = $2 for update',
+    [playerId, kind]);
+  return BigInt(rows[0]?.count ?? '0');
+}
+
+/** Earned shield seconds available in the balance row (tx-locked read). */
+export async function earnedShieldSeconds(tx: PoolClient, playerId: string): Promise<bigint> {
+  const { rows } = await tx.query<{ seconds_remaining: string }>(
+    `select seconds_remaining::text from shield_balance
+      where player_id = $1 and kind = 'earned' for update`, [playerId]);
+  return BigInt(rows[0]?.seconds_remaining ?? '0');
+}
+
+/**
+ * Move earned shield seconds between players atomically inside the journal
+ * transaction. Nightly (free) hours are never touched — PW26 forbids offering
+ * them, so only the 'earned' balance row participates. Returns false when the
+ * sender's balance is short (the caller must roll back or fail the command).
+ */
+export async function transferEarnedShieldSeconds(tx: PoolClient, args: {
+  fromId: string; toId: string; seconds: number | bigint;
+}): Promise<boolean> {
+  const seconds = BigInt(args.seconds);
+  if (seconds <= 0n) return true;
+  const debit = await tx.query(
+    `update shield_balance set seconds_remaining = seconds_remaining - $2,
+       generation = generation + 1, updated_at = clock_timestamp()
+      where player_id = $1 and kind = 'earned' and seconds_remaining >= $2`,
+    [args.fromId, seconds.toString()]);
+  if (debit.rowCount !== 1) return false;
+  await tx.query(
+    `insert into shield_balance (player_id, kind, seconds_remaining)
+     values ($1,'earned',$2)
+     on conflict (player_id, kind) do update
+       set seconds_remaining = shield_balance.seconds_remaining + $2,
+           generation = shield_balance.generation + 1, updated_at = clock_timestamp()`,
+    [args.toId, seconds.toString()]);
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -1111,6 +1215,11 @@ async function shieldBalancesQ(q: Queryable, playerId: string): Promise<ShieldBa
 
 export async function shieldBalances(playerId: string): Promise<ShieldBalances> {
   return shieldBalancesQ(mmoDb(), playerId);
+}
+
+/** Transaction-scoped variant for in-journal reads (barter validation). */
+export async function shieldBalancesTx(q: Queryable, playerId: string): Promise<ShieldBalances> {
+  return shieldBalancesQ(q, playerId);
 }
 
 /** Total shield hours a player may commit: free nightly (consumed first) + earned. */

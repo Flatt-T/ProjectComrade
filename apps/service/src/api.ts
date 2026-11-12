@@ -44,6 +44,7 @@ import {
 } from './mmo/notify.js';
 import {
   committedShieldSeconds, compoundsForPlayer, MmoStoreError, openShieldRecordsForPlayer,
+  openTradeOffersForPlayer,
   shieldBalances, utcShieldDay,
 } from './mmo/store.js';
 
@@ -790,5 +791,20 @@ get('/api/mmo/protection', async (ctx: Ctx) => {
         } : null,
       };
     }),
+  };
+});
+
+/**
+ * GET /api/mmo/trade-offers — the player's open barter offers split into
+ * incoming (awaiting their acceptance) and outgoing (awaiting the other side).
+ * Read-only: offers are created and resolved through journaled /mmo commands.
+ */
+get('/api/mmo/trade-offers', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-trade-offers', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const offers = await openTradeOffersForPlayer(playerId);
+  return {
+    incoming: offers.filter(o => o.to_player_id === playerId),
+    outgoing: offers.filter(o => o.from_player_id === playerId),
   };
 });
