@@ -4,7 +4,7 @@ import { extname } from 'node:path';
  * Paths the single-page app owns. A deep link to one of these is served index.html so the
  * router can take over. `/kb` is not listed: those URLs are real HTML files for crawlers.
  */
-export const APP_ROUTES = /^\/(?:account|billing|tiers|legal|signin|register|commanders|match|vote)(?:\/|$)/;
+export const APP_ROUTES = /^\/(?:account|billing|tiers|legal|signin|register|commanders|match|vote|world)(?:\/|$)/;
 
 /**
  * Relative file paths to try, in order, for a GET of `pathname`.
