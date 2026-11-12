@@ -233,7 +233,13 @@ export class MmoGateway {
   }) {
     const sub = conn.subs.get(message.regionId);
     if (!sub) { sendError(conn.ws, 'NOT_SUBSCRIBED', 'Subscribe to the region before sending commands'); return; }
-    const fence = await this.service.fenceFor(message.regionId);
+    let fence = await this.service.fenceFor(message.regionId);
+    if (!fence) {
+      // The region may have hibernated after subscribe; a live command is
+      // presence, so wake it rather than failing the order.
+      await this.service.ensure(message.regionId).catch(() => undefined);
+      fence = await this.service.fenceFor(message.regionId);
+    }
     if (!fence) { sendError(conn.ws, 'REGION_UNAVAILABLE', 'Region runner is not live'); return; }
     const tail = await journalTail(message.regionId);
     const tick = tail ? BigInt(tail.tick) : 0n;
