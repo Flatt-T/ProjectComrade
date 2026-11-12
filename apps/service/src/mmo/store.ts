@@ -7,7 +7,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { PoolClient } from 'pg';
 import { mmoExec, mmoOne, mmoQuery, mmoTransaction } from './db.js';
-import { parseBarterOffer, type BarterOffer, type MmoOperation } from '@comrade/contracts';
+import { parseBarterOffer, type AlliancePermissions, type BarterOffer, type MmoOperation } from '@comrade/contracts';
 
 export class MmoStoreError extends Error {
   constructor(public code: string, message: string) { super(message); }
@@ -739,6 +739,303 @@ export async function markRegionEventApplied(tx: PoolClient, args: {
       where region_id = $1 and event_seq = $2 and applied_at is null`,
     [args.regionId, args.eventSeq.toString(), args.result === undefined ? null : JSON.stringify(args.result), args.operationId ?? null]);
   return rowCount === 1;
+}
+
+// ---------------------------------------------------------------------------
+// PW09: alliances, presence, caretaker preference
+// ---------------------------------------------------------------------------
+
+export interface AllianceRow {
+  alliance_id: string; ally_key: string; world_id: string; name: string;
+  owner_player_id: string; max_members: number; created_at: Date; disbanded_at: Date | null;
+}
+export interface AllianceMemberRow {
+  alliance_id: string; player_id: string; role: 'leader' | 'officer' | 'member';
+  permissions: Record<string, boolean>; joined_at: Date;
+}
+
+const NO_ALLIANCE_PERMISSIONS = { station: false, reinforce: false, trade: false, unitTransfer: false };
+
+export async function allianceForPlayer(worldId: string, playerId: string) {
+  const row = await mmoOne<AllianceRow & { role: AllianceMemberRow['role']; permissions: Record<string, boolean>; joined_at: Date }>(
+    `select a.alliance_id, a.ally_key::text, a.world_id, a.name, a.owner_player_id, a.max_members,
+            a.created_at, a.disbanded_at, m.role, m.permissions, m.joined_at
+       from alliance_member m join alliance a on a.alliance_id = m.alliance_id
+      where a.world_id = $1 and a.disbanded_at is null and m.player_id = $2 and m.left_at is null`,
+    [worldId, playerId]);
+  if (!row) return undefined;
+  const { role, permissions, joined_at, ...alliance } = row;
+  return {
+    alliance: { ...alliance, leader_id: alliance.owner_player_id } as AllianceRow & { leader_id: string },
+    member: { alliance_id: row.alliance_id, player_id: playerId, role, permissions, joined_at } as AllianceMemberRow,
+  };
+}
+
+export async function allianceMembers(allianceId: string): Promise<AllianceMemberRow[]> {
+  return mmoQuery<AllianceMemberRow>(
+    `select alliance_id, player_id, role, permissions, joined_at from alliance_member
+      where alliance_id = $1 and left_at is null order by joined_at`,
+    [allianceId]);
+}
+
+export async function allianceInvitesFor(playerId: string) {
+  return mmoQuery<{ alliance_id: string; name: string; invited_by: string }>(
+    `select i.alliance_id, a.name, i.invited_by from alliance_invite i
+       join alliance a on a.alliance_id = i.alliance_id
+      where i.player_id = $1 and a.disbanded_at is null`, [playerId]);
+}
+
+/** Create an alliance; the creator becomes leader with implicit full permissions. */
+export async function allianceCreate(tx: PoolClient, args: {
+  worldId: string; name: string; leaderId: string; maxMembers?: number;
+}): Promise<AllianceRow> {
+  const existing = await mmoOne<{ alliance_id: string }>(
+    'select alliance_id from alliance where world_id = $1 and lower(name) = lower($2) and disbanded_at is null',
+    [args.worldId, args.name]);
+  if (existing) throw new MmoStoreError('ALLIANCE_NAME_TAKEN', 'alliance name already in use');
+  const inAlliance = await mmoOne<{ alliance_id: string }>(
+    `select m.alliance_id from alliance_member m join alliance a on a.alliance_id = m.alliance_id
+      where a.world_id = $1 and a.disbanded_at is null and m.player_id = $2 and m.left_at is null`,
+    [args.worldId, args.leaderId]);
+  if (inAlliance) throw new MmoStoreError('ALREADY_IN_ALLIANCE', 'player already belongs to an alliance');
+  const id = uuid();
+  await tx.query(
+    'insert into alliance (alliance_id, world_id, name, owner_player_id, max_members) values ($1,$2,$3,$4,$5)',
+    [id, args.worldId, args.name, args.leaderId, args.maxMembers ?? 10]);
+  await tx.query(
+    `insert into alliance_member (alliance_id, player_id, role, permissions)
+     values ($1,$2,'leader',$3::jsonb)`,
+    [id, args.leaderId, JSON.stringify(NO_ALLIANCE_PERMISSIONS)]);
+  const row = await tx.query<AllianceRow>('select * from alliance where alliance_id = $1', [id]);
+  return row.rows[0]!;
+}
+
+/** ally_key values for a set of alliances (sim sync). */
+export async function allianceKeys(tx: PoolClient, allianceIds: string[]): Promise<Map<string, number>> {
+  if (!allianceIds.length) return new Map();
+  const { rows } = await tx.query<{ alliance_id: string; ally_key: string }>(
+    'select alliance_id, ally_key::text from alliance where alliance_id = any($1)', [allianceIds]);
+  return new Map(rows.map(r => [r.alliance_id, Number(r.ally_key)]));
+}
+
+/** The alliance leader invites a world member (leader-only action). */
+export async function allianceInvite(tx: PoolClient, args: {
+  allianceId: string; playerId: string; invitedBy: string;
+}): Promise<void> {
+  const leader = await tx.query<{ role: string }>(
+    `select m.role from alliance_member m join alliance a on a.alliance_id = m.alliance_id
+      where m.alliance_id = $1 and m.player_id = $2 and m.left_at is null and a.disbanded_at is null`,
+    [args.allianceId, args.invitedBy]);
+  if (leader.rows[0]?.role !== 'leader') throw new MmoStoreError('NOT_LEADER', 'only the alliance leader can invite');
+  const member = await tx.query(
+    'select 1 from alliance_member where alliance_id = $1 and player_id = $2 and left_at is null',
+    [args.allianceId, args.playerId]);
+  if (member.rowCount) throw new MmoStoreError('ALREADY_MEMBER', 'player is already a member');
+  const elsewhere = await tx.query(
+    `select 1 from alliance_member m join alliance a on a.alliance_id = m.alliance_id
+      where m.player_id = $1 and m.left_at is null and a.disbanded_at is null and a.alliance_id <> $2`,
+    [args.playerId, args.allianceId]);
+  if (elsewhere.rowCount) throw new MmoStoreError('ALREADY_IN_ALLIANCE', 'player belongs to another alliance');
+  const alliance = await tx.query<{ world_id: string; disbanded_at: Date | null }>(
+    'select world_id, disbanded_at from alliance where alliance_id = $1', [args.allianceId]);
+  if (alliance.rows[0]?.disbanded_at) throw new MmoStoreError('ALLIANCE_DISBANDED', 'alliance is disbanded');
+  const inWorld = await tx.query('select 1 from world_member where world_id = $1 and player_id = $2',
+    [alliance.rows[0]?.world_id, args.playerId]);
+  if (!inWorld.rowCount) throw new MmoStoreError('NOT_IN_WORLD', 'player is not a member of this world');
+  await tx.query(
+    `insert into alliance_invite (alliance_id, player_id, invited_by) values ($1,$2,$3)
+     on conflict do nothing`, [args.allianceId, args.playerId, args.invitedBy]);
+}
+
+/** Accept an invite: the invitee joins with no permissions until granted. */
+export async function allianceJoin(tx: PoolClient, args: {
+  allianceId: string; playerId: string; maxMembers: number;
+}): Promise<void> {
+  const invite = await tx.query(
+    'delete from alliance_invite where alliance_id = $1 and player_id = $2 returning alliance_id',
+    [args.allianceId, args.playerId]);
+  if (!invite.rowCount) throw new MmoStoreError('NO_INVITE', 'no pending invite for this alliance');
+  const alliance = await tx.query<{ max_members: number; disbanded_at: Date | null }>(
+    'select max_members, disbanded_at from alliance where alliance_id = $1', [args.allianceId]);
+  if (alliance.rows[0]?.disbanded_at) throw new MmoStoreError('ALLIANCE_DISBANDED', 'alliance is disbanded');
+  const cap = Math.min(args.maxMembers, alliance.rows[0]?.max_members ?? args.maxMembers);
+  const active = await tx.query<{ n: string }>(
+    'select count(*)::text as n from alliance_member where player_id = $1 and left_at is null', [args.playerId]);
+  if (Number(active.rows[0]?.n ?? 0) > 0) throw new MmoStoreError('ALREADY_IN_ALLIANCE', 'player belongs to another alliance');
+  const count = await tx.query<{ n: string }>(
+    'select count(*)::text as n from alliance_member where alliance_id = $1 and left_at is null', [args.allianceId]);
+  if (Number(count.rows[0]?.n ?? 0) >= cap) {
+    throw new MmoStoreError('ALLIANCE_FULL', 'alliance is at capacity');
+  }
+  await tx.query(
+    `insert into alliance_member (alliance_id, player_id, role, permissions)
+     values ($1,$2,'member',$3::jsonb)
+     on conflict (alliance_id, player_id) do update
+       set left_at = null, role = 'member', permissions = $3::jsonb, joined_at = clock_timestamp()`,
+    [args.allianceId, args.playerId, JSON.stringify(NO_ALLIANCE_PERMISSIONS)]);
+}
+
+/**
+ * Leave an alliance (soft delete via left_at). A departing leader promotes the
+ * earliest remaining member; an emptied alliance is disbanded, not deleted.
+ * Pending invites are cleaned up either way.
+ */
+export async function allianceLeave(tx: PoolClient, playerId: string): Promise<{ allianceId: string } | undefined> {
+  const membership = await tx.query<{ alliance_id: string; role: string }>(
+    `update alliance_member set left_at = clock_timestamp()
+      where player_id = $1 and left_at is null returning alliance_id, role`, [playerId]);
+  if (!membership.rowCount) return undefined;
+  const allianceId = membership.rows[0]!.alliance_id;
+  await tx.query('delete from alliance_invite where alliance_id = $1', [allianceId]);
+  await tx.query('delete from alliance_invite where invited_by = $1', [playerId]);
+  if (membership.rows[0]!.role === 'leader') {
+    const next = await tx.query<{ player_id: string }>(
+      `select player_id from alliance_member where alliance_id = $1 and left_at is null
+        order by joined_at limit 1`, [allianceId]);
+    if (next.rowCount) {
+      await tx.query(`update alliance_member set role = 'leader' where alliance_id = $1 and player_id = $2`,
+        [allianceId, next.rows[0]!.player_id]);
+      await tx.query('update alliance set owner_player_id = $2 where alliance_id = $1',
+        [allianceId, next.rows[0]!.player_id]);
+    } else {
+      await tx.query('update alliance set disbanded_at = clock_timestamp() where alliance_id = $1', [allianceId]);
+    }
+  }
+  return { allianceId };
+}
+
+/** Leader removes a member (never themselves — that is allianceLeave). */
+export async function allianceKick(tx: PoolClient, args: {
+  allianceId: string; leaderId: string; targetId: string;
+}): Promise<void> {
+  const leader = await tx.query<{ role: string }>(
+    `select m.role from alliance_member m join alliance a on a.alliance_id = m.alliance_id
+      where m.alliance_id = $1 and m.player_id = $2 and m.left_at is null and a.disbanded_at is null`,
+    [args.allianceId, args.leaderId]);
+  if (leader.rows[0]?.role !== 'leader') throw new MmoStoreError('NOT_LEADER', 'only the alliance leader can kick');
+  const target = await tx.query<{ role: string }>(
+    'select role from alliance_member where alliance_id = $1 and player_id = $2 and left_at is null',
+    [args.allianceId, args.targetId]);
+  if (!target.rowCount) throw new MmoStoreError('NOT_MEMBER', 'player is not in this alliance');
+  if (target.rows[0]!.role === 'leader') throw new MmoStoreError('CANNOT_KICK_LEADER', 'the leader cannot be kicked');
+  await tx.query(
+    'update alliance_member set left_at = clock_timestamp() where alliance_id = $1 and player_id = $2',
+    [args.allianceId, args.targetId]);
+}
+
+/** Leader grants or revokes one member's explicit permissions. */
+export async function allianceSetPermissions(tx: PoolClient, args: {
+  allianceId: string; leaderId: string; targetId: string; permissions: AlliancePermissions;
+}): Promise<void> {
+  const leader = await tx.query<{ role: string }>(
+    `select m.role from alliance_member m join alliance a on a.alliance_id = m.alliance_id
+      where m.alliance_id = $1 and m.player_id = $2 and m.left_at is null and a.disbanded_at is null`,
+    [args.allianceId, args.leaderId]);
+  if (leader.rows[0]?.role !== 'leader') throw new MmoStoreError('NOT_LEADER', 'only the alliance leader can set permissions');
+  const target = await tx.query<{ role: string }>(
+    'select role from alliance_member where alliance_id = $1 and player_id = $2 and left_at is null',
+    [args.allianceId, args.targetId]);
+  if (!target.rowCount) throw new MmoStoreError('NOT_MEMBER', 'player is not in this alliance');
+  if (target.rows[0]!.role === 'leader') throw new MmoStoreError('LEADER_IMPLICIT', 'the leader holds every permission implicitly');
+  await tx.query('update alliance_member set permissions = $3::jsonb where alliance_id = $1 and player_id = $2 and left_at is null',
+    [args.allianceId, args.targetId, JSON.stringify(args.permissions)]);
+}
+
+/** Leader disbands the alliance; memberships end and invites are cleared. */
+export async function allianceDisband(tx: PoolClient, args: {
+  allianceId: string; leaderId: string;
+}): Promise<void> {
+  const leader = await tx.query<{ role: string }>(
+    `select m.role from alliance_member m join alliance a on a.alliance_id = m.alliance_id
+      where m.alliance_id = $1 and m.player_id = $2 and m.left_at is null and a.disbanded_at is null`,
+    [args.allianceId, args.leaderId]);
+  if (leader.rows[0]?.role !== 'leader') throw new MmoStoreError('NOT_LEADER', 'only the alliance leader can disband');
+  await tx.query(
+    'update alliance_member set left_at = clock_timestamp() where alliance_id = $1 and left_at is null',
+    [args.allianceId]);
+  await tx.query('delete from alliance_invite where alliance_id = $1', [args.allianceId]);
+  await tx.query('update alliance set disbanded_at = clock_timestamp() where alliance_id = $1', [args.allianceId]);
+}
+
+/**
+ * The permission check every alliance-gated action must pass (PW09): both
+ * players must share an alliance in this world, and BOTH must hold the
+ * permission — reinforce/station/unitTransfer are mutual-consent grants so an
+ * ally can never act on a base whose owner revoked the permission. The leader
+ * holds every permission implicitly.
+ */
+export async function alliancePermission(args: {
+  worldId: string; fromId: string; toId: string; permission: 'station' | 'reinforce' | 'trade' | 'unitTransfer';
+}): Promise<boolean> {
+  if (args.fromId === args.toId) return true;
+  const rows = await mmoQuery<AllianceMemberRow>(
+    `select m.alliance_id, m.player_id, m.role, m.permissions, m.joined_at
+       from alliance_member m join alliance a on a.alliance_id = m.alliance_id
+      where a.world_id = $1 and a.disbanded_at is null
+        and m.player_id = any($2) and m.left_at is null`,
+    [args.worldId, [args.fromId, args.toId]]);
+  if (rows.length !== 2) return false;
+  const [a, b] = rows;
+  if (a!.alliance_id !== b!.alliance_id) return false;
+  const holds = (m: AllianceMemberRow) =>
+    m.role === 'leader' || m.permissions?.[args.permission] === true;
+  return holds(a!) && holds(b!);
+}
+
+// --- presence -------------------------------------------------------------
+
+export async function playerConnected(playerId: string, nowMs: number): Promise<void> {
+  await mmoQuery(
+    `update player set
+       online_count = online_count + 1,
+       online_since_ms = coalesce(online_since_ms, $2),
+       offline_since_ms = null,
+       last_seen_ms = $2
+      where player_id = $1`, [playerId, nowMs]);
+}
+
+export async function playerDisconnected(playerId: string, nowMs: number): Promise<void> {
+  await mmoQuery(
+    `update player set
+       online_count = greatest(0, online_count - 1),
+       online_since_ms = case when online_count <= 1 then null else online_since_ms end,
+       offline_since_ms = case when online_count <= 1 then $2 else offline_since_ms end,
+       last_seen_ms = $2
+      where player_id = $1`, [playerId, nowMs]);
+}
+
+export interface PlayerPresence {
+  online_count: number; online_since_ms: string | null;
+  offline_since_ms: string | null; last_seen_ms: string | null;
+  auto_repair: boolean;
+}
+
+export async function playerPresence(playerId: string): Promise<PlayerPresence | undefined> {
+  return mmoOne<PlayerPresence>(
+    `select online_count, online_since_ms::text, offline_since_ms::text, last_seen_ms::text, auto_repair
+       from player where player_id = $1`, [playerId]);
+}
+
+/**
+ * Effective online state (PW09): online while at least one authenticated socket
+ * is live, plus the offlineAfterMs grace after the last one drops. Offline
+ * begins offlineAfterMs after the final disconnect — never instantly.
+ */
+export function presenceIsOnline(p: PlayerPresence | undefined, nowMs: number, offlineAfterMs: number): boolean {
+  if (!p) return false;
+  if (p.online_count > 0) return true;
+  if (p.offline_since_ms === null) return false;
+  return nowMs - Number(p.offline_since_ms) < offlineAfterMs;
+}
+
+export async function setAutoRepair(playerId: string, on: boolean): Promise<void> {
+  await mmoQuery('update player set auto_repair = $2 where player_id = $1', [playerId, on]);
+}
+
+/** Heartbeat touch: refresh last_seen for a connection's subscribed players. */
+export async function playersSeen(playerIds: string[], nowMs: number): Promise<void> {
+  if (!playerIds.length) return;
+  await mmoQuery('update player set last_seen_ms = $2 where player_id = any($1)', [playerIds, nowMs]);
 }
 
 // Re-export for tests that drive the whole stack through one entry point.

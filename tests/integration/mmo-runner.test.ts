@@ -84,7 +84,7 @@ describeDb('mmo region runner (real PostgreSQL + real Fusion sim)', () => {
     const runner = new RegionRunner({
       regionId: fx.regionId, workerId: fx.workerId, leaseMs: 60_000,
       tickMs: TICK_MS, pollMs: 20,
-      worldHandler: async (_tx, action) => { seen.push(action); return { pong: true }; },
+      worldHandler: async (_tx, action) => { seen.push(action); return { result: { pong: true } }; },
     });
     await runner.start();
     try {

@@ -24,7 +24,7 @@ import {
 import { mmoOne } from './db.js';
 import { journalTail } from './commands.js';
 import { submitCommand } from './commands.js';
-import { MmoStoreError } from './store.js';
+import { MmoStoreError, playerConnected, playerDisconnected, playersSeen } from './store.js';
 import { dispatchOutbox, type OutboxEnvelope } from './bus.js';
 import { identityUuid, type RegionIdentity, type RegionService } from './regions.js';
 import { guestIdFromCookieHeader, parseSessionCookie } from '../auth.js';
@@ -45,6 +45,9 @@ interface Conn {
   identity?: RegionIdentity;
   sessionId: string;
   subs: Map<string, Sub>;
+  /** Durable player ids this socket currently holds presence for (PW09). */
+  present: Set<string>;
+  lastPresenceSweep: number;
   messages: number;
   interval?: ReturnType<typeof setInterval>;
 }
@@ -107,10 +110,18 @@ export class MmoGateway {
     ws.on('error', () => ws.terminate());
     const conn: Conn = {
       ws, id: randomUUID().slice(0, 8), sessionId: randomUUID(),
-      subs: new Map(), messages: 0,
+      subs: new Map(), present: new Set(), lastPresenceSweep: 0, messages: 0,
     };
     this.conns.add(conn);
-    conn.interval = setInterval(() => { conn.messages = 0; }, 1000);
+    conn.interval = setInterval(() => {
+      conn.messages = 0;
+      // Presence heartbeat (PW09): an open socket with a live sweep counts as
+      // online; last_seen refreshes at most once per 5 s per connection.
+      if (conn.present.size && Date.now() - conn.lastPresenceSweep >= 5_000) {
+        conn.lastPresenceSweep = Date.now();
+        void playersSeen([...conn.present], conn.lastPresenceSweep).catch(() => undefined);
+      }
+    }, 1000);
     log('mmo-connect', { peer: conn.id });
 
     void resolveIdentity(req.headers.cookie).then(identity => {
@@ -125,7 +136,13 @@ export class MmoGateway {
     ws.on('close', () => {
       if (conn.interval) clearInterval(conn.interval);
       this.conns.delete(conn);
-      log('mmo-disconnect', { peer: conn.id });
+      // PW09: dropping the last socket starts the offline grace period; other
+      // live sockets for the same account keep the player online.
+      const now = Date.now();
+      for (const playerId of conn.present) {
+        void playerDisconnected(playerId, now).catch(() => undefined);
+      }
+      log('mmo-disconnect', { peer: conn.id, presence: conn.present.size });
     });
   }
 
@@ -144,6 +161,13 @@ export class MmoGateway {
 
   private async subscribe(conn: Conn, regionId: string, seenEpoch: string) {
     if (!conn.identity) { sendError(conn.ws, 'UNAUTHENTICATED', 'No durable identity'); return; }
+    // PW09 / COMRADE 18: guests cannot own a persistent base. When platform auth
+    // is configured the derived guest identity is rejected; auth-disabled dev
+    // deployments (and MMO_ALLOW_GUESTS=1) keep guest subscriptions for testing.
+    if (conn.identity.kind === 'guest' && authEnabled() && process.env.MMO_ALLOW_GUESTS !== '1') {
+      sendError(conn.ws, 'GUEST_NOT_ALLOWED', 'Persistent worlds require a registered account');
+      return;
+    }
     if (conn.subs.size >= MAX_SUBSCRIPTIONS && !conn.subs.has(regionId)) {
       sendError(conn.ws, 'TOO_MANY_REGIONS', 'Subscription limit reached'); return;
     }
@@ -161,6 +185,14 @@ export class MmoGateway {
     const player = await this.service.playerFor(conn.identity, region.world_id);
     const slot = runner.slotForPlayer(player.player_id) ?? null;
     conn.subs.set(regionId, { regionId, playerId: player.player_id, slot });
+    // PW09 presence: one authenticated socket with a live heartbeat per count.
+    // Re-subscribing on the same socket does not double-count.
+    if (!conn.present.has(player.player_id)) {
+      conn.present.add(player.player_id);
+      const now = Date.now();
+      await playerConnected(player.player_id, now).catch(() => undefined);
+      conn.lastPresenceSweep = now;
+    }
 
     const world = await mmoOne<{
       ruleset_version: number;

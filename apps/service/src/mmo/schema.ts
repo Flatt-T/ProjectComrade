@@ -402,4 +402,43 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
       add column power_score bigint not null default 0 check (power_score >= 0);
     `,
   },
+  {
+    version: 6,
+    name: 'alliance permissions, presence and caretaker preference',
+    sql: `
+    -- PW09: registered-account presence (online count + last-seen), the owner
+    -- opt-in caretaker auto-repair flag, explicit per-member alliance
+    -- permissions and a stable numeric ally key the sim mirrors. The v1
+    -- alliance/alliance_member tables (soft-delete via left_at, disbanded_at,
+    -- owner_player_id, max_members) are extended, not replaced.
+    alter table player
+      add column online_count integer not null default 0 check (online_count >= 0),
+      add column online_since_ms bigint,
+      add column offline_since_ms bigint,
+      add column last_seen_ms bigint,
+      add column auto_repair boolean not null default false;
+
+    alter table alliance add column ally_key bigint;
+    create sequence alliance_ally_key_seq;
+    alter table alliance alter column ally_key set default nextval('alliance_ally_key_seq');
+    update alliance set ally_key = nextval('alliance_ally_key_seq') where ally_key is null;
+    alter table alliance alter column ally_key set not null;
+    create unique index alliance_ally_key_idx on alliance (ally_key);
+    create unique index alliance_world_name_idx on alliance (world_id, lower(name))
+      where disbanded_at is null;
+
+    alter table alliance_member
+      add column permissions jsonb not null default
+        '{"station":false,"reinforce":false,"trade":false,"unitTransfer":false}'::jsonb;
+
+    create table alliance_invite (
+      alliance_id uuid not null references alliance(alliance_id),
+      player_id   uuid not null references player(player_id),
+      invited_by  uuid not null references player(player_id),
+      created_at  timestamptz not null default clock_timestamp(),
+      primary key (alliance_id, player_id)
+    );
+    create index alliance_invite_player_idx on alliance_invite (player_id);
+    `,
+  },
 ];

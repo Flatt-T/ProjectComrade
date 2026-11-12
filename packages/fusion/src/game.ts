@@ -30,9 +30,13 @@ export type Command =
   /** Persistent profile only: a player disconnects; their base keeps running. */
   | { t: 'leave'; slot: number }
   /** Persistent profile only: hand entities to another player slot, state preserved. */
-  | { t: 'transfer'; ids: number[]; to: number };
+  | { t: 'transfer'; ids: number[]; to: number }
+  /** Persistent profile only: journaled alliance sync — allied players do not fight. */
+  | { t: 'setAlly'; slot: number; ally: number }
+  /** Persistent profile only: owner-enabled caretaker auto-repair (bounded). */
+  | { t: 'setAutoRepair'; slot: number; on: boolean };
 
-export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number; level?: AILevel }
+export interface PlayerSetup { name: string; faction: string; ai: boolean; team?: number; level?: AILevel; ally?: number; autoRepair?: boolean }
 
 /**
  * Persistent-region extension points (PW21). Classic matches leave this empty; the
@@ -97,6 +101,9 @@ export interface MmoTuning {
 
 /** Supply upkeep cadence: one in-game minute at the 15 Hz tick rate. */
 export const SUPPLY_UPKEEP_TICKS = 900;
+/** Caretaker auto-repair cadence and rate: 1% of max structure HP per in-game minute. */
+export const AUTO_REPAIR_TICKS = 900;
+export const AUTO_REPAIR_PERCENT = 1;
 /** Queue kinds that produce units (subject to the PW23 supply cap). */
 const UNIT_QUEUES = new Set<QueueKind>(['infantry', 'vehicle', 'aircraft', 'naval', 'starport']);
 
@@ -225,6 +232,10 @@ export interface Player {
   costReduction: number;
   /** Persistent profile: false after a `leave` command; the base keeps simulating. */
   connected: boolean;
+  /** Persistent profile: alliance key (-1 = none). Allied players are not enemies. */
+  ally: number;
+  /** Persistent profile: caretaker auto-repair of own damaged structures. */
+  autoRepair: boolean;
 }
 
 export interface Projectile { id: number; owner: number; weapon: string; x: number; y: number; sx: number; sy: number; tx: number; ty: number; target: number; source: number }
@@ -342,6 +353,7 @@ export class Game {
       stats: { built: 0, lost: 0, killed: 0, harvested: 0 },
       upgrades: {}, blackoutUntil: 0, veteranQueues: [], incomeBonus: 0, costReduction: 0,
       connected: true,
+      ally: p.ally ?? -1, autoRepair: p.autoRepair === true,
     };
     this.players.push(player);
     this.ai.push(p.ai ? createAIState(slot, p.level) : null);
@@ -403,6 +415,8 @@ export class Game {
     if (cmd.t === 'join') { if (this.persistent) this.addPlayer(cmd.player); return; }
     if (cmd.t === 'leave') { const p = this.players[cmd.slot]; if (this.persistent && p) p.connected = false; return; }
     if (cmd.t === 'transfer') { if (this.persistent) this.transferOwner(cmd.ids, cmd.to, slot); return; }
+    if (cmd.t === 'setAlly') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.ally = cmd.ally; } return; }
+    if (cmd.t === 'setAutoRepair') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.autoRepair = cmd.on; } return; }
     const player = this.players[slot];
     if (!player || player.defeated || !player.connected) return;
     const own = (ids: number[]) => ids.map(id => this.entities.get(id)).filter((e): e is Entity => !!e && e.owner === slot && e.kind === 'unit' && e.hp > 0 && !e.carriedBy);
@@ -556,6 +570,7 @@ export class Game {
       if (p.defeated) continue;
       this.production(p);
       if (this.mmo && this.tick % SUPPLY_UPKEEP_TICKS === 0) this.mmoUpkeep(p);
+      if (p.autoRepair && this.tick % AUTO_REPAIR_TICKS === 0) this.autoRepairBase(p);
     }
     for (const e of this.entities.values()) {
       e.px = e.x; e.py = e.y;
@@ -682,7 +697,13 @@ export class Game {
 
   isEnemy(a: number, b: number): boolean {
     if (a === b || a < 0 || b < 0) return false;
-    return this.players[a]?.team !== this.players[b]?.team;
+    const pa = this.players[a], pb = this.players[b];
+    if (!pa || !pb) return false;
+    if (pa.team === pb.team) return false;
+    // PW09: players sharing a non-negative alliance key are not enemies, whatever
+    // their spawn team is. -1 means no alliance.
+    if (pa.ally >= 0 && pa.ally === pb.ally) return false;
+    return true;
   }
 
   private effect(kind: string, x: number, y: number, x2: number, y2: number, dur: number, color?: string): Effect {
@@ -771,6 +792,21 @@ export class Game {
     if (!t || t.upkeepPerPointPerMinute <= 0) return;
     const due = t.upkeepPerPointPerMinute * this.supplyPoints(p);
     if (due > 0) p.credits = Math.max(0, p.credits - due);
+  }
+
+  /**
+   * Caretaker auto-repair (PW09): when the owner enabled it, own damaged
+   * structures regenerate AUTO_REPAIR_PERCENT of max HP per in-game minute. It
+   * never spends resources, places nothing and takes no orders — the only thing
+   * the caretaker is allowed to do besides guards, harvesters and production.
+   */
+  private autoRepairBase(p: Player) {
+    for (const e of this.entities.values()) {
+      if (e.owner !== p.slot || e.kind !== 'structure' || e.hp <= 0 || e.hp >= e.maxHp) continue;
+      if (e.invulnUntil > this.tick) continue;
+      const heal = Math.max(1, Math.floor(e.maxHp * AUTO_REPAIR_PERCENT / 100));
+      e.hp = Math.min(e.maxHp, e.hp + heal);
+    }
   }
 
   /**
@@ -2309,6 +2345,7 @@ export class Game {
         // this.tick+i+1, so the per-minute drain fires on the same cadence a
         // live step() would have used across the interval.
         if (this.mmo && (this.tick + i + 1) % SUPPLY_UPKEEP_TICKS === 0) this.mmoUpkeep(p);
+        if (p.autoRepair && (this.tick + i + 1) % AUTO_REPAIR_TICKS === 0) this.autoRepairBase(p);
       }
       // Effects are cosmetic and tick-frozen here; keep the same bound step() uses.
       if (this.effects.length > 400) this.effects = this.effects.slice(-300);

@@ -109,7 +109,7 @@ acceptance detail; this file is the resume point. Read it first in every session
 
 ### PW21 — THU-2269 — Fusion persistent-region engine — 2026-11-11
 
-- State: implemented on branch `thu-2269-pw21-fusion-persistent` (in progress).
+- State: merged to `main` (PR #17, squash `db47228`); THU-2269 Done.
 - Deliverables: `packages/fusion/src/persistent.ts` (`captureGame`/`restoreGame`
   full deterministic snapshot incl. RNG, pending orders, queues, timers, map
   mutations `resKind`/`concrete`, stable entity IDs and `nextId`; `joinPlayer`/
@@ -258,3 +258,39 @@ acceptance detail; this file is the resume point. Read it first in every session
   into salvage/ladder payouts lands with PW24/PW26. Frontier join places the
   newcomer in the world + region roster selection; the join command into a live
   region sim is exercised by PW11 settlement work.
+
+### PW09 - THU-2233 - persistent identity, alliances and limited caretaker - 2026-11-12
+
+- State: implemented on branch `thu-2233-pw09-identity-alliances`; verification
+  green locally (lint 0, typecheck 0, 386 unit, 56 integration).
+- Deliverables: `MmoWorldAction` alliance + caretaker union and parser
+  validation (`packages/contracts/src/mmo.ts`); `AlliancePermissions` grant set
+  (station/reinforce/trade/unitTransfer — membership grants nothing, leader
+  implicit, construction never grantable); schema v6 extending the PW05 alliance
+  tables (`ally_key` sequence, `alliance_invite`, per-member `permissions`,
+  presence columns `online_count`/`online_since_ms`/`offline_since_ms`/
+  `last_seen_ms`, `player.auto_repair`); store lifecycle functions
+  (create/invite/join/leave/kick/succession/disband/permission grants) plus
+  `alliancePermission` mutual-consent check and presence helpers; engine
+  `Player.ally`/`Player.autoRepair`, `isEnemy` alliance awareness, persistent-only
+  `setAlly`/`setAutoRepair` commands, bounded caretaker auto-repair (1% max HP
+  per in-game minute, no spend/orders), snapshot/restore of both fields;
+  `apps/service/src/mmo/world.ts` journaled world-action handler returning
+  `mmo.result` + fan-out `mmo.sim` commands; runner world-handler wiring,
+  multi-command sim fan-out and fresh-region ally/autoRepair seeding;
+  gateway guest rejection (`GUEST_NOT_ALLOWED` when auth enabled,
+  `MMO_ALLOW_GUESTS=1` dev hatch), durable-identity provisioning guard in
+  `RegionService.playerFor`, and socket-count presence with offline grace.
+- Proven: `tests/unit/fusion-ally.test.ts` 10/10; `tests/unit/mmo-contracts.test.ts`
+  parser cases; `tests/integration/mmo-alliance.test.ts` 10/10 against real
+  PostgreSQL + real runner — display-name reuse cannot claim an identity,
+  guest provisioning rejected, journaled alliance create/invite/join syncs the
+  sim ally key, membership grants zero permissions until explicit grants,
+  mutual-consent `alliancePermission` semantics, allies reinforce while
+  non-allies cannot, revoke kills permissions without ending membership,
+  leave/kick restore hostility and resync `ally = -1`, leader succession,
+  `setAutoRepair` durable+sim, presence multi-socket/offline-grace.
+- Open: `alliancePermission` is the enforcement primitive; the barter/trade
+  actions that consume `trade`/`unitTransfer` grants land in PW13/PW17, and
+  shield-gated reinforcement boundary completes with PW10 protection. Client UI
+  for alliances/presence is not part of this issue.
