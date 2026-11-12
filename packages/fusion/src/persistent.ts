@@ -11,7 +11,7 @@
 // `game.hooks` after restore. The map's static layers are regenerated from
 // pack + preset + seed; only the mutable layers (occupied, res) are stored.
 import { Rng } from './core.js';
-import { Game, type Command, type Entity, type MmoTuning, type Player } from './game.js';
+import { Game, withPackedCarriers, type Command, type Entity, type MmoTuning, type Player } from './game.js';
 import type { AIState } from './ai.js';
 import { generateMap, type MapData } from './map.js';
 import type { Doctrine, MapPreset, RulePack } from './rules.js';
@@ -180,7 +180,9 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   internals.startMoney = snap.state.startMoney;
 
   const g = game as unknown as Record<string, unknown>;
-  g.pack = pack;
+  // PW14: restored persistent games get the same carrier-augmented pack the
+  // constructor would have produced — captures store only the pack id.
+  g.pack = snap.setup.persistent ? withPackedCarriers(pack) : pack;
   g.map = map;
   g.mapPreset = preset;
   const rng = new Rng(0);
@@ -194,6 +196,8 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
     e.battleAt = typeof e.battleAt === 'number' ? e.battleAt : -1;
     // Snapshots predating PW12 lack the recovery protection flag.
     e.recoveryProtected = e.recoveryProtected === true;
+    // Snapshots predating PW14 lack the packed-building carrier marker.
+    e.packedType = typeof e.packedType === 'string' ? e.packedType : '';
   }
   g.projectiles = snap.state.projectiles;
   g.worms = snap.state.worms;
