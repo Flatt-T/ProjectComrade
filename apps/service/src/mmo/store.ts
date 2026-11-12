@@ -1240,6 +1240,20 @@ export async function compoundsForRegion(regionId: string): Promise<CompoundRow[
     `select compound_id, player_id, region_id, state from compound where region_id = $1`, [regionId]);
 }
 
+/** Live compounds owned by this player (any region) — the shield panel's scope. */
+export async function compoundsForPlayer(playerId: string): Promise<CompoundRow[]> {
+  return mmoQuery<CompoundRow>(
+    `select compound_id, player_id, region_id, state from compound
+      where player_id = $1 and state = 'active'`, [playerId]);
+}
+
+/** Open OFFLINE_EARNED selections/activations for this player (PW27 read model). */
+export async function openShieldRecordsForPlayer(playerId: string): Promise<ProtectionRecordRow[]> {
+  return mmoQuery<ProtectionRecordRow>(
+    `select * from protection_record
+      where player_id = $1 and kind = 'OFFLINE_EARNED' and status in ('armed','active')`, [playerId]);
+}
+
 export async function compoundForPlayer(compoundId: string, playerId: string): Promise<CompoundRow | undefined> {
   return mmoOne<CompoundRow>(
     `select compound_id, player_id, region_id, state from compound

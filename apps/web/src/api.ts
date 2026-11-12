@@ -173,7 +173,27 @@ export const api = {
   mmoMarkNotificationsRead: (ids?: string[]) =>
     post<{ marked: number }>('/api/mmo/notifications/read', ids ? { ids } : {}),
   mmoAwayReport: () => get<MmoAwayReport>('/api/mmo/away-report'),
+  mmoProtection: () => get<MmoProtectionResponse>('/api/mmo/protection'),
 };
+
+export interface MmoProtectionResponse {
+  now: number;
+  availableSeconds: number;
+  nightlySeconds: number;
+  earnedSeconds: number;
+  compounds: {
+    compoundId: string;
+    regionId: string;
+    state: string;
+    record: {
+      kind: string;
+      status: 'armed' | 'active';
+      armedSeconds: number;
+      remainingSeconds: number | null;
+      endsAt: string | null;
+    } | null;
+  }[];
+}
 
 export interface MmoNotificationsResponse {
   prefs: MmoNotificationPrefs;

@@ -4,7 +4,8 @@
 // that need a database or an identity provider say so with a 503 when the deployment has
 // none, rather than failing in some obscure way, so the site degrades to free open play.
 import {
-  AVATAR_MAX_BYTES, AVATAR_TYPES, CREDIT_PACK, GameStyle, HANDLE_MAX, MMO_NOTIFY_CHANNELS, PAID_TIERS, PlayDecision,
+  AVATAR_MAX_BYTES, AVATAR_TYPES, CREDIT_PACK, GameStyle, HANDLE_MAX, MMO_NOTIFY_CHANNELS,
+  PAID_TIERS, PERSISTENT_RULES_V1, PlayDecision,
   PlayKind, STYLES, Tier, allowance, handleValid, playKind, plan, tierRank,
   type MmoNotifyChannel,
 } from '@comrade/contracts';
@@ -41,7 +42,10 @@ import {
   awayReportFor, listNotifications, markNotificationsRead, notificationPrefs,
   pushSubscribe, pushUnsubscribe, setNotificationPref,
 } from './mmo/notify.js';
-import { MmoStoreError } from './mmo/store.js';
+import {
+  committedShieldSeconds, compoundsForPlayer, MmoStoreError, openShieldRecordsForPlayer,
+  shieldBalances, utcShieldDay,
+} from './mmo/store.js';
 
 const str = (value: unknown, max = 200): string => (typeof value === 'string' ? value.trim().slice(0, max) : '');
 const EMAIL = /^[^\s@]{1,64}@[^\s@.]+(?:\.[^\s@.]+)+$/;
@@ -740,4 +744,51 @@ get('/api/mmo/away-report', async (ctx: Ctx) => {
   limit(ctx, 'mmo-away-report', 20, 60_000);
   const playerId = await requireMmoPlayer(ctx);
   return awayReportFor(playerId);
+});
+
+/**
+ * GET /api/mmo/protection — the player's live compounds, their OFFLINE_EARNED
+ * shield records and the seconds still available to arm (PW27 shield panel).
+ * Read-only: selections themselves are journaled world actions on /mmo.
+ */
+get('/api/mmo/protection', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-protection', 60, 60_000);
+  const playerId = await requireMmoPlayer(ctx);
+  const now = Date.now();
+  const [compounds, records, balances, committed] = await Promise.all([
+    compoundsForPlayer(playerId), openShieldRecordsForPlayer(playerId),
+    shieldBalances(playerId), committedShieldSeconds(playerId, now),
+  ]);
+  const byCompound = new Map(records.map(r => [r.compound_id, r]));
+  const nightlyAvail = balances.nightly.day === utcShieldDay(now)
+    ? balances.nightly.seconds : BigInt(PERSISTENT_RULES_V1.nightlyShieldSeconds);
+  const availableSeconds = nightlyAvail + balances.earned.seconds - committed;
+  return {
+    now,
+    availableSeconds: Number(availableSeconds > 0n ? availableSeconds : 0n),
+    nightlySeconds: Number(balances.nightly.seconds),
+    earnedSeconds: Number(balances.earned.seconds),
+    compounds: compounds.map(c => {
+      const r = byCompound.get(c.compound_id);
+      let remainingSeconds: number | null = null;
+      let endsAt: string | null = null;
+      if (r?.status === 'armed') {
+        remainingSeconds = Number(r.armed_seconds);
+      } else if (r?.status === 'active' && r.ends_at_ms !== null) {
+        const left = BigInt(Math.max(0, Number(r.ends_at_ms) - Math.max(Number(r.started_at_ms ?? 0), now)));
+        remainingSeconds = Number(left / 1000n + (left % 1000n > 0n ? 1n : 0n));
+        endsAt = new Date(Number(r.ends_at_ms)).toISOString();
+      }
+      return {
+        compoundId: c.compound_id,
+        regionId: c.region_id,
+        state: c.state,
+        record: r ? {
+          kind: r.kind, status: r.status,
+          armedSeconds: Number(r.armed_seconds),
+          remainingSeconds, endsAt,
+        } : null,
+      };
+    }),
+  };
 });
