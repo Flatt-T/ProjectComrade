@@ -633,4 +633,25 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table settlement add column loadout jsonb;
     `,
   },
+  {
+    version: 15,
+    name: 'journal resolved application plans',
+    sql: `
+    -- PW29: a journaled input's durable resolution (authoritative result plus the
+    -- ordered sim effects it implies) commits with its ledger/inventory/outbox
+    -- intents BEFORE the sim is touched. Retries and post-commit interruptions
+    -- reuse this stored plan instead of re-resolving, so durable side-effects
+    -- and sim effects each happen exactly once.
+    alter table region_event add column resolved jsonb;
+    `,
+  },
+  {
+    version: 16,
+    name: 'outbox journal-position index',
+    sql: `
+    -- PW30: snapshot-recovery replay reads the recorded mmo.sim fan-out per
+    -- journal position; the pending-delivery index cannot serve that lookup.
+    create index if not exists outbox_event_idx on outbox (region_id, event_seq, topic, outbox_id);
+    `,
+  },
 ];
