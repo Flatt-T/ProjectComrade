@@ -700,7 +700,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
             <h2>Found your settlement</h2>
             <p>Choose your faction. You will receive a starter army and one hour of setup protection.</p>
             <div className="settle-factions">
-              {rig.current?.game.pack.factions.map(f => (
+              {(rig.current?.game.pack.factions ?? PACKS['td'].factions).map(f => (
                 <button key={f.id} className="settle-faction" style={{ borderColor: f.color }}
                   onClick={() => chooseFaction(f.id)}>
                   <strong>{f.name}</strong><span>{f.blurb}</span>
