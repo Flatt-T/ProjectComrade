@@ -416,6 +416,20 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             };
           }
 
+          // PW28+: once a world has a universal region, legacy regions keep
+          // their existing settlers but take no newcomers — a fresh settle on
+          // a two-faction roster would strand the player outside the full
+          // Fusion catalogue. Entry routing already prefers universal regions;
+          // this also covers stale sessions and explicit ?region= links.
+          if (!universal) {
+            const { rows: uni } = await tx.query(
+              `select 1 from region where world_id = $1 and seed->'sim'->>'packId' = $2 limit 1`,
+              [worldId, WORLD_PACK_ID]);
+            if (uni.length) {
+              return { result: { accepted: false, reason: 'REGION_RETIRED' } };
+            }
+          }
+
           // PW28: universal-world settlers must pick a mashup loadout; the
           // region validates every slot key against the live catalogue.
           let loadout: MashupLoadout | undefined;

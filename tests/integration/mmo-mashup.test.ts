@@ -9,14 +9,14 @@ import {
   closeMmoDatabase, mmoOne, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import {
-  createPlayer, createRegion, createWorld, getSettlement,
+  createPlayer, createRegion, createSettlement, createWorld, getSettlement,
   type RegionRow,
 } from '../../apps/service/src/mmo/store.js';
 import { submitCommand, journalTail } from '../../apps/service/src/mmo/commands.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { createWorldHandler } from '../../apps/service/src/mmo/world.js';
 import {
-  WORLD_PACK_ID, worldAllowedDefs, worldPack, type MashupLoadout,
+  PACKS, WORLD_PACK_ID, worldAllowedDefs, worldPack, type MashupLoadout,
 } from '../../packages/fusion/src/index';
 import {
   MMO_RULESET_ID, MMO_RULESET_VERSION, PERSISTENT_RULES_V1,
@@ -229,5 +229,48 @@ describeDb('mmo universal-world settlement (real PostgreSQL + real Fusion sim)',
     } finally {
       ctx.runner.stop();
     }
+  });
+
+  it('retires legacy regions to newcomers once a universal region exists', async () => {
+    const worldId = await makeWorld();
+    // A legacy 'td' frontier region plus the universal one — the beta shape.
+    const tdPack = PACKS['td'];
+    const legacyId = randomUUID();
+    await createRegion({
+      regionId: legacyId, worldId, label: `legacy-${legacyId.slice(0, 8)}`,
+      seed: { sim: { packId: tdPack.id, mapId: tdPack.maps[0].id, seed: 555, players: [] } },
+      rulesetVersion: 'persistent_world', engineArtifactSha256: 'fixture-engine-sha',
+    });
+    const legacy = (await mmoOne<RegionRow>('select * from region where region_id = $1', [legacyId]))!;
+    const universal = await makeWorldRegion(worldId);
+    const ctx = await startRunner(legacy);
+    try {
+      // A newcomer aiming at the legacy region is turned away…
+      const newcomer = await createPlayer({ accountId: randomUUID(), displayName: 'Latecomer' });
+      const rejected = await worldAction(ctx, newcomer.player_id, {
+        t: 'settle', regionId: legacy.region_id, faction: 'gdi', x: 5, y: 5,
+      });
+      expect(rejected.accepted).toBe(false);
+      expect(rejected.reason).toBe('REGION_RETIRED');
+      expect(await getSettlement(newcomer.player_id)).toBeNull();
+
+      // …but a player who settled BEFORE the universal region existed keeps
+      // their settlement: the idempotent re-settle still succeeds.
+      const veteran = await createPlayer({ accountId: randomUUID(), displayName: 'Veteran' });
+      // Simulate the pre-universal settle by writing the durable row directly.
+      await createSettlement({
+        playerId: veteran.player_id, worldId,
+        regionId: legacy.region_id, faction: 'gdi', cellX: 10, cellY: 10,
+      });
+      const again = await worldAction(ctx, veteran.player_id, {
+        t: 'settle', regionId: legacy.region_id, faction: 'gdi', x: 10, y: 10,
+      });
+      // The sim has no roster for this player, so the handler takes the
+      // rejoin branch — accepted, never a second grant.
+      expect(again.accepted).toBe(true);
+    } finally {
+      ctx.runner.stop();
+    }
+    expect(universal.region_id).not.toBe(legacy.region_id);
   });
 });
