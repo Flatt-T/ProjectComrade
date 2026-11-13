@@ -243,18 +243,21 @@
 }
 
 /* PW11 newcomer settlement overlay */
-.settle-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0b0f0bd9;z-index:5}
-.settle-card{max-width:560px;padding:28px 32px;background:#141a12f2;border:1px solid #3a4a2e;border-radius:10px;color:#dfe8d2}
-.settle-card h2{margin:0 0 8px;font-size:20px}
-.settle-card p{margin:0 0 18px;font-size:13px;color:#9fb08e;line-height:1.6}
+.settle-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0b0f0bd9;z-index:5;overflow:auto}
+.settle-card{width:min(560px, calc(100vw - 24px));max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:flex;flex-direction:column;gap:0;padding:28px 32px;background:#141a12f2;border:1px solid #3a4a2e;border-radius:10px;color:#dfe8d2;box-sizing:border-box}
+.settle-card h2{margin:0 0 8px;font-size:20px;flex:none}
+.settle-card p{margin:0 0 18px;font-size:13px;color:#9fb08e;line-height:1.6;flex:none}
 .settle-factions{display:flex;flex-direction:column;gap:10px}
 .settle-faction{display:flex;flex-direction:column;gap:4px;text-align:left;padding:12px 14px;background:#1c2417;border:1px solid #46543a;border-radius:8px;color:#e6efdc;cursor:pointer}
 .settle-faction:hover{background:#263020}
 .settle-faction strong{font-size:14px}
 .settle-faction span{font-size:12px;color:#93a481;line-height:1.5}
 .settle-faction:disabled{opacity:.45;cursor:default}
-/* PW28 loadout picker: one labelled select per slot */
-.loadout-slots{max-height:60vh;overflow:auto;padding-right:6px}
+.settle-card .settle-faction{flex:none}
+/* PW28 loadout picker: one labelled select per slot. The slot list flexes
+   inside the height-capped card so small screens can always scroll to the
+   last slot and the Settle button; the overlay scrolls as a fallback. */
+.loadout-slots{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;padding-right:6px}
 .loadout-slot{display:flex;flex-direction:column;gap:4px;padding:10px 12px;background:#1c2417;border:1px solid #46543a;border-radius:8px}
 .loadout-slot-name{font-size:12px;font-weight:600;color:#b9c8a4;text-transform:uppercase;letter-spacing:.04em}
 .loadout-slot select{background:#10150e;color:#e6efdc;border:1px solid #3a4a2e;border-radius:6px;padding:6px 8px;font-size:13px}
@@ -287,7 +290,7 @@
 .chat-input input{flex:1;background:#0c100a;color:#e8f0e0;border:1px solid #3a4a2e;border-radius:4px;padding:2px 6px}
 .chat-input button{background:#22341a;color:#cfe8b8;border:1px solid #3a4a2e;border-radius:4px;padding:2px 8px;cursor:pointer}
 
-/* Persistent world (/world) battle layout — stage + command sidebar. */
+/* Persistent world (/world) battle layout ï¿½ stage + command sidebar. */
 .battle-stage{position:relative;overflow:hidden;min-width:0;background:#000}
 .battle-stage .battle-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;outline:none;cursor:crosshair;touch-action:none}
 .battle-stage .notice{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:3;max-width:70%;text-align:center;pointer-events:none}
