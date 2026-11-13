@@ -1153,4 +1153,4 @@ preset 0 with a different seed.
   only resolves through allowedDefs when a loadout is present - packs
   with a literal 'yard' structure (irregular/holdout) unchanged.
 - Verified: 478 unit + 125 integration (real PG) green; tsc+eslint clean.
-  PR #53 merged f182724. Beta deploy + mashup region provisioning pending.
+  PR #53 merged f182724, deployed to beta. Mashup region 918087cb provisioned (192x192, 481 structures/519 units); live-verified: catalogue endpoint, enter routing, journaled cross-pack settle, durable loadout, allowedDefs=75 + w-* starter units in snapshot, second settler different loadout ~160 cells apart, hibernate/wake OK. THU-2421.
