@@ -411,8 +411,10 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           const faction = pack.factions.find(f => f.id === action.faction);
           if (!faction) return { result: { accepted: false, reason: 'BAD_FACTION' } };
 
-          // Keep-away cells: every live asset of every other player, so the
-          // spawn lands the configured practical travel distance away.
+          // Keep-away cells: every live asset of every other player PLUS their
+          // durable settlement cell — the journaled settle can land before the
+          // previous newcomer's starter units finish applying, and a durable
+          // base must still push the next spawn the full separation band away.
           const keepAway: number[] = [];
           if (game) {
             for (const e of game.entities.values()) {
@@ -421,6 +423,10 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
               keepAway.push(toCell(e.y) * mapW + toCell(e.x));
             }
           }
+          const { rows: settledCells } = await tx.query<{ player_id: string; cell_x: number; cell_y: number }>(
+            'select player_id, cell_x, cell_y from settlement where region_id = $1 and player_id <> $2',
+            [ctx.regionId, ctx.playerId]);
+          for (const s of settledCells) keepAway.push(s.cell_y * mapW + s.cell_x);
           const preferCell = action.x >= 0 && action.y >= 0 && action.x < mapW && action.y < mapH
             ? action.y * mapW + action.x : undefined;
           const pick = pickSpawnCell({
