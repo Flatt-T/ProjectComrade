@@ -645,4 +645,13 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table region_event add column resolved jsonb;
     `,
   },
+  {
+    version: 16,
+    name: 'outbox journal-position index',
+    sql: `
+    -- PW30: snapshot-recovery replay reads the recorded mmo.sim fan-out per
+    -- journal position; the pending-delivery index cannot serve that lookup.
+    create index if not exists outbox_event_idx on outbox (region_id, event_seq, topic, outbox_id);
+    `,
+  },
 ];

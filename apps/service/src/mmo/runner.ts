@@ -12,7 +12,7 @@
 // (real-time stepping) → checkpointing (snapshot write) → active/quiescent. A stale
 // worker fails the fence check and the region is marked 'failed' for the next owner.
 import type { PoolClient } from 'pg';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   Game, SUPPLY_UPKEEP_TICKS, captureGame, restoreGame, isMcvUnit, nearestCell, passable, regionSitePlan, registryPacks, starterPicks, structureRoles, toCell,
   type Command, type Entity, type GameSetup, type TransferManifestEntry, type WorldgenSpec,
@@ -27,7 +27,8 @@ import {
 import { mmoOne, mmoTransaction } from './db.js';
 import {
   acquireRegionLease, appendRegionEvent, applyShieldTransition, assertRegionFence,
-  claimDueJobs, finishJobTx, getRegion, getRegionEventForUpdate, latestSnapshot, listUnappliedRegionEvents,
+  claimDueJobs, finishJobTx, getRegion, getRegionEventForUpdate, listRegionEventsAfter, listSimFanout,
+  listSnapshots, listUnappliedRegionEvents,
   markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot, storeRegionEventResolved,
   releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
   syncCompounds, updateMemberPowerScores, updateSettlementProtection,
@@ -295,13 +296,30 @@ export class RegionRunner {
     if (!spec) throw new MmoStoreError('NO_SIM_SPEC', 'region has no sim spec and none was provided');
     for (const [i, p] of spec.players.entries()) this.slotByPlayer.set(p.playerId, i);
 
-    const snap = await latestSnapshot(this.opts.regionId);
+    // PW30: walk retained checkpoints newest→oldest. A payload that fails
+    // checksum, parse or engine-restore validation is skipped so an older
+    // verified checkpoint plus the journal tail is used instead; only when no
+    // checkpoint validates does the region fall back to genesis + full replay.
+    const snaps = await listSnapshots(this.opts.regionId);
     let hib: SnapshotPayload['hib'];
-    if (snap) {
-      const payload = JSON.parse(snap.payload.toString('utf8')) as SnapshotPayload;
+    let replayFrom = 0n;
+    let degradedGenesis = false;
+    let restored = false;
+    for (const snap of snaps) {
+      const payload = this.validatedSnapshotPayload(snap);
+      if (!payload) {
+        this.opts.log('region-snapshot-rejected', { snapshotId: snap.snapshot_id });
+        continue;
+      }
+      try {
+        this.game = restoreGame(payload.snapshot, PACK_LIST);
+      } catch (error) {
+        this.opts.log('region-snapshot-rejected', { snapshotId: snap.snapshot_id, error: String(error) });
+        this.game = undefined;
+        continue;
+      }
       hib = payload.hib;
       this.simSeed = payload.seed;
-      this.game = restoreGame(payload.snapshot, PACK_LIST);
       // PW24: snapshots written before salvage shipped lack mmo.salvage; the
       // profile is pinned per world, so backfill it deterministically here.
       if (this.game.mmo && !this.game.mmo.salvage) {
@@ -317,9 +335,20 @@ export class RegionRunner {
         this.game.mmo.sites = this.opts.rules.sites ?? MMO_SITES_DEFAULT;
       }
       this.bindings = new Map(payload.bindings);
-      this.lastAppliedSeq = BigInt(snap.last_applied_seq);
-      this.opts.log('region-restored', { regionId: this.opts.regionId, tick: this.game.tick, epoch: this.epoch });
-    } else {
+      replayFrom = BigInt(snap.last_applied_seq);
+      this.lastAppliedSeq = replayFrom;
+      restored = true;
+      this.opts.log('region-restored', {
+        regionId: this.opts.regionId, tick: this.game.tick, epoch: this.epoch,
+        snapshotId: snap.snapshot_id, replayFrom: replayFrom.toString(),
+      });
+      break;
+    }
+    if (!restored) {
+      if (snaps.length) {
+        this.opts.log('region-snapshots-exhausted', { regionId: this.opts.regionId, count: snaps.length });
+      }
+      degradedGenesis = true;
       this.simSeed = spec.seed;
       const pack = PACK_LIST.find(p => p.id === spec.packId);
       // PW17: only manifest-approved packs may run a persistent region.
@@ -365,25 +394,11 @@ export class RegionRunner {
       await this.syncPersistentPlayerFlags(spec);
       this.opts.log('region-created', { regionId: this.opts.regionId, tick: 0, epoch: this.epoch });
     }
+    if (!this.game) throw new MmoStoreError('NO_SIM', 'region sim failed to initialize');
 
-    // PW20: snapshots are only written at hibernate/stop, so the durable journal
-    // tail can sit far ahead of the restored sim tick (a runner that never
-    // checkpointed journaled thousands of ticks the snapshot never saw). The
-    // monotone-tick fence would then reject every future journal write — the
-    // wake accrual included — bricking the region. Reconcile the fence down to
-    // the sim tick once, under the fresh lease: journal order (event_seq) is
-    // the recovery authority, not the tick column.
-    const tickRow = await mmoOne<{ last_committed_tick: string }>(
-      'select last_committed_tick from region where region_id = $1', [this.opts.regionId]);
-    const committedTick = tickRow ? BigInt(tickRow.last_committed_tick) : 0n;
-    if (committedTick > BigInt(this.game.tick)) {
-      await mmoQuery(
-        'update region set last_committed_tick = $2 where region_id = $1 and last_committed_tick > $2',
-        [this.opts.regionId, String(this.game.tick)]);
-      this.opts.log('region-tick-reconcile', {
-        regionId: this.opts.regionId, from: committedTick.toString(), to: this.game.tick,
-      });
-    }
+    // PW30: the durable tick fence is NEVER lowered to match a restored sim.
+    // last_committed_tick records acknowledged journal history; recovery
+    // replays the committed tail forward instead of rewinding the fence.
 
     // PW24: capturable sites are placed deterministically from (pack, map, seed)
     // — identical on every runner, before any tick or accrual runs.
@@ -391,7 +406,10 @@ export class RegionRunner {
 
     // PW22 wake: a hibernated region accounts for its quiescent interval as one
     // journaled 'accrual' event, then re-anchors wall-clock so real-time resumes —
-    // the slept ticks are never re-simulated.
+    // the slept ticks are never re-simulated. This runs BEFORE tail replay: the
+    // accrual's arithmetic advance is tick-parity sensitive (upkeep cadence keys
+    // off the absolute sim tick), and its journal position must precede the
+    // post-wake commands the replay is about to reproduce.
     if (hib) {
       const t0 = performance.now();
       await this.applyWakeAccrual(hib);
@@ -402,6 +420,15 @@ export class RegionRunner {
         wakeMs: this.wakeLatencyMs,
       });
     }
+
+    // PW30: replay every committed, simulation-relevant journal event after the
+    // restored checkpoint — including rows already marked applied, whose durable
+    // receipts committed but whose sim effects the snapshot never saw. Replay is
+    // sim-only (no receipts, outbox or ledger writes) and runs before wall-clock
+    // catch-up so recorded atTicks still land in the future. 'accrual' rows are
+    // cursor entries here when a hib wake owns their advance.
+    await this.replayCommittedTail(replayFrom, { applyAccrual: !hib });
+    if (degradedGenesis) await this.rebindCompletedTransfers();
 
     // Wall-clock ↔ sim-tick anchor. A region that was down fast-forwards through the
     // elapsed ticks on recovery — the sim is the only authority, so there is no
@@ -765,6 +792,131 @@ export class RegionRunner {
   }
 
   /**
+   * PW30: validate a retained checkpoint before trusting it — payload digest,
+   * envelope shape and nothing else; engine compatibility is proven by
+   * restoreGame itself. Returns null for any malformed or foreign material.
+   */
+  private validatedSnapshotPayload(snap: {
+    payload: Buffer; payload_sha256: string;
+  }): SnapshotPayload | null {
+    try {
+      const digest = createHash('sha256').update(snap.payload.toString('hex')).digest('hex');
+      if (digest !== snap.payload_sha256) return null;
+      const payload = JSON.parse(snap.payload.toString('utf8')) as SnapshotPayload;
+      if (payload?.v !== 1 || typeof payload.snapshot !== 'string'
+        || typeof payload.seed !== 'number' || !Array.isArray(payload.bindings)) return null;
+      return payload;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * PW30: replay the committed journal tail after a restored checkpoint.
+   *
+   * Every command/scheduled/accrual event with seq > `afterSeq` is walked in
+   * journal order at its recorded simulation tick. Only durably committed sim
+   * inputs are reproduced:
+   *  - a stored PW29 plan (`resolved`) replays its ordered simEffects;
+   *  - pre-plan rows marked applied replay their recorded `mmo.sim` outbox
+   *    fan-out — the exact Fusion inputs the original apply committed;
+   *  - rows never applied (no plan, no receipt) are skipped here and left for
+   *    applyUnappliedEvents, which resolves and receipts them normally.
+   *
+   * Replay writes nothing durable: no applied receipts, no outbox rows, no
+   * ledger entries — those already committed at their journal positions.
+   * `simAppliedSeqs` marks replayed positions so a later receipt pass for a
+   * committed-plan event does not enqueue its effects a second time.
+   */
+  private async replayCommittedTail(afterSeq: bigint, opts?: { applyAccrual?: boolean }): Promise<void> {
+    const applyAccrual = opts?.applyAccrual !== false;
+    const kinds = ['command', 'scheduled', 'accrual'];
+    let cursor = afterSeq;
+    // Pre-plan fan-out is fetched lazily once and grouped by journal position.
+    let fanout: Map<string, { slot: number; atTick: number; command: Command }[]> | null = null;
+    const fanoutFor = async (seq: string) => {
+      if (!fanout) {
+        fanout = new Map();
+        for (const row of await listSimFanout(this.opts.regionId, afterSeq)) {
+          const p = row.payload as { atTick?: unknown; slot?: unknown; command?: Command };
+          if (typeof p.slot !== 'number' || typeof p.atTick !== 'number' || !p.command) continue;
+          const list = fanout.get(row.event_seq) ?? [];
+          list.push({ slot: p.slot, atTick: p.atTick, command: p.command });
+          fanout.set(row.event_seq, list);
+        }
+      }
+      return fanout.get(seq) ?? [];
+    };
+    let replayed = 0;
+    for (;;) {
+      const events = await listRegionEventsAfter(this.opts.regionId, cursor, kinds, 256);
+      if (!events.length) break;
+      for (const ev of events) {
+        const seq = BigInt(ev.event_seq);
+        if (ev.event_kind === 'accrual') {
+          // Wake accrual owns its arithmetic advance (hib path dedupes on
+          // sinceMs); only replay accrual rows when no hib metadata will.
+          if (applyAccrual) {
+            const p = ev.payload as { ticks?: number; rates?: number[] };
+            this.game?.fastForwardQuiescent(Number(p.ticks ?? 0), p.rates ?? []);
+          }
+          cursor = seq;
+          continue;
+        }
+        const plan = (ev.resolved as ResolvedPlan | null)?.v === 1
+          ? ev.resolved as ResolvedPlan : null;
+        const committed = plan !== null || ev.applied_at !== null;
+        if (!committed) { cursor = seq; continue; } // never applied: normal apply owns it
+        this.advanceTo(Number(ev.simulation_tick));
+        const effects: SimEffect[] = plan
+          ? plan.simEffects
+          : (await fanoutFor(ev.event_seq))
+            .map(f => ({ t: 'enqueue' as const, slot: f.slot, atTick: f.atTick, command: f.command }));
+        for (const fx of effects) this.applySimEffect(fx);
+        this.simAppliedSeqs.add(ev.event_seq);
+        cursor = seq;
+        replayed++;
+      }
+      if (events.length < 256) break;
+    }
+    if (cursor > this.lastAppliedSeq) this.lastAppliedSeq = cursor;
+    if (replayed || cursor !== afterSeq) {
+      this.opts.log('region-tail-replay', {
+        regionId: this.opts.regionId, from: afterSeq.toString(), to: cursor.toString(), replayed,
+      });
+    }
+  }
+
+  /**
+   * PW30 degraded recovery: genesis replay cannot know sim ids assigned by
+   * wall-clock drains, so durable bindings are gone. Completed inbound
+   * transfers still carry their manifest — re-materialize them so the assets
+   * survive; their new sim ids are rebound for future commands. Best-effort:
+   * entities that already interacted during replayed ticks cannot be rewound.
+   */
+  private async rebindCompletedTransfers(): Promise<void> {
+    const g = this.game;
+    if (!g || this.epoch === undefined) return;
+    const rows = await mmoQuery<TransferRow>(
+      `select * from region_transfer where dest_region_id = $1 and state = 'COMPLETED'`,
+      [this.opts.regionId]);
+    let rebound = 0;
+    for (const t of rows) {
+      if (this.bindings.has(t.transfer_id) || this.bindings.has(t.entity_id)) continue;
+      const manifest = (t.payload as { manifest?: TransferManifestEntry } | null)?.manifest;
+      if (!manifest) continue;
+      const simId = g.spawnTransfer(manifest, this.transferEntryCell(t), t.transfer_id);
+      if (simId === null) continue;
+      this.bindEntity(t.transfer_id, simId);
+      this.bindEntity(t.entity_id, simId);
+      rebound++;
+    }
+    if (rebound) {
+      this.opts.log('region-transfers-rebound', { regionId: this.opts.regionId, count: rebound });
+    }
+  }
+
+  /**
    * PW24: persist salvage crate spawns as audited operations. The sim stays
    * authoritative for the crate itself (snapshot + journal replay reproduce it
    * exactly); these rows are the durable audit trail — one SALVAGE_SPAWN
@@ -977,7 +1129,11 @@ export class RegionRunner {
     const g = this.game;
     if (!g || !g.persistent || !g.mmo?.sites) return;
     const sp = this.opts.rules.sitesPerRegion;
-    const plan = regionSitePlan(g.pack, g.map, this.simSeed ?? 0, sp.min, sp.max);
+    // The plan must be identical on every runner, including restores: at
+    // genesis `map.occupied` is always empty (sites spawn before any player
+    // structure can exist), so replay it against a zeroed occupancy view.
+    // Otherwise restored site cells would shift the plan and duplicate sites.
+    const plan = regionSitePlan(g.pack, { ...g.map, occupied: new Int32Array(g.map.occupied.length) }, this.simSeed ?? 0, sp.min, sp.max);
     for (const s of plan) {
       const exists = [...g.entities.values()].some(e =>
         e.kind === 'structure' && e.hp > 0 && g.structDef(e).site
@@ -1187,18 +1343,7 @@ export class RegionRunner {
     receipt?: (tx: PoolClient) => Promise<void>,
   ): Promise<void> {
     if (!this.simAppliedSeqs.has(eventSeq)) {
-      const g = this.game;
-      if (g) {
-        for (const fx of plan.simEffects) {
-          if (fx.t === 'enqueue') {
-            // Clamp to the next boundary: a receipt retried after further ticks
-            // must still deliver the command rather than lose it to a past tick.
-            g.enqueue(fx.slot, fx.command, Math.max(fx.atTick, g.tick + 1));
-          } else {
-            g.fastForwardQuiescent(fx.ticks, fx.rates);
-          }
-        }
-      }
+      for (const fx of plan.simEffects) this.applySimEffect(fx);
       this.simAppliedSeqs.add(eventSeq);
     }
     await this.opts.faultHooks?.beforeReceipt?.(eventSeq);
@@ -1213,6 +1358,19 @@ export class RegionRunner {
       if (receipt) await receipt(tx);
     });
     this.simAppliedSeqs.delete(eventSeq);
+  }
+
+  /**
+   * Apply one committed sim effect to the live game. The enqueue clamp keeps a
+   * receipt retried after further ticks delivering at the next boundary rather
+   * than losing the command to a past tick; recorded atTicks always exceed the
+   * replay position, so recovery replay is unaffected.
+   */
+  private applySimEffect(fx: SimEffect): void {
+    const g = this.game;
+    if (!g) return;
+    if (fx.t === 'enqueue') g.enqueue(fx.slot, fx.command, Math.max(fx.atTick, g.tick + 1));
+    else g.fastForwardQuiescent(fx.ticks, fx.rates);
   }
 
   /**

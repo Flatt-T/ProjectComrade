@@ -797,6 +797,50 @@ export async function latestSnapshot(regionId: string) {
   }>('select * from region_snapshot where region_id = $1 order by last_applied_seq desc, created_at desc limit 1', [regionId]);
 }
 
+/**
+ * PW30: every retained checkpoint, newest first. Recovery walks this list when
+ * the latest payload fails validation — an older verified checkpoint plus the
+ * journal tail is always preferable to a corrupt newest one.
+ */
+export async function listSnapshots(regionId: string) {
+  return mmoQuery<{
+    snapshot_id: string; authority_epoch: string; last_applied_seq: string; last_committed_seq: string;
+    tick: string; engine_artifact_sha256: string; ruleset_version: string; format: string;
+    payload: Buffer; payload_sha256: string;
+  }>('select * from region_snapshot where region_id = $1 order by last_applied_seq desc, created_at desc', [regionId]);
+}
+
+/**
+ * PW30: journal events after a snapshot sequence in authoritative order,
+ * including rows already marked applied — their durable receipts committed but
+ * a pre-checkpoint snapshot never saw their sim effects, so recovery must
+ * replay them. `resolved` carries the PW29 stored plan when one was committed.
+ */
+export async function listRegionEventsAfter(regionId: string, afterSeq: number | bigint, kinds: string[], limit = 500) {
+  return mmoQuery<{
+    event_seq: string; event_kind: string; payload: unknown; simulation_tick: string;
+    applied_at: Date | null; resolved: unknown;
+  }>(
+    `select event_seq, event_kind, payload, simulation_tick, applied_at, resolved
+       from region_event
+      where region_id = $1 and event_seq > $2 and event_kind = any($3)
+      order by event_seq limit $4`,
+    [regionId, afterSeq.toString(), kinds, limit]);
+}
+
+/**
+ * PW30: recorded sim fan-out for journal events after `afterSeq`, in journal
+ * then insertion order. Pre-PW29 events have no stored plan; their mmo.sim
+ * outbox rows are the durable record of the exact Fusion inputs applied.
+ */
+export async function listSimFanout(regionId: string, afterSeq: number | bigint) {
+  return mmoQuery<{ event_seq: string; payload: unknown }>(
+    `select event_seq, payload from outbox
+      where region_id = $1 and event_seq > $2 and topic = 'mmo.sim'
+      order by event_seq, outbox_id`,
+    [regionId, afterSeq.toString()]);
+}
+
 export async function scheduleJob(args: {
   jobId?: string; regionId: string; kind: string; dueAtMs: number | bigint;
   generation?: number | bigint; payload?: unknown; dedupeKey?: string;
