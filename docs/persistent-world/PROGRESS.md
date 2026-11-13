@@ -1107,3 +1107,26 @@ preset 0 with a different seed.
   log event carries wakeMs when it next occurs naturally.
 - Pending: PR #48 CI/merge/deploy, final evidence index + runbook +
   THU-2244 write-up.
+
+### PW post-PW20 - world spacing + guest cap (THU-2244 follow-up) - 2026-11-13
+
+- Frontier worldgen default raised 96x96 -> 192x192 cells with
+  density-scaled resources (56 clusters), rivers (6), spawn sites (16);
+  spawnSeparationCells 24 -> 48 (PR #50, merge 0a11ce0, deployed).
+- pickSpawnCell salted spread: deterministic per-player choice among the
+  top-24 richest max-separation cells via seed+playerId FNV-1a hash —
+  replay-safe for journal re-application; unit test covers determinism
+  and spread (tests/unit/mmo-spawn.test.ts 6/6).
+- MMO_ALLOW_GUESTS semantics: unset disables guests under platform auth;
+  '1'/'true' = uncapped (legacy); integer N = max concurrent guest /mmo
+  sockets (GUEST_LIMIT error + close 1013 + mmo-guest-cap log). Beta
+  service.env set to 5.
+- Beta ops: existing region 3417e60a stays 96x96 for its 9 settlers
+  (spawn-band rule keeps newcomers there while member scores <= 80k).
+  Provisioned fresh 192x192 region 3269b73d-557a-4104-a054-044cd2a3107f
+  (worldgen 1 attempt, 223 land bridges, empty roster) — verified live:
+  /api/mmo/enter routes fresh guests to it, journaled settle commits
+  (NEWCOMER_SPAWN), second settler auto-adjusted from preferred (96,96)
+  to (145,31) — 65 cells separation >= 48.
+- Guest cap verified live: 6 concurrent guest /mmo sockets -> first
+  slots admitted, remainder rejected with GUEST_LIMIT + close 1013.
