@@ -688,7 +688,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
 
   return <div className="fusion-battle">
     <div ref={stage} className="battle-stage">
-      <canvas ref={canvas} onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp}
+      <canvas ref={canvas} className="battle-canvas" onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp}
         onDoubleClick={ev => {
           const p = local(ev), r = rig.current; if (!r || mode.current !== 'normal') return;
           const t = r.renderer.pick(p.x, p.y);
