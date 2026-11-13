@@ -938,11 +938,27 @@ export async function getRegionEventForUpdate(tx: PoolClient, regionId: string, 
   const { rows } = await tx.query<{
     event_seq: string; event_kind: string; payload: unknown; operation_id: string | null;
     applied_at: Date | null; application_result: unknown; authority_epoch: string; simulation_tick: string;
+    resolved: unknown;
   }>(
-    `select event_seq, event_kind, payload, operation_id, applied_at, application_result, authority_epoch, simulation_tick
+    `select event_seq, event_kind, payload, operation_id, applied_at, application_result, authority_epoch, simulation_tick, resolved
        from region_event where region_id = $1 and event_seq = $2 for update`,
     [regionId, eventSeq.toString()]);
   return rows[0];
+}
+
+/**
+ * PW29: persist a journaled input's resolved application plan (authoritative
+ * result + ordered sim effects) inside the commit transaction. Written once —
+ * a concurrent resolver that loses the row lock sees the stored plan and reuses
+ * it, so durable side-effects never run twice for one journal position.
+ */
+export async function storeRegionEventResolved(tx: PoolClient, args: {
+  regionId: string; eventSeq: string | bigint; resolved: unknown;
+}): Promise<void> {
+  await tx.query(
+    `update region_event set resolved = $3
+      where region_id = $1 and event_seq = $2 and resolved is null`,
+    [args.regionId, args.eventSeq.toString(), JSON.stringify(args.resolved)]);
 }
 
 /** Mark a journal event applied exactly once; returns false if already applied. */

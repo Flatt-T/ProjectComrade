@@ -633,4 +633,16 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table settlement add column loadout jsonb;
     `,
   },
+  {
+    version: 15,
+    name: 'journal resolved application plans',
+    sql: `
+    -- PW29: a journaled input's durable resolution (authoritative result plus the
+    -- ordered sim effects it implies) commits with its ledger/inventory/outbox
+    -- intents BEFORE the sim is touched. Retries and post-commit interruptions
+    -- reuse this stored plan instead of re-resolving, so durable side-effects
+    -- and sim effects each happen exactly once.
+    alter table region_event add column resolved jsonb;
+    `,
+  },
 ];
