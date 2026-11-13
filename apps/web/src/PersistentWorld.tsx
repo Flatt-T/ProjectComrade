@@ -174,6 +174,9 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       },
       onResult: (_commandId, status, result) => {
         const r = result as { accepted?: boolean; reason?: string } | undefined;
+        // PW28+: legacy regions refuse new settlements once a universal region
+        // exists — re-enter so the server routes us to the right one.
+        if (r?.reason === 'REGION_RETIRED') { window.location.assign('/world'); return; }
         if (status !== 'applied' || r?.accepted === false) flash(`Order rejected${r?.reason ? `: ${r.reason}` : ''}`);
       },
       onError: (code, message) => flash(`${code}: ${message}`),
