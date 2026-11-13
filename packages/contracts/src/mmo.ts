@@ -8,7 +8,7 @@
 //
 // Wire counters (event sequences, ticks, epochs, balances) are decimal strings, never
 // JSON numbers: they can exceed JavaScript's safe integer range (COMRADE 14 §5).
-import { Faction } from './index.js';
+import { Faction, Loadout, parseLoadout } from './index.js';
 
 export const MMO_PROTOCOL = 'comrade.mmo.v1' as const;
 export const MMO_RULESET_ID = 'persistent_world' as const;
@@ -603,7 +603,7 @@ export type MmoWorldAction =
   | { t: 'selectShield'; compoundId: MmoId; seconds: number }
   | { t: 'clearShield'; compoundId: MmoId }
   | { t: 'endRecovery'; compoundId: MmoId }
-  | { t: 'settle'; regionId: MmoId; faction: Faction; x: number; y: number }
+  | { t: 'settle'; regionId: MmoId; faction: Faction; x: number; y: number; loadout?: Loadout }
   | { t: 'chat'; channel: 'region' | 'alliance'; text: string }
   | { t: 'ping'; x: number; y: number }
   | { t: 'objectiveClaim'; objectiveId: MmoId }
@@ -919,7 +919,13 @@ export function parseMmoAction(value: unknown): MmoAction {
     case 'barterAccept': case 'barterDecline': case 'barterCancel': if (!uuid(v.offerId)) throw new Error(`${t} requires an offer`); return { t, offerId: v.offerId } as MmoAction;
     case 'selectShield': if (!uuid(v.compoundId) || !isNonNegInt(v.seconds) || v.seconds > 7 * 24 * 3600) throw new Error('Invalid shield selection'); return { t, compoundId: v.compoundId, seconds: v.seconds } as MmoAction;
     case 'clearShield': case 'endRecovery': if (!uuid(v.compoundId)) throw new Error(`${t} requires a compound`); return { t, compoundId: v.compoundId } as MmoAction;
-    case 'settle': if (!uuid(v.regionId) || !faction(v.faction)) throw new Error('Invalid settle'); needCell(); return { t, regionId: v.regionId, faction: v.faction, x: v.x, y: v.y } as MmoAction;
+    case 'settle': {
+      if (!uuid(v.regionId) || !faction(v.faction)) throw new Error('Invalid settle'); needCell();
+      // PW28: universal-world regions settle with a mashup loadout instead of a
+      // faction roster. Shape-checked here; the region validates the keys.
+      const loadout = v.loadout === undefined ? undefined : parseLoadout(v.loadout);
+      return { t, regionId: v.regionId, faction: v.faction, x: v.x, y: v.y, loadout } as MmoAction;
+    }
     case 'chat': if (v.channel !== 'region' && v.channel !== 'alliance') throw new Error('Invalid chat channel');
       if (!str(v.text, 500)) throw new Error('Invalid chat text');
       return { t, channel: v.channel as 'region' | 'alliance', text: v.text as string } as MmoAction;

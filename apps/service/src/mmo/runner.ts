@@ -14,8 +14,8 @@
 import type { PoolClient } from 'pg';
 import { randomUUID } from 'node:crypto';
 import {
-  Game, PACKS, SUPPLY_UPKEEP_TICKS, captureGame, restoreGame, isMcvUnit, nearestCell, passable, regionSitePlan, starterPicks, structureRoles, toCell,
-  type Command, type Entity, type GameSetup, type RulePack, type TransferManifestEntry, type WorldgenSpec,
+  Game, SUPPLY_UPKEEP_TICKS, captureGame, restoreGame, isMcvUnit, nearestCell, passable, regionSitePlan, registryPacks, starterPicks, structureRoles, toCell,
+  type Command, type Entity, type GameSetup, type TransferManifestEntry, type WorldgenSpec,
 } from '@comrade/fusion';
 import {
   computePowerScore, mmoEntityId, mmoSimEntityId, newProtection, PERSISTENT_RULES_V1,
@@ -42,7 +42,7 @@ import { raiseNotification } from './notify.js';
 import { persistentPackRunnable } from './packs.js';
 
 const TICK_MS = 1000 / 15;
-const PACK_LIST = Object.values(PACKS) as RulePack[];
+const PACK_LIST = registryPacks();
 
 export interface SimPlayerSpec {
   playerId: string; name: string; faction: string;
@@ -1883,6 +1883,12 @@ export class RegionRunner {
   private packMcvType(g: Game, slot: number): string | undefined {
     const p = g.players[slot];
     if (!p) return undefined;
+    // PW28: a loadout player's recovery MCV is their own cheapest deployable.
+    if (p.allowedDefs) {
+      return Object.values(g.pack.units)
+        .filter(u => !!u.deploysTo && p.allowedDefs!.includes(u.id))
+        .map(u => u.id).sort()[0];
+    }
     const faction = g.pack.factions.find(f => f.id === p.faction);
     if (!faction) return undefined;
     try { return starterPicks(g.pack, faction).mcv; } catch { return undefined; }

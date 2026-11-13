@@ -5,17 +5,17 @@
 // triggers a fresh snapshot — the client never predicts its own state.
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Entity, Game, PACKS, QueueKind, restoreGame,
+  Entity, Game, PACKS, QueueKind, WORLD_PACK_ID, registryPacks, restoreGame,
 } from '../../../packages/fusion/src/index';
 import { FusionRenderer, drawIcon } from '../../../packages/fusion/src/render';
 import { MmoConnection, PersistentSession, SnapshotState } from './mmo';
-import { mmoEntityId } from '@comrade/contracts';
+import { MASHUP_SLOT_IDS, mmoEntityId } from '@comrade/contracts';
 import type {
-  BarterItem, MmoAwayReport, MmoNotification, MmoNotificationKind, MmoNotificationPrefs, MmoNotifyChannel,
+  BarterItem, Loadout, MmoAwayReport, MmoNotification, MmoNotificationKind, MmoNotificationPrefs, MmoNotifyChannel,
 } from '@comrade/contracts';
 import { api } from './api';
 import type {
-  MmoAllianceResponse, MmoLadderResponse, MmoObjectivesResponse, MmoPlayersResponse,
+  MmoAllianceResponse, MmoLadderResponse, MmoLoadoutCatalogue, MmoObjectivesResponse, MmoPlayersResponse,
   MmoProtectionResponse, MmoRegionsResponse, MmoTradeOffersResponse, MmoTransfersResponse,
 } from './api';
 import { typingIn } from './help';
@@ -72,9 +72,21 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // PW11: newcomers pick a faction, then the journaled `settle` action grants
   // the starter army and the one-hour setup protection window.
   const [needSettle, setNeedSettle] = useState(!settled);
+  // PW28: universal-world settlers pick a mashup loadout (every pack's
+  // buildings and forces) instead of a two-faction roster.
+  const [catalogue, setCatalogue] = useState<MmoLoadoutCatalogue | null>(null);
+  const [loadout, setLoadout] = useState<Partial<Record<string, string>>>({});
   // Mirrors "the durable player owns a roster slot" for the polling effect,
   // which cannot see state updates. The ladder endpoint 400s pre-settlement.
   const rosteredRef = useRef(settled);
+  // PW28: fetch the universal world's loadout catalogue once settlement looms.
+  useEffect(() => {
+    if (!needSettle) return;
+    let live = true;
+    api.mmoLoadoutCatalogue().then(c => { if (live) setCatalogue(c); }).catch(() => {});
+    return () => { live = false; };
+  }, [needSettle]);
+
   // PW25: notification inbox, channel opt-ins and the offline timeline.
   const [notes, setNotes] = useState<MmoNotification[]>([]);
   const [prefs, setPrefs] = useState<MmoNotificationPrefs | null>(null);
@@ -135,7 +147,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         const state = header.state as SnapshotState | undefined;
         if (!state?.snapshot) { flash('Region snapshot unavailable'); return; }
         try {
-          game = restoreGame(state.snapshot, Object.values(PACKS));
+          game = restoreGame(state.snapshot, registryPacks());
         } catch { flash('Could not restore region state'); return; }
         // A fresh snapshot replaces the whole rig: it is the authoritative baseline.
         renderer = new FusionRenderer(canvas.current!, game, slot);
@@ -511,6 +523,14 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     window.setTimeout(() => setNotice(''), 4000);
   }
 
+  // PW28: universal-world settle — the loadout picks whose buildings and forces
+  // the commander fields; the region validates every slot key at apply time.
+  function chooseLoadout() {
+    connRef.current?.command({ t: 'settle', regionId, faction: 'commander', x: 0, y: 0, loadout: loadout as Loadout });
+    setNotice('Settling into the persistent world…');
+    window.setTimeout(() => setNotice(''), 4000);
+  }
+
   const local = (ev: React.MouseEvent) => { const r = canvas.current!.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
 
   function onMouseDown(ev: React.MouseEvent) {
@@ -551,7 +571,9 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     const p = local(ev), r = rig.current; if (!r) return;
     const cam = r.renderer.camera;
     const before = { x: p.x / cam.zoom + cam.x, y: p.y / cam.zoom + cam.y };
-    cam.zoom = Math.max(0.6, Math.min(2.2, cam.zoom * (ev.deltaY > 0 ? 0.9 : 1.1)));
+    // PW28 camera: wide enough to read a base layout (~28 cells on 1080p) but
+    // never the whole 192-cell world; tight enough to inspect single units.
+    cam.zoom = Math.max(0.2, Math.min(3.5, cam.zoom * (ev.deltaY > 0 ? 0.9 : 1.1)));
     cam.x = before.x - p.x / cam.zoom; cam.y = before.y - p.y / cam.zoom;
     r.renderer.clampCamera();
   }
@@ -697,16 +719,49 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       {needSettle && ui && (
         <div className="settle-overlay">
           <div className="settle-card">
-            <h2>Found your settlement</h2>
-            <p>Choose your faction. You will receive a starter army and one hour of setup protection.</p>
-            <div className="settle-factions">
-              {(rig.current?.game.pack.factions ?? PACKS['td'].factions).map(f => (
-                <button key={f.id} className="settle-faction" style={{ borderColor: f.color }}
-                  onClick={() => chooseFaction(f.id)}>
-                  <strong>{f.name}</strong><span>{f.blurb}</span>
-                </button>
-              ))}
-            </div>
+            {rig.current?.game?.pack.id === WORLD_PACK_ID ? (
+              catalogue ? (
+                <>
+                  <h2>Choose your loadout</h2>
+                  <p>Pick whose buildings and forces you fight with — every pack in the game is on offer.</p>
+                  <div className="settle-factions loadout-slots">
+                    {catalogue.slots.map(slot => {
+                      const opts = catalogue.choices[slot.id] ?? [];
+                      const sel = loadout[slot.id];
+                      const chosen = opts.find(c => c.key === sel);
+                      return (
+                        <label key={slot.id} className="loadout-slot">
+                          <span className="loadout-slot-name">{slot.label}</span>
+                          <select value={sel ?? ''} onChange={e => setLoadout(l => ({ ...l, [slot.id]: e.target.value || undefined }))}>
+                            {slot.id !== 'structures' && <option value="">— none —</option>}
+                            {opts.map(c => (
+                              <option key={c.key} value={c.key}>{c.packName} · {c.label} ({c.count})</option>
+                            ))}
+                          </select>
+                          {chosen && <small className="loadout-blurb">{chosen.blurb}</small>}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <button className="settle-faction" disabled={
+                    !loadout.structures || !MASHUP_SLOT_IDS.some(s => s !== 'structures' && loadout[s])
+                  } onClick={chooseLoadout}>Settle</button>
+                </>
+              ) : <p>Loading the arsenal…</p>
+            ) : (
+              <>
+                <h2>Found your settlement</h2>
+                <p>Choose your faction. You will receive a starter army and one hour of setup protection.</p>
+                <div className="settle-factions">
+                  {(rig.current?.game.pack.factions ?? PACKS['td'].factions).map(f => (
+                    <button key={f.id} className="settle-faction" style={{ borderColor: f.color }}
+                      onClick={() => chooseFaction(f.id)}>
+                      <strong>{f.name}</strong><span>{f.blurb}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

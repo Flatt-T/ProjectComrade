@@ -182,7 +182,18 @@ export const api = {
   mmoObjectives: () => get<MmoObjectivesResponse>('/api/mmo/objectives'),
   mmoLadder: (board: 'player' | 'alliance' = 'player', period: '30d' | 'all' = '30d') =>
     get<MmoLadderResponse>(`/api/mmo/ladder?board=${board}&period=${period}`),
+  // PW28: the universal world's selectable sets per loadout slot.
+  mmoLoadoutCatalogue: () => get<MmoLoadoutCatalogue>('/api/mmo/loadout-catalogue'),
 };
+
+export interface MmoLoadoutChoice {
+  key: string; packId: string; packName: string; factionIds: string[];
+  label: string; blurb: string; count: number;
+}
+export interface MmoLoadoutCatalogue {
+  slots: { id: string; label: string }[];
+  choices: Record<string, MmoLoadoutChoice[]>;
+}
 
 export interface MmoLadderRow { board: string; subject_id: string; period: string; points: string }
 export interface MmoLadderResponse { board: string; period: string; rows: MmoLadderRow[] }

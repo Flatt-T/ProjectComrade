@@ -7,6 +7,7 @@ export * from './path.js';
 export * from './game.js';
 export * from './session.js';
 export * from './mashup.js';
+export * from './worldpack.js';
 export * from './persistent.js';
 export * from './worldgen.js';
 export * from './starter.js';
@@ -14,6 +15,7 @@ export * from './recovery.js';
 import { RulePack } from './rules.js';
 import { CLASSIC_PACKS, dunePack, ra1Pack, ra2Pack, tdPack } from './packs/index.js';
 import { FUSIONS, conquerPack, holdoutPack, irregularPack, leviathanPack } from './fusions/index.js';
+import { WORLD_PACK_ID, worldPack } from './worldpack.js';
 
 export { dunePack, ra1Pack, ra2Pack, tdPack, leviathanPack, conquerPack, irregularPack, holdoutPack, FUSIONS, CLASSIC_PACKS };
 
@@ -22,3 +24,17 @@ export const PACKS: Record<string, RulePack> = {
   ...Object.fromEntries(CLASSIC_PACKS.map(p => [p.id, p])),
   ...Object.fromEntries(FUSIONS.map(f => [f.id, f])),
 };
+
+/**
+ * PW28: resolve any pack id a region spec or snapshot may pin — the classic
+ * and fusion registry plus the persistent universal world pack. The world
+ * pack stays OUT of PACKS so lobby/catalogue iterations never see it.
+ */
+export function packById(id: string): RulePack | undefined {
+  return PACKS[id] ?? (id === WORLD_PACK_ID ? worldPack().pack : undefined);
+}
+
+/** Every pack restoreGame may need to resolve, world pack included. */
+export function registryPacks(): RulePack[] {
+  return [...Object.values(PACKS), worldPack().pack];
+}

@@ -3,13 +3,18 @@
 // region qualifies a new frontier region is generated. Power scores are the
 // world_member read model the region runner refreshes at checkpoints.
 import { randomInt, randomUUID } from 'node:crypto';
-import { PACKS, WORLDGEN_VERSION, buildableTerrain, generateMap, generateWorldMap, passable, worldgenSpecFor, type RulePack, type WorldgenSpec } from '@comrade/fusion';
+import { WORLDGEN_VERSION, buildableTerrain, generateMap, generateWorldMap, packById, passable, worldgenSpecFor, worldPack, type RulePack, type WorldgenSpec } from '@comrade/fusion';
 import { MMO_WORLDGEN_DEFAULT, PERSISTENT_RULES_V1, spawnRegionInBand, type MmoRulesProfile } from '@comrade/contracts';
 import { mmoOne, mmoQuery } from './db.js';
 import { createRegion, getRegion, getSettlement, joinWorld, memberPowerScores, type RegionRow } from './store.js';
 
 interface RegionSeedSim {
-  sim?: { players?: { playerId: string }[] };
+  sim?: { players?: { playerId: string }[]; packId?: string };
+}
+
+/** The pack a region's sim spec pins, or null when absent. */
+function regionPackId(region: RegionRow): string | null {
+  return (region.seed as RegionSeedSim | null)?.sim?.packId ?? null;
 }
 
 /** Scores of the players rostered in a region's sim spec. */
@@ -33,7 +38,13 @@ export async function selectSpawnRegion(
 ): Promise<RegionRow | null> {
   const regions = await mmoQuery<RegionRow>(
     `select * from region where world_id = $1 order by created_at desc`, [worldId]);
-  for (const region of regions) {
+  // PW28: once any universal-world region exists, newcomers only ever join
+  // mashup regions — a legacy 'td' region would deny them the full faction
+  // roster. Worlds with no mashup region yet (fresh deploys, test fixtures)
+  // keep the legacy scan so existing regions remain joinable.
+  const universal = regions.filter(r => regionPackId(r) === worldPack().pack.id);
+  const pool = universal.length ? universal : regions;
+  for (const region of pool) {
     const scores = await regionMemberScores(worldId, region);
     if (spawnRegionInBand(scores, baselineScore, rules.spawnRegionPowerBandRatio)) return region;
   }
@@ -62,7 +73,10 @@ export async function ensureSpawnRegion(args: {
   const existing = await selectSpawnRegion(args.worldId, baseline, rules);
   await joinWorld(args.worldId, args.playerId);
   if (existing) return { region: existing, created: false };
-  const pack = PACKS['td'];
+  // PW28: every NEW frontier region runs the universal mashup world pack — all
+  // factions' buildings and forces, gated per player by their settle loadout.
+  // Regions created before this change keep their pinned packId ('td').
+  const pack = worldPack().pack;
   const regionId = randomUUID();
   const players = args.roster === false ? [] : [{
     playerId: args.playerId, name: args.displayName,
@@ -109,7 +123,7 @@ export async function worldHasRegions(worldId: string): Promise<boolean> {
 const RESOURCE_RADIUS_CELLS = 14;
 
 function spawnMap(packId: string, mapId: string, seed: number, worldgen?: WorldgenSpec): { pack: RulePack; map: ReturnType<typeof generateMap> } {
-  const pack = PACKS[packId];
+  const pack = packById(packId);
   if (!pack) throw new Error(`unknown pack ${packId}`);
   if (worldgen) return { pack, map: generateWorldMap(pack, worldgen, seed).map };
   const preset = pack.maps.find(m => m.id === mapId) ?? pack.maps[0];

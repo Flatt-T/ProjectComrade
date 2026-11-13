@@ -68,6 +68,9 @@ export interface PlayerSetup {
   starter?: { credits: number; units: string[] };
   /** Spawn already inside the one-hour newcomer protection window (PW11). */
   newcomerProtected?: boolean;
+  /** Persistent mashup worlds (PW28): the def ids this player's loadout may
+   *  build and field. Absent on classic/faction packs — factionCanUse rules. */
+  allowedDefs?: string[];
 }
 
 /**
@@ -384,6 +387,9 @@ export interface Player {
   /** Persistent profile (PW12): a recovering player's forces dealt damage to
    *  another player — the durable evaluator ends recovery on this flag. */
   recoveryAttacked: boolean;
+  /** Persistent mashup worlds (PW28): def ids the player's loadout may use.
+   *  Present only on the universal pack; snapshots carry it verbatim. */
+  allowedDefs?: string[];
 }
 
 export interface Projectile { id: number; owner: number; weapon: string; x: number; y: number; sx: number; sy: number; tx: number; ty: number; target: number; source: number }
@@ -734,6 +740,7 @@ export class Game {
       ally: p.ally ?? -1, autoRepair: p.autoRepair === true,
       newcomerProtected: p.newcomerProtected === true,
       recovering: false, recoveryAttacked: false,
+      allowedDefs: p.allowedDefs ? [...p.allowedDefs] : undefined,
     };
     if (p.playerId) player.pid = p.playerId;
     this.players.push(player);
@@ -748,7 +755,16 @@ export class Game {
     const starting = p.starter?.units ?? this.startUnitsFor(faction);
     const bound = p.starter ? 1 : 0;
     const mcvType = starting.find(t => this.pack.units[t]?.deploysTo);
-    const yard = mcvType ? this.pack.structures[this.pack.units[mcvType].deploysTo!] : undefined;
+    // PW28: on the universal pack deploysTo='yard' resolves to the player's own
+    // first allowed construction yard; classic packs keep their literal 'yard'
+    // structure (or concrete yard id) when no loadout is present.
+    const deploysTo = mcvType ? this.pack.units[mcvType].deploysTo : undefined;
+    const yardId = deploysTo === 'yard' && p.allowedDefs
+      ? Object.values(this.pack.structures)
+          .filter(s => s.constructionYard && p.allowedDefs!.includes(s.id))
+          .map(s => s.id).sort()[0] ?? deploysTo
+      : deploysTo;
+    const yard = yardId ? this.pack.structures[yardId] : undefined;
     const fx = cx - ((yard?.w ?? 1) >> 1), fy = cy - ((yard?.h ?? 1) >> 1);
     const inFootprint = (i: number) => {
       const x = i % this.map.w, y = Math.floor(i / this.map.w);
@@ -842,11 +858,19 @@ export class Game {
           if (e.owner === cmd.slot && e.hp > 0 && e.kind === 'unit' && isMcvUnit(this.unitDef(e))) { hasMcv = true; break; }
         }
         if (p && !hasMcv) {
-          const faction = this.pack.factions.find(f => f.id === p.faction) ?? this.pack.factions[p.slot % this.pack.factions.length];
           // starterPicks throws on packs that cannot fill every role — a grant
           // must never crash the deterministic step, so degrade to no spawn.
+          // PW28: a loadout player gets THEIR cheapest deployable vehicle.
           let mcvType = '';
-          try { mcvType = starterPicks(this.pack, faction).mcv; } catch { mcvType = ''; }
+          if (p.allowedDefs) {
+            mcvType = Object.values(this.pack.units)
+              .filter(u => !!u.deploysTo && p.allowedDefs!.includes(u.id))
+              .map(u => u.id).sort()[0] ?? '';
+          }
+          if (!mcvType) {
+            const faction = this.pack.factions.find(f => f.id === p.faction) ?? this.pack.factions[p.slot % this.pack.factions.length];
+            try { mcvType = starterPicks(this.pack, faction).mcv; } catch { mcvType = ''; }
+          }
           if (mcvType) {
             const cell = cmd.cell >= 0 && cmd.cell < this.map.w * this.map.h ? cmd.cell : this.defaultSpawnCell(cmd.slot);
             const spot = nearestCell(this.map, cell, 10,
@@ -1166,11 +1190,14 @@ export class Game {
       player.stats.built++;
       if (def.storage) player.storage += def.storage;
     }
-    if (def.refinery?.freeUnit) {
-      const dock = this.cellIndex(cx + def.refinery.dockX, cy + def.refinery.dockY);
-      const free = this.pack.units[def.refinery.freeUnit];
+    // PW28: on the universal pack refineries carry no static freeUnit — the
+    // owner's loadout decides which harvester rolls out (first allowed, by id).
+    const freeUnitId = def.refinery ? (def.refinery.freeUnit ?? this.playerFreeUnit(owner)) : undefined;
+    if (freeUnitId && def.refinery) {
+      const dock = this.cellIndex(cx + def.refinery!.dockX, cy + def.refinery!.dockY);
+      const free = this.pack.units[freeUnitId];
       const cell = free ? nearestCell(this.map, dock, 4, i => passable(this.pack, this.map, i, this.moveClass(free))) : -1;
-      if (cell >= 0) this.spawnUnit(def.refinery.freeUnit, owner, cell);
+      if (cell >= 0) this.spawnUnit(freeUnitId, owner, cell);
     }
     return e;
   }
@@ -1403,6 +1430,7 @@ export class Game {
     const out: Entity[] = [];
     for (const e of this.factories(p, kind)) {
       const ff = this.factoryFaction(e);
+      if (!this.mayUseDef(p, def.id)) continue;
       if (!factionCanUse(def, ff.faction, ff.side)) continue;
       if (!item.startsWith(STARPORT) && !this.prereqsSatisfied(p, def.prereqs)) continue;
       out.push(e);
@@ -1507,11 +1535,21 @@ export class Game {
     return harvesters < 1;
   }
 
+  /**
+   * PW28: on the universal persistent pack a player's mashup loadout — not a
+   * faction — decides which defs they may use. `allowedDefs` absent means the
+   * classic factionCanUse rules apply unchanged.
+   */
+  private mayUseDef(p: Player, id: string): boolean {
+    return !p.allowedDefs || p.allowedDefs.includes(id);
+  }
+
   canBuild(p: Player, item: string, owned = this.owned(p)): boolean {
     const queue = this.queueFor(item);
     if (!queue) return false;
     if (p.recovering && !this.recoveryBuildAllowed(p, item)) return false;
     const base = this.baseItem(item);
+    if (!this.mayUseDef(p, base)) return false;
     const sdef = this.pack.structures[base];
     const udef = this.pack.units[base];
     const def: UnitDef | StructureDef | undefined = sdef ?? udef;
@@ -1739,18 +1777,45 @@ export class Game {
       return;
     }
     if (!def.deploysTo) return;
-    const s = this.pack.structures[def.deploysTo];
+    // PW28: the universal pack marks every MCV-class unit deploysTo='yard'; the
+    // concrete yard is whichever construction-yard def the owner's loadout
+    // allows (deterministic first by id). Classic packs keep their literal
+    // 'yard' structure when the owner has no loadout.
+    const yardType = (def.deploysTo === 'yard' ? this.playerYardType(u.owner) : undefined) ?? def.deploysTo;
+    const s = yardType ? this.pack.structures[yardType] : undefined;
+    if (!yardType || !s) return;
     const cx = toCell(u.x) - (s.w >> 1), cy = toCell(u.y) - (s.h >> 1);
-    if (!this.canPlace(this.players[u.owner], def.deploysTo, cx, cy, true, u.id)) { this.effect('denied', u.x, u.y, 0, 0, 10); return; }
+    if (!this.canPlace(this.players[u.owner], yardType, cx, cy, true, u.id)) { this.effect('denied', u.x, u.y, 0, 0, 10); return; }
     u.hp = 0;
     this.entities.delete(u.id);
     const fx = this.effect('deploy', u.x, u.y, 0, 0, 30); fx.item = u.type; fx.owner = u.owner;
     // A bound MCV (newcomer starter grant, PW11) deploys a bound yard — the
     // grant cannot be cashed out by deploying and selling. The recovery MCV
     // (PW12) likewise passes its protection onto the yard it becomes.
-    const yard = this.spawnStructure(def.deploysTo, u.owner, cx, cy, 100);
+    const yard = this.spawnStructure(yardType, u.owner, cx, cy, 100);
     yard.bound = u.bound;
     yard.recoveryProtected = u.recoveryProtected;
+  }
+
+  /** PW28: first allowed harvester unit id for a universal-pack player. */
+  private playerFreeUnit(owner: number): string | undefined {
+    const p = this.players[owner];
+    if (!p?.allowedDefs) return undefined;
+    return Object.values(this.pack.units)
+      .filter(u => !!u.harvester && p.allowedDefs!.includes(u.id))
+      .map(u => u.id).sort()[0];
+  }
+
+  /**
+   * PW28: the construction-yard def a player's MCV deploys into on the
+   * universal pack — the first allowed yard by id (deterministic).
+   */
+  private playerYardType(owner: number): string | undefined {
+    const p = this.players[owner];
+    if (!p?.allowedDefs) return undefined;
+    return Object.values(this.pack.structures)
+      .filter(s => s.constructionYard && p.allowedDefs!.includes(s.id))
+      .map(s => s.id).sort()[0];
   }
 
   // ---------------------------------------------------------------- packed buildings (PW14)

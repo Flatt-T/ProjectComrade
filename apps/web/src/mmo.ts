@@ -5,8 +5,8 @@
 // durable-id intents and applied only when they come back on the sim stream — the
 // client never predicts.
 import {
-  Game, PACKS, restoreGame, TICKS_PER_SECOND,
-  type Command, type RulePack, type Session, type SessionStatus,
+  Game, restoreGame, registryPacks, TICKS_PER_SECOND,
+  type Command, type Session, type SessionStatus,
 } from '../../../packages/fusion/src/index';
 import {
   MMO_PROTOCOL, mmoEntityId, type MmoAction, type MmoServerMessage,
@@ -211,6 +211,5 @@ export class PersistentSession implements Session {
 
 /** Restore a region snapshot into a runnable Game (packs by id). */
 export function gameFromSnapshot(state: SnapshotState): Game {
-  const packs = Object.values(PACKS) as RulePack[];
-  return restoreGame(state.snapshot, packs);
+  return restoreGame(state.snapshot, registryPacks());
 }

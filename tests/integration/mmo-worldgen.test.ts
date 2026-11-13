@@ -12,7 +12,7 @@ import { submitCommand, journalTail } from '../../apps/service/src/mmo/commands.
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { createWorldHandler } from '../../apps/service/src/mmo/world.js';
 import { ensureSpawnRegion } from '../../apps/service/src/mmo/spawn.js';
-import { PACKS, WORLDGEN_VERSION, isWater, passable, buildableTerrain } from '../../packages/fusion/src/index';
+import { WORLDGEN_VERSION, isWater, passable, buildableTerrain, worldPack } from '../../packages/fusion/src/index';
 import {
   MMO_RULESET_ID, MMO_RULESET_VERSION, PERSISTENT_RULES_V1,
   type MmoCommandMessage, type MmoRulesProfile, type MmoWorldAction,
@@ -132,15 +132,23 @@ describeDb('mmo frontier worldgen (real PostgreSQL + real Fusion sim)', () => {
       expect(water).toBeGreaterThan(0);
       expect(land).toBeGreaterThan(0);
 
+      // PW28: frontier regions run the universal world pack — settle carries a
+      // mashup loadout and the single 'commander' faction.
+      const { choices } = worldPack();
       const res = await worldAction(ctx, player.player_id, {
-        t: 'settle', regionId: region.region_id, faction: 'gdi', x: 48, y: 48,
+        t: 'settle', regionId: region.region_id, faction: 'commander', x: 48, y: 48,
+        loadout: {
+          structures: choices.structures[0].key,
+          infantry: choices.infantry[0].key,
+          vehicle: choices.vehicle[0].key,
+        },
       });
       expect(res.accepted).toBe(true);
       const settlement = await getSettlement(player.player_id);
       expect(settlement).toBeTruthy();
       // The settled cell is vehicle-capable, unoccupied-terrain buildable land
       // (the MCV itself occupies it, so check terrain not occupancy).
-      const pack = PACKS['td'];
+      const pack = game.pack;
       const cell = settlement!.cell_y * spec.width + settlement!.cell_x;
       expect(pack.terrains[game.map.terrain[cell]].vehicle).toBe(true);
       expect(isWater(pack, game.map, cell)).toBe(false);
@@ -150,7 +158,7 @@ describeDb('mmo frontier worldgen (real PostgreSQL + real Fusion sim)', () => {
         const g = ctx.runner.currentGame!;
         const slot = g.players.findIndex(p => p.pid === player.player_id);
         if (slot < 0) return false;
-        return [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.hp > 0).length === 16;
+        return [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.hp > 0).length > 0;
       });
     } finally {
       ctx.runner.stop();

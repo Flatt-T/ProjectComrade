@@ -17,7 +17,7 @@ import { submitCommand, journalTail } from '../../apps/service/src/mmo/commands.
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { createWorldHandler } from '../../apps/service/src/mmo/world.js';
 import { enterPersistentWorld } from '../../apps/service/src/mmo/entry.js';
-import { PACKS } from '../../packages/fusion/src/index';
+import { PACKS, worldPack } from '../../packages/fusion/src/index';
 import {
   MMO_RULESET_ID, MMO_RULESET_VERSION, PERSISTENT_RULES_V1, parseProtectionRecord,
   type MmoCommandMessage, type MmoRulesProfile, type MmoWorldAction,
@@ -270,11 +270,25 @@ describeDb('mmo newcomer settlement (real PostgreSQL + real Fusion sim)', () => 
     const second = await enterPersistentWorld(identity);
     expect(second.regionId).toBe(first.regionId);
     expect(second.settled).toBe(false); // still owes the settle action
-    // Settle through the region runner, then entry reports settled.
+    // Settle through the region runner, then entry reports settled. New
+    // frontier regions run the universal world pack (PW28): settle carries a
+    // mashup loadout and the single 'commander' faction.
     const region = (await mmoOne<RegionRow>('select * from region where region_id = $1', [first.regionId]))!;
     const ctx = await startRunner(region);
     try {
-      await worldAction(ctx, first.playerId, { t: 'settle', regionId: first.regionId, faction: 'gdi', x: 1, y: 1 });
+      const { choices } = worldPack();
+      // The routed region may be a legacy 'td' frontier (faction settle) or a
+      // universal 'mashup-world' one (loadout settle) — send both; each pack
+      // reads only its own field.
+      const settleRes = await worldAction(ctx, first.playerId, {
+        t: 'settle', regionId: first.regionId, faction: 'gdi', x: 1, y: 1,
+        loadout: {
+          structures: choices.structures[0].key,
+          infantry: choices.infantry[0].key,
+          vehicle: choices.vehicle[0].key,
+        },
+      });
+      expect(settleRes.accepted).toBe(true);
       const third = await enterPersistentWorld(identity);
       expect(third.regionId).toBe(first.regionId);
       expect(third.settled).toBe(true);

@@ -11,8 +11,11 @@
 // until an accepted trade (PW13) transfers them.
 import type { PoolClient } from 'pg';
 import { randomUUID } from 'node:crypto';
-import type { Command, Game, WorldgenSpec } from '@comrade/fusion';
-import { PACKS, starterLoadout, toCell } from '@comrade/fusion';
+import type { Command, Game, MashupLoadout, WorldgenSpec } from '@comrade/fusion';
+import {
+  WORLD_PACK_ID, packById, starterLoadout, toCell,
+  loadoutFromStored, worldAllowedDefs, worldLoadoutProblem, worldStarterUnits,
+} from '@comrade/fusion';
 import {
   PERSISTENT_RULES_V1, newProtection, parseProtectionRecord, protectionTransition,
   type BarterItem, type MmoRulesProfile, type MmoWorldAction, type ProtectionRecord,
@@ -151,7 +154,7 @@ async function barterAllianceCheck(
 async function barterStarterGrant(tx: PoolClient, regionId: string, rules: MmoRulesProfile): Promise<number> {
   const { rows } = await tx.query<{ seed: unknown }>('select seed from region where region_id = $1', [regionId]);
   const simSpec = (rows[0]?.seed as { sim?: { packId?: string } } | null)?.sim;
-  const pack = PACKS[simSpec?.packId ?? 'td'];
+  const pack = packById(simSpec?.packId ?? 'td');
   return (pack?.startCredits.standard ?? 0) * rules.starterCreditsMultiplier;
 }
 
@@ -362,8 +365,11 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             'select seed from region where region_id = $1', [ctx.regionId]);
           const simSpec = (regionRows[0]?.seed as { sim?: { packId?: string; mapId?: string; seed?: number; worldgen?: WorldgenSpec } } | null)?.sim;
           const packId = simSpec?.packId ?? 'td';
-          const pack = PACKS[packId];
+          const pack = packById(packId);
           if (!pack) return { result: { accepted: false, reason: 'BAD_PACK' } };
+          // PW28: universal-world regions have a single 'commander' faction —
+          // the player's mashup loadout is the real roster choice.
+          const universal = pack.id === WORLD_PACK_ID;
           const mapId = simSpec?.mapId ?? pack.maps[0].id;
           const preset = pack.maps.find(m => m.id === mapId) ?? pack.maps[0];
           // PW16: worldgen regions size their map from the spec, not a preset.
@@ -402,13 +408,25 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
                     name: displayName, faction: existing.faction, ai: false,
                     playerId: ctx.playerId, cell,
                     newcomerProtected: prot?.status === 'active',
+                    // PW28: rebuild the same loadout gate the settle chose.
+                    ...(universal ? { allowedDefs: worldAllowedDefs(loadoutFromStored(existing.loadout)) } : {}),
                   },
                 },
               }],
             };
           }
 
-          const faction = pack.factions.find(f => f.id === action.faction);
+          // PW28: universal-world settlers must pick a mashup loadout; the
+          // region validates every slot key against the live catalogue.
+          let loadout: MashupLoadout | undefined;
+          if (universal) {
+            const problem = worldLoadoutProblem(action.loadout);
+            if (problem) return { result: { accepted: false, reason: 'BAD_LOADOUT', detail: problem } };
+            loadout = action.loadout;
+          }
+          const faction = universal
+            ? pack.factions[0]
+            : pack.factions.find(f => f.id === action.faction);
           if (!faction) return { result: { accepted: false, reason: 'BAD_FACTION' } };
 
           // Keep-away cells: every live asset of every other player PLUS their
@@ -433,7 +451,7 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             packId, mapId, seed: mapSeed, worldgen: simSpec?.worldgen, keepAwayCells: keepAway,
             separationCells: rules.spawnSeparationCells, preferCell, salt: ctx.playerId,
           });
-          const loadout = starterLoadout(pack, faction);
+          const grantUnits = universal ? worldStarterUnits(loadout!) : starterLoadout(pack, faction).units;
           const credits = pack.startCredits.standard * rules.starterCreditsMultiplier;
           const settlementId = randomUUID();
           const nowMs = Date.now();
@@ -441,6 +459,7 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           const { settlement, created } = await createSettlement({
             settlementId, playerId: ctx.playerId, worldId, regionId: ctx.regionId,
             faction: faction.id, cellX: pick.x, cellY: pick.y, protection,
+            loadout: universal ? loadout : undefined,
           }, tx);
           if (!created) {
             // A concurrent settle won the insert — behave exactly like the
@@ -484,8 +503,10 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
                 player: {
                   name: displayName, faction: faction.id, ai: false,
                   playerId: ctx.playerId, cell: pick.cell,
-                  starter: { credits, units: loadout.units },
+                  starter: { credits, units: grantUnits },
                   newcomerProtected: true,
+                  // PW28: the loadout's allowed-def set is the build gate.
+                  ...(universal ? { allowedDefs: worldAllowedDefs(loadout!) } : {}),
                 },
               },
             }],

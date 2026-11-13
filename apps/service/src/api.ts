@@ -15,6 +15,7 @@ import {
   eraseAccount, handleTaken, pendingByEmail, recordAccountEvent, releaseReservation, reserveAccount,
   setAvatar, setConsent, setPendingEmail, updateProfile,
 } from './accounts.js';
+import { MASHUP_SLOT_LABEL, MASHUP_SLOTS, worldPack } from '@comrade/fusion';
 import { adBreak, recordImpression } from './ads.js';
 import { completeAdCredit, startAdCredit } from './credits.js';
 import {
@@ -671,6 +672,21 @@ get('/api/mmo/enter', async (ctx: Ctx) => {
     }
     throw error;
   }
+});
+
+/**
+ * GET /api/mmo/loadout-catalogue — every selectable set per slot in the
+ * universal persistent world (PW28). Public catalogue data; the region
+ * re-validates the chosen keys at settle time.
+ */
+get('/api/mmo/loadout-catalogue', async (ctx: Ctx) => {
+  if (!mmoDatabaseConfigured()) throw unavailable('Persistent world is not enabled');
+  limit(ctx, 'mmo-loadout', 60, 60_000);
+  const { choices } = worldPack();
+  return {
+    slots: MASHUP_SLOTS.map(slot => ({ id: slot, label: MASHUP_SLOT_LABEL[slot] })),
+    choices,
+  };
 });
 
 // ---------------------------------------------------------------------------
