@@ -20,7 +20,7 @@ async function betaWorldId(): Promise<string> {
   if (existing) return existing.world_id;
   const world = await createWorld({
     rulesetId: MMO_RULESET_ID, rulesetVersion: MMO_RULESET_VERSION,
-    packRevision: persistentPackRevision('td'), engineArtifactSha256: 'persistent-engine',
+    packRevision: persistentPackRevision('mashup-world'), engineArtifactSha256: 'persistent-engine',
     capabilities: MMO_CAPABILITIES_MILESTONE1, decisions: MMO_DECISIONS_OPEN,
   });
   return world.world_id;

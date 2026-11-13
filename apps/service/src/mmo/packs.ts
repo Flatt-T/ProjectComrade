@@ -31,6 +31,12 @@ export const PERSISTENT_PACK_MANIFEST: PersistentPackEntry[] = [
     status: 'supported',
     notes: 'Tiberian Dawn rules pack — the persistent beta baseline. GDI/Nod mixed forces verified under persistent rules (PW17).',
   },
+  {
+    packId: 'mashup-world',
+    revision: 'mashup-world-1',
+    status: 'supported',
+    notes: 'PW28 universal world: every mashup choice from every registered pack, per-player loadout gating. New frontier regions.',
+  },
   // Future approved content packs append here with their own revision. A pack
   // from another engine family requires an actual adapter/mechanics proof
   // before its status may become 'supported' — listing it 'unsupported' keeps

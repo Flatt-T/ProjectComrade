@@ -623,4 +623,14 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     create index player_objective_player_idx on player_objective (player_id, status);
     `,
   },
+  {
+    version: 14,
+    name: 'settlement mashup loadout',
+    sql: `
+    -- PW28: universal-world settlers pick a mashup loadout (whose buildings and
+    -- forces they field). Persisted on the one-ever settlement row so rejoins
+    -- rebuild the same allowed-def set; NULL on faction-pack settlements.
+    alter table settlement add column loadout jsonb;
+    `,
+  },
 ];

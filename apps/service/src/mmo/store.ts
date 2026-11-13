@@ -732,6 +732,8 @@ export async function closeRecoveryEpisode(episodeId: string, status: 'completed
 export interface SettlementRow {
   settlement_id: string; player_id: string; world_id: string; region_id: string;
   faction: string; cell_x: number; cell_y: number; protection: unknown | null;
+  /** PW28: the mashup loadout chosen at settle (universal-world regions only). */
+  loadout?: unknown | null;
 }
 
 /** The player's one-ever newcomer settlement, or null before first spawn (PW11). */
@@ -743,13 +745,16 @@ export async function getSettlement(playerId: string, q: Queryable = mmoDb()): P
 export async function createSettlement(args: {
   settlementId?: string; playerId: string; worldId: string; regionId: string;
   faction: string; cellX: number; cellY: number; protection?: unknown;
+  /** PW28: mashup loadout for universal-world settlements. */
+  loadout?: unknown;
 }, q: Queryable = mmoDb()): Promise<{ settlement: SettlementRow; created: boolean }> {
   const id = args.settlementId ?? uuid();
   const { rowCount } = await q.query(
-    `insert into settlement (settlement_id, player_id, world_id, region_id, faction, cell_x, cell_y, protection)
-     values ($1,$2,$3,$4,$5,$6,$7,$8) on conflict (player_id) do nothing`,
+    `insert into settlement (settlement_id, player_id, world_id, region_id, faction, cell_x, cell_y, protection, loadout)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9) on conflict (player_id) do nothing`,
     [id, args.playerId, args.worldId, args.regionId, args.faction, args.cellX, args.cellY,
-     args.protection === undefined ? null : JSON.stringify(args.protection)]);
+     args.protection === undefined ? null : JSON.stringify(args.protection),
+     args.loadout === undefined ? null : JSON.stringify(args.loadout)]);
   const existing = await getSettlement(args.playerId, q);
   if (!existing) throw new MmoStoreError('SETTLEMENT_CONFLICT', 'settlement insert conflicted');
   return { settlement: existing, created: rowCount === 1 };

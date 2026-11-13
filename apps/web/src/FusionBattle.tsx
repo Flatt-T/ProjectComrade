@@ -440,7 +440,7 @@ export default function FusionBattle({ launch, mapName, conn, onExit }: { launch
     const r = rig.current; if (!r) return;
     const cam = r.renderer.camera;
     const before = { x: x / cam.zoom + cam.x, y: y / cam.zoom + cam.y };
-    cam.zoom = Math.max(0.6, Math.min(2.2, cam.zoom * factor));
+    cam.zoom = Math.max(0.2, Math.min(3.5, cam.zoom * factor));
     cam.x = before.x - x / cam.zoom; cam.y = before.y - y / cam.zoom;
     r.renderer.clampCamera();
   }

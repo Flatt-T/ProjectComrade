@@ -189,10 +189,10 @@ function signatureOf(pack: RulePack, slot: MashupSlot, choice: MashupChoice): st
 // Resolution
 // ---------------------------------------------------------------------------
 
-interface Chosen { pack: RulePack; faction?: FactionDef; defs: Def[] }
+export interface Chosen { pack: RulePack; faction?: FactionDef; defs: Def[] }
 
 /** Look an option key ('ra2:russia', or 'dune' for a whole pack) back up in the packs. */
-function resolveChoice(key: string, slot: MashupSlot, packs: RulePack[]): Chosen {
+export function resolveChoice(key: string, slot: MashupSlot, packs: RulePack[] = MASHUP_PACKS): Chosen {
   const [packId, factionId] = key.split(':');
   const pack = packs.find(p => p.id === packId);
   if (!pack) throw new Error(`Unknown mashup pack ${packId}`);
@@ -288,7 +288,7 @@ export function spreadWarhead(warhead: WarheadDef, id = warhead.id): WarheadDef 
  * same role. A building can serve more than one role (Red Alert 2's Airforce Command HQ is
  * both radar and the air producer), so the roles are tried in order.
  */
-function rolesOf(st: StructureDef): string[] {
+export function rolesOf(st: StructureDef): string[] {
   const roles: string[] = [];
   if (st.constructionYard) roles.push('yard');
   if (st.produces) roles.push(`produces:${st.produces}`);
@@ -308,7 +308,7 @@ function rolesOf(st: StructureDef): string[] {
 }
 
 /** Where a role has no counterpart, these are tried next; an empty list drops the gate. */
-const ROLE_FALLBACK: Record<string, string[]> = {
+export const ROLE_FALLBACK: Record<string, string[]> = {
   power: ['yard'], refinery: ['yard'], silo: ['refinery', 'yard'],
   radar: ['tech'], tech: ['radar'], super: ['tech', 'radar'],
 };
