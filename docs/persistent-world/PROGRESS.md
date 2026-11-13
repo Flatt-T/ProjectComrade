@@ -1130,3 +1130,27 @@ preset 0 with a different seed.
   to (145,31) — 65 cells separation >= 48.
 - Guest cap verified live: 6 concurrent guest /mmo sockets -> first
   slots admitted, remainder rejected with GUEST_LIMIT + close 1013.
+
+### PW28 - universal persistent world: all Fusion factions (THU-2421) - 2026-11-13
+
+- Owner directive: ALL fusion factions/buildings/units in the persistent
+  world, non-negotiable; bounded zoom (no whole-map view, close unit view).
+- New deterministic `mashup-world` RulePack (packages/fusion/src/worldpack.ts)
+  composed once from every registered pack (TD, Dune, RA1, RA2, all FUSIONS):
+  namespaced ids (w-st-*/w-u-*), shared weapon/warhead bank, bridged
+  prereqs, synthetic yard/MCV/harvester/queue producers.
+- Per-player loadout: settle action carries optional `loadout`
+  (parseLoadout + worldLoadoutProblem validation); schema v14 persists it
+  on settlement; join command carries allowedDefs; mayUseDef gates
+  canBuild/buildOptions. Classic regions keep factionCanUse.
+- selectSpawnRegion prefers mashup-world regions once one exists;
+  settled players always return to their settlement region.
+- Web: loadout picker at settle via GET /api/mmo/loadout-catalogue;
+  restoreGame uses registryPacks() (world pack included).
+- Camera: zoom clamp 0.6-2.2 -> 0.2-3.5 in PersistentWorld + FusionBattle;
+  ~28 cells max view on 1080p (never whole 192-cell map); fog unchanged.
+- Classic-pack regression found + fixed: deploysTo='yard' sentinel now
+  only resolves through allowedDefs when a loadout is present - packs
+  with a literal 'yard' structure (irregular/holdout) unchanged.
+- Verified: 478 unit + 125 integration (real PG) green; tsc+eslint clean.
+  PR #53 merged f182724. Beta deploy + mashup region provisioning pending.
