@@ -127,6 +127,36 @@ describe('PW18 depart + manifest', () => {
     expect(cargo.hp).toBe(Math.floor(rider.maxHp / 2));
   });
 
+  it('spawnTransfer rejects the whole crossing when a passenger cannot be restored', () => {
+    const src = new Game(setup([PID_A]));
+    const apc = src.spawnUnit('apc', 0, landNear(src));
+    const rider = src.spawnUnit('commando', 0, landNear(src, 'se'));
+    src.entities.get(apc.id)!.passengers.push(rider.id);
+    src.entities.get(rider.id)!.carriedBy = apc.id;
+    src.entities.get(rider.id)!.x = apc.x; src.entities.get(rider.id)!.y = apc.y;
+    const m = src.transferManifest(apc);
+    expect(m.cargoUnits).toHaveLength(1);
+
+    // Destination pack lacks the rider definition: the carrier must not
+    // arrive empty — the entire transfer stays recoverable (null).
+    const broken = JSON.parse(JSON.stringify(m));
+    broken.cargoUnits[0].type = 'unit-not-in-this-pack';
+    const dst = new Game(setup([PID_A]));
+    const before = dst.entities.size;
+    expect(dst.spawnTransfer(broken, landNear(dst))).toBeNull();
+    expect(dst.entities.size).toBe(before);
+
+    // Same for a passenger whose owner has no slot here.
+    const orphan = JSON.parse(JSON.stringify(m));
+    orphan.cargoUnits[0].ownerPid = PID_B;
+    expect(dst.spawnTransfer(orphan, landNear(dst))).toBeNull();
+    expect(dst.entities.size).toBe(before);
+
+    // The intact manifest still crosses with its passenger.
+    const id = dst.spawnTransfer(m, landNear(dst))!;
+    expect(dst.entities.get(id)!.passengers).toHaveLength(1);
+  });
+
   it('spawnTransfer returns null when the owner has no slot', () => {
     const src = new Game(setup([PID_A]));
     const u = src.spawnUnit('lighttank', 0, landNear(src));

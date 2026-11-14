@@ -2476,9 +2476,22 @@ export class Game {
    * sim id, or null when the owner has no slot here — the durable layer keeps
    * the transfer pending until they do.
    */
+  /**
+   * PW34: every manifest entry — carrier and each passenger, recursively —
+   * must name a definition this pack knows and an owner with a slot here.
+   * One unrestorable passenger rejects the whole crossing.
+   */
+  private manifestFits(m: TransferManifestEntry): boolean {
+    if (!this.pack.units[m.type]) return false;
+    if (this.players.findIndex(p => p.pid === m.ownerPid) < 0) return false;
+    for (const c of m.cargoUnits ?? []) if (!this.manifestFits(c)) return false;
+    return true;
+  }
+
   spawnTransfer(m: TransferManifestEntry, cell: number, durableId = ''): number | null {
     const slot = this.players.findIndex(p => p.pid === m.ownerPid);
     if (slot < 0 || !this.pack.units[m.type]) return null;
+    if (!this.manifestFits(m)) return null;
     const kind = this.moveClass(this.pack.units[m.type]);
     const spot = nearestCell(this.map, cell, 8,
       i => passable(this.pack, this.map, i, kind) && !this.unitInCell(i));
