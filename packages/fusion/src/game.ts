@@ -2287,7 +2287,7 @@ export class Game {
     if (def.engineer) {
       // PW34: neutral objective sites use their own contest rules, never enter-capture.
       if (this.structDef(t).site) { u.order = 'idle'; u.target = 0; return; }
-      if (enemy && this.capturePermitted(t, u.owner)) {
+      if (enemy && this.capturePermitted(t)) {
         this.capture(t, u.owner);
         this.consume(u);
         return;
@@ -2319,7 +2319,7 @@ export class Game {
    * capture while it holds — consent cannot grant entry), and newcomer /
    * recovery protection blocks hostile takeover of protected assets.
    */
-  private capturePermitted(s: Entity, by: number): boolean {
+  private capturePermitted(s: Entity): boolean {
     if (this.compoundProtecting(s.x, s.y, s.owner)) return false;
     if (this.persistent) {
       const def = this.players[s.owner];
