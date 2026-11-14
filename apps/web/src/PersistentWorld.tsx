@@ -722,7 +722,13 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       {needSettle && ui && (
         <div className="settle-overlay">
           <div className="settle-card">
-            {rig.current?.game?.pack.id === WORLD_PACK_ID ? (
+            {!rig.current?.game ? (
+              // The connection status can light up `ui` before the snapshot
+              // restores the sim — never show a faction/loadout picker until
+              // the authoritative pack is known, or legacy GDI/Nod buttons
+              // flash over the map on slow connections.
+              <p>Entering the persistent world…</p>
+            ) : rig.current.game.pack.id === WORLD_PACK_ID ? (
               catalogue ? (
                 <>
                   <h2>Choose your loadout</h2>
@@ -736,6 +742,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
                         <label key={slot.id} className="loadout-slot">
                           <span className="loadout-slot-name">{slot.label}</span>
                           <select value={sel ?? ''} onChange={e => setLoadout(l => ({ ...l, [slot.id]: e.target.value || undefined }))}>
+                            {!sel && slot.id === 'structures' && <option value="" disabled>— choose buildings —</option>}
                             {slot.id !== 'structures' && <option value="">— none —</option>}
                             {opts.map(c => (
                               <option key={c.key} value={c.key}>{c.packName} · {c.label} ({c.count})</option>
