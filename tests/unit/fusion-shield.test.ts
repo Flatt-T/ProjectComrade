@@ -140,6 +140,70 @@ describe('PW10 shield protection', () => {
   });
 });
 
+describe('PW34 engineer capture gate', () => {
+  it('an enemy Engineer inside an active shield cannot capture — building and Engineer survive', () => {
+    const g = new Game(setup(true));
+    compound(g, 0);
+    const target = g.spawnStructure('pyle', 0, 33, 30); // inside the 4-cell radius
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    const e = g.entities.get(eng.id)!;
+    expect(e.hp).toBeGreaterThan(0);
+    expect(e.order).toBe('idle');
+  });
+
+  it('a shield raised after the order still blocks the capture at execution', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 42, 30);
+    const eng = unitNear(g, 'engineer', 1, 35, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    g.step();
+    compound(g, 0, 40, 30); // radius 4 covers the pyle at (42,30)
+    steps(g, 1200);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+  });
+
+  it('the unshielded control still captures and consumes the Engineer', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(eng.id)?.hp ?? 0).toBe(0); // consumed: culled or dead
+  });
+
+  it('newcomer protection blocks hostile capture', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    g.enqueue(-1, { t: 'setNewcomerProtection', slot: 0, on: true });
+    g.step();
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+  });
+
+  it('an ally Engineer cannot take a building without consent — order rejected, unit survives', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    g.enqueue(-1, { t: 'setAlly', slot: 0, ally: 5 });
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: 5 });
+    g.step();
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    const e = g.entities.get(eng.id)!;
+    expect(e.hp).toBeGreaterThan(0);
+    expect(e.order).toBe('idle');
+  });
+});
+
 describe('PW10 shield lifecycle in the sim', () => {
   it('shield flags survive snapshot/restore and pre-PW10 snapshots default off', () => {
     const g = new Game(setup(true));

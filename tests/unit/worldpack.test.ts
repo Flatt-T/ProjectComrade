@@ -73,6 +73,49 @@ describe('worldpack composition', () => {
     for (const id of starters) expect(pack.units[id], `starter ${id}`).toBeTruthy();
     expect(starters.some(id => !!pack.units[id].deploysTo)).toBe(true);
   });
+
+  it('fields the approved opening: MCV, harvester, 4 main tanks, 2 lights, 8 infantry', () => {
+    // THU-2446: the grant is a composition, not a token pair — and repeated
+    // defs are allowed (four of the main battle tank, eight infantry).
+    for (let i = 0; i < Math.min(4, choices.vehicle.length); i++) {
+      const lo = loadout(i);
+      const starters = worldStarterUnits(lo);
+      const defs = starters.map(id => pack.units[id]);
+      expect(defs.filter(d => !!d.deploysTo)).toHaveLength(1);       // one MCV
+      expect(defs.filter(d => !!d.harvester)).toHaveLength(1);       // one harvester
+      const veh = defs.filter(d => d.kind === 'vehicle');
+      expect(veh.length).toBe(starters.length - 8);                   // MCV+harv+tanks+lights
+      expect(veh.length).toBeGreaterThanOrEqual(2);                   // MCV + harvester always
+      const foot = defs.filter(d => d.kind === 'infantry');
+      expect(foot).toHaveLength(8);
+      // Every starter is buildable under this commander's own loadout.
+      const allowed = worldAllowedDefs(lo);
+      for (const id of starters) expect(allowed, `starter ${id}`).toContain(id);
+    }
+    // A full loadout fields the complete approved 16.
+    const full = worldStarterUnits(LO);
+    expect(full).toHaveLength(16);
+  });
+
+  it('every naval choice fields a heavy-cargo landing craft (THU-2239)', () => {
+    expect(choices.naval.length).toBeGreaterThan(1);
+    for (const choice of choices.naval) {
+      const lo: MashupLoadout = { ...LO, naval: choice.key };
+      const allowed = worldAllowedDefs(lo);
+      const lifts = allowed
+        .map(id => pack.units[id])
+        .filter(u => !!u && u.heavyCargo === true && !!u.transport);
+      expect(lifts.length, `naval choice ${choice.key}`).toBeGreaterThanOrEqual(1);
+      // The granted craft is buildable: its prereqs resolve to real structures.
+      for (const lift of lifts) {
+        for (const entry of lift.prereqs) {
+          for (const alt of entry.split('|')) {
+            expect(pack.structures[alt.split('@')[0]], `${lift.id} prereq`).toBeTruthy();
+          }
+        }
+      }
+    }
+  });
 });
 
 describe('worldpack Game', () => {
