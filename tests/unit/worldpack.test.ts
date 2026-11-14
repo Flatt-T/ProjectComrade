@@ -96,6 +96,26 @@ describe('worldpack composition', () => {
     const full = worldStarterUnits(LO);
     expect(full).toHaveLength(16);
   });
+
+  it('every naval choice fields a heavy-cargo landing craft (THU-2239)', () => {
+    expect(choices.naval.length).toBeGreaterThan(1);
+    for (const choice of choices.naval) {
+      const lo: MashupLoadout = { ...LO, naval: choice.key };
+      const allowed = worldAllowedDefs(lo);
+      const lifts = allowed
+        .map(id => pack.units[id])
+        .filter(u => !!u && u.heavyCargo === true && !!u.transport);
+      expect(lifts.length, `naval choice ${choice.key}`).toBeGreaterThanOrEqual(1);
+      // The granted craft is buildable: its prereqs resolve to real structures.
+      for (const lift of lifts) {
+        for (const entry of lift.prereqs) {
+          for (const alt of entry.split('|')) {
+            expect(pack.structures[alt.split('@')[0]], `${lift.id} prereq`).toBeTruthy();
+          }
+        }
+      }
+    }
+  });
 });
 
 describe('worldpack Game', () => {

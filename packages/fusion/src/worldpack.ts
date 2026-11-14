@@ -237,6 +237,23 @@ export function composeWorldPack(packs: RulePack[] = MASHUP_PACKS): WorldPackRes
     }
   }
 
+  // -- 3b. Sea lift (THU-2239): every naval choice fields a heavy-cargo
+  //       landing craft so any commander can move an MCV or packed building
+  //       by sea. Choices whose own set already has one keep it; the rest
+  //       get the cheapest heavy-craft template namespaced to their key,
+  //       with prerequisites bridged like every other unit.
+  const heavyLift = heavyLiftTemplate(packs);
+  if (heavyLift) {
+    // '-hl' keeps the injected id clear of a choice's own same-named unit
+    // (e.g. Conquer's landing-craft is a lighter transport, not heavy cargo).
+    const tpl = { ...heavyLift.def, id: `${heavyLift.def.id}-hl` };
+    for (const choice of catalogue.choices.naval) {
+      const { defs } = resolveChoice(choice.key, 'naval', packs);
+      if ((defs as UnitDef[]).some(u => u.heavyCargo && u.transport)) continue;
+      addUnit('naval', choice.key, heavyLift.pack, tpl);
+    }
+  }
+
   // -- 4. Service units every loadout can field: the cheapest deployable MCV
   //       and harvester across all packs, plus each choice's own if present.
   const svcUnits: UnitDef[] = [];
@@ -347,6 +364,23 @@ export function worldPack(packs: RulePack[] = MASHUP_PACKS): WorldPackResult {
   return cached;
 }
 
+/**
+ * The cheapest heavy-cargo sea transport across all packs — the template every
+ * naval choice without its own landing craft is granted (THU-2239).
+ */
+function heavyLiftTemplate(packs: RulePack[]): { pack: RulePack; def: UnitDef } | null {
+  let best: { pack: RulePack; def: UnitDef } | null = null;
+  for (const pack of packs) {
+    for (const def of Object.values(pack.units)) {
+      if (!def.heavyCargo || !def.transport || def.tech > 10) continue;
+      if (!best || def.cost < best.def.cost || (def.cost === best.def.cost && def.id < best.def.id)) {
+        best = { pack, def };
+      }
+    }
+  }
+  return best;
+}
+
 /** The def id a choice's source def was namespaced to — must match composeWorldPack. */
 export function worldDefId(slot: MashupSlot, choiceKey: string, srcId: string): string {
   return ns(slot === 'structures' ? 'st' : `u-${slot}`, choiceKey, srcId);
@@ -398,11 +432,17 @@ export function worldAllowedDefs(loadout: MashupLoadout, packs: RulePack[] = MAS
   for (const u of Object.values(pack.units)) {
     if (u.id.startsWith('w-svc-')) allowed.add(u.id);
   }
+  const lift = heavyLiftTemplate(packs);
   for (const slot of MASHUP_SLOTS) {
     const key = loadout[slot];
     if (!key) continue;
     const { defs } = resolveChoice(key, slot, packs);
     for (const d of defs as Def[]) allowed.add(worldDefId(slot, key, d.id));
+    // THU-2239: naval choices without their own heavy craft are granted the
+    // template — mirror composeWorldPack's injection exactly.
+    if (slot === 'naval' && lift && !(defs as UnitDef[]).some(u => u.heavyCargo && u.transport)) {
+      allowed.add(worldDefId('naval', key, `${lift.def.id}-hl`));
+    }
   }
   return [...allowed].sort();
 }
