@@ -303,7 +303,6 @@ export class RegionRunner {
     const snaps = await listSnapshots(this.opts.regionId);
     let hib: SnapshotPayload['hib'];
     let replayFrom = 0n;
-    let degradedGenesis = false;
     let restored = false;
     for (const snap of snaps) {
       const payload = this.validatedSnapshotPayload(snap);
@@ -348,7 +347,6 @@ export class RegionRunner {
       if (snaps.length) {
         this.opts.log('region-snapshots-exhausted', { regionId: this.opts.regionId, count: snaps.length });
       }
-      degradedGenesis = true;
       this.simSeed = spec.seed;
       const pack = PACK_LIST.find(p => p.id === spec.packId);
       // PW17: only manifest-approved packs may run a persistent region.
@@ -428,7 +426,13 @@ export class RegionRunner {
     // catch-up so recorded atTicks still land in the future. 'accrual' rows are
     // cursor entries here when a hib wake owns their advance.
     await this.replayCommittedTail(replayFrom, { applyAccrual: !hib });
-    if (degradedGenesis) await this.rebindCompletedTransfers();
+    // PW30/PW18: reconcile durable COMPLETED inbound transfers on EVERY start,
+    // not only genesis. An arrival that committed after the restored snapshot
+    // is absent from both the snapshot and the journal tail (the drain is not
+    // a journaled event), so without this the carrier and its cargo vanish.
+    // Rows already bound by the snapshot are skipped; unbound ones are
+    // re-materialized and rebound. Genesis replay needs the same pass.
+    await this.rebindCompletedTransfers();
 
     // Wall-clock ↔ sim-tick anchor. A region that was down fast-forwards through the
     // elapsed ticks on recovery — the sim is the only authority, so there is no
@@ -888,11 +892,13 @@ export class RegionRunner {
   }
 
   /**
-   * PW30 degraded recovery: genesis replay cannot know sim ids assigned by
-   * wall-clock drains, so durable bindings are gone. Completed inbound
-   * transfers still carry their manifest — re-materialize them so the assets
-   * survive; their new sim ids are rebound for future commands. Best-effort:
-   * entities that already interacted during replayed ticks cannot be rewound.
+   * PW30/PW18: durable COMPLETED inbound transfers are not journaled sim
+   * events, so neither a snapshot taken before the arrival nor the journal
+   * tail can reproduce them. Reconcile on every start: genesis replay loses
+   * all sim-id bindings, and a checkpoint restore loses only post-snapshot
+   * arrivals. Rows already bound are skipped; unbound manifests are
+   * re-materialized and rebound. Best-effort: entities that already
+   * interacted during replayed ticks cannot be rewound.
    */
   private async rebindCompletedTransfers(): Promise<void> {
     const g = this.game;
