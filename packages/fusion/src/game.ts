@@ -2285,9 +2285,21 @@ export class Game {
     }
     const enemy = this.isEnemy(u.owner, t.owner);
     if (def.engineer) {
-      if (enemy) this.capture(t, u.owner);
-      else if (t.owner === u.owner) { t.hp = t.maxHp; this.effect('repairFx', t.x, t.y, 0, 0, 20); }
-      this.consume(u);
+      // PW34: neutral objective sites use their own contest rules, never enter-capture.
+      if (this.structDef(t).site) { u.order = 'idle'; u.target = 0; return; }
+      if (enemy && this.capturePermitted(t, u.owner)) {
+        this.capture(t, u.owner);
+        this.consume(u);
+        return;
+      }
+      if (!enemy && t.owner === u.owner) {
+        t.hp = t.maxHp; this.effect('repairFx', t.x, t.y, 0, 0, 20);
+        this.consume(u);
+        return;
+      }
+      // Rejected capture (shield, protection, site, or ally without consent):
+      // the Engineer survives and goes idle — a denied capture consumes nothing.
+      u.order = 'idle'; u.target = 0;
       return;
     }
     if (def.spy && enemy) { this.infiltrate(t, u.owner); this.consume(u); return; }
@@ -2299,6 +2311,21 @@ export class Game {
   private consume(u: Entity) {
     const fx = this.effect('enter', u.x, u.y, 0, 0, 10); fx.owner = u.owner;
     u.hp = 0;
+  }
+
+  /**
+   * PW34 capture gate, rechecked at the moment the Engineer reaches the
+   * building: an active compound shield protects every covered asset (no
+   * capture while it holds — consent cannot grant entry), and newcomer /
+   * recovery protection blocks hostile takeover of protected assets.
+   */
+  private capturePermitted(s: Entity, by: number): boolean {
+    if (this.compoundProtecting(s.x, s.y, s.owner)) return false;
+    if (this.persistent) {
+      const def = this.players[s.owner];
+      if (def?.newcomerProtected || s.recoveryProtected) return false;
+    }
+    return true;
   }
 
   private capture(s: Entity, owner: number) {
