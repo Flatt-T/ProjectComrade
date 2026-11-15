@@ -2039,3 +2039,114 @@ export async function claimObjectiveTx(tx: PoolClient, args: {
   });
   return { rewardSeconds: obj.reward_seconds };
 }
+
+// ---------------------------------------------------------------------------
+// PW34: allied Engineer capture consent.
+// ---------------------------------------------------------------------------
+
+export interface EngineerConsentRow {
+  request_id: string; world_id: string; region_id: string;
+  requester_id: string; owner_id: string;
+  engineer_id: string; building_id: string;
+  engineer_sim_id: number | null; building_sim_id: number | null;
+  state: 'pending' | 'accepted' | 'declined' | 'cancelled' | 'expired' | 'consumed' | 'invalidated';
+  created_at: Date; decided_at: Date | null; consumed_at: Date | null;
+}
+
+export async function engineerConsentCreate(tx: PoolClient, args: {
+  requestId: string; worldId: string; regionId: string;
+  requesterId: string; ownerId: string;
+  engineerId: string; buildingId: string;
+  engineerSimId: number; buildingSimId: number;
+}): Promise<EngineerConsentRow> {
+  const { rows } = await tx.query<EngineerConsentRow>(
+    `insert into engineer_consent
+       (request_id, world_id, region_id, requester_id, owner_id,
+        engineer_id, building_id, engineer_sim_id, building_sim_id)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+     returning *`,
+    [args.requestId, args.worldId, args.regionId, args.requesterId, args.ownerId,
+     args.engineerId, args.buildingId, args.engineerSimId, args.buildingSimId]);
+  return rows[0];
+}
+
+export async function engineerConsentById(requestId: string): Promise<EngineerConsentRow | undefined> {
+  return mmoOne<EngineerConsentRow>(
+    `select * from engineer_consent where request_id = $1`, [requestId]);
+}
+
+/** Pending request for the same engineer/building pair AND owner, if one exists.
+ *  The owner is part of the dedupe key: a building that changed hands must not
+ *  inherit a pending request bound to its previous owner. */
+export async function engineerConsentPendingFor(tx: PoolClient, args: {
+  regionId: string; requesterId: string; ownerId: string; engineerId: string; buildingId: string;
+}): Promise<EngineerConsentRow | undefined> {
+  const { rows } = await tx.query<EngineerConsentRow>(
+    `select * from engineer_consent
+      where region_id = $1 and requester_id = $2 and owner_id = $3
+        and engineer_id = $4 and building_id = $5
+        and state = 'pending'
+      order by created_at limit 1 for update`,
+    [args.regionId, args.requesterId, args.ownerId, args.engineerId, args.buildingId]);
+  return rows[0];
+}
+
+/** Irreversibly invalidate every live consent in a region touching these
+ *  players — used when alliance membership changes so a break (even one later
+ *  reversed) kills pending and accepted grants alike. */
+export async function engineerConsentInvalidateForPlayers(tx: PoolClient, args: {
+  regionId: string; playerIds: string[];
+}): Promise<EngineerConsentRow[]> {
+  if (!args.playerIds.length) return [];
+  const { rows } = await tx.query<EngineerConsentRow>(
+    `update engineer_consent
+        set state = 'invalidated', decided_at = clock_timestamp()
+      where region_id = $1 and state in ('pending', 'accepted')
+        and (requester_id = any($2::uuid[]) or owner_id = any($2::uuid[]))
+      returning *`,
+    [args.regionId, args.playerIds]);
+  return rows;
+}
+
+/** Owner decision; only a still-pending row transitions, so double-decisions conflict. */
+export async function engineerConsentDecide(tx: PoolClient, args: {
+  requestId: string; ownerId: string; decision: 'accept' | 'decline';
+}): Promise<EngineerConsentRow | undefined> {
+  const state = args.decision === 'accept' ? 'accepted' : 'declined';
+  const { rows } = await tx.query<EngineerConsentRow>(
+    `update engineer_consent
+        set state = $3, decided_at = clock_timestamp()
+      where request_id = $1 and owner_id = $2 and state = 'pending'
+      returning *`,
+    [args.requestId, args.ownerId, state]);
+  return rows[0];
+}
+
+/** Requester withdraws a still-pending request. */
+export async function engineerConsentCancel(tx: PoolClient, args: {
+  requestId: string; requesterId: string;
+}): Promise<EngineerConsentRow | undefined> {
+  const { rows } = await tx.query<EngineerConsentRow>(
+    `update engineer_consent
+        set state = 'cancelled', decided_at = clock_timestamp()
+      where request_id = $1 and requester_id = $2 and state = 'pending'
+      returning *`,
+    [args.requestId, args.requesterId]);
+  return rows[0];
+}
+
+/** The sim recorded the capture: the accepted grant is spent. */
+export async function engineerConsentConsume(requestId: string, tx?: PoolClient): Promise<void> {
+  const q = tx ?? mmoDb();
+  await q.query(
+    `update engineer_consent set state = 'consumed', consumed_at = clock_timestamp()
+      where request_id = $1 and state = 'accepted'`, [requestId]);
+}
+
+/** Accepted grants whose sim entities no longer satisfy the request. */
+export async function engineerConsentInvalidate(requestId: string, tx?: PoolClient): Promise<void> {
+  const q = tx ?? mmoDb();
+  await q.query(
+    `update engineer_consent set state = 'invalidated', decided_at = clock_timestamp()
+      where request_id = $1 and state in ('pending', 'accepted')`, [requestId]);
+}

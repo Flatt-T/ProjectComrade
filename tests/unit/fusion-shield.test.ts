@@ -243,3 +243,318 @@ describe('PW10 shield lifecycle in the sim', () => {
     expect(g.tick - c.battleAt).toBeLessThan(600);
   });
 });
+
+describe('PW34 allied capture consent', () => {
+  const allied = (g: Game) => {
+    g.enqueue(-1, { t: 'setAlly', slot: 0, ally: 5 });
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: 5 });
+    g.step();
+  };
+  const grant = (g: Game, requestId: string, eng: number, bld: number, owner = 0, requester = 1) =>
+    g.enqueue(-1, { t: 'consentGrant', requestId, engineer: eng, building: bld, owner, requester });
+
+  it('a journaled consent lets the allied Engineer capture — one use, audited', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(eng.id)?.hp ?? 0).toBe(0);
+    expect(g.consents).toHaveLength(1);
+    expect(g.consents[0].used).toBe(true);
+    expect(g.captureEvents).toHaveLength(1);
+    expect(g.captureEvents[0].requestId).toBe('req-1');
+    expect(g.captureEvents[0].from).toBe(0);
+    expect(g.captureEvents[0].to).toBe(1);
+  });
+
+  it('the grant is one-use and idempotent on requestId', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    grant(g, 'req-1', eng.id, target.id); // replayed journal must not double-grant
+    g.step();
+    expect(g.consents).toHaveLength(1);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    // A second Engineer has no consent — order rejected at issue, survives.
+    const eng2 = unitNear(g, 'engineer', 1, 32, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng2.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(eng2.id)!.hp).toBeGreaterThan(0);
+    expect(g.entities.get(eng2.id)!.order).toBe('idle');
+    expect(g.captureEvents).toHaveLength(1);
+  });
+
+  it('consent bound to the wrong engineer, building or owner cannot be used', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const other = g.spawnStructure('pyle', 0, 40, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    // Grant names a different building — the order on `target` finds no consent.
+    grant(g, 'req-x', eng.id, other.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+  });
+
+  it('an active shield still bars a consented capture at arrival', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    compound(g, 0, 32, 30); // radius covers the pyle at (33,30)
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.entities.get(eng.id)!.order).toBe('idle');
+    expect(g.captureEvents).toHaveLength(0);
+  });
+
+  it('an ownership change after consent invalidates the capture mid-walk', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    const target = g.spawnStructure('pyle', 0, 50, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    g.step();
+    // The building changes hands while the Engineer walks — consent no longer applies.
+    g.enqueue(0, { t: 'transfer', ids: [target.id], to: 1 });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(1); // now the requester's own
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.entities.get(eng.id)!.order).toBe('idle');
+    expect(g.consents[0].used).toBe(false);
+    expect(g.captureEvents).toHaveLength(0);
+  });
+
+  it('an alliance break after consent invalidates the order — it never becomes a hostile capture', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    const target = g.spawnStructure('pyle', 0, 50, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    g.step();
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: -1 });
+    steps(g, 1500);
+    // The players are enemies now, but the consent order is dead — the
+    // Engineer must issue a fresh hostile order to take the building.
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.entities.get(eng.id)!.order).toBe('idle');
+    // The break destroyed the grant outright — nothing left to consume.
+    expect(g.consents).toHaveLength(0);
+    expect(g.captureEvents).toHaveLength(0);
+  });
+
+  it('a protected attacker cannot capture by force; a recovering attacker loses protection on capture', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    // Newcomer-protected attacker: capture is refused, Engineer survives.
+    g.enqueue(-1, { t: 'setNewcomerProtection', slot: 1, on: true });
+    g.step();
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+
+    // A recovering player may still fight — but a successful capture marks the
+    // attacker so recovery protection ends at the next evaluation.
+    const g2 = new Game(setup(true));
+    const target2 = g2.spawnStructure('pyle', 0, 33, 30);
+    g2.enqueue(-1, { t: 'setRecovery', slot: 1, on: true });
+    g2.step();
+    const eng2 = unitNear(g2, 'engineer', 1, 31, 30);
+    g2.enqueue(1, { t: 'enter', ids: [eng2.id], target: target2.id });
+    steps(g2, 300);
+    expect(g2.entities.get(target2.id)!.owner).toBe(1);
+    expect(g2.players[1].recoveryAttacked).toBe(true);
+  });
+
+  it('two Engineers racing one building produce exactly one capture and one consumption', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 40, 30);
+    const engA = unitNear(g, 'engineer', 1, 31, 29);
+    const engB = unitNear(g, 'engineer', 1, 31, 31);
+    g.enqueue(1, { t: 'enter', ids: [engA.id, engB.id], target: target.id });
+    steps(g, 600);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    const survivors = [engA, engB].filter(e => (g.entities.get(e.id)?.hp ?? 0) > 0);
+    expect(survivors).toHaveLength(1);
+    expect(survivors[0].order).toBe('idle');
+    expect(g.captureEvents).toHaveLength(1);
+  });
+
+  it('a capture order whose target changes hands never becomes an own-repair', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 40, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id }); // hostile intent
+    g.step();
+    g.enqueue(0, { t: 'transfer', ids: [target.id], to: 1 }); // now ours mid-walk
+    target.hp = target.maxHp - 1; // damaged: the old code would heal+consume
+    steps(g, 1500);
+    const t = g.entities.get(target.id)!;
+    expect(t.owner).toBe(1);
+    expect(t.hp).toBe(target.maxHp - 1); // NOT repaired
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.entities.get(eng.id)!.order).toBe('idle');
+  });
+
+  it('consents and enter intents survive snapshot/restore', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    const target = g.spawnStructure('pyle', 0, 50, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    g.step();
+    const restored = restoreGame(captureGame(g, { seed: 47 }), CLASSIC_PACKS);
+    expect(restored.consents).toHaveLength(1);
+    expect(restored.consents[0].requestId).toBe('req-1');
+    const re = restored.entities.get(eng.id)!;
+    expect(re.enterIntent).toBe(2);
+    steps(restored, 1500);
+    expect(restored.entities.get(target.id)!.owner).toBe(1);
+  });
+
+  // The three failures independently reproduced on b4c72b1 (15 Nov review).
+
+  it('repro 1: a shielded-at-issue order is rejected — lowering the shield does not revive it', () => {
+    const g = new Game(setup(true));
+    const yard = compound(g, 0, 48, 30); // active shield covers the pyle at (50,30)
+    const target = g.spawnStructure('pyle', 0, 50, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    g.step();
+    // Coverage at issue: the order is refused outright, not queued.
+    expect(eng.order).toBe('idle');
+    // Lower the shield without reissuing — the Engineer must not capture.
+    g.enqueue(-1, { t: 'setShield', compound: yard.id, on: false });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.captureEvents).toHaveLength(0);
+    // A NEW lawful hostile order after the shield falls captures normally.
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(eng.id)?.hp ?? 0).toBe(0);
+    expect(g.captureEvents).toHaveLength(1);
+  });
+
+  it('repro 2: a stale own-repair order ends when an enemy captures first — the repairer survives', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 1, 50, 30);
+    target.hp = target.maxHp - 50; // damaged: a lawful own-repair target
+    const repairer = unitNear(g, 'engineer', 1, 31, 30);
+    const foe = unitNear(g, 'engineer', 0, 49, 30); // nearer, reaches it first
+    g.enqueue(1, { t: 'enter', ids: [repairer.id], target: target.id }); // own-repair intent
+    g.step();
+    g.enqueue(0, { t: 'enter', ids: [foe.id], target: target.id }); // hostile intent
+    steps(g, 1500);
+    // Only the intervening hostile Engineer captures — exactly one event.
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.captureEvents).toHaveLength(1);
+    // The stale repair order is dead: the former repairer survives, unconsumed,
+    // and never enters the enemy branch as a second capture.
+    const r = g.entities.get(repairer.id)!;
+    expect(r.hp).toBeGreaterThan(0);
+    expect(r.order).toBe('idle');
+  });
+
+  it('repro 3: an alliance break-and-rejoin invalidates the grant — rejoining needs a fresh decision', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    const target = g.spawnStructure('pyle', 0, 50, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    g.step();
+    // Leave, become hostile, rejoin — all while the Engineer walks.
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: -1 });
+    g.step();
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: 5 });
+    g.step();
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.entities.get(eng.id)!.order).toBe('idle');
+    // The grant was destroyed at the break — membership restored does not revive it.
+    expect(g.consents).toHaveLength(0);
+    expect(g.captureEvents).toHaveLength(0);
+    // And a fresh grant on the rejoined alliance works normally.
+    grant(g, 'req-2', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(eng.id)?.hp ?? 0).toBe(0);
+  });
+
+  it('two different requesters race one building — exactly one capture, one Engineer consumed', () => {
+    // Tiberium Gardens seats four commanders — the 2-player crossing map
+    // cannot host owner + two requesters.
+    const s = setup(true);
+    s.mapId = 'td-tiberium-gardens';
+    const g = new Game(s);
+    expect(g.players.length).toBeGreaterThanOrEqual(3);
+    g.enqueue(-1, { t: 'setAlly', slot: 0, ally: 5 });
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: 5 });
+    g.enqueue(-1, { t: 'setAlly', slot: 2, ally: 5 });
+    g.step();
+    const target = g.spawnStructure('pyle', 0, 40, 30);
+    const engA = unitNear(g, 'engineer', 1, 31, 29);
+    const engB = unitNear(g, 'engineer', 2, 31, 31);
+    grant(g, 'req-A', engA.id, target.id, 0, 1);
+    grant(g, 'req-B', engB.id, target.id, 0, 2);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [engA.id], target: target.id });
+    g.enqueue(2, { t: 'enter', ids: [engB.id], target: target.id });
+    steps(g, 600);
+    // Exactly one capture: the building belongs to one requester, one Engineer
+    // was consumed, one CAPTURE receipt was queued — never two.
+    expect([1, 2]).toContain(g.entities.get(target.id)!.owner);
+    const consumed = [engA, engB].filter(e => (g.entities.get(e.id)?.hp ?? 0) <= 0);
+    expect(consumed).toHaveLength(1);
+    const survivor = [engA, engB].find(e => (g.entities.get(e.id)?.hp ?? 0) > 0)!;
+    expect(survivor.order).toBe('idle');
+    expect(g.captureEvents).toHaveLength(1);
+    expect(g.consents.filter(c => c.used)).toHaveLength(1);
+  });
+
+  it('pending capture receipts survive snapshot/restore for the durable drain', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.captureEvents).toHaveLength(1); // queued, not yet drained
+    const restored = restoreGame(captureGame(g, { seed: 47 }), CLASSIC_PACKS);
+    expect(restored.captureEvents).toHaveLength(1);
+    expect(restored.captureEvents[0]).toEqual(g.captureEvents[0]);
+    // Draining the restored feed receipts the same deterministic operation.
+    expect(restored.captureEvents[0].building).toBe(target.id);
+    expect(restored.captureEvents[0].engineer).toBe(eng.id);
+  });
+});

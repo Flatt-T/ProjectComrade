@@ -493,6 +493,7 @@ export class RegionRunner {
     this.advanceTo(tick);
     await this.drainSalvageEvents();
     await this.drainDepartEvents();
+    await this.drainCaptureEvents();
     await this.drainInboundTransfers();
     this.stats.catchUpTicks += this.game!.tick - before;
     if (this.game!.tick !== before) this.opts.log('region-catchup', { from: before, to: this.game!.tick });
@@ -506,6 +507,7 @@ export class RegionRunner {
       if (this.game.tick < expected) this.advanceTo(Math.min(expected, this.game.tick + 600));
       await this.drainSalvageEvents();
       await this.drainDepartEvents();
+      await this.drainCaptureEvents();
       await this.drainInboundTransfers();
       if (this.opts.checkpointEveryTicks > 0
         && this.game.tick - this.lastCheckpointTick >= this.opts.checkpointEveryTicks) {
@@ -788,6 +790,7 @@ export class RegionRunner {
       if (!events.length) {
         await this.drainSalvageEvents();
         await this.drainDepartEvents();
+        await this.drainCaptureEvents();
         await this.drainInboundTransfers();
         return;
       }
@@ -938,7 +941,7 @@ export class RegionRunner {
   private async drainSalvageEvents(): Promise<void> {
     const g = this.game;
     if (!g || this.epoch === undefined) {
-      if (g) { g.salvageEvents.length = 0; g.siteEvents.length = 0; g.departEvents.length = 0; }
+      if (g) { g.salvageEvents.length = 0; g.siteEvents.length = 0; g.departEvents.length = 0; g.captureEvents.length = 0; }
       return;
     }
     // Spawns become SALVAGE_SPAWN ops; collect events stay queued for
@@ -1050,6 +1053,97 @@ export class RegionRunner {
         [t.transfer_id, t.transfer_id, this.opts.regionId, ownerPid || null, String(simId),
          JSON.stringify({ transferId: t.transfer_id, destRegionId: t.dest_region_id, ownerPid })]);
     });
+  }
+
+  /**
+   * Deterministic CAPTURE operation id: same capture event → same UUID, so a
+   * retried drain or duplicate delivery cannot mint a second operation.
+   */
+  private captureOperationId(ev: { building: number; engineer: number; from: number; to: number; requestId: string; tick: number }): string {
+    const h = createHash('sha256')
+      .update(`capture|${this.opts.regionId}|${ev.building}|${ev.engineer}|${ev.from}|${ev.to}|${ev.requestId}|${ev.tick}`)
+      .digest('hex');
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-${((parseInt(h[16]!, 16) & 0x3) | 0x8).toString(16)}${h.slice(17, 20)}-${h.slice(20, 32)}`;
+  }
+
+  /**
+   * PW34: receipt completed Engineer captures. The sim queues one event per
+   * capture (hostile or consented); each becomes a single CAPTURE
+   * economy_operation with a CAPTURE ledger row for the building and a DESTROY
+   * row for the consumed engineer. A consented capture also spends its durable
+   * grant (accepted -> consumed); accepted grants whose engineer or building
+   * died some other way are invalidated here so they cannot linger.
+   *
+   * Same best-effort crash semantics as the other audit drains: the sim state
+   * is already committed, so a lost receipt row is audit-only, never
+   * state-corrupting.
+   */
+  private async drainCaptureEvents(): Promise<void> {
+    const g = this.game;
+    if (!g || this.epoch === undefined) {
+      if (g) g.captureEvents.length = 0;
+      return;
+    }
+    const playerIdBySlot = new Map<number, string>();
+    for (const [playerId, slot] of this.slotByPlayer) playerIdBySlot.set(slot, playerId);
+    // Capture receipts first: a completed capture kills its engineer, so the
+    // stale-grant sweep below would otherwise invalidate the accepted grant
+    // before the consume update (which requires state='accepted') can match.
+    for (const ev of g.captureEvents.splice(0)) {
+      // Stable operation identity derived from the capture itself: a retried
+      // or duplicated drain resolves to the same operation_id, and the unique
+      // indexes make every insert a no-op on redelivery.
+      const opId = this.captureOperationId(ev);
+      const fromId = playerIdBySlot.get(ev.from) ?? null;
+      const toId = playerIdBySlot.get(ev.to) ?? null;
+      const buildingEntityId = ev.buildingDurableId || mmoEntityId(this.opts.regionId, ev.building);
+      const engineerEntityId = ev.engineerDurableId || mmoEntityId(this.opts.regionId, ev.engineer);
+      const detail = JSON.stringify({
+        simBuilding: ev.building, simEngineer: ev.engineer,
+        requestId: ev.requestId || null, fromId, toId,
+      });
+      await mmoTransaction(async tx => {
+        await assertRegionFence(tx, {
+          regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+        });
+        await tx.query(
+          `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+           values ($1,$2,$3,$4,'CAPTURE',$5,$6) on conflict (operation_id) do nothing`,
+          [opId, this.opts.regionId, this.epoch, String(ev.tick || g.tick),
+           JSON.stringify({ kind: 'CAPTURE', buildingId: buildingEntityId, engineerId: engineerEntityId, requestId: ev.requestId || null, fromId, toId }),
+           JSON.stringify({ simBuilding: ev.building, simEngineer: ev.engineer })]);
+        await tx.query(
+          `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+           values ($1,$2,$3,'CAPTURE',$4,$5,'deployed',$6,$7) on conflict do nothing`,
+          [opId, buildingEntityId, this.opts.regionId, fromId, toId, String(ev.building), detail]);
+        // The DESTROY charge belongs to the Engineer's actual owner — the
+        // capturing slot — never the building's former owner.
+        await tx.query(
+          `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+           values ($1,$2,$3,'DESTROY',$4,null,'destroyed',$5,$6) on conflict do nothing`,
+          [opId, engineerEntityId, this.opts.regionId, toId, String(ev.engineer), detail]);
+        if (ev.requestId) {
+          await tx.query(
+            `update engineer_consent set state = 'consumed', consumed_at = clock_timestamp()
+              where request_id = $1 and state = 'accepted'`, [ev.requestId]);
+        }
+      });
+    }
+    // Sweep accepted grants whose bound entities died some other way — the
+    // consent can never complete, so the durable row must not stay 'accepted'.
+    // Runs after capture receipts so a just-consumed grant is never swept.
+    const stale = await mmoQuery<{ request_id: string; engineer_sim_id: number | null; building_sim_id: number | null }>(
+      `select request_id, engineer_sim_id, building_sim_id from engineer_consent
+        where region_id = $1 and state = 'accepted'`, [this.opts.regionId]);
+    for (const row of stale) {
+      const eng = row.engineer_sim_id === null ? undefined : g.entities.get(row.engineer_sim_id);
+      const bld = row.building_sim_id === null ? undefined : g.entities.get(row.building_sim_id);
+      if (!eng || eng.hp <= 0 || !bld || bld.hp <= 0) {
+        await mmoQuery(
+          `update engineer_consent set state = 'invalidated', decided_at = clock_timestamp()
+            where request_id = $1 and state = 'accepted'`, [row.request_id]);
+      }
+    }
   }
 
   /**

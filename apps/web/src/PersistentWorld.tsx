@@ -125,6 +125,12 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // journaled world actions that grant earned shield seconds.
   const [objectives, setObjectives] = useState<MmoObjectivesResponse | null>(null);
   const [ladder, setLadder] = useState<MmoLadderResponse | null>(null);
+  // PW34: allied Engineer capture consent — the owner answers private requests
+  // (queued by requestId); the requester tracks asks so an accepted grant
+  // auto-issues the enter order. Durable list recovers state on mount/reconnect.
+  const [consentQueue, setConsentQueue] = useState<{ requestId: string; requesterName: string; engineerId: string; buildingId: string }[]>([]);
+  const [myConsents, setMyConsents] = useState<{ requestId: string; state: string; role: string; otherName: string; engineerId: string; buildingId: string }[]>([]);
+  const pendingConsent = useRef(new Map<string, { engineerId: string; buildingId: string }>());
 
   useEffect(() => {
     let game: Game | null = null;
@@ -142,6 +148,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         connRef.current = conn;
         if (info.slot !== null) slot = info.slot;
         else { rosteredRef.current = false; setNeedSettle(true); } // rostered nowhere yet — settle (or rejoin) first
+        conn.command({ t: 'engineerConsentList' }); // recover consent state on (re)connect
       },
       onSnapshot: header => {
         const state = header.state as SnapshotState | undefined;
@@ -173,14 +180,31 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         }
       },
       onResult: (_commandId, status, result) => {
-        const r = result as { accepted?: boolean; reason?: string } | undefined;
+        const r = result as { accepted?: boolean; reason?: string; requests?: { requestId: string; state: string; role: string; otherName: string; engineerId: string; buildingId: string }[] } | undefined;
+        // PW34: durable consent list — rebuilds the owner queue and the
+        // requester's request ledger after mount/reconnect.
+        if (Array.isArray(r?.requests)) {
+          setMyConsents(r.requests!);
+          setConsentQueue(q => {
+            const pendingOwner = r.requests!.filter(x => x.role === 'owner' && x.state === 'pending');
+            const kept = q.filter(x => pendingOwner.some(p => p.requestId === x.requestId));
+            const known = new Set(kept.map(x => x.requestId));
+            const added = pendingOwner.filter(p => !known.has(p.requestId))
+              .map(p => ({ requestId: p.requestId, requesterName: p.otherName, engineerId: p.engineerId, buildingId: p.buildingId }));
+            return [...kept, ...added];
+          });
+          return;
+        }
         // PW28+: legacy regions refuse new settlements once a universal region
         // exists — re-enter so the server routes us to the right one.
         if (r?.reason === 'REGION_RETIRED') { window.location.assign('/world'); return; }
         if (status !== 'applied' || r?.accepted === false) flash(`Order rejected${r?.reason ? `: ${r.reason}` : ''}`);
       },
       onError: (code, message) => flash(`${code}: ${message}`),
-      onStatus: connected => setUi(u => u ? { ...u, connected } : { tick: 0, credits: 0, storage: 0, powerGen: 0, powerUse: 0, options: {}, costs: {}, selection: null, status: connected ? '' : 'Reconnecting…', connected, slot, supers: [], recovering: false }),
+      onStatus: connected => {
+        setUi(u => u ? { ...u, connected } : { tick: 0, credits: 0, storage: 0, powerGen: 0, powerUse: 0, options: {}, costs: {}, selection: null, status: connected ? '' : 'Reconnecting…', connected, slot, supers: [], recovering: false });
+        if (connected) connRef.current?.command({ t: 'engineerConsentList' });
+      },
     });
     conn.subscribe(regionId);
 
@@ -196,6 +220,35 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
             fromName: p.fromName ?? 'Commander', text,
           }]);
         }
+        return;
+      }
+      if (msg.type === 'event' && msg.eventKind === 'private') {
+        const p = msg.payload as {
+          kind?: string; requestId?: string; requesterName?: string;
+          engineerId?: string; buildingId?: string; decision?: string;
+        };
+        if (p.kind === 'engineer-consent-request' && p.requestId) {
+          const req = {
+            requestId: p.requestId, requesterName: p.requesterName ?? 'Commander',
+            engineerId: p.engineerId ?? '', buildingId: p.buildingId ?? '',
+          };
+          setConsentQueue(q => q.some(r => r.requestId === req.requestId) ? q : [...q, req]);
+        } else if (p.kind === 'engineer-consent-result' && p.engineerId && p.buildingId) {
+          const key = `${p.engineerId}:${p.buildingId}`;
+          const pending = pendingConsent.current.get(key);
+          pendingConsent.current.delete(key);
+          if (p.decision === 'accepted' && pending) {
+            connRef.current?.command({ t: 'enter', entityIds: [pending.engineerId], targetId: pending.buildingId });
+            flash('Capture consent granted — Engineer moving in');
+          } else {
+            flash(`Capture consent ${p.decision ?? 'failed'}`);
+          }
+        } else if (p.kind === 'engineer-consent-request-closed' && p.requestId) {
+          setConsentQueue(q => q.filter(r => r.requestId !== p.requestId));
+          setMyConsents(cs => cs.map(c => c.requestId === p.requestId ? { ...c, state: p.decision ?? 'closed' } : c));
+        }
+        // Any consent lifecycle event may change durable state — resync the list.
+        connRef.current?.command({ t: 'engineerConsentList' });
         return;
       }
       if (msg.type !== 'notification') return;
@@ -587,6 +640,8 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     else r.renderer.selected = new Set();
   }
 
+  const flashNotice = (text: string) => { setNotice(text); window.setTimeout(() => setNotice(''), 4000); };
+
   function click(x: number, y: number, mods: { shift: boolean; ctrl: boolean; alt: boolean }) {
     const r = rig.current; if (!r) return;
     const { game, renderer, session } = r;
@@ -654,12 +709,30 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         if (d.harvester && sdef.refinery && target.owner === session.slot) return true;
         return target.owner === session.slot && (sdef.repairPad && d.kind !== 'infantry' && d.kind !== 'aircraft' || sdef.airfield && d.kind === 'aircraft');
       });
+      // PW34: an allied building needs the owner's private consent first —
+      // request it for each selected Engineer instead of issuing an enter
+      // order the sim would reject. The accepted grant auto-issues the order.
+      const consentEngineers = units.filter(u => {
+        const d = pack.units[u.type];
+        return !!d.engineer && !enemy && target.owner !== session.slot
+          && me.ally >= 0 && game.players[target.owner]?.ally === me.ally;
+      });
+      if (consentEngineers.length) {
+        const buildingId = mmoEntityId(regionId, target.id);
+        for (const u of consentEngineers) {
+          const engineerId = mmoEntityId(regionId, u.id);
+          pendingConsent.current.set(`${engineerId}:${buildingId}`, { engineerId, buildingId });
+          connRef.current?.command({ t: 'engineerRequest', engineerId, buildingId });
+        }
+        flashNotice(`Capture consent requested from ${game.players[target.owner]?.name ?? 'the owner'}`);
+      }
       if (enter.length) {
         session.issue({ t: 'enter', ids: enter.map(u => u.id), target: target.id });
         const rest = units.filter(u => !enter.includes(u));
         if (rest.length && enemy) session.issue({ t: 'attack', ids: rest.map(u => u.id), target: target.id });
         mark(enemy ? '#ffd24a' : '#7dff7a'); return;
       }
+      if (consentEngineers.length) return; // consent requested — hold position
     }
     if (target && target.kind === 'unit' && target.owner === session.slot && !renderer.selected.has(target.id) && pack.units[target.type].transport) {
       const boarders = units.filter(u => game.canBoard(u, target));
@@ -1138,6 +1211,30 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       </div>
       {modeView === 'sell' &&
         <div className="status-line">Sell mode — click your buildings for credits. Selling your last building starts protected recovery: your MCV redeploys at the compound.</div>}
+      {consentQueue.length > 0 && consentQueue[0] && <div className="consent-dialog">
+        <b>{consentQueue[0].requesterName} requests capture consent{consentQueue.length > 1 ? ` (+${consentQueue.length - 1} more)` : ''}</b>
+        <span>Their Engineer wants to take your building. Accept grants a one-use capture — shields and ownership are rechecked when it arrives.</span>
+        <div>
+          <button onClick={() => {
+            const req = consentQueue[0]!;
+            connRef.current?.command({ t: 'engineerConsent', requestId: req.requestId, decision: 'accept' });
+            setConsentQueue(q => q.filter(r => r.requestId !== req.requestId));
+          }}>Accept</button>
+          <button onClick={() => {
+            const req = consentQueue[0]!;
+            connRef.current?.command({ t: 'engineerConsent', requestId: req.requestId, decision: 'decline' });
+            setConsentQueue(q => q.filter(r => r.requestId !== req.requestId));
+          }}>Decline</button>
+        </div>
+      </div>}
+      {myConsents.length > 0 && <div className="consent-requests">
+        <b>Capture requests</b>
+        {myConsents.slice(0, 8).map(c => <div key={c.requestId} className="consent-request-row">
+          <span>{c.role === 'owner' ? `From ${c.otherName}` : `To ${c.otherName}`} — {c.state}</span>
+          {c.role === 'requester' && c.state === 'pending' &&
+            <button onClick={() => connRef.current?.command({ t: 'engineerCancel', requestId: c.requestId })}>Withdraw</button>}
+        </div>)}
+      </div>}
       <button className="leave" onClick={onExit}>Leave region</button>
     </aside>
   </div>;
