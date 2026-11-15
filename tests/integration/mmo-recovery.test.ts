@@ -444,5 +444,5 @@ describeDb('mmo recovery (real PostgreSQL + runner + Fusion sim)', () => {
     g.entities.delete(site.id);
     await resetPlayer(p0id, 0);
     await resetPlayer(p1id, 1);
-  }, 90_000);
+  });
 });
