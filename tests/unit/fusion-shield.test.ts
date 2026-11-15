@@ -511,4 +511,50 @@ describe('PW34 allied capture consent', () => {
     expect(g.entities.get(target.id)!.owner).toBe(1);
     expect(g.entities.get(eng.id)?.hp ?? 0).toBe(0);
   });
+
+  it('two different requesters race one building — exactly one capture, one Engineer consumed', () => {
+    // Tiberium Gardens seats four commanders — the 2-player crossing map
+    // cannot host owner + two requesters.
+    const s = setup(true);
+    s.mapId = 'td-tiberium-gardens';
+    const g = new Game(s);
+    expect(g.players.length).toBeGreaterThanOrEqual(3);
+    g.enqueue(-1, { t: 'setAlly', slot: 0, ally: 5 });
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: 5 });
+    g.enqueue(-1, { t: 'setAlly', slot: 2, ally: 5 });
+    g.step();
+    const target = g.spawnStructure('pyle', 0, 40, 30);
+    const engA = unitNear(g, 'engineer', 1, 31, 29);
+    const engB = unitNear(g, 'engineer', 2, 31, 31);
+    grant(g, 'req-A', engA.id, target.id, 0, 1);
+    grant(g, 'req-B', engB.id, target.id, 0, 2);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [engA.id], target: target.id });
+    g.enqueue(2, { t: 'enter', ids: [engB.id], target: target.id });
+    steps(g, 600);
+    // Exactly one capture: the building belongs to one requester, one Engineer
+    // was consumed, one CAPTURE receipt was queued — never two.
+    expect([1, 2]).toContain(g.entities.get(target.id)!.owner);
+    const consumed = [engA, engB].filter(e => (g.entities.get(e.id)?.hp ?? 0) <= 0);
+    expect(consumed).toHaveLength(1);
+    const survivor = [engA, engB].find(e => (g.entities.get(e.id)?.hp ?? 0) > 0)!;
+    expect(survivor.order).toBe('idle');
+    expect(g.captureEvents).toHaveLength(1);
+    expect(g.consents.filter(c => c.used)).toHaveLength(1);
+  });
+
+  it('pending capture receipts survive snapshot/restore for the durable drain', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.captureEvents).toHaveLength(1); // queued, not yet drained
+    const restored = restoreGame(captureGame(g, { seed: 47 }), CLASSIC_PACKS);
+    expect(restored.captureEvents).toHaveLength(1);
+    expect(restored.captureEvents[0]).toEqual(g.captureEvents[0]);
+    // Draining the restored feed receipts the same deterministic operation.
+    expect(restored.captureEvents[0].building).toBe(target.id);
+    expect(restored.captureEvents[0].engineer).toBe(eng.id);
+  });
 });

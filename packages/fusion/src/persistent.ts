@@ -98,6 +98,9 @@ export interface GameSnapshotV1 {
     pending: [number, { slot: number; cmd: Command }[]][];
     /** PW34: journaled allied-capture consent grants (absent pre-PW34). */
     consents?: { requestId: string; engineer: number; building: number; owner: number; requester: number; used: boolean }[];
+    /** PW34: pending capture audit receipts — serialized so a checkpoint taken
+     *  between the capture tick and the durable drain cannot lose them. */
+    captureEvents?: { building: number; buildingDurableId: string; engineer: number; engineerDurableId: string; from: number; to: number; requestId: string; tick: number }[];
     map: { occupied: string; res: string; resKind: string; concrete: string };
   };
 }
@@ -150,6 +153,7 @@ export function captureGame(game: Game, meta: SnapshotMeta): string {
       reveals: game.reveals, crates: game.crates,
       pending: [...internals.pending.entries()].sort((a, b) => a[0] - b[0]),
       consents: game.consents.map(c => ({ ...c })),
+      captureEvents: game.captureEvents.map(e => ({ ...e })),
       map: { occupied: i32ToB64(game.map.occupied), res: u16ToB64(game.map.res), resKind: bytesToB64(game.map.resKind), concrete: bytesToB64(game.map.concrete) },
     },
   };
@@ -228,11 +232,15 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   g.reveals = snap.state.reveals;
   g.crates = snap.state.crates;
   // Audit feeds are transient (the runner drains them); Object.create skips
-  // field initializers, so re-arm them empty on every restore.
+  // field initializers, so re-arm them empty on every restore. PW34: pending
+  // capture receipts ARE serialized — a crash between the capture tick and
+  // the durable drain must not lose the CAPTURE audit; the drain is
+  // idempotent so a duplicated receipt resolves to the same operation.
   (g as unknown as { salvageEvents: unknown[] }).salvageEvents = [];
   (g as unknown as { siteEvents: unknown[] }).siteEvents = [];
   (g as unknown as { departEvents: unknown[] }).departEvents = [];
-  (g as unknown as { captureEvents: unknown[] }).captureEvents = [];
+  (g as unknown as { captureEvents: { building: number; buildingDurableId: string; engineer: number; engineerDurableId: string; from: number; to: number; requestId: string; tick: number }[] }).captureEvents =
+    Array.isArray(snap.state.captureEvents) ? snap.state.captureEvents.map(e => ({ ...e })) : [];
   g.effects = [];
   g.tick = snap.state.tick;
   g.market = snap.state.market;

@@ -638,9 +638,10 @@ export class Game {
   private nextId = 1;
   private pending = new Map<number, { slot: number; cmd: Command }[]>();
   private powerDirty = true;
-  /** PW34: transient audit feed — every completed Engineer capture (hostile or
+  /** PW34: audit feed — every completed Engineer capture (hostile or
    *  consented) is queued here for the durable layer to receipt as one CAPTURE
-   *  operation. Drained by the region runner; never serialized. */
+   *  operation. Drained by the region runner; serialized in snapshots so a
+   *  checkpoint between capture and drain cannot lose the receipt. */
   captureEvents: { building: number; buildingDurableId: string; engineer: number; engineerDurableId: string; from: number; to: number; requestId: string; tick: number }[] = [];
   /** PW34: journaled allied-capture consents mirrored into the sim. Each grant
    *  is one-use and bound to the engineer/building sim ids and owner/requester
