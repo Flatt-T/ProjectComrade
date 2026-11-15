@@ -166,15 +166,19 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         (window as unknown as { __comradeWorld?: unknown }).__comradeWorld = rig.current;
         const start = game.mapPreset.starts[slot] ?? { x: game.map.w >> 1, y: game.map.h >> 1 };
         renderer.centerOn(start.x, start.y);
+        // PW31: anchor the render-delay tracker to the snapshot's authoritative
+        // tick/epoch and route divergence through one debounced resnapshot.
+        session.noteServerTick(Number(header.tick), performance.now(), header.epoch);
+        session.onNeedResync = () => { flash('State diverged — resyncing'); conn.resync(); };
       },
-      onSim: (atTick, fromSlot, command) => session?.applyRemote(atTick, fromSlot, command),
-      onObservation: (tick, checksum) => {
+      onSim: (atTick, fromSlot, command, key) => session?.applyRemote(atTick, fromSlot, command, key),
+      onObservation: (tick, checksum, epoch) => {
         const g = rig.current?.game;
         if (!g) return;
-        if (g.tick === tick && g.checksum() !== checksum) {
-          flash('State diverged — resyncing');
-          conn.resync();
-        } else if (g.tick < tick - 900) {
+        session?.observeChecksum(tick, checksum, epoch, performance.now());
+        // Safety net: the client sim stalled far behind the authoritative tick
+        // (e.g. a hidden tab that missed its catch-up) — one resnapshot.
+        if (tick - g.tick > 900) {
           flash('Fell behind — resyncing');
           conn.resync();
         }
