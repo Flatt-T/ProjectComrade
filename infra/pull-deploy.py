@@ -74,6 +74,28 @@ def compose(image):
                    env=deploy_env(image), check=True)
 
 
+def prune_images(commit, previous_commit):
+    """The guest disk is ~24 GiB and every release adds a ~430 MiB image; without
+    pruning the deployer eventually fails `docker load` with no space left
+    (observed 2026-11-15: prod stuck a release behind at 97% disk). Keep the live
+    image and the rollback target; drop every older comrade tag and dangling
+    layers. Non-comrade images (postgres, base layers) are untouched."""
+    keep = {c for c in (commit, previous_commit) if c}
+    try:
+        listing = subprocess.check_output(
+            ['docker', 'images', '--format', '{{.Repository}}:{{.Tag}}'], text=True)
+        old = [line for line in listing.splitlines()
+               if line.startswith('ghcr.io/flatt-t/projectcomrade:')
+               and line.rsplit(':', 1)[-1] not in keep]
+        if old:
+            subprocess.run(['docker', 'rmi'] + old, check=False,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(['docker', 'image', 'prune', '-f'], check=False,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as exc:  # pruning must never fail a completed deploy
+        print(f'Image prune skipped: {exc}')
+
+
 def main():
     ROOT.mkdir(exist_ok=True)
     with (ROOT / 'deploy.lock').open('w') as lock:
@@ -162,6 +184,7 @@ def main():
             temporary = ROOT / 'current.next.json'
             temporary.write_text(json.dumps(manifest))
             temporary.replace(state_file)
+            prune_images(commit, previous['commit'] if previous else None)
             print(f'Deployed {commit} ({image_id})')
         finally:
             archive.unlink(missing_ok=True)
