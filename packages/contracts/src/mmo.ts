@@ -760,6 +760,10 @@ export interface MmoWelcomeMessage {
   regions: MmoId[];
   /** The player's slot in each subscribed region's sim (parallel to `regions`). */
   slots?: (number | null)[];
+  /** PW33: the region's pinned content fingerprint (engine/pack/rules/worldgen
+   *  hashes) so clients can verify they run the same content; null on regions
+   *  that predate pinning. */
+  fingerprints?: unknown;
 }
 
 /** Ephemeral authoritative observation pushed to subscribers (not journaled): the

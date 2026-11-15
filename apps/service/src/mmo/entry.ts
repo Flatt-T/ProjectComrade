@@ -9,6 +9,7 @@ import {
 import { mmoOne } from './db.js';
 import { createPlayer, createWorld, MmoStoreError, recordSignupSignal } from './store.js';
 import { persistentPackRevision } from './packs.js';
+import { engineFingerprint } from './fingerprints.js';
 import { ensureEntryRegion } from './spawn.js';
 import type { RegionIdentity } from './regions.js';
 import { authEnabled, mmoGuestPolicy } from '../config.js';
@@ -20,7 +21,7 @@ async function betaWorldId(): Promise<string> {
   if (existing) return existing.world_id;
   const world = await createWorld({
     rulesetId: MMO_RULESET_ID, rulesetVersion: MMO_RULESET_VERSION,
-    packRevision: persistentPackRevision('mashup-world'), engineArtifactSha256: 'persistent-engine',
+    packRevision: persistentPackRevision('mashup-world'), engineArtifactSha256: engineFingerprint(),
     capabilities: MMO_CAPABILITIES_MILESTONE1, decisions: MMO_DECISIONS_OPEN,
   });
   return world.world_id;

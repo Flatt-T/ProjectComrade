@@ -698,4 +698,16 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
        'TRANSFER_OUT', 'TRANSFER_IN', 'SALVAGE', 'CAPTURE'));
     `,
   },
+  {
+    version: 18,
+    name: 'region content fingerprints',
+    sql: `
+    -- PW33: pin the immutable content a region actually runs — engine artifact,
+    -- rules profile, pack definitions and worldgen settings — as canonical
+    -- hashes recorded at region creation. NULL on pre-existing regions: their
+    -- content cannot be verified retroactively, so they are never stamped with
+    -- a digest they did not demonstrably run.
+    alter table region add column fingerprints jsonb;
+    `,
+  },
 ];
