@@ -208,7 +208,84 @@ export class FusionRenderer {
     this.drawMarkers();
     this.drawShroud();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.drawOwnerLabels();
     this.drawOverlays();
+  }
+
+  /**
+   * THU-2450/PW39: compact "Name · Ally/Foe" labels on another player's
+   * identifiable unit or building once one of the viewer's living fielded
+   * units closes to its own sight range. Fog-, disguise-, cargo- and
+   * ownership-gated exactly like the entity draw pass; persistent worlds
+   * only; screen-space so labels stay readable at every zoom. Camera pan or
+   * zoom alone never qualifies — a real unit must approach.
+   */
+  private drawOwnerLabels() {
+    const { game, ctx } = this;
+    if (!game.persistent) return;
+    const viewer = game.players[this.viewer];
+    if (!viewer) return;
+    // Approaching units: living, on-map, non-embarked viewer units with their
+    // authoritative sight ranges (distTo measures buildings to the footprint).
+    const anchors: { e: Entity; reach: number }[] = [];
+    for (const e of game.entities.values()) {
+      if (e.kind === 'unit' && e.owner === this.viewer && e.hp > 0 && !e.carriedBy) {
+        anchors.push({ e, reach: game.sightOf(e) * LEPTONS });
+      }
+    }
+    if (!anchors.length) return;
+    interface Candidate { e: Entity; p: { x: number; y: number }; foe: boolean; text: string; priority: number }
+    const found: Candidate[] = [];
+    for (const e of game.entities.values()) {
+      if (e.hp <= 0 || e.owner < 0 || e.owner === this.viewer) continue;
+      const owner = game.players[e.owner];
+      if (!owner?.name) continue;
+      const cell = game.cellOf(e);
+      if (e.kind === 'unit') {
+        if (e.carriedBy || this.hiddenFromViewer(e) || !viewer.visible[cell]) continue;
+      } else {
+        // Remembered-but-fogged structures are suppressed: the label needs
+        // the entity currently visible, not merely explored once.
+        if (this.hiddenFromViewer(e) || !viewer.visible[cell]) continue;
+      }
+      let near = false;
+      for (const a of anchors) {
+        if (game.distTo(a.e.x, a.e.y, e) <= a.reach) { near = true; break; }
+      }
+      if (!near) continue;
+      const lx = e.kind === 'structure' ? (e.cx + e.w / 2) * LEPTONS : e.x;
+      const ly = e.kind === 'structure' ? (e.cy + e.h / 2) * LEPTONS : e.y;
+      const p = this.toScreen(lx, ly);
+      if (p.x < -120 || p.y < -120 || p.x > this.canvas.width + 120 || p.y > this.canvas.height + 120) continue;
+      const foe = game.isEnemy(this.viewer, e.owner);
+      found.push({
+        e, p, foe, text: `${owner.name} · ${foe ? 'Foe' : 'Ally'}`,
+        priority: (this.selected.has(e.id) ? 2 : 0) + (this.hover === e.id ? 1 : 0),
+      });
+    }
+    if (!found.length) return;
+    // Deterministic collision handling: pointed/selected targets win, then
+    // keep one label per ~34px band so dense groups stay legible.
+    found.sort((a, b) => b.priority - a.priority || a.p.y - b.p.y || a.p.x - b.p.x || a.e.id - b.e.id);
+    const placed: { x: number; y: number }[] = [];
+    ctx.save();
+    ctx.font = '600 11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    for (const c of found) {
+      if (placed.some(q => Math.abs(q.x - c.p.x) < 60 && Math.abs(q.y - c.p.y) < 30)) continue;
+      placed.push(c.p);
+      const wpx = ctx.measureText(c.text).width + 10;
+      const top = c.p.y - 34;
+      ctx.fillStyle = c.foe ? 'rgba(110,18,18,0.78)' : 'rgba(16,52,104,0.78)';
+      ctx.fillRect(c.p.x - wpx / 2, top, wpx, 14);
+      ctx.strokeStyle = c.foe ? '#ff9a7a' : '#7db4ff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(c.p.x - wpx / 2 + 0.5, top + 0.5, wpx - 1, 13);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(c.text, c.p.x, top + 11);
+    }
+    ctx.restore();
   }
 
   /** Pixels per cell for sizing radial effects in either projection. */
