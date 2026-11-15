@@ -24,7 +24,7 @@ import {
 import { mmoOne } from './db.js';
 import { journalTail } from './commands.js';
 import { submitCommand } from './commands.js';
-import { MmoStoreError, playerConnected, playerDisconnected, playersSeen } from './store.js';
+import { MmoStoreError, allianceAudience, playerConnected, playerDisconnected, playersSeen } from './store.js';
 import { dispatchOutbox, type OutboxEnvelope } from './bus.js';
 import { identityUuid, type RegionIdentity, type RegionService } from './regions.js';
 import { guestIdFromCookieHeader, parseSessionCookie } from '../auth.js';
@@ -294,14 +294,52 @@ export class MmoGateway {
     send(conn.ws, ack);
   }
 
-  /** Route one delivered outbox envelope to subscribed sockets. */
-  private publish(envelope: OutboxEnvelope) {
+  /**
+   * Route one delivered outbox envelope to authorized sockets (PW32).
+   * Region-public simulation events fan out to every region subscriber; private
+   * streams (alliance chat, command results, two-party requests) go only to the
+   * durable player ids they name — evaluated at delivery time so membership or
+   * ownership changes after journaling still apply.
+   */
+  private async publish(envelope: OutboxEnvelope) {
     const message = this.toClientMessage(envelope);
     if (!message) return; // topics not destined for browsers are acked and dropped here
+    const audience = await this.audienceFor(envelope);
     for (const conn of this.conns) {
-      if (!conn.subs.has(envelope.regionId)) continue;
+      const sub = conn.subs.get(envelope.regionId);
+      if (!sub) continue;
+      if (audience && !audience.has(sub.playerId)) continue;
       try { send(conn.ws, message); } catch { conn.ws.terminate(); }
     }
+  }
+
+  /**
+   * Who may receive this envelope: null means every subscriber of the region
+   * (public simulation data and region chat); a Set restricts delivery to those
+   * durable player ids — all of that player's authorized sessions in the region.
+   */
+  private async audienceFor(envelope: OutboxEnvelope): Promise<Set<string> | null> {
+    const payload = envelope.payload as Record<string, unknown>;
+    if (envelope.topic === 'mmo.chat') {
+      if (payload.channel !== 'alliance') return null;
+      const allianceId = typeof payload.allianceId === 'string' ? payload.allianceId : '';
+      return allianceId ? allianceAudience(allianceId) : new Set();
+    }
+    if (envelope.topic === 'mmo.result') {
+      // Command outcomes belong to the issuing player only — never the region.
+      return typeof payload.playerId === 'string' ? new Set([payload.playerId]) : new Set();
+    }
+    if (envelope.topic === 'mmo.private') {
+      // Reserved for two-party requests (PW34 Engineer consent): explicit
+      // playerId and/or recipients list; absent both, nobody receives it.
+      const ids = new Set<string>();
+      if (typeof payload.playerId === 'string') ids.add(payload.playerId);
+      if (Array.isArray(payload.recipients)) {
+        for (const r of payload.recipients) if (typeof r === 'string') ids.add(r);
+      }
+      return ids;
+    }
+    return null;
   }
 
   private toClientMessage(envelope: OutboxEnvelope): MmoServerMessage | null {
@@ -319,6 +357,13 @@ export class MmoGateway {
         protocol: MMO_PROTOCOL, type: 'event', regionId: envelope.regionId,
         eventSeq: envelope.eventSeq, epoch, tick: '0',
         eventKind: 'chat', payload,
+      };
+    }
+    if (envelope.topic === 'mmo.private') {
+      return {
+        protocol: MMO_PROTOCOL, type: 'event', regionId: envelope.regionId,
+        eventSeq: envelope.eventSeq, epoch, tick: String(payload.atTick ?? 0),
+        eventKind: 'private', payload,
       };
     }
     if (envelope.topic === 'mmo.result') {

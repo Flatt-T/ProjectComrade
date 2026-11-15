@@ -1054,6 +1054,20 @@ export async function allianceMembers(allianceId: string): Promise<AllianceMembe
     [allianceId]);
 }
 
+/**
+ * PW32: durable player ids currently authorized for alliance-private traffic.
+ * Evaluated at delivery time so a member removed after the message was journaled
+ * but before dispatch does not receive it.
+ */
+export async function allianceAudience(allianceId: string): Promise<Set<string>> {
+  const rows = await mmoQuery<{ player_id: string }>(
+    `select m.player_id from alliance_member m
+       join alliance a on a.alliance_id = m.alliance_id
+      where m.alliance_id = $1 and m.left_at is null and a.disbanded_at is null`,
+    [allianceId]);
+  return new Set(rows.map(r => r.player_id));
+}
+
 export async function allianceInvitesFor(playerId: string) {
   return mmoQuery<{ alliance_id: string; name: string; invited_by: string }>(
     `select i.alliance_id, a.name, i.invited_by from alliance_invite i
