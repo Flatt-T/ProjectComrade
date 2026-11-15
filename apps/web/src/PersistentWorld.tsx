@@ -125,10 +125,11 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // journaled world actions that grant earned shield seconds.
   const [objectives, setObjectives] = useState<MmoObjectivesResponse | null>(null);
   const [ladder, setLadder] = useState<MmoLadderResponse | null>(null);
-  // PW34: allied Engineer capture consent — the owner answers a private request;
-  // the requester tracks pending asks so an accepted grant auto-issues the
-  // enter order the sim will now permit.
-  const [consentReq, setConsentReq] = useState<{ requestId: string; requesterName: string; engineerId: string; buildingId: string } | null>(null);
+  // PW34: allied Engineer capture consent — the owner answers private requests
+  // (queued by requestId); the requester tracks asks so an accepted grant
+  // auto-issues the enter order. Durable list recovers state on mount/reconnect.
+  const [consentQueue, setConsentQueue] = useState<{ requestId: string; requesterName: string; engineerId: string; buildingId: string }[]>([]);
+  const [myConsents, setMyConsents] = useState<{ requestId: string; state: string; role: string; otherName: string; engineerId: string; buildingId: string }[]>([]);
   const pendingConsent = useRef(new Map<string, { engineerId: string; buildingId: string }>());
 
   useEffect(() => {
@@ -147,6 +148,7 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         connRef.current = conn;
         if (info.slot !== null) slot = info.slot;
         else { rosteredRef.current = false; setNeedSettle(true); } // rostered nowhere yet — settle (or rejoin) first
+        conn.command({ t: 'engineerConsentList' }); // recover consent state on (re)connect
       },
       onSnapshot: header => {
         const state = header.state as SnapshotState | undefined;
@@ -178,14 +180,31 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         }
       },
       onResult: (_commandId, status, result) => {
-        const r = result as { accepted?: boolean; reason?: string } | undefined;
+        const r = result as { accepted?: boolean; reason?: string; requests?: { requestId: string; state: string; role: string; otherName: string; engineerId: string; buildingId: string }[] } | undefined;
+        // PW34: durable consent list — rebuilds the owner queue and the
+        // requester's request ledger after mount/reconnect.
+        if (Array.isArray(r?.requests)) {
+          setMyConsents(r.requests!);
+          setConsentQueue(q => {
+            const pendingOwner = r.requests!.filter(x => x.role === 'owner' && x.state === 'pending');
+            const kept = q.filter(x => pendingOwner.some(p => p.requestId === x.requestId));
+            const known = new Set(kept.map(x => x.requestId));
+            const added = pendingOwner.filter(p => !known.has(p.requestId))
+              .map(p => ({ requestId: p.requestId, requesterName: p.otherName, engineerId: p.engineerId, buildingId: p.buildingId }));
+            return [...kept, ...added];
+          });
+          return;
+        }
         // PW28+: legacy regions refuse new settlements once a universal region
         // exists — re-enter so the server routes us to the right one.
         if (r?.reason === 'REGION_RETIRED') { window.location.assign('/world'); return; }
         if (status !== 'applied' || r?.accepted === false) flash(`Order rejected${r?.reason ? `: ${r.reason}` : ''}`);
       },
       onError: (code, message) => flash(`${code}: ${message}`),
-      onStatus: connected => setUi(u => u ? { ...u, connected } : { tick: 0, credits: 0, storage: 0, powerGen: 0, powerUse: 0, options: {}, costs: {}, selection: null, status: connected ? '' : 'Reconnecting…', connected, slot, supers: [], recovering: false }),
+      onStatus: connected => {
+        setUi(u => u ? { ...u, connected } : { tick: 0, credits: 0, storage: 0, powerGen: 0, powerUse: 0, options: {}, costs: {}, selection: null, status: connected ? '' : 'Reconnecting…', connected, slot, supers: [], recovering: false });
+        if (connected) connRef.current?.command({ t: 'engineerConsentList' });
+      },
     });
     conn.subscribe(regionId);
 
@@ -209,10 +228,11 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
           engineerId?: string; buildingId?: string; decision?: string;
         };
         if (p.kind === 'engineer-consent-request' && p.requestId) {
-          setConsentReq({
+          const req = {
             requestId: p.requestId, requesterName: p.requesterName ?? 'Commander',
             engineerId: p.engineerId ?? '', buildingId: p.buildingId ?? '',
-          });
+          };
+          setConsentQueue(q => q.some(r => r.requestId === req.requestId) ? q : [...q, req]);
         } else if (p.kind === 'engineer-consent-result' && p.engineerId && p.buildingId) {
           const key = `${p.engineerId}:${p.buildingId}`;
           const pending = pendingConsent.current.get(key);
@@ -224,8 +244,11 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
             flash(`Capture consent ${p.decision ?? 'failed'}`);
           }
         } else if (p.kind === 'engineer-consent-request-closed' && p.requestId) {
-          setConsentReq(c => c && c.requestId === p.requestId ? null : c);
+          setConsentQueue(q => q.filter(r => r.requestId !== p.requestId));
+          setMyConsents(cs => cs.map(c => c.requestId === p.requestId ? { ...c, state: p.decision ?? 'closed' } : c));
         }
+        // Any consent lifecycle event may change durable state — resync the list.
+        connRef.current?.command({ t: 'engineerConsentList' });
         return;
       }
       if (msg.type !== 'notification') return;
@@ -1188,19 +1211,29 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       </div>
       {modeView === 'sell' &&
         <div className="status-line">Sell mode — click your buildings for credits. Selling your last building starts protected recovery: your MCV redeploys at the compound.</div>}
-      {consentReq && <div className="consent-dialog">
-        <b>{consentReq.requesterName} requests capture consent</b>
+      {consentQueue.length > 0 && consentQueue[0] && <div className="consent-dialog">
+        <b>{consentQueue[0].requesterName} requests capture consent{consentQueue.length > 1 ? ` (+${consentQueue.length - 1} more)` : ''}</b>
         <span>Their Engineer wants to take your building. Accept grants a one-use capture — shields and ownership are rechecked when it arrives.</span>
         <div>
           <button onClick={() => {
-            connRef.current?.command({ t: 'engineerConsent', requestId: consentReq.requestId, decision: 'accept' });
-            setConsentReq(null);
+            const req = consentQueue[0]!;
+            connRef.current?.command({ t: 'engineerConsent', requestId: req.requestId, decision: 'accept' });
+            setConsentQueue(q => q.filter(r => r.requestId !== req.requestId));
           }}>Accept</button>
           <button onClick={() => {
-            connRef.current?.command({ t: 'engineerConsent', requestId: consentReq.requestId, decision: 'decline' });
-            setConsentReq(null);
+            const req = consentQueue[0]!;
+            connRef.current?.command({ t: 'engineerConsent', requestId: req.requestId, decision: 'decline' });
+            setConsentQueue(q => q.filter(r => r.requestId !== req.requestId));
           }}>Decline</button>
         </div>
+      </div>}
+      {myConsents.length > 0 && <div className="consent-requests">
+        <b>Capture requests</b>
+        {myConsents.slice(0, 8).map(c => <div key={c.requestId} className="consent-request-row">
+          <span>{c.role === 'owner' ? `From ${c.otherName}` : `To ${c.otherName}`} — {c.state}</span>
+          {c.role === 'requester' && c.state === 'pending' &&
+            <button onClick={() => connRef.current?.command({ t: 'engineerCancel', requestId: c.requestId })}>Withdraw</button>}
+        </div>)}
       </div>}
       <button className="leave" onClick={onExit}>Leave region</button>
     </aside>

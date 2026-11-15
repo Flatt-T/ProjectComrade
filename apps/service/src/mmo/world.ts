@@ -1201,6 +1201,31 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             }],
           };
         }
+        case 'engineerConsentList': {
+          // Durable recovery read: every consent touching this player in this
+          // region, newest first, with both parties' display names so the
+          // client can rebuild queues after mount/reconnect.
+          const { rows } = await tx.query<EngineerConsentRow & { requester_name: string; owner_name: string }>(
+            `select c.*, rp.display_name as requester_name, op.display_name as owner_name
+               from engineer_consent c
+               join player rp on rp.player_id = c.requester_id
+               join player op on op.player_id = c.owner_id
+              where c.region_id = $1 and (c.requester_id = $2 or c.owner_id = $2)
+              order by c.created_at desc limit 50`,
+            [ctx.regionId, ctx.playerId]);
+          return {
+            result: {
+              accepted: true,
+              requests: rows.map(r => ({
+                requestId: r.request_id, state: r.state,
+                role: r.requester_id === ctx.playerId ? 'requester' : 'owner',
+                otherName: r.requester_id === ctx.playerId ? r.owner_name : r.requester_name,
+                engineerId: r.engineer_id, buildingId: r.building_id,
+                createdAt: r.created_at, decidedAt: r.decided_at, consumedAt: r.consumed_at,
+              })),
+            },
+          };
+        }
         case 'chat': {
           // PW19: journaled chat. The region channel fans out to this region's
           // subscribers; the alliance channel resolves every member's settlement

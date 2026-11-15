@@ -337,3 +337,7 @@
 .consent-dialog span{color:#b9c9a4;line-height:1.4}
 .consent-dialog div{display:flex;gap:8px;justify-content:flex-end}
 .consent-dialog button{padding:6px 14px}
+.consent-requests{margin-top:10px;border-top:1px solid #3a4a2e;padding-top:8px;display:flex;flex-direction:column;gap:4px;font-size:11px;color:#b9c9a4}
+.consent-requests b{color:#dfe8c8;font-size:11px;letter-spacing:.5px}
+.consent-request-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.consent-request-row button{padding:2px 8px;font-size:10px}

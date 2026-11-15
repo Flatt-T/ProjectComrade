@@ -625,7 +625,10 @@ export type MmoWorldAction =
    *  one-use, bound to the exact engineer and building. */
   | { t: 'engineerRequest'; engineerId: MmoId; buildingId: MmoId }
   | { t: 'engineerConsent'; requestId: MmoId; decision: 'accept' | 'decline' }
-  | { t: 'engineerCancel'; requestId: MmoId };
+  | { t: 'engineerCancel'; requestId: MmoId }
+  /** PW34: durable recovery read — every consent request where the caller is
+   *  requester or owner, with its current state, for mount/reconnect. */
+  | { t: 'engineerConsentList' };
 
 export type MmoAction = MmoSimAction | MmoWorldAction;
 
@@ -860,7 +863,7 @@ const faction = (x: unknown): x is Faction => typeof x === 'string' && /^[a-z0-9
 
 const SIM_KINDS = new Set(['move', 'attackMove', 'attack', 'fireAt', 'guard', 'scatter', 'stop', 'deploy', 'harvest', 'enter', 'build', 'cancel', 'place', 'repair', 'rally', 'super']);
 const WORLD_KINDS = new Set(['sell', 'pack', 'unpack', 'redeploy', 'barterOffer', 'barterAccept', 'barterDecline', 'barterCancel',
-  'selectShield', 'clearShield', 'endRecovery', 'settle', 'chat', 'ping', 'objectiveClaim', 'engineerRequest', 'engineerConsent', 'engineerCancel',
+  'selectShield', 'clearShield', 'endRecovery', 'settle', 'chat', 'ping', 'objectiveClaim', 'engineerRequest', 'engineerConsent', 'engineerCancel', 'engineerConsentList',
   'allianceCreate', 'allianceInvite', 'allianceJoin', 'allianceLeave', 'allianceKick',
   'allianceSetPermissions', 'allianceDisband', 'setAutoRepair',
   'regionTransfer', 'regionTransferCancel']);
@@ -956,6 +959,7 @@ export function parseMmoAction(value: unknown): MmoAction {
     case 'engineerCancel':
       if (!uuid(v.requestId)) throw new Error('engineerCancel requires a request');
       return { t, requestId: v.requestId } as MmoAction;
+    case 'engineerConsentList': return { t } as MmoAction;
     default: throw new Error('Unknown MMO action');
   }
 }

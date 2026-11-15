@@ -208,6 +208,48 @@ describeDb('mmo engineer capture consent (PW34, real PostgreSQL)', () => {
     expect(row?.state).toBe('declined');
   }, IT_TIMEOUT);
 
+  it('engineerConsentList recovers state for both parties and withdrawal cancels a pending request', async () => {
+    const [owner, requester] = p();
+    const { bld, eng } = engineerPair(ctx, 0, 1, 30, 55);
+    const engId = mmoEntityId(ctx.regionId, eng.id);
+    const bldId = mmoEntityId(ctx.regionId, bld.id);
+
+    const req = await act(ctx, requester, { t: 'engineerRequest', engineerId: engId, buildingId: bldId });
+    expect(req.accepted).toBe(true);
+    const requestId = req.requestId as string;
+
+    // Both parties recover the pending request from durable state — this is
+    // the mount/reconnect read the client uses to rebuild its queues.
+    const asRequester = await act(ctx, requester, { t: 'engineerConsentList' });
+    expect(asRequester.accepted).toBe(true);
+    const mine = (asRequester.requests as { requestId: string; state: string; role: string; otherName: string }[])
+      .find(r => r.requestId === requestId);
+    expect(mine?.state).toBe('pending');
+    expect(mine?.role).toBe('requester');
+    expect(mine?.otherName).toBeTruthy();
+    const asOwner = await act(ctx, owner, { t: 'engineerConsentList' });
+    const theirs = (asOwner.requests as { requestId: string; state: string; role: string }[])
+      .find(r => r.requestId === requestId);
+    expect(theirs?.state).toBe('pending');
+    expect(theirs?.role).toBe('owner');
+
+    // Withdrawal before use: requester cancels; owner sees it close.
+    const cancel = await act(ctx, requester, { t: 'engineerCancel', requestId });
+    expect(cancel.accepted).toBe(true);
+    await waitFor(async () => {
+      const row = await mmoOne<{ state: string }>(
+        'select state from engineer_consent where request_id = $1', [requestId]);
+      return row?.state === 'cancelled';
+    });
+    const after = await act(ctx, owner, { t: 'engineerConsentList' });
+    const closed = (after.requests as { requestId: string; state: string }[])
+      .find(r => r.requestId === requestId);
+    expect(closed?.state).toBe('cancelled');
+    // A decided/cancelled request cannot be decided again.
+    const late = await act(ctx, owner, { t: 'engineerConsent', requestId, decision: 'accept' });
+    expect(late.accepted).toBe(false);
+  }, IT_TIMEOUT);
+
   it('an alliance break after acceptance invalidates the grant durably and privately', async () => {
     const [owner, requester] = p();
     const { bld, eng } = engineerPair(ctx, 0, 1, 60, 100);
