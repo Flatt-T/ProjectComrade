@@ -10,7 +10,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
-import { releaseRegionLease, scheduleJob } from '../../apps/service/src/mmo/store.js';
+import { createRegion, releaseRegionLease, scheduleJob } from '../../apps/service/src/mmo/store.js';
 import { submitCommand, journalTail } from '../../apps/service/src/mmo/commands.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { createWorldHandler } from '../../apps/service/src/mmo/world.js';
@@ -346,4 +346,103 @@ describeDb('mmo recovery (real PostgreSQL + runner + Fusion sim)', () => {
       `select count(*)::text as n from recovery_episode where player_id = $1 and status = 'active'`, [p1().playerId]);
     expect(eps?.n).toBe('0');
   }, 60_000);
+
+  // THU-2236 reopened scope: qualifying assets ANYWHERE in the world — other
+  // regions' published rosters and in-flight/parked manifests — delay recovery;
+  // neutral-site objectives never count as property.
+  it('world-wide anchors delay recovery: remote roster, in-flight manifest, site exclusion', { timeout: 90_000 }, async () => {
+    const g = live(ctx);
+    const worldId = (await mmoOne<{ world_id: string }>(
+      'select world_id from region where region_id = $1', [ctx.fx.regionId]))!.world_id;
+    // A second region in the same world — roster-only, no runner needed: the
+    // eval reads published rosters, it does not need the remote sim live.
+    const regionB = randomUUID();
+    const regionA = await mmoOne<{ seed: { sim?: { packId?: string; mapId?: string; seed?: number } } }>(
+      'select seed from region where region_id = $1', [ctx.fx.regionId]);
+    const sim = regionA!.seed.sim ?? {};
+    await createRegion({
+      regionId: regionB, worldId, label: `pw12-remote-${regionB.slice(0, 8)}`,
+      seed: { sim: { packId: sim.packId ?? 'td', mapId: sim.mapId ?? 'td-tiberium-gardens', seed: sim.seed ?? 1, players: [] } },
+      rulesetVersion: 'persistent_world', engineArtifactSha256: 'fixture-engine-sha',
+    });
+
+    // Reset both players to the qualifying state: no entities, no compounds,
+    // no active episode. grantRecovery/setRecovery sim mirrors are journaled —
+    // a queued MCV can spawn AFTER the first wipe, so settle, wipe again, then
+    // clear the durable rows.
+    const resetPlayer = async (pid: string, slot: number) => {
+      wipeSlot(ctx, slot);
+      await sleep(800);
+      wipeSlot(ctx, slot);
+      await mmoQuery(`update compound set state = 'destroyed' where player_id = $1 and state <> 'destroyed'`, [pid]);
+      await mmoQuery(
+        `delete from protection_record where compound_id in
+           (select episode_id from recovery_episode where player_id = $1)`, [pid]);
+      await mmoQuery(`delete from recovery_episode where player_id = $1`, [pid]);
+      await sleep(300);
+      wipeSlot(ctx, slot);
+    };
+    const p0id = p0().playerId, p1id = p1().playerId;
+    await resetPlayer(p0id, 0);
+    await resetPlayer(p1id, 1);
+
+    const activeEpisode = (pid: string) => mmoOne<{ x: number }>(
+      `select 1 as x from recovery_episode where player_id = $1 and status = 'active'`, [pid]);
+
+    // 1) Remote roster: region B publishes a lone non-yard building for p0.
+    //    p1 has nothing anywhere — the eval must grant p1 (proving it ran)
+    //    while p0 is delayed by an asset it does not hold locally.
+    await mmoQuery(
+      `update region set asset_roster = $2::jsonb where region_id = $1`,
+      [regionB, JSON.stringify({ [p0id]: { s: 1, m: 0, p: 0 } })]);
+    await pokeRecovery(ctx);
+    await waitFor(async () => !!(await activeEpisode(p1id)), 20_000);
+    await sleep(1_000); // give a second eval pass a chance to wrongly grant p0
+    expect(await activeEpisode(p0id)).toBeUndefined();
+
+    // 2) Roster cleared: p0 now qualifies — the remote row was the blocker.
+    await mmoQuery(`update region set asset_roster = '{}'::jsonb where region_id = $1`, [regionB]);
+    await pokeRecovery(ctx);
+    await waitFor(async () => !!(await activeEpisode(p0id)), 20_000);
+    // Clean p0's episode + grant MCV before the next scenario.
+    await resetPlayer(p0id, 0);
+
+    // 3) In-flight/parked manifest: p0's packed carrier is between regions —
+    //    cargo inside a transport still owns its anchors.
+    const transferId = randomUUID();
+    await mmoQuery(
+      `insert into region_transfer (transfer_id, entity_id, source_region_id, dest_region_id, state, payload)
+       values ($1,$2,$3,$4,'RECOVERY_REQUIRED',$5)`,
+      [transferId, randomUUID(), regionB, ctx.fx.regionId, JSON.stringify({
+        ownerPid: p0id,
+        manifest: {
+          type: 'apc', kind: 'unit', ownerPid: p0id, hp: 100, packedType: 'pyle',
+          cell: { x: 1, y: 1 },
+        },
+      })]);
+    await pokeRecovery(ctx);
+    await sleep(1_500);
+    expect(await activeEpisode(p0id)).toBeUndefined();
+    await mmoQuery('delete from region_transfer where transfer_id = $1', [transferId]);
+    await pokeRecovery(ctx);
+    await waitFor(async () => !!(await activeEpisode(p0id)), 20_000);
+    await resetPlayer(p0id, 0);
+
+    // 4) Site-only ownership: a controlled neutral site is not property.
+    const site = g.spawnStructure('site_income', 0, 20, 20);
+    expect(site).toBeTruthy();
+    await pokeRecovery(ctx);
+    // The eval publishes region A's roster first — verify the site contributed
+    // no anchor count for p0 (sites are excluded even when controlled).
+    await waitFor(async () => {
+      const r = await mmoOne<{ asset_roster: Record<string, { s?: number }> }>(
+        'select asset_roster from region where region_id = $1', [ctx.fx.regionId]);
+      const mine = r?.asset_roster?.[p0id];
+      return mine !== undefined ? (mine.s ?? 0) === 0 : true;
+    }, 15_000);
+    await waitFor(async () => !!(await activeEpisode(p0id)), 20_000);
+    g.entities.delete(site.id);
+    await resetPlayer(p0id, 0);
+    await resetPlayer(p1id, 1);
+  });
 });

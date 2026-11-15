@@ -2121,6 +2121,16 @@ export class RegionRunner {
     const worldId = worldRows[0]?.world_id;
     if (!worldId) return { error: 'NO_WORLD' };
 
+    // THU-2236: publish this region's anchor roster for world-wide recovery
+    // eligibility. Other regions' evals read it to see qualifying assets
+    // outside their own sim — a read-only projection of the authoritative
+    // sim, refreshed at eval cadence while the region is live.
+    if (g) {
+      await tx.query(
+        `update region set asset_roster = $2::jsonb where region_id = $1`,
+        [this.opts.regionId, JSON.stringify(this.assetRoster())]);
+    }
+
     interface ActiveRow {
       episode_id: string; compound_id: string; player_id: string;
       status: 'active'; generation: string; armed_seconds: string;
@@ -2270,14 +2280,48 @@ export class RegionRunner {
         if (Number(comp[0]?.n ?? 0) > 0) continue;
         // No deployed building, packed building carrier or MCV in this sim.
         // Surviving units do not block recovery — they are kept, unprotected.
+        // Neutral-site objectives never count as a player's property, even
+        // when the site is currently controlled by them.
         let hasAnchor = false;
         for (const e of g.entities.values()) {
           if (e.owner !== slot || e.hp <= 0) continue;
-          if (e.kind === 'structure' || e.packedType || (e.kind === 'unit' && isMcvUnit(g.unitDef(e)))) {
+          if (e.packedType || (e.kind === 'unit' && isMcvUnit(g.unitDef(e)))
+            || (e.kind === 'structure' && !g.structDef(e).site)) {
             hasAnchor = true; break;
           }
         }
         if (hasAnchor) continue;
+        // World-wide anchor projection (THU-2236): every live region publishes
+        // its roster at eval/checkpoint cadence. A qualifying asset ANYWHERE —
+        // a lone barracks in another region, an MCV, a packed carrier — delays
+        // recovery exactly like a local one.
+        const { rows: rosters } = await tx.query<{ asset_roster: unknown }>(
+          `select asset_roster from region where world_id = $1`, [worldId]);
+        let remoteAnchor = false;
+        for (const r of rosters) {
+          const roster = r.asset_roster as Record<string, { s?: number; m?: number; p?: number }> | null;
+          const mine = roster?.[playerId];
+          if (mine && ((mine.s ?? 0) + (mine.m ?? 0) + (mine.p ?? 0)) > 0) { remoteAnchor = true; break; }
+        }
+        if (remoteAnchor) continue;
+        // In-flight and parked manifests: cargo between sims still belongs to
+        // its owner — a packed carrier or MCV in transit delays recovery.
+        const { rows: transfers } = await tx.query<{ payload: unknown }>(
+          `select t.payload from region_transfer t
+            where t.state in ('PREPARED','SOURCE_RELEASED','DESTINATION_ACCEPTED','RECOVERY_REQUIRED')
+              and (t.source_region_id in (select region_id from region where world_id = $1)
+                or t.dest_region_id in (select region_id from region where world_id = $1))`,
+          [worldId]);
+        const manifestAnchor = (e: TransferManifestEntry): boolean => {
+          const own = e.ownerPid === playerId
+            && (e.packedType !== '' || PACK_LIST.some(pk => pk.units[e.type]?.deploysTo));
+          return own || (e.cargoUnits ?? []).some(manifestAnchor);
+        };
+        for (const t of transfers) {
+          const manifest = (t.payload as { manifest?: TransferManifestEntry } | null)?.manifest;
+          if (manifest && manifestAnchor(manifest)) { remoteAnchor = true; break; }
+        }
+        if (remoteAnchor) continue;
         // Recovery replaces defeat — a rostered player who never settled (no
         // starter grant, no assets ever) is not defeated and gets nothing.
         const { rows: settled } = await tx.query<{ n: string }>(
@@ -2604,9 +2648,41 @@ export class RegionRunner {
       this.stats.checkpoints++;
       this.opts.log('region-checkpoint', { regionId: this.opts.regionId, tick: this.game.tick, reason });
       await this.persistPowerScores();
+      await this.persistAssetRoster();
     } finally {
       if (this.running) await setRegionLifecycle(this.opts.regionId, 'active');
     }
+  }
+
+  /**
+   * THU-2236: anchor-asset roster for world-wide recovery eligibility, keyed
+   * by durable player id (slots differ per region). Counts only qualifying
+   * anchors — deployed non-site structures, MCVs and packed carriers — never
+   * neutral-site objectives, ordinary units or cargo-less transports.
+   */
+  private assetRoster(): Record<string, { s: number; m: number; p: number }> {
+    const g = this.game;
+    const roster: Record<string, { s: number; m: number; p: number }> = {};
+    if (!g) return roster;
+    for (const [playerId, slot] of this.slotByPlayer) {
+      let s = 0, m = 0, p = 0;
+      for (const e of g.entities.values()) {
+        if (e.owner !== slot || e.hp <= 0) continue;
+        if (e.packedType) { p++; continue; }
+        if (e.kind === 'structure') { if (!g.structDef(e).site) s++; }
+        else if (e.kind === 'unit' && isMcvUnit(g.unitDef(e))) m++;
+      }
+      if (s + m + p > 0) roster[playerId] = { s, m, p };
+    }
+    return roster;
+  }
+
+  /** Checkpoint-time roster refresh — covers stop/hibernate when eval is idle. */
+  private async persistAssetRoster(): Promise<void> {
+    if (!this.game || this.epoch === undefined) return;
+    await mmoQuery(
+      `update region set asset_roster = $2::jsonb where region_id = $1`,
+      [this.opts.regionId, JSON.stringify(this.assetRoster())]);
   }
 
   /**
