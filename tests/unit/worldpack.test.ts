@@ -74,27 +74,80 @@ describe('worldpack composition', () => {
     expect(starters.some(id => !!pack.units[id].deploysTo)).toBe(true);
   });
 
+  // THU-2446 role predicates — mirrors starterPicks in packages/fusion/src/starter.ts.
+  const isTank = (d: { kind: string; role?: string; crusher?: unknown; weapon?: unknown; deploysTo?: unknown; transport?: unknown }) =>
+    d.kind === 'vehicle' && d.role === 'combat' && !!d.crusher && !!d.weapon && !d.deploysTo && !d.transport;
+  const isLight = (d: { kind: string; role?: string; harvester?: unknown; deploysTo?: unknown; transport?: unknown; armor?: string }) =>
+    d.kind === 'vehicle' && !d.harvester && !d.deploysTo &&
+    (d.role === 'scout' || (d.role === 'support' && d.armor === 'light' && !d.transport));
+  const isInf = (d: { kind: string; engineer?: unknown; crushable?: unknown }) =>
+    d.kind === 'infantry' && !d.engineer && d.crushable !== false;
+
   it('fields the approved opening: MCV, harvester, 4 main tanks, 2 lights, 8 infantry', () => {
-    // THU-2446: the grant is a composition, not a token pair — and repeated
-    // defs are allowed (four of the main battle tank, eight infantry).
-    for (let i = 0; i < Math.min(4, choices.vehicle.length); i++) {
-      const lo = loadout(i);
+    for (const lo of [LO, LO2, loadout(Math.min(2, choices.structures.length - 1))]) {
       const starters = worldStarterUnits(lo);
-      const defs = starters.map(id => pack.units[id]);
-      expect(defs.filter(d => !!d.deploysTo)).toHaveLength(1);       // one MCV
-      expect(defs.filter(d => !!d.harvester)).toHaveLength(1);       // one harvester
-      const veh = defs.filter(d => d.kind === 'vehicle');
-      expect(veh.length).toBe(starters.length - 8);                   // MCV+harv+tanks+lights
-      expect(veh.length).toBeGreaterThanOrEqual(2);                   // MCV + harvester always
-      const foot = defs.filter(d => d.kind === 'infantry');
-      expect(foot).toHaveLength(8);
-      // Every starter is buildable under this commander's own loadout.
-      const allowed = worldAllowedDefs(lo);
-      for (const id of starters) expect(allowed, `starter ${id}`).toContain(id);
+      const defs = starters.map(id => pack.units[id]!);
+      expect(defs.every(Boolean), 'every starter id resolves in the composed pack').toBe(true);
+      expect(starters).toHaveLength(16);
+      expect(defs.filter(d => !!d!.deploysTo)).toHaveLength(1);          // one MCV
+      expect(defs.filter(d => !!d!.harvester)).toHaveLength(1);          // one harvester
+      expect(defs.filter(isTank)).toHaveLength(4);                       // four main tanks
+      expect(defs.filter(isLight)).toHaveLength(2);                      // two light vehicles
+      expect(defs.filter(isInf)).toHaveLength(8);                        // eight infantry
+      // Repeated defs are a multiset — each grant entry is its own entity.
+      expect(new Set(starters).size).toBeLessThanOrEqual(starters.length);
     }
-    // A full loadout fields the complete approved 16.
-    const full = worldStarterUnits(LO);
-    expect(full).toHaveLength(16);
+  });
+
+  it('covers every legal infantry x vehicle combination with the full roster', () => {
+    // THU-2446: all choice pairs — sparse sets, single-def sets and omitted
+    // slots must all still field the approved sixteen by role.
+    const structs = choices.structures[0].key;
+    for (const inf of choices.infantry) {
+      for (const veh of choices.vehicle) {
+        const lo: MashupLoadout = { structures: structs, infantry: inf.key, vehicle: veh.key };
+        const starters = worldStarterUnits(lo);
+        const defs = starters.map(id => pack.units[id]!);
+        expect(starters, `${inf.key} x ${veh.key}`).toHaveLength(16);
+        expect(defs.filter(d => !!d!.deploysTo)).toHaveLength(1);
+        expect(defs.filter(d => !!d!.harvester)).toHaveLength(1);
+        expect(defs.filter(isTank), `${inf.key} x ${veh.key} tanks`).toHaveLength(4);
+        expect(defs.filter(isLight), `${inf.key} x ${veh.key} lights`).toHaveLength(2);
+        expect(defs.filter(isInf), `${inf.key} x ${veh.key} infantry`).toHaveLength(8);
+      }
+    }
+  });
+
+  it('fills omitted and single-domain slots with role equivalents', () => {
+    const structs = choices.structures[0].key;
+    const cases: MashupLoadout[] = [
+      { structures: structs },                                                        // force slots all blank — illegal alone, but roster must still resolve
+      { structures: structs, aircraft: choices.aircraft[0]?.key },                   // air-only
+      { structures: structs, naval: choices.naval[0]?.key },                         // naval-only
+      { structures: structs, infantry: choices.infantry[0].key },                    // infantry-only
+      { structures: structs, vehicle: choices.vehicle[0].key },                      // vehicle-only
+      { structures: structs, aircraft: choices.aircraft[0]?.key, naval: choices.naval[0]?.key }, // air+naval, no ground picks
+    ];
+    for (const lo of cases) {
+      const starters = worldStarterUnits(lo).filter(Boolean);
+      const defs = starters.map(id => pack.units[id]!);
+      expect(defs.filter(d => !!d!.deploysTo)).toHaveLength(1);
+      expect(defs.filter(d => !!d!.harvester)).toHaveLength(1);
+      expect(defs.filter(isTank)).toHaveLength(4);
+      expect(defs.filter(isLight)).toHaveLength(2);
+      expect(defs.filter(isInf)).toHaveLength(8);
+      // Grant-only equivalents may sit outside allowedDefs — that is the point:
+      // they are granted, never buildable. Chosen-slot picks must be allowed.
+      const allowed = new Set(worldAllowedDefs(lo));
+      for (const slot of ['vehicle', 'infantry'] as const) {
+        if (!lo[slot]) continue;
+        const { defs: chosen } = resolveChoice(lo[slot]!, slot, MASHUP_PACKS);
+        for (const d of chosen as { id: string }[]) {
+          const wid = worldDefId(slot, lo[slot]!, d.id);
+          if (pack.units[wid] && starters.includes(wid)) expect(allowed.has(wid)).toBe(true);
+        }
+      }
+    }
   });
 
   it('every naval choice fields a heavy-cargo landing craft (THU-2239)', () => {
