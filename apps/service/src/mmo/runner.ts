@@ -534,7 +534,7 @@ export class RegionRunner {
         await this.checkpoint('interval');
       }
     } catch (error) {
-      await this.fail(String(error));
+      await this.fenceErrorOrFail(error, String(error));
     } finally {
       this.busy = false;
     }
@@ -558,13 +558,45 @@ export class RegionRunner {
       this.lastPoll = now;
     } catch (error) {
       if (error instanceof MmoStoreError && (error.code === 'FENCE_LOST' || error.code === 'LEASE_HELD')) {
-        await this.fail(error.code === 'FENCE_LOST' ? 'fence lost' : 'lease lost');
+        await this.fenceErrorOrFail(error, error.code === 'FENCE_LOST' ? 'fence lost' : 'lease lost');
       } else {
         this.opts.log('poll-error', { error: String(error) });
       }
     } finally {
       this.busy = false;
     }
+  }
+
+  /**
+   * A FENCE_LOST/LEASE_HELD is only fatal when ownership truly changed. If the
+   * region row still names this worker at this epoch, the lease merely lapsed
+   * under load (starved renewal) — renew it and carry on. A different owner or
+   * epoch means a real takeover: fail as before.
+   */
+  private async fenceErrorOrFail(error: unknown, reason: string): Promise<void> {
+    if (!(error instanceof MmoStoreError) || (error.code !== 'FENCE_LOST' && error.code !== 'LEASE_HELD')) {
+      await this.fail(reason);
+      return;
+    }
+    try {
+      const row = await mmoOne<{ owner_worker_id: string | null; authority_epoch: string }>(
+        'select owner_worker_id, authority_epoch from region where region_id = $1',
+        [this.opts.regionId]);
+      const stillOurs = !!row && row.owner_worker_id === this.opts.workerId
+        && this.epoch !== undefined && BigInt(row.authority_epoch) === BigInt(this.epoch);
+      if (stillOurs) {
+        await acquireRegionLease({
+          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
+        });
+        this.lastRenew = this.opts.now();
+        this.opts.log('lease-recovered', { regionId: this.opts.regionId, epoch: this.epoch });
+        return;
+      }
+    } catch {
+      // Recovery itself failed (e.g. another worker grabbed the lease in the
+      // gap) — fall through to the fatal path.
+    }
+    await this.fail(reason);
   }
 
   private async fail(reason: string): Promise<void> {
@@ -1113,7 +1145,10 @@ export class RegionRunner {
     // Capture receipts first: a completed capture kills its engineer, so the
     // stale-grant sweep below would otherwise invalidate the accepted grant
     // before the consume update (which requires state='accepted') can match.
-    for (const ev of g.captureEvents.splice(0)) {
+    // Iterate a copy and dequeue each event only after its receipt transaction
+    // commits: a mid-drain fence loss must leave uncommitted events queued for
+    // the next pass rather than silently dropping their audit.
+    for (const ev of [...g.captureEvents]) {
       // Stable operation identity derived from the capture itself: a retried
       // or duplicated drain resolves to the same operation_id, and the unique
       // indexes make every insert a no-op on redelivery.
@@ -1152,6 +1187,9 @@ export class RegionRunner {
               where request_id = $1 and state = 'accepted'`, [ev.requestId]);
         }
       });
+      // Committed — safe to dequeue. Events are processed in order, so the
+      // head of the live queue is always this event.
+      if (g.captureEvents[0] === ev) g.captureEvents.shift();
     }
     // Sweep accepted grants whose bound entities died some other way — the
     // consent can never complete, so the durable row must not stay 'accepted'.
