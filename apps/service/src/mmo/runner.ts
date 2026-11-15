@@ -1056,6 +1056,17 @@ export class RegionRunner {
   }
 
   /**
+   * Deterministic CAPTURE operation id: same capture event → same UUID, so a
+   * retried drain or duplicate delivery cannot mint a second operation.
+   */
+  private captureOperationId(ev: { building: number; engineer: number; from: number; to: number; requestId: string; tick: number }): string {
+    const h = createHash('sha256')
+      .update(`capture|${this.opts.regionId}|${ev.building}|${ev.engineer}|${ev.from}|${ev.to}|${ev.requestId}|${ev.tick}`)
+      .digest('hex');
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-${((parseInt(h[16]!, 16) & 0x3) | 0x8).toString(16)}${h.slice(17, 20)}-${h.slice(20, 32)}`;
+  }
+
+  /**
    * PW34: receipt completed Engineer captures. The sim queues one event per
    * capture (hostile or consented); each becomes a single CAPTURE
    * economy_operation with a CAPTURE ledger row for the building and a DESTROY
@@ -1079,7 +1090,10 @@ export class RegionRunner {
     // stale-grant sweep below would otherwise invalidate the accepted grant
     // before the consume update (which requires state='accepted') can match.
     for (const ev of g.captureEvents.splice(0)) {
-      const opId = randomUUID();
+      // Stable operation identity derived from the capture itself: a retried
+      // or duplicated drain resolves to the same operation_id, and the unique
+      // indexes make every insert a no-op on redelivery.
+      const opId = this.captureOperationId(ev);
       const fromId = playerIdBySlot.get(ev.from) ?? null;
       const toId = playerIdBySlot.get(ev.to) ?? null;
       const buildingEntityId = ev.buildingDurableId || mmoEntityId(this.opts.regionId, ev.building);
@@ -1094,18 +1108,20 @@ export class RegionRunner {
         });
         await tx.query(
           `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
-           values ($1,$2,$3,$4,'CAPTURE',$5,$6)`,
-          [opId, this.opts.regionId, this.epoch, String(g.tick),
+           values ($1,$2,$3,$4,'CAPTURE',$5,$6) on conflict (operation_id) do nothing`,
+          [opId, this.opts.regionId, this.epoch, String(ev.tick || g.tick),
            JSON.stringify({ kind: 'CAPTURE', buildingId: buildingEntityId, engineerId: engineerEntityId, requestId: ev.requestId || null, fromId, toId }),
            JSON.stringify({ simBuilding: ev.building, simEngineer: ev.engineer })]);
         await tx.query(
           `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
-           values ($1,$2,$3,'CAPTURE',$4,$5,'deployed',$6,$7)`,
+           values ($1,$2,$3,'CAPTURE',$4,$5,'deployed',$6,$7) on conflict do nothing`,
           [opId, buildingEntityId, this.opts.regionId, fromId, toId, String(ev.building), detail]);
+        // The DESTROY charge belongs to the Engineer's actual owner — the
+        // capturing slot — never the building's former owner.
         await tx.query(
           `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
-           values ($1,$2,$3,'DESTROY',$4,null,'destroyed',$5,$6)`,
-          [opId, engineerEntityId, this.opts.regionId, fromId, String(ev.engineer), detail]);
+           values ($1,$2,$3,'DESTROY',$4,null,'destroyed',$5,$6) on conflict do nothing`,
+          [opId, engineerEntityId, this.opts.regionId, toId, String(ev.engineer), detail]);
         if (ev.requestId) {
           await tx.query(
             `update engineer_consent set state = 'consumed', consumed_at = clock_timestamp()

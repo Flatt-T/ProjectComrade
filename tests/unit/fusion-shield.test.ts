@@ -359,7 +359,8 @@ describe('PW34 allied capture consent', () => {
     expect(g.entities.get(target.id)!.owner).toBe(0);
     expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
     expect(g.entities.get(eng.id)!.order).toBe('idle');
-    expect(g.consents[0].used).toBe(false);
+    // The break destroyed the grant outright — nothing left to consume.
+    expect(g.consents).toHaveLength(0);
     expect(g.captureEvents).toHaveLength(0);
   });
 
@@ -434,5 +435,80 @@ describe('PW34 allied capture consent', () => {
     expect(re.enterIntent).toBe(2);
     steps(restored, 1500);
     expect(restored.entities.get(target.id)!.owner).toBe(1);
+  });
+
+  // The three failures independently reproduced on b4c72b1 (15 Nov review).
+
+  it('repro 1: a shielded-at-issue order is rejected — lowering the shield does not revive it', () => {
+    const g = new Game(setup(true));
+    const yard = compound(g, 0, 48, 30); // active shield covers the pyle at (50,30)
+    const target = g.spawnStructure('pyle', 0, 50, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    g.step();
+    // Coverage at issue: the order is refused outright, not queued.
+    expect(eng.order).toBe('idle');
+    // Lower the shield without reissuing — the Engineer must not capture.
+    g.enqueue(-1, { t: 'setShield', compound: yard.id, on: false });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.captureEvents).toHaveLength(0);
+    // A NEW lawful hostile order after the shield falls captures normally.
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(eng.id)?.hp ?? 0).toBe(0);
+    expect(g.captureEvents).toHaveLength(1);
+  });
+
+  it('repro 2: a stale own-repair order ends when an enemy captures first — the repairer survives', () => {
+    const g = new Game(setup(true));
+    const target = g.spawnStructure('pyle', 1, 50, 30);
+    target.hp = target.maxHp - 50; // damaged: a lawful own-repair target
+    const repairer = unitNear(g, 'engineer', 1, 31, 30);
+    const foe = unitNear(g, 'engineer', 0, 49, 30); // nearer, reaches it first
+    g.enqueue(1, { t: 'enter', ids: [repairer.id], target: target.id }); // own-repair intent
+    g.step();
+    g.enqueue(0, { t: 'enter', ids: [foe.id], target: target.id }); // hostile intent
+    steps(g, 1500);
+    // Only the intervening hostile Engineer captures — exactly one event.
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.captureEvents).toHaveLength(1);
+    // The stale repair order is dead: the former repairer survives, unconsumed,
+    // and never enters the enemy branch as a second capture.
+    const r = g.entities.get(repairer.id)!;
+    expect(r.hp).toBeGreaterThan(0);
+    expect(r.order).toBe('idle');
+  });
+
+  it('repro 3: an alliance break-and-rejoin invalidates the grant — rejoining needs a fresh decision', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    const target = g.spawnStructure('pyle', 0, 50, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    g.step();
+    // Leave, become hostile, rejoin — all while the Engineer walks.
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: -1 });
+    g.step();
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: 5 });
+    g.step();
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.entities.get(eng.id)!.order).toBe('idle');
+    // The grant was destroyed at the break — membership restored does not revive it.
+    expect(g.consents).toHaveLength(0);
+    expect(g.captureEvents).toHaveLength(0);
+    // And a fresh grant on the rejoined alliance works normally.
+    grant(g, 'req-2', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(eng.id)?.hp ?? 0).toBe(0);
   });
 });

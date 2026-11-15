@@ -2075,17 +2075,37 @@ export async function engineerConsentById(requestId: string): Promise<EngineerCo
     `select * from engineer_consent where request_id = $1`, [requestId]);
 }
 
-/** Pending request for the same engineer/building pair, if one exists. */
+/** Pending request for the same engineer/building pair AND owner, if one exists.
+ *  The owner is part of the dedupe key: a building that changed hands must not
+ *  inherit a pending request bound to its previous owner. */
 export async function engineerConsentPendingFor(tx: PoolClient, args: {
-  regionId: string; requesterId: string; engineerId: string; buildingId: string;
+  regionId: string; requesterId: string; ownerId: string; engineerId: string; buildingId: string;
 }): Promise<EngineerConsentRow | undefined> {
   const { rows } = await tx.query<EngineerConsentRow>(
     `select * from engineer_consent
-      where region_id = $1 and requester_id = $2 and engineer_id = $3 and building_id = $4
+      where region_id = $1 and requester_id = $2 and owner_id = $3
+        and engineer_id = $4 and building_id = $5
         and state = 'pending'
       order by created_at limit 1 for update`,
-    [args.regionId, args.requesterId, args.engineerId, args.buildingId]);
+    [args.regionId, args.requesterId, args.ownerId, args.engineerId, args.buildingId]);
   return rows[0];
+}
+
+/** Irreversibly invalidate every live consent in a region touching these
+ *  players — used when alliance membership changes so a break (even one later
+ *  reversed) kills pending and accepted grants alike. */
+export async function engineerConsentInvalidateForPlayers(tx: PoolClient, args: {
+  regionId: string; playerIds: string[];
+}): Promise<EngineerConsentRow[]> {
+  if (!args.playerIds.length) return [];
+  const { rows } = await tx.query<EngineerConsentRow>(
+    `update engineer_consent
+        set state = 'invalidated', decided_at = clock_timestamp()
+      where region_id = $1 and state in ('pending', 'accepted')
+        and (requester_id = any($2::uuid[]) or owner_id = any($2::uuid[]))
+      returning *`,
+    [args.regionId, args.playerIds]);
+  return rows;
 }
 
 /** Owner decision; only a still-pending row transitions, so double-decisions conflict. */

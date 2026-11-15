@@ -33,7 +33,7 @@ import {
   createTransfer, liveTransferForEntity, transitionTransfer,
   bumpObjectiveProgress, claimObjectiveTx, ensureObjectives,
   engineerConsentCreate, engineerConsentPendingFor, engineerConsentDecide,
-  engineerConsentCancel, engineerConsentInvalidate,
+  engineerConsentCancel, engineerConsentInvalidate, engineerConsentInvalidateForPlayers,
   type EngineerConsentRow, type ProtectionRow, type Queryable,
 } from './store.js';
 import { raiseNotification } from './notify.js';
@@ -78,6 +78,18 @@ async function allySyncSim(
     out.push({ slot, command: { t: 'setAlly', slot, ally: keyByPlayer.get(pid) ?? -1 } });
   }
   return out;
+}
+
+/** Private notices to both parties of each consent killed by an alliance change. */
+function consentInvalidatedFanout(regionId: string, rows: EngineerConsentRow[]) {
+  return rows.flatMap(r => [r.requester_id, r.owner_id].map(playerId => ({
+    regionId, topic: 'mmo.private' as const,
+    payload: {
+      kind: 'engineer-consent-request-closed', playerId,
+      requestId: r.request_id, decision: 'invalidated', regionId,
+      engineerId: r.engineer_id, buildingId: r.building_id,
+    },
+  })));
 }
 
 function fail(error: unknown): WorldHandlerResult {
@@ -299,16 +311,24 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
             [ctx.regionId, ctx.playerId]);
           const left = await allianceLeave(tx, ctx.playerId);
           if (!left) return { result: { accepted: false, reason: 'NOT_IN_ALLIANCE' } };
+          // PW34: leaving the alliance irreversibly invalidates every live
+          // capture consent this player is party to in this region.
+          const killed = await engineerConsentInvalidateForPlayers(tx, {
+            regionId: ctx.regionId, playerIds: [ctx.playerId] });
           return {
             result: { accepted: true, allianceId: left.allianceId },
             sim: await allySyncSim(tx, ctx, rows.map(r => r.player_id)),
+            fanout: consentInvalidatedFanout(ctx.regionId, killed),
           };
         }
         case 'allianceKick': {
           await allianceKick(tx, { allianceId: await allianceIdOf(tx, ctx), leaderId: ctx.playerId, targetId: action.playerId });
+          const killed = await engineerConsentInvalidateForPlayers(tx, {
+            regionId: ctx.regionId, playerIds: [action.playerId] });
           return {
             result: { accepted: true },
             sim: await allySyncSim(tx, ctx, [action.playerId]),
+            fanout: consentInvalidatedFanout(ctx.regionId, killed),
           };
         }
         case 'allianceSetPermissions': {
@@ -323,9 +343,12 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           const { rows } = await tx.query<{ player_id: string }>(
             'select player_id from alliance_member where alliance_id = $1 and left_at is null', [allianceId]);
           await allianceDisband(tx, { allianceId, leaderId: ctx.playerId });
+          const killed = await engineerConsentInvalidateForPlayers(tx, {
+            regionId: ctx.regionId, playerIds: rows.map(r => r.player_id) });
           return {
             result: { accepted: true },
             sim: await allySyncSim(tx, ctx, rows.map(r => r.player_id)),
+            fanout: consentInvalidatedFanout(ctx.regionId, killed),
           };
         }
         case 'setAutoRepair': {
@@ -1054,7 +1077,7 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           // One pending request per engineer+building pair; re-asking returns
           // the live request id (and re-fans the private notice).
           const existing = await engineerConsentPendingFor(tx, {
-            regionId: ctx.regionId, requesterId: ctx.playerId,
+            regionId: ctx.regionId, requesterId: ctx.playerId, ownerId: ownerPid,
             engineerId: action.engineerId, buildingId: action.buildingId,
           });
           if (existing) {

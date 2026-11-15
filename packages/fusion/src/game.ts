@@ -641,7 +641,7 @@ export class Game {
   /** PW34: transient audit feed — every completed Engineer capture (hostile or
    *  consented) is queued here for the durable layer to receipt as one CAPTURE
    *  operation. Drained by the region runner; never serialized. */
-  captureEvents: { building: number; buildingDurableId: string; engineer: number; engineerDurableId: string; from: number; to: number; requestId: string }[] = [];
+  captureEvents: { building: number; buildingDurableId: string; engineer: number; engineerDurableId: string; from: number; to: number; requestId: string; tick: number }[] = [];
   /** PW34: journaled allied-capture consents mirrored into the sim. Each grant
    *  is one-use and bound to the engineer/building sim ids and owner/requester
    *  slots captured when the durable owner accepted — any later change of
@@ -917,7 +917,19 @@ export class Game {
       }
       return;
     }
-    if (cmd.t === 'setAlly') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.ally = cmd.ally; } return; }
+    if (cmd.t === 'setAlly') {
+      if (this.persistent) {
+        const p = this.players[cmd.slot];
+        if (p && p.ally !== cmd.ally) {
+          p.ally = cmd.ally;
+          // PW34: any membership change irreversibly invalidates that player's
+          // consent grants — leaving and rejoining cannot resurrect them; a
+          // fresh request and owner decision are required.
+          this.consents = this.consents.filter(c => c.requester !== cmd.slot && c.owner !== cmd.slot);
+        }
+      }
+      return;
+    }
     if (cmd.t === 'setAutoRepair') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.autoRepair = cmd.on; } return; }
     if (cmd.t === 'setShield') {
       if (this.persistent && this.mmo?.shieldRadiusCells) {
@@ -1016,8 +1028,15 @@ export class Game {
           const enemy = this.isEnemy(slot, target.owner);
           // PW34: an allied target needs a live owner consent bound to this
           // engineer and building; without it the order is refused at issue.
-          const ok = def.engineer ? enemy
-            || (target.owner === slot ? target.hp < target.maxHp : this.consentFor(u.id, target.id, slot, target.owner) !== undefined)
+          // Hostile and consented captures are also refused at issue while the
+          // target sits under an active shield or protected status — a shield
+          // that later drops does not revive the rejected order; the player
+          // must issue a fresh lawful order. Own repair is unaffected.
+          const ok = def.engineer ? (enemy
+            ? this.capturePermitted(target) && !this.captureBlockedFor(u)
+            : target.owner === slot ? target.hp < target.maxHp
+            : this.consentFor(u.id, target.id, slot, target.owner) !== undefined
+              && this.capturePermitted(target) && !this.captureBlockedFor(u))
             : def.spy ? enemy
             : target.owner === slot && (sdef.repairPad && def.kind !== 'infantry' && def.kind !== 'aircraft'
               || sdef.airfield && def.kind === 'aircraft' || !!sdef.refinery && !!def.harvester);
@@ -2323,16 +2342,17 @@ export class Game {
       if (this.structDef(t).site) { u.order = 'idle'; u.target = 0; return; }
       const defender = t.owner;
       if (enemy) {
-        // A consent order whose alliance broke mid-walk is invalidated, not
-        // converted — it must not become a hostile capture the owner never saw.
-        if (u.enterIntent === 2) { u.order = 'idle'; u.target = 0; return; }
+        // Only an order issued as a hostile capture may complete one here —
+        // consent (2) and own-repair (3) intents are invalidated by the
+        // relationship change, never converted into a new hostile action.
+        if (u.enterIntent !== 1 && u.enterIntent !== 0) { u.order = 'idle'; u.target = 0; return; }
         // A protected attacker cannot take a building by force — protection
         // must not be retained through a hostile capture.
         if (!this.captureBlockedFor(u) && this.capturePermitted(t)) {
           this.capture(t, u.owner);
           this.captureEvents.push({
             building: t.id, buildingDurableId: t.durableId, engineer: u.id, engineerDurableId: u.durableId,
-            from: defender, to: u.owner, requestId: '',
+            from: defender, to: u.owner, requestId: '', tick: this.tick,
           });
           // Hostile capture is a PvP act: a recovering attacker loses
           // protection at once and the compound records the battle.
@@ -2369,7 +2389,7 @@ export class Game {
         this.capture(t, u.owner);
         this.captureEvents.push({
           building: t.id, buildingDurableId: t.durableId, engineer: u.id, engineerDurableId: u.durableId,
-          from: defender, to: u.owner, requestId: c.requestId,
+          from: defender, to: u.owner, requestId: c.requestId, tick: this.tick,
         });
         this.consume(u);
         return;

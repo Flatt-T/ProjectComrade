@@ -171,6 +171,11 @@ describeDb('mmo engineer capture consent (PW34, real PostgreSQL)', () => {
     const cap = ledger.find(l => l.kind === 'CAPTURE')!;
     expect(cap.from_owner).toBe(owner);
     expect(cap.to_owner).toBe(requester);
+    // The DESTROY charge belongs to the Engineer's owner (the requester),
+    // never the building's former owner.
+    const dead = ledger.find(l => l.kind === 'DESTROY')!;
+    expect(dead.from_owner).toBe(requester);
+    expect(dead.to_owner).toBeNull();
   }, IT_TIMEOUT);
 
   it('a declined consent leaves building and Engineer untouched', async () => {
@@ -201,5 +206,44 @@ describeDb('mmo engineer capture consent (PW34, real PostgreSQL)', () => {
     const row = await mmoOne<{ state: string }>(
       'select state from engineer_consent where request_id = $1', [requestId]);
     expect(row?.state).toBe('declined');
+  }, IT_TIMEOUT);
+
+  it('an alliance break after acceptance invalidates the grant durably and privately', async () => {
+    const [owner, requester] = p();
+    const { bld, eng } = engineerPair(ctx, 0, 1, 60, 100);
+    const engId = mmoEntityId(ctx.regionId, eng.id);
+    const bldId = mmoEntityId(ctx.regionId, bld.id);
+
+    const req = await act(ctx, requester, { t: 'engineerRequest', engineerId: engId, buildingId: bldId });
+    expect(req.accepted).toBe(true);
+    const requestId = req.requestId as string;
+    expect((await act(ctx, owner, { t: 'engineerConsent', requestId, decision: 'accept' })).accepted).toBe(true);
+    await waitFor(() => (ctx.runner.currentGame!.consents?.length ?? 0) >= 1);
+
+    // The requester leaves the alliance mid-walk: durable row invalidated,
+    // sim grant destroyed by the setAlly resync, both parties notified.
+    expect((await act(ctx, requester, { t: 'allianceLeave' })).accepted).toBe(true);
+    await waitFor(async () => {
+      const row = await mmoOne<{ state: string }>(
+        'select state from engineer_consent where request_id = $1', [requestId]);
+      return row?.state === 'invalidated';
+    });
+    await waitFor(() => !(ctx.runner.currentGame!.consents ?? []).some(c => c.requestId === requestId));
+    const priv = await mmoQuery<{ payload: { kind?: string; decision?: string } }>(
+      `select payload from outbox where region_id = $1 and topic = 'mmo.private'
+         and payload->>'requestId' = $2 and payload->>'decision' = 'invalidated'`,
+      [ctx.regionId, requestId]);
+    expect(priv.length).toBeGreaterThanOrEqual(2); // requester AND owner told
+
+    // Rejoining does not resurrect anything — a fresh request is required.
+    const reReq = await act(ctx, requester, { t: 'engineerRequest', engineerId: engId, buildingId: bldId });
+    expect(reReq.accepted).toBe(false); // no longer allied
+
+    // And the dead grant cannot capture even if an enter order is forced.
+    await act(ctx, requester, { t: 'enter', entityIds: [engId], targetId: bldId });
+    await sleep(800);
+    const g = ctx.runner.currentGame!;
+    expect(g.entities.get(bld.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
   }, IT_TIMEOUT);
 });
