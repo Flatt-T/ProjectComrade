@@ -17,7 +17,7 @@ import {
 } from './rules.js';
 import {
   MASHUP_ARMORS, MASHUP_PACKS, MASHUP_SLOT_LABEL, MASHUP_SLOTS, ROLE_FALLBACK,
-  MashupChoice, MashupLoadout, MashupSlot, mashupCatalogue, resolveChoice, rolesOf, spreadWarhead,
+  Chosen, MashupChoice, MashupLoadout, MashupSlot, mashupCatalogue, resolveChoice, rolesOf, spreadWarhead,
 } from './mashup.js';
 import { tdPack } from './packs/td.js';
 
@@ -448,58 +448,77 @@ export function worldAllowedDefs(loadout: MashupLoadout, packs: RulePack[] = MAS
 }
 
 /**
- * The approved opening army (THU-2446): one MCV, one harvester, four main
- * battle tanks, two light vehicles and eight infantry — counts, not unique
- * defs, so a single-faction loadout fields a real combined-arms force.
- * Every pick comes from the commander's own vehicle/infantry choices, with
- * the service MCV/harvester as fallback; nothing outside the loadout's
- * allowedDefs is granted.
+ * The approved opening army (THU-2446, DEC-3.3): one MCV, one harvester, four
+ * main battle tanks, two light vehicles and eight infantry — the same role
+ * schedule and role predicates as the faction grant in starter.ts, resolved
+ * against the commander's own picks first.
+ *
+ * Every legal loadout fields the full sixteen: a slot the commander left blank
+ * — or whose pick cannot fill a role (no scout chassis, no armed infantry) —
+ * falls back to the buildings faction's equivalent set, then the catalogue
+ * default, then any composed unit of that kind. Equivalent picks are grant-only:
+ * they live in the composed pack but stay out of the commander's allowedDefs,
+ * so no donor faction's build tree is granted.
  */
 export function worldStarterUnits(loadout: MashupLoadout, packs: RulePack[] = MASHUP_PACKS): string[] {
-  const { pack } = worldPack(packs);
+  const { pack, choices } = worldPack(packs);
   const units = pack.units;
-  const chosenUnits = (slot: Exclude<MashupSlot, 'structures'>): UnitDef[] => {
-    const key = loadout[slot];
+
+  const defsFor = (slot: Exclude<MashupSlot, 'structures'>, key: string | undefined): UnitDef[] => {
     if (!key) return [];
-    const { defs } = resolveChoice(key, slot, packs);
-    return (defs as UnitDef[]).map(u => units[worldDefId(slot, key, u.id)]).filter((u): u is UnitDef => !!u);
+    try {
+      const { defs } = resolveChoice(key, slot, packs);
+      return (defs as UnitDef[])
+        .map(u => units[worldDefId(slot, key, u.id)])
+        .filter((u): u is UnitDef => !!u);
+    } catch { return []; }
   };
-  const svc = (tag: string) => Object.values(units).find(u => u.id.startsWith(`w-svc-${tag}-`));
-  const byCostAsc = (a: UnitDef, b: UnitDef) => a.cost - b.cost || (a.id < b.id ? -1 : 1);
-  const byCostDesc = (a: UnitDef, b: UnitDef) => b.cost - a.cost || (a.id < b.id ? -1 : 1);
-  const start: string[] = [];
-  const push = (def: UnitDef | undefined, n: number) => { for (let i = 0; i < n && def; i++) start.push(def.id); };
 
-  // deploysTo is the 'yard' sentinel on every MCV-class unit; the engine resolves
-  // the concrete yard per player at deploy time.
-  const veh = chosenUnits('vehicle').filter(u => u.tech <= 10);
-  const mcv = cheapest(veh.filter(u => !!u.deploysTo)) ?? svc('mcv');
-  push(mcv, 1);
-  const harv = cheapest(veh.filter(u => !!u.harvester)) ?? svc('harvester');
-  push(harv, 1);
+  // The buildings choice anchors the faction-equivalent pool: its pack and
+  // faction lend the standard vehicles/infantry when a force slot is omitted.
+  let anchor: Chosen | null = null;
+  if (loadout.structures) {
+    try { anchor = resolveChoice(loadout.structures, 'structures', packs); } catch { anchor = null; }
+  }
+  const equivDefs = (slot: Exclude<MashupSlot, 'structures'>): UnitDef[] => {
+    const same = anchor?.faction
+      ? choices[slot].find(c => c.packId === anchor!.pack.id && c.factionIds.includes(anchor!.faction!.id))
+      : undefined;
+    return defsFor(slot, same?.key ?? choices[slot][0]?.key);
+  };
 
-  // Main battle tanks: armed chassis, no transport/heavy-cargo/MCV roles.
-  // Combat-role vehicles preferred; strongest cost tier wins the main gun.
-  const gunVeh = veh.filter(u =>
-    u.id !== mcv?.id && u.id !== harv?.id && !!u.weapon &&
-    !u.transport && !u.heavyCargo && !u.deploysTo && u.role !== 'siege' && u.role !== 'support');
-  const combatVeh = gunVeh.filter(u => u.role === 'combat' || !u.role);
-  const mainTank = [...(combatVeh.length ? combatVeh : gunVeh)].sort(byCostDesc)[0];
-  push(mainTank, 4);
+  // starterPicks' ordering: lowest tech, then cheapest, then id — the
+  // faction's standard-issue pick for the role.
+  const techCost = (a: UnitDef, b: UnitDef) =>
+    a.tech - b.tech || a.cost - b.cost || (a.id < b.id ? -1 : 1);
+  const pick = (pred: (u: UnitDef) => boolean, pools: UnitDef[][]): UnitDef | undefined => {
+    for (const pool of pools) {
+      const hit = pool.filter(pred).sort(techCost)[0];
+      if (hit) return hit;
+    }
+    return undefined;
+  };
+  const vehPools = [defsFor('vehicle', loadout.vehicle), equivDefs('vehicle'),
+    Object.values(units).filter(u => u.kind === 'vehicle')];
+  const infPools = [defsFor('infantry', loadout.infantry), equivDefs('infantry'),
+    Object.values(units).filter(u => u.kind === 'infantry')];
 
-  // Light vehicles: the cheapest remaining armed chassis, scout role preferred.
-  const lightVeh = veh.filter(u =>
-    u.id !== mcv?.id && u.id !== harv?.id && u.id !== mainTank?.id && !!u.weapon &&
-    !u.transport && !u.heavyCargo && !u.deploysTo)
-    .sort(byCostAsc);
-  const light = lightVeh.find(u => u.role === 'scout') ?? lightVeh[0];
-  push(light, 2);
+  // deploysTo is the 'yard' sentinel on every MCV-class unit; the engine
+  // resolves the concrete yard per player at deploy time.
+  const mcv = pick(u => !!u.deploysTo, vehPools);
+  const harv = pick(u => !!u.harvester && u.kind === 'vehicle', vehPools);
+  // Main battle tank: the standard-issue crusher (starterPicks' predicate).
+  const tank = pick(u => u.kind === 'vehicle' && u.role === 'combat' && !!u.crusher
+    && !!u.weapon && !u.deploysTo && !u.transport, vehPools);
+  // Light vehicle: scout role first, then a light-armour support scout —
+  // never a siege or heavy chassis wearing the light slot.
+  const light = pick(u => u.kind === 'vehicle' && u.role === 'scout' && !u.harvester && !u.deploysTo, vehPools)
+    ?? pick(u => u.kind === 'vehicle' && (u.role === 'scout' || u.role === 'support')
+      && !u.harvester && !u.deploysTo && !u.transport && u.armor === 'light', vehPools);
+  const foot = pick(u => u.kind === 'infantry' && !u.engineer && u.crushable !== false, infPools);
 
-  // Infantry: eight drawn from the cheapest armed infantry, cycling so a thin
-  // pick still fields a full squad instead of a token pair.
-  const foot = chosenUnits('infantry').filter(u => u.tech <= 10 && !!u.weapon)
-    .sort(byCostAsc);
-  for (let i = 0; i < 8 && foot.length; i++) start.push(foot[i % foot.length].id);
-
-  return start.filter(id => !!units[id]);
+  const out: string[] = [];
+  const push = (def: UnitDef | undefined, n: number) => { for (let i = 0; i < n && def; i++) out.push(def.id); };
+  push(mcv, 1); push(harv, 1); push(tank, 4); push(light, 2); push(foot, 8);
+  return out.filter(id => !!units[id]);
 }

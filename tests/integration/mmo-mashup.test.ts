@@ -6,7 +6,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
-  closeMmoDatabase, mmoOne, resetMmoDatabase,
+  closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import {
   createPlayer, createRegion, createSettlement, createWorld, getSettlement,
@@ -39,12 +39,17 @@ async function waitFor(predicate: () => Promise<boolean> | boolean, timeoutMs = 
   throw new Error('waitFor timed out');
 }
 
-interface LivePlayer { slot: number; pid?: string; faction: string; allowedDefs?: string[]; newcomerProtected: boolean }
+interface LivePlayer { slot: number; pid?: string; faction: string; allowedDefs?: string[]; newcomerProtected: boolean; credits?: number }
 interface LiveEntity { id: number; owner: number; kind: string; bound: number; hp: number; type: string }
+interface LiveUnitDef {
+  id: string; kind: string; role?: string; crusher?: unknown; weapon?: unknown;
+  deploysTo?: unknown; transport?: unknown; harvester?: unknown; armor?: string;
+  engineer?: unknown; crushable?: unknown;
+}
 interface LiveGame {
   players: LivePlayer[];
   entities: Map<number, LiveEntity>;
-  pack: { units: Record<string, { id: string }>; structures: Record<string, { id: string }> };
+  pack: { units: Record<string, LiveUnitDef>; structures: Record<string, { id: string }> };
 }
 
 const { pack: WORLD_PACK, choices } = worldPack();
@@ -186,20 +191,88 @@ describeDb('mmo universal-world settlement (real PostgreSQL + real Fusion sim)',
       expect(me.faction).toBe('commander');
       expect(me.allowedDefs).toEqual(worldAllowedDefs(LO_A));
 
-      // Every starter unit is inside the loadout's allowed set.
+      // THU-2446: the approved opening is exactly sixteen bound units by role.
       const units = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.hp > 0);
-      expect(units.length).toBeGreaterThanOrEqual(3);
+      expect(units).toHaveLength(16);
+      const defs = units.map(u => g.pack.units[u.type]!);
+      const isTank = (d: LiveUnitDef) =>
+        d.kind === 'vehicle' && d.role === 'combat' && !!d.crusher && !!d.weapon && !d.deploysTo && !d.transport;
+      const isLight = (d: LiveUnitDef) =>
+        d.kind === 'vehicle' && !d.harvester && !d.deploysTo &&
+        (d.role === 'scout' || (d.role === 'support' && d.armor === 'light' && !d.transport));
+      const isInf = (d: LiveUnitDef) =>
+        d.kind === 'infantry' && !d.engineer && d.crushable !== false;
+      expect(defs.filter(d => !!d.deploysTo)).toHaveLength(1);
+      expect(defs.filter(d => !!d.harvester)).toHaveLength(1);
+      expect(defs.filter(isTank)).toHaveLength(4);
+      expect(defs.filter(isLight)).toHaveLength(1 + 1); // two light vehicles
+      expect(defs.filter(isInf)).toHaveLength(8);
       for (const u of units) {
         expect(u.bound).toBe(1);
-        expect(me.allowedDefs!).toContain(u.type);
         expect(g.pack.units[u.type], `starter ${u.type} exists`).toBeTruthy();
+        // Chosen-slot picks are buildable; grant-only role equivalents may sit
+        // outside allowedDefs — they are granted once, never produced, and only
+        // ever fill the vehicle/infantry roles.
+        if (me.allowedDefs!.includes(u.type)) continue;
+        expect(['vehicle', 'infantry']).toContain(g.pack.units[u.type]!.kind);
       }
+      // Twice the standard skirmish start.
+      expect(me.credits).toBe(WORLD_PACK.startCredits.standard * RULES.starterCreditsMultiplier);
+      expect(RULES.starterCreditsMultiplier).toBe(2);
       // An MCV-class unit is present so the player can deploy a base.
       expect(units.some(u => !!g.pack.units[u.type] && (g.pack.units[u.type] as { deploysTo?: string }).deploysTo)).toBe(true);
     } finally {
       ctx.runner.stop();
     }
   });
+
+  it('settles a sparse loadout with the full sixteen and survives a retried settle', async () => {
+    // THU-2446: air+naval only — no vehicle or infantry picks. The grant must
+    // still field the approved roster via role equivalents, and a retried
+    // settle must not duplicate the settlement or the army.
+    const worldId = await makeWorld();
+    const region = await makeWorldRegion(worldId);
+    const ctx = await startRunner(region);
+    try {
+      const sparse: MashupLoadout = {
+        structures: choices.structures[0].key,
+        aircraft: choices.aircraft[0]?.key,
+        naval: choices.naval[0]?.key,
+      };
+      const player = await createPlayer({ accountId: randomUUID(), displayName: 'Sparse' });
+      const commandId = randomUUID();
+      const res = await worldAction(ctx, player.player_id, {
+        t: 'settle', regionId: region.region_id, faction: 'commander', x: 5, y: 5, loadout: sparse,
+      }, commandId);
+      expect(res.accepted).toBe(true);
+
+      await waitFor(() => {
+        const g = live(ctx);
+        const p = g.players.find(pl => pl.pid === player.player_id);
+        return !!p && [...g.entities.values()].some(e => e.owner === g.players.indexOf(p!) && e.kind === 'unit');
+      });
+      const g = live(ctx);
+      const slot = g.players.findIndex(pl => pl.pid === player.player_id);
+      const units = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.hp > 0);
+      expect(units).toHaveLength(16);
+      expect(units.every(u => u.bound === 1)).toBe(true);
+      expect(g.players[slot].credits).toBe(WORLD_PACK.startCredits.standard * RULES.starterCreditsMultiplier);
+
+      // Retry the identical command — idempotent, no second army.
+      const again = await worldAction(ctx, player.player_id, {
+        t: 'settle', regionId: region.region_id, faction: 'commander', x: 5, y: 5, loadout: sparse,
+      }, commandId);
+      expect(again.accepted).toBe(true);
+      await sleep(300);
+      const unitsAfter = [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.hp > 0);
+      expect(unitsAfter).toHaveLength(16);
+      const rows = await mmoQuery<{ n: number }>(
+        'select count(*)::int as n from settlement where player_id = $1', [player.player_id]);
+      expect(rows[0]!.n).toBe(1);
+    } finally {
+      ctx.runner.stop();
+    }
+  }, 90_000);
 
   it('gates each commander to their own loadout inside the same region', async () => {
     const worldId = await makeWorld();
