@@ -339,4 +339,54 @@ describeDb('mmo region transfer (two live runners)', () => {
     const ledger = await mmoQuery('select kind from asset_ledger where operation_id = $1', [transferId]);
     expect(ledger.map(l => l.kind).sort()).toEqual(['TRANSFER_IN', 'TRANSFER_OUT']);
   }, IT_TIMEOUT);
+
+  it('retries a parked RECOVERY_REQUIRED transfer once the manifest becomes deliverable', async () => {
+    // THU-2242: a manifest the destination cannot restore parks the row instead
+    // of dropping the asset; the row must re-evaluate and deliver later.
+    const transferId = randomUUID();
+    const unitType = Object.keys(PACKS['td'].units)
+      .find(t => PACKS['td'].units[t].kind === 'infantry')!;
+    const manifest = {
+      type: 'definitely-not-a-unit', kind: 'unit', ownerPid: p0(),
+      hp: 50, maxHp: 100, facing: 0, turret: 0,
+      bound: 0, packedType: '', faction: '', shielded: false, battleAt: 0,
+      recoveryProtected: false, xp: 0, rank: 0, ammo: 0,
+      deployed: false, disguised: false, hstate: 'seek',
+      cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1,
+      cell: { x: 4, y: 4 },
+    };
+    // The source release path writes the REGION_TRANSFER operation that the
+    // TRANSFER_IN ledger row references; replicate it for the synthetic row.
+    await mmoQuery(
+      `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+       values ($1,$2,1,0,'REGION_TRANSFER',$3,$4)`,
+      [transferId, ctx.a.regionId,
+       JSON.stringify({ kind: 'REGION_TRANSFER', transferId, entityId: null, sourceRegionId: ctx.a.regionId, destRegionId: ctx.b.regionId }),
+       JSON.stringify({ simId: 0, departedTick: 0 })]);
+    await mmoQuery(
+      `insert into region_transfer (transfer_id, entity_id, source_region_id, dest_region_id, payload, state)
+       values ($1,$2,$3,$4,$5,'SOURCE_RELEASED')`,
+      [transferId, randomUUID(), ctx.a.regionId, ctx.b.regionId,
+       JSON.stringify({ manifest, ownerPid: p0() })]);
+
+    // Unknown definition: spawnTransfer refuses, the row parks.
+    await waitFor(async () => (await transferState(transferId)) === 'RECOVERY_REQUIRED', 30000);
+    expect([...ctx.b.runner.currentGame!.entities.values()]
+      .filter(x => x.durableId === transferId)).toHaveLength(0);
+
+    // Repair the manifest (as a corrected payload would be): the next inbound
+    // pass must deliver through the same fenced commit path.
+    await mmoQuery(
+      `update region_transfer set payload = payload || $2::jsonb where transfer_id = $1`,
+      [transferId, JSON.stringify({ manifest: { ...manifest, type: unitType } })]);
+    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+
+    const arrived = [...ctx.b.runner.currentGame!.entities.values()]
+      .find(x => x.durableId === transferId);
+    expect(arrived).toBeTruthy();
+    expect(arrived!.type).toBe(unitType);
+    expect(ctx.b.runner.currentGame!.players[arrived!.owner].pid).toBe(p0());
+    const ledger = await mmoQuery('select kind from asset_ledger where operation_id = $1', [transferId]);
+    expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN']);
+  }, IT_TIMEOUT);
 });

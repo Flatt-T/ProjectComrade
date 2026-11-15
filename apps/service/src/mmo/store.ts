@@ -642,10 +642,14 @@ export async function liveTransferForEntity(entityId: string, q: Queryable = mmo
     [entityId])).rows[0];
 }
 
-/** Transfers awaiting pickup by a destination region (SOURCE_RELEASED inbound). */
+/** Transfers awaiting pickup by a destination region. SOURCE_RELEASED is the
+ *  normal inbound queue; RECOVERY_REQUIRED rows are retried every pass so a
+ *  parked manifest re-evaluates on roster, pack, route or capacity changes —
+ *  nothing parks permanently without an explicit CANCELLED resolution. */
 export async function inboundTransfers(destRegionId: string, q: Queryable = mmoDb()): Promise<TransferRow[]> {
   return (await q.query<TransferRow>(
-    `select * from region_transfer where dest_region_id = $1 and state = 'SOURCE_RELEASED'
+    `select * from region_transfer where dest_region_id = $1
+       and state in ('SOURCE_RELEASED','RECOVERY_REQUIRED')
      order by created_at`, [destRegionId])).rows;
 }
 

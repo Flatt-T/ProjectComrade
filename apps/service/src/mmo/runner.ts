@@ -1201,7 +1201,9 @@ export class RegionRunner {
           });
           const fresh = (await tx.query<TransferRow>(
             'select * from region_transfer where transfer_id = $1 for update', [t.transfer_id])).rows[0];
-          if (!fresh || fresh.state !== 'SOURCE_RELEASED') { raced = true; return; }
+          // RECOVERY_REQUIRED rows retry through the same commit path — the
+          // state machine allows RECOVERY_REQUIRED -> DESTINATION_ACCEPTED.
+          if (!fresh || (fresh.state !== 'SOURCE_RELEASED' && fresh.state !== 'RECOVERY_REQUIRED')) { raced = true; return; }
           await transitionTransfer(t.transfer_id, 'DESTINATION_ACCEPTED', tx);
           await transitionTransfer(t.transfer_id, 'COMPLETED', tx);
           this.bindEntity(t.transfer_id, simId);
@@ -1220,7 +1222,13 @@ export class RegionRunner {
         });
       } catch (error) {
         g.unspawnTransfer(simId);
-        throw error;
+        // A lost fence must still fail the region; any other per-transfer
+        // failure (bad ledger ref, transient DB error) leaves the row parked
+        // for the next pass instead of killing the whole region runner.
+        if (error instanceof MmoStoreError && error.code === 'FENCE_LOST') throw error;
+        this.opts.log('transfer-inbound-error', {
+          transferId: t.transfer_id, error: String(error).slice(0, 300),
+        });
       }
       if (raced) g.unspawnTransfer(simId);
     }

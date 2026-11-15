@@ -2611,9 +2611,16 @@ export class Game {
     if (slot < 0 || !this.pack.units[m.type]) return null;
     if (!this.manifestFits(m)) return null;
     const kind = this.moveClass(this.pack.units[m.type]);
+    // PW18/THU-2242: never fall back to the requested cell — it may be water,
+    // occupied or off the movement class. Search outward and refuse the spawn
+    // when no lawful cell exists; the durable layer parks the transfer in
+    // RECOVERY_REQUIRED and retries as the region changes.
     const spot = nearestCell(this.map, cell, 8,
-      i => passable(this.pack, this.map, i, kind) && !this.unitInCell(i));
-    const target = spot >= 0 ? spot : cell;
+        i => passable(this.pack, this.map, i, kind) && !this.unitInCell(i))
+      ?? nearestCell(this.map, cell, 40,
+        i => passable(this.pack, this.map, i, kind) && !this.unitInCell(i));
+    if (spot < 0) return null;
+    const target = spot;
     const e = this.spawnUnit(m.type, slot, target);
     e.order = 'idle'; e.hp = Math.max(1, Math.min(m.hp, m.maxHp)); e.maxHp = m.maxHp;
     e.facing = m.facing; e.turret = m.turret;
