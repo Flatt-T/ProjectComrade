@@ -238,7 +238,6 @@ describeDb('mmo transfer arrival crash window (PW18+PW30, real PostgreSQL)', () 
       }
     }
 
-    const checksumControl = gameOf(ctx.bc.runner).checksum();
     const tickControl = gameOf(ctx.bc.runner).tick;
     const creditsControl = gameOf(ctx.bc.runner).players.map(p => p.credits);
 
