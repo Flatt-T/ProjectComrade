@@ -7,6 +7,8 @@ import { WORLDGEN_VERSION, buildableTerrain, generateMap, generateWorldMap, pack
 import { MMO_WORLDGEN_DEFAULT, PERSISTENT_RULES_V1, spawnRegionInBand, type MmoRulesProfile } from '@comrade/contracts';
 import { mmoOne, mmoQuery } from './db.js';
 import { createRegion, getRegion, getSettlement, joinWorld, memberPowerScores, type RegionRow } from './store.js';
+import { engineFingerprint, regionFingerprints } from './fingerprints.js';
+import type { RegionSimSpec } from './runner.js';
 
 interface RegionSeedSim {
   sim?: { players?: { playerId: string }[]; packId?: string };
@@ -103,7 +105,11 @@ export async function ensureSpawnRegion(args: {
         rejected: gen.report.attempts.filter(a => a.reasons.length),
       },
     },
-    rulesetVersion: 'persistent_world', engineArtifactSha256: 'persistent-engine',
+    rulesetVersion: 'persistent_world', engineArtifactSha256: engineFingerprint(),
+    // PW33: pin the exact content this region runs — engine, pack, rules and
+    // worldgen — so a later build that resolves different content fails the
+    // region start instead of silently reinterpreting the journal.
+    fingerprints: regionFingerprints(sim as RegionSimSpec, rules),
   });
   return { region, created: true };
 }

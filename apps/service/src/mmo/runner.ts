@@ -41,6 +41,7 @@ import { pickSpawnCell } from './spawn.js';
 import { mmoQuery } from './db.js';
 import { raiseNotification } from './notify.js';
 import { persistentPackRunnable } from './packs.js';
+import { regionFingerprints, type RegionFingerprints } from './fingerprints.js';
 
 const TICK_MS = 1000 / 15;
 const PACK_LIST = registryPacks();
@@ -139,6 +140,9 @@ export interface RegionRunnerOptions {
 
 interface SnapshotPayload {
   v: 1; seed: number; snapshot: string; bindings: [string, number][];
+  /** PW33: content fingerprint this checkpoint was taken under. Absent on
+   *  pre-pinning snapshots — those are accepted but never re-stamped. */
+  fp?: string;
   /** Present only on checkpoints taken at hibernation: the quiescent interval the
    *  wake path must account for arithmetically (PW22). */
   hib?: { sinceMs: number; rates: number[]; sampleTick: number };
@@ -172,6 +176,8 @@ export class RegionRunner {
   private game?: Game;
   private epoch?: string;
   private region?: RegionRow;
+  /** PW33: content fingerprint this build resolves for the region spec. */
+  private regionFingerprints?: RegionFingerprints;
   private simSeed = 0;
   private startedAtMs = 0;
   private bindings = new Map<string, number>();
@@ -295,6 +301,20 @@ export class RegionRunner {
     const spec = this.simSpecFromRegion();
     if (!spec) throw new MmoStoreError('NO_SIM_SPEC', 'region has no sim spec and none was provided');
     for (const [i, p] of spec.players.entries()) this.slotByPlayer.set(p.playerId, i);
+
+    // PW33: verify the pinned content fingerprint BEFORE any restore or
+    // mutation. A region created under different engine/pack/rules/worldgen
+    // content fails cleanly here rather than replaying its journal through
+    // definitions it was never written against. Regions predating the column
+    // carry NULL and remain runnable (their content is unverifiable, so it is
+    // never stamped with a digest it did not demonstrably run).
+    this.regionFingerprints = regionFingerprints(spec, this.opts.rules);
+    const storedFp = this.region.fingerprints as RegionFingerprints | null | undefined;
+    if (storedFp?.content && storedFp.content !== this.regionFingerprints.content) {
+      throw new MmoStoreError('FINGERPRINT_MISMATCH',
+        `region ${this.opts.regionId} was created under different content ` +
+        `(stored ${storedFp.content.slice(0, 16)}…, build ${this.regionFingerprints.content.slice(0, 16)}…)`);
+    }
 
     // PW30: walk retained checkpoints newest→oldest. A payload that fails
     // checksum, parse or engine-restore validation is skipped so an older
@@ -812,6 +832,10 @@ export class RegionRunner {
       const payload = JSON.parse(snap.payload.toString('utf8')) as SnapshotPayload;
       if (payload?.v !== 1 || typeof payload.snapshot !== 'string'
         || typeof payload.seed !== 'number' || !Array.isArray(payload.bindings)) return null;
+      // PW33: a checkpoint stamped with a different content fingerprint was
+      // written by content this build does not reproduce — skip it rather
+      // than restore state the current definitions cannot verify.
+      if (payload.fp && this.regionFingerprints && payload.fp !== this.regionFingerprints.content) return null;
       return payload;
     } catch {
       return null;
@@ -2500,6 +2524,7 @@ export class RegionRunner {
         v: 1, seed: this.simSeed,
         snapshot: captureGame(this.game, { seed: this.simSeed }),
         bindings: this.durableBindings(),
+        ...(this.regionFingerprints ? { fp: this.regionFingerprints.content } : {}),
         ...(this.hibMeta ? { hib: this.hibMeta } : {}),
       };
       const tail = await journalTail(this.opts.regionId);

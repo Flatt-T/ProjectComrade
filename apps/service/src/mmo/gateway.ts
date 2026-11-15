@@ -256,6 +256,9 @@ export class MmoGateway {
       protocol: MMO_PROTOCOL, type: 'welcome', playerId: player.player_id,
       sessionId: conn.sessionId, config, regions: [...conn.subs.keys()],
       slots: [...conn.subs.values()].map(s => s.slot),
+      // PW33: the client pins this fingerprint; a later build that resolves
+      // different content is detectable at handshake rather than mid-game.
+      fingerprints: region.fingerprints ?? null,
     });
     send(conn.ws, snap.header);
     log('mmo-subscribe', { peer: conn.id, regionId: regionId.slice(0, 8), slot });

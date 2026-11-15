@@ -39,6 +39,9 @@ export interface RegionRow {
   seed?: unknown;
   ruleset_version?: string;
   engine_artifact_sha256?: string;
+  /** PW33: immutable content fingerprint recorded at region creation (NULL on
+   *  regions that predate pinning — never backfilled with unverifiable data). */
+  fingerprints?: unknown;
 }
 export interface PlayerRow { player_id: string; account_id: string; display_name: string; }
 export interface ProtectionRow {
@@ -114,12 +117,15 @@ export async function memberPowerScores(worldId: string): Promise<{ playerId: st
 export async function createRegion(args: {
   regionId?: string; worldId: string; label?: string; seed?: unknown;
   rulesetVersion: string; engineArtifactSha256: string;
+  /** PW33 content fingerprint set; omit only for legacy/unpinned regions. */
+  fingerprints?: unknown;
 }): Promise<RegionRow> {
   const id = args.regionId ?? uuid();
   await mmoQuery(
-    `insert into region (region_id, world_id, label, seed, ruleset_version, engine_artifact_sha256)
-     values ($1,$2,$3,$4,$5,$6)`,
-    [id, args.worldId, args.label ?? '', JSON.stringify(args.seed ?? {}), args.rulesetVersion, args.engineArtifactSha256]);
+    `insert into region (region_id, world_id, label, seed, ruleset_version, engine_artifact_sha256, fingerprints)
+     values ($1,$2,$3,$4,$5,$6,$7)`,
+    [id, args.worldId, args.label ?? '', JSON.stringify(args.seed ?? {}), args.rulesetVersion, args.engineArtifactSha256,
+     args.fingerprints === undefined ? null : JSON.stringify(args.fingerprints)]);
   return (await mmoOne<RegionRow>('select * from region where region_id = $1', [id]))!;
 }
 
