@@ -40,8 +40,31 @@ export async function submitCommand(args: {
 }): Promise<SubmitResult> {
   const message = parseMmoClientMessage(args.rawMessage) as MmoClientMessage;
   if (message.type !== 'command') throw new MmoStoreError('BAD_MESSAGE', 'only command messages are accepted');
-  const { commandId, regionId, action } = message;
+  const { action } = message;
   const payloadHash = sha256(JSON.stringify(action));
+
+  // The journal tick must be >= last_committed_tick (fenceRegion enforces
+  // monotonicity). The caller's tail read is stale by definition: runner-originated
+  // events (scheduled jobs, accrual, shield transitions) commit continuously at the
+  // live sim tick, so a command that loses that race fails FENCE_LOST and is dropped.
+  // Re-read the tail inside each attempt and retry the rolled-back transaction —
+  // the intent dedup check makes resubmission safe.
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      return await submitCommandOnce(args, message, payloadHash);
+    } catch (error) {
+      lastError = error;
+      if (!(error instanceof MmoStoreError) || error.code !== 'FENCE_LOST') throw error;
+    }
+  }
+  throw lastError;
+}
+
+async function submitCommandOnce(args: {
+  playerId: string; rawMessage: unknown; fence: RegionFence; tick: number | bigint;
+}, message: MmoClientMessage & { type: 'command' }, payloadHash: string): Promise<SubmitResult> {
+  const { commandId, regionId, action } = message;
 
   return mmoTransaction(async tx => {
     // Lock the intent row first: stable lock order is intent → region fence → event.
@@ -73,16 +96,22 @@ export async function submitCommand(args: {
       // as a fresh submission (the previous attempt rolled back).
     }
 
-    // Reject commands issued against a stale connection/authority epoch.
-    const regionEpoch = await tx.query<{ authority_epoch: string }>(
-      'select authority_epoch from region where region_id = $1', [regionId]);
-    const currentEpoch = regionEpoch.rows[0]?.authority_epoch;
+    // Reject commands issued against a stale connection/authority epoch, and read
+    // the freshest journal tick in the same transaction — runner-originated events
+    // advance last_committed_tick continuously, so the caller's earlier tail read
+    // would lose the fenceRegion monotonicity check whenever one lands in between.
+    const regionRow = await tx.query<{ authority_epoch: string; last_committed_tick: string }>(
+      'select authority_epoch, last_committed_tick from region where region_id = $1', [regionId]);
+    const currentEpoch = regionRow.rows[0]?.authority_epoch;
     if (currentEpoch !== undefined && BigInt(message.seenEpoch) !== BigInt(currentEpoch)) {
       throw new MmoStoreError('STALE_EPOCH', 'command seenEpoch does not match the region authority epoch');
     }
+    const tick = regionRow.rows[0]
+      ? BigInt(regionRow.rows[0].last_committed_tick)
+      : BigInt(args.tick);
 
     const { eventSeq, eventId } = await appendRegionEvent(tx, {
-      regionId, workerId: args.fence.workerId, epoch: args.fence.epoch, tick: args.tick,
+      regionId, workerId: args.fence.workerId, epoch: args.fence.epoch, tick,
       kind: 'command', payload: { commandId, playerId: args.playerId, action },
       outboxTopic: 'mmo.command',
       outboxPayload: { commandId, playerId: args.playerId, regionId },
