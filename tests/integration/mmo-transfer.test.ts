@@ -389,4 +389,86 @@ describeDb('mmo region transfer (two live runners)', () => {
     const ledger = await mmoQuery('select kind from asset_ledger where operation_id = $1', [transferId]);
     expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN']);
   }, IT_TIMEOUT);
+
+  it('resolves border combat once: fighter departs mid-firefight, single authority', async () => {
+    // THU-2242: a unit engaged in combat at the border keeps exactly one
+    // authority — it damages only while resident in the source region, leaves
+    // no corpse/salvage/kill credit behind, and its entity-bound attack order
+    // resolves to idle at the destination while durable state is preserved.
+    const g = ctx.a.runner.currentGame!;
+    const w = g.map.w;
+    // Dedicated p0 fighter spawned at the NW edge — earlier tests consume the
+    // starter roster, so this test brings its own combatant.
+    let aspot = -1;
+    outer: for (let ring = 2; ring <= 6; ring++) {
+      for (let y = ring; y < g.map.h - ring; y++) for (let x = ring; x < w - ring; x++) {
+        const i = y * w + x;
+        if (Math.min(x, w - 1 - x, y, g.map.h - 1 - y) === ring
+            && passable(g.pack, g.map, i, 'vehicle') && !g.map.occupied[i]) { aspot = i; break outer; }
+      }
+    }
+    if (aspot < 0) throw new Error('no attacker edge cell');
+    const atkE = g.spawnUnit('lighttank', 0, aspot);
+    // Survive the defender's return fire — this test needs the fighter alive
+    // through the transfer, not a duel outcome.
+    atkE.maxHp = 100000; atkE.hp = 100000;
+    const atk = { simId: atkE.id, ref: mmoEntityId(ctx.a.regionId, atkE.id), e: atkE };
+    const def = [...g.entities.values()]
+      .find(e => e.kind === 'unit' && e.owner === 1 && e.hp > 0 && !e.carriedBy
+        && !e.packedType && g.unitDef(e).kind !== 'aircraft'
+        && g.unitDef(e).transport === undefined);
+    if (!def) throw new Error('fixture has no p1 ground unit');
+    // Park the defender on the adjacent edge cell so the fight is isolated
+    // from both armies.
+    const ax = Math.floor(atk.e.x / LEPTONS), ay = Math.floor(atk.e.y / LEPTONS);
+    let dspot = -1;
+    for (const [dx, dy] of [[1, 0], [0, 1], [1, 1], [2, 0]] as const) {
+      const x = ax + dx, y = ay + dy, i = y * w + x;
+      if (x >= 0 && y >= 0 && x < w && y < g.map.h
+          && passable(g.pack, g.map, i, 'vehicle') && !g.map.occupied[i] && !g.unitInCell(i)) { dspot = i; break; }
+    }
+    if (dspot < 0) throw new Error('no defender cell beside attacker');
+    def.x = (dspot % w) * LEPTONS + LEPTONS / 2;
+    def.y = Math.floor(dspot / w) * LEPTONS + LEPTONS / 2;
+    def.order = 'idle'; def.path = []; def.target = 0;
+    // Engage: direct order fields (journal path covered by command tests).
+    atk.e.order = 'attack'; atk.e.target = def.id; atk.e.path = []; atk.e.repathTick = 0;
+    atk.e.xp = 4; atk.e.rank = 1;
+    const hpBefore = def.hp;
+    await waitFor(() => g.entities.get(def.id)!.hp < hpBefore, 15000);
+    const dealtDamage = hpBefore - g.entities.get(def.id)!.hp;
+    expect(dealtDamage).toBeGreaterThan(0);
+
+    const made = await worldAction(ctx, ctx.a, p0(), {
+      t: 'regionTransfer', entityId: atk.ref, destRegionId: ctx.b.regionId,
+    });
+    expect(made.accepted).toBe(true);
+    const transferId = made.transferId as string;
+    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+
+    // Source authority ends at departure: the fighter is gone (no corpse, no
+    // salvage), and the defender's stale target is cleared by the sim itself.
+    expect(g.entities.has(atk.simId)).toBe(false);
+    await waitFor(() => {
+      const d = g.entities.get(def.id);
+      return !!d && (d.target === 0 || !g.entities.has(d.target));
+    }, 10000);
+
+    // Destination: exactly one copy, durable state preserved, attack order
+    // resolved to idle (entity-bound orders cannot cross regions).
+    const copies = [...ctx.b.runner.currentGame!.entities.values()]
+      .filter(x => x.durableId === transferId);
+    expect(copies).toHaveLength(1);
+    const arrived = copies[0];
+    expect(arrived.xp).toBe(4);
+    expect(arrived.rank).toBe(1);
+    expect(arrived.hp).toBeLessThanOrEqual(atk.e.maxHp);
+    expect(arrived.order).toBe('idle');
+    // Single authority: no second copy anywhere in the source region.
+    expect([...g.entities.values()].filter(x => x.durableId === transferId)).toHaveLength(0);
+    // Exactly one ledger pair — combat produced no extra receipts.
+    const ledger = await mmoQuery<{ kind: string }>(
+      'select kind from asset_ledger where operation_id = $1 order by kind', [transferId]);
+    expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN', 'TRANSFER_OUT']);
+  }, IT_TIMEOUT);
 });

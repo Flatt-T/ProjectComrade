@@ -508,6 +508,18 @@ export interface TransferManifestEntry {
   homeField: number;
   /** Cell the entity occupied when the manifest was captured. */
   cell: { x: number; y: number };
+  /** THU-2242: live order at capture — only position-based orders survive a
+   *  crossing; entity-bound orders (attack/enter/ferry/depart) resolve to
+   *  idle at the destination per the border policy. */
+  order?: string;
+  /** Goal cell for move/attackMove orders. */
+  goalCell?: number;
+  /** Target cell for attackGround orders. */
+  fireCell?: number;
+  /** Source pack/map the cell coordinates refer to — orders restore only
+   *  when the destination runs the same content. */
+  packId?: string;
+  mapId?: string;
   /** Transport passengers, recursively manifested. */
   cargoUnits?: TransferManifestEntry[];
   /** Cross-region asset identity (region_transfer id) once assigned. */
@@ -2582,6 +2594,11 @@ export class Game {
       hstate: e.hstate, cargo: e.cargo, cargoValue: e.cargoValue,
       harvestCell: e.harvestCell, homeField: e.homeField,
       cell: { x: Math.floor(e.x / LEPTONS), y: Math.floor(e.y / LEPTONS) },
+      order: e.order,
+      goalCell: e.goal >= 0 ? e.goal : undefined,
+      fireCell: e.order === 'attackGround' && e.fireCell >= 0 ? e.fireCell : undefined,
+      packId: this.pack.id,
+      mapId: this.mapPreset?.id,
       durableId: e.durableId || undefined,
     };
     const cargo: TransferManifestEntry[] = [];
@@ -2651,10 +2668,14 @@ export class Game {
     // occupied or off the movement class. Search outward and refuse the spawn
     // when no lawful cell exists; the durable layer parks the transfer in
     // RECOVERY_REQUIRED and retries as the region changes.
-    const spot = nearestCell(this.map, cell, 8,
-        i => passable(this.pack, this.map, i, kind) && !this.unitInCell(i))
-      ?? nearestCell(this.map, cell, 40,
+    // THU-2242: nearestCell returns -1 (not nullish), so the wider search must
+    // be gated on the result, not `??` — otherwise the 40-cell fallback never runs.
+    let spot = nearestCell(this.map, cell, 8,
         i => passable(this.pack, this.map, i, kind) && !this.unitInCell(i));
+    if (spot < 0) {
+      spot = nearestCell(this.map, cell, 40,
+        i => passable(this.pack, this.map, i, kind) && !this.unitInCell(i));
+    }
     if (spot < 0) return null;
     const target = spot;
     const e = this.spawnUnit(m.type, slot, target);
@@ -2668,6 +2689,25 @@ export class Game {
     e.cargo = m.cargo; e.cargoValue = m.cargoValue;
     e.harvestCell = m.harvestCell; e.homeField = m.homeField;
     e.durableId = durableId || m.durableId || '';
+    // THU-2242 border policy: position-based orders survive the crossing only
+    // when pack and map match (cell coordinates are meaningless across maps);
+    // entity-bound orders (attack/enter/ferry/depart/rearm) resolve to idle —
+    // the destination's own acquire/harvest logic resumes valid behaviour.
+    const sameContent = (!m.packId || m.packId === this.pack.id)
+      && (!m.mapId || m.mapId === this.mapPreset?.id);
+    if (sameContent && (m.order === 'move' || m.order === 'attackMove')
+        && m.goalCell !== undefined && m.goalCell >= 0) {
+      e.order = m.order; e.goal = m.goalCell;
+      e.path = this.pathFor(e, m.goalCell); e.repathTick = this.tick + 20;
+    } else if (sameContent && m.order === 'attackGround'
+        && m.fireCell !== undefined && m.fireCell >= 0) {
+      e.order = 'attackGround'; e.fireCell = m.fireCell; e.target = 0;
+      e.path = this.pathFor(e, m.fireCell); e.repathTick = this.tick + 20;
+    } else if (m.order === 'harvest' && this.pack.units[e.type]?.harvester) {
+      e.order = 'harvest';
+    } else {
+      e.order = 'idle'; e.goal = -1; e.target = 0; e.path = []; e.resume = -1;
+    }
     for (const c of m.cargoUnits ?? []) {
       const cid = this.spawnTransfer(c, target);
       if (cid !== null) {
