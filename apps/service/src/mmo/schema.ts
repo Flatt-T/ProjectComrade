@@ -710,4 +710,18 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table region add column fingerprints jsonb;
     `,
   },
+  {
+    version: 19,
+    name: 'region asset roster for world-wide recovery eligibility',
+    sql: `
+    -- PW12 (THU-2236 reopened scope): recovery eligibility must see qualifying
+    -- assets ANYWHERE in the world, not just compounds and the evaluating
+    -- region's sim. Each region publishes a read-only roster of its live
+    -- anchor assets — { playerId: { s: non-site structures, m: MCVs,
+    -- p: packed carriers } } — derived from its authoritative sim at eval and
+    -- checkpoint cadence. It is a projection, never a second asset authority:
+    -- the sim remains the only writer of asset state.
+    alter table region add column asset_roster jsonb;
+    `,
+  },
 ];
