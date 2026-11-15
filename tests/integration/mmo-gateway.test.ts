@@ -176,10 +176,14 @@ describeDb('mmo gateway (real PostgreSQL + real WebSocket)', () => {
       });
       expect(res.status).toBe('committed');
 
+      // PW32: the sim intent is region-public, but the applied commandResult is
+      // private to the issuing player — this unrelated subscriber must never see it.
       await waitFor(() =>
-        ofType(client.messages, 'event').some(e => e.eventKind === 'sim')
-        && ofType(client.messages, 'commandResult').some(r => r.commandId === commandId && r.status === 'applied'),
+        ofType(client.messages, 'event').some(e => e.eventKind === 'sim'),
       10_000);
+      await sleep(500); // allow the receipt's outbox row to dispatch before asserting absence
+      expect(ofType(client.messages, 'commandResult')
+        .some(r => r.commandId === commandId)).toBe(false);
 
       const simEvents = ofType(client.messages, 'event').filter(e => e.eventKind === 'sim');
       const ours = simEvents.find(e =>
@@ -190,10 +194,6 @@ describeDb('mmo gateway (real PostgreSQL + real WebSocket)', () => {
       expect(payload.command.x).toBe(7);
       expect(payload.command.y).toBe(8);
       expect(payload.slot).toBe(0);
-
-      const applied = ofType(client.messages, 'commandResult')
-        .find(r => r.commandId === commandId && r.status === 'applied');
-      expect(applied).toBeTruthy();
     } finally {
       client.close();
     }
