@@ -251,7 +251,10 @@ describe('PW34 allied capture consent', () => {
     g.step();
   };
   const grant = (g: Game, requestId: string, eng: number, bld: number, owner = 0, requester = 1) =>
-    g.enqueue(-1, { t: 'consentGrant', requestId, engineer: eng, building: bld, owner, requester });
+    g.enqueue(-1, {
+      t: 'consentGrant', requestId, engineer: eng, building: bld, owner, requester,
+      ownerGen: g.entities.get(bld)!.ownerGen,
+    });
 
   it('a journaled consent lets the allied Engineer capture — one use, audited', () => {
     const g = new Game(setup(true));
@@ -556,5 +559,82 @@ describe('PW34 allied capture consent', () => {
     // Draining the restored feed receipts the same deterministic operation.
     expect(restored.captureEvents[0].building).toBe(target.id);
     expect(restored.captureEvents[0].engineer).toBe(eng.id);
+  });
+
+  // THU-2445 ownership-change cases (15 Nov review): orders and grants bind the
+  // exact owner/generation they were issued against — never the slot number or
+  // a "still allied" relationship alone.
+
+  it('ownership case A: a nearer hostile Engineer captures first — the stale order ends, its Engineer survives', () => {
+    const s = setup(true);
+    s.mapId = 'td-tiberium-gardens';
+    const g = new Game(s);
+    expect(g.players.length).toBeGreaterThanOrEqual(3);
+    const target = g.spawnStructure('pyle', 0, 50, 30); // slot 0's barracks
+    const far = unitNear(g, 'engineer', 1, 20, 30);   // slot 1: orders first, arrives last
+    const near = unitNear(g, 'engineer', 2, 49, 30);  // slot 2: nearer, captures first
+    g.enqueue(1, { t: 'enter', ids: [far.id], target: target.id });
+    g.enqueue(2, { t: 'enter', ids: [near.id], target: target.id });
+    g.step();
+    // Slot 2's Engineer reaches the building while it is still slot 0's.
+    steps(g, 400);
+    expect(g.entities.get(target.id)!.owner).toBe(2);
+    expect(g.entities.get(near.id)?.hp ?? 0).toBe(0); // consumed by its own capture
+    // Slot 1's order was issued against owner 0 — owner is now 2, so it dies
+    // with the Engineer alive rather than taking slot 2's building.
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(2);
+    const f = g.entities.get(far.id)!;
+    expect(f.hp).toBeGreaterThan(0);
+    expect(f.order).toBe('idle');
+    // A fresh lawful order against the NEW owner captures normally.
+    g.enqueue(1, { t: 'enter', ids: [far.id], target: target.id });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(far.id)?.hp ?? 0).toBe(0);
+    expect(g.captureEvents).toHaveLength(2);
+  });
+
+  it('ownership case B: a grant dies permanently when the building changes hands and returns — new consent required', () => {
+    const s = setup(true);
+    s.mapId = 'td-tiberium-gardens';
+    const g = new Game(s);
+    expect(g.players.length).toBeGreaterThanOrEqual(3);
+    g.enqueue(-1, { t: 'setAlly', slot: 0, ally: 5 });
+    g.enqueue(-1, { t: 'setAlly', slot: 1, ally: 5 });
+    g.step(); // slot 2 stays hostile
+    const target = g.spawnStructure('pyle', 0, 50, 30);
+    const requester = unitNear(g, 'engineer', 1, 20, 30); // walks the whole sequence
+    const raider = unitNear(g, 'engineer', 2, 49, 30);   // hostile: takes it first
+    const ownerEng = unitNear(g, 'engineer', 0, 52, 31); // hostile recapture back to 0
+    grant(g, 'req-1', requester.id, target.id, 0, 1);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [requester.id], target: target.id }); // consent intent
+    g.enqueue(2, { t: 'enter', ids: [raider.id], target: target.id });   // hostile intent
+    // Wait for the raider's capture 0 -> 2.
+    for (let i = 0; i < 600 && g.entities.get(target.id)!.owner !== 2; i++) g.step();
+    expect(g.entities.get(target.id)!.owner).toBe(2);
+    // Slot 0's Engineer takes it back 2 -> 0 while the requester still walks.
+    g.enqueue(0, { t: 'enter', ids: [ownerEng.id], target: target.id });
+    for (let i = 0; i < 600 && g.entities.get(target.id)!.owner !== 0; i++) g.step();
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    // The original grant is permanently dead: owner slot and alliance match
+    // again, but the ownership generation advanced twice. The requester
+    // survives and the building stays slot 0's.
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    const r = g.entities.get(requester.id)!;
+    expect(r.hp).toBeGreaterThan(0);
+    expect(r.order).toBe('idle');
+    expect(g.consents[0].used).toBe(false);
+    expect(g.captureEvents).toHaveLength(2); // only the two hostile captures
+    // New consent on the returned building works normally.
+    grant(g, 'req-2', requester.id, target.id, 0, 1);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [requester.id], target: target.id });
+    steps(g, 1500);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(requester.id)?.hp ?? 0).toBe(0);
+    expect(g.captureEvents).toHaveLength(3);
   });
 });

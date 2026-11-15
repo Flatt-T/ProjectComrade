@@ -55,7 +55,7 @@ export type Command =
   | { t: 'adjustCredits'; slot: number; delta: number }
   /** Persistent profile only (PW34): journaled allied-capture consent grant.
    *  Mirrors a durable owner decision into the sim; idempotent on requestId. */
-  | { t: 'consentGrant'; requestId: string; engineer: number; building: number; owner: number; requester: number }
+  | { t: 'consentGrant'; requestId: string; engineer: number; building: number; owner: number; requester: number; ownerGen: number }
   /** Persistent profile only (PW18): units walk to the region edge and depart
    *  into the cross-region transfer pipeline. */
   | { t: 'depart'; ids: number[] };
@@ -341,6 +341,22 @@ export interface Entity {
    * a capture order into an accidental own-repair. 0 on pre-PW34 entities.
    */
   enterIntent: number;
+  /**
+   * PW34 ownership binding: the owner slot an 'enter' order was issued
+   * against. A hostile capture order completes only while the target still
+   * belongs to that exact owner — an intervening capture by a third party
+   * ends the order with the Engineer alive instead of letting it take the
+   * new owner's building. -1 = unstamped (pre-binding entities/orders).
+   */
+  enterOwner: number;
+  /**
+   * PW34 ownership generation: incremented on EVERY ownership change of this
+   * entity (capture, site contest, durable transfer). Consent grants record
+   * the generation they were issued against, so an owner who loses and
+   * regains a building still cannot honour a grant issued before the first
+   * change — new consent is required.
+   */
+  ownerGen: number;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -647,7 +663,7 @@ export class Game {
    *  is one-use and bound to the engineer/building sim ids and owner/requester
    *  slots captured when the durable owner accepted — any later change of
    *  hands, alliance or life invalidates it at the execution recheck. */
-  consents: { requestId: string; engineer: number; building: number; owner: number; requester: number; used: boolean }[] = [];
+  consents: { requestId: string; engineer: number; building: number; owner: number; requester: number; ownerGen: number; used: boolean }[] = [];
   /** Highest tech level buildable in this match (the lobby setting mapped to 1..10). */
   readonly techCap: number;
   readonly doctrine: Doctrine;
@@ -914,7 +930,13 @@ export class Game {
       // idempotent on requestId — a replayed journal cannot double-grant, and a
       // used grant is never resurrected.
       if (this.persistent && !this.consents.some(c => c.requestId === cmd.requestId)) {
-        this.consents.push({ requestId: cmd.requestId, engineer: cmd.engineer, building: cmd.building, owner: cmd.owner, requester: cmd.requester, used: false });
+        // The grant binds the ownership generation observed at decision time.
+        // If the building changed hands between decision and this journaled
+        // application, the generation no longer matches and the grant is
+        // born dead — consentFor can never complete it.
+        const b = this.entities.get(cmd.building);
+        const live = !!b && b.ownerGen === cmd.ownerGen;
+        this.consents.push({ requestId: cmd.requestId, engineer: cmd.engineer, building: cmd.building, owner: cmd.owner, requester: cmd.requester, ownerGen: cmd.ownerGen, used: !live });
       }
       return;
     }
@@ -1051,9 +1073,11 @@ export class Game {
           }
           if (sdef.airfield && def.kind === 'aircraft') { u.order = 'rearm'; u.dock = target.id; u.path = [this.cellOf(target)]; continue; }
           u.order = 'enter'; u.target = target.id; u.path = []; u.repathTick = 0;
-          // PW34: stamp the order's intent so a target that changes hands
-          // mid-walk cannot silently turn a capture into an own-repair.
+          // PW34: stamp the order's intent and target owner so a target that
+          // changes hands mid-walk cannot silently turn a capture into an
+          // own-repair or let a hostile order take a different owner's asset.
           u.enterIntent = def.engineer ? (enemy ? 1 : target.owner === slot ? 3 : 2) : 0;
+          u.enterOwner = target.owner;
         }
         break;
       }
@@ -1115,6 +1139,7 @@ export class Game {
       // carrier or smuggle bound/protected units across accounts.
       if (!e || e.hp <= 0 || e.carriedBy || e.owner !== from || e.bound !== 0 || e.passengers.length > 0) continue;
       e.owner = to;
+      e.ownerGen++;
     }
   }
 
@@ -1212,7 +1237,7 @@ export class Game {
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
       xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1, recoveryProtected: false, packedType: '',
-      faction: this.players[owner]?.faction ?? '', durableId: '', enterIntent: 0,
+      faction: this.players[owner]?.faction ?? '', durableId: '', enterIntent: 0, enterOwner: -1, ownerGen: 0,
     };
   }
 
@@ -2347,6 +2372,12 @@ export class Game {
         // consent (2) and own-repair (3) intents are invalidated by the
         // relationship change, never converted into a new hostile action.
         if (u.enterIntent !== 1 && u.enterIntent !== 0) { u.order = 'idle'; u.target = 0; return; }
+        // The order was issued against a specific owner: if that owner changed
+        // hands mid-walk (another capture, a transfer), the order is over — the
+        // Engineer survives and a fresh lawful order may target the new owner.
+        if (u.enterIntent === 1 && u.enterOwner >= 0 && t.owner !== u.enterOwner) {
+          u.order = 'idle'; u.target = 0; return;
+        }
         // A protected attacker cannot take a building by force — protection
         // must not be retained through a hostile capture.
         if (!this.captureBlockedFor(u) && this.capturePermitted(t)) {
@@ -2419,8 +2450,12 @@ export class Game {
    */
   /** PW34: an unconsumed consent grant matching this engineer/building/slots. */
   private consentFor(engineer: number, building: number, requester: number, owner: number) {
+    // The grant is bound to the ownership generation it was issued against:
+    // ANY ownership change — including losing and regaining the building —
+    // permanently retires it. New consent is required.
+    const gen = this.entities.get(building)?.ownerGen;
     return this.consents.find(c => !c.used && c.engineer === engineer && c.building === building
-      && c.requester === requester && c.owner === owner);
+      && c.requester === requester && c.owner === owner && c.ownerGen === gen);
   }
 
   /** PW34: protected attackers lose the ability to take a building by force —
@@ -2451,6 +2486,7 @@ export class Game {
     const from = this.players[s.owner], to = this.players[owner];
     if (def.storage) { if (from) from.storage -= def.storage; if (to) to.storage += def.storage; }
     s.owner = owner; s.originalOwner = owner; s.repairing = false; s.target = 0; s.charge = 0;
+    s.ownerGen++;
     this.powerDirty = true;
     const fx = this.effect('capture', s.x, s.y, 0, 0, 30); fx.owner = owner; fx.item = s.type;
   }
@@ -3096,7 +3132,7 @@ export class Game {
         if (st.progress >= cfg.captureTicks) {
           const from = s.owner;
           const heldTicks = from >= 0 && st.heldSince >= 0 ? this.tick - st.heldSince : 0;
-          s.owner = best; s.originalOwner = best;
+          s.owner = best; s.originalOwner = best; s.ownerGen++;
           st.progress = 0; st.by = -1; st.heldSince = this.tick;
           this.powerDirty = true;
           const fx = this.effect('capture', s.x, s.y, 0, 0, 30); fx.owner = best; fx.item = s.type;

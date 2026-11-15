@@ -1168,6 +1168,21 @@ export class RegionRunner {
             where request_id = $1 and state = 'accepted'`, [row.request_id]);
       }
     }
+    // Ownership binding: a CAPTURE committed for this building after the
+    // consent decision kills the grant's generation — including a
+    // lose-and-regain round trip back to the same owner. The sim-side
+    // ownerGen check is authoritative for execution; this keeps the durable
+    // row honest for reconnect/observer reads. A grant's own capture is
+    // already 'consumed' by the receipts above, so it cannot self-invalidate.
+    await mmoQuery(
+      `update engineer_consent c set state = 'invalidated', decided_at = clock_timestamp()
+        where c.region_id = $1 and c.state = 'accepted' and c.decided_at is not null
+          and exists (
+            select 1 from economy_operation o
+             where o.region_id = c.region_id and o.kind = 'CAPTURE'
+               and o.canonical_action->>'buildingId' = c.building_id::text
+               and o.committed_at > c.decided_at)`,
+      [this.opts.regionId]);
   }
 
   /**
