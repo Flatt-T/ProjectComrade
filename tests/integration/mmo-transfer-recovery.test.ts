@@ -17,7 +17,7 @@ import { submitCommand, journalTail } from '../../apps/service/src/mmo/commands.
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { createWorldHandler } from '../../apps/service/src/mmo/world.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
-import { Game, PACKS, LEPTONS, passable, type Entity } from '../../packages/fusion/src/index.js';
+import { PACKS, LEPTONS, passable, type Entity } from '../../packages/fusion/src/index.js';
 import { PERSISTENT_RULES_V1, MMO_PROTOCOL, mmoEntityId, type MmoCommandMessage, type MmoWorldAction } from '../../packages/contracts/src/index.js';
 
 const DB_URL = process.env.MMO_TEST_DATABASE_URL;
@@ -74,7 +74,7 @@ async function worldAction(
 const usedRefs = new Set<string>();
 
 /** A free vehicle-passable cell, biased to the map interior. */
-function freeVehicleCell(g: Game): number {
+function freeVehicleCell(g: { pack: Parameters<typeof passable>[0]; map: Parameters<typeof passable>[1] }): number {
   const w = g.map.w, h = g.map.h;
   for (let y = Math.floor(h / 2) - 10; y < h / 2 + 10; y++) {
     for (let x = Math.floor(w / 2) - 10; x < w / 2 + 10; x++) {
@@ -117,8 +117,8 @@ const transferState = async (id: string) =>
   (await mmoOne<{ state: string }>('select state from region_transfer where transfer_id = $1', [id]))?.state;
 
 interface SimGame {
-  tick: number; checksum(): number;
-  entities: Map<number, { id: number; kind: string; type: string; owner: number; hp: number; x: number; y: number; facing: number; carriedBy: number; passengers: number[] }>;
+  tick: number; checksum(): number; step(): void;
+  entities: Map<number, { id: number; kind: string; type: string; owner: number; hp: number; x: number; y: number; facing: number; carriedBy: number; passengers: number[]; charge: number; xp: number; ammo: number; deployed: boolean; heldUntil: number; bound: number }>;
   players: { credits: number; pid?: string }[];
 }
 const gameOf = (r: RegionRunner) => (r as unknown as { game: SimGame }).game;
@@ -291,18 +291,31 @@ describeDb('mmo transfer arrival crash window (PW18+PW30, real PostgreSQL)', () 
       const p = g2.entities.get(pid)!;
       p.x = e2.x; p.y = e2.y; p.facing = 0;
     }
-    await waitFor(() => gameOf(runnerBf2).tick === gameOf(ctx.bc.runner).tick, 30000, 50);
-    // Let both runners settle on the same expected tick, then compare.
-    await sleep(300);
-    const gC = gameOf(ctx.bc.runner);
-    const gF = gameOf(runnerBf2);
-    if (gF.tick !== gC.tick) {
-      // Fast-forward the lagging sim manually to the control tick.
-      while (gF.tick < gC.tick) gF.step();
+    // Wait for tick parity, then hash BOTH games synchronously — the runners
+    // keep stepping on timers, so any await between the two checksum() calls
+    // can straddle a tick boundary and make identical states compare unequal.
+    let sums: { faulted: number; control: number } | undefined;
+    await waitFor(() => {
+      const gC = gameOf(ctx.bc.runner);
+      const gF = gameOf(runnerBf2);
+      if (gF.tick !== gC.tick) return false;
+      sums = { faulted: gF.checksum(), control: gC.checksum() };
+      return true;
+    }, 30000, 25);
+    if (sums!.faulted !== sums!.control) {
+      // Diagnostic: first entity whose hashed fields differ.
+      const fields = (e: { id: number; x: number; y: number; hp: number; owner: number; facing: number; charge: number; xp: number; ammo: number; carriedBy: number; deployed: boolean; passengers: number[]; heldUntil: number; bound: number }) =>
+        [e.id, e.x, e.y, e.hp, e.owner, e.facing, e.charge, e.xp, e.ammo, e.carriedBy, e.deployed ? 1 : 0, e.passengers.length, e.heldUntil, e.bound];
+      const cEnt = [...gameOf(ctx.bc.runner).entities.values()];
+      const fEnt = [...gameOf(runnerBf2).entities.values()];
+      const diffs = cEnt.map((c, i) => ({ c, f: fEnt[i] }))
+        .filter(({ c, f }) => !f || JSON.stringify(fields(c)) !== JSON.stringify(fields(f as never)));
+      console.log('CHECKSUM-DIFF tick', gameOf(runnerBf2).tick, 'entities', cEnt.length, fEnt.length,
+        'first diffs', JSON.stringify(diffs.slice(0, 4).map(d => ({ c: fields(d.c), f: d.f ? fields(d.f as never) : null }))));
     }
-    expect(gF.checksum()).toBe(gC.checksum());
-    expect(gF.players.map(p => p.credits)).toEqual(creditsControl);
-    expect(gF.players[0].pid).toBe(p0());
+    expect(sums!.faulted).toBe(sums!.control);
+    expect(gameOf(runnerBf2).players.map(p => p.credits)).toEqual(creditsControl);
+    expect(gameOf(runnerBf2).players[0].pid).toBe(p0());
     expect(tickControl).toBeGreaterThan(0);
   }, IT_TIMEOUT);
 });
