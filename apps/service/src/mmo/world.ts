@@ -1136,13 +1136,18 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           const engineerOk = !!eng && eng.kind === 'unit' && eng.hp > 0 && !eng.carriedBy
             && eng.owner === requesterSlot;
           const worldId = await worldIdFor(tx, ctx.regionId);
-          const { rows: allyRows } = await tx.query<{ alliance_id: string }>(
-            `select distinct m.alliance_id from alliance_member m
+          // Both parties must currently share ONE live alliance — a bare
+          // distinct-alliance count also passes when only one of them is in
+          // any alliance at all.
+          const { rows: allyRows } = await tx.query<{ player_id: string; alliance_id: string }>(
+            `select m.player_id, m.alliance_id from alliance_member m
                join alliance a on a.alliance_id = m.alliance_id
               where a.world_id = $1 and a.disbanded_at is null and m.left_at is null
                 and m.player_id = any($2::uuid[])`,
             [worldId, [row.requester_id, row.owner_id]]);
-          const stillAllied = allyRows.length === 1;
+          const allyOf = new Map(allyRows.map(r => [r.player_id, r.alliance_id]));
+          const stillAllied = allyOf.get(row.requester_id) !== undefined
+            && allyOf.get(row.requester_id) === allyOf.get(row.owner_id);
           if (!buildingOk || !engineerOk || !stillAllied || ownerSlot === undefined || requesterSlot === undefined) {
             await engineerConsentInvalidate(action.requestId, tx);
             return {
@@ -1170,6 +1175,10 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
                 t: 'consentGrant', requestId: action.requestId,
                 engineer: row.engineer_sim_id!, building: row.building_sim_id!,
                 owner: ownerSlot, requester: requesterSlot,
+                // Bind the ownership generation observed at decision time so a
+                // capture between decision and journaled application cannot
+                // launder the grant onto the new owner.
+                ownerGen: bld!.ownerGen,
               },
             }] : [],
             fanout: [{

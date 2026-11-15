@@ -97,7 +97,7 @@ export interface GameSnapshotV1 {
     crates: unknown[];
     pending: [number, { slot: number; cmd: Command }[]][];
     /** PW34: journaled allied-capture consent grants (absent pre-PW34). */
-    consents?: { requestId: string; engineer: number; building: number; owner: number; requester: number; used: boolean }[];
+    consents?: { requestId: string; engineer: number; building: number; owner: number; requester: number; ownerGen?: number; used: boolean }[];
     /** PW34: pending capture audit receipts — serialized so a checkpoint taken
      *  between the capture tick and the durable drain cannot lose them. */
     captureEvents?: { building: number; buildingDurableId: string; engineer: number; engineerDurableId: string; from: number; to: number; requestId: string; tick: number }[];
@@ -225,6 +225,11 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
     e.durableId = typeof e.durableId === 'string' ? e.durableId : '';
     // Snapshots predating PW34 lack the enter-order intent stamp.
     e.enterIntent = typeof e.enterIntent === 'number' ? e.enterIntent : 0;
+    // Snapshots predating the ownership binding lack these; -1/0 sentinels keep
+    // legacy intent-1 orders permissive and pre-binding grants comparable only
+    // against generation-0 buildings.
+    e.enterOwner = typeof e.enterOwner === 'number' ? e.enterOwner : -1;
+    e.ownerGen = typeof e.ownerGen === 'number' ? e.ownerGen : 0;
   }
   g.projectiles = snap.state.projectiles;
   g.worms = snap.state.worms;
@@ -253,8 +258,11 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   g.superCharge = snap.state.superCharge;
   g.crateRate = snap.state.crateRate;
   g.persistent = snap.setup.persistent;
-  // Snapshots predating PW34 carry no consent grants.
-  g.consents = Array.isArray(snap.state.consents) ? snap.state.consents.map(c => ({ ...c })) : [];
+  // Snapshots predating PW34 carry no consent grants; grants predating the
+  // ownership binding get ownerGen -1 so they can never match a live building.
+  g.consents = Array.isArray(snap.state.consents) ? snap.state.consents.map(c => ({
+    ...c, ownerGen: typeof c.ownerGen === 'number' ? c.ownerGen : -1,
+  })) : [];
   g.mmo = g.persistent ? snap.setup.mmo : undefined;
   g.worldgenSpec = snap.setup.worldgen;
   g.hooks = {};
