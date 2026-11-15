@@ -47,7 +47,7 @@ async function waitFor(predicate: () => Promise<boolean> | boolean, timeoutMs = 
 }
 
 interface LivePlayer { slot: number; pid?: string; newcomerProtected: boolean; credits: number }
-interface LiveEntity { id: number; owner: number; kind: string; bound: number; hp: number }
+interface LiveEntity { id: number; owner: number; kind: string; type: string; bound: number; hp: number }
 interface LiveGame {
   players: LivePlayer[];
   entities: Map<number, LiveEntity>;
@@ -259,6 +259,72 @@ describeDb('mmo newcomer settlement (real PostgreSQL + real Fusion sim)', () => 
       await waitFor(async () => (await protectionOf(player.player_id))?.status === 'ended', 15_000);
     } finally {
       ctx.runner.stop();
+    }
+  });
+
+  it('resumes an existing player after a runner restart with identical assets and credits (THU-2446)', { timeout: 60_000 }, async () => {
+    const worldId = await makeWorld();
+    const region = await makeFrontierRegion(worldId);
+    const ctx = await startRunner(region);
+    const player = await createPlayer({ accountId: randomUUID(), displayName: 'Returner' });
+    await playerConnected(player.player_id, Date.now());
+    const settleRes = await worldAction(ctx, player.player_id, {
+      t: 'settle', regionId: region.region_id, faction: 'gdi', x: 40, y: 40,
+    });
+    expect(settleRes.accepted).toBe(true);
+    const starterUnits = (g: LiveGame, pid: string) => {
+      const slot = g.players.findIndex(pl => pl.pid === pid);
+      return [...g.entities.values()].filter(e => e.owner === slot && e.kind === 'unit' && e.hp > 0);
+    };
+    // Wait for the full army and its durable bindings — sim-id bindings are
+    // journaled asynchronously after the grant applies. Sim ids are stable
+    // across snapshot/restore, so they are the comparison identity.
+    await waitFor(() => {
+      const units = starterUnits(live(ctx), player.player_id);
+      return units.length === 16 && units.every(u => u.bound === 1);
+    });
+    const snapshotAssets = (g: LiveGame, pid: string) => {
+      const slot = g.players.findIndex(pl => pl.pid === pid);
+      expect(slot).toBeGreaterThanOrEqual(0);
+      const units = starterUnits(g, pid)
+        .map(e => ({ id: e.id, type: e.type, hp: e.hp, bound: e.bound }))
+        .sort((a, b) => a.id - b.id);
+      return { slot, credits: g.players[slot].credits, units };
+    };
+    const before = snapshotAssets(live(ctx), player.player_id);
+    const settlementBefore = await settlementOf(player.player_id);
+    expect(before.units).toHaveLength(16);
+    // Stop checkpoints the sim; a NEW runner (new worker, new epoch) must
+    // restore the snapshot and replay the journal — the player resumes, not
+    // re-settles.
+    ctx.runner.stop();
+    await sleep(100);
+    const ctx2 = await startRunner(region);
+    try {
+      await waitFor(() => live(ctx2).players.some(pl => pl.pid === player.player_id));
+      const after = snapshotAssets(live(ctx2), player.player_id);
+      expect(after.credits).toBe(before.credits);
+      expect(after.units).toEqual(before.units);
+      const settlementAfter = await settlementOf(player.player_id);
+      expect(settlementAfter?.settlement_id).toBe(settlementBefore?.settlement_id);
+      expect(settlementAfter?.region_id).toBe(region.region_id);
+      // No duplicate settlement or second starter grant was journaled.
+      const settlements = await mmoQuery('select settlement_id from settlement where player_id = $1', [player.player_id]);
+      expect(settlements).toHaveLength(1);
+      const grants = await mmoQuery<{ kind: string }>(
+        `select kind from economy_operation where region_id = $1 and kind = 'NEWCOMER_SPAWN'`,
+        [region.region_id]);
+      expect(grants).toHaveLength(1);
+      // Re-settling after resume is a no-op returning the same settlement.
+      const res = await worldAction(ctx2, player.player_id, {
+        t: 'settle', regionId: region.region_id, faction: 'nod', x: 1, y: 1,
+      });
+      expect(res.accepted).toBe(true);
+      const still = await settlementOf(player.player_id);
+      expect(still?.settlement_id).toBe(settlementBefore?.settlement_id);
+      expect(still?.faction).toBe('gdi');
+    } finally {
+      ctx2.runner.stop();
     }
   });
 
