@@ -32,7 +32,9 @@ import {
   shieldBalancesTx, tradeOfferById, transferEarnedShieldSeconds, utcShieldDay,
   createTransfer, liveTransferForEntity, transitionTransfer,
   bumpObjectiveProgress, claimObjectiveTx, ensureObjectives,
-  type ProtectionRow, type Queryable,
+  engineerConsentCreate, engineerConsentPendingFor, engineerConsentDecide,
+  engineerConsentCancel, engineerConsentInvalidate,
+  type EngineerConsentRow, type ProtectionRow, type Queryable,
 } from './store.js';
 import { raiseNotification } from './notify.js';
 import { pickSpawnCell } from './spawn.js';
@@ -1009,6 +1011,171 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           return {
             result: { accepted: true, transferId: existing.transfer_id, state: 'CANCELLED' },
             sim: e && e.hp > 0 ? [{ slot: e.owner, command: { t: 'stop', ids: [sim!] } }] : [],
+          };
+        }
+        // -----------------------------------------------------------------
+        // PW34: allied Engineer capture consent — private, one-use, bound to
+        // the exact engineer and building. The durable row is the decision;
+        // an accept is mirrored into the sim as a journaled consentGrant and
+        // every shield/ownership/relationship/protection check is repeated at
+        // physical arrival inside the engine.
+        // -----------------------------------------------------------------
+        case 'engineerRequest': {
+          const game = ctx.game?.();
+          if (!game || ctx.slot === undefined) return { result: { accepted: false, reason: 'NOT_IN_REGION' } };
+          const engSim = ctx.simIdFor?.(action.engineerId);
+          const bSim = ctx.simIdFor?.(action.buildingId);
+          if (engSim === null || engSim === undefined || bSim === null || bSim === undefined) {
+            return { result: { accepted: false, reason: 'UNKNOWN_ENTITY' } };
+          }
+          const eng = game.entities.get(engSim);
+          const bld = game.entities.get(bSim);
+          if (!eng || eng.kind !== 'unit' || eng.hp <= 0 || eng.carriedBy || eng.owner !== ctx.slot
+            || !game.unitDef(eng).engineer) {
+            return { result: { accepted: false, reason: 'NOT_ENGINEER' } };
+          }
+          if (!bld || bld.kind !== 'structure' || bld.hp <= 0 || game.structDef(bld).site) {
+            return { result: { accepted: false, reason: 'NOT_BUILDING' } };
+          }
+          const ownerPid = game.players[bld.owner]?.pid;
+          if (!ownerPid || ownerPid === ctx.playerId) return { result: { accepted: false, reason: 'NOT_ALLIED_TARGET' } };
+          // Requester and owner must currently share an alliance in this world.
+          const worldId = await worldIdFor(tx, ctx.regionId);
+          const { rows: allyRows } = await tx.query<{ player_id: string; alliance_id: string }>(
+            `select m.player_id, m.alliance_id from alliance_member m
+               join alliance a on a.alliance_id = m.alliance_id
+              where a.world_id = $1 and a.disbanded_at is null and m.left_at is null
+                and m.player_id = any($2::uuid[])`,
+            [worldId, [ctx.playerId, ownerPid]]);
+          const allyOf = new Map(allyRows.map(r => [r.player_id, r.alliance_id]));
+          if (!allyOf.get(ctx.playerId) || allyOf.get(ctx.playerId) !== allyOf.get(ownerPid)) {
+            return { result: { accepted: false, reason: 'NOT_ALLIED' } };
+          }
+          // One pending request per engineer+building pair; re-asking returns
+          // the live request id (and re-fans the private notice).
+          const existing = await engineerConsentPendingFor(tx, {
+            regionId: ctx.regionId, requesterId: ctx.playerId,
+            engineerId: action.engineerId, buildingId: action.buildingId,
+          });
+          if (existing) {
+            return {
+              result: { accepted: true, requestId: existing.request_id, deduplicated: true },
+              fanout: [{
+                regionId: ctx.regionId, topic: 'mmo.private',
+                payload: {
+                  kind: 'engineer-consent-request', playerId: ownerPid,
+                  requestId: existing.request_id, requesterId: ctx.playerId,
+                  engineerId: action.engineerId, buildingId: action.buildingId,
+                  regionId: ctx.regionId,
+                },
+              }],
+            };
+          }
+          const requestId = randomUUID();
+          const { rows: who } = await tx.query<{ display_name: string }>(
+            'select display_name from player where player_id = $1', [ctx.playerId]);
+          await engineerConsentCreate(tx, {
+            requestId, worldId, regionId: ctx.regionId,
+            requesterId: ctx.playerId, ownerId: ownerPid,
+            engineerId: action.engineerId, buildingId: action.buildingId,
+            engineerSimId: engSim, buildingSimId: bSim,
+          });
+          return {
+            result: { accepted: true, requestId },
+            fanout: [{
+              regionId: ctx.regionId, topic: 'mmo.private',
+              payload: {
+                kind: 'engineer-consent-request', playerId: ownerPid,
+                requestId, requesterId: ctx.playerId,
+                requesterName: who[0]?.display_name ?? 'Commander',
+                engineerId: action.engineerId, buildingId: action.buildingId,
+                regionId: ctx.regionId, x: eng.x, y: eng.y,
+              },
+            }],
+          };
+        }
+        case 'engineerConsent': {
+          const { rows } = await tx.query<EngineerConsentRow>(
+            `select * from engineer_consent where request_id = $1 for update`, [action.requestId]);
+          const row = rows[0];
+          if (!row || row.region_id !== ctx.regionId) return { result: { accepted: false, reason: 'NO_REQUEST' } };
+          if (row.owner_id !== ctx.playerId) return { result: { accepted: false, reason: 'NOT_OWNER' } };
+          if (row.state !== 'pending') return { result: { accepted: false, reason: 'NOT_PENDING', state: row.state } };
+          const game = ctx.game?.();
+          const ownerSlot = ctx.slotOf(row.owner_id);
+          const requesterSlot = ctx.slotOf(row.requester_id);
+          const eng = row.engineer_sim_id !== null ? game?.entities.get(row.engineer_sim_id) : undefined;
+          const bld = row.building_sim_id !== null ? game?.entities.get(row.building_sim_id) : undefined;
+          // Decision-time recheck: both entities live, building still owned by
+          // the consenting owner, and the alliance still holds.
+          const buildingOk = !!bld && bld.kind === 'structure' && bld.hp > 0
+            && game!.players[bld.owner]?.pid === row.owner_id;
+          const engineerOk = !!eng && eng.kind === 'unit' && eng.hp > 0 && !eng.carriedBy
+            && eng.owner === requesterSlot;
+          const worldId = await worldIdFor(tx, ctx.regionId);
+          const { rows: allyRows } = await tx.query<{ alliance_id: string }>(
+            `select distinct m.alliance_id from alliance_member m
+               join alliance a on a.alliance_id = m.alliance_id
+              where a.world_id = $1 and a.disbanded_at is null and m.left_at is null
+                and m.player_id = any($2::uuid[])`,
+            [worldId, [row.requester_id, row.owner_id]]);
+          const stillAllied = allyRows.length === 1;
+          if (!buildingOk || !engineerOk || !stillAllied || ownerSlot === undefined || requesterSlot === undefined) {
+            await engineerConsentInvalidate(action.requestId, tx);
+            return {
+              result: { accepted: false, reason: 'INVALIDATED' },
+              fanout: [{
+                regionId: ctx.regionId, topic: 'mmo.private',
+                payload: {
+                  kind: 'engineer-consent-result', playerId: row.requester_id,
+                  requestId: action.requestId, decision: 'invalidated', regionId: ctx.regionId,
+                  engineerId: row.engineer_id, buildingId: row.building_id,
+                },
+              }],
+            };
+          }
+          const decided = await engineerConsentDecide(tx, {
+            requestId: action.requestId, ownerId: ctx.playerId, decision: action.decision,
+          });
+          if (!decided) return { result: { accepted: false, reason: 'NOT_PENDING' } };
+          const decision = action.decision === 'accept' ? 'accepted' : 'declined';
+          return {
+            result: { accepted: true, requestId: action.requestId, decision },
+            sim: action.decision === 'accept' ? [{
+              slot: ownerSlot,
+              command: {
+                t: 'consentGrant', requestId: action.requestId,
+                engineer: row.engineer_sim_id!, building: row.building_sim_id!,
+                owner: ownerSlot, requester: requesterSlot,
+              },
+            }] : [],
+            fanout: [{
+              regionId: ctx.regionId, topic: 'mmo.private',
+              payload: {
+                kind: 'engineer-consent-result', playerId: row.requester_id,
+                requestId: action.requestId, decision, regionId: ctx.regionId,
+                engineerId: row.engineer_id, buildingId: row.building_id,
+              },
+            }],
+          };
+        }
+        case 'engineerCancel': {
+          const { rows } = await tx.query<EngineerConsentRow>(
+            `select * from engineer_consent where request_id = $1 for update`, [action.requestId]);
+          const row = rows[0];
+          if (!row || row.region_id !== ctx.regionId) return { result: { accepted: false, reason: 'NO_REQUEST' } };
+          if (row.requester_id !== ctx.playerId) return { result: { accepted: false, reason: 'NOT_REQUESTER' } };
+          const done = await engineerConsentCancel(tx, { requestId: action.requestId, requesterId: ctx.playerId });
+          if (!done) return { result: { accepted: false, reason: 'NOT_PENDING', state: row.state } };
+          return {
+            result: { accepted: true, requestId: action.requestId, state: 'cancelled' },
+            fanout: [{
+              regionId: ctx.regionId, topic: 'mmo.private',
+              payload: {
+                kind: 'engineer-consent-request-closed', playerId: row.owner_id,
+                requestId: action.requestId, decision: 'cancelled', regionId: ctx.regionId,
+              },
+            }],
           };
         }
         case 'chat': {

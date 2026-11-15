@@ -125,6 +125,11 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
   // journaled world actions that grant earned shield seconds.
   const [objectives, setObjectives] = useState<MmoObjectivesResponse | null>(null);
   const [ladder, setLadder] = useState<MmoLadderResponse | null>(null);
+  // PW34: allied Engineer capture consent — the owner answers a private request;
+  // the requester tracks pending asks so an accepted grant auto-issues the
+  // enter order the sim will now permit.
+  const [consentReq, setConsentReq] = useState<{ requestId: string; requesterName: string; engineerId: string; buildingId: string } | null>(null);
+  const pendingConsent = useRef(new Map<string, { engineerId: string; buildingId: string }>());
 
   useEffect(() => {
     let game: Game | null = null;
@@ -195,6 +200,31 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
             channel: p.channel ?? 'region', fromId: p.fromId ?? '',
             fromName: p.fromName ?? 'Commander', text,
           }]);
+        }
+        return;
+      }
+      if (msg.type === 'event' && msg.eventKind === 'private') {
+        const p = msg.payload as {
+          kind?: string; requestId?: string; requesterName?: string;
+          engineerId?: string; buildingId?: string; decision?: string;
+        };
+        if (p.kind === 'engineer-consent-request' && p.requestId) {
+          setConsentReq({
+            requestId: p.requestId, requesterName: p.requesterName ?? 'Commander',
+            engineerId: p.engineerId ?? '', buildingId: p.buildingId ?? '',
+          });
+        } else if (p.kind === 'engineer-consent-result' && p.engineerId && p.buildingId) {
+          const key = `${p.engineerId}:${p.buildingId}`;
+          const pending = pendingConsent.current.get(key);
+          pendingConsent.current.delete(key);
+          if (p.decision === 'accepted' && pending) {
+            connRef.current?.command({ t: 'enter', entityIds: [pending.engineerId], targetId: pending.buildingId });
+            flash('Capture consent granted — Engineer moving in');
+          } else {
+            flash(`Capture consent ${p.decision ?? 'failed'}`);
+          }
+        } else if (p.kind === 'engineer-consent-request-closed' && p.requestId) {
+          setConsentReq(c => c && c.requestId === p.requestId ? null : c);
         }
         return;
       }
@@ -587,6 +617,8 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     else r.renderer.selected = new Set();
   }
 
+  const flashNotice = (text: string) => { setNotice(text); window.setTimeout(() => setNotice(''), 4000); };
+
   function click(x: number, y: number, mods: { shift: boolean; ctrl: boolean; alt: boolean }) {
     const r = rig.current; if (!r) return;
     const { game, renderer, session } = r;
@@ -654,12 +686,30 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
         if (d.harvester && sdef.refinery && target.owner === session.slot) return true;
         return target.owner === session.slot && (sdef.repairPad && d.kind !== 'infantry' && d.kind !== 'aircraft' || sdef.airfield && d.kind === 'aircraft');
       });
+      // PW34: an allied building needs the owner's private consent first —
+      // request it for each selected Engineer instead of issuing an enter
+      // order the sim would reject. The accepted grant auto-issues the order.
+      const consentEngineers = units.filter(u => {
+        const d = pack.units[u.type];
+        return !!d.engineer && !enemy && target.owner !== session.slot
+          && me.ally >= 0 && game.players[target.owner]?.ally === me.ally;
+      });
+      if (consentEngineers.length) {
+        const buildingId = mmoEntityId(regionId, target.id);
+        for (const u of consentEngineers) {
+          const engineerId = mmoEntityId(regionId, u.id);
+          pendingConsent.current.set(`${engineerId}:${buildingId}`, { engineerId, buildingId });
+          connRef.current?.command({ t: 'engineerRequest', engineerId, buildingId });
+        }
+        flashNotice(`Capture consent requested from ${game.players[target.owner]?.name ?? 'the owner'}`);
+      }
       if (enter.length) {
         session.issue({ t: 'enter', ids: enter.map(u => u.id), target: target.id });
         const rest = units.filter(u => !enter.includes(u));
         if (rest.length && enemy) session.issue({ t: 'attack', ids: rest.map(u => u.id), target: target.id });
         mark(enemy ? '#ffd24a' : '#7dff7a'); return;
       }
+      if (consentEngineers.length) return; // consent requested — hold position
     }
     if (target && target.kind === 'unit' && target.owner === session.slot && !renderer.selected.has(target.id) && pack.units[target.type].transport) {
       const boarders = units.filter(u => game.canBoard(u, target));
@@ -1138,6 +1188,20 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
       </div>
       {modeView === 'sell' &&
         <div className="status-line">Sell mode — click your buildings for credits. Selling your last building starts protected recovery: your MCV redeploys at the compound.</div>}
+      {consentReq && <div className="consent-dialog">
+        <b>{consentReq.requesterName} requests capture consent</b>
+        <span>Their Engineer wants to take your building. Accept grants a one-use capture — shields and ownership are rechecked when it arrives.</span>
+        <div>
+          <button onClick={() => {
+            connRef.current?.command({ t: 'engineerConsent', requestId: consentReq.requestId, decision: 'accept' });
+            setConsentReq(null);
+          }}>Accept</button>
+          <button onClick={() => {
+            connRef.current?.command({ t: 'engineerConsent', requestId: consentReq.requestId, decision: 'decline' });
+            setConsentReq(null);
+          }}>Decline</button>
+        </div>
+      </div>}
       <button className="leave" onClick={onExit}>Leave region</button>
     </aside>
   </div>;

@@ -654,4 +654,48 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     create index if not exists outbox_event_idx on outbox (region_id, event_seq, topic, outbox_id);
     `,
   },
+  {
+    version: 17,
+    name: 'engineer capture consent',
+    sql: `
+    -- PW34: allied Engineer capture requires the current building owner's
+    -- explicit, one-use consent for the exact engineer and building. The row is
+    -- the durable decision; an accepted grant is mirrored into the region sim
+    -- as a journaled consentGrant command and rechecked at physical arrival.
+    create table engineer_consent (
+      request_id       uuid primary key,
+      world_id         uuid not null references world(world_id),
+      region_id        uuid not null references region(region_id),
+      requester_id     uuid not null,
+      owner_id         uuid not null,
+      engineer_id      uuid not null,
+      building_id      uuid not null,
+      engineer_sim_id  integer,
+      building_sim_id  integer,
+      state            text not null default 'pending' check (state in
+        ('pending', 'accepted', 'declined', 'cancelled', 'expired', 'consumed', 'invalidated')),
+      created_at       timestamptz not null default clock_timestamp(),
+      decided_at       timestamptz,
+      consumed_at      timestamptz,
+      check (requester_id <> owner_id)
+    );
+    create index engineer_consent_region_state_idx on engineer_consent (region_id, state);
+    create index engineer_consent_requester_idx on engineer_consent (requester_id, state);
+    create index engineer_consent_owner_idx on engineer_consent (owner_id, state);
+
+    -- Captures are ownership-changing operations: one CAPTURE operation anchors
+    -- the audit, with CAPTURE ledger rows for the building and the consumed
+    -- engineer against it.
+    alter table economy_operation drop constraint if exists economy_operation_kind_check;
+    alter table economy_operation add constraint economy_operation_kind_check check (kind in
+      ('SELL_REFUND', 'PACK', 'UNPACK', 'DEPLOY', 'BARTER', 'SELECT_PROTECTION',
+       'SHIELD_CONSUME', 'NEWCOMER_SPAWN', 'RECOVERY_GRANT', 'RECOVERY_TRANSITION',
+       'SALVAGE_SPAWN', 'SITE_CAPTURE', 'LADDER_AWARD', 'DEFEAT', 'REGION_TRANSFER',
+       'CAPTURE'));
+    alter table asset_ledger drop constraint if exists asset_ledger_kind_check;
+    alter table asset_ledger add constraint asset_ledger_kind_check check (kind in
+      ('SELL_REFUND', 'PACK', 'UNPACK', 'DEPLOY', 'BARTER', 'DESTROY', 'SPAWN',
+       'TRANSFER_OUT', 'TRANSFER_IN', 'SALVAGE', 'CAPTURE'));
+    `,
+  },
 ];

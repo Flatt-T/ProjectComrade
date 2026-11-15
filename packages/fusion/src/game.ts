@@ -53,6 +53,9 @@ export type Command =
   /** Journaled credit movement between players (PW13 barter settlement). The
    *  durable layer validates balances; the engine clamps at zero defensively. */
   | { t: 'adjustCredits'; slot: number; delta: number }
+  /** Persistent profile only (PW34): journaled allied-capture consent grant.
+   *  Mirrors a durable owner decision into the sim; idempotent on requestId. */
+  | { t: 'consentGrant'; requestId: string; engineer: number; building: number; owner: number; requester: number }
   /** Persistent profile only (PW18): units walk to the region edge and depart
    *  into the cross-region transfer pipeline. */
   | { t: 'depart'; ids: number[] };
@@ -331,6 +334,13 @@ export interface Entity {
    * Only meaningful while structDef(e).site is set.
    */
   siteState?: { progress: number; by: number; heldSince: number };
+  /**
+   * Persistent profile (PW34): what the current 'enter' order intends —
+   * 0 none, 1 hostile capture, 2 consented allied capture, 3 own repair.
+   * Stamped at order issue so a target that changes hands mid-walk cannot turn
+   * a capture order into an accidental own-repair. 0 on pre-PW34 entities.
+   */
+  enterIntent: number;
 }
 
 export interface ProductionQueue { items: string[]; paid: number; acc: number; ready: boolean; hold: boolean }
@@ -628,6 +638,15 @@ export class Game {
   private nextId = 1;
   private pending = new Map<number, { slot: number; cmd: Command }[]>();
   private powerDirty = true;
+  /** PW34: transient audit feed — every completed Engineer capture (hostile or
+   *  consented) is queued here for the durable layer to receipt as one CAPTURE
+   *  operation. Drained by the region runner; never serialized. */
+  captureEvents: { building: number; buildingDurableId: string; engineer: number; engineerDurableId: string; from: number; to: number; requestId: string }[] = [];
+  /** PW34: journaled allied-capture consents mirrored into the sim. Each grant
+   *  is one-use and bound to the engineer/building sim ids and owner/requester
+   *  slots captured when the durable owner accepted — any later change of
+   *  hands, alliance or life invalidates it at the execution recheck. */
+  consents: { requestId: string; engineer: number; building: number; owner: number; requester: number; used: boolean }[] = [];
   /** Highest tech level buildable in this match (the lobby setting mapped to 1..10). */
   readonly techCap: number;
   readonly doctrine: Doctrine;
@@ -889,6 +908,15 @@ export class Game {
       return;
     }
     if (cmd.t === 'transfer') { if (this.persistent) this.transferOwner(cmd.ids, cmd.to, slot); return; }
+    if (cmd.t === 'consentGrant') {
+      // PW34: an accepted durable consent becomes a one-use sim grant. Replay is
+      // idempotent on requestId — a replayed journal cannot double-grant, and a
+      // used grant is never resurrected.
+      if (this.persistent && !this.consents.some(c => c.requestId === cmd.requestId)) {
+        this.consents.push({ requestId: cmd.requestId, engineer: cmd.engineer, building: cmd.building, owner: cmd.owner, requester: cmd.requester, used: false });
+      }
+      return;
+    }
     if (cmd.t === 'setAlly') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.ally = cmd.ally; } return; }
     if (cmd.t === 'setAutoRepair') { if (this.persistent) { const p = this.players[cmd.slot]; if (p) p.autoRepair = cmd.on; } return; }
     if (cmd.t === 'setShield') {
@@ -986,7 +1014,10 @@ export class Game {
           const def = this.unitDef(u);
           const sdef = this.structDef(target);
           const enemy = this.isEnemy(slot, target.owner);
-          const ok = def.engineer ? enemy || target.owner === slot && target.hp < target.maxHp
+          // PW34: an allied target needs a live owner consent bound to this
+          // engineer and building; without it the order is refused at issue.
+          const ok = def.engineer ? enemy
+            || (target.owner === slot ? target.hp < target.maxHp : this.consentFor(u.id, target.id, slot, target.owner) !== undefined)
             : def.spy ? enemy
             : target.owner === slot && (sdef.repairPad && def.kind !== 'infantry' && def.kind !== 'aircraft'
               || sdef.airfield && def.kind === 'aircraft' || !!sdef.refinery && !!def.harvester);
@@ -1000,6 +1031,9 @@ export class Game {
           }
           if (sdef.airfield && def.kind === 'aircraft') { u.order = 'rearm'; u.dock = target.id; u.path = [this.cellOf(target)]; continue; }
           u.order = 'enter'; u.target = target.id; u.path = []; u.repathTick = 0;
+          // PW34: stamp the order's intent so a target that changes hands
+          // mid-walk cannot silently turn a capture into an own-repair.
+          u.enterIntent = def.engineer ? (enemy ? 1 : target.owner === slot ? 3 : 2) : 0;
         }
         break;
       }
@@ -1158,7 +1192,7 @@ export class Game {
       hstate: 'seek', cargo: 0, cargoValue: 0, harvestCell: -1, homeField: -1, timer: 0, dock: 0,
       cx: 0, cy: 0, w: 1, h: 1, repairing: false, dockedBy: 0, originalOwner: owner, convertedUntil: 0, born: this.tick, exposed: false, charge: 0, force: false, fireCell: -1,
       xp: 0, rank: 0, ammo: 0, deployed: false, disguised: false, stillTicks: 0, carrying: 0, carriedBy: 0, controls: 0, c4At: 0, c4By: -1, invulnUntil: 0, heldUntil: 0, drone: 0, warp: -999, passengers: [], bound: 0, shielded: false, battleAt: -1, recoveryProtected: false, packedType: '',
-      faction: this.players[owner]?.faction ?? '', durableId: '',
+      faction: this.players[owner]?.faction ?? '', durableId: '', enterIntent: 0,
     };
   }
 
@@ -2287,13 +2321,56 @@ export class Game {
     if (def.engineer) {
       // PW34: neutral objective sites use their own contest rules, never enter-capture.
       if (this.structDef(t).site) { u.order = 'idle'; u.target = 0; return; }
-      if (enemy && this.capturePermitted(t)) {
-        this.capture(t, u.owner);
-        this.consume(u);
+      const defender = t.owner;
+      if (enemy) {
+        // A consent order whose alliance broke mid-walk is invalidated, not
+        // converted — it must not become a hostile capture the owner never saw.
+        if (u.enterIntent === 2) { u.order = 'idle'; u.target = 0; return; }
+        // A protected attacker cannot take a building by force — protection
+        // must not be retained through a hostile capture.
+        if (!this.captureBlockedFor(u) && this.capturePermitted(t)) {
+          this.capture(t, u.owner);
+          this.captureEvents.push({
+            building: t.id, buildingDurableId: t.durableId, engineer: u.id, engineerDurableId: u.durableId,
+            from: defender, to: u.owner, requestId: '',
+          });
+          // Hostile capture is a PvP act: a recovering attacker loses
+          // protection at once and the compound records the battle.
+          if (this.persistent) {
+            const p = this.players[u.owner];
+            if (p?.recovering) p.recoveryAttacked = true;
+            this.noteCompoundBattle(u.x, u.y, u.owner, defender);
+          }
+          this.consume(u);
+          return;
+        }
+        u.order = 'idle'; u.target = 0;
         return;
       }
-      if (!enemy && t.owner === u.owner) {
-        t.hp = t.maxHp; this.effect('repairFx', t.x, t.y, 0, 0, 20);
+      if (defender === u.owner) {
+        // Own repair requires an order that was not issued as a capture — a
+        // hostile or consent order whose target changed hands mid-walk must
+        // not become an accidental heal-and-consume.
+        if (u.enterIntent !== 1 && u.enterIntent !== 2 && t.hp < t.maxHp) {
+          t.hp = t.maxHp; this.effect('repairFx', t.x, t.y, 0, 0, 20);
+          this.consume(u);
+          return;
+        }
+        u.order = 'idle'; u.target = 0;
+        return;
+      }
+      // Allied target: only a live, unconsumed owner consent bound to this
+      // engineer and building may complete — and the shield boundary still
+      // bars entry even with consent.
+      if (u.enterIntent === 2 && !this.captureBlockedFor(u)
+        && !this.compoundProtecting(t.x, t.y, t.owner) && this.consentCaptureOk(u, t)) {
+        const c = this.consentFor(u.id, t.id, u.owner, t.owner)!;
+        c.used = true;
+        this.capture(t, u.owner);
+        this.captureEvents.push({
+          building: t.id, buildingDurableId: t.durableId, engineer: u.id, engineerDurableId: u.durableId,
+          from: defender, to: u.owner, requestId: c.requestId,
+        });
         this.consume(u);
         return;
       }
@@ -2319,6 +2396,26 @@ export class Game {
    * capture while it holds — consent cannot grant entry), and newcomer /
    * recovery protection blocks hostile takeover of protected assets.
    */
+  /** PW34: an unconsumed consent grant matching this engineer/building/slots. */
+  private consentFor(engineer: number, building: number, requester: number, owner: number) {
+    return this.consents.find(c => !c.used && c.engineer === engineer && c.building === building
+      && c.requester === requester && c.owner === owner);
+  }
+
+  /** PW34: protected attackers lose the ability to take a building by force —
+   *  newcomer/recovery protection must not be retained through a capture. */
+  private captureBlockedFor(u: Entity): boolean {
+    return this.persistent && (this.players[u.owner]?.newcomerProtected === true || u.recoveryProtected === true);
+  }
+
+  /** PW34: execution-time recheck for a consented allied capture — the grant
+   *  must be live and both players must still share an alliance. */
+  private consentCaptureOk(u: Entity, t: Entity): boolean {
+    if (!this.consentFor(u.id, t.id, u.owner, t.owner)) return false;
+    const po = this.players[u.owner], pt = this.players[t.owner];
+    return !!po && !!pt && po.ally >= 0 && po.ally === pt.ally;
+  }
+
   private capturePermitted(s: Entity): boolean {
     if (this.compoundProtecting(s.x, s.y, s.owner)) return false;
     if (this.persistent) {

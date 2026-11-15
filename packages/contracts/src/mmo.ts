@@ -619,7 +619,13 @@ export type MmoWorldAction =
    *  The entity walks to the region edge, then the durable transfer protocol
    *  carries its full state — one stable identity, never duplicated. */
   | { t: 'regionTransfer'; entityId: MmoId; destRegionId: MmoId }
-  | { t: 'regionTransferCancel'; entityId: MmoId };
+  | { t: 'regionTransferCancel'; entityId: MmoId }
+  /** PW34: allied Engineer capture consent. The requester asks the building's
+   *  current owner; only the owner may accept/decline, and an accepted grant is
+   *  one-use, bound to the exact engineer and building. */
+  | { t: 'engineerRequest'; engineerId: MmoId; buildingId: MmoId }
+  | { t: 'engineerConsent'; requestId: MmoId; decision: 'accept' | 'decline' }
+  | { t: 'engineerCancel'; requestId: MmoId };
 
 export type MmoAction = MmoSimAction | MmoWorldAction;
 
@@ -854,7 +860,7 @@ const faction = (x: unknown): x is Faction => typeof x === 'string' && /^[a-z0-9
 
 const SIM_KINDS = new Set(['move', 'attackMove', 'attack', 'fireAt', 'guard', 'scatter', 'stop', 'deploy', 'harvest', 'enter', 'build', 'cancel', 'place', 'repair', 'rally', 'super']);
 const WORLD_KINDS = new Set(['sell', 'pack', 'unpack', 'redeploy', 'barterOffer', 'barterAccept', 'barterDecline', 'barterCancel',
-  'selectShield', 'clearShield', 'endRecovery', 'settle', 'chat', 'ping', 'objectiveClaim',
+  'selectShield', 'clearShield', 'endRecovery', 'settle', 'chat', 'ping', 'objectiveClaim', 'engineerRequest', 'engineerConsent', 'engineerCancel',
   'allianceCreate', 'allianceInvite', 'allianceJoin', 'allianceLeave', 'allianceKick',
   'allianceSetPermissions', 'allianceDisband', 'setAutoRepair',
   'regionTransfer', 'regionTransferCancel']);
@@ -941,6 +947,15 @@ export function parseMmoAction(value: unknown): MmoAction {
     case 'setAutoRepair': if (typeof v.on !== 'boolean') throw new Error('setAutoRepair requires a boolean'); return { t, on: v.on } as MmoAction;
     case 'regionTransfer': if (!uuid(v.entityId) || !uuid(v.destRegionId)) throw new Error('regionTransfer requires entity and destination region'); return { t, entityId: v.entityId, destRegionId: v.destRegionId } as MmoAction;
     case 'regionTransferCancel': if (!uuid(v.entityId)) throw new Error('regionTransferCancel requires an entity'); return { t, entityId: v.entityId } as MmoAction;
+    case 'engineerRequest':
+      if (!uuid(v.engineerId) || !uuid(v.buildingId)) throw new Error('engineerRequest requires engineer and building');
+      return { t, engineerId: v.engineerId, buildingId: v.buildingId } as MmoAction;
+    case 'engineerConsent':
+      if (!uuid(v.requestId) || (v.decision !== 'accept' && v.decision !== 'decline')) throw new Error('engineerConsent requires requestId and decision');
+      return { t, requestId: v.requestId, decision: v.decision } as MmoAction;
+    case 'engineerCancel':
+      if (!uuid(v.requestId)) throw new Error('engineerCancel requires a request');
+      return { t, requestId: v.requestId } as MmoAction;
     default: throw new Error('Unknown MMO action');
   }
 }

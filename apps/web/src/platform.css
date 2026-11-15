@@ -331,3 +331,9 @@
 .leave{margin-top:auto;padding:9px;font-size:9px}
 .shield-custom{width:70px;padding:3px 6px;font-size:11px}
 @media(max-width:900px){.fusion-battle{grid-template-columns:1fr;height:auto}.battle-stage{height:62vh}.sidebar{border-left:0;border-top:2px solid #526039}}
+
+.consent-dialog{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:60;background:#1c2413;border:2px solid #f2d35c;border-radius:6px;padding:12px 16px;max-width:340px;display:flex;flex-direction:column;gap:8px;font-size:12px;color:#dfe8c8;box-shadow:0 8px 30px #000a}
+.consent-dialog b{color:#f2d35c;font-size:13px}
+.consent-dialog span{color:#b9c9a4;line-height:1.4}
+.consent-dialog div{display:flex;gap:8px;justify-content:flex-end}
+.consent-dialog button{padding:6px 14px}

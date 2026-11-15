@@ -96,6 +96,8 @@ export interface GameSnapshotV1 {
     reveals: unknown[];
     crates: unknown[];
     pending: [number, { slot: number; cmd: Command }[]][];
+    /** PW34: journaled allied-capture consent grants (absent pre-PW34). */
+    consents?: { requestId: string; engineer: number; building: number; owner: number; requester: number; used: boolean }[];
     map: { occupied: string; res: string; resKind: string; concrete: string };
   };
 }
@@ -147,6 +149,7 @@ export function captureGame(game: Game, meta: SnapshotMeta): string {
       projectiles: game.projectiles, worms: game.worms, strikes: game.strikes,
       reveals: game.reveals, crates: game.crates,
       pending: [...internals.pending.entries()].sort((a, b) => a[0] - b[0]),
+      consents: game.consents.map(c => ({ ...c })),
       map: { occupied: i32ToB64(game.map.occupied), res: u16ToB64(game.map.res), resKind: bytesToB64(game.map.resKind), concrete: bytesToB64(game.map.concrete) },
     },
   };
@@ -216,6 +219,8 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
       : undefined;
     // Snapshots predating PW18 lack the cross-region asset identity.
     e.durableId = typeof e.durableId === 'string' ? e.durableId : '';
+    // Snapshots predating PW34 lack the enter-order intent stamp.
+    e.enterIntent = typeof e.enterIntent === 'number' ? e.enterIntent : 0;
   }
   g.projectiles = snap.state.projectiles;
   g.worms = snap.state.worms;
@@ -227,6 +232,7 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   (g as unknown as { salvageEvents: unknown[] }).salvageEvents = [];
   (g as unknown as { siteEvents: unknown[] }).siteEvents = [];
   (g as unknown as { departEvents: unknown[] }).departEvents = [];
+  (g as unknown as { captureEvents: unknown[] }).captureEvents = [];
   g.effects = [];
   g.tick = snap.state.tick;
   g.market = snap.state.market;
@@ -239,6 +245,8 @@ export function restoreGame(json: string, packs: RulePack[]): Game {
   g.superCharge = snap.state.superCharge;
   g.crateRate = snap.state.crateRate;
   g.persistent = snap.setup.persistent;
+  // Snapshots predating PW34 carry no consent grants.
+  g.consents = Array.isArray(snap.state.consents) ? snap.state.consents.map(c => ({ ...c })) : [];
   g.mmo = g.persistent ? snap.setup.mmo : undefined;
   g.worldgenSpec = snap.setup.worldgen;
   g.hooks = {};
