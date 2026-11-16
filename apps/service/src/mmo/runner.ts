@@ -505,11 +505,19 @@ export class RegionRunner {
     // poll-loop renewal is not yet armed; renew authority mid-catch-up or the
     // first fenced write fails and the region crash-loops on every retry.
     let lastBeat = performance.now();
+    // Deep replay/catch-up runs hundreds of thousands of ticks; without periodic
+    // yields the event loop starves and every DB connect hits its timeout
+    // (observed live: /api/mmo/* all crashing while a region replayed ~600k ticks).
+    let sinceYield = 0;
     while (game.tick < tick && guard++ < 4_000_000) {
       const t0 = performance.now();
       game.step();
       this.stats.simMs += performance.now() - t0;
       this.stats.ticksStepped++;
+      if (++sinceYield >= 256) {
+        sinceYield = 0;
+        await new Promise(resolve => setImmediate(resolve));
+      }
       if (this.epoch !== undefined
         && performance.now() - lastBeat > this.opts.leaseMs * 0.4) {
         await acquireRegionLease({
