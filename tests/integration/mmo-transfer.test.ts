@@ -14,7 +14,7 @@ import { submitCommand, journalTail } from '../../apps/service/src/mmo/commands.
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { createWorldHandler } from '../../apps/service/src/mmo/world.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
-import { PACKS, LEPTONS, passable, type Entity } from '../../packages/fusion/src/index.js';
+import { PACKS, LEPTONS, buildableTerrain, passable, type Entity } from '../../packages/fusion/src/index.js';
 import { PERSISTENT_RULES_V1, MMO_PROTOCOL, mmoEntityId, type MmoCommandMessage, type MmoWorldAction } from '../../packages/contracts/src/index.js';
 
 const DB_URL = process.env.MMO_TEST_DATABASE_URL;
@@ -535,5 +535,93 @@ describeDb('mmo region transfer (two live runners)', () => {
     const t = await mmoOne<{ state: string }>(
       'select state from region_transfer where transfer_id = $1', [transferId]);
     expect(t?.state).toBe('CANCELLED');
+  }, IT_TIMEOUT);
+
+  it('moves a packed-building carrier across regions and redeploys it', async () => {
+    // THU-2242: the packed carrier is a unit with packedType — it must cross
+    // with the packed structure identity intact and unpack at the destination.
+    const g = ctx.a.runner.currentGame!;
+    const sdef = g.pack.structures['pyle'];
+    if (!sdef) throw new Error('fixture pack has no pyle');
+    // Free footprint for the structure.
+    let site = { x: -1, y: -1 };
+    outerS: for (let cy = 2; cy < g.map.h - sdef.h - 2; cy++) {
+      for (let cx = 2; cx < g.map.w - sdef.w - 2; cx++) {
+        let ok = true;
+        for (let y = cy; y < cy + sdef.h && ok; y++) for (let x = cx; x < cx + sdef.w && ok; x++) {
+          const i = y * g.map.w + x;
+          if (g.map.occupied[i] || !buildableTerrain(g.pack, g.map, i)) ok = false;
+        }
+        if (ok) { site = { x: cx, y: cy }; break outerS; }
+      }
+    }
+    if (site.x < 0) throw new Error('no site for pyle');
+    const s = g.spawnStructure('pyle', 0, site.x, site.y);
+    const ref = mmoEntityId(ctx.a.regionId, s.id);
+    const packed = await worldAction(ctx, ctx.a, p0(), { t: 'pack', entityId: ref });
+    expect(packed.accepted).toBe(true);
+    await waitFor(() => {
+      const e = g.entities.get(s.id);
+      return e?.kind === 'unit' && e.packedType === 'pyle';
+    });
+    const carrier = g.entities.get(s.id)!;
+    const hpBefore = carrier.hp;
+    // Park the carrier near a map edge for a short depart walk.
+    const w = g.map.w;
+    let cspot = -1;
+    outerC: for (let ring = 4; ring <= 8; ring++) {
+      for (let y = ring; y < g.map.h - ring; y++) for (let x = ring; x < w - ring; x++) {
+        const i = y * w + x;
+        if (Math.min(x, w - 1 - x, y, g.map.h - 1 - y) === ring
+            && passable(g.pack, g.map, i, 'vehicle') && !g.map.occupied[i] && !g.unitInCell(i)) { cspot = i; break outerC; }
+      }
+    }
+    if (cspot < 0) throw new Error('no carrier edge cell');
+    carrier.x = (cspot % w) * LEPTONS + LEPTONS / 2;
+    carrier.y = Math.floor(cspot / w) * LEPTONS + LEPTONS / 2;
+    carrier.order = 'idle'; carrier.path = []; carrier.target = 0;
+
+    const made = await worldAction(ctx, ctx.a, p0(), {
+      t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
+    });
+    expect(made.accepted).toBe(true);
+    const transferId = made.transferId as string;
+    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+
+    // Destination: exactly one carrier, packed identity and hp preserved.
+    const gB = ctx.b.runner.currentGame!;
+    const copies = [...gB.entities.values()]
+      .filter(x => x.durableId === transferId || x.durableId === ref);
+    expect(copies).toHaveLength(1);
+    const arrived = copies[0];
+    expect(arrived.kind).toBe('unit');
+    expect(arrived.packedType).toBe('pyle');
+    expect(arrived.type).toBe('pack_pyle');
+    expect(arrived.hp).toBe(hpBefore);
+    // Source holds no copy.
+    expect([...g.entities.values()].filter(x => x.durableId === ref)).toHaveLength(0);
+
+    // Redeploy at the destination: park beside a free footprint and unpack.
+    const dSite = { x: -1, y: -1 };
+    outerD: for (let cy = 2; cy < gB.map.h - sdef.h - 2; cy++) {
+      for (let cx = 2; cx < gB.map.w - sdef.w - 2; cx++) {
+        let ok = true;
+        for (let y = cy; y < cy + sdef.h && ok; y++) for (let x = cx; x < cx + sdef.w && ok; x++) {
+          const i = y * gB.map.w + x;
+          if (gB.map.occupied[i] || !buildableTerrain(gB.pack, gB.map, i)) ok = false;
+        }
+        if (ok) { dSite.x = cx; dSite.y = cy; break outerD; }
+      }
+    }
+    if (dSite.x < 0) throw new Error('no destination site');
+    arrived.x = (dSite.x + 1) * LEPTONS; arrived.y = (dSite.y + 1) * LEPTONS;
+    const unpacked = await worldAction(ctx, ctx.b, p0(), {
+      t: 'unpack', entityId: ref, x: dSite.x, y: dSite.y,
+    });
+    expect(unpacked.accepted).toBe(true);
+    await waitFor(() => {
+      const e = gB.entities.get(arrived.id);
+      return e?.kind === 'structure' && e.type === 'pyle' && e.packedType === '';
+    });
   }, IT_TIMEOUT);
 });
