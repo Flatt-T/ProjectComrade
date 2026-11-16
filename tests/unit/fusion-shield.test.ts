@@ -327,6 +327,40 @@ describe('PW34 allied capture consent', () => {
     expect(g.captureEvents).toHaveLength(0);
   });
 
+  it('owner consent waives the owner\'s own newcomer protection — order issues and capture lands', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    // The consenting owner is still inside the 1-hour newcomer setup window.
+    // Their explicit consent is the waiver — protection must not silently
+    // reject the enter order at issue or arrival.
+    g.players[0].newcomerProtected = true;
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(1);
+    expect(g.entities.get(eng.id)?.hp ?? 0).toBe(0);
+    expect(g.captureEvents).toHaveLength(1);
+  });
+
+  it('an active shield still rejects the consented enter order at issue', () => {
+    const g = new Game(setup(true));
+    allied(g);
+    compound(g, 0, 32, 30);
+    const target = g.spawnStructure('pyle', 0, 33, 30);
+    const eng = unitNear(g, 'engineer', 1, 31, 30);
+    grant(g, 'req-1', eng.id, target.id);
+    g.step();
+    g.enqueue(1, { t: 'enter', ids: [eng.id], target: target.id });
+    steps(g, 300);
+    expect(g.entities.get(target.id)!.owner).toBe(0);
+    expect(g.entities.get(eng.id)!.hp).toBeGreaterThan(0);
+    expect(g.entities.get(eng.id)!.order).toBe('idle');
+    expect(g.captureEvents).toHaveLength(0);
+  });
+
   it('an ownership change after consent invalidates the capture mid-walk', () => {
     const g = new Game(setup(true));
     allied(g);

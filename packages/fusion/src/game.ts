@@ -1071,7 +1071,11 @@ export class Game {
             ? this.capturePermitted(target) && !this.captureBlockedFor(u)
             : target.owner === slot ? target.hp < target.maxHp
             : this.consentFor(u.id, target.id, slot, target.owner) !== undefined
-              && this.capturePermitted(target) && !this.captureBlockedFor(u))
+              // The owner's live consent is their explicit waiver of their own
+              // newcomer/recovery protection — but an active compound shield
+              // still bars entry even with consent.
+              && !this.compoundProtecting(target.x, target.y, target.owner)
+              && !this.captureBlockedFor(u))
             : def.spy ? enemy
             : target.owner === slot && (sdef.repairPad && def.kind !== 'infantry' && def.kind !== 'aircraft'
               || sdef.airfield && def.kind === 'aircraft' || !!sdef.refinery && !!def.harvester);
