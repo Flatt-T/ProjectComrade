@@ -401,7 +401,7 @@ export class MmoGateway {
    * PW25 channel senders. Each returns an audited status; 'skipped' means the
    * channel could not apply (offline, unconfigured, no address) — never an error.
    * Email goes through SES only when COMRADE_SES_* and AWS credentials exist;
-   * push subscriptions are stored but the VAPID sender is a documented placeholder.
+   * Web Push goes through VAPID only when COMRADE_VAPID_* is configured.
    */
   private notificationSenders(): NotificationSenders {
     return {

@@ -45,6 +45,12 @@ services:
       COMRADE_SES_FROM_NAME: ${COMRADE_SES_FROM_NAME:-}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      # PW25 Web Push (THU-2451): VAPID keys identify this service to push
+      # services. Inert until both keys are set; the public key is served to
+      # browsers via /api/mmo/push-key.
+      COMRADE_VAPID_PUBLIC_KEY: ${COMRADE_VAPID_PUBLIC_KEY:-}
+      COMRADE_VAPID_PRIVATE_KEY: ${COMRADE_VAPID_PRIVATE_KEY:-}
+      COMRADE_VAPID_SUBJECT: ${COMRADE_VAPID_SUBJECT:-}
     read_only: true
     tmpfs:
       - /tmp
