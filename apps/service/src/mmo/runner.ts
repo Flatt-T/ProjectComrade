@@ -920,6 +920,13 @@ export class RegionRunner {
       for (const ev of events) {
         const seq = BigInt(ev.event_seq);
         if (ev.event_kind === 'accrual') {
+          // The accrual's simulation_tick is the authoritative sim position at
+          // its journal point: live ticks between the restored checkpoint and
+          // here must be stepped deterministically first, or the replayed tick
+          // lands behind last_committed_tick and every later fenced write fails
+          // (observed: quiescent regions bricked after content-fingerprint
+          // rejection forced a deep replay).
+          this.advanceTo(Number(ev.simulation_tick));
           // Wake accrual owns its arithmetic advance (hib path dedupes on
           // sinceMs); only replay accrual rows when no hib metadata will.
           if (applyAccrual) {

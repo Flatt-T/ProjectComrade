@@ -387,4 +387,61 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
       await runnerC.stop().catch(() => undefined);
     }
   }, 120000);
+
+  it('an accrual journaled beyond the checkpoint replays the authoritative tick fence', async () => {
+    // Live failure this reproduces: a quiescent region's journal tail is all
+    // 'accrual' rows whose simulation_tick is AHEAD of the restored sim tick.
+    // Replay must advanceTo() each accrual's tick or last_committed_tick stays
+    // ahead of game.tick and every later fenced write fails FENCE_LOST —
+    // observed on beta as region-start-failed crash loops after deploys forced
+    // content-fingerprint checkpoint rejection and deep journal replay.
+    const fx = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
+    await pinIdenticalSim(fx);
+    const runnerA = mkRunner(fx, fx.workerId);
+    await runnerA.start();
+    try {
+      const g = gameOf(runnerA);
+      for (let i = 0; i < 40; i++) g.step();
+      await runnerA.checkpoint('manual');
+      const snap = await mmoOne<{ last_applied_seq: string; tick: string }>(
+        `select last_applied_seq::text as last_applied_seq, tick::text as tick
+           from region_snapshot where region_id = $1 order by created_at desc limit 1`,
+        [fx.regionId]);
+      expect(snap).toBeTruthy();
+      const snapTick = Number(snap!.tick);
+      const epoch = await regionEpoch(fx.regionId);
+      // Kill first so no live writer races the hand-journaled accrual below.
+      const usurper = randomUUID();
+      await hardKill(runnerA, fx, usurper);
+      // Journal an accrual beyond the checkpoint exactly as a wake would have.
+      const tail = await journalTail(fx);
+      const accrualSeq = (BigInt(tail.last_committed_seq) + 1n).toString();
+      const accrualTick = snapTick + 500;
+      await mmoQuery(
+        `insert into region_event (region_id, event_seq, authority_epoch, simulation_tick, event_id, event_kind, payload)
+         values ($1,$2,$3,$4,$5,'accrual',$6)`,
+        [fx.regionId, accrualSeq, epoch, String(accrualTick), randomUUID(),
+         JSON.stringify({ ticks: 10, rates: [0], sinceMs: 1, sampleTick: snapTick })]);
+      await mmoQuery(
+        'update region set last_committed_seq = $2, last_committed_tick = $3 where region_id = $1',
+        [fx.regionId, accrualSeq, String(accrualTick)]);
+      const runnerB = mkRunner(fx, usurper);
+      await runnerB.start();
+      try {
+        const gB = gameOf(runnerB);
+        // Replay must land on the accrual's authoritative tick, not the
+        // checkpoint's older one.
+        expect(gB.tick).toBe(accrualTick);
+        // And a fenced journal write after restore must commit, not FENCE_LOST.
+        const epochB = await regionEpoch(fx.regionId);
+        const post = await submitFresh(fx, usurper, epochB, moveAction(fx, runnerB, 15, 15));
+        expect(post.status).toBe('committed');
+        await waitFor(async () => await eventApplied(fx, post.eventSeq!), 15000);
+      } finally {
+        await runnerB.stop().catch(() => undefined);
+      }
+    } finally {
+      await runnerA.stop().catch(() => undefined);
+    }
+  }, 120000);
 });
