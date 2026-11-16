@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "1.0.0",
+  "referenceId": "RA2-CLASSIC-001",
+  "referenceBuildId": "BLOCKED-awaiting-owner-provision",
+  "generatedAt": "2026-11-16T00:00:00Z",
+  "fixtureType": "scenario-template",
+  "notes": "PROPOSED SCENARIO TEMPLATES for Red Alert 2 (OPTIONAL separately-gated extension). RA2 has no public EA source and its permitted engine path (Chrono Divide or other) is unresolved; expected results must come from controlled observations of an approved reference build. All expected values are BLOCKED placeholders. This file covers the base game profile only; Yuri's Revenge is a separate expansion profile (ra2-yuris-revenge).",
+  "fixtures": [
+    {
+      "fixtureId": "RA2-ECON-001",
+      "title": "Basic ore miner cycle - single refinery",
+      "scenarioFamily": "economy",
+      "template": true,
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["GDI", "Nod"],
+        "seed": 42
+      },
+      "settings": {"gameSpeed": "normal", "unitCap": 500, "techLevel": 1, "fogOfWar": false, "shroud": false},
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "ore-miner-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 100, "y": 200}}, "playerId": 0},
+        {"tick": 100, "command": "harvest", "parameters": {"fieldId": "ore-1"}, "playerId": 0},
+        {"tick": 300, "command": "return", "parameters": {"targetId": "refinery-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {"tick": 100, "observations": {"credits": "BLOCKED-awaiting-reference", "ore-miner-1.state": "harvesting", "ore-miner-1.cargo": "BLOCKED-awaiting-reference"}},
+          {"tick": 300, "observations": {"credits": "BLOCKED-awaiting-reference", "ore-miner-1.state": "returning", "ore-miner-1.cargo": "BLOCKED-awaiting-reference"}},
+          {"tick": 500, "observations": {"credits": "BLOCKED-awaiting-reference", "ore-miner-1.state": "idle", "ore-miner-1.cargo": 0}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra2-gog-2000",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"},
+        {"property": "ore-miner-1.cargo", "condition": ">= 0 and <= max_capacity"}
+      ],
+      "tolerancePolicy": {"integerFields": "exact", "floatingPointFields": "not-applicable"},
+      "linkedCatalogIds": ["ore-miner", "refinery", "ore"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data", "optional-extension-gated"]
+    },
+    {
+      "fixtureId": "RA2-MOVE-001",
+      "title": "Basic unit movement to destination",
+      "scenarioFamily": "movement",
+      "template": true,
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {"gameSpeed": "normal", "unitCap": 500, "techLevel": 1, "fogOfWar": false, "shroud": false},
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "soldier-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 500, "y": 500}}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {"tick": 100, "observations": {"soldier-1.position": "BLOCKED-awaiting-reference", "soldier-1.state": "moving"}},
+          {"tick": 300, "observations": {"soldier-1.position": {"x": 500, "y": 500}, "soldier-1.state": "idle"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra2-gog-2000",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [{"property": "soldier-1.hp", "condition": ">= 0 and <= max_hp"}],
+      "tolerancePolicy": {"integerFields": "exact"},
+      "linkedCatalogIds": ["soldier"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data", "optional-extension-gated"]
+    },
+    {
+      "fixtureId": "RA2-PROD-001",
+      "title": "Unit production from barracks",
+      "scenarioFamily": "production",
+      "template": true,
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 20000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {"gameSpeed": "normal", "unitCap": 500, "techLevel": 1, "fogOfWar": false, "shroud": false},
+      "inputTrace": [
+        {"tick": 0, "command": "select-building", "parameters": {"buildingId": "barracks-1"}, "playerId": 0},
+        {"tick": 10, "command": "produce", "parameters": {"unitType": "soldier"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {"tick": 10, "observations": {"credits": "BLOCKED-awaiting-reference", "barracks-1.queue": [{"unitType": "soldier", "progress": 0}]}},
+          {"tick": 200, "observations": {"credits": "BLOCKED-awaiting-reference", "barracks-1.queue": []}}
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-produced", "parameters": {"unitType": "soldier"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra2-gog-2000",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "credits", "condition": ">= 0"},
+        {"property": "barracks-1.queue.length", "condition": ">= 0"}
+      ],
+      "tolerancePolicy": {"integerFields": "exact"},
+      "linkedCatalogIds": ["barracks", "soldier"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data", "optional-extension-gated"]
+    },
+    {
+      "fixtureId": "RA2-PROD-002",
+      "title": "MCV deploys into construction yard",
+      "scenarioFamily": "production",
+      "template": true,
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 20000,
+        "playerFactions": ["GDI"],
+        "seed": 42
+      },
+      "settings": {"gameSpeed": "normal", "unitCap": 500, "techLevel": 1, "fogOfWar": false, "shroud": false},
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "mcv-1"}, "playerId": 0},
+        {"tick": 10, "command": "move", "parameters": {"target": {"x": 200, "y": 200}}, "playerId": 0},
+        {"tick": 200, "command": "deploy", "parameters": {"unitId": "mcv-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {"tick": 200, "observations": {"mcv-1.state": "deploying"}},
+          {"tick": "BLOCKED-awaiting-reference", "observations": {"construction-yard-1.state": "operational"}}
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "building-constructed", "parameters": {"buildingType": "construction-yard"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra2-gog-2000",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [{"property": "credits", "condition": ">= 0"}],
+      "tolerancePolicy": {"integerFields": "exact"},
+      "linkedCatalogIds": ["mcv", "construction-yard"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data", "optional-extension-gated"]
+    },
+    {
+      "fixtureId": "RA2-COMBAT-001",
+      "title": "Basic infantry attack",
+      "scenarioFamily": "combat",
+      "template": true,
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 10000,
+        "playerFactions": ["GDI", "Nod"],
+        "seed": 42
+      },
+      "settings": {"gameSpeed": "normal", "unitCap": 500, "techLevel": 1, "fogOfWar": false, "shroud": false},
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "soldier-gdi-1"}, "playerId": 0},
+        {"tick": 10, "command": "attack", "parameters": {"targetId": "soldier-nod-1"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {"tick": 50, "observations": {"soldier-gdi-1.hp": "BLOCKED-awaiting-reference", "soldier-nod-1.hp": "BLOCKED-awaiting-reference"}},
+          {"tick": 100, "observations": {"soldier-nod-1.state": "destroyed"}}
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "unit-destroyed", "parameters": {"unitId": "soldier-nod-1"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra2-gog-2000",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [
+        {"property": "soldier-gdi-1.hp", "condition": ">= 0 and <= max_hp"},
+        {"property": "soldier-nod-1.hp", "condition": ">= 0 and <= max_hp"}
+      ],
+      "tolerancePolicy": {"integerFields": "exact"},
+      "linkedCatalogIds": ["soldier", "weapon-rifle"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data", "optional-extension-gated"]
+    },
+    {
+      "fixtureId": "RA2-VICTORY-001",
+      "title": "Destroy all enemy construction yards",
+      "scenarioFamily": "victory",
+      "template": true,
+      "initialState": {
+        "mapHash": "BLOCKED-awaiting-map-file",
+        "startingCredits": 20000,
+        "playerFactions": ["GDI", "Nod"],
+        "seed": 42
+      },
+      "settings": {"gameSpeed": "normal", "unitCap": 500, "techLevel": 1, "fogOfWar": false, "shroud": false},
+      "inputTrace": [
+        {"tick": 0, "command": "select-unit", "parameters": {"unitId": "grizzly-tank-1"}, "playerId": 0},
+        {"tick": 10, "command": "attack", "parameters": {"targetId": "construction-yard-nod"}, "playerId": 0}
+      ],
+      "expectedObservations": {
+        "checkpoints": [
+          {"tick": 500, "observations": {"construction-yard-nod.hp": 0, "gameState": "victory", "winner": "GDI"}}
+        ],
+        "eventTrace": [
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "building-destroyed", "parameters": {"buildingId": "construction-yard-nod"}},
+          {"tick": "BLOCKED-awaiting-reference", "eventType": "game-ended", "parameters": {"result": "victory", "winner": "GDI"}}
+        ]
+      },
+      "sourceEvidence": {
+        "captureDate": "BLOCKED-awaiting-reference",
+        "captureMethod": "controlled-recording",
+        "referenceVersion": "ra2-gog-2000",
+        "observer": "BLOCKED-awaiting-owner"
+      },
+      "oracleCaptureMethod": "native-game-run",
+      "expectedInvariants": [{"property": "construction-yard-nod.hp", "condition": ">= 0 and <= max_hp"}],
+      "tolerancePolicy": {"integerFields": "exact"},
+      "linkedCatalogIds": ["construction-yard", "grizzly-tank"],
+      "knownLimitations": ["BLOCKED-awaiting-reference-data", "optional-extension-gated"]
+    }
+  ]
+}
