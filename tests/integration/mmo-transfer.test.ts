@@ -550,6 +550,50 @@ describeDb('mmo region transfer (two live runners)', () => {
     expect(t?.state).toBe('CANCELLED');
   }, IT_TIMEOUT);
 
+  it('chains an onward transfer A→B→A with one identity and both ledger legs', async () => {
+    const { ref } = edgeUnit(ctx);
+    const made = await worldAction(ctx, ctx.a, p0(), {
+      t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
+    });
+    const t1 = made.transferId as string;
+    await waitFor(async () => (await transferState(t1)) === 'COMPLETED', 30000);
+
+    // Park the arrived unit beside B's edge so the return depart walk is short.
+    const gB = ctx.b.runner.currentGame!;
+    const arrived = [...gB.entities.values()].find(x => x.durableId === t1);
+    expect(arrived).toBeTruthy();
+    const w = gB.map.w, h = gB.map.h;
+    let spot = -1;
+    outer: for (let ring = 2; ring <= 6; ring++) {
+      for (let y = ring; y < h - ring; y++) for (let x = ring; x < w - ring; x++) {
+        const i = y * w + x;
+        if (Math.min(x, w - 1 - x, y, h - 1 - y) === ring
+            && passable(gB.pack, gB.map, i, 'vehicle') && !gB.map.occupied[i] && !gB.unitInCell(i)) { spot = i; break outer; }
+      }
+    }
+    if (spot < 0) throw new Error('no B edge cell');
+    arrived!.x = (spot % w) * LEPTONS + LEPTONS / 2;
+    arrived!.y = Math.floor(spot / w) * LEPTONS + LEPTONS / 2;
+    arrived!.order = 'idle'; arrived!.path = []; arrived!.target = 0;
+
+    const back = await worldAction(ctx, ctx.b, p0(), {
+      t: 'regionTransfer', entityId: ref, destRegionId: ctx.a.regionId,
+    });
+    expect(back.accepted).toBe(true);
+    const t2 = back.transferId as string;
+    await waitFor(async () => (await transferState(t2)) === 'COMPLETED', 30000);
+
+    // Exactly one live copy, back in A; B holds none.
+    const gA = ctx.a.runner.currentGame!;
+    expect([...gA.entities.values()].filter(x => x.durableId === t2)).toHaveLength(1);
+    expect([...gB.entities.values()].filter(x => x.durableId === t1 || x.durableId === t2)).toHaveLength(0);
+    for (const tid of [t1, t2]) {
+      const ledger = await mmoQuery<{ kind: string; region_id: string }>(
+        'select kind, region_id from asset_ledger where operation_id = $1 order by kind', [tid]);
+      expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN', 'TRANSFER_OUT']);
+    }
+  }, IT_TIMEOUT);
+
   it('rolls back a failed inbound commit — no ghost, no stale binding, retry delivers once', async () => {
     // THU-2242: the spawn binds durable identities only after the durable
     // commit lands; a commit failure must leave no entity AND no binding, and
