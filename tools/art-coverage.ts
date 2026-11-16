@@ -13,7 +13,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   CLASSIC_PACKS, FUSIONS, MASHUP_PACKS, composeWorldPack,
-  type RulePack, type StructureDef, type UnitDef,
+  type StructureDef, type UnitDef,
 } from '../packages/fusion/src/index.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -57,7 +57,7 @@ if (infantryCases.size <= 20) {
   const i = renderSrc.indexOf('private drawInfantry(');
   if (i >= 0) {
     const rest = renderSrc.slice(i);
-    const next = rest.slice(10).search(/\n  (private|public) /);
+    const next = rest.slice(10).search(/\n {2}(private|public) /);
     const body = next < 0 ? rest : rest.slice(0, next + 10);
     for (const m of body.matchAll(/shape === '([^']+)'/g)) infantryCases.add(m[1]);
     for (const m of body.matchAll(/shape !== '([^']+)'/g)) infantryCases.add(m[1]); // negative guards still imply the shape renders
