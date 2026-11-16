@@ -60,6 +60,16 @@ export const ses = {
   configured: () => !!(text('COMRADE_SES_FROM') && text('AWS_ACCESS_KEY_ID') && text('AWS_SECRET_ACCESS_KEY')),
 };
 
+/** Web Push (PW25/THU-2451): VAPID keys identify this service to push services.
+ *  Generate once with `npx web-push generate-vapid-keys`; without all three the
+ *  channel reports 'push-unconfigured' rather than pretending to send. */
+export const vapid = {
+  publicKey: () => text('COMRADE_VAPID_PUBLIC_KEY'),
+  privateKey: () => text('COMRADE_VAPID_PRIVATE_KEY'),
+  subject: () => text('COMRADE_VAPID_SUBJECT', 'mailto:ops@projectcomrade.co.uk'),
+  configured: () => !!(text('COMRADE_VAPID_PUBLIC_KEY') && text('COMRADE_VAPID_PRIVATE_KEY')),
+};
+
 /** Bumped whenever the terms change, so acceptance can be re-requested. */
 export function termsVersion(): string { return text('COMRADE_TERMS_VERSION', '2026-10-30'); }
 

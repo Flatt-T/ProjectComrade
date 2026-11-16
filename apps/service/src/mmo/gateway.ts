@@ -32,9 +32,10 @@ import { authEnabled, mmoGuestPolicy, ses } from '../config.js';
 import * as cognito from '../cognito.js';
 import { accountById, accountBySub } from '../accounts.js';
 import {
-  dispatchDueNotifications, notificationSummary, playerAccountId, pushEndpoints,
+  dispatchDueNotifications, notificationSummary, playerAccountId,
   type NotificationSenders,
 } from './notify.js';
+import { sendWebPush } from './push.js';
 import { sendSesEmail } from './ses.js';
 import { log } from '../ops.js';
 
@@ -437,13 +438,7 @@ export class MmoGateway {
           return { status: 'failed' as const, detail: error instanceof Error ? error.message : String(error) };
         }
       },
-      push: async (playerId) => {
-        const subs = await pushEndpoints(playerId);
-        if (!subs.length) return { status: 'skipped' as const, detail: 'no-subscription' };
-        // VAPID sender lands with the push provider decision; subscriptions are
-        // already stored so enabling it is configuration, not a migration.
-        return { status: 'skipped' as const, detail: 'push-unconfigured' };
-      },
+      push: async (playerId, n) => sendWebPush(playerId, n),
     };
   }
 

@@ -173,6 +173,11 @@ export const api = {
   mmoMarkNotificationsRead: (ids?: string[]) =>
     post<{ marked: number }>('/api/mmo/notifications/read', ids ? { ids } : {}),
   mmoAwayReport: () => get<MmoAwayReport>('/api/mmo/away-report'),
+  mmoPushKey: () => get<{ publicKey: string; configured: boolean }>('/api/mmo/push-key'),
+  mmoPushSubscribe: (endpoint: string, keys: unknown) =>
+    post<{ subscribed: boolean }>('/api/mmo/push-subscriptions', { endpoint, keys }),
+  mmoPushUnsubscribe: (endpoint: string) =>
+    remove<{ subscribed: boolean }>('/api/mmo/push-subscriptions', { endpoint }),
   mmoProtection: () => get<MmoProtectionResponse>('/api/mmo/protection'),
   mmoTradeOffers: () => get<MmoTradeOffersResponse>('/api/mmo/trade-offers'),
   mmoPlayers: () => get<MmoPlayersResponse>('/api/mmo/players'),

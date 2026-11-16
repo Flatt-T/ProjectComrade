@@ -18,6 +18,7 @@ import type { Queryable } from './store.js';
 export interface NotificationRow {
   notification_id: string; player_id: string; region_id: string | null;
   kind: string; payload: Record<string, unknown>; dedupe_key: string;
+  journal_seq: string | null;
   deliver_after: string; created_at: string; delivered_at: string | null; read_at: string | null;
 }
 
@@ -42,8 +43,9 @@ export async function raiseNotification(
   },
 ): Promise<boolean> {
   const { rows } = await q.query<{ notification_id: string }>(
-    `insert into notification (notification_id, player_id, region_id, kind, payload, dedupe_key, deliver_after)
-     values ($1,$2,$3,$4,$5,$6,$7)
+    `insert into notification (notification_id, player_id, region_id, kind, payload, dedupe_key, deliver_after, journal_seq)
+     values ($1,$2,$3,$4,$5,$6,$7,
+       (select max(event_seq) from region_event re where re.region_id = $3::uuid))
      on conflict (player_id, dedupe_key) do nothing
      returning notification_id`,
     [randomUUID(), args.playerId, args.regionId ?? null, args.kind,
@@ -205,14 +207,14 @@ export async function awayReportFor(playerId: string): Promise<MmoAwayReport> {
 
   const notifications = await mmoQuery<{
     notification_id: string; region_id: string | null; kind: string;
-    payload: Record<string, unknown>; created_at: string;
+    payload: Record<string, unknown>; journal_seq: string | null; created_at: string;
   }>(
-    `select notification_id, region_id, kind, payload, created_at
+    `select notification_id, region_id, kind, payload, journal_seq, created_at
        from notification where player_id = $1 and created_at >= $2::timestamptz
       order by created_at`, [playerId, since]);
   for (const n of notifications) {
     push(n.created_at, `notification:${n.kind}`, notificationSummary(n.kind, n.payload),
-      n.region_id, null, n.notification_id);
+      n.region_id, n.journal_seq, n.notification_id);
   }
 
   const episodes = await mmoQuery<{
