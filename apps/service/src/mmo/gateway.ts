@@ -43,6 +43,11 @@ const OBSERVE_MS = 2_000;
 const DISPATCH_MS = 250;
 const NOTIFY_MS = 2_000;
 const MAX_SUBSCRIPTIONS = 4;
+// Dead-socket reaper: without pings a silently dropped client holds its slot
+// (including a capped guest seat) until TCP gives up, which can take hours.
+// Read lazily so tests can shrink the intervals without a module reload.
+const wsPingMs = () => Number(process.env.MMO_WS_PING_MS || 30_000);
+const wsDeadMs = () => Number(process.env.MMO_WS_DEAD_MS || 75_000);
 
 interface Sub { regionId: string; playerId: string; slot: number | null }
 
@@ -57,6 +62,9 @@ interface Conn {
   lastPresenceSweep: number;
   messages: number;
   interval?: ReturnType<typeof setInterval>;
+  /** Last protocol pong (or connect) — drives the dead-socket reaper. */
+  lastPong?: number;
+  beat?: number;
   /** Set when this connection holds one of the capped guest slots. */
   guestCounted?: boolean;
 }
@@ -134,8 +142,16 @@ export class MmoGateway {
       subs: new Map(), present: new Set(), lastPresenceSweep: 0, messages: 0,
     };
     this.conns.add(conn);
+    conn.lastPong = Date.now();
+    ws.on('pong', () => { conn.lastPong = Date.now(); });
     conn.interval = setInterval(() => {
       conn.messages = 0;
+      // Reap sockets that stopped answering pings (dead peer, vanished tab).
+      conn.beat = (conn.beat ?? 0) + 1;
+      if (conn.beat % Math.max(1, Math.round(wsPingMs() / 1000)) === 0) {
+        if (Date.now() - (conn.lastPong ?? 0) > wsDeadMs()) { ws.terminate(); return; }
+        try { ws.ping(); } catch { ws.terminate(); return; }
+      }
       // Presence heartbeat (PW09): an open socket with a live sweep counts as
       // online; last_seen refreshes at most once per 5 s per connection.
       if (conn.present.size && Date.now() - conn.lastPresenceSweep >= 5_000) {

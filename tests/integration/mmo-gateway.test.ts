@@ -5,6 +5,7 @@
 // Requires MMO_TEST_DATABASE_URL (disposable database).
 import { createServer, type Server } from 'node:http';
 import { createHmac, randomBytes, randomUUID } from 'node:crypto';
+import { connect as netConnect, type Socket } from 'node:net';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
@@ -287,4 +288,57 @@ describeDb('mmo gateway (real PostgreSQL + real WebSocket)', () => {
     expect(row?.lifecycle).toBe('active');
     expect(row?.owner_worker_id).toBe(fence!.workerId);
   }, 30_000);
+
+  it('pings live sockets and reaps peers that stop ponging', async () => {
+    // A dead client must not hold its slot forever: the gateway pings on a
+    // beat and terminates sockets that miss WS_DEAD_MS of pongs.
+    const prevPing = process.env.MMO_WS_PING_MS;
+    const prevDead = process.env.MMO_WS_DEAD_MS;
+    process.env.MMO_WS_PING_MS = '1000';
+    process.env.MMO_WS_DEAD_MS = '3000';
+    try {
+      // Healthy client: pings arrive and the socket stays open.
+      const live = await connect(port);
+      const sawPing = new Promise<void>(resolve => live.ws.on('ping', () => resolve()));
+      await Promise.race([sawPing, sleep(6_000).then(() => { throw new Error('no ping within 6s'); })]);
+      await sleep(4_500); // several beats past the dead window — still alive via auto-pong
+      expect(live.ws.readyState).toBe(WebSocket.OPEN);
+      live.close();
+
+      // Dead peer: complete the WS handshake over raw TCP then never pong.
+      const sock = await rawUpgrade(port, guestCookie());
+      const closed = new Promise<void>(resolve => sock.once('close', () => resolve()));
+      await Promise.race([
+        closed,
+        sleep(12_000).then(() => { throw new Error('dead socket was not reaped within 12s'); }),
+      ]);
+    } finally {
+      if (prevPing === undefined) delete process.env.MMO_WS_PING_MS; else process.env.MMO_WS_PING_MS = prevPing;
+      if (prevDead === undefined) delete process.env.MMO_WS_DEAD_MS; else process.env.MMO_WS_DEAD_MS = prevDead;
+    }
+  }, 30_000);
 });
+
+/** Minimal RFC6455 client: upgrade, then hold the socket without answering pings. */
+function rawUpgrade(port: number, cookie: string): Promise<Socket> {
+  return new Promise((resolve, reject) => {
+    const sock = netConnect(port, '127.0.0.1');
+    const key = randomBytes(16).toString('base64');
+    let upgraded = false;
+    sock.on('connect', () => {
+      sock.write(
+        'GET /mmo HTTP/1.1\r\n' +
+        `Host: 127.0.0.1:${port}\r\n` +
+        'Upgrade: websocket\r\nConnection: Upgrade\r\n' +
+        `Sec-WebSocket-Key: ${key}\r\nSec-WebSocket-Version: 13\r\n` +
+        `Cookie: ${cookie}\r\n\r\n`);
+    });
+    sock.on('data', chunk => {
+      if (upgraded) return; // ignore ping frames — that is the point
+      const text = chunk.toString('latin1');
+      if (text.includes('101')) { upgraded = true; resolve(sock); }
+    });
+    sock.on('error', reject);
+    setTimeout(() => { if (!upgraded) reject(new Error('raw upgrade timed out')); }, 5_000);
+  });
+}

@@ -105,7 +105,19 @@ wss.on('connection', (ws, req) => {
   const connectionVersion = rooms.connectionVersion(id);
   log('connect', { peer: id.slice(0, 8), clients: wss.clients.size });
   let messages = 0;
-  const interval = setInterval(() => { messages = 0; }, 1000);
+  let lastPong = Date.now();
+  let beat = 0;
+  ws.on('pong', () => { lastPong = Date.now(); });
+  const interval = setInterval(() => {
+    messages = 0;
+    // Reap dead sockets: without pings a vanished client would hold its room
+    // seat until TCP gives up (THU-2244 guest-cap leak on /mmo, same here).
+    beat++;
+    if (beat % Math.max(1, Math.round(Number(process.env.WS_PING_MS || 30_000) / 1000)) === 0) {
+      if (Date.now() - lastPong > Number(process.env.WS_DEAD_MS || 75_000)) { ws.terminate(); return; }
+      try { ws.ping(); } catch { ws.terminate(); }
+    }
+  }, 1000);
 
   ws.on('message', (data) => {
     if (++messages > 30) { log('rate-limit', { peer: id.slice(0, 8) }); ws.close(1008, 'Message rate exceeded'); return; }
