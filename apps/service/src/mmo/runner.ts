@@ -508,14 +508,16 @@ export class RegionRunner {
     // Deep replay/catch-up runs hundreds of thousands of ticks; without periodic
     // yields the event loop starves and every DB connect hits its timeout
     // (observed live: /api/mmo/* all crashing while a region replayed ~600k ticks).
-    let sinceYield = 0;
+    // Yield on a wall-clock budget, not a tick count: step cost varies with world
+    // size, and a fixed count still allowed ~1.5s blocks (health checks took 38s).
+    let lastYield = performance.now();
     while (game.tick < tick && guard++ < 4_000_000) {
       const t0 = performance.now();
       game.step();
       this.stats.simMs += performance.now() - t0;
       this.stats.ticksStepped++;
-      if (++sinceYield >= 256) {
-        sinceYield = 0;
+      if (performance.now() - lastYield > 100) {
+        lastYield = performance.now();
         await new Promise(resolve => setImmediate(resolve));
       }
       if (this.epoch !== undefined
