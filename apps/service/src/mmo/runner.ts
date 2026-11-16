@@ -125,6 +125,9 @@ export interface RegionRunnerOptions {
   faultHooks?: {
     afterPlanCommit?: (eventSeq: string) => void | Promise<void>;
     beforeReceipt?: (eventSeq: string) => void | Promise<void>;
+    /** Fires inside the inbound-transfer commit transaction before the state
+     *  transitions — a throw exercises the spawn-rollback path (PW18). */
+    beforeTransferCommit?: (transferId: string) => void | Promise<void>;
   };
   /** Quiescence watchdog. Enabled by default for persistent regions. */
   quiescence?: {
@@ -1277,10 +1280,9 @@ export class RegionRunner {
           // RECOVERY_REQUIRED rows retry through the same commit path — the
           // state machine allows RECOVERY_REQUIRED -> DESTINATION_ACCEPTED.
           if (!fresh || (fresh.state !== 'SOURCE_RELEASED' && fresh.state !== 'RECOVERY_REQUIRED')) { raced = true; return; }
+          await this.opts.faultHooks?.beforeTransferCommit?.(t.transfer_id);
           await transitionTransfer(t.transfer_id, 'DESTINATION_ACCEPTED', tx);
           await transitionTransfer(t.transfer_id, 'COMPLETED', tx);
-          this.bindEntity(t.transfer_id, simId);
-          this.bindEntity(t.entity_id, simId);
           await tx.query(
             `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
              values ($1,$2,$3,'TRANSFER_IN',$4,$5,$6,$7,$8)`,
@@ -1293,6 +1295,12 @@ export class RegionRunner {
             await bumpObjectiveProgress(tx, { playerId: payload.ownerPid, kind: 'transfer_unit' });
           }
         });
+        // Bind durable identities only after the commit lands — a rolled-back
+        // transaction must not leave bindings pointing at an unspawned sim id.
+        if (!raced) {
+          this.bindEntity(t.transfer_id, simId);
+          this.bindEntity(t.entity_id, simId);
+        }
       } catch (error) {
         g.unspawnTransfer(simId);
         // A lost fence must still fail the region; any other per-transfer

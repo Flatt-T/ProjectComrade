@@ -77,11 +77,24 @@ async function worldAction(
 const usedRefs = new Set<string>();
 function edgeUnit(ctx: Ctx, edgeDist = 2): { simId: number; ref: string; e: Entity } {
   const g = ctx.a.runner.currentGame!;
-  const e = [...g.entities.values()]
+  let e = [...g.entities.values()]
     .find(e => e.kind === 'unit' && e.owner === 0 && e.hp > 0 && !e.carriedBy && e.bound === 0
       && !e.packedType && e.order !== 'depart' && g.unitDef(e).transport === undefined
       && !usedRefs.has(mmoEntityId(ctx.a.regionId, e.id)));
-  if (!e) throw new Error('no transferable unit for p0');
+  if (!e) {
+    // Starter roster exhausted by earlier tests — spawn a dedicated unit.
+    const w = g.map.w;
+    let c = -1;
+    outerS: for (let ring = 6; ring <= 12; ring++) {
+      for (let y = ring; y < g.map.h - ring; y++) for (let x = ring; x < w - ring; x++) {
+        const i = y * w + x;
+        if (Math.min(x, w - 1 - x, y, g.map.h - 1 - y) === ring
+            && passable(g.pack, g.map, i, 'vehicle') && !g.map.occupied[i] && !g.unitInCell(i)) { c = i; break outerS; }
+      }
+    }
+    if (c < 0) throw new Error('no spawn cell for dedicated unit');
+    e = g.spawnUnit('lighttank', 0, c);
+  }
   const w = g.map.w, h = g.map.h;
   let spot = -1;
   outer: for (let ring = edgeDist; ring <= edgeDist + 4; ring++) {
@@ -535,6 +548,63 @@ describeDb('mmo region transfer (two live runners)', () => {
     const t = await mmoOne<{ state: string }>(
       'select state from region_transfer where transfer_id = $1', [transferId]);
     expect(t?.state).toBe('CANCELLED');
+  }, IT_TIMEOUT);
+
+  it('rolls back a failed inbound commit — no ghost, no stale binding, retry delivers once', async () => {
+    // THU-2242: the spawn binds durable identities only after the durable
+    // commit lands; a commit failure must leave no entity AND no binding, and
+    // the automatic retry must deliver the manifest exactly once.
+    const { ref } = edgeUnit(ctx);
+    let pendingId: string | null = null;
+    let injected = 0;
+    const runnerAny = ctx.b.runner as unknown as {
+      opts: { faultHooks?: { beforeTransferCommit?: (id: string) => void } };
+    };
+    // Fail every inbound commit for the pending transfer until disarmed — the
+    // drain retries each pass, so several rollback cycles run before we check.
+    runnerAny.opts.faultHooks = {
+      beforeTransferCommit: (id: string) => {
+        if (id === pendingId) {
+          injected++;
+          throw new Error('injected inbound commit failure');
+        }
+      },
+    };
+    try {
+      const made = await worldAction(ctx, ctx.a, p0(), {
+        t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
+      });
+      expect(made.accepted).toBe(true);
+      pendingId = made.transferId as string;
+
+      // Let several drain passes fail, then verify the rollback is clean.
+      await waitFor(() => injected >= 2, 30000);
+      await sleep(150);
+      const gB = ctx.b.runner.currentGame!;
+      // At most one transient spawn may exist mid-commit; nothing may persist
+      // or accumulate across the repeated failed passes.
+      expect([...gB.entities.values()].filter(x => x.durableId === pendingId).length).toBeLessThanOrEqual(1);
+      const bindings = ctx.b.runner.durableBindings();
+      expect(bindings.find(([id]) => id === pendingId)).toBeUndefined();
+      expect(bindings.find(([id]) => id === ref)).toBeUndefined();
+      expect(await transferState(pendingId!)).not.toBe('COMPLETED');
+      // The source TRANSFER_OUT leg commits at depart; the inbound TRANSFER_IN
+      // must not exist while every destination commit is failing.
+      const early = await mmoQuery<{ kind: string }>(
+        `select kind from asset_ledger where operation_id = $1 and kind = 'TRANSFER_IN'`, [pendingId!]);
+      expect(early).toHaveLength(0);
+    } finally {
+      runnerAny.opts.faultHooks = undefined;
+    }
+
+    // Retry path delivers the same transfer exactly once.
+    await waitFor(async () => (await transferState(pendingId!)) === 'COMPLETED', 30000);
+    const gB = ctx.b.runner.currentGame!;
+    const copies = [...gB.entities.values()].filter(x => x.durableId === pendingId);
+    expect(copies).toHaveLength(1);
+    const ledger = await mmoQuery<{ kind: string }>(
+      'select kind from asset_ledger where operation_id = $1 order by kind', [pendingId!]);
+    expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN', 'TRANSFER_OUT']);
   }, IT_TIMEOUT);
 
   it('moves a packed-building carrier across regions and redeploys it', async () => {
