@@ -512,8 +512,8 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
       primary key (player_id, channel)
     );
 
-    -- Web-push subscriptions (PW25 placeholder transport: stored now, sender
-    -- lands when VAPID credentials are provisioned).
+    -- Web-push subscriptions (PW25: sent via VAPID when COMRADE_VAPID_* is
+    -- configured; rows are inert until then).
     create table push_subscription (
       subscription_id uuid primary key,
       player_id        uuid not null references player(player_id),

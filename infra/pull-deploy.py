@@ -49,9 +49,11 @@ def deploy_env(image):
         # Persistent world (PW27 beta): the isolated MMO database and its pool bounds.
         'MMO_DATABASE_URL', 'MMO_DATABASE_SSL_VERIFY', 'MMO_DATABASE_POOL_MAX', 'MMO_ALLOW_GUESTS',
         # Notification email (PW25): SES via SigV4; inert until COMRADE_SES_FROM
-        # and AWS credentials are set. Web push needs no server secret.
+        # and AWS credentials are set. Web Push (THU-2451) is inert until the
+        # VAPID key pair is set; the private key is a server secret.
         'COMRADE_SES_REGION', 'COMRADE_SES_FROM', 'COMRADE_SES_FROM_NAME',
         'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY',
+        'COMRADE_VAPID_PUBLIC_KEY', 'COMRADE_VAPID_PRIVATE_KEY', 'COMRADE_VAPID_SUBJECT',
     }
     # `service.env` is the current name; `ops.env` is still read so an existing host keeps working.
     for name in ('ops.env', 'service.env'):
