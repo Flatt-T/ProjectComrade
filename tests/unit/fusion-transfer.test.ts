@@ -4,7 +4,7 @@
 // identity, cargo nesting and owner-by-pid resolution.
 import { describe, expect, it } from 'vitest';
 import {
-  CLASSIC_PACKS, Game, captureGame, passable, restoreGame,
+  CLASSIC_PACKS, Game, captureGame, isWater, passable, restoreGame,
   type Entity, type GameSetup, type MmoTuning,
 } from '../../packages/fusion/src/index';
 
@@ -198,5 +198,136 @@ describe('PW18 depart + manifest', () => {
     dst.unspawnTransfer(id);
     expect(dst.entities.has(id)).toBe(false);
     expect(dst.salvageEvents.filter(e => e.kind === 'spawn')).toHaveLength(0);
+  });
+});
+
+describe('PW18/THU-2242 spawn-cell search', () => {
+  const GARDENS = 'td-tiberium-gardens';
+  const gardenSetup = (pids = [PID_A]): GameSetup => ({
+    pack: PACK, mapId: GARDENS, seed: 11, persistent: true, mmo: TUNING,
+    players: pids.map((pid, i) => ({
+      name: `P${i}`, faction: PACK.factions[i % PACK.factions.length].id, ai: false,
+      playerId: pid,
+    })),
+  });
+  const cheb = (a: number, b: number, w: number) =>
+    Math.max(Math.abs((a % w) - (b % w)), Math.abs(Math.floor(a / w) - Math.floor(b / w)));
+
+  it('falls through to the 9–40 cell ring when the near field is full', () => {
+    const dst = new Game(gardenSetup());
+    const w = dst.map.w;
+    // Origin: an open vehicle cell near the map centre.
+    let origin = -1;
+    for (let y = dst.map.h >> 1; y < dst.map.h; y++) {
+      for (let x = dst.map.w >> 1; x < dst.map.w; x++) {
+        const i = y * w + x;
+        if (passable(PACK, dst.map, i, 'vehicle') && !dst.map.occupied[i] && !dst.unitInCell(i)) { origin = i; break; }
+      }
+      if (origin >= 0) break;
+    }
+    expect(origin).toBeGreaterThanOrEqual(0);
+    // Saturate every passable cell within Chebyshev radius 8 — including the
+    // origin — so the inner search cannot succeed.
+    const ox = origin % w, oy = Math.floor(origin / w);
+    for (let dy = -8; dy <= 8; dy++) for (let dx = -8; dx <= 8; dx++) {
+      const x = ox + dx, y = oy + dy;
+      if (x < 0 || y < 0 || x >= w || y >= dst.map.h) continue;
+      const i = y * w + x;
+      if (passable(PACK, dst.map, i, 'vehicle') && !dst.map.occupied[i] && !dst.unitInCell(i)) {
+        dst.spawnUnit('commando', 0, i);
+      }
+    }
+    // Sanity: the origin itself is now blocked.
+    expect(dst.unitInCell(origin)).toBeDefined();
+    // A lawful cell must exist in the 9–40 ring (open map, radius 40 reaches
+    // well past the saturated disc).
+    const src = new Game(setup([PID_A]));
+    const m = src.transferManifest(src.spawnUnit('lighttank', 0, landNear(src)));
+    const id = dst.spawnTransfer(m, origin, 'tid-far');
+    expect(id).not.toBeNull();
+    const e = dst.entities.get(id!)!;
+    // The spawn MUST land outside the saturated disc — proof the wider search ran.
+    expect(cheb(dst.cellOf(e), origin, w)).toBeGreaterThan(8);
+    expect(e.durableId).toBe('tid-far');
+  });
+
+  it('refuses a naval manifest when no water exists in range (truly blocked)', () => {
+    const dst = new Game(gardenSetup());
+    const src = new Game(setup([PID_A]));
+    // td-tiberium-gardens has zero water cells (verified: 80x80, 0 water).
+    const boat = src.spawnUnit('gunboat', 0, landNear(src));
+    const m = src.transferManifest(boat);
+    expect(m.type).toBe('gunboat');
+    const before = dst.entities.size;
+    for (const cell of [landNear(dst), landNear(dst, 'se'), (dst.map.h >> 1) * dst.map.w + (dst.map.w >> 1)]) {
+      expect(dst.spawnTransfer(JSON.parse(JSON.stringify(m)), cell)).toBeNull();
+    }
+    expect(dst.entities.size).toBe(before);
+  });
+
+  it('lands a ground manifest on a bank when the requested cell is water', () => {
+    const dst = new Game({ ...gardenSetup(), mapId: 'td-landing' });
+    const src = new Game(setup([PID_A]));
+    const m = src.transferManifest(src.spawnUnit('lighttank', 0, landNear(src)));
+    // td-landing: vertical water channel around x=28..43 — request mid-channel.
+    const w = dst.map.w, waterCell = 32 * w + 35;
+    expect(isWater(PACK, dst.map, waterCell)).toBe(true);
+    const id = dst.spawnTransfer(m, waterCell, 'tid-bank');
+    expect(id).not.toBeNull();
+    const e = dst.entities.get(id!)!;
+    const ec = dst.cellOf(e);
+    expect(isWater(PACK, dst.map, ec)).toBe(false);
+    expect(cheb(ec, waterCell, w)).toBeLessThanOrEqual(40);
+  });
+});
+
+describe('PW18/THU-2242 order preservation across transfer', () => {
+  it('restores a move order with a fresh path on the same map', () => {
+    const src = new Game(setup([PID_A]));
+    const u = src.spawnUnit('lighttank', 0, landNear(src));
+    const goal = landNear(src, 'se');
+    src.enqueue(0, { t: 'move', ids: [u.id], x: goal % src.map.w, y: Math.floor(goal / src.map.w) });
+    src.step();
+    expect(u.order).toBe('move');
+    const m = src.transferManifest(u);
+    expect(m.order).toBe('move');
+    expect(m.goalCell).toBe(u.goal);
+    expect(m.packId).toBe(PACK.id);
+    expect(m.mapId).toBe(MAP);
+
+    const dst = new Game(setup([PID_A]));
+    const id = dst.spawnTransfer(m, landNear(dst))!;
+    const e = dst.entities.get(id)!;
+    expect(e.order).toBe('move');
+    expect(e.goal).toBe(m.goalCell);
+    // The destination recomputes the route — the source path is not carried.
+    expect(e.path.length).toBeGreaterThan(0);
+  });
+
+  it('resolves entity-bound orders to idle at the destination', () => {
+    const src = new Game(setup([PID_A]));
+    const u = src.spawnUnit('lighttank', 0, landNear(src));
+    u.order = 'attack'; u.target = 424242;
+    const m = src.transferManifest(u);
+    expect(m.order).toBe('attack');
+    const dst = new Game(setup([PID_A]));
+    const id = dst.spawnTransfer(m, landNear(dst))!;
+    const e = dst.entities.get(id)!;
+    expect(e.order).toBe('idle');
+    expect(e.target).toBe(0);
+  });
+
+  it('does not restore position orders when the destination map differs', () => {
+    const src = new Game(setup([PID_A]));
+    const u = src.spawnUnit('lighttank', 0, landNear(src));
+    const goal = landNear(src, 'se');
+    src.enqueue(0, { t: 'move', ids: [u.id], x: goal % src.map.w, y: Math.floor(goal / src.map.w) });
+    src.step();
+    const m = src.transferManifest(u);
+    expect(m.order).toBe('move');
+    // Same pack, different map — cell coordinates are meaningless there.
+    const dst = new Game({ ...setup([PID_A]), mapId: 'td-river-crossing' });
+    const id = dst.spawnTransfer(m, landNear(dst))!;
+    expect(dst.entities.get(id)!.order).toBe('idle');
   });
 });
