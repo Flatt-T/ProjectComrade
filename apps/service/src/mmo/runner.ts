@@ -125,6 +125,9 @@ export interface RegionRunnerOptions {
   faultHooks?: {
     afterPlanCommit?: (eventSeq: string) => void | Promise<void>;
     beforeReceipt?: (eventSeq: string) => void | Promise<void>;
+    /** Fires inside the inbound-transfer commit transaction before the state
+     *  transitions — a throw exercises the spawn-rollback path (PW18). */
+    beforeTransferCommit?: (transferId: string) => void | Promise<void>;
   };
   /** Quiescence watchdog. Enabled by default for persistent regions. */
   quiescence?: {
@@ -1067,9 +1070,29 @@ export class RegionRunner {
     }
     for (const t of await preparedTransfers(this.opts.regionId)) {
       const simId = Number((t.payload as { simId?: unknown }).simId);
-      if (!Number.isFinite(simId) || g.entities.has(simId)) continue;
+      if (!Number.isFinite(simId)) {
+        await transitionTransfer(t.transfer_id, 'CANCELLED').catch(() => undefined);
+        continue;
+      }
+      if (g.entities.has(simId)) continue;
       const manifest = (t.payload as { manifest?: TransferManifestEntry }).manifest;
       if (!manifest) {
+        await transitionTransfer(t.transfer_id, 'CANCELLED').catch(() => undefined);
+        continue;
+      }
+      // THU-2242: a gone entity is ambiguous — it either departed and the drain
+      // was interrupted (release is correct) or it was destroyed during the
+      // depart walk (release would deliver a ghost). Deaths are audited as
+      // DESTROY ledger rows keyed by engine_entity_key = sim id; a DESTROY
+      // committed after the transfer row means the asset no longer exists.
+      const died = await mmoOne<{ x: number }>(
+        `select 1 as x from asset_ledger l
+           join economy_operation o on o.operation_id = l.operation_id
+          where l.region_id = $1 and l.engine_entity_key = $2 and l.kind = 'DESTROY'
+            and o.committed_at > (select created_at from region_transfer where transfer_id = $3)
+          limit 1`,
+        [this.opts.regionId, String(simId), t.transfer_id]);
+      if (died) {
         await transitionTransfer(t.transfer_id, 'CANCELLED').catch(() => undefined);
         continue;
       }
@@ -1257,10 +1280,9 @@ export class RegionRunner {
           // RECOVERY_REQUIRED rows retry through the same commit path — the
           // state machine allows RECOVERY_REQUIRED -> DESTINATION_ACCEPTED.
           if (!fresh || (fresh.state !== 'SOURCE_RELEASED' && fresh.state !== 'RECOVERY_REQUIRED')) { raced = true; return; }
+          await this.opts.faultHooks?.beforeTransferCommit?.(t.transfer_id);
           await transitionTransfer(t.transfer_id, 'DESTINATION_ACCEPTED', tx);
           await transitionTransfer(t.transfer_id, 'COMPLETED', tx);
-          this.bindEntity(t.transfer_id, simId);
-          this.bindEntity(t.entity_id, simId);
           await tx.query(
             `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
              values ($1,$2,$3,'TRANSFER_IN',$4,$5,$6,$7,$8)`,
@@ -1273,6 +1295,12 @@ export class RegionRunner {
             await bumpObjectiveProgress(tx, { playerId: payload.ownerPid, kind: 'transfer_unit' });
           }
         });
+        // Bind durable identities only after the commit lands — a rolled-back
+        // transaction must not leave bindings pointing at an unspawned sim id.
+        if (!raced) {
+          this.bindEntity(t.transfer_id, simId);
+          this.bindEntity(t.entity_id, simId);
+        }
       } catch (error) {
         g.unspawnTransfer(simId);
         // A lost fence must still fail the region; any other per-transfer

@@ -14,7 +14,7 @@ import { submitCommand, journalTail } from '../../apps/service/src/mmo/commands.
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { createWorldHandler } from '../../apps/service/src/mmo/world.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
-import { PACKS, LEPTONS, passable, type Entity } from '../../packages/fusion/src/index.js';
+import { PACKS, LEPTONS, buildableTerrain, passable, type Entity } from '../../packages/fusion/src/index.js';
 import { PERSISTENT_RULES_V1, MMO_PROTOCOL, mmoEntityId, type MmoCommandMessage, type MmoWorldAction } from '../../packages/contracts/src/index.js';
 
 const DB_URL = process.env.MMO_TEST_DATABASE_URL;
@@ -77,11 +77,24 @@ async function worldAction(
 const usedRefs = new Set<string>();
 function edgeUnit(ctx: Ctx, edgeDist = 2): { simId: number; ref: string; e: Entity } {
   const g = ctx.a.runner.currentGame!;
-  const e = [...g.entities.values()]
+  let e = [...g.entities.values()]
     .find(e => e.kind === 'unit' && e.owner === 0 && e.hp > 0 && !e.carriedBy && e.bound === 0
       && !e.packedType && e.order !== 'depart' && g.unitDef(e).transport === undefined
       && !usedRefs.has(mmoEntityId(ctx.a.regionId, e.id)));
-  if (!e) throw new Error('no transferable unit for p0');
+  if (!e) {
+    // Starter roster exhausted by earlier tests — spawn a dedicated unit.
+    const w = g.map.w;
+    let c = -1;
+    outerS: for (let ring = 6; ring <= 12; ring++) {
+      for (let y = ring; y < g.map.h - ring; y++) for (let x = ring; x < w - ring; x++) {
+        const i = y * w + x;
+        if (Math.min(x, w - 1 - x, y, g.map.h - 1 - y) === ring
+            && passable(g.pack, g.map, i, 'vehicle') && !g.map.occupied[i] && !g.unitInCell(i)) { c = i; break outerS; }
+      }
+    }
+    if (c < 0) throw new Error('no spawn cell for dedicated unit');
+    e = g.spawnUnit('lighttank', 0, c);
+  }
   const w = g.map.w, h = g.map.h;
   let spot = -1;
   outer: for (let ring = edgeDist; ring <= edgeDist + 4; ring++) {
@@ -470,5 +483,259 @@ describeDb('mmo region transfer (two live runners)', () => {
     const ledger = await mmoQuery<{ kind: string }>(
       'select kind from asset_ledger where operation_id = $1 order by kind', [transferId]);
     expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN', 'TRANSFER_OUT']);
+  }, IT_TIMEOUT);
+
+  it('cancels a transfer whose unit is destroyed during the depart walk — no ghost arrives', async () => {
+    // THU-2242: PREPARED + missing entity is ambiguous (departed vs destroyed).
+    // The sweep must release only when no DESTROY audit post-dates the transfer
+    // row; a death during the walk cancels instead of delivering a ghost.
+    // Deterministic version: stop the depart order, remove the entity, and
+    // write the same DESTROY audit a real kill produces.
+    // Dedicated combatant — earlier tests consume the p0 starter roster.
+    const g0 = ctx.a.runner.currentGame!;
+    const w0 = g0.map.w;
+    let spot0 = -1;
+    outer0: for (let ring = 6; ring <= 10; ring++) {
+      for (let y = ring; y < g0.map.h - ring; y++) for (let x = ring; x < w0 - ring; x++) {
+        const i = y * w0 + x;
+        if (Math.min(x, w0 - 1 - x, y, g0.map.h - 1 - y) === ring
+            && passable(g0.pack, g0.map, i, 'vehicle') && !g0.map.occupied[i]) { spot0 = i; break outer0; }
+      }
+    }
+    if (spot0 < 0) throw new Error('no spawn cell');
+    const spawned = g0.spawnUnit('lighttank', 0, spot0);
+    spawned.order = 'idle'; spawned.path = []; spawned.target = 0;
+    const simId = spawned.id;
+    const ref = mmoEntityId(ctx.a.regionId, simId);
+    const e = spawned;
+    // Flag the unit as drone-controlled: the depart command skips such units,
+    // so the PREPARED row persists while we stage the death — no walk race.
+    e.drone = 999;
+    const made = await worldAction(ctx, ctx.a, p0(), {
+      t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
+    });
+    expect(made.accepted).toBe(true);
+    const transferId = made.transferId as string;
+    const g = ctx.a.runner.currentGame!;
+    const live = g.entities.get(simId)!;
+    live.drone = 0;
+    // Same audit drainSalvageEvents writes for a real kill: SALVAGE_SPAWN op
+    // plus a DESTROY ledger row keyed by the sim id.
+    const opId = randomUUID();
+    await mmoQuery(
+      `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+       values ($1,$2,$3,0,'SALVAGE_SPAWN',$4,$5)`,
+      [opId, ctx.a.regionId, ctx.a.runner.authorityEpoch!,
+       JSON.stringify({ kind: 'SALVAGE_SPAWN', regionId: ctx.a.regionId, x: 0, y: 0, credits: '0' }),
+       JSON.stringify({ simId, victimOwner: 0, killerOwner: 1, victimType: live.type, victimKind: 'unit' })]);
+    await mmoQuery(
+      `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+       values ($1,$2,$3,'DESTROY',$4,null,'destroyed',$5,$6)`,
+      [opId, ref, ctx.a.regionId, p0(), String(simId),
+       JSON.stringify({ killerPlayerId: p1(), type: live.type, simKind: 'unit' })]);
+    // The entity is gone (killed) — the next depart sweep must cancel, not release.
+    g.entities.delete(simId);
+    await waitFor(async () => {
+      const row = await mmoOne<{ state: string }>(
+        'select state from region_transfer where transfer_id = $1', [transferId]);
+      return row?.state === 'CANCELLED';
+    }, 20000);
+    // No copy materializes at the destination.
+    await sleep(500);
+    const ghosts = [...ctx.b.runner.currentGame!.entities.values()]
+      .filter(x => x.durableId === transferId || x.durableId === ref);
+    expect(ghosts).toHaveLength(0);
+    const t = await mmoOne<{ state: string }>(
+      'select state from region_transfer where transfer_id = $1', [transferId]);
+    expect(t?.state).toBe('CANCELLED');
+  }, IT_TIMEOUT);
+
+  it('chains an onward transfer A→B→A with one identity and both ledger legs', async () => {
+    const { ref } = edgeUnit(ctx);
+    const made = await worldAction(ctx, ctx.a, p0(), {
+      t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
+    });
+    const t1 = made.transferId as string;
+    await waitFor(async () => (await transferState(t1)) === 'COMPLETED', 30000);
+
+    // Park the arrived unit beside B's edge so the return depart walk is short.
+    const gB = ctx.b.runner.currentGame!;
+    const arrived = [...gB.entities.values()].find(x => x.durableId === t1);
+    expect(arrived).toBeTruthy();
+    const w = gB.map.w, h = gB.map.h;
+    let spot = -1;
+    outer: for (let ring = 2; ring <= 6; ring++) {
+      for (let y = ring; y < h - ring; y++) for (let x = ring; x < w - ring; x++) {
+        const i = y * w + x;
+        if (Math.min(x, w - 1 - x, y, h - 1 - y) === ring
+            && passable(gB.pack, gB.map, i, 'vehicle') && !gB.map.occupied[i] && !gB.unitInCell(i)) { spot = i; break outer; }
+      }
+    }
+    if (spot < 0) throw new Error('no B edge cell');
+    arrived!.x = (spot % w) * LEPTONS + LEPTONS / 2;
+    arrived!.y = Math.floor(spot / w) * LEPTONS + LEPTONS / 2;
+    arrived!.order = 'idle'; arrived!.path = []; arrived!.target = 0;
+
+    const back = await worldAction(ctx, ctx.b, p0(), {
+      t: 'regionTransfer', entityId: ref, destRegionId: ctx.a.regionId,
+    });
+    expect(back.accepted).toBe(true);
+    const t2 = back.transferId as string;
+    await waitFor(async () => (await transferState(t2)) === 'COMPLETED', 30000);
+
+    // Exactly one live copy, back in A; B holds none.
+    const gA = ctx.a.runner.currentGame!;
+    expect([...gA.entities.values()].filter(x => x.durableId === t2)).toHaveLength(1);
+    expect([...gB.entities.values()].filter(x => x.durableId === t1 || x.durableId === t2)).toHaveLength(0);
+    for (const tid of [t1, t2]) {
+      const ledger = await mmoQuery<{ kind: string; region_id: string }>(
+        'select kind, region_id from asset_ledger where operation_id = $1 order by kind', [tid]);
+      expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN', 'TRANSFER_OUT']);
+    }
+  }, IT_TIMEOUT);
+
+  it('rolls back a failed inbound commit — no ghost, no stale binding, retry delivers once', async () => {
+    // THU-2242: the spawn binds durable identities only after the durable
+    // commit lands; a commit failure must leave no entity AND no binding, and
+    // the automatic retry must deliver the manifest exactly once.
+    const { ref } = edgeUnit(ctx);
+    let pendingId: string | null = null;
+    let injected = 0;
+    const runnerAny = ctx.b.runner as unknown as {
+      opts: { faultHooks?: { beforeTransferCommit?: (id: string) => void } };
+    };
+    // Fail every inbound commit for the pending transfer until disarmed — the
+    // drain retries each pass, so several rollback cycles run before we check.
+    runnerAny.opts.faultHooks = {
+      beforeTransferCommit: (id: string) => {
+        if (id === pendingId) {
+          injected++;
+          throw new Error('injected inbound commit failure');
+        }
+      },
+    };
+    try {
+      const made = await worldAction(ctx, ctx.a, p0(), {
+        t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
+      });
+      expect(made.accepted).toBe(true);
+      pendingId = made.transferId as string;
+
+      // Let several drain passes fail, then verify the rollback is clean.
+      await waitFor(() => injected >= 2, 30000);
+      await sleep(150);
+      const gB = ctx.b.runner.currentGame!;
+      // At most one transient spawn may exist mid-commit; nothing may persist
+      // or accumulate across the repeated failed passes.
+      expect([...gB.entities.values()].filter(x => x.durableId === pendingId).length).toBeLessThanOrEqual(1);
+      const bindings = ctx.b.runner.durableBindings();
+      expect(bindings.find(([id]) => id === pendingId)).toBeUndefined();
+      expect(bindings.find(([id]) => id === ref)).toBeUndefined();
+      expect(await transferState(pendingId!)).not.toBe('COMPLETED');
+      // The source TRANSFER_OUT leg commits at depart; the inbound TRANSFER_IN
+      // must not exist while every destination commit is failing.
+      const early = await mmoQuery<{ kind: string }>(
+        `select kind from asset_ledger where operation_id = $1 and kind = 'TRANSFER_IN'`, [pendingId!]);
+      expect(early).toHaveLength(0);
+    } finally {
+      runnerAny.opts.faultHooks = undefined;
+    }
+
+    // Retry path delivers the same transfer exactly once.
+    await waitFor(async () => (await transferState(pendingId!)) === 'COMPLETED', 30000);
+    const gB = ctx.b.runner.currentGame!;
+    const copies = [...gB.entities.values()].filter(x => x.durableId === pendingId);
+    expect(copies).toHaveLength(1);
+    const ledger = await mmoQuery<{ kind: string }>(
+      'select kind from asset_ledger where operation_id = $1 order by kind', [pendingId!]);
+    expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN', 'TRANSFER_OUT']);
+  }, IT_TIMEOUT);
+
+  it('moves a packed-building carrier across regions and redeploys it', async () => {
+    // THU-2242: the packed carrier is a unit with packedType — it must cross
+    // with the packed structure identity intact and unpack at the destination.
+    const g = ctx.a.runner.currentGame!;
+    const sdef = g.pack.structures['pyle'];
+    if (!sdef) throw new Error('fixture pack has no pyle');
+    // Free footprint for the structure.
+    let site = { x: -1, y: -1 };
+    outerS: for (let cy = 2; cy < g.map.h - sdef.h - 2; cy++) {
+      for (let cx = 2; cx < g.map.w - sdef.w - 2; cx++) {
+        let ok = true;
+        for (let y = cy; y < cy + sdef.h && ok; y++) for (let x = cx; x < cx + sdef.w && ok; x++) {
+          const i = y * g.map.w + x;
+          if (g.map.occupied[i] || !buildableTerrain(g.pack, g.map, i)) ok = false;
+        }
+        if (ok) { site = { x: cx, y: cy }; break outerS; }
+      }
+    }
+    if (site.x < 0) throw new Error('no site for pyle');
+    const s = g.spawnStructure('pyle', 0, site.x, site.y);
+    const ref = mmoEntityId(ctx.a.regionId, s.id);
+    const packed = await worldAction(ctx, ctx.a, p0(), { t: 'pack', entityId: ref });
+    expect(packed.accepted).toBe(true);
+    await waitFor(() => {
+      const e = g.entities.get(s.id);
+      return e?.kind === 'unit' && e.packedType === 'pyle';
+    });
+    const carrier = g.entities.get(s.id)!;
+    const hpBefore = carrier.hp;
+    // Park the carrier near a map edge for a short depart walk.
+    const w = g.map.w;
+    let cspot = -1;
+    outerC: for (let ring = 4; ring <= 8; ring++) {
+      for (let y = ring; y < g.map.h - ring; y++) for (let x = ring; x < w - ring; x++) {
+        const i = y * w + x;
+        if (Math.min(x, w - 1 - x, y, g.map.h - 1 - y) === ring
+            && passable(g.pack, g.map, i, 'vehicle') && !g.map.occupied[i] && !g.unitInCell(i)) { cspot = i; break outerC; }
+      }
+    }
+    if (cspot < 0) throw new Error('no carrier edge cell');
+    carrier.x = (cspot % w) * LEPTONS + LEPTONS / 2;
+    carrier.y = Math.floor(cspot / w) * LEPTONS + LEPTONS / 2;
+    carrier.order = 'idle'; carrier.path = []; carrier.target = 0;
+
+    const made = await worldAction(ctx, ctx.a, p0(), {
+      t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
+    });
+    expect(made.accepted).toBe(true);
+    const transferId = made.transferId as string;
+    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+
+    // Destination: exactly one carrier, packed identity and hp preserved.
+    const gB = ctx.b.runner.currentGame!;
+    const copies = [...gB.entities.values()]
+      .filter(x => x.durableId === transferId || x.durableId === ref);
+    expect(copies).toHaveLength(1);
+    const arrived = copies[0];
+    expect(arrived.kind).toBe('unit');
+    expect(arrived.packedType).toBe('pyle');
+    expect(arrived.type).toBe('pack_pyle');
+    expect(arrived.hp).toBe(hpBefore);
+    // Source holds no copy.
+    expect([...g.entities.values()].filter(x => x.durableId === ref)).toHaveLength(0);
+
+    // Redeploy at the destination: park beside a free footprint and unpack.
+    const dSite = { x: -1, y: -1 };
+    outerD: for (let cy = 2; cy < gB.map.h - sdef.h - 2; cy++) {
+      for (let cx = 2; cx < gB.map.w - sdef.w - 2; cx++) {
+        let ok = true;
+        for (let y = cy; y < cy + sdef.h && ok; y++) for (let x = cx; x < cx + sdef.w && ok; x++) {
+          const i = y * gB.map.w + x;
+          if (gB.map.occupied[i] || !buildableTerrain(gB.pack, gB.map, i)) ok = false;
+        }
+        if (ok) { dSite.x = cx; dSite.y = cy; break outerD; }
+      }
+    }
+    if (dSite.x < 0) throw new Error('no destination site');
+    arrived.x = (dSite.x + 1) * LEPTONS; arrived.y = (dSite.y + 1) * LEPTONS;
+    const unpacked = await worldAction(ctx, ctx.b, p0(), {
+      t: 'unpack', entityId: ref, x: dSite.x, y: dSite.y,
+    });
+    expect(unpacked.accepted).toBe(true);
+    await waitFor(() => {
+      const e = gB.entities.get(arrived.id);
+      return e?.kind === 'structure' && e.type === 'pyle' && e.packedType === '';
+    });
   }, IT_TIMEOUT);
 });
