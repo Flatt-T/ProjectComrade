@@ -357,4 +357,30 @@ describeDb('mmo notifications + away report (real PostgreSQL + runner + Fusion s
     const times = report.entries.map(e => e.at);
     expect([...times].sort()).toEqual(times);
   }, 30_000);
+
+  it('durable-derived away entries carry a journal head pointer at change time', async () => {
+    const playerId = p0().playerId;
+    const wentOffline = Date.now();
+    await playerConnected(playerId, wentOffline - 60_000);
+    await playerDisconnected(playerId, wentOffline);
+
+    // A compound destroyed "while away" — durable state with no notification row.
+    const compoundId = randomUUID();
+    await mmoQuery(
+      `insert into compound (compound_id, player_id, region_id, state)
+       values ($1,$2,$3,'destroyed')`, [compoundId, playerId, ctx.fx.regionId]);
+    const destroyed = await mmoOne<{ updated_at: string }>(
+      'select updated_at::text from compound where compound_id = $1', [compoundId]);
+    const expectedHead = await mmoOne<{ max: string }>(
+      `select max(event_seq)::text as max from region_event
+        where region_id = $1 and created_at <= $2::timestamptz`,
+      [ctx.fx.regionId, destroyed!.updated_at]);
+
+    const report = await awayReportFor(playerId);
+    const entry = report.entries.find(e => e.kind === 'compound_destroyed');
+    expect(entry).toBeTruthy();
+    expect(entry!.regionId).toBe(ctx.fx.regionId);
+    expect(entry!.eventSeq).toBe(expectedHead!.max);
+    expect(entry!.notificationId).toBeNull();
+  }, 30_000);
 });
