@@ -217,6 +217,17 @@ export async function awayReportFor(playerId: string): Promise<MmoAwayReport> {
       n.region_id, n.journal_seq, n.notification_id);
   }
 
+  // Durable-derived entries (recovery episodes, destroyed compounds) carry no
+  // notification row, so resolve their journal pointer as the region's journal
+  // head at the moment the durable change landed — the position a client
+  // replays to verify the entry against the sim.
+  const journalHeadAt = async (regionId: string, at: string): Promise<string | null> => {
+    const row = await mmoOne<{ event_seq: string }>(
+      `select max(event_seq)::text as event_seq from region_event
+        where region_id = $1 and created_at <= $2::timestamptz`, [regionId, at]);
+    return row?.event_seq ?? null;
+  };
+
   const episodes = await mmoQuery<{
     episode_id: string; region_id: string; status: string; created_at: string; ended_at: string | null;
   }>(
@@ -226,10 +237,10 @@ export async function awayReportFor(playerId: string): Promise<MmoAwayReport> {
       order by created_at`, [playerId, since]);
   for (const e of episodes) {
     push(e.created_at, 'recovery', `Recovery episode opened (${e.status})`,
-      e.region_id, null, null);
+      e.region_id, await journalHeadAt(e.region_id, e.created_at), null);
     if (e.ended_at && e.ended_at >= since) {
       push(e.ended_at, 'recovery', `Recovery episode ${e.status}`,
-        e.region_id, null, null);
+        e.region_id, await journalHeadAt(e.region_id, e.ended_at), null);
     }
   }
 
@@ -238,7 +249,8 @@ export async function awayReportFor(playerId: string): Promise<MmoAwayReport> {
       where player_id = $1 and state = 'destroyed' and updated_at >= $2::timestamptz`,
     [playerId, since]);
   for (const c of compounds) {
-    push(c.updated_at, 'compound_destroyed', 'A compound was destroyed', c.region_id, null, null);
+    push(c.updated_at, 'compound_destroyed', 'A compound was destroyed', c.region_id,
+      await journalHeadAt(c.region_id, c.updated_at), null);
   }
 
   entries.sort((a, b) => a.at.localeCompare(b.at));
