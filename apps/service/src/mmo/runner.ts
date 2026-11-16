@@ -520,10 +520,18 @@ export class RegionRunner {
       }
       if (this.epoch !== undefined
         && performance.now() - lastBeat > this.opts.leaseMs * 0.4) {
-        await acquireRegionLease({
-          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
-        });
-        lastBeat = performance.now();
+        try {
+          await acquireRegionLease({
+            regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
+          });
+          lastBeat = performance.now();
+        } catch (error) {
+          // A transient pool/connect failure must not kill a multi-hour replay:
+          // leave lastBeat stale so the next check retries almost immediately.
+          // LEASE_HELD means a real takeover — that stays fatal.
+          if (error instanceof MmoStoreError && error.code === 'LEASE_HELD') throw error;
+          this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
+        }
       }
     }
     if (game.tick < tick) this.opts.log('advance-capped', { tick, reached: game.tick });
