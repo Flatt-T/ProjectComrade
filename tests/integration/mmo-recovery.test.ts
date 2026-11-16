@@ -73,7 +73,7 @@ async function worldAction(
 interface LiveEntity {
   id: number; type: string; kind: string; owner: number; hp: number;
   bound?: number; recoveryProtected?: boolean; carriedBy?: number;
-  x: number; y: number;
+  packedType?: string; x: number; y: number;
 }
 interface LiveGame {
   map: { w: number; h: number; occupied: ArrayLike<number> };
@@ -445,4 +445,100 @@ describeDb('mmo recovery (real PostgreSQL + runner + Fusion sim)', () => {
     await resetPlayer(p0id, 0);
     await resetPlayer(p1id, 1);
   });
+
+  // THU-2236: PACK and BARTER preserve assets — they must not run the
+  // sale-recovery handler. A packed building carrier is still a qualifying
+  // anchor (the player has not lost everything), so no episode may open.
+  it('a packed building carrier anchors the player — packing is not a sale', async () => {
+    const g = live(ctx);
+    const p0id = p0().playerId, p1id = p1().playerId;
+    const resetPlayer = async (pid: string, slot: number) => {
+      wipeSlot(ctx, slot);
+      await sleep(800);
+      wipeSlot(ctx, slot);
+      await mmoQuery(`update compound set state = 'destroyed' where player_id = $1 and state <> 'destroyed'`, [pid]);
+      await mmoQuery(
+        `delete from protection_record where compound_id in
+           (select episode_id from recovery_episode where player_id = $1)`, [pid]);
+      await mmoQuery(`delete from recovery_episode where player_id = $1`, [pid]);
+      await sleep(300);
+      wipeSlot(ctx, slot);
+    };
+    await resetPlayer(p0id, 0);
+    await resetPlayer(p1id, 1);
+
+    // p0 holds ONLY a packed carrier — the deliberate-pack case. p1 holds
+    // nothing and must still qualify, proving the eval actually ran.
+    const carrier = g.spawnUnit('humvee', 0, g.cellIndex(30, 30));
+    carrier.packedType = 'fact';
+    await pokeRecovery(ctx);
+    const activeEpisode = (pid: string) => mmoOne<{ x: number }>(
+      `select 1 as x from recovery_episode where player_id = $1 and status = 'active'`, [pid]);
+    await waitFor(async () => !!(await activeEpisode(p1id)), 20_000);
+    await sleep(1_000); // a second eval pass must not wrongly grant p0 either
+    expect(await activeEpisode(p0id)).toBeUndefined();
+    // The packed carrier is published as an anchor in the world roster.
+    await waitFor(async () => {
+      const r = await mmoOne<{ asset_roster: Record<string, { p?: number }> }>(
+        'select asset_roster from region where region_id = $1', [ctx.fx.regionId]);
+      return (r?.asset_roster?.[p0id]?.p ?? 0) >= 1;
+    }, 15_000);
+    // No bound recovery MCV was granted to the packing player.
+    expect([...g.entities.values()].filter(e => e.owner === 0 && e.kind === 'unit' && e.bound === 2 && e.hp > 0)).toHaveLength(0);
+
+    g.entities.delete(carrier.id);
+    await resetPlayer(p0id, 0);
+    await resetPlayer(p1id, 1);
+  }, 90_000);
+
+  // THU-2236: restart idempotency — replaying the journal after a runner
+  // restart must not duplicate the episode or the bound recovery MCV.
+  it('a runner restart preserves exactly one recovery episode and one MCV', async () => {
+    const g = live(ctx);
+    const p1id = p1().playerId;
+    // p1 qualifies again: wipe everything, evaluate, wait for the grant.
+    wipeSlot(ctx, 1);
+    await sleep(800);
+    wipeSlot(ctx, 1);
+    await mmoQuery(`update compound set state = 'destroyed' where player_id = $1 and state <> 'destroyed'`, [p1id]);
+    await mmoQuery(
+      `delete from protection_record where compound_id in
+         (select episode_id from recovery_episode where player_id = $1)`, [p1id]);
+    await mmoQuery(`delete from recovery_episode where player_id = $1`, [p1id]);
+    await pokeRecovery(ctx);
+    await waitFor(async () => {
+      const r = await mmoOne('select 1 as x from recovery_episode where player_id = $1 and status = $2', [p1id, 'active']);
+      return !!r;
+    }, 20_000);
+    await waitFor(() =>
+      [...g.entities.values()].filter(e => e.owner === 1 && e.kind === 'unit' && e.bound === 2 && e.hp > 0).length === 1,
+      15_000);
+
+    // Hard restart: stop the runner and boot a fresh one on the same region.
+    await ctx.runner.stop();
+    const runner2 = new RegionRunner({
+      regionId: ctx.fx.regionId, workerId: ctx.fx.workerId, leaseMs: 60_000,
+      tickMs: TICK_MS, pollMs: 20, compoundSyncMs: 200,
+      rules: RULES,
+      worldHandler: createWorldHandler(RULES),
+      quiescence: { enabled: false },
+    });
+    ctx.runner = runner2;
+    await runner2.start();
+    await waitFor(() => !!runner2.currentGame, 15_000);
+    const g2 = live(ctx);
+    // Let the journal replay and a couple of eval passes run.
+    await sleep(2_000);
+    await pokeRecovery(ctx);
+    await sleep(1_500);
+
+    const eps = await mmoOne<{ n: string }>(
+      `select count(*)::text as n from recovery_episode where player_id = $1 and status = 'active'`, [p1id]);
+    expect(eps?.n).toBe('1');
+    const mcvs = [...g2.entities.values()].filter(e => e.owner === 1 && e.kind === 'unit' && e.bound === 2 && e.hp > 0);
+    expect(mcvs).toHaveLength(1);
+    // The player is still in recovery — restart did not silently end it.
+    const p = g2.players.find(pl => (pl as { pid?: string }).pid === p1id);
+    expect(p?.recovering).toBe(true);
+  }, 90_000);
 });
