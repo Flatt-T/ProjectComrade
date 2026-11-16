@@ -425,6 +425,21 @@ export class RegionRunner {
     // — identical on every runner, before any tick or accrual runs.
     this.ensureRegionSites();
 
+    // Snapshot validation parses every retained payload; on a region with
+    // hundreds of checkpoints that can outlast the lease TTL before the first
+    // fenced write. Renew authority at each long-phase boundary.
+    if (this.epoch !== undefined) {
+      try {
+        await acquireRegionLease({
+          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
+        });
+        this.lastRenew = this.opts.now();
+      } catch (error) {
+        if (error instanceof MmoStoreError && error.code === 'LEASE_HELD') throw error;
+        this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
+      }
+    }
+
     // PW22 wake: a hibernated region accounts for its quiescent interval as one
     // journaled 'accrual' event, then re-anchors wall-clock so real-time resumes —
     // the slept ticks are never re-simulated. This runs BEFORE tail replay: the
@@ -696,7 +711,7 @@ export class RegionRunner {
     });
     // Apply to the restored (pre-interval) game. Deterministic, so re-running it on a
     // fresh restore produces identical state.
-    this.game!.fastForwardQuiescent(ticks, hib.rates);
+    await this.quiescentAdvance(ticks, hib.rates);
     // Re-anchor: slept wall-time was consumed arithmetically, so the next tick is
     // the hibernated tick stepping in real time again.
     const anchor = now - this.game!.tick * this.opts.tickMs;
@@ -870,6 +885,21 @@ export class RegionRunner {
   /** Apply every unapplied command/scheduled journal event in seq order. */
   private async applyUnappliedEvents(): Promise<void> {
     for (;;) {
+      // Recovery can reach here minutes after the last catch-up renewal (long
+      // quiescent fast-forwards, replay tails); fenced writes below die with
+      // FENCE_LOST if the lease lapsed in between. Throttled renewal keeps the
+      // gap bounded without adding a transaction per event.
+      if (this.epoch !== undefined && this.opts.now() - this.lastRenew > this.opts.leaseMs * 0.4) {
+        try {
+          await acquireRegionLease({
+            regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
+          });
+          this.lastRenew = this.opts.now();
+        } catch (error) {
+          if (error instanceof MmoStoreError && error.code === 'LEASE_HELD') throw error;
+          this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
+        }
+      }
       const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual'], 64);
       if (!events.length) {
         await this.drainSalvageEvents();
@@ -960,7 +990,7 @@ export class RegionRunner {
           // sinceMs); only replay accrual rows when no hib metadata will.
           if (applyAccrual) {
             const p = ev.payload as { ticks?: number; rates?: number[] };
-            this.game?.fastForwardQuiescent(Number(p.ticks ?? 0), p.rates ?? []);
+            await this.quiescentAdvance(Number(p.ticks ?? 0), p.rates ?? []);
           }
           cursor = seq;
           continue;
@@ -974,7 +1004,7 @@ export class RegionRunner {
           ? plan.simEffects
           : (await fanoutFor(ev.event_seq))
             .map(f => ({ t: 'enqueue' as const, slot: f.slot, atTick: f.atTick, command: f.command }));
-        for (const fx of effects) this.applySimEffect(fx);
+        for (const fx of effects) await this.applySimEffect(fx);
         this.simAppliedSeqs.add(ev.event_seq);
         cursor = seq;
         replayed++;
@@ -1592,7 +1622,7 @@ export class RegionRunner {
     receipt?: (tx: PoolClient) => Promise<void>,
   ): Promise<void> {
     if (!this.simAppliedSeqs.has(eventSeq)) {
-      for (const fx of plan.simEffects) this.applySimEffect(fx);
+      for (const fx of plan.simEffects) await this.applySimEffect(fx);
       this.simAppliedSeqs.add(eventSeq);
     }
     await this.opts.faultHooks?.beforeReceipt?.(eventSeq);
@@ -1610,16 +1640,47 @@ export class RegionRunner {
   }
 
   /**
+   * fastForwardQuiescent iterates every slept tick; a multi-day quiescent
+   * interval is millions of iterations (~1 h observed live on beta) during
+   * which the lease TTL lapses with no renewal path — the next fenced write
+   * then fails the whole start(). Chunk the advance, yielding the event loop
+   * and renewing authority between chunks. offsetTicks + a shared remainders
+   * array keep the arithmetic identical to one uninterrupted call.
+   */
+  private async quiescentAdvance(ticks: number, rates: number[]): Promise<void> {
+    const CHUNK = 25_000;
+    if (ticks <= CHUNK) {
+      this.game?.fastForwardQuiescent(ticks, rates);
+      return;
+    }
+    const remainders = this.game?.players.map(() => 0);
+    for (let done = 0; done < ticks; done += CHUNK) {
+      this.game?.fastForwardQuiescent(Math.min(CHUNK, ticks - done), rates, done, remainders);
+      await new Promise(resolve => setImmediate(resolve));
+      if (this.epoch !== undefined) {
+        try {
+          await acquireRegionLease({
+            regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
+          });
+        } catch (error) {
+          if (error instanceof MmoStoreError && error.code === 'LEASE_HELD') throw error;
+          this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
+        }
+      }
+    }
+  }
+
+  /**
    * Apply one committed sim effect to the live game. The enqueue clamp keeps a
    * receipt retried after further ticks delivering at the next boundary rather
    * than losing the command to a past tick; recorded atTicks always exceed the
    * replay position, so recovery replay is unaffected.
    */
-  private applySimEffect(fx: SimEffect): void {
+  private async applySimEffect(fx: SimEffect): Promise<void> {
     const g = this.game;
     if (!g) return;
     if (fx.t === 'enqueue') g.enqueue(fx.slot, fx.command, Math.max(fx.atTick, g.tick + 1));
-    else g.fastForwardQuiescent(fx.ticks, fx.rates);
+    else await this.quiescentAdvance(fx.ticks, fx.rates);
   }
 
   /**
