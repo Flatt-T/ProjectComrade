@@ -407,4 +407,35 @@ describeDb('mmo region runner (real PostgreSQL + real Fusion sim)', () => {
     });
     if (again.find(j => j.job_id === jobId)) await finishJob(jobId, 'cancelled');
   });
+
+  it('renews the region lease during long startup catch-up (beta brick regression)', async () => {
+    // Beta 2026-11-16: a quiescent region's start() replay+catch-up outran the
+    // lease TTL because renewal only ran in the poll loop; the first fenced
+    // write then failed 'region authority lost' and every retry crash-looped.
+    // Backdate started_at_ms so catch-up must step ~10 min of ticks under a
+    // deliberately tiny lease; start must renew mid-catch-up and succeed.
+    const row = await regionRow(fx.regionId);
+    const original = row!.started_at_ms;
+    try {
+      await mmoQuery(
+        'update region set started_at_ms = started_at_ms - $2 where region_id = $1',
+        [fx.regionId, 600_000]);
+      const runner = new RegionRunner({
+        regionId: fx.regionId, workerId: fx.workerId, leaseMs: 250,
+        tickMs: TICK_MS, pollMs: 20,
+      });
+      await runner.start();
+      try {
+        const after = await regionRow(fx.regionId);
+        expect(after?.lifecycle).toBe('active');
+        expect(after?.owner_worker_id).toBe(fx.workerId);
+      } finally {
+        await runner.stop();
+      }
+    } finally {
+      await mmoQuery(
+        'update region set started_at_ms = $2 where region_id = $1',
+        [fx.regionId, original]);
+    }
+  });
 });

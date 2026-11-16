@@ -498,14 +498,25 @@ export class RegionRunner {
   }
 
   /** Step the sim forward to `tick`, bounded per call so the event loop stays live. */
-  private advanceTo(tick: number): void {
+  private async advanceTo(tick: number): Promise<void> {
     const game = this.game!;
     let guard = 0;
+    // Startup replay/catch-up can run far longer than the lease TTL while the
+    // poll-loop renewal is not yet armed; renew authority mid-catch-up or the
+    // first fenced write fails and the region crash-loops on every retry.
+    let lastBeat = performance.now();
     while (game.tick < tick && guard++ < 4_000_000) {
       const t0 = performance.now();
       game.step();
       this.stats.simMs += performance.now() - t0;
       this.stats.ticksStepped++;
+      if (this.epoch !== undefined
+        && performance.now() - lastBeat > this.opts.leaseMs * 0.4) {
+        await acquireRegionLease({
+          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
+        });
+        lastBeat = performance.now();
+      }
     }
     if (game.tick < tick) this.opts.log('advance-capped', { tick, reached: game.tick });
   }
@@ -513,7 +524,7 @@ export class RegionRunner {
   /** Fast-forward missed wall time once at startup (bounded; logged if capped). */
   private async catchUpTo(tick: number): Promise<void> {
     const before = this.game!.tick;
-    this.advanceTo(tick);
+    await this.advanceTo(tick);
     await this.drainSalvageEvents();
     await this.drainDepartEvents();
     await this.drainCaptureEvents();
@@ -527,7 +538,7 @@ export class RegionRunner {
     this.busy = true;
     try {
       const expected = this.tickFor(this.opts.now());
-      if (this.game.tick < expected) this.advanceTo(Math.min(expected, this.game.tick + 600));
+      if (this.game.tick < expected) await this.advanceTo(Math.min(expected, this.game.tick + 600));
       await this.drainSalvageEvents();
       await this.drainDepartEvents();
       await this.drainCaptureEvents();
@@ -926,7 +937,7 @@ export class RegionRunner {
           // lands behind last_committed_tick and every later fenced write fails
           // (observed: quiescent regions bricked after content-fingerprint
           // rejection forced a deep replay).
-          this.advanceTo(Number(ev.simulation_tick));
+          await this.advanceTo(Number(ev.simulation_tick));
           // Wake accrual owns its arithmetic advance (hib path dedupes on
           // sinceMs); only replay accrual rows when no hib metadata will.
           if (applyAccrual) {
@@ -940,7 +951,7 @@ export class RegionRunner {
           ? ev.resolved as ResolvedPlan : null;
         const committed = plan !== null || ev.applied_at !== null;
         if (!committed) { cursor = seq; continue; } // never applied: normal apply owns it
-        this.advanceTo(Number(ev.simulation_tick));
+        await this.advanceTo(Number(ev.simulation_tick));
         const effects: SimEffect[] = plan
           ? plan.simEffects
           : (await fanoutFor(ev.event_seq))
@@ -1470,7 +1481,7 @@ export class RegionRunner {
     // the input applies, exactly as it would have in real time. Ticking is
     // deterministic catch-up, not an event effect — a rolled-back receipt leaves
     // the sim at the same point an uninterrupted retry would reach anyway.
-    this.advanceTo(Number(event.simulation_tick));
+    await this.advanceTo(Number(event.simulation_tick));
     const plan = await this.commitEventPlan(event);
     if (!plan) return; // already applied by this or a concurrent owner
     await this.opts.faultHooks?.afterPlanCommit?.(event.event_seq);
