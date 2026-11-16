@@ -73,7 +73,14 @@ const rooms = new RoomCoordinator();
 // Persistent world (PW08): the /mmo endpoint exists only when MMO_DATABASE_URL is
 // configured. Without it there is no gateway, no runner and no schema — classic play
 // is completely untouched.
-const mmoService = mmoDatabaseConfigured() ? new RegionService({ log }) : undefined;
+// PW30: without periodic checkpoints an awake region's restart replay grows with
+// wall-clock time (a 12 h-old region was replaying ~600k ticks on boot, blocking
+// the API for tens of minutes). Checkpoint every ~10 min of sim time so any
+// restart replays at most that tail.
+const CHECKPOINT_TICKS = Math.max(0, Number(process.env.MMO_CHECKPOINT_TICKS ?? 9000) || 0);
+const mmoService = mmoDatabaseConfigured()
+  ? new RegionService({ log, runner: { checkpointEveryTicks: CHECKPOINT_TICKS } })
+  : undefined;
 const mmoGateway = mmoService ? new MmoGateway(mmoService) : undefined;
 server.on('upgrade', (req, socket, head) => {
   const pathname = new URL(req.url || '/', 'http://localhost').pathname;
