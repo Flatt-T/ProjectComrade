@@ -24,7 +24,7 @@ import {
 } from './auth.js';
 import * as billingApi from './billing.js';
 import * as cognito from './cognito.js';
-import { ads as adsConfig, authEnabled, billingEnabled, platformEnabled, termsVersion } from './config.js';
+import { ads as adsConfig, authEnabled, billingEnabled, platformEnabled, termsVersion, vapid } from './config.js';
 import {
   activeSubscription, entitlementsFor, openEntitlements, quotaFor, tierFromSubscription,
 } from './entitlements.js';
@@ -745,6 +745,12 @@ post('/api/mmo/notifications/read', async (ctx: Ctx) => {
     : undefined;
   const marked = await markNotificationsRead(playerId, ids);
   return { marked };
+});
+
+get('/api/mmo/push-key', async (ctx: Ctx) => {
+  limit(ctx, 'mmo-push-key', 60, 60_000);
+  await requireMmoPlayer(ctx);
+  return { publicKey: vapid.publicKey(), configured: vapid.configured() };
 });
 
 post('/api/mmo/push-subscriptions', async (ctx: Ctx) => {

@@ -21,9 +21,11 @@ import {
 } from '../../packages/contracts/src/index.js';
 import {
   awayReportFor, dispatchDueNotifications, listNotifications,
-  markNotificationsRead, notificationPrefs, raiseNotification, setNotificationPref,
+  markNotificationsRead, notificationPrefs, pushEndpoints, pushSubscribe,
+  pushUnsubscribe, raiseNotification, setNotificationPref,
   type NotificationRow, type NotificationSenders,
 } from '../../apps/service/src/mmo/notify.js';
+import { sendWebPush } from '../../apps/service/src/mmo/push.js';
 
 const DB_URL = process.env.MMO_TEST_DATABASE_URL;
 const describeDb = DB_URL ? describe : describe.skip;
@@ -151,6 +153,13 @@ describeDb('mmo notifications + away report (real PostgreSQL + runner + Fusion s
     expect(rows.length).toBe(1);
     // deliver_after honours the configured delay.
     expect(new Date(rows[0].deliver_after).getTime()).toBeGreaterThan(Date.now() + 30_000);
+    // THU-2451: the row carries the region journal tail observed at raise time —
+    // the away report replays entries against that pointer.
+    expect(rows[0].journal_seq).not.toBeNull();
+    const tail = await mmoOne<{ max: string }>(
+      'select max(event_seq)::text as max from region_event where region_id = $1',
+      [ctx.fx.regionId]);
+    expect(BigInt(rows[0].journal_seq!)).toBeLessThanOrEqual(BigInt(tail!.max));
   }, 30_000);
 
   it('active shield inside the warning window raises shield_ending once', async () => {
@@ -251,6 +260,58 @@ describeDb('mmo notifications + away report (real PostgreSQL + runner + Fusion s
     expect(calls.length).toBe(0);
   }, 30_000);
 
+  it('push channel: subscriptions round-trip, unconfigured sender skips truthfully, unsubscribe removes the endpoint', async () => {
+    const playerId = p1().playerId;
+    const endpoint = `https://push.example.com/sub/${randomUUID()}`;
+    await pushSubscribe(playerId, endpoint, { p256dh: 'k1', auth: 'k2' });
+    const subs = await pushEndpoints(playerId);
+    expect(subs.some(s => s.endpoint === endpoint)).toBe(true);
+
+    // No COMRADE_VAPID_* in the test env — the sender must report the channel
+    // as unconfigured rather than pretending to deliver.
+    delete process.env.COMRADE_VAPID_PUBLIC_KEY;
+    delete process.env.COMRADE_VAPID_PRIVATE_KEY;
+    const result = await sendWebPush(playerId, {
+      notification_id: randomUUID(), kind: 'system',
+      payload: {}, created_at: new Date().toISOString(),
+    });
+    expect(result.status).toBe('skipped');
+    expect(result.detail).toBe('push-unconfigured');
+
+    // Unsubscribing removes the stored endpoint — a later dispatch has nothing
+    // to send to even if the player re-enables the pref.
+    await pushUnsubscribe(playerId, endpoint);
+    expect((await pushEndpoints(playerId)).some(s => s.endpoint === endpoint)).toBe(false);
+  }, 30_000);
+
+  it('push-pref opt-in with no subscription records a truthful skip, not a send', async () => {
+    const playerId = p0().playerId;
+    await pushUnsubscribe(playerId, 'https://push.example.com/none'); // ensure clean
+    await mmoQuery('delete from push_subscription where player_id = $1', [playerId]);
+    await setNotificationPref(playerId, 'push', true);
+    await mmoTransaction(tx => raiseNotification(tx, {
+      playerId, kind: 'system', dedupeKey: `push-nomsub:${randomUUID()}`,
+      deliverAfter: new Date(Date.now() - 1_000),
+    }));
+    // Route the real push sender through dispatch: unconfigured VAPID means
+    // every due push notification audits 'skipped', never 'sent'.
+    const realSenders: NotificationSenders = {
+      inapp: async () => ({ status: 'skipped' as const, detail: 'offline' }),
+      email: async () => ({ status: 'skipped' as const, detail: 'email-unconfigured' }),
+      push: async (pid, n) => sendWebPush(pid, n),
+    };
+    await dispatchDueNotifications(realSenders);
+    const rows = await mmoQuery<{ channel: string; status: string; detail: string }>(
+      `select d.channel, d.status, d.detail from notification_delivery d
+        join notification n on n.notification_id = d.notification_id
+        where n.player_id = $1 and n.kind = 'system' and d.channel = 'push'
+        order by d.attempted_at desc limit 1`, [playerId]);
+    expect(rows.length).toBe(1);
+    expect(rows[0].status).toBe('skipped');
+    expect(['push-unconfigured', 'no-subscription']).toContain(rows[0].detail);
+    await setNotificationPref(playerId, 'push', false);
+  }, 30_000);
+
   it('prefs default off and markNotificationsRead works', async () => {
     const playerId = p1().playerId;
     const prefs = await notificationPrefs(playerId);
@@ -272,16 +333,24 @@ describeDb('mmo notifications + away report (real PostgreSQL + runner + Fusion s
     await playerConnected(playerId, wentOffline - 60_000);
     await playerDisconnected(playerId, wentOffline);
     // Raise one notification "while offline" — after the disconnect timestamp.
+    // journal_seq stands in for the region journal pointer the runner stamps.
+    const journalSeq = await mmoOne<{ max: string }>(
+      'select max(event_seq)::text as max from region_event where region_id = $1',
+      [ctx.fx.regionId]);
     await mmoQuery(
-      `insert into notification (notification_id, player_id, kind, dedupe_key, deliver_after, created_at)
-       values ($1,$2,'compound_under_attack','away-test', clock_timestamp(), clock_timestamp())
+      `insert into notification (notification_id, player_id, region_id, kind, dedupe_key, deliver_after, created_at, journal_seq)
+       values ($1,$2,$3,'compound_under_attack','away-test', clock_timestamp(), clock_timestamp(), $4)
        on conflict (player_id, dedupe_key) do nothing`,
-      [randomUUID(), playerId]);
+      [randomUUID(), playerId, ctx.fx.regionId, journalSeq!.max]);
 
     const report = await awayReportFor(playerId);
     expect(report.since).not.toBeNull();
     const kinds = report.entries.map(e => e.kind);
     expect(kinds).toContain('notification:compound_under_attack');
+    // The notification entry replays against its journal pointer, not a null.
+    const awayEntry = report.entries.find(e => e.kind === 'notification:compound_under_attack');
+    expect(awayEntry?.regionId).toBe(ctx.fx.regionId);
+    expect(awayEntry?.eventSeq).toBe(journalSeq!.max);
     // Entries are ordered and every notification entry links back to its row.
     const notifEntries = report.entries.filter(e => e.notificationId !== null);
     expect(notifEntries.length).toBeGreaterThan(0);

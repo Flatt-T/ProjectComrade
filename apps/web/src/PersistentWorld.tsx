@@ -409,9 +409,59 @@ export default function PersistentWorld({ regionId, settled = true, onExit }: { 
     };
   }, [regionId]);
 
+  // THU-2451: real Web Push opt-in. Toggling 'push' on registers the service
+  // worker and creates a PushSubscription; toggling off removes it. When the
+  // server has no VAPID keys the channel simply records the pref — delivery
+  // reports 'push-unconfigured' rather than pretending.
+  const pushSupported = typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+  function urlB64ToUint8Array(base64: string): Uint8Array {
+    const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+    const raw = atob((base64 + padding).replace(/-/g, '+').replace(/_/g, '/'));
+    const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+
+  async function subscribePush(): Promise<boolean> {
+    if (!pushSupported) return false;
+    const key = await api.mmoPushKey();
+    if (!key.configured || !key.publicKey) { flashNotice('Push not configured on this server'); return false; }
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') { flashNotice('Notifications blocked by browser'); return false; }
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlB64ToUint8Array(key.publicKey) as BufferSource,
+    });
+    const json = sub.toJSON();
+    if (!json.endpoint || !json.keys) return false;
+    await api.mmoPushSubscribe(json.endpoint, json.keys);
+    return true;
+  }
+
+  async function unsubscribePush(): Promise<void> {
+    if (!pushSupported) return;
+    const reg = await navigator.serviceWorker.getRegistration('/sw.js');
+    const sub = reg ? await reg.pushManager.getSubscription() : null;
+    if (!sub) return;
+    await api.mmoPushUnsubscribe(sub.endpoint).catch(() => undefined);
+    await sub.unsubscribe().catch(() => undefined);
+  }
+
   function toggleNotifyPref(channel: MmoNotifyChannel) {
     if (!prefs) return;
     const enabled = !prefs[channel];
+    if (channel === 'push' && enabled) {
+      void subscribePush().then(ok => {
+        if (!ok) return;
+        setPrefs(p => p ? { ...p, push: true } : p);
+        void api.mmoSetNotifyPref('push', true).then(r => setPrefs(r.prefs)).catch(() => undefined);
+      });
+      return;
+    }
+    if (channel === 'push' && !enabled) void unsubscribePush();
     setPrefs({ ...prefs, [channel]: enabled });
     void api.mmoSetNotifyPref(channel, enabled)
       .then(r => setPrefs(r.prefs)).catch(() => setPrefs(p => p ? { ...p, [channel]: !enabled } : p));

@@ -25,5 +25,11 @@
     "*.config.ts",
     "engines/",
     "apps/web/public/engines/"
+  ],
+  "overrides": [
+    {
+      "files": ["apps/web/public/sw.js"],
+      "env": { "serviceworker": true }
+    }
   ]
 }

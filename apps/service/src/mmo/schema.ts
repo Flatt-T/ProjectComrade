@@ -724,4 +724,15 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table region add column asset_roster jsonb;
     `,
   },
+  {
+    version: 20,
+    name: 'notification journal pointer for away-report replay',
+    sql: `
+    -- THU-2451: an away-report entry must carry an inspectable journal pointer,
+    -- not just a summary. The notification row records the region journal tail
+    -- (region_id, event_seq) observed when it was raised; entries replay against
+    -- that position. NULL for region-less notifications.
+    alter table notification add column journal_seq bigint;
+    `,
+  },
 ];
