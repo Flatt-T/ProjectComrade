@@ -3,6 +3,39 @@ import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 const browser = await chromium.launch({ headless: true, ...(process.env.COMRADE_BROWSER_CHANNEL ? { channel: process.env.COMRADE_BROWSER_CHANNEL } : {}) });
 await mkdir('build/evidence', { recursive: true });
+// The privacy banner and the Google Funding Choices dialog render asynchronously
+// and can intercept pointer events; decline them before touching the lobby.
+async function dismissConsent(page) {
+  // The site banner mounts only after auth resolves and the Google Funding
+  // Choices dialog appears whenever it pleases; both can intercept pointer
+  // events, so loop until neither is present any more.
+  const banner = page.locator('aside.consent-banner');
+  const fcRoot = page.locator('.fc-consent-root, .fc-dialog');
+  for (let i = 0; i < 25; i++) {
+    if (!(await banner.count()) && !(await fcRoot.count())) break;
+    for (const label of ['NO ANALYTICS', 'NO, KEEP IT GENERIC']) {
+      const btn = banner.getByRole('button', { name: label, exact: true }).first();
+      if (await btn.count()) await btn.click({ timeout: 2000 }).catch(() => {});
+    }
+    if (await fcRoot.count()) {
+      let clicked = false;
+      for (const frame of page.frames()) {
+        for (const name of [/reject all/i, /accept all/i, /agree/i, /got it/i, /confirm/i]) {
+          const b = frame.getByRole('button', { name }).first();
+          if (await b.count().catch(() => 0)) { await b.click().catch(() => {}); clicked = true; break; }
+        }
+        if (clicked) break;
+      }
+      if (!clicked) {
+        // Enter submits the name form if a text field has focus — only use it
+        // as a last resort when nothing editable is focused.
+        const focused = await page.evaluate(() => /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || ''));
+        if (!focused) await page.keyboard.press('Enter').catch(() => {});
+      }
+    }
+    await page.waitForTimeout(500);
+  }
+}
 try {
   for (const faction of ['gdi', 'nod']) {
     const page = await browser.newPage({ viewport: { width: 1600, height: 1100 } });
@@ -18,9 +51,11 @@ try {
     page.on('request', request => { if (/\/engines\/vanillatd\.(js|wasm)(\?|$)/.test(request.url())) engineRequests.push(request.url()); });
     page.on('request', request => { if (/\/content\/td\/[^/]+\.(MIX|INI|BIN)(\?|$)/.test(request.url())) contentRequests.push(request.url()); });
     await page.goto(process.env.COMRADE_URL || 'http://127.0.0.1:3001');
+    await dismissConsent(page);
     assert.equal(await page.locator('input[type=file]').count(), 0);
     // Registration-free war room: callsign, create a game, pick a side, launch.
     await page.getByLabel('Your name').fill(`Smoke ${faction}`);
+    await dismissConsent(page);
     await page.getByRole('button', { name: /ENTER THE WAR ROOM/ }).click();
     await page.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
     await page.getByRole('button', { name: /START OPERATION/ }).waitFor();
@@ -101,6 +136,7 @@ try {
   const setSelect = (page, label, value) => page.getByLabel(label).selectOption(value);
   const enter = async (page, name) => {
     await page.getByLabel('Your name').fill(name);
+    await dismissConsent(page);
     await page.getByRole('button', { name: /ENTER THE WAR ROOM/ }).click();
   };
   const fusionDeploy = async page => {
@@ -121,6 +157,7 @@ try {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(base);
+    await dismissConsent(page);
     await enter(page, `Smoke ${style}`);
     await page.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
     await page.getByRole('button', { name: /START OPERATION/ }).waitFor();
@@ -167,6 +204,7 @@ try {
   const errors = [];
   for (const page of [a, b]) page.on('pageerror', error => errors.push(error.message));
   await a.goto(base);
+  await dismissConsent(a);
   await enter(a, 'Lockstep A');
   await a.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
   await a.getByRole('button', { name: /START OPERATION/ }).waitFor();
@@ -174,6 +212,7 @@ try {
   await a.waitForFunction(() => document.querySelector('.room-head .eyebrow')?.textContent.includes('DUNE'));
   const invite = await a.locator('.room-share code').innerText();
   await b.goto(invite);
+  await dismissConsent(b);
   await enter(b, 'Lockstep B');
   await b.getByRole('button', { name: /READY UP/ }).click();
   await a.waitForFunction(() => [...document.querySelectorAll('.player')].some(p => p.textContent.includes('Lockstep B') && p.querySelector('.pready.on')));
