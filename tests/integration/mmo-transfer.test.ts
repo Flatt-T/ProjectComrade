@@ -471,4 +471,69 @@ describeDb('mmo region transfer (two live runners)', () => {
       'select kind from asset_ledger where operation_id = $1 order by kind', [transferId]);
     expect(ledger.map(l => l.kind)).toEqual(['TRANSFER_IN', 'TRANSFER_OUT']);
   }, IT_TIMEOUT);
+
+  it('cancels a transfer whose unit is destroyed during the depart walk — no ghost arrives', async () => {
+    // THU-2242: PREPARED + missing entity is ambiguous (departed vs destroyed).
+    // The sweep must release only when no DESTROY audit post-dates the transfer
+    // row; a death during the walk cancels instead of delivering a ghost.
+    // Deterministic version: stop the depart order, remove the entity, and
+    // write the same DESTROY audit a real kill produces.
+    // Dedicated combatant — earlier tests consume the p0 starter roster.
+    const g0 = ctx.a.runner.currentGame!;
+    const w0 = g0.map.w;
+    let spot0 = -1;
+    outer0: for (let ring = 6; ring <= 10; ring++) {
+      for (let y = ring; y < g0.map.h - ring; y++) for (let x = ring; x < w0 - ring; x++) {
+        const i = y * w0 + x;
+        if (Math.min(x, w0 - 1 - x, y, g0.map.h - 1 - y) === ring
+            && passable(g0.pack, g0.map, i, 'vehicle') && !g0.map.occupied[i]) { spot0 = i; break outer0; }
+      }
+    }
+    if (spot0 < 0) throw new Error('no spawn cell');
+    const spawned = g0.spawnUnit('lighttank', 0, spot0);
+    spawned.order = 'idle'; spawned.path = []; spawned.target = 0;
+    const simId = spawned.id;
+    const ref = mmoEntityId(ctx.a.regionId, simId);
+    const e = spawned;
+    // Flag the unit as drone-controlled: the depart command skips such units,
+    // so the PREPARED row persists while we stage the death — no walk race.
+    e.drone = 999;
+    const made = await worldAction(ctx, ctx.a, p0(), {
+      t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
+    });
+    expect(made.accepted).toBe(true);
+    const transferId = made.transferId as string;
+    const g = ctx.a.runner.currentGame!;
+    const live = g.entities.get(simId)!;
+    live.drone = 0;
+    // Same audit drainSalvageEvents writes for a real kill: SALVAGE_SPAWN op
+    // plus a DESTROY ledger row keyed by the sim id.
+    const opId = randomUUID();
+    await mmoQuery(
+      `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
+       values ($1,$2,$3,0,'SALVAGE_SPAWN',$4,$5)`,
+      [opId, ctx.a.regionId, ctx.a.runner.authorityEpoch!,
+       JSON.stringify({ kind: 'SALVAGE_SPAWN', regionId: ctx.a.regionId, x: 0, y: 0, credits: '0' }),
+       JSON.stringify({ simId, victimOwner: 0, killerOwner: 1, victimType: live.type, victimKind: 'unit' })]);
+    await mmoQuery(
+      `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
+       values ($1,$2,$3,'DESTROY',$4,null,'destroyed',$5,$6)`,
+      [opId, ref, ctx.a.regionId, p0(), String(simId),
+       JSON.stringify({ killerPlayerId: p1(), type: live.type, simKind: 'unit' })]);
+    // The entity is gone (killed) — the next depart sweep must cancel, not release.
+    g.entities.delete(simId);
+    await waitFor(async () => {
+      const row = await mmoOne<{ state: string }>(
+        'select state from region_transfer where transfer_id = $1', [transferId]);
+      return row?.state === 'CANCELLED';
+    }, 20000);
+    // No copy materializes at the destination.
+    await sleep(500);
+    const ghosts = [...ctx.b.runner.currentGame!.entities.values()]
+      .filter(x => x.durableId === transferId || x.durableId === ref);
+    expect(ghosts).toHaveLength(0);
+    const t = await mmoOne<{ state: string }>(
+      'select state from region_transfer where transfer_id = $1', [transferId]);
+    expect(t?.state).toBe('CANCELLED');
+  }, IT_TIMEOUT);
 });
