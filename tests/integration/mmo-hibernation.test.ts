@@ -3,7 +3,7 @@
 // need the durable runner: quiescent shutdown, wake accrual exactly-once, storage
 // cap, movement/combat guards, scheduled-job wake and wake latency metrics.
 // Requires MMO_TEST_DATABASE_URL (disposable database).
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
@@ -184,6 +184,43 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
       [fx.regionId, String(hib.sinceMs)]);
     expect(accrual[0].n).toBe('1');
     await runnerC.stop();
+  });
+
+  it('wake fast-forward renews the lease across chunked multi-hundred-thousand-tick intervals', { timeout: 120_000 }, async () => {
+    // Beta 2026-11-16 brick: applyWakeAccrual ran fastForwardQuiescent as one
+    // unbroken call — ~1.3 M slept ticks took ~65 min with no lease renewal,
+    // so authority lapsed mid-start and the next fenced write failed
+    // 'region authority lost' on every retry. Chunked advance must renew.
+    const fx = await seedFixtureWorld({ leaseMs: 300_000 });
+    const runnerA = runnerFor(fx);
+    await runnerA.start();
+    await waitFor(async () => (await regionRow(fx.regionId))?.lifecycle === 'quiescent', 15_000);
+    await runnerA.stop();
+    // Age the hibernation interval past the 25k-tick chunk threshold: at
+    // TICK_MS=5, backdating sinceMs by 5 000 000 ms yields ~1 M slept ticks.
+    const snap = await latestSnapshot(fx.regionId);
+    expect(snap?.payload).toBeTruthy();
+    const payload = JSON.parse(snap!.payload.toString('utf8')) as {
+      hib: { sinceMs: number; rates: number[]; sampleTick: number };
+    };
+    expect(payload.hib).toBeDefined();
+    payload.hib.sinceMs -= 5_000_000;
+    const buf = Buffer.from(JSON.stringify(payload), 'utf8');
+    const digest = createHash('sha256').update(buf.toString('hex')).digest('hex');
+    await mmoQuery(
+      'update region_snapshot set payload = $2, payload_sha256 = $3 where snapshot_id = $1',
+      [snap!.snapshot_id, buf, digest]);
+    const runnerB = new RegionRunner({
+      regionId: fx.regionId, workerId: fx.workerId, leaseMs: 200,
+      tickMs: TICK_MS, pollMs: 20, quiescence: QUIESCENCE,
+    });
+    await runnerB.start(); // would throw FENCE_LOST if the lease lapsed mid-advance
+    try {
+      expect((await regionRow(fx.regionId))?.lifecycle).toBe('active');
+      expect(runnerB.currentGame).toBeDefined();
+    } finally {
+      await runnerB.stop();
+    }
   });
 
   it('queued production due during quiescence exists at wake', { timeout: 60_000 }, async () => {

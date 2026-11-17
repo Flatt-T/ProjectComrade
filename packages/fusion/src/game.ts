@@ -3854,21 +3854,23 @@ export class Game {
    * real refinery delivery. Only valid on a game verified quiescent for the whole
    * interval; the caller journals the interval so replay applies it once.
    */
-  fastForwardQuiescent(ticks: number, rates: number[]): void {
+  fastForwardQuiescent(ticks: number, rates: number[], offsetTicks = 0, remainders?: number[]): void {
     if (!this.persistent) throw new Error('fastForwardQuiescent is persistent-profile only');
     if (ticks <= 0) return;
     const caches = new Map<Player, { factories: Map<QueueKind, Entity[]>; speed: Map<QueueKind, number> }>();
-    const remainders = this.players.map(() => 0);
+    // A chunked caller passes one remainders array across calls so fractional
+    // harvest income accumulates exactly as a single uninterrupted call would.
+    const rem = remainders ?? this.players.map(() => 0);
     for (let i = 0; i < ticks; i++) {
       for (let pi = 0; pi < this.players.length; pi++) {
         const p = this.players[pi];
         if (p.defeated) continue;
         const rate = rates[pi] ?? 0;
         if (rate > 0) {
-          remainders[pi] += rate;
-          const each = Math.floor(remainders[pi]);
+          rem[pi] += rate;
+          const each = Math.floor(rem[pi]);
           if (each > 0) {
-            remainders[pi] -= each;
+            rem[pi] -= each;
             // Same delivery accounting as the live harvest path (storage-capped).
             const next = p.credits + each + Math.floor((each * p.incomeBonus) / 100);
             p.credits = p.storage > 0 && next > p.storage ? Math.max(p.credits, p.storage) : next;
@@ -3880,9 +3882,10 @@ export class Game {
         this.production(p, cache);
         // Supply upkeep parity: slept tick i+1 lands on absolute tick
         // this.tick+i+1, so the per-minute drain fires on the same cadence a
-        // live step() would have used across the interval.
-        if (this.mmo && (this.tick + i + 1) % SUPPLY_UPKEEP_TICKS === 0) this.mmoUpkeep(p);
-        if (p.autoRepair && (this.tick + i + 1) % AUTO_REPAIR_TICKS === 0) this.autoRepairBase(p);
+        // live step() would have used across the interval. offsetTicks lets a
+        // chunked caller preserve that absolute cadence across chunks.
+        if (this.mmo && (this.tick + offsetTicks + i + 1) % SUPPLY_UPKEEP_TICKS === 0) this.mmoUpkeep(p);
+        if (p.autoRepair && (this.tick + offsetTicks + i + 1) % AUTO_REPAIR_TICKS === 0) this.autoRepairBase(p);
       }
       // Effects are cosmetic and tick-frozen here; keep the same bound step() uses.
       if (this.effects.length > 400) this.effects = this.effects.slice(-300);

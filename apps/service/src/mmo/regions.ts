@@ -107,6 +107,10 @@ export class RegionService {
     // and barter) resolve through the journaled world handler by default.
     const runner = new RegionRunner({
       ...this.opts, regionId, workerId,
+      // Runner diagnostics (restore, tail replay, lease renewal) use the same
+      // service log — without this they default to a no-op and start failures
+      // are undiagnosable.
+      log: this.opts.log ?? this.log,
       liveSubscribers: this.opts.liveSubscribers ?? (rid => this.hasSubscribers(rid)),
       worldHandler: this.opts.worldHandler ?? createWorldHandler(this.opts.rules ?? PERSISTENT_RULES_V1),
     });
@@ -123,7 +127,12 @@ export class RegionService {
       // Only remove the entry if it is still ours — a concurrent start may
       // have already registered a healthy runner for this region.
       if (this.entries.get(regionId) === entry) this.entries.delete(regionId);
-      this.log('region-start-failed', { regionId, error: String(error) });
+      this.log('region-start-failed', {
+        regionId,
+        error: String(error),
+        code: error instanceof MmoStoreError ? error.code : undefined,
+        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 6).join(' | ') : undefined,
+      });
       throw error;
     }
     return entry;

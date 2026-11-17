@@ -78,8 +78,12 @@ const rooms = new RoomCoordinator();
 // the API for tens of minutes). Checkpoint every ~10 min of sim time so any
 // restart replays at most that tail.
 const CHECKPOINT_TICKS = Math.max(0, Number(process.env.MMO_CHECKPOINT_TICKS ?? 9000) || 0);
+// Deep genesis replays (content-fingerprint-invalidated checkpoints) run for
+// over an hour; a longer lease gives mid-catch-up renewals more slack against
+// transient pool pressure without changing steady-state fencing semantics.
+const LEASE_MS = Math.max(5_000, Number(process.env.MMO_LEASE_MS ?? 30_000) || 30_000);
 const mmoService = mmoDatabaseConfigured()
-  ? new RegionService({ log, runner: { checkpointEveryTicks: CHECKPOINT_TICKS } })
+  ? new RegionService({ log, runner: { checkpointEveryTicks: CHECKPOINT_TICKS, leaseMs: LEASE_MS } })
   : undefined;
 const mmoGateway = mmoService ? new MmoGateway(mmoService) : undefined;
 server.on('upgrade', (req, socket, head) => {
