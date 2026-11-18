@@ -1,0 +1,3121 @@
+{
+  "schema_version": "1.0.0",
+  "published_at": "2026-11-18",
+  "programme_id": "COMRADE-F3D",
+  "epic": {
+    "id": "THU-2533",
+    "uuid": "6d0904a4-11fd-4611-a80a-b2fdff9c501f",
+    "title": "COMRADE F3D — Upgrade Fusion to the complete 3D series homage",
+    "url": "https://linear.app/thunderchild-creative/issue/THU-2533/comrade-f3d-upgrade-fusion-to-the-complete-3d-series-homage"
+  },
+  "documentation_branch": "plan/fusion-3d-20261118-thu2533",
+  "repository": "Flatt-T/ProjectComrade",
+  "documents": [
+    {
+      "path": "00-START-HERE.md",
+      "id": "daa99d7b-9750-4e15-b284-b3e068aed948",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21-start-here-fusion-3d-specialist-implementation-programme-7a155426bc52",
+      "title": "COMRADE 21 — START HERE Fusion 3D specialist implementation programme"
+    },
+    {
+      "path": "programme/01-authority-and-scope.md",
+      "id": "d0fb3472-c36f-4b51-8be4-f7a5b89d352c",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21a-fusion-3d-mandate-scope-and-authority-aad7d6490602",
+      "title": "COMRADE 21A — Fusion 3D mandate scope and authority"
+    },
+    {
+      "path": "programme/02-fleet-execution.md",
+      "id": "4c60c3d3-7863-41e2-b142-3bab3b27c309",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21b-specialist-fleet-execution-and-handoff-contract-db201933edaf",
+      "title": "COMRADE 21B — Specialist fleet execution and handoff contract"
+    },
+    {
+      "path": "programme/03-quality-and-release.md",
+      "id": "e1937a8a-ec8d-43c8-a54d-da845196ace0",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21c-quality-gates-verification-and-release-7958304ead2e",
+      "title": "COMRADE 21C — Quality gates verification and release"
+    },
+    {
+      "path": "programme/04-content-work-order-contract.md",
+      "id": "b6fef841-846a-43e6-bf4d-573fbd73073e",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21d-complete-content-census-and-bounded-work-orders-e1dc613f4351",
+      "title": "COMRADE 21D — Complete content census and bounded work orders"
+    },
+    {
+      "path": "programme/05-existing-work-crosswalk.md",
+      "id": "2ee28d00-0c3c-49fc-a5dd-ecec0293ca9f",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21e-existing-work-and-upgrade-crosswalk-afc72f1c68b2",
+      "title": "COMRADE 21E — Existing work and upgrade crosswalk"
+    },
+    {
+      "path": "engine/01-engine-baseline-and-gap-audit.md",
+      "id": "564eea27-7282-4f57-ad52-3bb05e7f090f",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21f-current-fusion-engine-audit-and-gaps-2e7ac486fcaa",
+      "title": "COMRADE 21F — Current Fusion engine audit and gaps"
+    },
+    {
+      "path": "engine/02-fusion-3d-architecture-and-contracts.md",
+      "id": "177de0f4-a2e2-4d85-92aa-c71d587f9422",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21g-fusion-3d-architecture-and-contracts-0fb5e5b72e1e",
+      "title": "COMRADE 21G — Fusion 3D architecture and contracts"
+    },
+    {
+      "path": "research/01_series_research_and_fidelity.md",
+      "id": "b3929925-98f2-44dc-b50a-dd400ab67759",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21h-complete-series-research-and-fidelity-framework-0b7dc3b378c9",
+      "title": "COMRADE 21H — Complete series research and fidelity framework"
+    },
+    {
+      "path": "research/02_catalogue_schema_and_completion.md",
+      "id": "6117e460-eb10-4e2c-ab3f-0f10ec9c8584",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21i-catalogue-schema-and-whole-series-completion-0fd4746f9307",
+      "title": "COMRADE 21I — Catalogue schema and whole-series completion"
+    },
+    {
+      "path": "research/source_register.md",
+      "id": "040d0a96-510a-4d04-adf0-3ec5f6a54b0d",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21j-source-register-and-verified-research-access-8f42293882ba",
+      "title": "COMRADE 21J — Source register and verified research access"
+    },
+    {
+      "path": "world-art/01_art_and_animation_contract.md",
+      "id": "6257bfea-6e55-4794-9adc-8bd18deec547",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21k-full-3d-art-and-animation-contract-9feb6e598c8f",
+      "title": "COMRADE 21K — Full 3D art and animation contract"
+    },
+    {
+      "path": "world-art/02_terrain_and_bridges_contract.md",
+      "id": "750fb20f-73f0-4400-8428-8ee17ef22472",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21l-complete-terrain-and-bridge-lifecycle-contract-121769a5d751",
+      "title": "COMRADE 21L — Complete terrain and bridge lifecycle contract"
+    },
+    {
+      "path": "world-art/03_experience_audio_and_quality_gates.md",
+      "id": "dd5eaf83-5419-4e88-bfa1-d29f1508965c",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21m-game-feel-audio-controls-and-visual-qualification-5268aa171150",
+      "title": "COMRADE 21M — Game feel audio controls and visual qualification"
+    },
+    {
+      "path": "world-art/04_per_entity_work_orders.md",
+      "id": "473d044c-26f4-4eaa-876b-ca4ad38e9e40",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21n-detailed-per-entity-production-work-orders-650cdeb22c97",
+      "title": "COMRADE 21N — Detailed per-entity production work orders"
+    },
+    {
+      "path": "world-art/06_sources_and_evidence.md",
+      "id": "b9fa4b1d-fb39-45b0-b6ef-4df218ce1285",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21o-art-and-world-sources-and-evidence-c896a27c88e9",
+      "title": "COMRADE 21O — Art and world sources and evidence"
+    },
+    {
+      "path": "task-index.md",
+      "id": "6b4add29-0ded-4225-acf1-4ee151dea2c4",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21p-complete-initial-specialist-work-order-index-8fa69062a29b",
+      "title": "COMRADE 21P — Complete initial specialist work-order index"
+    },
+    {
+      "path": "programme/06-independent-review.md",
+      "id": "22826ceb-a928-4b53-a399-b92bf121c680",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21q-independent-programme-review-ef967b5c833b",
+      "title": "COMRADE 21Q — Independent programme review"
+    },
+    {
+      "path": "programme/07-gameplay-coverage-review.md",
+      "id": "f63a8894-dd75-4c69-af2e-5b0a92866a7e",
+      "url": "https://linear.app/thunderchild-creative/document/comrade-21r-independent-gameplay-coverage-review-86edabb50af3",
+      "title": "COMRADE 21R — Independent gameplay coverage review"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "f859704c-2b15-4322-8aa0-5d2d984fd3a9",
+      "name": "F3D G0 — Baseline and authority",
+      "description": "Current source/runtime/evidence crosswalk, preserved modes and saves, accepted authority/decision register, bounded fleet execution and source inventory.",
+      "progress": 0,
+      "sortOrder": 5966
+    },
+    {
+      "id": "85705787-7e50-4607-b513-2c47c50ad168",
+      "name": "F3D G1 — Series research and content contracts",
+      "description": "Pinned era/faction/entity/terrain census, source confidence, mechanics reference cases and rights/distribution route per family; complete content schema and production fan-out.",
+      "progress": 0,
+      "sortOrder": 6919
+    },
+    {
+      "id": "0c6ece80-ae37-419c-8187-fa193b085f89",
+      "name": "F3D G2 — Real 3D feasibility",
+      "description": "Read-only presentation seam and comparable measured renderer spike on named desktop/mobile devices; geometry, camera, picking, animation, fog and loading proven.",
+      "progress": 0,
+      "sortOrder": 7961
+    },
+    {
+      "id": "a640864a-fa6b-4456-aa91-f3dd6e89f41c",
+      "name": "F3D G3 — World and gameplay systems",
+      "description": "Authoritative elevation/surfaces, bridge collapse/repair/rebuild, navigation and required capabilities; deterministic state/replay/version contracts.",
+      "progress": 0,
+      "sortOrder": 8983
+    },
+    {
+      "id": "74c686b3-49c8-4c08-806d-672b497b1d1b",
+      "name": "F3D G4 — Playable representative battle",
+      "description": "Opposing clients complete base/economy/combat/transport/bridge destruction and rebuild with accepted 3D presentation, game feel and persistence.",
+      "progress": 0,
+      "sortOrder": 10028
+    },
+    {
+      "id": "6c43079a-709a-42f8-b88a-82fd9cad95c3",
+      "name": "F3D G5 — Complete era and faction production",
+      "description": "Each required era's accepted census fully implemented with faction tech trees, all entity/model/animation/state work orders and independent acceptance.",
+      "progress": 0,
+      "sortOrder": 10948
+    },
+    {
+      "id": "06cc34a2-5cf2-46c9-888d-94e1b7dd53a1",
+      "name": "F3D G6 — Whole-catalogue experience",
+      "description": "All required terrain and content reconciled; cross-era balance, AI, mobile controls, audio, readability and visual quality accepted.",
+      "progress": 0,
+      "sortOrder": 11935
+    },
+    {
+      "id": "9d1a6e16-bdd3-489f-a3b2-0a147d653658",
+      "name": "F3D G7 — Integrated qualification",
+      "description": "Exact candidate passes multiplayer, save migration, crash/catchup, privacy, performance and independent regression evidence; original modes retain their own honest acceptance.",
+      "progress": 0,
+      "sortOrder": 12863
+    },
+    {
+      "id": "85badc3c-2c26-47e9-8eea-444409e6c669",
+      "name": "F3D G8 — Rollout and handover",
+      "description": "Deploy qualified artifacts under existing authorization; verify actual served revisions, new/resumed player journeys, data conservation, monitoring and safe rollback.",
+      "progress": 0,
+      "sortOrder": 13910
+    }
+  ],
+  "issues": [
+    {
+      "plan_id": "OPS-001",
+      "id": "THU-2534",
+      "uuid": "36b1420a-f396-425e-a8b7-86ee47ddabfc",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2534/f3d-ops-001-reconcile-the-live-programme-baseline-and-preserve-current",
+      "title": "F3D OPS-001 — Reconcile the live programme baseline and preserve current work",
+      "phase": 0,
+      "depends_on": [],
+      "blocked_by": [],
+      "description_characters": 4665
+    },
+    {
+      "plan_id": "OPS-002",
+      "id": "THU-2536",
+      "uuid": "f24cb562-ac86-49dd-be0a-ac194d895c7a",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2536/f3d-ops-002-publish-the-decision-register-and-freeze-the-mode",
+      "title": "F3D OPS-002 — Publish the decision register and freeze the mode boundaries",
+      "phase": 0,
+      "depends_on": [
+        "OPS-001"
+      ],
+      "blocked_by": [
+        "THU-2534"
+      ],
+      "description_characters": 4481
+    },
+    {
+      "plan_id": "OPS-003",
+      "id": "THU-2539",
+      "uuid": "a1c29ad0-6506-4334-9ebc-d61c67485e07",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2539/f3d-ops-003-resolve-content-rights-and-the-public-distribution-route",
+      "title": "F3D OPS-003 — Resolve content rights and the public distribution route",
+      "phase": 1,
+      "depends_on": [
+        "OPS-002"
+      ],
+      "blocked_by": [
+        "THU-2536"
+      ],
+      "description_characters": 4971
+    },
+    {
+      "plan_id": "OPS-004",
+      "id": "THU-2540",
+      "uuid": "246f3209-00f2-4216-823a-8d5e21965e2d",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2540/f3d-ops-004-establish-specialist-dispatch-file-ownership-and",
+      "title": "F3D OPS-004 — Establish specialist dispatch file ownership and independent review",
+      "phase": 0,
+      "depends_on": [
+        "OPS-002"
+      ],
+      "blocked_by": [
+        "THU-2536"
+      ],
+      "description_characters": 4165
+    },
+    {
+      "plan_id": "OPS-005",
+      "id": "THU-2596",
+      "uuid": "a02c3599-6857-4a33-88f3-5211c561ed48",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2596/f3d-ops-005-generate-complete-bounded-content-production-work-orders",
+      "title": "F3D OPS-005 — Generate complete bounded content production work orders",
+      "phase": 2,
+      "depends_on": [
+        "OPS-004",
+        "ART-013",
+        "RES-003",
+        "RES-027"
+      ],
+      "blocked_by": [
+        "THU-2540",
+        "THU-2592",
+        "THU-2546",
+        "THU-2578"
+      ],
+      "description_characters": 6288
+    },
+    {
+      "plan_id": "OPS-006",
+      "id": "THU-2544",
+      "uuid": "4640e28e-3491-469f-b3e9-478992f47b45",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2544/f3d-ops-006-maintain-requirement-evidence-and-change-control-through",
+      "title": "F3D OPS-006 — Maintain requirement evidence and change control through integration",
+      "phase": 1,
+      "depends_on": [
+        "OPS-004"
+      ],
+      "blocked_by": [
+        "THU-2540"
+      ],
+      "description_characters": 4076
+    },
+    {
+      "plan_id": "INT-001",
+      "id": "THU-2649",
+      "uuid": "3e3dc223-7d8e-473f-9813-560f8d56c2c7",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2649/f3d-int-001-integrate-and-qualify-the-first-complete-3d-battle-slice",
+      "title": "F3D INT-001 — Integrate and qualify the first complete 3D battle slice",
+      "phase": 4,
+      "depends_on": [
+        "OPS-006",
+        "UX-005",
+        "UX-006",
+        "ENG-026",
+        "ENG-046"
+      ],
+      "blocked_by": [
+        "THU-2544",
+        "THU-2648",
+        "THU-2604",
+        "THU-2609",
+        "THU-2601"
+      ],
+      "description_characters": 5118
+    },
+    {
+      "plan_id": "INT-002",
+      "id": "THU-2664",
+      "uuid": "f303b06a-ee1f-4f1b-8b9e-558f21d189d7",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2664/f3d-int-002-validate-faction-identity-tactical-feel-and-cross-era",
+      "title": "F3D INT-002 — Validate faction identity tactical feel and cross-era balance",
+      "phase": 6,
+      "depends_on": [
+        "INT-001",
+        "PKG-001",
+        "PKG-002",
+        "PKG-003",
+        "PKG-004",
+        "PKG-005",
+        "PKG-006",
+        "PKG-007",
+        "PKG-008",
+        "PKG-009",
+        "PKG-010",
+        "PKG-011",
+        "PKG-012",
+        "UX-008",
+        "RES-026"
+      ],
+      "blocked_by": [
+        "THU-2649",
+        "THU-2651",
+        "THU-2652",
+        "THU-2653",
+        "THU-2654",
+        "THU-2655",
+        "THU-2656",
+        "THU-2657",
+        "THU-2658",
+        "THU-2659",
+        "THU-2660",
+        "THU-2661",
+        "THU-2662",
+        "THU-2650",
+        "THU-2574"
+      ],
+      "description_characters": 6911
+    },
+    {
+      "plan_id": "INT-003",
+      "id": "THU-2666",
+      "uuid": "cc06b325-e817-4699-bb78-10800560f716",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2666/f3d-int-003-reconcile-the-entire-catalogue-and-terrain-coverage-before",
+      "title": "F3D INT-003 — Reconcile the entire catalogue and terrain coverage before qualification",
+      "phase": 6,
+      "depends_on": [
+        "INT-002",
+        "ART-020",
+        "UX-008",
+        "RES-029"
+      ],
+      "blocked_by": [
+        "THU-2664",
+        "THU-2647",
+        "THU-2650",
+        "THU-2607"
+      ],
+      "description_characters": 4787
+    },
+    {
+      "plan_id": "INT-004",
+      "id": "THU-2669",
+      "uuid": "7dce640b-3cb1-4fbe-acae-5467b95660ce",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2669/f3d-int-004-assemble-the-integrated-qualification-candidate-and",
+      "title": "F3D INT-004 — Assemble the integrated qualification candidate and migration dossier",
+      "phase": 7,
+      "depends_on": [
+        "INT-003",
+        "ENG-042",
+        "ENG-043",
+        "ENG-044",
+        "WORLD-010",
+        "UX-007"
+      ],
+      "blocked_by": [
+        "THU-2666",
+        "THU-2665",
+        "THU-2667",
+        "THU-2668",
+        "THU-2634",
+        "THU-2663"
+      ],
+      "description_characters": 5427
+    },
+    {
+      "plan_id": "INT-005",
+      "id": "THU-2671",
+      "uuid": "ae3afb90-8119-40fb-ae77-92db24feaf2c",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2671/f3d-int-005-deploy-the-qualified-upgrade-and-verify-actual-player",
+      "title": "F3D INT-005 — Deploy the qualified upgrade and verify actual player journeys",
+      "phase": 8,
+      "depends_on": [
+        "INT-004",
+        "INT-006"
+      ],
+      "blocked_by": [
+        "THU-2669",
+        "THU-2670"
+      ],
+      "description_characters": 4645
+    },
+    {
+      "plan_id": "INT-006",
+      "id": "THU-2670",
+      "uuid": "c366c1a3-8047-42b4-b6c2-dd3965851ea0",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2670/f3d-int-006-publish-player-developer-and-fleet-maintenance",
+      "title": "F3D INT-006 — Publish player developer and fleet maintenance documentation",
+      "phase": 8,
+      "depends_on": [
+        "INT-004"
+      ],
+      "blocked_by": [
+        "THU-2669"
+      ],
+      "description_characters": 4273
+    },
+    {
+      "plan_id": "RES-001",
+      "id": "THU-2541",
+      "uuid": "af812416-26e2-4631-8421-f25b34799a2c",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2541/f3d-res-001-lock-the-released-title-scope-source-hierarchy-and",
+      "title": "F3D RES-001 — Lock the released-title scope, source hierarchy and reference profiles",
+      "phase": 1,
+      "depends_on": [
+        "OPS-002"
+      ],
+      "blocked_by": [
+        "THU-2536"
+      ],
+      "description_characters": 11148
+    },
+    {
+      "plan_id": "RES-002",
+      "id": "THU-2545",
+      "uuid": "5d190778-0d6d-48f8-9b00-b42b32a2140b",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2545/f3d-res-002-resolve-the-user-video-evidence-and-timestamp-the-design",
+      "title": "F3D RES-002 — Resolve the user video evidence and timestamp the design observations",
+      "phase": 1,
+      "depends_on": [
+        "RES-001"
+      ],
+      "blocked_by": [
+        "THU-2541"
+      ],
+      "description_characters": 7874
+    },
+    {
+      "plan_id": "RES-003",
+      "id": "THU-2546",
+      "uuid": "0532dfea-a998-47bf-821f-bbe71c6c5753",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2546/f3d-res-003-implement-the-catalogue-schema-and-evidence-to-task",
+      "title": "F3D RES-003 — Implement the catalogue schema and evidence-to-task contract",
+      "phase": 1,
+      "depends_on": [
+        "RES-001"
+      ],
+      "blocked_by": [
+        "THU-2541"
+      ],
+      "description_characters": 9737
+    },
+    {
+      "plan_id": "RES-004",
+      "id": "THU-2548",
+      "uuid": "9b6015f0-61bc-4ee9-85ae-dbb489e445b6",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2548/f3d-res-004-research-and-reconcile-command-and-conquer-tiberian-dawn",
+      "title": "F3D RES-004 — Research and reconcile Command & Conquer Tiberian Dawn and The Covert Operations",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13389
+    },
+    {
+      "plan_id": "RES-005",
+      "id": "THU-2549",
+      "uuid": "a1aabb12-a56d-4966-9fc2-e46c4d946eb1",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2549/f3d-res-005-research-and-reconcile-red-alert-counterstrike-and-the",
+      "title": "F3D RES-005 — Research and reconcile Red Alert Counterstrike and The Aftermath",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13807
+    },
+    {
+      "plan_id": "RES-006",
+      "id": "THU-2550",
+      "uuid": "4f377fa2-9593-4d44-9610-1dc4d36b2843",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2550/f3d-res-006-research-and-reconcile-tiberian-sun",
+      "title": "F3D RES-006 — Research and reconcile Tiberian Sun",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13136
+    },
+    {
+      "plan_id": "RES-007",
+      "id": "THU-2567",
+      "uuid": "6d50faee-2bd2-44d5-8d13-ca3b3266ffa0",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2567/f3d-res-007-research-and-reconcile-tiberian-sun-firestorm",
+      "title": "F3D RES-007 — Research and reconcile Tiberian Sun Firestorm",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003",
+        "RES-006"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546",
+        "THU-2550"
+      ],
+      "description_characters": 13170
+    },
+    {
+      "plan_id": "RES-008",
+      "id": "THU-2551",
+      "uuid": "c68a49e1-1f8d-4668-bb3d-fb992e9ae54b",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2551/f3d-res-008-research-and-reconcile-red-alert-2",
+      "title": "F3D RES-008 — Research and reconcile Red Alert 2",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13437
+    },
+    {
+      "plan_id": "RES-009",
+      "id": "THU-2568",
+      "uuid": "2aee6852-1185-4ba7-9ca3-b7e3e9fa2b39",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2568/f3d-res-009-research-and-reconcile-red-alert-2-yuris-revenge",
+      "title": "F3D RES-009 — Research and reconcile Red Alert 2 Yuri's Revenge",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003",
+        "RES-008"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546",
+        "THU-2551"
+      ],
+      "description_characters": 13329
+    },
+    {
+      "plan_id": "RES-010",
+      "id": "THU-2552",
+      "uuid": "7c03c427-eb6e-4d3e-aba4-3e22942e6cd9",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2552/f3d-res-010-research-and-reconcile-command-and-conquer-generals",
+      "title": "F3D RES-010 — Research and reconcile Command & Conquer Generals",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13432
+    },
+    {
+      "plan_id": "RES-011",
+      "id": "THU-2569",
+      "uuid": "8bb3dd4e-d434-4780-8540-a04d58599dae",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2569/f3d-res-011-research-and-reconcile-generals-zero-hour",
+      "title": "F3D RES-011 — Research and reconcile Generals Zero Hour",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003",
+        "RES-010"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546",
+        "THU-2552"
+      ],
+      "description_characters": 14002
+    },
+    {
+      "plan_id": "RES-012",
+      "id": "THU-2553",
+      "uuid": "8c740d7a-31c2-456e-9ece-ad3ef90cfb55",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2553/f3d-res-012-research-and-reconcile-command-and-conquer-3-tiberium-wars",
+      "title": "F3D RES-012 — Research and reconcile Command & Conquer 3 Tiberium Wars",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13510
+    },
+    {
+      "plan_id": "RES-013",
+      "id": "THU-2570",
+      "uuid": "ce5a217e-4dc4-4a92-8728-9403f11e79b0",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2570/f3d-res-013-research-and-reconcile-command-and-conquer-3-kanes-wrath",
+      "title": "F3D RES-013 — Research and reconcile Command & Conquer 3 Kane's Wrath",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003",
+        "RES-012"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546",
+        "THU-2553"
+      ],
+      "description_characters": 13588
+    },
+    {
+      "plan_id": "RES-014",
+      "id": "THU-2554",
+      "uuid": "7ed254cb-8274-4538-aef1-f374262c2489",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2554/f3d-res-014-research-and-reconcile-red-alert-3",
+      "title": "F3D RES-014 — Research and reconcile Red Alert 3",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13500
+    },
+    {
+      "plan_id": "RES-015",
+      "id": "THU-2571",
+      "uuid": "f78b8eab-a210-4ade-89ad-2267eadff4fa",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2571/f3d-res-015-research-and-reconcile-red-alert-3-uprising",
+      "title": "F3D RES-015 — Research and reconcile Red Alert 3 Uprising",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003",
+        "RES-014"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546",
+        "THU-2554"
+      ],
+      "description_characters": 13451
+    },
+    {
+      "plan_id": "RES-016",
+      "id": "THU-2555",
+      "uuid": "1f1200d8-c89a-4c1a-ac5a-bc2a08e00abb",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2555/f3d-res-016-research-and-reconcile-command-and-conquer-4-tiberian",
+      "title": "F3D RES-016 — Research and reconcile Command & Conquer 4 Tiberian Twilight",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13485
+    },
+    {
+      "plan_id": "RES-017",
+      "id": "THU-2556",
+      "uuid": "d3d1f638-a979-47ba-87ea-daf22beaef28",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2556/f3d-res-017-research-and-reconcile-command-and-conquer-renegade",
+      "title": "F3D RES-017 — Research and reconcile Command & Conquer Renegade",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13361
+    },
+    {
+      "plan_id": "RES-018",
+      "id": "THU-2557",
+      "uuid": "07eacf43-f30f-4167-a573-f8a740267921",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2557/f3d-res-018-research-and-reconcile-command-and-conquer-sole-survivor",
+      "title": "F3D RES-018 — Research and reconcile Command & Conquer Sole Survivor",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 12768
+    },
+    {
+      "plan_id": "RES-019",
+      "id": "THU-2564",
+      "uuid": "5ce9528b-ae7d-485e-9294-96bbf87fee9c",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2564/f3d-res-019-research-and-reconcile-remastered-and-console-port-deltas",
+      "title": "F3D RES-019 — Research and reconcile Remastered and console port deltas",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003",
+        "RES-004",
+        "RES-005"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546",
+        "THU-2548",
+        "THU-2549"
+      ],
+      "description_characters": 13584
+    },
+    {
+      "plan_id": "RES-020",
+      "id": "THU-2558",
+      "uuid": "21ea5ca3-4dbc-4220-9e93-2f557ac7c35a",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2558/f3d-res-020-research-and-reconcile-tiberium-alliances",
+      "title": "F3D RES-020 — Research and reconcile Tiberium Alliances",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13143
+    },
+    {
+      "plan_id": "RES-021",
+      "id": "THU-2559",
+      "uuid": "e93d2462-45bd-468e-92a9-651a20219ce9",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2559/f3d-res-021-research-and-reconcile-command-and-conquer-rivals",
+      "title": "F3D RES-021 — Research and reconcile Command & Conquer Rivals",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 12937
+    },
+    {
+      "plan_id": "RES-022",
+      "id": "THU-2560",
+      "uuid": "2acdae8b-1545-4f67-a062-d02605923120",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2560/f3d-res-022-research-and-reconcile-legacy-and-regional-mobile-titles",
+      "title": "F3D RES-022 — Research and reconcile Legacy and regional mobile titles and Legions",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13799
+    },
+    {
+      "plan_id": "RES-023",
+      "id": "THU-2561",
+      "uuid": "4d8d1382-8248-48ca-91c0-d0ae5f0855fe",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2561/f3d-res-023-research-and-reconcile-dune-lineage-and-existing-dune-2000",
+      "title": "F3D RES-023 — Research and reconcile Dune lineage and existing Dune 2000 compatibility",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546"
+      ],
+      "description_characters": 13173
+    },
+    {
+      "plan_id": "RES-024",
+      "id": "THU-2565",
+      "uuid": "9c60d717-e4d9-496d-8458-0661daec06cb",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2565/f3d-res-024-define-the-capability-framework-and-first-battle-mechanic",
+      "title": "F3D RES-024 — Define the capability framework and first-battle mechanic contracts",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003",
+        "RES-005"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546",
+        "THU-2549"
+      ],
+      "description_characters": 12457
+    },
+    {
+      "plan_id": "RES-025",
+      "id": "THU-2566",
+      "uuid": "72527c90-2b94-4897-9f70-bad2a1ae067f",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2566/f3d-res-025-define-terrain-evidence-schema-and-first-crossing",
+      "title": "F3D RES-025 — Define terrain evidence schema and first-crossing reference fixtures",
+      "phase": 1,
+      "depends_on": [
+        "RES-001",
+        "RES-003",
+        "RES-005"
+      ],
+      "blocked_by": [
+        "THU-2541",
+        "THU-2546",
+        "THU-2549"
+      ],
+      "description_characters": 12307
+    },
+    {
+      "plan_id": "RES-026",
+      "id": "THU-2574",
+      "uuid": "b4ab525a-8847-4e36-b9e9-ab2534479ba6",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2574/f3d-res-026-define-the-game-feel-rubric-and-first-battle-benchmark",
+      "title": "F3D RES-026 — Define the game-feel rubric and first-battle benchmark scenes",
+      "phase": 1,
+      "depends_on": [
+        "RES-024",
+        "RES-025"
+      ],
+      "blocked_by": [
+        "THU-2565",
+        "THU-2566"
+      ],
+      "description_characters": 11465
+    },
+    {
+      "plan_id": "RES-027",
+      "id": "THU-2578",
+      "uuid": "4bf383f2-8bcd-4f0b-be2a-145dbd1ffa24",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2578/f3d-res-027-define-profile-adaptation-rules-and-first-battle-fusion",
+      "title": "F3D RES-027 — Define profile adaptation rules and first-battle Fusion decisions",
+      "phase": 1,
+      "depends_on": [
+        "RES-024",
+        "RES-025",
+        "RES-026"
+      ],
+      "blocked_by": [
+        "THU-2565",
+        "THU-2566",
+        "THU-2574"
+      ],
+      "description_characters": 12588
+    },
+    {
+      "plan_id": "RES-028",
+      "id": "THU-2602",
+      "uuid": "1f338742-5697-4c63-a3cf-9ab98bda60f7",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2602/f3d-res-028-close-the-census-and-validate-canonical-per-entity-task",
+      "title": "F3D RES-028 — Close the census and validate canonical per-entity task expansion",
+      "phase": 6,
+      "depends_on": [
+        "RES-003",
+        "RES-024",
+        "RES-025",
+        "RES-026",
+        "RES-027",
+        "RES-004",
+        "RES-005",
+        "RES-006",
+        "RES-007",
+        "RES-008",
+        "RES-009",
+        "RES-010",
+        "RES-011",
+        "RES-012",
+        "RES-013",
+        "RES-014",
+        "RES-015",
+        "RES-016",
+        "RES-017",
+        "RES-018",
+        "RES-019",
+        "RES-020",
+        "RES-021",
+        "RES-022",
+        "RES-023",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2546",
+        "THU-2565",
+        "THU-2566",
+        "THU-2574",
+        "THU-2578",
+        "THU-2548",
+        "THU-2549",
+        "THU-2550",
+        "THU-2567",
+        "THU-2551",
+        "THU-2568",
+        "THU-2552",
+        "THU-2569",
+        "THU-2553",
+        "THU-2570",
+        "THU-2554",
+        "THU-2571",
+        "THU-2555",
+        "THU-2556",
+        "THU-2557",
+        "THU-2564",
+        "THU-2558",
+        "THU-2559",
+        "THU-2560",
+        "THU-2561",
+        "THU-2596"
+      ],
+      "description_characters": 15129
+    },
+    {
+      "plan_id": "RES-029",
+      "id": "THU-2607",
+      "uuid": "223bf4b0-0608-4004-a755-d9d7565f3548",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2607/f3d-res-029-independently-audit-whole-series-coverage-and-fleet",
+      "title": "F3D RES-029 — Independently audit whole-series coverage and fleet readiness",
+      "phase": 6,
+      "depends_on": [
+        "RES-028"
+      ],
+      "blocked_by": [
+        "THU-2602"
+      ],
+      "description_characters": 10528
+    },
+    {
+      "plan_id": "ENG-001",
+      "id": "THU-2535",
+      "uuid": "b3643162-ac06-49ec-8b7a-c2ed3683e44e",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2535/f3d-eng-001-freeze-the-verified-engine-baseline-and-inventory",
+      "title": "F3D ENG-001 — Freeze the verified engine baseline and inventory compatibility surfaces",
+      "phase": 0,
+      "depends_on": [
+        "OPS-001"
+      ],
+      "blocked_by": [
+        "THU-2534"
+      ],
+      "description_characters": 5527
+    },
+    {
+      "plan_id": "ENG-002",
+      "id": "THU-2538",
+      "uuid": "92a6df42-79bf-4591-ab4d-7e689ea82438",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2538/f3d-eng-002-replace-placeholder-test-commands-with-executable-engine",
+      "title": "F3D ENG-002 — Replace placeholder test commands with executable engine gates",
+      "phase": 0,
+      "depends_on": [
+        "ENG-001"
+      ],
+      "blocked_by": [
+        "THU-2535"
+      ],
+      "description_characters": 5321
+    },
+    {
+      "plan_id": "ENG-003",
+      "id": "THU-2542",
+      "uuid": "8eac8c2c-b9ae-4991-bcec-012894d6f69b",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2542/f3d-eng-003-capture-deterministic-characterization-and-snapshot",
+      "title": "F3D ENG-003 — Capture deterministic characterization and snapshot regression fixtures",
+      "phase": 0,
+      "depends_on": [
+        "ENG-001",
+        "ENG-002"
+      ],
+      "blocked_by": [
+        "THU-2535",
+        "THU-2538"
+      ],
+      "description_characters": 5712
+    },
+    {
+      "plan_id": "ENG-004",
+      "id": "THU-2547",
+      "uuid": "b601c325-1c32-4975-9519-9970cfac9a09",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2547/f3d-eng-004-introduce-explicit-native-legacy-fusion-and-homage-profile",
+      "title": "F3D ENG-004 — Introduce explicit native, legacy Fusion and homage profile identities",
+      "phase": 0,
+      "depends_on": [
+        "ENG-001",
+        "ENG-003",
+        "OPS-002"
+      ],
+      "blocked_by": [
+        "THU-2535",
+        "THU-2542",
+        "THU-2536"
+      ],
+      "description_characters": 5595
+    },
+    {
+      "plan_id": "ENG-005",
+      "id": "THU-2562",
+      "uuid": "a5268be2-b948-40c1-8121-4ee4ab49d112",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2562/f3d-eng-005-extract-deterministic-subsystems-from-game-without",
+      "title": "F3D ENG-005 — Extract deterministic subsystems from Game without changing behavior",
+      "phase": 3,
+      "depends_on": [
+        "ENG-003",
+        "ENG-004"
+      ],
+      "blocked_by": [
+        "THU-2542",
+        "THU-2547"
+      ],
+      "description_characters": 5166
+    },
+    {
+      "plan_id": "ENG-006",
+      "id": "THU-2563",
+      "uuid": "76f39481-6e28-40fd-88a0-9e0defa8fdc6",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2563/f3d-eng-006-define-and-implement-the-immutable-simulation-to-view",
+      "title": "F3D ENG-006 — Define and implement the immutable simulation-to-view contract",
+      "phase": 2,
+      "depends_on": [
+        "ENG-003",
+        "ENG-004"
+      ],
+      "blocked_by": [
+        "THU-2542",
+        "THU-2547"
+      ],
+      "description_characters": 5643
+    },
+    {
+      "plan_id": "ENG-007",
+      "id": "THU-2594",
+      "uuid": "dc72710c-1f2d-4096-b03f-69faa5bcb4b6",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2594/f3d-eng-007-build-the-bounded-threejs-renderer-comparison-fixture",
+      "title": "F3D ENG-007 — Build the bounded Three.js renderer comparison fixture",
+      "phase": 2,
+      "depends_on": [
+        "ENG-006",
+        "ART-006"
+      ],
+      "blocked_by": [
+        "THU-2563",
+        "THU-2591"
+      ],
+      "description_characters": 5185
+    },
+    {
+      "plan_id": "ENG-008",
+      "id": "THU-2595",
+      "uuid": "977ef9ad-18cf-423f-9ee1-191e2ed02d48",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2595/f3d-eng-008-build-the-bounded-babylonjs-renderer-comparison-fixture",
+      "title": "F3D ENG-008 — Build the bounded Babylon.js renderer comparison fixture",
+      "phase": 2,
+      "depends_on": [
+        "ENG-006",
+        "ART-006"
+      ],
+      "blocked_by": [
+        "THU-2563",
+        "THU-2591"
+      ],
+      "description_characters": 5136
+    },
+    {
+      "plan_id": "ENG-009",
+      "id": "THU-2597",
+      "uuid": "18926ae5-ee17-4aac-9459-7971c10b2db9",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2597/f3d-eng-009-select-the-production-renderer-and-ratify-measured-budgets",
+      "title": "F3D ENG-009 — Select the production renderer and ratify measured budgets",
+      "phase": 2,
+      "depends_on": [
+        "ENG-007",
+        "ENG-008"
+      ],
+      "blocked_by": [
+        "THU-2594",
+        "THU-2595"
+      ],
+      "description_characters": 5254
+    },
+    {
+      "plan_id": "ENG-010",
+      "id": "THU-2603",
+      "uuid": "38335b90-f8ca-4685-9663-ebe6c5bcc28b",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2603/f3d-eng-010-implement-versioned-3d-asset-manifests-and-ingestion",
+      "title": "F3D ENG-010 — Implement versioned 3D asset manifests and ingestion validation",
+      "phase": 2,
+      "depends_on": [
+        "ENG-004",
+        "ENG-006",
+        "ENG-009",
+        "ART-003"
+      ],
+      "blocked_by": [
+        "THU-2547",
+        "THU-2563",
+        "THU-2597",
+        "THU-2585"
+      ],
+      "description_characters": 5714
+    },
+    {
+      "plan_id": "ENG-011",
+      "id": "THU-2608",
+      "uuid": "00908c27-992c-4dbb-9052-5faff45eda78",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2608/f3d-eng-011-implement-gpu-scene-lifecycle-and-robust-backend",
+      "title": "F3D ENG-011 — Implement GPU scene lifecycle and robust backend initialization",
+      "phase": 2,
+      "depends_on": [
+        "ENG-006",
+        "ENG-009",
+        "ENG-010"
+      ],
+      "blocked_by": [
+        "THU-2563",
+        "THU-2597",
+        "THU-2603"
+      ],
+      "description_characters": 5420
+    },
+    {
+      "plan_id": "ENG-012",
+      "id": "THU-2612",
+      "uuid": "c86921d9-b404-4c78-8168-bbb76a6d4c3e",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2612/f3d-eng-012-implement-rts-camera-height-aware-picking-and-command",
+      "title": "F3D ENG-012 — Implement RTS camera, height-aware picking and command surfaces",
+      "phase": 2,
+      "depends_on": [
+        "ENG-011",
+        "ENG-006"
+      ],
+      "blocked_by": [
+        "THU-2608",
+        "THU-2563"
+      ],
+      "description_characters": 5281
+    },
+    {
+      "plan_id": "ENG-013",
+      "id": "THU-2613",
+      "uuid": "640b497a-afd0-482a-a97b-9e414ab61b93",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2613/f3d-eng-013-render-streamed-3d-terrain-chunks-and-water-surfaces",
+      "title": "F3D ENG-013 — Render streamed 3D terrain chunks and water surfaces",
+      "phase": 3,
+      "depends_on": [
+        "ENG-011",
+        "ENG-019",
+        "ENG-020"
+      ],
+      "blocked_by": [
+        "THU-2608",
+        "THU-2573",
+        "THU-2576"
+      ],
+      "description_characters": 5394
+    },
+    {
+      "plan_id": "ENG-014",
+      "id": "THU-2614",
+      "uuid": "f884d45d-c076-4ae3-812d-08dc50d108b4",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2614/f3d-eng-014-render-entities-with-stable-identity-lod-and-measured",
+      "title": "F3D ENG-014 — Render entities with stable identity, LOD and measured instancing",
+      "phase": 2,
+      "depends_on": [
+        "ENG-010",
+        "ENG-011"
+      ],
+      "blocked_by": [
+        "THU-2603",
+        "THU-2608"
+      ],
+      "description_characters": 5438
+    },
+    {
+      "plan_id": "ENG-015",
+      "id": "THU-2624",
+      "uuid": "5a9040f4-4113-444e-a7c1-c2fa849d0dc2",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2624/f3d-eng-015-implement-capability-driven-animation-controllers-and-clip",
+      "title": "F3D ENG-015 — Implement capability-driven animation controllers and clip validation",
+      "phase": 2,
+      "depends_on": [
+        "ENG-010",
+        "ENG-014",
+        "ENG-006",
+        "ART-004"
+      ],
+      "blocked_by": [
+        "THU-2603",
+        "THU-2614",
+        "THU-2563",
+        "THU-2588"
+      ],
+      "description_characters": 5649
+    },
+    {
+      "plan_id": "ENG-016",
+      "id": "THU-2633",
+      "uuid": "299f3238-4e20-4652-9ad3-b66d817cb895",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2633/f3d-eng-016-implement-semantic-effects-and-audio-event-delivery",
+      "title": "F3D ENG-016 — Implement semantic effects and audio event delivery",
+      "phase": 2,
+      "depends_on": [
+        "ENG-006",
+        "ENG-011",
+        "ENG-015"
+      ],
+      "blocked_by": [
+        "THU-2563",
+        "THU-2608",
+        "THU-2624"
+      ],
+      "description_characters": 5336
+    },
+    {
+      "plan_id": "ENG-017",
+      "id": "THU-2618",
+      "uuid": "87d9bd24-800d-4e58-9eb5-3295b146855e",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2618/f3d-eng-017-implement-readable-3d-fog-shroud-radar-and-ownership",
+      "title": "F3D ENG-017 — Implement readable 3D fog, shroud, radar and ownership overlays",
+      "phase": 2,
+      "depends_on": [
+        "ENG-006",
+        "ENG-011",
+        "ENG-012"
+      ],
+      "blocked_by": [
+        "THU-2563",
+        "THU-2608",
+        "THU-2612"
+      ],
+      "description_characters": 5472
+    },
+    {
+      "plan_id": "ENG-018",
+      "id": "THU-2615",
+      "uuid": "507ed2aa-ad2d-48ed-93f5-e88c6f241f72",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2615/f3d-eng-018-isolate-browser-simulation-and-view-transport-from",
+      "title": "F3D ENG-018 — Isolate browser simulation and view transport from rendering load",
+      "phase": 2,
+      "depends_on": [
+        "ENG-005",
+        "ENG-006",
+        "ENG-011"
+      ],
+      "blocked_by": [
+        "THU-2562",
+        "THU-2563",
+        "THU-2608"
+      ],
+      "description_characters": 5422
+    },
+    {
+      "plan_id": "ENG-019",
+      "id": "THU-2573",
+      "uuid": "3f926672-9dc8-470b-953b-304cdce8c634",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2573/f3d-eng-019-define-authoritative-elevation-surface-and-topology",
+      "title": "F3D ENG-019 — Define authoritative elevation, surface and topology schemas",
+      "phase": 3,
+      "depends_on": [
+        "ENG-004",
+        "ENG-005",
+        "RES-025"
+      ],
+      "blocked_by": [
+        "THU-2547",
+        "THU-2562",
+        "THU-2566"
+      ],
+      "description_characters": 5225
+    },
+    {
+      "plan_id": "ENG-020",
+      "id": "THU-2576",
+      "uuid": "5da76d5c-fc19-4167-a8d7-728f75206b66",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2576/f3d-eng-020-implement-versioned-map-loading-and-immutable-generator",
+      "title": "F3D ENG-020 — Implement versioned map loading and immutable generator dispatch",
+      "phase": 3,
+      "depends_on": [
+        "ENG-019",
+        "ENG-003"
+      ],
+      "blocked_by": [
+        "THU-2573",
+        "THU-2542"
+      ],
+      "description_characters": 5208
+    },
+    {
+      "plan_id": "ENG-021",
+      "id": "THU-2579",
+      "uuid": "fbd315d5-2c19-49c7-aa90-7eea2f92826d",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2579/f3d-eng-021-implement-deterministic-layered-navigation-and-route",
+      "title": "F3D ENG-021 — Implement deterministic layered navigation and route outcomes",
+      "phase": 3,
+      "depends_on": [
+        "ENG-019",
+        "ENG-020",
+        "ENG-005"
+      ],
+      "blocked_by": [
+        "THU-2573",
+        "THU-2576",
+        "THU-2562"
+      ],
+      "description_characters": 5307
+    },
+    {
+      "plan_id": "ENG-022",
+      "id": "THU-2582",
+      "uuid": "f72af0fe-8a56-457a-8c40-87c48d158fdd",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2582/f3d-eng-022-implement-movement-reservations-congestion-and-formation",
+      "title": "F3D ENG-022 — Implement movement reservations, congestion and formation behavior",
+      "phase": 3,
+      "depends_on": [
+        "ENG-021",
+        "ENG-005"
+      ],
+      "blocked_by": [
+        "THU-2579",
+        "THU-2562"
+      ],
+      "description_characters": 5674
+    },
+    {
+      "plan_id": "ENG-023",
+      "id": "THU-2589",
+      "uuid": "c5750fba-ae29-4209-a54b-b3515284c7cd",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2589/f3d-eng-023-implement-bridge-identities-and-the-authoritative",
+      "title": "F3D ENG-023 — Implement bridge identities and the authoritative lifecycle",
+      "phase": 3,
+      "depends_on": [
+        "ENG-019",
+        "ENG-021",
+        "WORLD-007"
+      ],
+      "blocked_by": [
+        "THU-2573",
+        "THU-2579",
+        "THU-2587"
+      ],
+      "description_characters": 5497
+    },
+    {
+      "plan_id": "ENG-024",
+      "id": "THU-2593",
+      "uuid": "037f3927-309f-4374-95ad-6e4ed97d2df5",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2593/f3d-eng-024-resolve-bridge-damage-collapse-and-occupants",
+      "title": "F3D ENG-024 — Resolve bridge damage, collapse and occupants deterministically",
+      "phase": 3,
+      "depends_on": [
+        "ENG-023",
+        "ENG-022",
+        "ENG-028"
+      ],
+      "blocked_by": [
+        "THU-2589",
+        "THU-2582",
+        "THU-2583"
+      ],
+      "description_characters": 6586
+    },
+    {
+      "plan_id": "ENG-025",
+      "id": "THU-2605",
+      "uuid": "0ddfe8f5-075b-44b7-9d3a-e2a8fcbd3a35",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2605/f3d-eng-025-implement-bridge-repair-and-rebuilding-commands-with",
+      "title": "F3D ENG-025 — Implement bridge repair and rebuilding commands with resource accounting",
+      "phase": 3,
+      "depends_on": [
+        "ENG-023",
+        "ENG-021",
+        "ENG-029"
+      ],
+      "blocked_by": [
+        "THU-2589",
+        "THU-2579",
+        "THU-2598"
+      ],
+      "description_characters": 5446
+    },
+    {
+      "plan_id": "ENG-026",
+      "id": "THU-2609",
+      "uuid": "9933c2c7-ec1e-48f6-b9ab-a5a9c5c932a7",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2609/f3d-eng-026-persist-and-replicate-bridge-and-topology-state-across",
+      "title": "F3D ENG-026 — Persist and replicate bridge and topology state across recovery",
+      "phase": 3,
+      "depends_on": [
+        "ENG-024",
+        "ENG-025",
+        "ENG-037",
+        "ENG-038"
+      ],
+      "blocked_by": [
+        "THU-2593",
+        "THU-2605",
+        "THU-2577",
+        "THU-2580"
+      ],
+      "description_characters": 6550
+    },
+    {
+      "plan_id": "ENG-027",
+      "id": "THU-2586",
+      "uuid": "f1545d27-385b-4cb6-b5b5-550723021e28",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2586/f3d-eng-027-implement-locomotion-transitions-and-transport-surface",
+      "title": "F3D ENG-027 — Implement locomotion transitions and transport surface rules",
+      "phase": 3,
+      "depends_on": [
+        "ENG-021",
+        "ENG-022",
+        "ENG-031"
+      ],
+      "blocked_by": [
+        "THU-2579",
+        "THU-2582",
+        "THU-2572"
+      ],
+      "description_characters": 6059
+    },
+    {
+      "plan_id": "ENG-028",
+      "id": "THU-2583",
+      "uuid": "8e74c592-07ad-4e13-abe2-f3cafa1e2bb2",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2583/f3d-eng-028-implement-height-aware-combat-visibility-and-projectile",
+      "title": "F3D ENG-028 — Implement height-aware combat, visibility and projectile contracts",
+      "phase": 3,
+      "depends_on": [
+        "ENG-019",
+        "ENG-021",
+        "ENG-031"
+      ],
+      "blocked_by": [
+        "THU-2573",
+        "THU-2579",
+        "THU-2572"
+      ],
+      "description_characters": 5390
+    },
+    {
+      "plan_id": "ENG-029",
+      "id": "THU-2598",
+      "uuid": "77be1230-118e-449c-99dd-7dbbbd7baf47",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2598/f3d-eng-029-implement-pluggable-construction-and-economy-policies",
+      "title": "F3D ENG-029 — Implement pluggable construction and economy policies",
+      "phase": 3,
+      "depends_on": [
+        "ENG-004",
+        "ENG-005",
+        "ENG-031",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2547",
+        "THU-2562",
+        "THU-2572",
+        "THU-2596"
+      ],
+      "description_characters": 6140
+    },
+    {
+      "plan_id": "ENG-030",
+      "id": "THU-2606",
+      "uuid": "6bee4718-b29f-4f18-9707-c462f1f66c68",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2606/f3d-eng-030-implement-technology-production-and-upgrade-dependency",
+      "title": "F3D ENG-030 — Implement technology, production and upgrade dependency contracts",
+      "phase": 3,
+      "depends_on": [
+        "ENG-004",
+        "ENG-029",
+        "ENG-031",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2547",
+        "THU-2598",
+        "THU-2572",
+        "THU-2596"
+      ],
+      "description_characters": 6087
+    },
+    {
+      "plan_id": "ENG-031",
+      "id": "THU-2572",
+      "uuid": "052d981c-a37d-41ce-a669-98ce5b1a5e54",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2572/f3d-eng-031-implement-typed-capability-registration-and-finite-state",
+      "title": "F3D ENG-031 — Implement typed capability registration and finite-state execution",
+      "phase": 3,
+      "depends_on": [
+        "ENG-004",
+        "ENG-005",
+        "RES-024"
+      ],
+      "blocked_by": [
+        "THU-2547",
+        "THU-2562",
+        "THU-2565"
+      ],
+      "description_characters": 6487
+    },
+    {
+      "plan_id": "ENG-032",
+      "id": "THU-2599",
+      "uuid": "6db59fae-719b-45db-808b-3a24fb0ee6ce",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2599/f3d-eng-032-implement-occupation-cargo-garrison-and-portal-state",
+      "title": "F3D ENG-032 — Implement occupation, cargo, garrison and portal state contracts",
+      "phase": 3,
+      "depends_on": [
+        "ENG-031",
+        "ENG-021",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2572",
+        "THU-2579",
+        "THU-2596"
+      ],
+      "description_characters": 6477
+    },
+    {
+      "plan_id": "ENG-033",
+      "id": "THU-2600",
+      "uuid": "6cbc444b-1d6b-4cec-827f-1c1c7162f88c",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2600/f3d-eng-033-implement-control-detection-and-timed-power-lifecycle",
+      "title": "F3D ENG-033 — Implement control, detection and timed-power lifecycle contracts",
+      "phase": 3,
+      "depends_on": [
+        "ENG-031",
+        "ENG-028",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2572",
+        "THU-2583",
+        "THU-2596"
+      ],
+      "description_characters": 5994
+    },
+    {
+      "plan_id": "ENG-034",
+      "id": "THU-2610",
+      "uuid": "730f3cfa-7df5-4d81-87a1-21173bf98f8b",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2610/f3d-eng-034-implement-multi-mode-entities-hardpoints-and-squad",
+      "title": "F3D ENG-034 — Implement multi-mode entities, hardpoints and squad lifecycle contracts",
+      "phase": 3,
+      "depends_on": [
+        "ENG-031",
+        "ENG-027",
+        "ENG-030",
+        "ENG-032",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2572",
+        "THU-2586",
+        "THU-2606",
+        "THU-2599",
+        "THU-2596"
+      ],
+      "description_characters": 6260
+    },
+    {
+      "plan_id": "ENG-035",
+      "id": "THU-2616",
+      "uuid": "a36aaee2-264b-45c1-81e0-d6fb53ef406e",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2616/f3d-eng-035-teach-ai-the-new-economy-surfaces-and-signature",
+      "title": "F3D ENG-035 — Teach AI the new economy, surfaces and signature capabilities",
+      "phase": 5,
+      "depends_on": [
+        "ENG-021",
+        "ENG-029",
+        "ENG-030",
+        "ENG-032",
+        "ENG-033",
+        "ENG-034",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2579",
+        "THU-2598",
+        "THU-2606",
+        "THU-2599",
+        "THU-2600",
+        "THU-2610",
+        "THU-2596"
+      ],
+      "description_characters": 6291
+    },
+    {
+      "plan_id": "ENG-036",
+      "id": "THU-2611",
+      "uuid": "907a53c8-3c46-42ba-b3a7-db94cabe11b5",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2611/f3d-eng-036-build-release-content-completeness-and-semantic-coverage",
+      "title": "F3D ENG-036 — Build release content completeness and semantic coverage gates",
+      "phase": 5,
+      "depends_on": [
+        "ENG-010",
+        "ENG-030",
+        "ENG-031"
+      ],
+      "blocked_by": [
+        "THU-2603",
+        "THU-2606",
+        "THU-2572"
+      ],
+      "description_characters": 5453
+    },
+    {
+      "plan_id": "ENG-037",
+      "id": "THU-2577",
+      "uuid": "8c6492d9-22d8-42eb-acab-4e26636cf4e9",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2577/f3d-eng-037-version-snapshot-and-network-contracts-for-the-new-engine",
+      "title": "F3D ENG-037 — Version snapshot and network contracts for the new engine profile",
+      "phase": 3,
+      "depends_on": [
+        "ENG-004",
+        "ENG-006",
+        "ENG-019",
+        "ENG-031"
+      ],
+      "blocked_by": [
+        "THU-2547",
+        "THU-2563",
+        "THU-2573",
+        "THU-2572"
+      ],
+      "description_characters": 6473
+    },
+    {
+      "plan_id": "ENG-038",
+      "id": "THU-2580",
+      "uuid": "9d00fba3-f0be-436b-8589-67b5bbd00b65",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2580/f3d-eng-038-implement-isolated-migration-verification-and-rollback",
+      "title": "F3D ENG-038 — Implement isolated migration, verification and rollback tooling",
+      "phase": 3,
+      "depends_on": [
+        "ENG-003",
+        "ENG-019",
+        "ENG-020",
+        "ENG-037"
+      ],
+      "blocked_by": [
+        "THU-2542",
+        "THU-2573",
+        "THU-2576",
+        "THU-2577"
+      ],
+      "description_characters": 6677
+    },
+    {
+      "plan_id": "ENG-039",
+      "id": "THU-2626",
+      "uuid": "984b8497-b61e-455f-857c-49d6ee859689",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2626/f3d-eng-039-implement-server-filtered-authoritative-view-replication",
+      "title": "F3D ENG-039 — Implement server-filtered authoritative view replication",
+      "phase": 7,
+      "depends_on": [
+        "ENG-006",
+        "ENG-017",
+        "ENG-037"
+      ],
+      "blocked_by": [
+        "THU-2563",
+        "THU-2618",
+        "THU-2577"
+      ],
+      "description_characters": 5630
+    },
+    {
+      "plan_id": "ENG-040",
+      "id": "THU-2617",
+      "uuid": "99d9115d-d44b-4af4-9820-4bda7f4ae0ba",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2617/f3d-eng-040-prove-mmo-authority-and-protection-invariants-under-new",
+      "title": "F3D ENG-040 — Prove MMO authority and protection invariants under new mechanics",
+      "phase": 7,
+      "depends_on": [
+        "ENG-026",
+        "ENG-027",
+        "ENG-032",
+        "ENG-033",
+        "ENG-034",
+        "ENG-038"
+      ],
+      "blocked_by": [
+        "THU-2609",
+        "THU-2586",
+        "THU-2599",
+        "THU-2600",
+        "THU-2610",
+        "THU-2580"
+      ],
+      "description_characters": 7064
+    },
+    {
+      "plan_id": "ENG-041",
+      "id": "THU-2637",
+      "uuid": "2b1f2705-5012-4606-94ca-dbbe0ef488ae",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2637/f3d-eng-041-meet-mobile-and-desktop-performance-budgets-without",
+      "title": "F3D ENG-041 — Meet mobile and desktop performance budgets without gameplay degradation",
+      "phase": 7,
+      "depends_on": [
+        "ENG-013",
+        "ENG-014",
+        "ENG-015",
+        "ENG-016",
+        "ENG-018",
+        "ENG-035",
+        "UX-006"
+      ],
+      "blocked_by": [
+        "THU-2613",
+        "THU-2614",
+        "THU-2624",
+        "THU-2633",
+        "THU-2615",
+        "THU-2616",
+        "THU-2604"
+      ],
+      "description_characters": 6045
+    },
+    {
+      "plan_id": "ENG-042",
+      "id": "THU-2665",
+      "uuid": "16f3ae5b-cfaa-499c-a8da-e91182141660",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2665/f3d-eng-042-run-complete-play-and-synchronized-multiplayer-acceptance",
+      "title": "F3D ENG-042 — Run complete play and synchronized multiplayer acceptance journeys",
+      "phase": 7,
+      "depends_on": [
+        "ENG-024",
+        "ENG-025",
+        "ENG-035",
+        "ENG-036",
+        "ENG-039",
+        "ENG-040",
+        "ENG-041",
+        "ENG-045",
+        "ENG-046",
+        "PKG-001",
+        "PKG-002",
+        "PKG-003",
+        "PKG-004",
+        "PKG-005",
+        "PKG-006",
+        "PKG-007",
+        "PKG-008",
+        "PKG-009",
+        "PKG-010",
+        "PKG-011",
+        "PKG-012",
+        "INT-002",
+        "UX-007",
+        "WORLD-010"
+      ],
+      "blocked_by": [
+        "THU-2593",
+        "THU-2605",
+        "THU-2616",
+        "THU-2611",
+        "THU-2626",
+        "THU-2617",
+        "THU-2637",
+        "THU-2625",
+        "THU-2601",
+        "THU-2651",
+        "THU-2652",
+        "THU-2653",
+        "THU-2654",
+        "THU-2655",
+        "THU-2656",
+        "THU-2657",
+        "THU-2658",
+        "THU-2659",
+        "THU-2660",
+        "THU-2661",
+        "THU-2662",
+        "THU-2664",
+        "THU-2663",
+        "THU-2634"
+      ],
+      "description_characters": 9183
+    },
+    {
+      "plan_id": "ENG-043",
+      "id": "THU-2667",
+      "uuid": "214cd44d-c886-4f5a-bde7-8c4378dd0eb5",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2667/f3d-eng-043-prepare-controlled-beta-rollout-and-rehearsed-rollback",
+      "title": "F3D ENG-043 — Prepare controlled beta rollout and rehearsed rollback",
+      "phase": 7,
+      "depends_on": [
+        "ENG-038",
+        "ENG-040",
+        "ENG-042"
+      ],
+      "blocked_by": [
+        "THU-2580",
+        "THU-2617",
+        "THU-2665"
+      ],
+      "description_characters": 5969
+    },
+    {
+      "plan_id": "ENG-044",
+      "id": "THU-2668",
+      "uuid": "c5134f9b-a276-4c35-822f-aece0e4a6885",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2668/f3d-eng-044-reconcile-final-coverage-and-retire-temporary-paths-only",
+      "title": "F3D ENG-044 — Reconcile final coverage and retire temporary paths only after proof",
+      "phase": 7,
+      "depends_on": [
+        "ENG-036",
+        "ENG-042",
+        "ENG-043"
+      ],
+      "blocked_by": [
+        "THU-2611",
+        "THU-2665",
+        "THU-2667"
+      ],
+      "description_characters": 5930
+    },
+    {
+      "plan_id": "ENG-045",
+      "id": "THU-2625",
+      "uuid": "19a3f142-a8f1-4920-80f1-7b42af7020f1",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2625/f3d-eng-045-coordinate-bridges-and-topology-across-region-boundaries",
+      "title": "F3D ENG-045 — Coordinate bridges and topology across region boundaries",
+      "phase": 7,
+      "depends_on": [
+        "ENG-026",
+        "ENG-037",
+        "ENG-038",
+        "ENG-040"
+      ],
+      "blocked_by": [
+        "THU-2609",
+        "THU-2577",
+        "THU-2580",
+        "THU-2617"
+      ],
+      "description_characters": 7660
+    },
+    {
+      "plan_id": "ENG-046",
+      "id": "THU-2601",
+      "uuid": "1ad4888f-5618-4a8e-b316-14a436068d54",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2601/f3d-eng-046-implement-authoritative-match-objectives-and-result",
+      "title": "F3D ENG-046 — Implement authoritative match objectives and result lifecycle contracts",
+      "phase": 3,
+      "depends_on": [
+        "ENG-004",
+        "ENG-031",
+        "RES-024",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2547",
+        "THU-2572",
+        "THU-2565",
+        "THU-2596"
+      ],
+      "description_characters": 7108
+    },
+    {
+      "plan_id": "ART-001",
+      "id": "THU-2537",
+      "uuid": "87544686-aa65-4d4e-b666-ad744e112a1e",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2537/f3d-art-001-reconcile-every-current-runtime-item-with-its-art-and",
+      "title": "F3D ART-001 — Reconcile every current runtime item with its art and source identity",
+      "phase": 0,
+      "depends_on": [
+        "ENG-001"
+      ],
+      "blocked_by": [
+        "THU-2535"
+      ],
+      "description_characters": 5145
+    },
+    {
+      "plan_id": "ART-002",
+      "id": "THU-2581",
+      "uuid": "47cc2aad-acec-4bfc-a05b-4d833a732369",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2581/f3d-art-002-define-the-art-direction-framework-and-first-battle",
+      "title": "F3D ART-002 — Define the art-direction framework and first-battle faction style sheets",
+      "phase": 1,
+      "depends_on": [
+        "ART-001",
+        "RES-027"
+      ],
+      "blocked_by": [
+        "THU-2537",
+        "THU-2578"
+      ],
+      "description_characters": 5878
+    },
+    {
+      "plan_id": "ART-003",
+      "id": "THU-2585",
+      "uuid": "a2b1e379-5587-4ccc-bd02-24f27f5ca741",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2585/f3d-art-003-build-authoring-export-validation-and-specify-the-runtime",
+      "title": "F3D ART-003 — Build authoring export validation and specify the runtime asset contract",
+      "phase": 2,
+      "depends_on": [
+        "ART-002",
+        "RES-003"
+      ],
+      "blocked_by": [
+        "THU-2581",
+        "THU-2546"
+      ],
+      "description_characters": 5272
+    },
+    {
+      "plan_id": "ART-004",
+      "id": "THU-2588",
+      "uuid": "f480f3f0-401b-45db-95cb-16bff1077d63",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2588/f3d-art-004-specify-animation-pose-bindings-priorities-and-event",
+      "title": "F3D ART-004 — Specify animation pose bindings priorities and event fixtures",
+      "phase": 2,
+      "depends_on": [
+        "ART-003",
+        "ENG-006"
+      ],
+      "blocked_by": [
+        "THU-2585",
+        "THU-2563"
+      ],
+      "description_characters": 5315
+    },
+    {
+      "plan_id": "ART-005",
+      "id": "THU-2543",
+      "uuid": "e66fe2c0-02d0-4281-ad75-9fd4fd8fc1a7",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2543/f3d-art-005-enforce-provenance-and-publish-eligibility-for-every-art",
+      "title": "F3D ART-005 — Enforce provenance and publish eligibility for every art input",
+      "phase": 1,
+      "depends_on": [
+        "ART-001",
+        "OPS-003"
+      ],
+      "blocked_by": [
+        "THU-2537",
+        "THU-2539"
+      ],
+      "description_characters": 4993
+    },
+    {
+      "plan_id": "ART-006",
+      "id": "THU-2591",
+      "uuid": "5b24c395-768e-437d-b186-d20ad9908d14",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2591/f3d-art-006-produce-the-representative-battle-blockout-set",
+      "title": "F3D ART-006 — Produce the representative battle blockout set",
+      "phase": 2,
+      "depends_on": [
+        "ART-003",
+        "ART-005",
+        "ART-004"
+      ],
+      "blocked_by": [
+        "THU-2585",
+        "THU-2543",
+        "THU-2588"
+      ],
+      "description_characters": 5768
+    },
+    {
+      "plan_id": "ART-007",
+      "id": "THU-2628",
+      "uuid": "f8d1d628-5433-4208-8552-66a3c1ab5080",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2628/f3d-art-007-build-infantry-rigs-and-specialist-action-animations",
+      "title": "F3D ART-007 — Build infantry rigs and specialist action animations",
+      "phase": 4,
+      "depends_on": [
+        "ART-004",
+        "ART-006",
+        "ENG-015"
+      ],
+      "blocked_by": [
+        "THU-2588",
+        "THU-2591",
+        "THU-2624"
+      ],
+      "description_characters": 5016
+    },
+    {
+      "plan_id": "ART-008",
+      "id": "THU-2629",
+      "uuid": "719a5981-2186-4ce5-98e0-76b8cae33d1c",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2629/f3d-art-008-build-tracked-and-wheeled-vehicle-articulation",
+      "title": "F3D ART-008 — Build tracked and wheeled vehicle articulation",
+      "phase": 4,
+      "depends_on": [
+        "ART-004",
+        "ART-006",
+        "ENG-015"
+      ],
+      "blocked_by": [
+        "THU-2588",
+        "THU-2591",
+        "THU-2624"
+      ],
+      "description_characters": 4897
+    },
+    {
+      "plan_id": "ART-009",
+      "id": "THU-2630",
+      "uuid": "f7bbaf38-19a7-4087-a706-53c924f00acf",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2630/f3d-art-009-build-walker-creature-and-subterranean-animation-families",
+      "title": "F3D ART-009 — Build walker creature and subterranean animation families",
+      "phase": 5,
+      "depends_on": [
+        "ART-004",
+        "ART-006",
+        "ENG-015",
+        "ENG-027"
+      ],
+      "blocked_by": [
+        "THU-2588",
+        "THU-2591",
+        "THU-2624",
+        "THU-2586"
+      ],
+      "description_characters": 5187
+    },
+    {
+      "plan_id": "ART-010",
+      "id": "THU-2631",
+      "uuid": "6aa095d2-fa44-4f69-91f1-7fdae9a8d572",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2631/f3d-art-010-build-aircraft-naval-and-transforming-unit-animation",
+      "title": "F3D ART-010 — Build aircraft naval and transforming unit animation families",
+      "phase": 4,
+      "depends_on": [
+        "ART-004",
+        "ART-006",
+        "ENG-015",
+        "ENG-027",
+        "ENG-034"
+      ],
+      "blocked_by": [
+        "THU-2588",
+        "THU-2591",
+        "THU-2624",
+        "THU-2586",
+        "THU-2610"
+      ],
+      "description_characters": 5494
+    },
+    {
+      "plan_id": "ART-011",
+      "id": "THU-2632",
+      "uuid": "54bb70d2-658e-4b5a-80eb-e806cf288242",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2632/f3d-art-011-build-complete-structure-lifecycle-animation",
+      "title": "F3D ART-011 — Build complete structure lifecycle animation",
+      "phase": 4,
+      "depends_on": [
+        "ART-004",
+        "ART-006",
+        "ENG-015",
+        "ENG-030"
+      ],
+      "blocked_by": [
+        "THU-2588",
+        "THU-2591",
+        "THU-2624",
+        "THU-2606"
+      ],
+      "description_characters": 5288
+    },
+    {
+      "plan_id": "ART-012",
+      "id": "THU-2636",
+      "uuid": "8a015ed8-46d7-4cf6-b8e2-2dcfd58eb234",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2636/f3d-art-012-create-distinct-weapon-ability-and-destruction-effects",
+      "title": "F3D ART-012 — Create distinct weapon ability and destruction effects",
+      "phase": 4,
+      "depends_on": [
+        "ART-004",
+        "ART-006",
+        "ENG-016",
+        "ENG-017"
+      ],
+      "blocked_by": [
+        "THU-2588",
+        "THU-2591",
+        "THU-2633",
+        "THU-2618"
+      ],
+      "description_characters": 5282
+    },
+    {
+      "plan_id": "ART-013",
+      "id": "THU-2592",
+      "uuid": "2f0e1500-adac-4e1e-987d-892945191398",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2592/f3d-art-013-expand-the-complete-inventory-into-bounded-per-entity-work",
+      "title": "F3D ART-013 — Expand the complete inventory into bounded per-entity work orders",
+      "phase": 2,
+      "depends_on": [
+        "ART-001",
+        "ART-002",
+        "ART-003",
+        "ART-004",
+        "ART-005",
+        "RES-003",
+        "RES-027"
+      ],
+      "blocked_by": [
+        "THU-2537",
+        "THU-2581",
+        "THU-2585",
+        "THU-2588",
+        "THU-2543",
+        "THU-2546",
+        "THU-2578"
+      ],
+      "description_characters": 7341
+    },
+    {
+      "plan_id": "ART-014",
+      "id": "THU-2639",
+      "uuid": "e11fc2dd-a02f-42f9-9c5e-6d02ab507e63",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2639/f3d-art-014-complete-tiberian-dawn-and-red-alert-era-production",
+      "title": "F3D ART-014 — Complete Tiberian Dawn and Red Alert era production",
+      "phase": 5,
+      "depends_on": [
+        "ART-013",
+        "ART-007",
+        "ART-008",
+        "ART-010",
+        "ART-011",
+        "ART-012",
+        "OPS-005",
+        "RES-004",
+        "RES-005",
+        "RES-019"
+      ],
+      "blocked_by": [
+        "THU-2592",
+        "THU-2628",
+        "THU-2629",
+        "THU-2631",
+        "THU-2632",
+        "THU-2636",
+        "THU-2596",
+        "THU-2548",
+        "THU-2549",
+        "THU-2564"
+      ],
+      "description_characters": 7233
+    },
+    {
+      "plan_id": "ART-015",
+      "id": "THU-2640",
+      "uuid": "cc4e7ab0-6be9-4a86-893b-7cd29b9fec15",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2640/f3d-art-015-complete-tiberian-sun-and-red-alert-2-era-production",
+      "title": "F3D ART-015 — Complete Tiberian Sun and Red Alert 2 era production",
+      "phase": 5,
+      "depends_on": [
+        "ART-013",
+        "ART-007",
+        "ART-008",
+        "ART-009",
+        "ART-010",
+        "ART-011",
+        "ART-012",
+        "OPS-005",
+        "RES-006",
+        "RES-007",
+        "RES-008",
+        "RES-009"
+      ],
+      "blocked_by": [
+        "THU-2592",
+        "THU-2628",
+        "THU-2629",
+        "THU-2630",
+        "THU-2631",
+        "THU-2632",
+        "THU-2636",
+        "THU-2596",
+        "THU-2550",
+        "THU-2567",
+        "THU-2551",
+        "THU-2568"
+      ],
+      "description_characters": 7441
+    },
+    {
+      "plan_id": "ART-016",
+      "id": "THU-2641",
+      "uuid": "31371a7d-d1e4-4074-a9c8-fb0587b2f0cd",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2641/f3d-art-016-complete-generals-and-zero-hour-production",
+      "title": "F3D ART-016 — Complete Generals and Zero Hour production",
+      "phase": 5,
+      "depends_on": [
+        "ART-013",
+        "ART-007",
+        "ART-008",
+        "ART-010",
+        "ART-011",
+        "ART-012",
+        "OPS-005",
+        "RES-010",
+        "RES-011"
+      ],
+      "blocked_by": [
+        "THU-2592",
+        "THU-2628",
+        "THU-2629",
+        "THU-2631",
+        "THU-2632",
+        "THU-2636",
+        "THU-2596",
+        "THU-2552",
+        "THU-2569"
+      ],
+      "description_characters": 6953
+    },
+    {
+      "plan_id": "ART-017",
+      "id": "THU-2642",
+      "uuid": "612f716d-d093-42bd-ad3d-f56aadd37603",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2642/f3d-art-017-complete-tiberium-wars-and-kanes-wrath-production",
+      "title": "F3D ART-017 — Complete Tiberium Wars and Kane's Wrath production",
+      "phase": 5,
+      "depends_on": [
+        "ART-013",
+        "ART-007",
+        "ART-008",
+        "ART-009",
+        "ART-010",
+        "ART-011",
+        "ART-012",
+        "OPS-005",
+        "RES-012",
+        "RES-013"
+      ],
+      "blocked_by": [
+        "THU-2592",
+        "THU-2628",
+        "THU-2629",
+        "THU-2630",
+        "THU-2631",
+        "THU-2632",
+        "THU-2636",
+        "THU-2596",
+        "THU-2553",
+        "THU-2570"
+      ],
+      "description_characters": 7136
+    },
+    {
+      "plan_id": "ART-018",
+      "id": "THU-2643",
+      "uuid": "7d7245e6-d5b6-4bdb-9810-e8076188ce7a",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2643/f3d-art-018-complete-red-alert-3-and-uprising-production",
+      "title": "F3D ART-018 — Complete Red Alert 3 and Uprising production",
+      "phase": 5,
+      "depends_on": [
+        "ART-013",
+        "ART-007",
+        "ART-008",
+        "ART-009",
+        "ART-010",
+        "ART-011",
+        "ART-012",
+        "OPS-005",
+        "RES-014",
+        "RES-015"
+      ],
+      "blocked_by": [
+        "THU-2592",
+        "THU-2628",
+        "THU-2629",
+        "THU-2630",
+        "THU-2631",
+        "THU-2632",
+        "THU-2636",
+        "THU-2596",
+        "THU-2554",
+        "THU-2571"
+      ],
+      "description_characters": 7098
+    },
+    {
+      "plan_id": "ART-019",
+      "id": "THU-2644",
+      "uuid": "59f2bf90-72eb-4a18-9f88-c6fabfec094f",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2644/f3d-art-019-complete-later-title-and-existing-pack-presentation",
+      "title": "F3D ART-019 — Complete later-title and existing-pack presentation coverage",
+      "phase": 5,
+      "depends_on": [
+        "ART-013",
+        "ART-007",
+        "ART-008",
+        "ART-009",
+        "ART-010",
+        "ART-011",
+        "ART-012",
+        "OPS-005",
+        "RES-016",
+        "RES-017",
+        "RES-018",
+        "RES-019",
+        "RES-020",
+        "RES-021",
+        "RES-022",
+        "RES-023"
+      ],
+      "blocked_by": [
+        "THU-2592",
+        "THU-2628",
+        "THU-2629",
+        "THU-2630",
+        "THU-2631",
+        "THU-2632",
+        "THU-2636",
+        "THU-2596",
+        "THU-2555",
+        "THU-2556",
+        "THU-2557",
+        "THU-2564",
+        "THU-2558",
+        "THU-2559",
+        "THU-2560",
+        "THU-2561"
+      ],
+      "description_characters": 8235
+    },
+    {
+      "plan_id": "ART-020",
+      "id": "THU-2647",
+      "uuid": "5c0e5f0d-603e-47e7-a06e-d60c58a58a33",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2647/f3d-art-020-verify-complete-roster-presentation-and-close-missing",
+      "title": "F3D ART-020 — Verify complete roster presentation and close missing-asset defects",
+      "phase": 6,
+      "depends_on": [
+        "ART-014",
+        "ART-015",
+        "ART-016",
+        "ART-017",
+        "ART-018",
+        "ART-019"
+      ],
+      "blocked_by": [
+        "THU-2639",
+        "THU-2640",
+        "THU-2641",
+        "THU-2642",
+        "THU-2643",
+        "THU-2644"
+      ],
+      "description_characters": 5693
+    },
+    {
+      "plan_id": "WORLD-001",
+      "id": "THU-2575",
+      "uuid": "ecdc01eb-44ee-47d7-be0d-360673ba89a1",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2575/f3d-world-001-define-the-terrain-coverage-framework-and-first-crossing",
+      "title": "F3D WORLD-001 — Define the terrain coverage framework and first-crossing source mapping",
+      "phase": 1,
+      "depends_on": [
+        "RES-025"
+      ],
+      "blocked_by": [
+        "THU-2566"
+      ],
+      "description_characters": 5567
+    },
+    {
+      "plan_id": "WORLD-002",
+      "id": "THU-2584",
+      "uuid": "ac14c049-2792-4cb1-b636-bcc2aba35a7f",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2584/f3d-world-002-specify-and-verify-height-surface-and-transition",
+      "title": "F3D WORLD-002 — Specify and verify height surface and transition fixtures",
+      "phase": 2,
+      "depends_on": [
+        "WORLD-001",
+        "ENG-019",
+        "ENG-021"
+      ],
+      "blocked_by": [
+        "THU-2575",
+        "THU-2573",
+        "THU-2579"
+      ],
+      "description_characters": 5161
+    },
+    {
+      "plan_id": "WORLD-003",
+      "id": "THU-2620",
+      "uuid": "b9e34d44-67cb-4113-a4d9-75ee9cf536df",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2620/f3d-world-003-produce-temperate-forest-and-rural-terrain-kits",
+      "title": "F3D WORLD-003 — Produce temperate forest and rural terrain kits",
+      "phase": 5,
+      "depends_on": [
+        "WORLD-001",
+        "WORLD-002",
+        "ART-003",
+        "ART-005",
+        "ENG-013",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2575",
+        "THU-2584",
+        "THU-2585",
+        "THU-2543",
+        "THU-2613",
+        "THU-2596"
+      ],
+      "description_characters": 6248
+    },
+    {
+      "plan_id": "WORLD-004",
+      "id": "THU-2621",
+      "uuid": "5a3949b6-54cd-4b08-adc4-0cd57e702c63",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2621/f3d-world-004-produce-cold-arid-mountain-and-dune-compatible-terrain",
+      "title": "F3D WORLD-004 — Produce cold arid mountain and Dune-compatible terrain kits",
+      "phase": 5,
+      "depends_on": [
+        "WORLD-001",
+        "WORLD-002",
+        "ART-003",
+        "ART-005",
+        "ENG-013",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2575",
+        "THU-2584",
+        "THU-2585",
+        "THU-2543",
+        "THU-2613",
+        "THU-2596"
+      ],
+      "description_characters": 6297
+    },
+    {
+      "plan_id": "WORLD-005",
+      "id": "THU-2622",
+      "uuid": "8579d025-96aa-4707-87d0-371101487b3b",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2622/f3d-world-005-produce-urban-contaminated-and-special-terrain-kits",
+      "title": "F3D WORLD-005 — Produce urban contaminated and special terrain kits",
+      "phase": 5,
+      "depends_on": [
+        "WORLD-001",
+        "WORLD-002",
+        "ART-003",
+        "ART-005",
+        "ENG-013",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2575",
+        "THU-2584",
+        "THU-2585",
+        "THU-2543",
+        "THU-2613",
+        "THU-2596"
+      ],
+      "description_characters": 6358
+    },
+    {
+      "plan_id": "WORLD-006",
+      "id": "THU-2627",
+      "uuid": "f125be1b-e10d-403c-8820-4464d7843e06",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2627/f3d-world-006-produce-water-coast-tropical-and-wetland-terrain-kits",
+      "title": "F3D WORLD-006 — Produce water coast tropical and wetland terrain kits",
+      "phase": 5,
+      "depends_on": [
+        "WORLD-001",
+        "WORLD-002",
+        "ART-003",
+        "ART-005",
+        "WORLD-011",
+        "ENG-013",
+        "OPS-005"
+      ],
+      "blocked_by": [
+        "THU-2575",
+        "THU-2584",
+        "THU-2585",
+        "THU-2543",
+        "THU-2623",
+        "THU-2613",
+        "THU-2596"
+      ],
+      "description_characters": 6465
+    },
+    {
+      "plan_id": "WORLD-007",
+      "id": "THU-2587",
+      "uuid": "131656bf-bfd2-49cc-a7bf-71c294501657",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2587/f3d-world-007-specify-bridge-rules-and-independently-authored",
+      "title": "F3D WORLD-007 — Specify bridge rules and independently authored acceptance fixtures",
+      "phase": 3,
+      "depends_on": [
+        "WORLD-002"
+      ],
+      "blocked_by": [
+        "THU-2584"
+      ],
+      "description_characters": 6214
+    },
+    {
+      "plan_id": "WORLD-008",
+      "id": "THU-2638",
+      "uuid": "c9a66681-8dd1-4062-af48-4cabbbf3ee75",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2638/f3d-world-008-create-bridge-geometry-lifecycle-presentation-and",
+      "title": "F3D WORLD-008 — Create bridge geometry lifecycle presentation and targeting",
+      "phase": 4,
+      "depends_on": [
+        "WORLD-007",
+        "ART-004",
+        "ART-011",
+        "WORLD-011",
+        "ENG-024",
+        "ENG-025",
+        "ENG-016",
+        "ENG-012"
+      ],
+      "blocked_by": [
+        "THU-2587",
+        "THU-2588",
+        "THU-2632",
+        "THU-2623",
+        "THU-2593",
+        "THU-2605",
+        "THU-2633",
+        "THU-2612"
+      ],
+      "description_characters": 5955
+    },
+    {
+      "plan_id": "WORLD-009",
+      "id": "THU-2590",
+      "uuid": "6ca66814-041a-4d9b-8a89-295d2cf5aa0d",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2590/f3d-world-009-validate-strategic-generation-and-add-world-authoring",
+      "title": "F3D WORLD-009 — Validate strategic generation and add world authoring inspection",
+      "phase": 3,
+      "depends_on": [
+        "WORLD-001",
+        "WORLD-002",
+        "WORLD-007",
+        "ENG-020",
+        "ENG-021"
+      ],
+      "blocked_by": [
+        "THU-2575",
+        "THU-2584",
+        "THU-2587",
+        "THU-2576",
+        "THU-2579"
+      ],
+      "description_characters": 5677
+    },
+    {
+      "plan_id": "WORLD-010",
+      "id": "THU-2634",
+      "uuid": "c6f8952e-04f9-4717-bc61-4e70a8a2f695",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2634/f3d-world-010-verify-world-state-recovery-and-schedule-region-seam",
+      "title": "F3D WORLD-010 — Verify world state recovery and schedule region seam bridges",
+      "phase": 7,
+      "depends_on": [
+        "WORLD-007",
+        "WORLD-009",
+        "ENG-026",
+        "ENG-037",
+        "ENG-038",
+        "ENG-045"
+      ],
+      "blocked_by": [
+        "THU-2587",
+        "THU-2590",
+        "THU-2609",
+        "THU-2577",
+        "THU-2580",
+        "THU-2625"
+      ],
+      "description_characters": 6104
+    },
+    {
+      "plan_id": "UX-001",
+      "id": "THU-2619",
+      "uuid": "8546e056-4237-45d1-8048-59b4282e339e",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2619/f3d-ux-001-adapt-tactical-camera-picking-and-mouse-touch-orders-to-3d",
+      "title": "F3D UX-001 — Adapt tactical camera picking and mouse touch orders to 3D",
+      "phase": 4,
+      "depends_on": [
+        "ART-004",
+        "WORLD-002",
+        "ENG-012"
+      ],
+      "blocked_by": [
+        "THU-2588",
+        "THU-2584",
+        "THU-2612"
+      ],
+      "description_characters": 5408
+    },
+    {
+      "plan_id": "UX-002",
+      "id": "THU-2635",
+      "uuid": "f187d58e-454b-445d-b174-7c38ec0d05c5",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2635/f3d-ux-002-preserve-hud-ownership-labels-and-fog-information-rules",
+      "title": "F3D UX-002 — Preserve HUD ownership labels and fog information rules",
+      "phase": 4,
+      "depends_on": [
+        "UX-001",
+        "ART-011",
+        "ENG-017"
+      ],
+      "blocked_by": [
+        "THU-2619",
+        "THU-2632",
+        "THU-2618"
+      ],
+      "description_characters": 5835
+    },
+    {
+      "plan_id": "UX-003",
+      "id": "THU-2645",
+      "uuid": "f46385e8-c150-44e8-ad04-cc37fed2fdec",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2645/f3d-ux-003-add-accessible-visual-audio-and-control-settings",
+      "title": "F3D UX-003 — Add accessible visual audio and control settings",
+      "phase": 4,
+      "depends_on": [
+        "UX-001",
+        "UX-002",
+        "ART-012"
+      ],
+      "blocked_by": [
+        "THU-2619",
+        "THU-2635",
+        "THU-2636"
+      ],
+      "description_characters": 5059
+    },
+    {
+      "plan_id": "UX-004",
+      "id": "THU-2646",
+      "uuid": "93cb11fc-4c74-451f-b9e3-df12bfb25050",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2646/f3d-ux-004-build-faction-audio-voices-alerts-and-event-mixing",
+      "title": "F3D UX-004 — Build faction audio voices alerts and event mixing",
+      "phase": 4,
+      "depends_on": [
+        "ART-004",
+        "ART-005",
+        "ART-012",
+        "ENG-016"
+      ],
+      "blocked_by": [
+        "THU-2588",
+        "THU-2543",
+        "THU-2636",
+        "THU-2633"
+      ],
+      "description_characters": 5298
+    },
+    {
+      "plan_id": "UX-005",
+      "id": "THU-2648",
+      "uuid": "bedebe95-9a03-4562-a78d-32b88cdc1ff5",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2648/f3d-ux-005-prove-the-complete-representative-battle-experience",
+      "title": "F3D UX-005 — Prove the complete representative battle experience",
+      "phase": 4,
+      "depends_on": [
+        "ART-007",
+        "ART-008",
+        "ART-010",
+        "ART-011",
+        "ART-012",
+        "WORLD-008",
+        "UX-001",
+        "UX-002",
+        "UX-003",
+        "UX-004",
+        "ENG-024",
+        "ENG-025",
+        "ENG-026",
+        "ENG-046"
+      ],
+      "blocked_by": [
+        "THU-2628",
+        "THU-2629",
+        "THU-2631",
+        "THU-2632",
+        "THU-2636",
+        "THU-2638",
+        "THU-2619",
+        "THU-2635",
+        "THU-2645",
+        "THU-2646",
+        "THU-2593",
+        "THU-2605",
+        "THU-2609",
+        "THU-2601"
+      ],
+      "description_characters": 6957
+    },
+    {
+      "plan_id": "UX-006",
+      "id": "THU-2604",
+      "uuid": "4ebccdde-7238-4ebf-82cf-d3e405928397",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2604/f3d-ux-006-measure-performance-budgets-and-implement-asset-streaming",
+      "title": "F3D UX-006 — Measure performance budgets and implement asset streaming",
+      "phase": 4,
+      "depends_on": [
+        "ART-003",
+        "ART-004",
+        "ART-006",
+        "WORLD-002",
+        "ENG-009"
+      ],
+      "blocked_by": [
+        "THU-2585",
+        "THU-2588",
+        "THU-2591",
+        "THU-2584",
+        "THU-2597"
+      ],
+      "description_characters": 5865
+    },
+    {
+      "plan_id": "UX-007",
+      "id": "THU-2663",
+      "uuid": "115a2dee-edca-4395-b8de-d10300de043d",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2663/f3d-ux-007-qualify-real-mobile-browsers-and-crowded-battlefield",
+      "title": "F3D UX-007 — Qualify real mobile browsers and crowded battlefield controls",
+      "phase": 7,
+      "depends_on": [
+        "UX-003",
+        "UX-005",
+        "UX-006",
+        "WORLD-008",
+        "ENG-041",
+        "ENG-039",
+        "UX-008"
+      ],
+      "blocked_by": [
+        "THU-2645",
+        "THU-2648",
+        "THU-2604",
+        "THU-2638",
+        "THU-2637",
+        "THU-2626",
+        "THU-2650"
+      ],
+      "description_characters": 5738
+    },
+    {
+      "plan_id": "UX-008",
+      "id": "THU-2650",
+      "uuid": "a52b1f66-363a-4089-ad40-89714a31cf0f",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2650/f3d-ux-008-assemble-and-independently-approve-the-full-experience",
+      "title": "F3D UX-008 — Assemble and independently approve the full experience gallery",
+      "phase": 6,
+      "depends_on": [
+        "ART-020",
+        "WORLD-003",
+        "WORLD-004",
+        "WORLD-005",
+        "WORLD-006",
+        "UX-005",
+        "UX-006"
+      ],
+      "blocked_by": [
+        "THU-2647",
+        "THU-2620",
+        "THU-2621",
+        "THU-2622",
+        "THU-2627",
+        "THU-2648",
+        "THU-2604"
+      ],
+      "description_characters": 5761
+    },
+    {
+      "plan_id": "WORLD-011",
+      "id": "THU-2623",
+      "uuid": "d94e3072-0193-43a8-98b4-61fc270b7182",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2623/f3d-world-011-produce-the-representative-river-crossing-and-water-kit",
+      "title": "F3D WORLD-011 — Produce the representative river crossing and water kit",
+      "phase": 3,
+      "depends_on": [
+        "WORLD-002",
+        "ART-003",
+        "ART-005",
+        "ENG-013"
+      ],
+      "blocked_by": [
+        "THU-2584",
+        "THU-2585",
+        "THU-2543",
+        "THU-2613"
+      ],
+      "description_characters": 5429
+    },
+    {
+      "plan_id": "PKG-001",
+      "id": "THU-2651",
+      "uuid": "91f4b67d-bc24-4049-bf75-ada8408a2446",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2651/f3d-pkg-001-complete-tiberian-dawn-and-covert-operations-content",
+      "title": "F3D PKG-001 — Complete Tiberian Dawn and Covert Operations content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-014",
+        "RES-004"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2639",
+        "THU-2548"
+      ],
+      "description_characters": 6960
+    },
+    {
+      "plan_id": "PKG-002",
+      "id": "THU-2652",
+      "uuid": "7f0ed0e6-7c20-472c-a4ca-ad7c558b7d65",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2652/f3d-pkg-002-complete-red-alert-counterstrike-and-aftermath-content",
+      "title": "F3D PKG-002 — Complete Red Alert Counterstrike and Aftermath content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-014",
+        "RES-005"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2639",
+        "THU-2549"
+      ],
+      "description_characters": 6967
+    },
+    {
+      "plan_id": "PKG-003",
+      "id": "THU-2653",
+      "uuid": "5304acb4-17af-4ddc-b20b-af86e225094d",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2653/f3d-pkg-003-complete-tiberian-sun-and-firestorm-content-delivery-gate",
+      "title": "F3D PKG-003 — Complete Tiberian Sun and Firestorm content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-015",
+        "RES-006",
+        "RES-007"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2640",
+        "THU-2550",
+        "THU-2567"
+      ],
+      "description_characters": 7303
+    },
+    {
+      "plan_id": "PKG-004",
+      "id": "THU-2654",
+      "uuid": "d267b690-8a23-435a-bbd5-dbd87aa1d665",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2654/f3d-pkg-004-complete-red-alert-2-and-yuris-revenge-content-delivery",
+      "title": "F3D PKG-004 — Complete Red Alert 2 and Yuri's Revenge content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-015",
+        "RES-008",
+        "RES-009"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2640",
+        "THU-2551",
+        "THU-2568"
+      ],
+      "description_characters": 7617
+    },
+    {
+      "plan_id": "PKG-005",
+      "id": "THU-2655",
+      "uuid": "ddda004e-80e5-4aa5-9a28-1c6ac426d451",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2655/f3d-pkg-005-complete-generals-and-zero-hour-content-delivery-gate",
+      "title": "F3D PKG-005 — Complete Generals and Zero Hour content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-016",
+        "RES-010",
+        "RES-011"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2641",
+        "THU-2552",
+        "THU-2569"
+      ],
+      "description_characters": 7666
+    },
+    {
+      "plan_id": "PKG-006",
+      "id": "THU-2656",
+      "uuid": "bbf7f74a-a949-434c-804a-bfff9e31314c",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2656/f3d-pkg-006-complete-tiberium-wars-and-kanes-wrath-content-delivery",
+      "title": "F3D PKG-006 — Complete Tiberium Wars and Kane's Wrath content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-017",
+        "RES-012",
+        "RES-013"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2642",
+        "THU-2553",
+        "THU-2570"
+      ],
+      "description_characters": 7535
+    },
+    {
+      "plan_id": "PKG-007",
+      "id": "THU-2657",
+      "uuid": "48c9484c-314f-4e4a-8007-516b34fab018",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2657/f3d-pkg-007-complete-red-alert-3-and-uprising-content-delivery-gate",
+      "title": "F3D PKG-007 — Complete Red Alert 3 and Uprising content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-018",
+        "RES-014",
+        "RES-015"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2643",
+        "THU-2554",
+        "THU-2571"
+      ],
+      "description_characters": 7468
+    },
+    {
+      "plan_id": "PKG-008",
+      "id": "THU-2658",
+      "uuid": "4885356f-b1fe-4356-8fcb-3f87578c368c",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2658/f3d-pkg-008-complete-tiberian-twilight-faction-and-class-content",
+      "title": "F3D PKG-008 — Complete Tiberian Twilight faction and class content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-016"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2644",
+        "THU-2555"
+      ],
+      "description_characters": 7007
+    },
+    {
+      "plan_id": "PKG-009",
+      "id": "THU-2659",
+      "uuid": "835c66e0-e3b7-4ed6-99f9-2a2f10ce1c15",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2659/f3d-pkg-009-complete-renegade-content-adaptations-content-delivery",
+      "title": "F3D PKG-009 — Complete Renegade content adaptations content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-017"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2644",
+        "THU-2556"
+      ],
+      "description_characters": 6834
+    },
+    {
+      "plan_id": "PKG-010",
+      "id": "THU-2660",
+      "uuid": "996c6dae-07c5-47c5-b3e5-22a04d385964",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2660/f3d-pkg-010-complete-sole-survivor-remaster-and-console-deltas-content",
+      "title": "F3D PKG-010 — Complete Sole Survivor remaster and console deltas content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-018",
+        "RES-019"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2644",
+        "THU-2557",
+        "THU-2564"
+      ],
+      "description_characters": 7246
+    },
+    {
+      "plan_id": "PKG-011",
+      "id": "THU-2661",
+      "uuid": "cd11089b-7c99-4051-86f1-053fc53e3772",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2661/f3d-pkg-011-complete-released-browser-and-mobile-content-dispositions",
+      "title": "F3D PKG-011 — Complete Released browser and mobile content dispositions content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-020",
+        "RES-021",
+        "RES-022"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2644",
+        "THU-2558",
+        "THU-2559",
+        "THU-2560"
+      ],
+      "description_characters": 7701
+    },
+    {
+      "plan_id": "PKG-012",
+      "id": "THU-2662",
+      "uuid": "9e431d1d-702e-48ad-baa0-23ec5e5b9957",
+      "url": "https://linear.app/thunderchild-creative/issue/THU-2662/f3d-pkg-012-complete-existing-dune-and-custom-fusion-compatibility",
+      "title": "F3D PKG-012 — Complete Existing Dune and custom Fusion compatibility content delivery gate",
+      "phase": 5,
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-023"
+      ],
+      "blocked_by": [
+        "THU-2596",
+        "THU-2649",
+        "THU-2644",
+        "THU-2561"
+      ],
+      "description_characters": 7288
+    }
+  ],
+  "publication_scope": "138 initial task descriptions and native blockers. Future generated source/entity/capability/terrain children remain mandatory implementation work."
+}
