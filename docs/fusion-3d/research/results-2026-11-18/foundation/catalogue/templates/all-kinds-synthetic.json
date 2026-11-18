@@ -1,0 +1,846 @@
+{
+  "schema_version": 1,
+  "context": "synthetic_test",
+  "records": [
+    {
+      "schema_version": 1,
+      "kind": "source_profile",
+      "id": "profile.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": "automated test reviewer",
+      "blockers": [],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "title": "Pipeline verification",
+      "edition": "public-source",
+      "platform": "pc",
+      "region": "undetermined",
+      "language": "undetermined",
+      "inherits": null,
+      "data_hashes": [],
+      "executable_hashes": [],
+      "repository": null,
+      "revision": "fixture-v1",
+      "modification": "test_fixture",
+      "authoritative_use": [
+        "synthetic"
+      ],
+      "observation_environment": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "This synthetic fixture has no retail environment."
+        },
+        "tolerance": null
+      },
+      "rights_id": "profile.synthetic.rights",
+      "conflicts": [],
+      "lock_state": "locked",
+      "locked_at": "2026-11-18"
+    },
+    {
+      "schema_version": 1,
+      "kind": "asset_provenance",
+      "id": "profile.synthetic.rights",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "This synthetic fixture has no retail environment."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "asset_class": "research_reference",
+      "creator": "Electronic Arts public source archive",
+      "origin": "fixture:synthetic-square-agent",
+      "rights_basis": "Cited developer source used for factual comparison",
+      "distribution": "reference_only",
+      "derivatives": [],
+      "artifact_sha256": null,
+      "review_evidence": []
+    },
+    {
+      "schema_version": 1,
+      "kind": "entity",
+      "id": "entity.synthetic.sample",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": "automated test reviewer",
+      "blockers": [],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "identity": {
+        "source_title": "fixture",
+        "edition": "public-source",
+        "platform": "pc",
+        "source_faction": "Japan",
+        "namespace": "GameObject",
+        "source_object_id": "SyntheticSquare",
+        "form_id": "base"
+      },
+      "display_names": {},
+      "category": "unit",
+      "source_object_ids": [
+        "SyntheticSquare"
+      ],
+      "classification": "active",
+      "disposition": "verified_included",
+      "faction_ids": [],
+      "country_general_ids": [],
+      "class_ids": [],
+      "mode_ids": [],
+      "availability_rules": [],
+      "relations": [],
+      "acquisition": "starting",
+      "facts": {
+        "availability": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        },
+        "physical": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        },
+        "combat": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        },
+        "economy": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        },
+        "presentation": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        }
+      },
+      "observation_ids": [],
+      "conflict_ids": [],
+      "adaptation_ids": [
+        "adapt.synthetic"
+      ],
+      "asset_ids": [],
+      "capability_ids": [],
+      "fixture_ids": [
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "visual_family": null,
+      "visible": true,
+      "automatic_release": false
+    },
+    {
+      "schema_version": 1,
+      "kind": "adaptation",
+      "id": "adapt.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": "automated test reviewer",
+      "blockers": [],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "subject_ids": [
+        "entity.synthetic.sample"
+      ],
+      "target_profile": "synthetic.unpublished",
+      "source_semantics": {
+        "value": "Synthetic fixed behavior",
+        "unit": "test_fixture",
+        "profile_id": "profile.synthetic",
+        "status": "authored",
+        "evidence": [
+          {
+            "url": "fixture:synthetic-square-agent",
+            "revision": "test-v1",
+            "locator": "test-only declaration",
+            "method": "test_fixture"
+          }
+        ],
+        "resolution": null,
+        "tolerance": null
+      },
+      "fusion_semantics": {
+        "value": "Synthetic fixed behavior",
+        "unit": "test_fixture",
+        "profile_id": "profile.synthetic",
+        "status": "authored",
+        "evidence": [
+          {
+            "url": "fixture:synthetic-square-agent",
+            "revision": "test-v1",
+            "locator": "test-only declaration",
+            "method": "test_fixture"
+          }
+        ],
+        "resolution": null,
+        "tolerance": null
+      },
+      "disposition": "direct",
+      "rationale": "Exercises a local graph contract.",
+      "approval": "accepted",
+      "fixture_ids": [
+        "fixture:construct-reload-synthetic-square"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "kind": "faction",
+      "id": "faction.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "parent_id": null,
+      "display_names": {
+        "en": "Synthetic test faction"
+      },
+      "mode_ids": [
+        "fixture"
+      ],
+      "country_general_ids": [],
+      "entity_ids": [
+        "entity.synthetic.sample"
+      ],
+      "starting_entity_ids": [
+        "entity.synthetic.sample"
+      ],
+      "economy_production_graph": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "counter_roles": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "terrain_constraints": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "ai_policy": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "exclusion_fixtures": [
+        "fixture:forbidden-synthetic-purchase"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "kind": "capability",
+      "id": "cap.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "version": "fixture.1",
+      "domain": "environment",
+      "state_contract": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "commands": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "tick_order": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "world_policy": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "dependency_ids": [],
+      "implementation_task": "fixture:implementation",
+      "review_task": "fixture:review",
+      "support_status": "required",
+      "fixture_ids": []
+    },
+    {
+      "schema_version": 1,
+      "kind": "terrain_feature",
+      "id": "terrain.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "theatre_id": "fixture-theatre",
+      "biome_id": null,
+      "source_families": [
+        "fixture"
+      ],
+      "navigation": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "buildability": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "height_water": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "resource_hazard": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "destruction": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "visibility": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "state_transitions": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "map_generation": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "lod_budget": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "asset_ids": [],
+      "capability_ids": [
+        "cap.synthetic"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "kind": "map_theme",
+      "id": "theme.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "biome_id": "synthetic",
+      "theatre_ids": [
+        "fixture-theatre"
+      ],
+      "feature_ids": [
+        "terrain.synthetic"
+      ],
+      "spawn_fairness": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "harvesting": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "routes": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "height_visibility": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "civilian_cover": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "path_recovery": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "bounds": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "objective": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "fixture_ids": []
+    },
+    {
+      "schema_version": 1,
+      "kind": "observation",
+      "id": "obs.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "question": "Does this synthetic case carry a measured result?",
+      "subject_ids": [
+        "entity.synthetic.sample"
+      ],
+      "setup": "Schema exercise only",
+      "map_hash": null,
+      "seed": null,
+      "commands": [],
+      "expectation": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "result": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "sample_count": 0,
+      "interpretation": "fixture",
+      "independent": false
+    },
+    {
+      "schema_version": 1,
+      "kind": "conflict",
+      "id": "conflict.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "subject_ids": [
+        "entity.synthetic.sample"
+      ],
+      "claims": [
+        {
+          "value": 1,
+          "unit": "synthetic_ticks",
+          "profile_id": "profile.synthetic",
+          "status": "authored",
+          "evidence": [
+            {
+              "url": "fixture:synthetic-square-agent",
+              "revision": "test-v1",
+              "locator": "test-only declaration",
+              "method": "test_fixture"
+            }
+          ],
+          "resolution": null,
+          "tolerance": null
+        },
+        {
+          "value": 2,
+          "unit": "synthetic_ticks",
+          "profile_id": "profile.synthetic",
+          "status": "authored",
+          "evidence": [
+            {
+              "url": "fixture:synthetic-square-agent",
+              "revision": "test-v1",
+              "locator": "test-only declaration",
+              "method": "test_fixture"
+            }
+          ],
+          "resolution": null,
+          "tolerance": null
+        }
+      ],
+      "impact": "Synthetic timing disagreement",
+      "decision": null,
+      "status": "open",
+      "resolution_task": "fixture:repeat-timing"
+    },
+    {
+      "schema_version": 1,
+      "kind": "completion",
+      "id": "completion.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "subject_id": "entity.synthetic.sample",
+      "stage_records": [],
+      "release_state": "research",
+      "history": [
+        "research"
+      ],
+      "author": "fixture engineer"
+    }
+  ]
+}

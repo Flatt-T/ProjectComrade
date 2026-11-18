@@ -1,0 +1,518 @@
+{
+  "scope": "Gate skeleton for the 20 inventory work packets. A null result means this projection did not receive the corresponding approved evidence.",
+  "gates": [
+    "source_definition_enumeration",
+    "independent_mode_or_scenario_reconciliation",
+    "fusion_disposition_and_capability",
+    "data_and_acquisition",
+    "original_assets_and_rights",
+    "animation_and_feedback",
+    "integrated_device_and_replay",
+    "independent_release"
+  ],
+  "era_groups": [
+    {
+      "id": "td",
+      "source_packet": "RES-004",
+      "faction_groups_to_reconcile": [
+        "GDI",
+        "Brotherhood of Nod"
+      ],
+      "source_declared_additional_groups": [
+        "civilian/neutral",
+        "scripted mission forces",
+        "dinosaurs and special-mission objects"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "ra1",
+      "source_packet": "RES-005",
+      "faction_groups_to_reconcile": [
+        "Allies",
+        "Soviets"
+      ],
+      "source_declared_additional_groups": [
+        "country/house variants and availability by mode",
+        "campaign neutral/special houses",
+        "ant mission objects"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "ts",
+      "source_packet": "RES-006",
+      "faction_groups_to_reconcile": [
+        "GDI",
+        "Brotherhood of Nod"
+      ],
+      "source_declared_additional_groups": [
+        "Forgotten/mutant characters and creatures",
+        "civilian/neutral",
+        "mission-specific Nod/GDI forces"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "firestorm",
+      "source_packet": "RES-007",
+      "faction_groups_to_reconcile": [
+        "GDI",
+        "Brotherhood of Nod"
+      ],
+      "source_declared_additional_groups": [
+        "CABAL campaign forces",
+        "Forgotten",
+        "Tiberium lifeforms"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "ra2",
+      "source_packet": "RES-008",
+      "faction_groups_to_reconcile": [
+        "Allies: America",
+        "Allies: France",
+        "Allies: Germany",
+        "Allies: Great Britain",
+        "Allies: Korea",
+        "Soviets: Russia",
+        "Soviets: Cuba",
+        "Soviets: Libya",
+        "Soviets: Iraq"
+      ],
+      "source_declared_additional_groups": [
+        "civilian/tech structures",
+        "campaign characters and scripted forces"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "yr",
+      "source_packet": "RES-009",
+      "faction_groups_to_reconcile": [
+        "nine inherited Allied/Soviet country variants",
+        "Yuri"
+      ],
+      "source_declared_additional_groups": [
+        "campaign hero/civilian variants",
+        "lunar mission objects"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "generals",
+      "source_packet": "RES-010",
+      "faction_groups_to_reconcile": [
+        "USA",
+        "China",
+        "GLA"
+      ],
+      "source_declared_additional_groups": [
+        "neutral tech buildings",
+        "civilian vehicles/buildings",
+        "campaign-only military and naval objects"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "zh",
+      "source_packet": "RES-011",
+      "faction_groups_to_reconcile": [
+        "USA base",
+        "China base",
+        "GLA base",
+        "USA Air Force General Granger",
+        "USA Laser General Townes",
+        "USA Superweapon General Alexander",
+        "China Infantry General Fai",
+        "China Nuclear General Tao",
+        "China Tank General Kwai",
+        "GLA Toxin General Thrax",
+        "GLA Demolition General Juhziz",
+        "GLA Stealth General Kassad"
+      ],
+      "source_declared_additional_groups": [
+        "Challenge boss Leang and challenge-specific objects",
+        "campaign and neutral additions"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "tw",
+      "source_packet": "RES-012",
+      "faction_groups_to_reconcile": [
+        "GDI",
+        "Brotherhood of Nod",
+        "Scrin"
+      ],
+      "source_declared_additional_groups": [
+        "civilian/neutral tech",
+        "campaign variants",
+        "Forgotten/MUTANT hovel recruits"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "kw",
+      "source_packet": "RES-013",
+      "faction_groups_to_reconcile": [
+        "GDI",
+        "Steel Talons",
+        "ZOCOM",
+        "Brotherhood of Nod",
+        "Black Hand",
+        "Marked of Kane",
+        "Scrin",
+        "Reaper-17",
+        "Traveler-59"
+      ],
+      "source_declared_additional_groups": [
+        "global conquest strategic-map entities",
+        "campaign variants and neutral objects"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "ra3",
+      "source_packet": "RES-014",
+      "faction_groups_to_reconcile": [
+        "Allies",
+        "Soviets",
+        "Empire of the Rising Sun"
+      ],
+      "source_declared_additional_groups": [
+        "AI commander personalities (not automatically separate factions)",
+        "civilian and campaign objects"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "uprising",
+      "source_packet": "RES-015",
+      "faction_groups_to_reconcile": [
+        "Allies",
+        "Soviets",
+        "Empire of the Rising Sun"
+      ],
+      "source_declared_additional_groups": [
+        "FutureTech campaign force/assets",
+        "Yuriko campaign-specific entities",
+        "Commander Challenge variants"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "c4",
+      "source_packet": "RES-016",
+      "faction_groups_to_reconcile": [
+        "GDI Offense",
+        "GDI Defense",
+        "GDI Support",
+        "Nod Offense",
+        "Nod Defense",
+        "Nod Support"
+      ],
+      "source_declared_additional_groups": [
+        "Forgotten neutral/mercenary entities",
+        "campaign objects",
+        "obsolete source definitions"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "renegade",
+      "source_packet": "RES-017",
+      "faction_groups_to_reconcile": [
+        "GDI team/classes",
+        "Nod team/classes"
+      ],
+      "source_declared_additional_groups": [
+        "Havoc and campaign characters",
+        "Black Hand variants",
+        "building interiors",
+        "neutral vehicles/props"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "sole",
+      "source_packet": "RES-018",
+      "faction_groups_to_reconcile": [
+        "single-unit selections derived from TD"
+      ],
+      "source_declared_additional_groups": [
+        "dinosaurs",
+        "arena/crate objects"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "remaster_console",
+      "source_packet": "RES-019",
+      "faction_groups_to_reconcile": [
+        "inherited TD/RA1 factions"
+      ],
+      "source_declared_additional_groups": [
+        "PS1 and Nintendo 64 exclusive missions",
+        "Retaliation mission/object deltas",
+        "remastered presentation assets"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "alliances",
+      "source_packet": "RES-020",
+      "faction_groups_to_reconcile": [
+        "GDI",
+        "Nod"
+      ],
+      "source_declared_additional_groups": [
+        "Forgotten NPC forces"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "rivals",
+      "source_packet": "RES-021",
+      "faction_groups_to_reconcile": [
+        "GDI",
+        "Nod"
+      ],
+      "source_declared_additional_groups": [
+        "commander abilities",
+        "versioned unit/variant inventory"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "other_mobile",
+      "source_packet": "RES-022",
+      "faction_groups_to_reconcile": [
+        "must verify by exact released region/build"
+      ],
+      "source_declared_additional_groups": [
+        "Red Alert mobile/iOS/J2ME candidates",
+        "Tiberium Wars mobile candidate",
+        "Red Alert Online candidate",
+        "Legions announced regional/season content"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    },
+    {
+      "id": "dune",
+      "source_packet": "RES-023",
+      "faction_groups_to_reconcile": [
+        "existing Dune 2000 Atreides/Harkonnen/Ordos"
+      ],
+      "source_declared_additional_groups": [
+        "Dune II historical predecessor reference",
+        "Emperor Battle for Dune reference only",
+        "Emperor minor houses require explicit scope decision"
+      ],
+      "accepted_results": {
+        "source_definition_enumeration": null,
+        "independent_mode_or_scenario_reconciliation": null,
+        "fusion_disposition_and_capability": null,
+        "data_and_acquisition": null,
+        "original_assets_and_rights": null,
+        "animation_and_feedback": null,
+        "integrated_device_and_replay": null,
+        "independent_release": null
+      }
+    }
+  ],
+  "cross_era_fixture_axes": [
+    {
+      "interaction": "resource transfer and power",
+      "test": "Keep Tiberium, ore and supplies profile-specific. Check transfer, death during deposit and power-failure interactions against explicit Fusion decisions."
+    },
+    {
+      "interaction": "air, sea and ground crossing",
+      "test": "Compare hover/air/underground/ground movement with a destroyed span, repaired deck, blocked approaches and an occupied lower layer."
+    },
+    {
+      "interaction": "control, capture and protection",
+      "test": "Cross faction mind control, garrison exit, engineering, allied consent, shield and offline entry rules. Record owner, controller and visibility separately."
+    },
+    {
+      "interaction": "transform, summon and save",
+      "test": "Persist ownership, health, attachments and state through deployment, transformation, passenger death, summons and replay."
+    },
+    {
+      "interaction": "cross-era presentation",
+      "test": "Identify faction, unit role and action from silhouette and sound at combat zoom in winter, temperate and urban backgrounds; record device frame-time percentiles."
+    }
+  ]
+}

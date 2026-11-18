@@ -1,0 +1,25 @@
+{
+ "source_commit": "c13be46135820de4a83bf5cc2779ad32b29f4704",
+ "repository": "CnCNet/cncnet-ts-client-package",
+ "source_class": "Community client comparison, may contain author fixes. The unmodified retail patch and per-mode producer menus are separate.",
+ "all_map_paths_in_Maps": 352,
+ "selected_directories": {
+  "Firestorm": 15,
+  "Missions": 60,
+  "Tiberian Sun": 25
+ },
+ "fan_directory_excluded": 252,
+ "maps_with_tubes": 22,
+ "theaters": {
+  "SNOW": 23,
+  "TEMPERATE": 77
+ },
+ "placed_instances_by_type": {
+  "Units": 1512,
+  "Infantry": 2181,
+  "Aircraft": 61,
+  "Structures": 7725
+ },
+ "maps_with_placed_CABHUT": 73,
+ "note": "Task force members are declared quantities, not observations of spawns. Terrain and overlay sections are counted by entries/encoded lines, never interpreted as tile counts."
+}

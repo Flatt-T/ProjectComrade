@@ -1,0 +1,160 @@
+{
+ "profile": "fusion-bridge-v1",
+ "type": "research oracle; no claim of engine/device execution",
+ "cases_passed": 5,
+ "results": [
+  {
+   "fixture": "quoted mixed damage, racing engineers, duplicate command, save and single atomic reopen",
+   "final": {
+    "hp": [
+     2400,
+     2400,
+     2400
+    ],
+    "credits": 399,
+    "engineers": [
+     "E6:b"
+    ],
+    "revision": 1,
+    "job": null,
+    "receipts": {
+     "request:a": "accepted",
+     "request:b": "job_active"
+    },
+    "events": [
+     [
+      "admit",
+      "request:a",
+      20,
+      601
+     ],
+     [
+      "restore",
+      470,
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "fixture": "credit rejection preserves actor and budget",
+   "final": {
+    "hp": [
+     0
+    ],
+    "credits": 599,
+    "engineers": [
+     "engineer"
+    ],
+    "revision": 0,
+    "job": null,
+    "receipts": {
+     "a": "insufficient_credits"
+    },
+    "events": []
+   }
+  },
+  {
+   "fixture": "scaffold hit cancels once with closed route and no refund",
+   "final": {
+    "hp": [
+     0
+    ],
+    "credits": 0,
+    "engineers": [],
+    "revision": 0,
+    "job": null,
+    "receipts": {
+     "stale": "stale_revision",
+     "no-access": "invalid_actor_or_access",
+     "admit": "accepted"
+    },
+    "events": [
+     [
+      "admit",
+      "admit",
+      1,
+      600
+     ],
+     [
+      "abort_damage",
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "fixture": "ceil on aggregate deficit, completion obstruction, exactly one credit refund",
+   "final": {
+    "hp": [
+     2399,
+     2398
+    ],
+    "credits": 10,
+    "engineers": [],
+    "revision": 0,
+    "job": null,
+    "receipts": {
+     "partial": "accepted"
+    },
+    "events": [
+     [
+      "admit",
+      "partial",
+      0,
+      1
+     ],
+     [
+      "blocked",
+      150
+     ],
+     [
+      "refund",
+      1050,
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "fixture": "independent span, one close, clear obstruction and reopen once",
+   "final": {
+    "hp": [
+     2400,
+     2400,
+     2400
+    ],
+    "credits": 1400,
+    "engineers": [],
+    "revision": 2,
+    "job": null,
+    "receipts": {
+     "repair": "accepted"
+    },
+    "events": [
+     [
+      "deck_closed",
+      1,
+      2,
+      1
+     ],
+     [
+      "admit",
+      "repair",
+      3,
+      600
+     ],
+     [
+      "blocked",
+      453
+     ],
+     [
+      "restore",
+      454,
+      2
+     ]
+    ]
+   }
+  }
+ ]
+}

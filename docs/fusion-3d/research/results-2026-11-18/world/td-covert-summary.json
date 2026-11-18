@@ -1,0 +1,137 @@
+{
+  "verified_members_across_two_archival_images": true,
+  "disc_map_records": 79,
+  "distinct_candidate_filenames": 74,
+  "advertised_on_disc": {
+    "path": "README.TXT",
+    "lba": 5091,
+    "bytes": 68796,
+    "sha256": "f413cc34cfbdb1b7f48b76096aa3eaef75b0fcf3c65de9fcd6edfefe16ce17a6",
+    "section": "1.2",
+    "line_numbers_one_based": [
+      171,
+      172
+    ],
+    "stated_new_gdi": 7,
+    "stated_new_nod": 8,
+    "stated_new_multiplayer": 10
+  },
+  "by_pack": {
+    "GENERAL.MIX": {
+      "maps": 48,
+      "by_player": {
+        "BadGuy": 1,
+        "GoodGuy": 26,
+        "Multi4": 12,
+        "Multi1": 5,
+        "Multi3": 4
+      },
+      "by_theater": {
+        "DESERT": 9,
+        "TEMPERATE": 35,
+        "WINTER": 4
+      },
+      "with_paired_tiles": 48,
+      "same_candidate_name_as_community_count": 43,
+      "same_scenario_member_sha256_count": 21,
+      "same_paired_terrain_sha256_count": 35
+    },
+    "INSTALL/SC-000.MIX": {
+      "maps": 5,
+      "by_player": {
+        "Multi4": 5
+      },
+      "by_theater": {
+        "TEMPERATE": 4,
+        "DESERT": 1
+      },
+      "with_paired_tiles": 5,
+      "same_candidate_name_as_community_count": 0,
+      "same_scenario_member_sha256_count": 0,
+      "same_paired_terrain_sha256_count": 0
+    },
+    "INSTALL/SC-001.MIX": {
+      "maps": 26,
+      "by_player": {
+        "Multi1": 8,
+        "BadGuy": 8,
+        "GoodGuy": 7,
+        "Multi3": 2,
+        "Multi2": 1
+      },
+      "by_theater": {
+        "DESERT": 12,
+        "TEMPERATE": 13,
+        "WINTER": 1
+      },
+      "with_paired_tiles": 26,
+      "same_candidate_name_as_community_count": 0,
+      "same_scenario_member_sha256_count": 0,
+      "same_paired_terrain_sha256_count": 0
+    }
+  },
+  "duplicate_candidates_and_digests": {
+    "SCJ01EA": [
+      {
+        "pack": "GENERAL.MIX",
+        "ini_sha256": "3f2865b6a4e8b748ebeca5784c4bf945fdb8197d828f86425fdf7c7dfb617295",
+        "terrain_sha256": "611ded6a257a224ed9589fb087a12f61ad3529348ecbbe5cef8611ddb759b1dd"
+      },
+      {
+        "pack": "INSTALL/SC-000.MIX",
+        "ini_sha256": "81a1f3ad2b138f8fdc1234c1d321721530c5ffa26ac013570db32e5cac24880e",
+        "terrain_sha256": "611ded6a257a224ed9589fb087a12f61ad3529348ecbbe5cef8611ddb759b1dd"
+      }
+    ],
+    "SCJ02EA": [
+      {
+        "pack": "GENERAL.MIX",
+        "ini_sha256": "dc7777ce4f43a315c3e6625f27d7582cfbc19e686a110cd8c073c41f591e10db",
+        "terrain_sha256": "43f00fe8c9c34097fa640e935fdc4c8bb726131a1caccb299ca4a61e6227a6da"
+      },
+      {
+        "pack": "INSTALL/SC-000.MIX",
+        "ini_sha256": "cb1a3c61d5ed751c9fba6c37b96eeb4d9b042cc13d05fe13574780fd5dfaf2f7",
+        "terrain_sha256": "43f00fe8c9c34097fa640e935fdc4c8bb726131a1caccb299ca4a61e6227a6da"
+      }
+    ],
+    "SCJ03EA": [
+      {
+        "pack": "GENERAL.MIX",
+        "ini_sha256": "45375e3ea90d9cb4b09abea924d2dbe8a5d9dfd44ce079c91c7061577b194502",
+        "terrain_sha256": "a40286680ee72ff2474e8cc531156ef9c413f8042e9664cc00155c78caaa6e1a"
+      },
+      {
+        "pack": "INSTALL/SC-000.MIX",
+        "ini_sha256": "106282e44b0a71deeb1c5a9e0b7b416c53fe54e2876d73325e0bcff7262a13ca",
+        "terrain_sha256": "a40286680ee72ff2474e8cc531156ef9c413f8042e9664cc00155c78caaa6e1a"
+      }
+    ],
+    "SCJ04EA": [
+      {
+        "pack": "GENERAL.MIX",
+        "ini_sha256": "98d93a7b2d23abacdb2c382b4b3ce0ed7e1c143cbafb0b0b04e87994a6fe9ed4",
+        "terrain_sha256": "75c6208233bf1cedf0b265b1cedfc0a4ee5fdb1ddf0bed4ed7d5af63262659ba"
+      },
+      {
+        "pack": "INSTALL/SC-000.MIX",
+        "ini_sha256": "0cd9b44fab2cb0690514c74d9495dc4cf0d982031ce898083e4d8b67cf80cf87",
+        "terrain_sha256": "75c6208233bf1cedf0b265b1cedfc0a4ee5fdb1ddf0bed4ed7d5af63262659ba"
+      }
+    ],
+    "SCJ05EA": [
+      {
+        "pack": "GENERAL.MIX",
+        "ini_sha256": "39f9422e12a7f7fc1e11280eb128429b1d0d460b425a866481a1a124d33a3cfb",
+        "terrain_sha256": "dd5da12f3ad65791265298a0981668411a90bc3ac673050a0e6e1529b1f97897"
+      },
+      {
+        "pack": "INSTALL/SC-000.MIX",
+        "ini_sha256": "094af5fcdc56d7e2f365216e87d929ea695d5e5df68cca47fa7827622288e99c",
+        "terrain_sha256": "091f9438d8641316081c2661ea11f34b2a45cd699757115900bf23df7614daa6"
+      }
+    ]
+  },
+  "full_facts_sha256": "a6148d0689adae5f6a0ee00103b2cc5283518574955dcf872e8fa8954ad57799",
+  "unzipped_sha256": "18d6e667f729a346b32b878540bc430c83c2c6a76e5713de47504bd1a15e4e40"
+}

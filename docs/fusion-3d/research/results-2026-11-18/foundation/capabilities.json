@@ -1,0 +1,251 @@
+[
+ {
+  "capability_id": "yard_deploy",
+  "actors_in_ra_seed": [
+   "MCV",
+   "FACT"
+  ],
+  "command": "deploy(actor, target footprint)",
+  "authoritative_state": "alive owner, footprint, preexisting orders, packed payload",
+  "fusion_or_profile_contract": "Revalidate footprint and owner on apply. Replace mobile surface occupancy and produce the versioned yard once; preserve protected/bound identity as defined by active profile.",
+  "negative_tests": "overlap another building; retry after save",
+  "reference_context": [
+   "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "side_production",
+  "actors_in_ra_seed": [
+   "WEAP",
+   "TENT",
+   "BARR",
+   "E1"
+  ],
+  "command": "enqueue, cancel, place",
+  "authoritative_state": "queue owner, funded amount, technology, power, exit/rally",
+  "fusion_or_profile_contract": "Allied TENT and Soviet BARR expose different eligible menus. Charge by the owning profile; a blocked exit keeps production in a known state.",
+  "negative_tests": "capture or sell producer during queue; no duplicated refund or infantry",
+  "reference_context": [
+   "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "resource_loop",
+  "actors_in_ra_seed": [
+   "HARV",
+   "PROC"
+  ],
+  "command": "harvest(field), return(dock)",
+  "authoritative_state": "field stock, cargo, resource kind, dock reservation, storage and credit limits",
+  "fusion_or_profile_contract": "Reserve one valid unload position, then commit exactly the corresponding quantity. Cancelled/offline/replayed routes cannot create a second cargo payout.",
+  "negative_tests": "refinery removed during return; destination full; blocked bridge",
+  "reference_context": [
+   "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "turn_track_and_turret",
+  "actors_in_ra_seed": [
+   "1TNK",
+   "3TNK",
+   "4TNK",
+   "JEEP"
+  ],
+  "command": "move, attack, attack-move",
+  "authoritative_state": "body bearing, turret bearing, speed class, movement surface, line of fire",
+  "fusion_or_profile_contract": "Track/hull turn through the shortest legal arc. A render clip reads interpolated bearings. Source speed scale is independently calibrated per edition.",
+  "negative_tests": "change target on turn; hull occluded by bank; fog hides weapon cue",
+  "reference_context": [
+   "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "weapon_eligibility",
+  "actors_in_ra_seed": [
+   "E1",
+   "DD",
+   "YAK",
+   "4TNK"
+  ],
+  "command": "target(entity or surface)",
+  "authoritative_state": "owner relation, target domain, target memory, ammo, slot and cooldown",
+  "fusion_or_profile_contract": "Resolve domain, slot, projectile creation and impact independently. Snapshot the selected profile and pending projectile on save.",
+  "negative_tests": "surface target vs hidden ship underneath; target changes mode during flight",
+  "reference_context": [
+   "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "engineer_interaction",
+  "actors_in_ra_seed": [
+   "E6",
+   "FACT"
+  ],
+  "command": "enter(target), rebuild(hut)",
+  "authoritative_state": "eligibility, health threshold, ownership generation, consent, shield, command id",
+  "fusion_or_profile_contract": "Use source-specific capture/repair thresholds for native comparisons. In persistent Fusion revalidate consent, alliance, shield and generation when the engineer arrives.",
+  "negative_tests": "target sold, packed, captured or shielded before arrival; denied arrival retains engineer according to active rules",
+  "reference_context": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/INFANTRY.CPP"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "collapse_topology",
+  "actors_in_ra_seed": [
+   "1TNK",
+   "DD",
+   "YAK"
+  ],
+  "command": "damage(span)",
+  "authoritative_state": "span HP, topology revision, surface and reservation per occupant",
+  "fusion_or_profile_contract": "On zero close only failed deck edges, invalidate stale routes, snapshot occupant roots, run environmental damage through existing protections.",
+  "negative_tests": "ship below and aircraft above; bank already reached; refugee reservation lost",
+  "reference_context": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/MAP.CPP"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "repair_topology",
+  "actors_in_ra_seed": [
+   "E6"
+  ],
+  "command": "repair_bridge(hut, bridge, revision, request)",
+  "authoritative_state": "integer quote, actor arrival, credits, footprint blockers, job id, timer, refund state",
+  "fusion_or_profile_contract": "Atomically admit one repair and debit once. Restore quoted spans and bump topology once. Rejection, obstruction and hostile damage have distinct receipts.",
+  "negative_tests": "duplicate request; abort; exactly 900 blocked ticks; save immediately before completion",
+  "reference_context": [
+   "https://www.bestoldgames.net/download/games/command-and-conquer-tiberian-sun/command-and-conquer-tiberian-sun-win-manual.pdf"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "visibility_and_audio",
+  "actors_in_ra_seed": [
+   "E1",
+   "JEEP"
+  ],
+  "command": "select, investigate last known",
+  "authoritative_state": "viewer id, visible/remembered masks, event id, actual and last-observed state",
+  "fusion_or_profile_contract": "Render only viewer-permitted track, sound and shadows. Alerts and minimap read the same event entitlement.",
+  "negative_tests": "hidden bridge job; loud but invisible foe; replay duplicate FX",
+  "reference_context": [
+   "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "mobile_base_and_cap",
+  "actors_in_ra_seed": [],
+  "command": "pack, redeploy, build within unit cap",
+  "authoritative_state": "crawler form, owner, command points, unlocks, system class and tier",
+  "fusion_or_profile_contract": "Resolve explicit unit lists by faction/class; handle cap return and existing orders when changing form. Keep C&C4 accounting isolated from credits.",
+  "negative_tests": "support class attempts incompatible unit; cap/queue race",
+  "reference_context": [
+   "https://store.steampowered.com/manual/47700"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "worker_and_core_construction",
+  "actors_in_ra_seed": [],
+  "command": "start site, interrupt, deploy core",
+  "authoritative_state": "builder/site reference, resource account, faction, surface, actor availability",
+  "fusion_or_profile_contract": "Dedicate separate policies to Generals builder, Allied/Soviet placement and Empire mobile core. Tie build animation to committed stage; interruption preserves source-specific outcomes.",
+  "negative_tests": "builder leaves, destroyed core, sea/land restrictions, fit check changes",
+  "reference_context": [
+   "https://files.cncnz.com/generals/Command_and_Conquer_-_Generals_-_UK_Manual_-_PC.pdf",
+   "https://shared.steamstatic.com/store_item_assets/steam/apps/17480/manuals/manual_english.pdf?t=1712755099"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "morph_or_inherited_loadout",
+  "actors_in_ra_seed": [],
+  "command": "transform, board, eject",
+  "authoritative_state": "identity, HP fraction, ammo, owner, passengers, upgrade generation, layer",
+  "fusion_or_profile_contract": "Preserve one controller identity across scripted mode changes. Ground/air path and weapon target rules are jointly validated at the declared transition.",
+  "negative_tests": "interrupt, freeze or die mid-transform; incompatible cargo",
+  "reference_context": [
+   "https://shared.steamstatic.com/store_item_assets/steam/apps/17480/manuals/manual_english.pdf?t=1712755099",
+   "https://shared.steamstatic.com/store_item_assets/steam/apps/24800/manuals/CCRA3UPpcdMANukeng1.pdf?t=1741704725"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "control_garrison_and_release",
+  "actors_in_ra_seed": [],
+  "command": "garrison, control, release",
+  "authoritative_state": "controller, targets, slots, original owner, relation and overload state",
+  "fusion_or_profile_contract": "Do not conflate garrison occupancy, mind control and permanent capture. Release resolves once on death, sell, power loss or owner change per source profile.",
+  "negative_tests": "controller and target die in same tick; member cannot enter",
+  "reference_context": [
+   "https://oldgamesdownload.com/manual/command-conquer-red-alert-2-windows-manual-english/",
+   "https://gamepedia.cursecdn.com/cnc_gamepedia_en/8/8e/Red_Alert_2_-_Yuri%27s_Revenge_-_English.pdf"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "objective_and_profile_economy",
+  "actors_in_ra_seed": [],
+  "command": "occupy, deliver, score, grant",
+  "authoritative_state": "team, pad or node state, contest window, scoring owner, persistent ledger",
+  "fusion_or_profile_contract": "Separate C&C4 scoring, Rivals pads, TA strategic economy, Sole flag and ordinary annihilation. Render target state from rules event; never trade between accounts by default.",
+  "negative_tests": "tie, simultaneous capture, disconnected carrier, world vs skirmish",
+  "reference_context": [
+   "https://store.steampowered.com/manual/47700",
+   "https://apps.apple.com/gb/app/command-conquer-rivals-pvp/id1261165213",
+   "https://www.ea.com/games/command-and-conquer/command-and-conquer-tiberium-alliances/faq"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ },
+ {
+  "capability_id": "terrain_hazard",
+  "actors_in_ra_seed": [],
+  "command": "cross hazard, expose, evacuate",
+  "authoritative_state": "surface, hazard intensity, exposure tick, actor immunity, blocking update",
+  "fusion_or_profile_contract": "Source-verify ice, contamination, no-build or hazards for the named edition. Keep purely visual weather separate from authoritative damage or path cost.",
+  "negative_tests": "quality preset, fog, save/load and nav during an ice change",
+  "reference_context": [
+   "https://www.bestoldgames.net/download/games/command-and-conquer-tiberian-sun/command-and-conquer-tiberian-sun-win-manual.pdf",
+   "https://manuals.plus/m/fd3065a2b65ec6e72aede1a1bca4ea970455fa6f6fadc1a299e958a59ec7a6f6_optim.pdf"
+  ],
+  "historical_timing": "requires matched reference execution unless explicitly separately measured",
+  "replication": "journal command once; snapshot persistent fields; replay at fixed tick; derive camera effects from authorized events",
+  "handoff": "simulation specialist owns transitions, QA owns independent evidence, model/FX specialist consumes state only"
+ }
+]

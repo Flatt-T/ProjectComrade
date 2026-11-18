@@ -1,0 +1,101 @@
+{
+  "repo": "TheSuperHackers/GeneralsGamePatch",
+  "parent_commit": "b8f68f905e16fdaae2beda7dbea56ce753e1ab3c",
+  "checks": [
+    {
+      "inputs_path": "generals/Armor.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Armor.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/CommandButton.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/CommandButton.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/CommandSet.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/CommandSet.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Locomotor.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Locomotor.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/CivilianBuilding.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/CivilianBuilding.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/CivilianProp.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/CivilianProp.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/CivilianUnit.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/CivilianUnit.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/FactionBuilding.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/FactionBuilding.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/FactionProp.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/FactionProp.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/FactionUnit.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/FactionUnit.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/NatureProp.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/NatureProp.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/NatureUnit.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/NatureUnit.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Object/System.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Object/System.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/PlayerTemplate.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/PlayerTemplate.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Science.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Science.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/SpecialPower.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/SpecialPower.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Terrain.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Terrain.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Upgrade.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Upgrade.ini",
+      "identical_git_blob": true
+    },
+    {
+      "inputs_path": "generals/Weapon.ini",
+      "parent_path": "Patch104pZH/GameFilesOriginalCCG/Data/INI/Weapon.ini",
+      "identical_git_blob": true
+    }
+  ]
+}

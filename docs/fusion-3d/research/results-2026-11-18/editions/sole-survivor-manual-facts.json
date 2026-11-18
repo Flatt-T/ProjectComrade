@@ -1,0 +1,62 @@
+{
+  "source_url": "https://oldgamesdownload.com/wp-content/uploads/manuals/command-and-conquer-sole-survivor_win_manual_en_2vc.pdf",
+  "source_sha256": "5ba44d500e8ba9d13de9d55ef22a8254c23311c906f08a3323f56e578f1950e5",
+  "unit_index_locator": "PDF leaf 14, Unit Quick Reference; text descriptions on leaves 11\u201313. Locator is the PDF image number.",
+  "manual_units": [
+    "Minigunner",
+    "Grenadier",
+    "Rocket Soldier",
+    "Chem Warrior",
+    "Flame Thrower",
+    "Commando",
+    "APC",
+    "Humm-vee",
+    "Nod Buggy",
+    "Recon Bike",
+    "Light Tank",
+    "Medium Tank",
+    "Mammoth Tank",
+    "Flame Tank",
+    "Stealth Tank",
+    "Artillery",
+    "Rocket Launcher",
+    "SSM Launcher",
+    "Visceroid",
+    "Velociraptor",
+    "Stegosaurus",
+    "Triceratops",
+    "Tyrannosaurus Rex"
+  ],
+  "channel_examples": {
+    "Dinos Only": "dinosaur choices, timed kills",
+    "Capture The Flag": "take flags to home base, team scoring",
+    "Infantry Only": "infantry choices, timed kills",
+    "Football": "score with the flag at the designated team endzone"
+  },
+  "modes_locator": "PDF leaf 7",
+  "crate_dimensions": [
+    "armor",
+    "shot power",
+    "speed",
+    "rapid reload",
+    "range"
+  ],
+  "source_locators": {
+    "crate_rules": "PDF leaves 8\u20139",
+    "controls": "PDF leaves 10\u201311",
+    "practice": "PDF leaf 4"
+  },
+  "server_patch": {
+    "revision": "1.04 (2b) published notes",
+    "citation": "https://cncnz.com/features/technical-support-help-guides/sole-survivor-v101-v105-patch-history/",
+    "default_per_thousand": {
+      "wooden": 840,
+      "green": 100,
+      "steel": 50,
+      "orange": 10
+    },
+    "orange_seconds_default": 30,
+    "team_score": "counts the total including departed players",
+    "1.05": "Public patch exists. The 1.04 defaults cannot settle 1.05 server settings."
+  }
+}

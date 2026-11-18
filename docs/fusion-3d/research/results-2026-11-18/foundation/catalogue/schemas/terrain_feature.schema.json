@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:terrain_feature",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "terrain_feature"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "theatre_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "biome_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source_families": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "navigation": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "buildability": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "height_water": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "resource_hazard": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "destruction": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "visibility": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "state_transitions": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "map_generation": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "lod_budget": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "asset_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "capability_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "profile_id",
+    "evidence",
+    "owner",
+    "reviewer",
+    "blockers",
+    "theatre_id",
+    "biome_id",
+    "source_families",
+    "navigation",
+    "buildability",
+    "height_water",
+    "resource_hazard",
+    "destruction",
+    "visibility",
+    "state_transitions",
+    "map_generation",
+    "lod_budget",
+    "asset_ids",
+    "capability_ids"
+  ]
+}

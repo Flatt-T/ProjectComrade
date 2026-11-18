@@ -1,0 +1,470 @@
+{
+ "ts_reference": {
+  "url": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/RULES.INI#L4812",
+  "id": "CABHUT",
+  "facts": {
+   "Strength": "2000",
+   "Immune": "yes",
+   "LegalTarget": "no",
+   "Selectable": "no",
+   "BridgeRepairHut": "yes",
+   "TechLevel": "-1"
+  },
+  "source_class": "versioned mirror, source data"
+ },
+ "ra2_comparison": {
+  "url": "https://github.com/hamdirizal/red-alert-2-rules/blob/b66200ab0130a24bae8d8359caa6ab03bd78e8f7/rules-original.ini#L9448",
+  "id": "CABHUT",
+  "facts": {
+   "Strength": "2000",
+   "Immune": "yes",
+   "LegalTarget": "yes",
+   "Selectable": "yes",
+   "BridgeRepairHut": "yes",
+   "TechLevel": "-1"
+  },
+  "source_class": "community rules comparator, retail equivalence unverified"
+ },
+ "placed_huts_total": 454,
+ "maps_containing_exact_id": [
+  {
+   "path": "Maps/Firestorm/1lworld7.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Firestorm/1lworld7.map",
+   "count": 8,
+   "blob": "4293642357ddbe395abdd12dcbf71a59d41781d5"
+  },
+  {
+   "path": "Maps/Firestorm/2temp7.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Firestorm/2temp7.map",
+   "count": 6,
+   "blob": "8e7995ca9ab12642afbeb7b40438b839ed1ad4c0"
+  },
+  {
+   "path": "Maps/Firestorm/cityscap.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Firestorm/cityscap.map",
+   "count": 8,
+   "blob": "7bb4d5aa4d840bb09ee6e987b23aebf77ecbfd92"
+  },
+  {
+   "path": "Maps/Firestorm/drawbrid.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Firestorm/drawbrid.map",
+   "count": 12,
+   "blob": "1b3529128597a32d7d55afca3249d6473bd3bb3d"
+  },
+  {
+   "path": "Maps/Firestorm/duel.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Firestorm/duel.map",
+   "count": 6,
+   "blob": "9287dbc07e5bde419b75b63be716bcaee06e750c"
+  },
+  {
+   "path": "Maps/Firestorm/narrow.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Firestorm/narrow.map",
+   "count": 10,
+   "blob": "9f1f5ab3c382efdf911ee30257344b23fc4e37d8"
+  },
+  {
+   "path": "Maps/Firestorm/permfrst.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Firestorm/permfrst.map",
+   "count": 8,
+   "blob": "51aff719ab595f17abe231352c79e5a93e819024"
+  },
+  {
+   "path": "Maps/Firestorm/rivrrad4.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Firestorm/rivrrad4.map",
+   "count": 8,
+   "blob": "11224087d5f08d2295da2fd521411d123701a109"
+  },
+  {
+   "path": "Maps/Missions/fsgdi01.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsgdi01.map",
+   "count": 2,
+   "blob": "a5dad1e45153254ab88a867f4885e9b6049bb89e"
+  },
+  {
+   "path": "Maps/Missions/fsgdi03.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsgdi03.map",
+   "count": 6,
+   "blob": "34368c2ca062dd816f4f0c56b1ff7cc2f3aeae0e"
+  },
+  {
+   "path": "Maps/Missions/fsgdi06.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsgdi06.map",
+   "count": 2,
+   "blob": "c731f259b42f519638f2bbec80d421bc3445613a"
+  },
+  {
+   "path": "Maps/Missions/fsgdi07.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsgdi07.map",
+   "count": 8,
+   "blob": "90f9637261697d2d6be77c4bdcaea69a56f9325f"
+  },
+  {
+   "path": "Maps/Missions/fsgdi09.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsgdi09.map",
+   "count": 3,
+   "blob": "83f5168e5bcc7634fe02e8f4ff50043e84aecfa6"
+  },
+  {
+   "path": "Maps/Missions/fsnod01.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsnod01.map",
+   "count": 6,
+   "blob": "3b0029933ea1eb70d7f8e9eff22e685a8d9167ef"
+  },
+  {
+   "path": "Maps/Missions/fsnod02.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsnod02.map",
+   "count": 2,
+   "blob": "1e677ee42affc5e61349c3835edfd0f14da66c4e"
+  },
+  {
+   "path": "Maps/Missions/fsnod03.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsnod03.map",
+   "count": 5,
+   "blob": "3830f3c6a8a52db437756a99686d1fabc0db8379"
+  },
+  {
+   "path": "Maps/Missions/fsnod05.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsnod05.map",
+   "count": 2,
+   "blob": "1b4c1907452e0714ab3bf28c7b6aaaec5f9eea5b"
+  },
+  {
+   "path": "Maps/Missions/fsnod07.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsnod07.map",
+   "count": 2,
+   "blob": "113edd7ad61cc5fe005c2b1625862ab24a7bfce7"
+  },
+  {
+   "path": "Maps/Missions/fsnod09.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/fsnod09.map",
+   "count": 12,
+   "blob": "fda63f7dbe74bf430fbdb1af49c4cdf958d203ad"
+  },
+  {
+   "path": "Maps/Missions/gdi10a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi10a.map",
+   "count": 3,
+   "blob": "dd0789bbe65f3514cf2b8ce0cf631a2aeb56d101"
+  },
+  {
+   "path": "Maps/Missions/gdi10b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi10b.map",
+   "count": 4,
+   "blob": "e4190c378ddfffc8f7da0fce3cec2216853afe1b"
+  },
+  {
+   "path": "Maps/Missions/gdi11a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi11a.map",
+   "count": 2,
+   "blob": "3ce814d682d3b92e337937945bbbf52cc16d2935"
+  },
+  {
+   "path": "Maps/Missions/gdi12a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi12a.map",
+   "count": 5,
+   "blob": "d8776d16764b668824345b06d959d066868339b3"
+  },
+  {
+   "path": "Maps/Missions/gdi1a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi1a.map",
+   "count": 4,
+   "blob": "3d1e33b8aa60441702b57f8fd1557cbc2f7ffac8"
+  },
+  {
+   "path": "Maps/Missions/gdi1adshp.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi1adshp.map",
+   "count": 4,
+   "blob": "8e4969876adce0f2a3a42db288753dd5a7c47872"
+  },
+  {
+   "path": "Maps/Missions/gdi2a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi2a.map",
+   "count": 3,
+   "blob": "0b1d93b01e5aec02baca9c577ed4962bc8302d19"
+  },
+  {
+   "path": "Maps/Missions/gdi3a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi3a.map",
+   "count": 5,
+   "blob": "22c1d1eb11757b7cef726a4c08ba5a15b8620f80"
+  },
+  {
+   "path": "Maps/Missions/gdi3b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi3b.map",
+   "count": 10,
+   "blob": "dedecb64cc0fad852dcea8e85bce5e7d6c38c911"
+  },
+  {
+   "path": "Maps/Missions/gdi4a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi4a.map",
+   "count": 6,
+   "blob": "c453bc2edfc5ea6af719f6b206053364aa72f7a4"
+  },
+  {
+   "path": "Maps/Missions/gdi5b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi5b.map",
+   "count": 10,
+   "blob": "d73abbece5f710e983fb9bf256c3ccf1a4acadd7"
+  },
+  {
+   "path": "Maps/Missions/gdi5c.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi5c.map",
+   "count": 10,
+   "blob": "0de2cd3fab1d7c28f566db483f82942adf9bf04c"
+  },
+  {
+   "path": "Maps/Missions/gdi6a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi6a.map",
+   "count": 7,
+   "blob": "ce150fca883e570b21c8aaefacbc945b1ae15f8e"
+  },
+  {
+   "path": "Maps/Missions/gdi6b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi6b.map",
+   "count": 3,
+   "blob": "e41ed69131cdbd7843aabe53156a0b82bf7f1d70"
+  },
+  {
+   "path": "Maps/Missions/gdi7a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi7a.map",
+   "count": 8,
+   "blob": "a6f5ba3944bfc465a52bd24ceba5ad98e0ff51a7"
+  },
+  {
+   "path": "Maps/Missions/gdi8a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi8a.map",
+   "count": 6,
+   "blob": "a308efaad00482b3757b059045793e526f0b7c37"
+  },
+  {
+   "path": "Maps/Missions/gdi9a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi9a.map",
+   "count": 4,
+   "blob": "79f9cb17d2cfd2e0eaf35b179eabdc97cfa4d09e"
+  },
+  {
+   "path": "Maps/Missions/gdi9b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi9b.map",
+   "count": 4,
+   "blob": "cabc39af61460a929a6a9b87fa291f3fdf99d647"
+  },
+  {
+   "path": "Maps/Missions/gdi9d.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/gdi9d.map",
+   "count": 2,
+   "blob": "aa4dd9d31441dc13c3439b5fbd736f1c98f40069"
+  },
+  {
+   "path": "Maps/Missions/nod10a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod10a.map",
+   "count": 6,
+   "blob": "fc82be2477d9078030940f005cc5465285fb6406"
+  },
+  {
+   "path": "Maps/Missions/nod11a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod11a.map",
+   "count": 13,
+   "blob": "b7968102c0ff65525edaeb92811d1873c0a44b04"
+  },
+  {
+   "path": "Maps/Missions/nod12a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod12a.map",
+   "count": 12,
+   "blob": "9cf1a740c184cf4475c8a05f29e02fe28fc56d68"
+  },
+  {
+   "path": "Maps/Missions/nod2a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod2a.map",
+   "count": 2,
+   "blob": "7cc17e00b6e62bc4bd557d0fa468f04de211f54a"
+  },
+  {
+   "path": "Maps/Missions/nod3a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod3a.map",
+   "count": 7,
+   "blob": "134aae6926bfe89279a35e1a65738580acf9b672"
+  },
+  {
+   "path": "Maps/Missions/nod3b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod3b.map",
+   "count": 2,
+   "blob": "810011fd9ef2aa5e2f60efc210fa28be702ad342"
+  },
+  {
+   "path": "Maps/Missions/nod4a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod4a.map",
+   "count": 3,
+   "blob": "a4c0c30c423749cd3e0cf5e8e150f94030f676e7"
+  },
+  {
+   "path": "Maps/Missions/nod4b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod4b.map",
+   "count": 9,
+   "blob": "98a20de9ace2a6f1f962c34d8993ec7654f4ab92"
+  },
+  {
+   "path": "Maps/Missions/nod5a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod5a.map",
+   "count": 1,
+   "blob": "6e7a37f602aac793a4d5c7972b2cdf42fedac222"
+  },
+  {
+   "path": "Maps/Missions/nod6a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod6a.map",
+   "count": 4,
+   "blob": "379d2d8ca5eaca03dfcbcc5b90b2df085d3f5ee5"
+  },
+  {
+   "path": "Maps/Missions/nod6b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod6b.map",
+   "count": 2,
+   "blob": "c75a00fdb301cef3c7b9172d10fd9508a8d75294"
+  },
+  {
+   "path": "Maps/Missions/nod6c.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod6c.map",
+   "count": 6,
+   "blob": "1daedc1955b0b316c21aec243569fdbc2ad1303d"
+  },
+  {
+   "path": "Maps/Missions/nod7a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod7a.map",
+   "count": 1,
+   "blob": "98e2d8bc5f3280373982cfb0e417a430f85c7e4e"
+  },
+  {
+   "path": "Maps/Missions/nod7b.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod7b.map",
+   "count": 4,
+   "blob": "bfde4566af73fc2ee27000dec9511a66b877d531"
+  },
+  {
+   "path": "Maps/Missions/nod8a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod8a.map",
+   "count": 6,
+   "blob": "d0d5d918d60776f551cb255fb1ae09fbf05fd4db"
+  },
+  {
+   "path": "Maps/Missions/nod9a.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/nod9a.map",
+   "count": 6,
+   "blob": "594d494ebe32826a808b7cc2fdb3a9492e89d277"
+  },
+  {
+   "path": "Maps/Missions/tsdemo1.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Missions/tsdemo1.map",
+   "count": 2,
+   "blob": "98ae46adf623f0bbfb44e6d9dcf9707cb4a689de"
+  },
+  {
+   "path": "Maps/Tiberian Sun/access.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/access.map",
+   "count": 2,
+   "blob": "5d90fffcf40fc6c020d8edb24e1d3a111bab7a57"
+  },
+  {
+   "path": "Maps/Tiberian Sun/arivruns.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/arivruns.map",
+   "count": 16,
+   "blob": "02a13f714c7f1f1939ab2b505128980a1d1bcfa7"
+  },
+  {
+   "path": "Maps/Tiberian Sun/desolar.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/desolar.map",
+   "count": 6,
+   "blob": "f59ea362a82963a840ea65191a93a9aed8a6d815"
+  },
+  {
+   "path": "Maps/Tiberian Sun/forestfr.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/forestfr.map",
+   "count": 4,
+   "blob": "3b018c15c377c258314c4312a8dda03389970d37"
+  },
+  {
+   "path": "Maps/Tiberian Sun/g_canyon.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/g_canyon.map",
+   "count": 10,
+   "blob": "5514a37827fed0a371b24fd1d38472ad8a1feaa1"
+  },
+  {
+   "path": "Maps/Tiberian Sun/g_knoll.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/g_knoll.map",
+   "count": 6,
+   "blob": "1cbbe700be963f07fc72bbc1d7e4da4fe3ecfe01"
+  },
+  {
+   "path": "Maps/Tiberian Sun/hextreme.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/hextreme.map",
+   "count": 12,
+   "blob": "159ccedbe9067937be736c942aaaf0f05030fb9a"
+  },
+  {
+   "path": "Maps/Tiberian Sun/icecliff.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/icecliff.map",
+   "count": 14,
+   "blob": "9b55247df5e40dbb2edf6cb9e28cbbd6211bb9fc"
+  },
+  {
+   "path": "Maps/Tiberian Sun/icemust.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/icemust.map",
+   "count": 18,
+   "blob": "8f0d6297c1bb6160a1ba4b7013a2426e53840a04"
+  },
+  {
+   "path": "Maps/Tiberian Sun/pentagrm.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/pentagrm.map",
+   "count": 4,
+   "blob": "930bdafa5f6bf80c4011e3d6784c51b955827df9"
+  },
+  {
+   "path": "Maps/Tiberian Sun/pitplats.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/pitplats.map",
+   "count": 8,
+   "blob": "39a612e7a649a82c2afa2a6097806458f227cd08"
+  },
+  {
+   "path": "Maps/Tiberian Sun/pockets.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/pockets.map",
+   "count": 4,
+   "blob": "36966d8df46c86ccf6c7621f6da3c668464e8e05"
+  },
+  {
+   "path": "Maps/Tiberian Sun/seismic.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/seismic.map",
+   "count": 4,
+   "blob": "9918698de07b16dfd22bbcfba8a5ed82ce706c71"
+  },
+  {
+   "path": "Maps/Tiberian Sun/storms.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/storms.map",
+   "count": 2,
+   "blob": "2f87042a98ca099954a45120efeca60f09692288"
+  },
+  {
+   "path": "Maps/Tiberian Sun/strmyvly.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/strmyvly.map",
+   "count": 10,
+   "blob": "9b90a5d08c0c960afc4b4bc77198078a53d48f97"
+  },
+  {
+   "path": "Maps/Tiberian Sun/sup_bh_r.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/sup_bh_r.map",
+   "count": 14,
+   "blob": "111a8747f9b6d927fca2367afb552e3e0ea5ecd8"
+  },
+  {
+   "path": "Maps/Tiberian Sun/tactical.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/tactical.map",
+   "count": 2,
+   "blob": "cfabbd49384d62701d622696111818a3c3e6d239"
+  },
+  {
+   "path": "Maps/Tiberian Sun/tread_l.map",
+   "url": "https://github.com/CnCNet/cncnet-ts-client-package/blob/c13be46135820de4a83bf5cc2779ad32b29f4704/Maps/Tiberian%20Sun/tread_l.map",
+   "count": 16,
+   "blob": "9de11f9a94e362bab0f89ac737b6b7d1f59d7256"
+  }
+ ],
+ "scope": "same identifier across snapshots does not prove shared targetability, repair timing, engineer disposition or occupancy on collapse"
+}

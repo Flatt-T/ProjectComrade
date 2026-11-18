@@ -1,0 +1,875 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:entity",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "entity"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "identity": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/identity"
+    },
+    "display_names": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "category": {
+      "enum": [
+        "unit",
+        "building",
+        "form",
+        "variant",
+        "campaign",
+        "neutral",
+        "prop",
+        "resource",
+        "projectile",
+        "wreck",
+        "support_power",
+        "upgrade",
+        "ability",
+        "helper",
+        "unclassified"
+      ]
+    },
+    "source_object_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "classification": {
+      "enum": [
+        "unclassified",
+        "declared",
+        "referenced",
+        "active",
+        "unused",
+        "cancelled"
+      ]
+    },
+    "disposition": {
+      "enum": [
+        "candidate",
+        "verified_included",
+        "verified_inactive",
+        "accepted_alias",
+        "approved_exclusion",
+        "unresolved"
+      ]
+    },
+    "faction_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "country_general_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "class_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "mode_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "availability_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "faction_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]*$"
+          },
+          "mode": {
+            "type": "string",
+            "minLength": 1
+          },
+          "edition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "decision": {
+            "enum": [
+              "allowed",
+              "excluded",
+              "unknown"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "faction_id",
+          "mode",
+          "edition",
+          "decision",
+          "evidence"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/relation"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "acquisition": {
+      "enum": [
+        "unknown",
+        "starting",
+        "produced",
+        "scripted",
+        "spawned",
+        "transformation",
+        "noninteractive"
+      ]
+    },
+    "facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "availability": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "group_unknown": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+                }
+              },
+              "required": [
+                "group_unknown"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "producer_ids": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "required_all": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "required_any": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "forbidden_if": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "country_exclusions": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "required_upgrades": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "tech_level": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "build_limit": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "unique_scope": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "queue_kind": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "build_cost": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "payment_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "build_time": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "refund_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "power_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "exit_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "rally_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "build_placement": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "capture_producer_effect": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "sell_producer_effect": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "transfer_producer_effect": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                }
+              },
+              "required": [
+                "producer_ids",
+                "required_all",
+                "required_any",
+                "forbidden_if",
+                "country_exclusions",
+                "required_upgrades",
+                "tech_level",
+                "build_limit",
+                "unique_scope",
+                "queue_kind",
+                "build_cost",
+                "payment_policy",
+                "build_time",
+                "refund_policy",
+                "power_policy",
+                "exit_policy",
+                "rally_policy",
+                "build_placement",
+                "capture_producer_effect",
+                "sell_producer_effect",
+                "transfer_producer_effect"
+              ]
+            }
+          ]
+        },
+        "physical": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "group_unknown": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+                }
+              },
+              "required": [
+                "group_unknown"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "footprint": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "collision_shape": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "selection_shape": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "navigation_classes": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "terrain_costs": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "slope_limit": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "water_depth_range": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "bridge_clearance": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "speed": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "acceleration": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "turn_rate": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "hull_facing_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "turret_facing_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "firing_on_move": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "crush_tier": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "crushable_by": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "altitude_bands": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "transition_capabilities": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "transport_slots": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "passenger_limits": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "garrison_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                }
+              },
+              "required": [
+                "footprint",
+                "collision_shape",
+                "selection_shape",
+                "navigation_classes",
+                "terrain_costs",
+                "slope_limit",
+                "water_depth_range",
+                "bridge_clearance",
+                "speed",
+                "acceleration",
+                "turn_rate",
+                "hull_facing_policy",
+                "turret_facing_policy",
+                "firing_on_move",
+                "crush_tier",
+                "crushable_by",
+                "altitude_bands",
+                "transition_capabilities",
+                "transport_slots",
+                "passenger_limits",
+                "garrison_policy"
+              ]
+            }
+          ]
+        },
+        "combat": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "group_unknown": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+                }
+              },
+              "required": [
+                "group_unknown"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "health": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "armour_profile": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "directional_modifiers": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "weapon_slots": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "target_filters": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "range": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "minimum_range": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "acquisition": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "line_of_fire": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "projectile_contract": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "damage": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "splash": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "warmup": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "burst": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "cooldown": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "ammo": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "rearm": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "veterancy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "status_responses": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "death_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "wreck_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "capture_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "mind_control_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "infiltration_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "repair_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "visibility_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                }
+              },
+              "required": [
+                "health",
+                "armour_profile",
+                "directional_modifiers",
+                "weapon_slots",
+                "target_filters",
+                "range",
+                "minimum_range",
+                "acquisition",
+                "line_of_fire",
+                "projectile_contract",
+                "damage",
+                "splash",
+                "warmup",
+                "burst",
+                "cooldown",
+                "ammo",
+                "rearm",
+                "veterancy",
+                "status_responses",
+                "death_policy",
+                "wreck_policy",
+                "capture_policy",
+                "mind_control_policy",
+                "infiltration_policy",
+                "repair_policy",
+                "visibility_policy"
+              ]
+            }
+          ]
+        },
+        "economy": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "group_unknown": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+                }
+              },
+              "required": [
+                "group_unknown"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "resource_type": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "harvest_targets": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "harvest_rate": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "cargo_capacity": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "return_policy": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "unload_points": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "unload_duration": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "depletion_regrowth": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "secondary_income": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "power_produced": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "power_consumed": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "abilities": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "support_powers": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "ability_costs": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "ability_targets": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "ability_cooldowns": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "ability_interruptions": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                }
+              },
+              "required": [
+                "resource_type",
+                "harvest_targets",
+                "harvest_rate",
+                "cargo_capacity",
+                "return_policy",
+                "unload_points",
+                "unload_duration",
+                "depletion_regrowth",
+                "secondary_income",
+                "power_produced",
+                "power_consumed",
+                "abilities",
+                "support_powers",
+                "ability_costs",
+                "ability_targets",
+                "ability_cooldowns",
+                "ability_interruptions"
+              ]
+            }
+          ]
+        },
+        "presentation": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "group_unknown": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+                }
+              },
+              "required": [
+                "group_unknown"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "model_asset_id": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "model_source_and_licence": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "textures": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "material_style": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "team_colour_mask": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "silhouette_reference": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "scale_reference": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "skeleton_or_rigid_rig": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "animation_state_graph": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "animation_clips": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "sockets": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "VFX_events": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "SFX_events": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "voice_events": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "UI_icon": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "selection_feedback": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "damage_visual_states": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "destruction_visual_states": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "LOD_contract": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                },
+                "performance_budget": {
+                  "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+                }
+              },
+              "required": [
+                "model_asset_id",
+                "model_source_and_licence",
+                "textures",
+                "material_style",
+                "team_colour_mask",
+                "silhouette_reference",
+                "scale_reference",
+                "skeleton_or_rigid_rig",
+                "animation_state_graph",
+                "animation_clips",
+                "sockets",
+                "VFX_events",
+                "SFX_events",
+                "voice_events",
+                "UI_icon",
+                "selection_feedback",
+                "damage_visual_states",
+                "destruction_visual_states",
+                "LOD_contract",
+                "performance_budget"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "availability",
+        "physical",
+        "combat",
+        "economy",
+        "presentation"
+      ]
+    },
+    "observation_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "conflict_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "adaptation_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "asset_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "capability_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "fixture_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "visual_family": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "visible": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "automatic_release": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "profile_id",
+    "evidence",
+    "owner",
+    "reviewer",
+    "blockers",
+    "identity",
+    "display_names",
+    "category",
+    "source_object_ids",
+    "classification",
+    "disposition",
+    "faction_ids",
+    "country_general_ids",
+    "class_ids",
+    "mode_ids",
+    "availability_rules",
+    "relations",
+    "acquisition",
+    "facts",
+    "observation_ids",
+    "conflict_ids",
+    "adaptation_ids",
+    "asset_ids",
+    "capability_ids",
+    "fixture_ids",
+    "visual_family",
+    "visible",
+    "automatic_release"
+  ]
+}
