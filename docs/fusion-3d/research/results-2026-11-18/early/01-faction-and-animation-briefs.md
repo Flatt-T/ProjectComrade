@@ -1,5 +1,7 @@
 # Edition fixtures for gameplay and art specialists
 
+**Original media comparisons.** For Tiberian Sun and Firestorm, the named disc and revision determine which rules, art and terrain fields apply. For Red Alert 2, the verified 1.006 rules match every named section of the comparison rules, while the community art introduces 115 additional sections and changes 112 shared ones. The English Yuri 1.001 rules differ from the comparison rules on 25 named sections. The measured corrections accompany the original observation rows. [TS and Firestorm discs](ts-retail-verification.md) · [RA2 disc and applied update](ra2-patch-disc-provenance.md) · [Yuri rules](ra2-patch-provenance.md)
+
 Each example pairs a historical observation with a proposed Fusion test. In tests, capture the issuing faction, profile, map, camera, event tick, pose phase and outcome. Preserve source-specific special cases with data. Give gameplay authority to the simulation. Use its discrete events to drive art, sound and UI. A historical unit label below is a research key for an original homage asset.
 
 ## Tiberian Dawn and The Covert Operations

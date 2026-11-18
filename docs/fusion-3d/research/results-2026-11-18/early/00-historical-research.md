@@ -1,5 +1,7 @@
 # Historical object and rules research, 1995 to 2003
 
+**Original media comparisons.** For Tiberian Sun and Firestorm, the named disc and revision determine which rules, art and terrain fields apply. For Red Alert 2, the verified 1.006 rules match every named section of the comparison rules, while the community art introduces 115 additional sections and changes 112 shared ones. The English Yuri 1.001 rules differ from the comparison rules on 25 named sections. The measured corrections accompany the original observation rows. [TS and Firestorm discs](ts-retail-verification.md) · [RA2 disc and applied update](ra2-patch-disc-provenance.md) · [Yuri rules](ra2-patch-provenance.md)
+
 Eight edition-specific fact archives support the Fusion roster, animation, terrain and simulation work. Read each row as an observation of a particular source. Model names, game icons, original sequences and filenames are identifiers for comparison. Author new meshes, animation, textures, effects and audio for Fusion.
 
 | Edition | Inventory denominator | Further evidence | Direct qualification |

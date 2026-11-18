@@ -1,0 +1,228 @@
+section	action	official_1006_specific_key_values	comparator_specific_key_values	order_only
+$Include	exclude_comparator_only_section_from_1006			
+ADOG	compare_fields	[]	"[[""SecondaryFireFLH"",""0,0,0""],[""ElitePrimaryFireFLH"",""0,0,0""],[""EliteSecondaryFireFLH"",""0,0,0""]]"	false
+APOCEXP	compare_fields	[]	"[[""Normalized"",""yes""],[""Translucent"",""yes""],[""UseNormalLight"",""yes""]]"	false
+ASW	compare_fields	[]	"[[""SecondaryFireFLH"",""0,32,0""],[""ElitePrimaryFireFLH"",""0,32,0""],[""EliteSecondaryFireFLH"",""0,32,0""]]"	false
+BEAG	compare_fields	"[[""AltCameo"",""BEAGICON""]]"	"[[""AltCameo"",""BEAGUICO""]]"	false
+BEHIND	compare_fields	[]	"[[""YSortAdjust"",""2000""]]"	false
+BRRLEXP1	compare_fields	[]	"[[""Translucent"",""yes""],[""UseNormalLight"",""yes""]]"	false
+BRRLEXP2	compare_fields	[]	"[[""Translucent"",""yes""],[""UseNormalLight"",""yes""]]"	false
+CAAIRP	compare_fields	[]	"[[""OccupyHeight"",""2""],[""AddOccupy1"",""-2,0""],[""AddOccupy2"",""-1,1""]]"	false
+CABARR01	exclude_comparator_only_section_from_1006			
+CABARR02	exclude_comparator_only_section_from_1006			
+CABUNK03	exclude_comparator_only_section_from_1006			
+CABUNK04	exclude_comparator_only_section_from_1006			
+CACITY02	compare_fields	"[[""Foundation"",""5x4""]]"	"[[""Foundation"",""Custom""],[""Foundation.X"",""5""],[""Foundation.Y"",""4""],[""Foundation.0"",""0,0""],[""Foundation.1"",""1,0""],[""Foundation.2"",""2,0""],[""Foundation.3"",""3,0""],[""Foundation.4"",""4,0""],[""Foundation.5"",""0,1""],[""Foundation.6"",""1,1""],[""Foundation.7"",""2,1""],[""Foundation.8"",""3,1""],[""Foundation.9"",""4,1""],[""Foundation.10"",""0,2""],[""Foundation.11"",""1,2""],[""Foundation.12"",""2,2""],[""Foundation.13"",""3,2""],[""Foundation.14"",""4,2""],[""Foundation.15"",""0,3""],[""Foundation.16"",""1,3""],[""Foundation.17"",""2,3""],[""Foundation.18"",""3,3""],[""Foundation.19"",""4,3""],[""FoundationOutline.Length"",""22""],[""FoundationOutline.0"",""-1,-1""],[""FoundationOutline.1"",""0,-1""],[""FoundationOutline.2"",""1,-1""],[""FoundationOutline.3"",""2,-1""],[""FoundationOutline.4"",""3,-1""],[""FoundationOutline.5"",""4,-1""],[""FoundationOutline.6"",""5,-1""],[""FoundationOutline.7"",""-1,0""],[""FoundationOutline.8"",""5,0""],[""FoundationOutline.9"",""-1,1""],[""FoundationOutline.10"",""5,1""],[""FoundationOutline.11"",""-1,2""],[""FoundationOutline.12"",""5,2""],[""FoundationOutline.13"",""-1,3""],[""FoundationOutline.14"",""5,3""],[""FoundationOutline.15"",""-1,4""],[""FoundationOutline.16"",""0,4""],[""FoundationOutline.17"",""1,4""],[""FoundationOutline.18"",""2,4""],[""FoundationOutline.19"",""3,4""],[""FoundationOutline.20"",""4,4""],[""FoundationOutline.21"",""5,4""]]"	false
+CAEAST01	exclude_comparator_only_section_from_1006			
+CAEAST01DM	exclude_comparator_only_section_from_1006			
+CAEAST02	exclude_comparator_only_section_from_1006			
+CAEGYP01	exclude_comparator_only_section_from_1006			
+CAEGYP02	exclude_comparator_only_section_from_1006			
+CAEGYP03	exclude_comparator_only_section_from_1006			
+CAEGYP04	exclude_comparator_only_section_from_1006			
+CAEGYP05	exclude_comparator_only_section_from_1006			
+CAEGYP06	exclude_comparator_only_section_from_1006			
+CAGARD03	exclude_comparator_only_section_from_1006			
+CAKRMW	compare_fields	"[[""DamageLevels"",""2""]]"	"[[""DamageLevels"",""3""]]"	false
+CALA01	exclude_comparator_only_section_from_1006			
+CALA03	exclude_comparator_only_section_from_1006			
+CALA03A	exclude_comparator_only_section_from_1006			
+CALA04	exclude_comparator_only_section_from_1006			
+CALA05	exclude_comparator_only_section_from_1006			
+CALA06	exclude_comparator_only_section_from_1006			
+CALA07	exclude_comparator_only_section_from_1006			
+CALA08	exclude_comparator_only_section_from_1006			
+CALA09	exclude_comparator_only_section_from_1006			
+CALA10	exclude_comparator_only_section_from_1006			
+CALA10_A	exclude_comparator_only_section_from_1006			
+CALA10_AD	exclude_comparator_only_section_from_1006			
+CALA11	exclude_comparator_only_section_from_1006			
+CALA12	exclude_comparator_only_section_from_1006			
+CALA13	exclude_comparator_only_section_from_1006			
+CALA14	exclude_comparator_only_section_from_1006			
+CALA15	exclude_comparator_only_section_from_1006			
+CALND6_A	exclude_comparator_only_section_from_1006			
+CALND6_AD	exclude_comparator_only_section_from_1006			
+CALOND01	exclude_comparator_only_section_from_1006			
+CALOND03	exclude_comparator_only_section_from_1006			
+CALOND04	exclude_comparator_only_section_from_1006			
+CALOND05	exclude_comparator_only_section_from_1006			
+CALOND06	exclude_comparator_only_section_from_1006			
+CALUNR01	exclude_comparator_only_section_from_1006			
+CALUNR02	exclude_comparator_only_section_from_1006			
+CAMOON01	exclude_comparator_only_section_from_1006			
+CAMORR01	exclude_comparator_only_section_from_1006			
+CAMORR02	exclude_comparator_only_section_from_1006			
+CAMORR03	exclude_comparator_only_section_from_1006			
+CAMORR04	exclude_comparator_only_section_from_1006			
+CAMORR05	exclude_comparator_only_section_from_1006			
+CAMORR06	exclude_comparator_only_section_from_1006			
+CAMORR07	exclude_comparator_only_section_from_1006			
+CAMORR08	exclude_comparator_only_section_from_1006			
+CAMORR09	exclude_comparator_only_section_from_1006			
+CAMORR10	exclude_comparator_only_section_from_1006			
+CANKFGL	exclude_comparator_only_section_from_1006			
+CANKFGL_A	exclude_comparator_only_section_from_1006			
+CAPARK04	exclude_comparator_only_section_from_1006			
+CAPARK05	exclude_comparator_only_section_from_1006			
+CAPARK06	exclude_comparator_only_section_from_1006			
+CAPARS01	compare_fields	[]	"[[""SecondaryFireFLH"",""0,0,1566""],[""ElitePrimaryFireFLH"",""0,0,1566""],[""EliteSecondaryFireFLH"",""0,0,1566""]]"	false
+CASANF01	exclude_comparator_only_section_from_1006			
+CASANF02	exclude_comparator_only_section_from_1006			
+CASANF03	exclude_comparator_only_section_from_1006			
+CASANF04	exclude_comparator_only_section_from_1006			
+CASANF05	exclude_comparator_only_section_from_1006			
+CASANF06	exclude_comparator_only_section_from_1006			
+CASANF07	exclude_comparator_only_section_from_1006			
+CASANF08	exclude_comparator_only_section_from_1006			
+CASANF09	exclude_comparator_only_section_from_1006			
+CASANF10	exclude_comparator_only_section_from_1006			
+CASANF11	exclude_comparator_only_section_from_1006			
+CASANF12	exclude_comparator_only_section_from_1006			
+CASANF13	exclude_comparator_only_section_from_1006			
+CASANF14	exclude_comparator_only_section_from_1006			
+CASANF15	exclude_comparator_only_section_from_1006			
+CASANF16	exclude_comparator_only_section_from_1006			
+CASANF17	exclude_comparator_only_section_from_1006			
+CASANF18	exclude_comparator_only_section_from_1006			
+CASEAT01	exclude_comparator_only_section_from_1006			
+CASEAT02	exclude_comparator_only_section_from_1006			
+CASEAT02_A	exclude_comparator_only_section_from_1006			
+CASEAT02_AD	exclude_comparator_only_section_from_1006			
+CASIN03E	exclude_comparator_only_section_from_1006			
+CASIN03S	exclude_comparator_only_section_from_1006			
+CASLAB	exclude_comparator_only_section_from_1006			
+CASYDN02	exclude_comparator_only_section_from_1006			
+CASYDN03	exclude_comparator_only_section_from_1006			
+CATIME01	exclude_comparator_only_section_from_1006			
+CATIME02	exclude_comparator_only_section_from_1006			
+CATIME_A	exclude_comparator_only_section_from_1006			
+CATIME_AD	exclude_comparator_only_section_from_1006			
+CATR03DM	exclude_comparator_only_section_from_1006			
+CATRAN01	exclude_comparator_only_section_from_1006			
+CATRAN02	exclude_comparator_only_section_from_1006			
+CATRAN03	exclude_comparator_only_section_from_1006			
+CAURB01	exclude_comparator_only_section_from_1006			
+CAURB02	exclude_comparator_only_section_from_1006			
+CAURB03	exclude_comparator_only_section_from_1006			
+CCOMAND	compare_fields	[]	"[[""SecondaryFireFLH"",""100,0,100""],[""ElitePrimaryFireFLH"",""100,0,100""],[""EliteSecondaryFireFLH"",""100,0,100""]]"	false
+CIVAN	compare_fields	[]	"[[""AltCameo"",""IVNCUICO""],[""SecondaryFireFLH"",""80,0,85""],[""ElitePrimaryFireFLH"",""80,0,85""],[""EliteSecondaryFireFLH"",""80,0,85""]]"	false
+CLEG	compare_fields	[]	"[[""SecondaryFireFLH"",""100,-25,135""],[""ElitePrimaryFireFLH"",""100,-25,135""],[""EliteSecondaryFireFLH"",""100,-25,135""]]"	false
+CMIN	compare_fields	[]	"[[""AltCameo"",""AHRVUICO""]]"	false
+CONS	compare_fields	[]	"[[""PrimaryFireFLH"",""60,0,100""],[""SecondaryFireFLH"",""60,0,100""],[""ElitePrimaryFireFLH"",""60,0,100""],[""EliteSecondaryFireFLH"",""60,0,100""]]"	false
+COW	compare_fields	[]	"[[""SecondaryFireFLH"",""80,0,85""],[""ElitePrimaryFireFLH"",""80,0,85""],[""EliteSecondaryFireFLH"",""80,0,85""]]"	false
+CRIVEXP	compare_fields	[]	"[[""Normalized"",""yes""],[""Translucent"",""yes""],[""UseNormalLight"",""yes""]]"	false
+DBRIS1HV	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS1SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS2SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS3SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS4SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS5SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS6SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS7SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS8SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRIS9SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DBRS10SM	compare_fields	"[[""ExpireAnim"",""TWLT024""]]"	"[[""ExpireAnim"",""TWLT026""]]"	false
+DEMTEXP	exclude_comparator_only_section_from_1006			
+DESO	compare_fields	[]	"[[""SecondaryFireFLH"",""100,-25,135""],[""ElitePrimaryFireFLH"",""100,-25,135""],[""EliteSecondaryFireFLH"",""100,-25,135""]]"	false
+DEST	compare_fields	[]	"[[""SecondaryFireFLH"",""280,0,120""],[""ElitePrimaryFireFLH"",""280,0,120""],[""EliteSecondaryFireFLH"",""280,0,120""]]"	false
+DOG	compare_fields	[]	"[[""SecondaryFireFLH"",""0,0,0""],[""ElitePrimaryFireFLH"",""0,0,0""],[""EliteSecondaryFireFLH"",""0,0,0""]]"	false
+DRED	compare_fields	[]	"[[""SecondaryFireFLH"",""30,43,92""],[""ElitePrimaryFireFLH"",""30,43,92""],[""EliteSecondaryFireFLH"",""30,43,92""]]"	false
+DRON	compare_fields	[]	"[[""AltCameo"",""DRONUICO""],[""SecondaryFireFLH"",""0,0,30""],[""ElitePrimaryFireFLH"",""0,0,30""],[""EliteSecondaryFireFLH"",""0,0,30""]]"	false
+ENGINEER	compare_fields	"[[""AltCameo"",""ENGNUICO""]]"	"[[""AltCameo"",""AENGUICO""]]"	false
+FLAKT	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""90,0,175""],[""EliteSecondaryFireFLH"",""90,0,175""]]"	false
+GAAIRC	compare_fields	[]	"[[""ActiveAnimPowered"",""no""],[""ActiveAnimPoweredLight"",""yes""],[""ActiveAnimTwoPowered"",""no""],[""ActiveAnimTwoPoweredLight"",""yes""]]"	false
+GAAIRCBB	exclude_comparator_only_section_from_1006			
+GACNST	compare_fields	[]	"[[""CameoPCX"",""gacnsticon.pcx""],[""AltCameoPCX"",""gacnsticon.pcx""]]"	false
+GACSAM	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""152,50,192""],[""EliteSecondaryFireFLH"",""152,-50,192""]]"	false
+GAGATE_B	compare_fields	"[[""Cameo"",""GAT2ICON""]]"	"[[""Cameo"",""GATEICON""],[""Height"",""2""],[""CanHideThings"",""False""],[""CanBeHidden"",""False""]]"	false
+GALAMP	exclude_comparator_only_section_from_1006			
+GALITE	compare_fields	"[[""Foundation"",""1x1""]]"	"[[""Foundation"",""0x0""]]"	false
+GAPILL	compare_fields	[]	"[[""SecondaryFirePixelOffset"",""0,10""],[""ElitePrimaryFirePixelOffset"",""0,10""],[""EliteSecondaryFirePixelOffset"",""0,10""],[""SecondaryFireFLH"",""90,0,40""],[""ElitePrimaryFireFLH"",""90,0,40""],[""EliteSecondaryFireFLH"",""90,0,40""],[""SecondaryFireDualOffset"",""true""],[""ElitePrimaryFireDualOffset"",""true""],[""EliteSecondaryFireDualOffset"",""true""]]"	false
+GAPRIS	compare_fields	"[[""SpecialAnimZAdjust"",""-84""]]"	"[[""SecondaryFireDualOffset"",""true""],[""ElitePrimaryFireDualOffset"",""true""],[""EliteSecondaryFireDualOffset"",""true""],[""SecondaryFirePixelOffset"",""0,-4""],[""ElitePrimaryFirePixelOffset"",""0,-4""],[""EliteSecondaryFirePixelOffset"",""0,-4""],[""SecondaryFireFLH"",""0,0,378""],[""ElitePrimaryFireFLH"",""0,0,378""],[""EliteSecondaryFireFLH"",""0,0,378""],[""SpecialAnimZAdjust"",""-35""]]"	false
+GAREFNBB	exclude_comparator_only_section_from_1006			
+GAROCK	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""162,30,90""],[""EliteSecondaryFireFLH"",""162,-30,90""]]"	false
+GASPOT	compare_fields	"[[""Height"",""3""]]"	"[[""Height"",""5""]]"	false
+GCMUZZLE	exclude_comparator_only_section_from_1006			
+GI	compare_fields	[]	"[[""SecondaryFireFLH"",""80,0,90""],[""ElitePrimaryFireFLH"",""80,0,105""],[""EliteSecondaryFireFLH"",""80,0,90""]]"	false
+GTGCAN	compare_fields	"[[""PrimaryFireFLH"",""250,0,230""]]"	"[[""PrimaryFireFLH"",""400,0,292""],[""SecondaryFireFLH"",""400,0,292""],[""ElitePrimaryFireFLH"",""400,0,292""],[""EliteSecondaryFireFLH"",""400,0,292""]]"	false
+GTNK	compare_fields	"[[""PrimaryFireFLH"",""150,0,100""]]"	"[[""PrimaryFireFLH"",""170,0,112""],[""SecondaryFireFLH"",""170,0,112""],[""ElitePrimaryFireFLH"",""170,0,112""],[""EliteSecondaryFireFLH"",""170,0,112""]]"	false
+HARV	compare_fields	[]	"[[""SecondaryFireFLH"",""75,0,150""],[""ElitePrimaryFireFLH"",""75,0,150""],[""EliteSecondaryFireFLH"",""75,0,150""]]"	false
+HORNET	compare_fields	[]	"[[""SecondaryFireFLH"",""0,32,0""],[""ElitePrimaryFireFLH"",""0,32,0""],[""EliteSecondaryFireFLH"",""0,32,0""]]"	false
+HTK	compare_fields	[]	"[[""SecondaryFireFLH"",""65,0,220""],[""ElitePrimaryFireFLH"",""65,0,220""],[""EliteSecondaryFireFLH"",""65,0,220""]]"	false
+HTNK	compare_fields	"[[""PrimaryFireFLH"",""150,0,100""]]"	"[[""PrimaryFireFLH"",""170,0,115""],[""SecondaryFireFLH"",""170,0,115""],[""ElitePrimaryFireFLH"",""170,0,115""],[""EliteSecondaryFireFLH"",""170,0,115""]]"	false
+HWTZ	compare_fields	"[[""PrimaryFireFLH"",""200,0,55""]]"	"[[""PrimaryFireFLH"",""250,0,165""],[""SecondaryFireFLH"",""250,0,165""],[""ElitePrimaryFireFLH"",""250,0,165""],[""EliteSecondaryFireFLH"",""250,0,165""]]"	false
+HYD	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""65,0,180""],[""EliteSecondaryFireFLH"",""65,0,180""]]"	false
+IVAN	compare_fields	[]	"[[""AltCameo"",""IVANUICO""],[""SecondaryFireFLH"",""80,0,85""],[""ElitePrimaryFireFLH"",""80,0,85""],[""EliteSecondaryFireFLH"",""80,0,85""]]"	false
+KTSTLEXP	compare_fields	[]	"[[""Normalized"",""yes""],[""Translucent"",""yes""],[""UseNormalLight"",""yes""]]"	false
+LCRF	compare_fields	[]	"[[""AltCameo"",""LANDUICO""]]"	false
+LTNK	compare_fields	[]	"[[""PrimaryFireFLH"",""217,0,130""],[""SecondaryFireFLH"",""217,0,130""],[""ElitePrimaryFireFLH"",""217,0,130""],[""EliteSecondaryFireFLH"",""217,0,130""]]"	false
+MCV	compare_fields	[]	"[[""AltCameo"",""MCVUICO""]]"	false
+MGUN-E	compare_fields	[]	"[[""Translucent"",""no""]]"	false
+MGUN-N	compare_fields	[]	"[[""Translucent"",""no""]]"	false
+MGUN-NE	compare_fields	[]	"[[""Translucent"",""no""]]"	false
+MGUN-NW	compare_fields	[]	"[[""Translucent"",""no""]]"	false
+MGUN-S	compare_fields	[]	"[[""Translucent"",""no""]]"	false
+MGUN-SE	compare_fields	[]	"[[""Translucent"",""no""]]"	false
+MGUN-SW	compare_fields	[]	"[[""Translucent"",""no""]]"	false
+MGUN-W	compare_fields	[]	"[[""Translucent"",""no""]]"	false
+MININUKE	exclude_comparator_only_section_from_1006			
+MTNK	compare_fields	[]	"[[""SecondaryFireFLH"",""15,55,105""],[""ElitePrimaryFireFLH"",""190,25,120""],[""EliteSecondaryFireFLH"",""15,55,105""]]"	false
+NABNKR	exclude_comparator_only_section_from_1006			
+NACLON	compare_fields	[]	"[[""SpecialAnim"",""NACLON_A""],[""SpecialAnimDamaged"",""NACLON_AD""],[""SpecialAnimZAdjust"",""-5""]]"	false
+NACLON_A	compare_fields	[]	"[[""DoubleThick"",""true""]]"	false
+NACLON_AD	compare_fields	[]	"[[""DoubleThick"",""true""]]"	false
+NACNST	compare_fields	[]	"[[""CameoPCX"",""nacnsticon.pcx""],[""AltCameoPCX"",""nacnsticon.pcx""]]"	false
+NADEPTBB	exclude_comparator_only_section_from_1006			
+NAFLAK	compare_fields	"[[""PrimaryFireFLH"",""130,0,185""]]"	"[[""PrimaryFireFLH"",""140,0,220""],[""SecondaryFireFLH"",""140,0,220""],[""ElitePrimaryFireFLH"",""140,0,220""],[""EliteSecondaryFireFLH"",""140,0,220""]]"	false
+NALASR	compare_fields	"[[""PrimaryFireFLH"",""100,20,100""]]"	"[[""PrimaryFireFLH"",""103,22,100""],[""SecondaryFireFLH"",""103,22,100""],[""ElitePrimaryFireFLH"",""103,22,100""],[""EliteSecondaryFireFLH"",""103,22,100""]]"	false
+NANRCT_A	compare_fields	[]	"[[""DoubleThick"",""true""]]"	false
+NANRCT_AD	compare_fields	[]	"[[""DoubleThick"",""true""]]"	false
+NAPOWR_A	compare_fields	[]	"[[""DoubleThick"",""true""]]"	false
+NAPOWR_AD	compare_fields	[]	"[[""DoubleThick"",""true""]]"	false
+NAPSIS_AD	compare_fields	"[[""LoopEnd"",""79""]]"	"[[""LoopEnd"",""80""]]"	false
+NASAM	compare_fields	"[[""PrimaryFireFLH"",""90,50,100""],[""SecondaryFireFLH"",""90,-50,100""]]"	"[[""PrimaryFireFLH"",""90,75,105""],[""SecondaryFireFLH"",""90,75,105""],[""ElitePrimaryFireFLH"",""90,75,105""],[""EliteSecondaryFireFLH"",""90,75,105""]]"	false
+NAWEAP	compare_fields	[]	"[[""ActiveAnimDamaged"",""NAWEAP_AD""],[""ActiveAnimPowered"",""no""],[""ActiveAnimPoweredLight"",""yes""]]"	false
+NAWEAP_A	compare_fields	"[[""LoopEnd"",""12""],[""Rate"",""200""]]"	"[[""LoopEnd"",""18""],[""Rate"",""300""]]"	false
+NAWEAP_AD	exclude_comparator_only_section_from_1006			
+PDPLANE	compare_fields	"[[""DisableVoxelCache"",""yes""],[""DisableShadowCache"",""yes""]]"	"[[""SecondaryFireFLH"",""0,32,0""],[""ElitePrimaryFireFLH"",""0,32,0""],[""EliteSecondaryFireFLH"",""0,32,0""]]"	false
+PENTGEN	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""100,-25,135""],[""EliteSecondaryFireFLH"",""100,-25,135""]]"	false
+PIFF	compare_fields	[]	"[[""Normalized"",""yes""]]"	false
+PIFFPIFF	compare_fields	[]	"[[""Normalized"",""yes""]]"	false
+PRES	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""100,-25,135""],[""EliteSecondaryFireFLH"",""100,-25,135""]]"	false
+PTROOP	compare_fields	[]	"[[""SecondaryFireFLH"",""15,0,140""],[""ElitePrimaryFireFLH"",""15,0,140""],[""EliteSecondaryFireFLH"",""15,0,140""]]"	false
+ROCK	compare_fields	[]	"[[""SecondaryFireFLH"",""100,0,120""],[""ElitePrimaryFireFLH"",""100,0,120""],[""EliteSecondaryFireFLH"",""100,0,120""]]"	false
+RTNK	compare_fields	[]	"[[""SecondaryFireFLH"",""130,0,80""],[""ElitePrimaryFireFLH"",""130,0,80""],[""EliteSecondaryFireFLH"",""130,0,80""]]"	false
+SEAL	compare_fields	[]	"[[""SecondaryFireFLH"",""100,0,100""],[""ElitePrimaryFireFLH"",""100,0,100""],[""EliteSecondaryFireFLH"",""100,0,100""]]"	false
+SEALA	compare_fields	[]	"[[""SecondaryFireFLH"",""100,0,100""],[""ElitePrimaryFireFLH"",""100,0,100""],[""EliteSecondaryFireFLH"",""100,0,100""]]"	false
+SHAD	compare_fields	"[[""DisableVoxelCache"",""yes""],[""DisableShadowCache"",""yes""]]"	"[[""SecondaryFireFLH"",""175,0,10""],[""ElitePrimaryFireFLH"",""175,0,10""],[""EliteSecondaryFireFLH"",""175,0,10""]]"	false
+SHK	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""100,-25,135""],[""EliteSecondaryFireFLH"",""100,-25,135""]]"	false
+SMCV	compare_fields	[]	"[[""AltCameo"",""SMCVUICO""]]"	false
+SNIPE	compare_fields	[]	"[[""SecondaryFireFLH"",""80,0,85""],[""ElitePrimaryFireFLH"",""80,0,85""],[""EliteSecondaryFireFLH"",""80,0,85""]]"	false
+SPEED	exclude_comparator_only_section_from_1006			
+SPY	compare_fields	[]	"[[""AltCameo"",""SPYUICO""]]"	false
+SSRV	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""100,-25,135""],[""EliteSecondaryFireFLH"",""100,-25,135""]]"	false
+SUB	compare_fields	[]	"[[""SecondaryFireFLH"",""150,0,0""],[""ElitePrimaryFireFLH"",""150,0,0""],[""EliteSecondaryFireFLH"",""150,0,0""]]"	false
+TANY	compare_fields	[]	"[[""SecondaryFireFLH"",""100,0,100""],[""ElitePrimaryFireFLH"",""100,0,100""],[""EliteSecondaryFireFLH"",""100,0,100""]]"	false
+TNKD	compare_fields	"[[""PrimaryFireFLH"",""200,0,55""]]"	"[[""PrimaryFireFLH"",""200,0,90""],[""SecondaryFireFLH"",""200,0,90""],[""ElitePrimaryFireFLH"",""200,0,90""],[""EliteSecondaryFireFLH"",""200,0,90""]]"	false
+TREE31	exclude_comparator_only_section_from_1006			
+TREE32	exclude_comparator_only_section_from_1006			
+TREE33	exclude_comparator_only_section_from_1006			
+TREE34	exclude_comparator_only_section_from_1006			
+TREE35	exclude_comparator_only_section_from_1006			
+TREE36	exclude_comparator_only_section_from_1006			
+TRS	compare_fields	[]	"[[""AltCameo"",""SAPCUICO""],[""SecondaryFireFLH"",""80,0,120""],[""ElitePrimaryFireFLH"",""80,0,120""],[""EliteSecondaryFireFLH"",""80,0,120""]]"	false
+TRUCKA	compare_fields	[]	"[[""AltCameo"",""TRKAUICO""],[""ElitePrimaryFireFLH"",""40,32,96""],[""EliteSecondaryFireFLH"",""-32,80,120""]]"	false
+TRUCKB	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""40,32,96""],[""EliteSecondaryFireFLH"",""-32,80,120""]]"	false
+TSTIMPCT	exclude_comparator_only_section_from_1006			
+TTNK	compare_fields	"[[""PrimaryFireFLH"",""60,0,100""],[""ElitePrimaryFireFLH"",""60,0,100""]]"	"[[""PrimaryFireFLH"",""82,52,100""],[""SecondaryFireFLH"",""82,52,100""],[""ElitePrimaryFireFLH"",""82,52,100""],[""EliteSecondaryFireFLH"",""82,52,100""]]"	false
+TWLT026	compare_fields	"[[""Report"",""Explosion05""]]"	"[[""Report"",""ExplosionShard""]]"	false
+V3	compare_fields	[]	"[[""SecondaryFireFLH"",""-160,0,75""],[""ElitePrimaryFireFLH"",""-160,0,75""],[""EliteSecondaryFireFLH"",""-160,0,75""]]"	false
+VLAD	compare_fields	[]	"[[""SecondaryFireFLH"",""30,43,92""],[""ElitePrimaryFireFLH"",""30,43,92""],[""EliteSecondaryFireFLH"",""30,43,92""]]"	false
+VTEXPLOD	compare_fields	[]	"[[""Normalized"",""yes""],[""Translucent"",""yes""],[""UseNormalLight"",""yes""]]"	false
+VTMUZZLE	exclude_comparator_only_section_from_1006			
+YACOMD	exclude_comparator_only_section_from_1006			
+YAPPPT	exclude_comparator_only_section_from_1006			
+YURI	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""15,0,140""],[""EliteSecondaryFireFLH"",""15,0,140""]]"	false
+YURIPR	compare_fields	[]	"[[""ElitePrimaryFireFLH"",""10,0,195""],[""EliteSecondaryFireFLH"",""10,0,195""]]"	false
+ZEP	compare_fields	[]	"[[""SecondaryFireFLH"",""-50,0,-140""],[""ElitePrimaryFireFLH"",""-50,0,-140""],[""EliteSecondaryFireFLH"",""-50,0,-140""]]"	false

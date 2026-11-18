@@ -232,8 +232,12 @@
         "tag": "ra2_1006",
         "installer_sha256": "9b66734863c12f7634c44ef9a401a136d897010eed10f3aafe28d5a424e48156",
         "scope": "English Windows release",
-        "evidence": "early/ra2-patch-findings.json",
-        "interpretation": "Section-level per-field authority for the recovered Yuri rules; the RA2 updater describes its required precursor."
+        "evidence": "early/ra2-patch-disc-comparison.json.gz",
+        "interpretation": "Exact Allied-disc precursor recovered. Delta applied and verified. Patched rules match all 1,190 named comparator sections. The official ART.INI differs from the community art comparator.",
+        "patched_container_sha256": "896a8b64f9f1bb8ad5e0bc64fc0b8ea8c84112494761ea1a43478d10c5ef9914",
+        "original_container_sha256": "adea10f3125700257362bc73a3ac73647036335a0a705632a29330a390f20f43",
+        "rules_1006_sha256": "fd1e95cea0306ea78049dc81c8cd816e18c28c496872a1ff02edd50bd082062f",
+        "art_1006_sha256": "b477f861063a9509e87b7836b78190204c73bea5ea5595a842c456f5920ea223"
       }
     },
     {
@@ -257,6 +261,14 @@
         "scope": "English Windows release",
         "evidence": "early/ra2-patch-findings.json",
         "interpretation": "Section-level per-field authority for the recovered Yuri rules; the RA2 updater describes its required precursor."
+      },
+      "observed_retail_media": {
+        "readme_version": "1.000",
+        "game_version_resource": "1.05",
+        "game_exe_sha256": "3c27d0a397939dc3f4be5ada526129923fbcf38bc20f43b4be1107da959c23a5",
+        "artmd_sha256": "e1f0378394313c04ebbd5073f47785ee3e46f1b3c62d65724e8f3c310ee7ba31",
+        "rulesmd_sha256": "06761dd7f714e7d9400216ec3c06109ec5c1461f6a0727be7401eb9d8b0f6d05",
+        "evidence": "early/yr-disc-verification.json"
       }
     },
     {

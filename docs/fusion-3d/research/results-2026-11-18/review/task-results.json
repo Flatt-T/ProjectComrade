@@ -113,15 +113,19 @@
     "title": "Research and reconcile Red Alert 2",
     "specialist": "Red Alert 2 historian / rules and content census coordinator",
     "status": "In Progress",
-    "observed_or_delivered": "Indexed 409 type/group pairs, 403 rules sections, 402 art matches and 25 shared sequences. An independent byte-level check covered E1, GAPILE and HTNK. Hut targetability differs from the earlier Tiberian Sun comparator. The English 1.006 installer is fingerprinted. Its delta expects a 281,074,192-byte input RA2.MIX and writes a 281,888,480-byte target. This check alone establishes the input identity requirement.",
-    "remaining_acceptance_work": "Match the two community-sourced rules and art inputs to a specified retail patch. Close six missing definitions and country, mode and deploy restrictions one by one. Verify actual repair topology on a named retail map.",
+    "observed_or_delivered": "Indexed 409 type/group pairs, 403 rules sections, 402 comparison-art matches and 25 shared sequences. Extracted the original European Allied disc’s 281,074,192-byte RA2.MIX and applied the English 1.006 updater to the exact predecessor. All 1,190 named 1.006 rules sections match the comparator’s ordered fields. Fourteen rules sections changed between base and 1.006. Official base/1.006 ART.INI bytes are identical, but the community art comparator has 112 differing shared sections and 115 additional sections. A per-field correction sheet covers both groups. An independent comparison also counts the MirageWH header with trailing text. All 1,191 sections under that convention still match.",
+    "remaining_acceptance_work": "Use the original 1.006 art corrections for attachments, elite cues and sequences. Prove the six registry entries without direct definitions, country/mode and deployment availability, and engineer repair/route change on a named retail map. Check the other regional or platform builds independently.",
     "evidence_files": [
       "early/ra2-facts.zip",
       "early/isometric-summary.json",
       "world/bridge-hut-crosswalk.json",
       "review/independent-acceptance.md",
       "early/ra2-patch-provenance.md",
-      "early/ra2-patch-findings.json"
+      "early/ra2-patch-findings.json",
+      "early/ra2-patch-disc-provenance.md",
+      "early/ra2-patch-disc-comparison.json.gz",
+      "early/ra2-patch-art-corrections.tsv",
+      "review/edition-comparison-readback.json"
     ]
   },
   {
@@ -130,14 +134,20 @@
     "title": "Research and reconcile Red Alert 2 Yuri's Revenge",
     "specialist": "Red Alert 2 Yuri's Revenge historian / rules and content census coordinator",
     "status": "In Progress",
-    "observed_or_delivered": "Indexed 559 type/group pairs, 553 rule sections, 549 art matches and 37 shared sequences. The registry comparison identifies 156 additions and six removals. The faction brief distinguishes Yuri control and conversion from damage and normal production. The English 1.001 patch yields an original RULESMD.INI with 1,477 named sections. Of those, 1,452 match the comparison file’s ordered fields and 25 differ in actual values or key presence. CALA05 has CanOccupyFire=yes in the official patch.",
-    "remaining_acceptance_work": "Use official English 1.001 values for the 25 divergent sections. Recover an independent ARTMD.INI for timing and animation references and verify runtime mode, capture and ownership paths. Check the six former registry gaps against the selected shipped rules and mode.",
+    "observed_or_delivered": "Indexed 559 type/group pairs, 553 rule sections, 549 art matches and 37 shared sequences. The registry comparison identifies 156 additions and six removals. The faction brief distinguishes Yuri control and conversion from damage and normal production. The English 1.001 patch yields an original RULESMD.INI with 1,477 named sections. Of those, 1,452 match the comparison file’s ordered fields and 25 differ in actual values or key presence. CALA05 has CanOccupyFire=yes in the official patch. The specialist packet follows YTNK’s referenced weapons to the official values, including Range 6 for AGGattling versus 5 in the comparator. The 742,958-byte base-disc RULESMD.INI equals the existing comparator in full after newline normalization. The disc also yields all 559 registry bindings and 37 resolved animation sequences. In the original ARTMD.INI, 131 common sections differ from the community art and one is retail-only. The community art has 20 additional sections. BFRT’s original Image=SREF is a recorded example.",
+    "remaining_acceptance_work": "Use original disc presentation bindings and the selected base or 1.001 rules on each work order. Record actual in-game country/mode access, capture, mind-control release, deploy/undeploy and selected animation timings in a named build. Reconcile the six registration-without-direct-rules cases using the loader and mission evidence.",
     "evidence_files": [
       "early/yr-facts.zip",
       "early/isometric-summary.json",
       "early/01-faction-and-animation-briefs.md",
       "early/ra2-patch-provenance.md",
-      "early/ra2-patch-findings.json"
+      "early/ra2-patch-findings.json",
+      "catalogue/edition.py",
+      "catalogue/gatling-edition-comparison.md",
+      "review/edition-comparison-readback.json",
+      "early/yr-disc-verification.md",
+      "early/yr-disc-verification.json",
+      "early/yr-disc-profiles.zip"
     ]
   },
   {
@@ -310,12 +320,15 @@
     "title": "Research and reconcile Command & Conquer Rivals",
     "specialist": "Command & Conquer Rivals historian / rules and content census coordinator",
     "status": "In Progress",
-    "observed_or_delivered": "Indexed 96 side-specific roster rows including 64 combat entries. Twenty individual units have detailed primary-source profiles from the linked showcase/update series. Dated cost changes such as the Orca Bomber are preserved separately.",
-    "remaining_acceptance_work": "Lock the target patch and obtain first-party or runtime evidence for each outstanding combat, commander, power and building row. Verify pad control and special interactions on that version, with actual mobile input evidence.",
+    "observed_or_delivered": "Indexed 96 side-specific roster rows including 64 combat entries. Twenty individual units have detailed primary-source profiles from the linked showcase/update series. Dated cost changes such as the Orca Bomber are preserved separately. A separately identified community workbook matches all 64 combat units across 76 unit/mode rows, with 63 numeric health and speed entries. The dated August 2023 team post records 33 changes for 16 units. Each unit packet links its specific worksheet evidence. The workbook mixes balance periods.",
+    "remaining_acceptance_work": "Pin values to a single deployed version or keep them dated individually. Validate the Battering Ram’s supplemental HP/speed, unit interactions, pad control, squad loss and specialization on a named build. Observe mobile input and verify the community-only coverage against primary/runtime evidence.",
     "evidence_files": [
       "editions/rivals-ta-modes.md",
       "editions/rivals-ta-rivals-reference.tsv",
-      "editions/rivals-ta-rivals-sources.json"
+      "editions/rivals-ta-rivals-sources.json",
+      "editions/rivals-extended-guide.md",
+      "editions/rivals-extended-stats.json",
+      "editions/rivals-extended-2023-08-deltas.json"
     ]
   },
   {
@@ -455,7 +468,8 @@
       "review/catalogue-readback.md",
       "review/ra95-demo-runtime.md",
       "foundation/catalogue/era_delivery_gates.json",
-      "review/lookup-readback.json"
+      "review/lookup-readback.json",
+      "review/edition-comparison-readback.json"
     ]
   }
 ]

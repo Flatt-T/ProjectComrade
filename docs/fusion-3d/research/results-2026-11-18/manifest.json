@@ -6,9 +6,9 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 8917,
-      "sha256": "781cd2e8fecafed6d4ae33e7460150fd58a4b354e023525ae455fb81baa25459",
-      "git": "3753e2603de48c13d9bed4155e5f27559eb268ac"
+      "bytes": 10319,
+      "sha256": "e9d2d502425a8efa085e108f8deec1871af0d209dc0b4364aed07f615c90ac10",
+      "git": "9e468213d146778563f8db0c055f6df56f5829ad"
     },
     {
       "path": "art/README.md",
@@ -234,21 +234,33 @@
     },
     {
       "path": "catalogue/README.md",
-      "bytes": 4190,
-      "sha256": "92a023c5e2341ae2f8de3b838a84600d7314abc6a1fd59bcd7d3008d6e946dca",
-      "git": "b648e47df061df7970e12867a22ff7f16cb834f7"
+      "bytes": 5223,
+      "sha256": "e1407cd969082e1917878b1e2da8b3289565b6806892dcd6123ccf33e84749c7",
+      "git": "b075c84f49a9e3ec320ee67728ae863542d3808b"
     },
     {
       "path": "catalogue/brief.py",
-      "bytes": 4868,
-      "sha256": "9dd099dccf7fdd32e1f663c071b4aa4183f454acda4a2646b1e8ccdf9ec5b200",
-      "git": "e7bae7382c1149b42b9f960caa7fc32c0101d5fa"
+      "bytes": 5851,
+      "sha256": "90cbe6073a5c8e5aa8e961113ff82333515d05b8cf9f7a7b18ea2a6cea9f6f7f",
+      "git": "b3254d3e2a04a4c5a1bac20b50a58b1f109eed08"
+    },
+    {
+      "path": "catalogue/edition.py",
+      "bytes": 3323,
+      "sha256": "1cea7cad324ff383e3499fc58d25aaeb9e41ccf7e902b844eb2c8a820bb665f7",
+      "git": "a6ea263fbf8341d72a3e29298e51fe5fae4258ea"
     },
     {
       "path": "catalogue/find.py",
       "bytes": 6170,
       "sha256": "6b4f92fa7df6155091266c527e5dec58250a75018b1bf1d3d63457805a543b57",
       "git": "39e9910eca3fa74299cb4e9ddfd0883a57402788"
+    },
+    {
+      "path": "catalogue/gatling-edition-comparison.md",
+      "bytes": 8642,
+      "sha256": "66f8cb8c53205dbf2047d9d5c53a388404484900cd142a16f5a7211531d03650",
+      "git": "1dc6d850791aa667f0f9cf45667f2c92429f4bd0"
     },
     {
       "path": "catalogue/ranger-research-packet.md",
@@ -264,15 +276,15 @@
     },
     {
       "path": "early/00-historical-research.md",
-      "bytes": 9345,
-      "sha256": "0849ce7f76d6266bf77d925da3af59136c11284b9b1603bac201cfe1cd39987f",
-      "git": "32fc2b87220f4630520f55f0219b06fcc6fd95c9"
+      "bytes": 9978,
+      "sha256": "4c446ecd47a95c890c50ce2aa88df9f3a7ad35b487e76d6d0f9de9103912c57f",
+      "git": "cdd195c8e1aed8abad3390e227ab5d82c8849949"
     },
     {
       "path": "early/01-faction-and-animation-briefs.md",
-      "bytes": 13002,
-      "sha256": "46783ba2665976b6f1906ad665831efa4bee31b6cde83f33b7f2a8def8445dc2",
-      "git": "5d693d5910a1adc40994e9bf7604d23cfe766e02"
+      "bytes": 13635,
+      "sha256": "02d51b0bb8e9afd4688573562d2bfc507bfa37814cdd273417460820f5da89ca",
+      "git": "ae50c89df487f503fda75614517c8d122b7d9e35"
     },
     {
       "path": "early/archive-manifest.json",
@@ -377,10 +389,46 @@
       "git": "aaffd8ad8f6794edae12f5e194e66acc466e9ad5"
     },
     {
+      "path": "early/ra2-patch-art-corrections.tsv",
+      "bytes": 22255,
+      "sha256": "8eb49063b2bb99c8df822d299b210dfd82926562a362ad780d2bf04217a6a4ea",
+      "git": "0e09abccc361daa1352315cace604ee4a15174f6"
+    },
+    {
       "path": "early/ra2-patch-audit.py",
       "bytes": 4739,
       "sha256": "eb01bcec04ae7e71c478eb848553a59754cdc7af3b36a1bf7516aa705e0ebda9",
       "git": "c06a4f9a5e71eeb5813617d49a48a44050ba2d31"
+    },
+    {
+      "path": "early/ra2-patch-disc-audit.py",
+      "bytes": 5957,
+      "sha256": "472373895d8efbe9d1e18e18e60d4622965524a0562e140b8c7de053003b12a0",
+      "git": "e4b44c4ffccf4d5157babdbd854f331549b960e2"
+    },
+    {
+      "path": "early/ra2-patch-disc-comparison.json.gz",
+      "bytes": 195633,
+      "sha256": "7f7eea666de9d95773ad6ad250480a9d3287f70f81ed19ea79eaa63698ece232",
+      "git": "5c8b36228cff0f1a9ec66f619df5b27e0308cf70"
+    },
+    {
+      "path": "early/ra2-patch-disc-delta.rs",
+      "bytes": 1245,
+      "sha256": "4d5ebfd631eb13487023445a9f17dadb54c5464e46c906a99222e66f11e42211",
+      "git": "db17640dc44d612850b7d494b7efe8910281d7c3"
+    },
+    {
+      "path": "early/ra2-patch-disc-media.json",
+      "bytes": 1805,
+      "sha256": "f226a6eaac7d82c5c39c2f07b7f7ce59c0a153ea9b00a7871ab7b76893951f47",
+      "git": "7ff1a6479626e85a0083932c155ba6e415918740"
+    },
+    {
+      "path": "early/ra2-patch-disc-provenance.md",
+      "bytes": 7134,
+      "sha256": "c4193dbd9d7f9c6adae75f5898e3de50d159a8ec8a8284d307eed31b1305a4a3",
+      "git": "d397d3175c8a2902855c5b764d62ddf299d046b1"
     },
     {
       "path": "early/ra2-patch-findings.json",
@@ -390,9 +438,9 @@
     },
     {
       "path": "early/ra2-patch-provenance.md",
-      "bytes": 3695,
-      "sha256": "c27ad309fa073395df64713bb21f4e18f33c9ef8ed6e2193acc5b6115d0e5aa3",
-      "git": "23b7156f089b45dae1525a288483d152c22e5247"
+      "bytes": 4433,
+      "sha256": "6d7a98786ac912cba09ab783c8690fda2aaf0bad9e9efdd39b043dbe12e7010e",
+      "git": "874cac25ecb4dcec42dd5b5cc42792ae0b52cd8d"
     },
     {
       "path": "early/sage-summary.json",
@@ -443,6 +491,36 @@
       "git": "436992058207a12c7e5d699bbbfa1cbafc8be104"
     },
     {
+      "path": "early/yr-disc-profiles.zip",
+      "bytes": 285083,
+      "sha256": "259cc6622725fc2db5faec7004233ebdafbd0685f983b356fe4dbbff8d3fb277",
+      "git": "b1194f940a863e07e11fb325560943941ad02904"
+    },
+    {
+      "path": "early/yr-disc-read-media.py",
+      "bytes": 2128,
+      "sha256": "7052416c2cf2543d3ebf32fc1d78de1539fec5e43fb823b18ece2be4adec89b7",
+      "git": "efe27e50bf0eb1ad5c035411c8d39f3cbda9ffc7"
+    },
+    {
+      "path": "early/yr-disc-verification.json",
+      "bytes": 6160,
+      "sha256": "38b9948db5d77ae87a564b186d0a52b8c56b55e1c06b89f5cbe9dc8cea27143b",
+      "git": "88aae7b5fae13bcaf05d1ae50ceb686ece6e9fbe"
+    },
+    {
+      "path": "early/yr-disc-verification.md",
+      "bytes": 8021,
+      "sha256": "a0c1de0a7be41a87fc0a11275f797d79ba753259fd76e00e9996a8191b811f85",
+      "git": "73a11a9eaec3cc4b318e73067c0b3ed806a9a18f"
+    },
+    {
+      "path": "early/yr-disc-verify.py",
+      "bytes": 9861,
+      "sha256": "5afd6278854af41345da3e6d962b6214f50d4212642b2f19947367bb3e3ecb6c",
+      "git": "3f8f4a6561c507142ae84d2b88b632a6aac273b7"
+    },
+    {
       "path": "early/yr-facts.zip",
       "bytes": 80120,
       "sha256": "fdfde2077a16676e3f5bd03c6ac5ecf2fb1f21eb617951069645d3e3cfce1a90",
@@ -486,9 +564,33 @@
     },
     {
       "path": "editions/reference-profiles.json",
-      "bytes": 46917,
-      "sha256": "2954e5e3de45116dbbc8ff474135c1a1c97f4b36b2a5ff7ef9d533be2f777f24",
-      "git": "2559815f0833e1dd4d82dd80cb0865a434ddb050"
+      "bytes": 47855,
+      "sha256": "1894be14b009c9459e179f7a18757db5944252933068f8133b5846dafaded63e",
+      "git": "af659e73c9f3fade514db0817d349babe0355400"
+    },
+    {
+      "path": "editions/rivals-extended-2023-08-deltas.json",
+      "bytes": 8634,
+      "sha256": "97750ecba8c5820dd3c6aa8d8f68e61eea0bc12964e9d0361887bae22c97e1be",
+      "git": "bfa81c0d4be5f2bd9d8b771a0c8957c699a15ce6"
+    },
+    {
+      "path": "editions/rivals-extended-extract.py",
+      "bytes": 5438,
+      "sha256": "2ac6f66e6ac62804bd5632107553a80897fe734123df3d3b58af9337c15f8b56",
+      "git": "976a7c5c75eb019dc28eb1345594253b29ad7727"
+    },
+    {
+      "path": "editions/rivals-extended-guide.md",
+      "bytes": 5631,
+      "sha256": "63a122eb3ef8f55f93bb1f05902c0609b8292a895e024cce9b019d97b1715d6b",
+      "git": "eda6c8302bf731de7b79c84897f345b04e0d3132"
+    },
+    {
+      "path": "editions/rivals-extended-stats.json",
+      "bytes": 102427,
+      "sha256": "247c9d9e23ade4bf771c670f76c930d52cdaaee8f9b1ad0723903d9c36116379",
+      "git": "5f85d234eacb0bb1bf29fc5dab3beec4f36b4bf0"
     },
     {
       "path": "editions/rivals-ta-alliances-reference.tsv",
@@ -504,9 +606,9 @@
     },
     {
       "path": "editions/rivals-ta-modes.md",
-      "bytes": 10104,
-      "sha256": "2be4b1020192876653ed91f9a2afdcecef44b85b22a66aedf82959246c2a51d0",
-      "git": "ce0592bfb1ce6f6965159192283fb0b625a42797"
+      "bytes": 10332,
+      "sha256": "af6eacd21e70140194b672ab695e78eeba7ecb0e77a0ef04edd4d949ad3efbbc",
+      "git": "bd5ca1393fe045cbf47eedaafb048c9af1ee91ad"
     },
     {
       "path": "editions/rivals-ta-rivals-reference.tsv",
@@ -1091,10 +1193,16 @@
       "git": "889783e920a6f65ed762c57e20696868634e5280"
     },
     {
+      "path": "review/edition-comparison-readback.json",
+      "bytes": 6281,
+      "sha256": "d456592a8f287801e36c99b6a98a140734c30f339a7d38136c649b192cbcb54e",
+      "git": "26fd9441382649106087880a902b6962abe05cee"
+    },
+    {
       "path": "review/independent-acceptance.md",
-      "bytes": 6474,
-      "sha256": "cd48eb484b9a972d2774c371558e9493b47af31694bfd1c59617bb06fccd54f2",
-      "git": "5e29e09be437cfa95ee1f090ff1fec8278e42b53"
+      "bytes": 7970,
+      "sha256": "524ce158405c2d6544fde054c5439c056b5625c78bbcc4eb64e6b6b43c762ef2",
+      "git": "2002ad3a7fd8f6c9fc720e8b6c525b219251e679"
     },
     {
       "path": "review/lookup-readback.json",
@@ -1116,15 +1224,15 @@
     },
     {
       "path": "review/task-results.json",
-      "bytes": 34353,
-      "sha256": "2a0c5aeea50598dc5337312601df940147bee6ade7ff4a0756a83cf7dd90eea9",
-      "git": "7da23214424b58c93c00cd87bca428d46d3dee9b"
+      "bytes": 36307,
+      "sha256": "5676b4f98358402f564d36f4b52018efd4dc3377f37164cecc999158441b82ce",
+      "git": "81b8ef5e35bda49f3d8ad39c184ac02496c6e8a7"
     },
     {
       "path": "review/task-results.md",
-      "bytes": 35604,
-      "sha256": "58a044d76f48fba8c24ae9c71df0cf4b00a7689bac084ac0e553b0f3dd5739c9",
-      "git": "d56646228c2191bec6991bec6d1eaf6c47dbfee8"
+      "bytes": 37950,
+      "sha256": "c72450e126bc13349b101d049583f8eefd0cfd5d8f2e91033c5f67e0a67a0002",
+      "git": "7138b49c3fbc578b9491d03354683c724b37f42e"
     },
     {
       "path": "review/verify_deposit.py",
@@ -1137,6 +1245,12 @@
       "bytes": 7062,
       "sha256": "466f05a343b62f7da4b198ddeaaf83b530f88514d6772a29e44f89bb318e89dc",
       "git": "6354928ecbc166d4d00a8d928e7bf10262146865"
+    },
+    {
+      "path": "review/verify_rules_comparisons.py",
+      "bytes": 3672,
+      "sha256": "756ebe99c10427df86e4a961fe39e3acbe708637a404267ded923439eca80cd2",
+      "git": "3cd6bed33f614e2ca1d550c1b461c7a216589c7c"
     },
     {
       "path": "video/BYlEgGHx4II.json",

@@ -29,3 +29,5 @@ EA documents five resources. Tiberium builds structures, crystals fund units, an
 3. **Forgotten defense formation.** Fill an attack row with GDI or Nod offense, give the Forgotten defense a wall, ranged defense and mobile unit, and retain the defending base’s own structures. Verify that swapping the inspecting player changes attack-side origin while preserving the opponent's defense. Save a before/after occupancy trace and a territory result after destruction. The pinned adapter's own/world and event branches supply data-link evidence; unit speeds, arrival times, targeting and current world modifiers require a live or recorded build.
 
 To reproduce the catalog, run `python3 rivals-ta-extract-alliances.py CnCTAOpt.link.user.js rivals-ta-alliances-reference.tsv` against the pinned adapter. The extracted identifiers are factual references. The input game code, server data, art and animation remain outside this package.
+
+The [extended 64-unit Rivals ledger](rivals-extended-guide.md) resolves the combat roster against a mixed-date community workbook and separate dated balance changes. The primary showcases above retain their own date and scope.

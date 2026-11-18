@@ -1,0 +1,206 @@
+{
+  "cabinet_directory": [
+    {
+      "file": "GAME1.CAB",
+      "lba": 257381,
+      "bytes": 30000000,
+      "sha256": "1b98fb82c9037ac8138b2fc42498ea170007d5730e32293fe7cdbff99d2f4d8b"
+    },
+    {
+      "file": "GAME2.CAB",
+      "lba": 272030,
+      "bytes": 30000000,
+      "sha256": "1a7d8361f51142955ad24b162d973720c6f403679367839861370cd48f615c62"
+    },
+    {
+      "file": "GAME3.CAB",
+      "lba": 286679,
+      "bytes": 30000000,
+      "sha256": "7c7142f5a4c0b50ad76d71c78861cd86187dbaa6b4b2dd8bd3c503a96dcd7bda"
+    },
+    {
+      "file": "GAME4.CAB",
+      "lba": 301328,
+      "bytes": 30000000,
+      "sha256": "4b61f6ac8c6c812fd871ac01e4c94d1c129f6a2b0dcb6d3598e1295968f216d2"
+    },
+    {
+      "file": "GAME5.CAB",
+      "lba": 315977,
+      "bytes": 30000000,
+      "sha256": "413ea6593ea50e9546ffe3bbd322d7878a1409b4c36de155f356b6d332a08c23"
+    },
+    {
+      "file": "GAME6.CAB",
+      "lba": 330626,
+      "bytes": 7699669,
+      "sha256": "c9719c77ea21e070c8493b69b81197b2054ac375f10eee7c6a720846a8dd32ad"
+    }
+  ],
+  "public_sources": [
+    {
+      "id": "CC_YR_Europe",
+      "track": "YR1.img",
+      "url": "https://archive.org/details/CC_YR_Europe"
+    },
+    {
+      "id": "cnc-ra2-yuri-thai-release",
+      "track": "Disc/YR1.bin",
+      "url": "https://archive.org/details/cnc-ra2-yuri-thai-release"
+    }
+  ],
+  "sector_bytes": 2352,
+  "user_data_offset": 16,
+  "user_data_bytes": 2048,
+  "readme_version": {
+    "value": "1.000",
+    "sha256": "9cf684e7bfd1abbd5b5781add637dfbe4e22345aee39d4fb8c82212be34c1598",
+    "lba": 334483
+  },
+  "game_version_strings": {
+    "sha256": "3c27d0a397939dc3f4be5ada526129923fbcf38bc20f43b4be1107da959c23a5",
+    "lba": 334974,
+    "fields": {
+      "FileVersion": {
+        "value": "1.05",
+        "key_offset": 4712282
+      },
+      "ProductVersion": {
+        "value": "1.05",
+        "key_offset": 4712810
+      }
+    }
+  },
+  "mixed_containers": {
+    "ra2md.mix": {
+      "sha256": "69d886defad9114dd440a013b364c8c004e369b5221d1889957b49d00058559d",
+      "size": 204527696,
+      "members": 25,
+      "embedded_sha1_validated": true
+    },
+    "localmd.mix": {
+      "start_in_ra2md": 6237612,
+      "size": 4819480,
+      "sha256": "cd181596b2deaeacf7bba77e661ae4438d3f778efc0e38ae2b967c410bf3f931",
+      "members": 187,
+      "embedded_sha1_validated": true
+    }
+  },
+  "retail_members": {
+    "artmd.ini": {
+      "logical_member_id": "5b47d8d5",
+      "relative_start_in_localmd": 140884,
+      "bytes": 336535,
+      "sha256": "e1f0378394313c04ebbd5073f47785ee3e46f1b3c62d65724e8f3c310ee7ba31"
+    },
+    "rulesmd.ini": {
+      "logical_member_id": "8218f9f4",
+      "relative_start_in_localmd": 477428,
+      "bytes": 742958,
+      "sha256": "06761dd7f714e7d9400216ec3c06109ec5c1461f6a0727be7401eb9d8b0f6d05"
+    }
+  },
+  "comparators": {
+    "art": {
+      "url": "https://github.com/CnCNet/cncnet-yr-client-package/blob/0e5bb2076fa600e13094daebdfbaf85f6b057b8a/game-assets/cncnet.pack/artmd.ini",
+      "sha256": "e28c0784bd0a21fd7e8ef7fb96e13cd590a337ca9c448190741a6f3ee242a982"
+    },
+    "rules": {
+      "url": "https://github.com/hamdirizal/red-alert-2-rules/blob/b66200ab0130a24bae8d8359caa6ab03bd78e8f7/rulesmd-original.ini",
+      "sha256": "c8718ffd3d155fb2f60d15cbd0c3a8fd5c0b9bc786b3b78c7bd53dff1d42da57"
+    }
+  },
+  "official_1001_rules_sha256": "3d341ef8a13a4b5ab24af2eef48ac94931ac2bb87d950fe3330a07e2d25672ef",
+  "base_rules_identical_to_comparator_after_crlf_to_lf": true,
+  "section_comparisons": {
+    "retail-art-vs-cncnet": {
+      "only_second": 20,
+      "equal": 1449,
+      "changed_fields": 131,
+      "only_first": 1
+    },
+    "retail-rules-vs-baseline": {
+      "equal": 1477
+    },
+    "retail-rules-vs-patch1001": {
+      "equal": 1452,
+      "changed_fields": 25
+    }
+  },
+  "zip_sha256": "259cc6622725fc2db5faec7004233ebdafbd0685f983b356fe4dbbff8d3fb277",
+  "zip_members": {
+    "retail-art-vs-cncnet": {
+      "rows": 1601,
+      "bytes": 508853,
+      "sha256": "b77d43e13767b70263a6d675c61b706162364ed1dd3d85ce1150e37d9c7dcc4a"
+    },
+    "retail-rules-vs-baseline": {
+      "rows": 1477,
+      "bytes": 454264,
+      "sha256": "d27ef19bd4b704ec575ad7ebbe5927a071c45dc55316c61fe22f3eb8cae289a1"
+    },
+    "retail-rules-vs-patch1001": {
+      "rows": 1477,
+      "bytes": 457948,
+      "sha256": "c3e807f513838bebc5aa6952574cddef87ba0e49176a9c978540fa04764b059f"
+    },
+    "retail-object-bindings": {
+      "rows": 559,
+      "bytes": 368877,
+      "sha256": "e6fa5f19d1fce9f799940d0ea1aaa6fa8d2322bd736056b6e3289ae5b113695d"
+    },
+    "retail-sequences": {
+      "rows": 37,
+      "bytes": 15338,
+      "sha256": "3154dcd2a4879f570b9b83e150801d5a29a82e7d07008eaf88ca0e8747d237f9"
+    }
+  },
+  "retail_bindings": {
+    "registry_rows": 559,
+    "retail_art_matches": 549,
+    "with_rules": 553,
+    "resolved_animation_sequences": 37
+  },
+  "verified_second_disc_files": [
+    {
+      "name": "GAME1.CAB",
+      "same_bytes": true,
+      "second_sha256": "1b98fb82c9037ac8138b2fc42498ea170007d5730e32293fe7cdbff99d2f4d8b"
+    },
+    {
+      "name": "GAME2.CAB",
+      "same_bytes": true,
+      "second_sha256": "1a7d8361f51142955ad24b162d973720c6f403679367839861370cd48f615c62"
+    },
+    {
+      "name": "GAME3.CAB",
+      "same_bytes": true,
+      "second_sha256": "7c7142f5a4c0b50ad76d71c78861cd86187dbaa6b4b2dd8bd3c503a96dcd7bda"
+    },
+    {
+      "name": "GAME4.CAB",
+      "same_bytes": true,
+      "second_sha256": "4b61f6ac8c6c812fd871ac01e4c94d1c129f6a2b0dcb6d3598e1295968f216d2"
+    },
+    {
+      "name": "GAME5.CAB",
+      "same_bytes": true,
+      "second_sha256": "413ea6593ea50e9546ffe3bbd322d7878a1409b4c36de155f356b6d332a08c23"
+    },
+    {
+      "name": "GAME6.CAB",
+      "same_bytes": true,
+      "second_sha256": "c9719c77ea21e070c8493b69b81197b2054ac375f10eee7c6a720846a8dd32ad"
+    },
+    {
+      "name": "GAMEMD.EXE",
+      "same_bytes": true,
+      "second_sha256": "3c27d0a397939dc3f4be5ada526129923fbcf38bc20f43b4be1107da959c23a5"
+    },
+    {
+      "name": "README.TXT",
+      "same_bytes": true,
+      "second_sha256": "9cf684e7bfd1abbd5b5781add637dfbe4e22345aee39d4fb8c82212be34c1598"
+    }
+  ]
+}

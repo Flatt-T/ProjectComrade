@@ -3,6 +3,7 @@ import argparse
 import gzip
 import json
 from find import INDEX, ROOT, details
+from edition import original_differences
 
 PROFILE_TASK={'td':4,'ra1':5,'ts':6,'fs':7,'ra2':8,'yr':9,'generals':10,'zh':11,
               'tw':12,'kw':13,'ra3':14,'uprising':15,'tt':16,'ren.demo':17,'ss':18,
@@ -28,6 +29,17 @@ def packet(key):
     owner=next(t for t in tasks if t['task']==task)
     action=next(s for games,s in GROUPS if r['profile'] in games)
     files=', '.join(owner['evidence_files'])
+    fact=details(r)
+    changes=original_differences(r,fact)
+    edition_notes=''
+    if changes:
+        edition_notes='\n## Original-edition differences for this ID or its direct bindings\n\nThese are measured differences. Use the value for the edition being researched and keep its source identifier.\n\n~~~json\n'+json.dumps(changes,indent=2,ensure_ascii=False)+'\n~~~\n'
+    if r['profile']=='rivals':
+        path='editions/rivals-extended-stats.json'
+        supplement=json.loads((ROOT/path).read_text())
+        matched=[u for u in supplement['units'] if u['faction']==r['source_side'] and u['unit']==r['id']]
+        if matched:
+            edition_notes+='\n## Additional Rivals comparison\n\nThis is a mixed-date community worksheet. The game build is unresolved. Keep its dated publisher cross-checks and variant rows distinct. Source: '+path+'\n\n~~~json\n'+json.dumps(matched[0],indent=2,ensure_ascii=False)+'\n~~~\n'
     return f"""# Research one observation · {r['id']}
 
 [{owner['linear']}](https://linear.app/thunderchild-creative/issue/{owner['linear']}) · {owner['specialist']} · Source profile {r['profile']}
@@ -45,9 +57,9 @@ def packet(key):
 ## Exact source record
 
 ~~~json
-{json.dumps(details(r),indent=2,ensure_ascii=False)}
+{json.dumps(fact,indent=2,ensure_ascii=False)}
 ~~~
-"""
+{edition_notes}"""
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('key')
