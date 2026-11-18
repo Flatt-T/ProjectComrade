@@ -1,0 +1,432 @@
+{
+  "commit": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+  "pack": "ra1",
+  "map": "ra1-bridgehead",
+  "seed": 14077,
+  "tickRateHz": 15,
+  "independentRunsPerOpponent": 2,
+  "healthTraceUnit": "post-step HP, capped at zero",
+  "trials": [
+    {
+      "combatants": [
+        {
+          "id": 5,
+          "type": "ranger",
+          "armor": "light",
+          "weapon": "m60mg",
+          "damage": 18,
+          "burst": 2,
+          "refireTicks": 14
+        },
+        {
+          "id": 7,
+          "type": "conscript",
+          "armor": "none",
+          "weapon": "ak47",
+          "damage": 15,
+          "burst": 1,
+          "refireTicks": 20
+        }
+      ],
+      "rangerWarhead": "sa",
+      "percentAgainstOpponent": 100,
+      "firstMoveEnqueued": {
+        "tick": 1,
+        "hp": [
+          150,
+          50
+        ],
+        "cells": [
+          [
+            9,
+            36
+          ],
+          [
+            69,
+            34
+          ]
+        ]
+      },
+      "alliedFirstSight": {
+        "tick": 556,
+        "hp": [
+          150,
+          50
+        ],
+        "cells": [
+          [
+            39,
+            22
+          ],
+          [
+            45,
+            22
+          ]
+        ]
+      },
+      "sovietFirstSight": {
+        "tick": 592,
+        "hp": [
+          150,
+          14
+        ],
+        "cells": [
+          [
+            40,
+            22
+          ],
+          [
+            43,
+            22
+          ]
+        ]
+      },
+      "explicitAttackEnqueued": {
+        "tick": 592,
+        "hp": [
+          150,
+          14
+        ],
+        "cells": [
+          [
+            40,
+            22
+          ],
+          [
+            43,
+            22
+          ]
+        ]
+      },
+      "firstRangerTarget": {
+        "tick": 587,
+        "hp": [
+          150,
+          50
+        ],
+        "cells": [
+          [
+            39,
+            22
+          ],
+          [
+            44,
+            22
+          ]
+        ]
+      },
+      "firstSovietTarget": {
+        "tick": 593,
+        "hp": [
+          147,
+          14
+        ],
+        "cells": [
+          [
+            40,
+            22
+          ],
+          [
+            43,
+            22
+          ]
+        ]
+      },
+      "hpChangeTicks": 3,
+      "hpTraceSamples": [
+        {
+          "tick": 591,
+          "hp": [
+            150,
+            14
+          ],
+          "cells": [
+            [
+              40,
+              22
+            ],
+            [
+              44,
+              22
+            ]
+          ]
+        },
+        {
+          "tick": 593,
+          "hp": [
+            147,
+            14
+          ],
+          "cells": [
+            [
+              40,
+              22
+            ],
+            [
+              43,
+              22
+            ]
+          ]
+        },
+        {
+          "tick": 605,
+          "hp": [
+            147,
+            0
+          ],
+          "cells": [
+            [
+              40,
+              22
+            ],
+            [
+              43,
+              22
+            ]
+          ]
+        }
+      ],
+      "fullTraceSha256": "a815ae5e73873a492018f8815d9f0b2eb8bfdd1dc03c373e9c89193366d5c408",
+      "finalTick": 605,
+      "finalChecksum": 1925073728,
+      "finalKillsAndLosses": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "combatants": [
+        {
+          "id": 5,
+          "type": "ranger",
+          "armor": "light",
+          "weapon": "m60mg",
+          "damage": 18,
+          "burst": 2,
+          "refireTicks": 14
+        },
+        {
+          "id": 6,
+          "type": "mcv",
+          "armor": "heavy",
+          "weapon": null,
+          "damage": null,
+          "burst": null,
+          "refireTicks": null
+        }
+      ],
+      "rangerWarhead": "sa",
+      "percentAgainstOpponent": 10,
+      "firstMoveEnqueued": {
+        "tick": 1,
+        "hp": [
+          150,
+          600
+        ],
+        "cells": [
+          [
+            9,
+            36
+          ],
+          [
+            69,
+            31
+          ]
+        ]
+      },
+      "alliedFirstSight": {
+        "tick": 431,
+        "hp": [
+          150,
+          600
+        ],
+        "cells": [
+          [
+            39,
+            22
+          ],
+          [
+            45,
+            22
+          ]
+        ]
+      },
+      "sovietFirstSight": {
+        "tick": 472,
+        "hp": [
+          150,
+          598
+        ],
+        "cells": [
+          [
+            39,
+            22
+          ],
+          [
+            42,
+            22
+          ]
+        ]
+      },
+      "explicitAttackEnqueued": {
+        "tick": 472,
+        "hp": [
+          150,
+          598
+        ],
+        "cells": [
+          [
+            39,
+            22
+          ],
+          [
+            42,
+            22
+          ]
+        ]
+      },
+      "firstRangerTarget": {
+        "tick": 459,
+        "hp": [
+          150,
+          600
+        ],
+        "cells": [
+          [
+            39,
+            22
+          ],
+          [
+            43,
+            22
+          ]
+        ]
+      },
+      "firstSovietTarget": null,
+      "hpChangeTicks": 300,
+      "hpTraceSamples": [
+        {
+          "tick": 462,
+          "hp": [
+            150,
+            598
+          ],
+          "cells": [
+            [
+              39,
+              22
+            ],
+            [
+              43,
+              22
+            ]
+          ]
+        },
+        {
+          "tick": 476,
+          "hp": [
+            150,
+            596
+          ],
+          "cells": [
+            [
+              39,
+              22
+            ],
+            [
+              42,
+              22
+            ]
+          ]
+        },
+        {
+          "tick": 490,
+          "hp": [
+            150,
+            594
+          ],
+          "cells": [
+            [
+              39,
+              22
+            ],
+            [
+              41,
+              22
+            ]
+          ]
+        },
+        {
+          "tick": 4620,
+          "hp": [
+            150,
+            4
+          ],
+          "cells": [
+            [
+              39,
+              22
+            ],
+            [
+              40,
+              22
+            ]
+          ]
+        },
+        {
+          "tick": 4634,
+          "hp": [
+            150,
+            2
+          ],
+          "cells": [
+            [
+              39,
+              22
+            ],
+            [
+              40,
+              22
+            ]
+          ]
+        },
+        {
+          "tick": 4648,
+          "hp": [
+            150,
+            0
+          ],
+          "cells": [
+            [
+              39,
+              22
+            ],
+            [
+              40,
+              22
+            ]
+          ]
+        }
+      ],
+      "fullTraceSha256": "3237b82a1ce1890415f240f6481e958023cb008da5290262bf9cdaea2645b7ec",
+      "finalTick": 4648,
+      "finalChecksum": 631760324,
+      "finalKillsAndLosses": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "installer_sha256": "a4f42065491f30fe969739abdd88e6169618b3790d8401871453caa66964024f",
+  "terminal_ledger_sha256": "3f5ceee24470b009e278c84aa639515790d8f1f34058532d57565a3fc03e7200",
+  "settings_blocks_independently_found": 15,
+  "unique_rows_verified": 73,
+  "nonzero_preset_ids_and_names_verified": 70,
+  "nonzero_string_ids_and_labels_verified": 71,
+  "configured_prices_verified": 63,
+  "publisher_context_file_digests_verified": 8,
+  "illustrated_rows": 43
+}

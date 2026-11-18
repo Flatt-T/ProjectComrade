@@ -1,0 +1,924 @@
+[
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Armor.ini",
+    "local": "generals/Armor.ini",
+    "blob": "3ce4089639a33dfb6e555f435678c2b46f64c6aa",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Armor.ini",
+    "sha256": "6e43ccd6bf8686a5d4adca32ec11d59dacce91086859085bc26d7f4fba9d5a34"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/CommandButton.ini",
+    "local": "generals/CommandButton.ini",
+    "blob": "e8860aada7a841932c505646549a0932809dba67",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/CommandButton.ini",
+    "sha256": "7a6106858543135f33c00d32b12c4fa7c99ba0cd053ee4cfdfeffb68b1d4b9a4"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/CommandSet.ini",
+    "local": "generals/CommandSet.ini",
+    "blob": "b471a63b3aefebff05e93fd2712fc2615776b91f",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/CommandSet.ini",
+    "sha256": "d4b5bd0f5b835e5dcd0b46e0d942160d163dd67d7636a3b23888a172f609b05b"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Locomotor.ini",
+    "local": "generals/Locomotor.ini",
+    "blob": "30f748aa9f23fbf6cdd4019d4ab62d85c27afb55",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Locomotor.ini",
+    "sha256": "ab1233fa5895a24a31f80c01bc7448b4e05832073847ad3d394aeab92b6fdde8"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/CivilianBuilding.ini",
+    "local": "generals/Object/CivilianBuilding.ini",
+    "blob": "0e68214ea6b621e2ba34986ec63b8f5a48c9cf74",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/CivilianBuilding.ini",
+    "sha256": "5ce1879d7cd7919fd60ac773c219174d497aa9349ac873e420af3af3b4b7ae63"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/CivilianProp.ini",
+    "local": "generals/Object/CivilianProp.ini",
+    "blob": "25427d723172f8a97594336497df5ab7e8535c48",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/CivilianProp.ini",
+    "sha256": "1623d0bfb000a7d9852900b9b28a2fd7f34b2841dc4557c28dc340ab5dd43568"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/CivilianUnit.ini",
+    "local": "generals/Object/CivilianUnit.ini",
+    "blob": "89798b6adcc9d69efcbce363f5c4f407772f9bb8",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/CivilianUnit.ini",
+    "sha256": "53823f706c42c5b6bde1e1114747c8f6c8b27b366122497173c7ca3381fab805"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/FactionBuilding.ini",
+    "local": "generals/Object/FactionBuilding.ini",
+    "blob": "7e462c7bf8e73c0774ed77382c4fececcaa39681",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/FactionBuilding.ini",
+    "sha256": "aacc5b712c94a070f118cb7f27f7d2835668fcf2269f6c0f6d848da7072b21ae"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/FactionProp.ini",
+    "local": "generals/Object/FactionProp.ini",
+    "blob": "9f4f36690c7d60ae5b7e887be1f56c7021f501d1",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/FactionProp.ini",
+    "sha256": "2219cdaacf53e8fd1e20abfc11d00cf229cac72746bd0362487a920c2d34aebf"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/FactionUnit.ini",
+    "local": "generals/Object/FactionUnit.ini",
+    "blob": "52eb6cc8971ebe8c9a09a4ac7cdc7917b6625c59",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/FactionUnit.ini",
+    "sha256": "b73aa54e37e842df7ad31ab2633bf54259e6e8499558bb1a61add8d1c6b92fe4"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/NatureProp.ini",
+    "local": "generals/Object/NatureProp.ini",
+    "blob": "f0d93f47ff05467dc264e5af201f14bdec208fc3",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/NatureProp.ini",
+    "sha256": "f2dd03e7b565ffcdc5d48ce9ba3428e53c620751e9ca77983a96e71c2a657777"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/NatureUnit.ini",
+    "local": "generals/Object/NatureUnit.ini",
+    "blob": "cb216554aea84ca0314b6993c012323cba557254",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/NatureUnit.ini",
+    "sha256": "9fd081c41e6b639519d1d1fe7b3e53d73a5a77567f438784edefa484ffbc61b4"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Object/System.ini",
+    "local": "generals/Object/System.ini",
+    "blob": "47b619bbd6bcab5a0c428c542088b5bd9ef54967",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Object/System.ini",
+    "sha256": "a4c5de7991594e48f74a3ff7a6918fb8f117e94892884861629d88531979ddda"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/PlayerTemplate.ini",
+    "local": "generals/PlayerTemplate.ini",
+    "blob": "ab3e5499c3d9dfe74dda1e27d85f8017dbafca52",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/PlayerTemplate.ini",
+    "sha256": "45e86a2c1d919b8b0d5de9588cc43c72ee364b3d4e02da767c2b25b894893d00"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Science.ini",
+    "local": "generals/Science.ini",
+    "blob": "d9004164ae1eaf1cb291fe9708df9071165741c3",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Science.ini",
+    "sha256": "1a827cf2a6faf70a064850ef0ea0b28a58b3f641a24ed82651fff56db4e8f233"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/SpecialPower.ini",
+    "local": "generals/SpecialPower.ini",
+    "blob": "908859253d50a511fbde704312901912cef31a28",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/SpecialPower.ini",
+    "sha256": "4980efd22f93f2e35007b3f190b6b0a273666a31fcec0483d0fcf61be369c56b"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Terrain.ini",
+    "local": "generals/Terrain.ini",
+    "blob": "eff3dfbf2c3767bf1ca0ec3b707c43722da1f166",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Terrain.ini",
+    "sha256": "8600a645f10ffa04ce188d45e5478487e582ae2ae109be3b7af512e25fe9bdfe"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Upgrade.ini",
+    "local": "generals/Upgrade.ini",
+    "blob": "feb5a3aafdd553938af56e94a67d7d082e671fa9",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Upgrade.ini",
+    "sha256": "400488c0a09090d53659597ce27b455e113d9a4da6e13fec03b21f652c25b3b5"
+  },
+  {
+    "profile": "generals",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "a01989802ff4e626395c014d1cba99ba2e97b09f",
+    "path": "Patch108pCCG/GameFilesCore/Data/INI/Weapon.ini",
+    "local": "generals/Weapon.ini",
+    "blob": "a87e18047f117ed198584514c7ec0911f57a2081",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/a01989802ff4e626395c014d1cba99ba2e97b09f/Patch108pCCG/GameFilesCore/Data/INI/Weapon.ini",
+    "sha256": "ea378338ea602092bf14aa501139635a8658825217025df3f129457d92fdb98a"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Armor.ini",
+    "local": "zh/Armor.ini",
+    "blob": "4f7c2ec1d6a350de1d518bd2e2436e272a47f285",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Armor.ini",
+    "sha256": "e696ac62df9b6aa812ee7d2385d481788ef08e662d2a9ecb09ab93d95b7c09e6"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/CommandButton.ini",
+    "local": "zh/CommandButton.ini",
+    "blob": "85deb55ce8dd88f53b5c994ec33028f11c1eee65",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/CommandButton.ini",
+    "sha256": "4386cdf9067e6306ef9b3748bcaf7c65fa463f8aea639ed856e020095789180f"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/CommandSet.ini",
+    "local": "zh/CommandSet.ini",
+    "blob": "6d24388f00ded13ccaac950147f7da111bf1bec8",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/CommandSet.ini",
+    "sha256": "e44327c435044a284a63563d245f461e9f0b3f17c5a7f34ec8e52ddc9d1326f5"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Locomotor.ini",
+    "local": "zh/Locomotor.ini",
+    "blob": "0951a5be1c59c6080044fb41f1290ed77a818936",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Locomotor.ini",
+    "sha256": "4c390d875d19ffa99d65259b3201fb5c77d3506b7ccc6a86bef3c805018f4e58"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AirforceGeneral.ini",
+    "local": "zh/Object/AirforceGeneral.ini",
+    "blob": "11a84332485df1210480e2e61091e7b9a3bdbc6f",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AirforceGeneral.ini",
+    "sha256": "a90ded88ae23c2bb10f422ee516f340e4765cd9e5960b10c79873c036e5ef375"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaAir.ini",
+    "local": "zh/Object/AmericaAir.ini",
+    "blob": "ebd97d758d16194c96d09cebfd3fb39f8b820913",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaAir.ini",
+    "sha256": "4f5bb77b378581639149b02494cbe01a89aca8c894933f71ec3dc27d6c58857f"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaCINEUnit.ini",
+    "local": "zh/Object/AmericaCINEUnit.ini",
+    "blob": "e695964d5a146a14ebfade57d210c18779397caf",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaCINEUnit.ini",
+    "sha256": "3287c6126b3d844475ad66ca69e0feecb0f5270a27c9db9f7976cc1233d5a606"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaInfantry.ini",
+    "local": "zh/Object/AmericaInfantry.ini",
+    "blob": "4f935fa46e8d22863d0d89f1400862e6184c3d98",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaInfantry.ini",
+    "sha256": "6de07c334541d576bf9a2172ece56443e034140b272a40678442f99a14d1f8e0"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaMiscUnit.ini",
+    "local": "zh/Object/AmericaMiscUnit.ini",
+    "blob": "594edd38039238f6d02d7b2c912e94e5748ec255",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaMiscUnit.ini",
+    "sha256": "03397dd442e7c25910ebe2b6d3fafed4ad48c3e883e98880b0b7470c70476410"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaVehicle.ini",
+    "local": "zh/Object/AmericaVehicle.ini",
+    "blob": "9776f8ea3b2bb65ad7eda5ad07eb29fe89970965",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/AmericaVehicle.ini",
+    "sha256": "6965c7bc3a80fae4aff2c0a755a60db31dc6b236b03436f5cfcb2cba6581a7b8"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/BossGeneral.ini",
+    "local": "zh/Object/BossGeneral.ini",
+    "blob": "d85aaad960d84bbba885c2de0c7352134677818c",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/BossGeneral.ini",
+    "sha256": "c13cc6e66dad9a799c07c83014ad4d505ece6e5a638417f196d4971a52bad227"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChemicalGeneral.ini",
+    "local": "zh/Object/ChemicalGeneral.ini",
+    "blob": "b3bc5717499f31681c5a11381efcc0fa8a6e5da1",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChemicalGeneral.ini",
+    "sha256": "c61b8e21e2cfba6e4167b00a80cc730c13098615e8b2e5b01bb1270c1ea0b09a"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaAir.ini",
+    "local": "zh/Object/ChinaAir.ini",
+    "blob": "4f035bea694fb70af4002e316628df06c9c8d4d4",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaAir.ini",
+    "sha256": "47503abadaa702e6b280afdba1cf093a5d2af3241e30bb91ac27f5d454e2bcbb"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaCINEUnit.ini",
+    "local": "zh/Object/ChinaCINEUnit.ini",
+    "blob": "6fbff1c76a11ddfbcf8dbaa370f109be35e85b09",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaCINEUnit.ini",
+    "sha256": "d4fab36798b60439f07cefbe159d881340a679eb219ae921e97e7812ebec9e98"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaInfantry.ini",
+    "local": "zh/Object/ChinaInfantry.ini",
+    "blob": "409c429e6381197faa76096ce6c491845dd8293a",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaInfantry.ini",
+    "sha256": "21152a6ae9ff28808c6db392da472f4963c6430e6a8d665fef9cba790138c599"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaMiscUnit.ini",
+    "local": "zh/Object/ChinaMiscUnit.ini",
+    "blob": "ba812350e4a0880608b8752c138456e5c317bc7c",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaMiscUnit.ini",
+    "sha256": "8d39f672265cb43173b5271ea566c3686f4611c3e0a09f5f5f47857b400b2bbe"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaVehicle.ini",
+    "local": "zh/Object/ChinaVehicle.ini",
+    "blob": "f1e26fa5e82e989e9488e4e7f55306dfc00cf232",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/ChinaVehicle.ini",
+    "sha256": "17a475238187edd9f8f0ce0b53ca10e3eae010b729f7ad033a001f2fb9a3ab9c"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/CivilianBuilding.ini",
+    "local": "zh/Object/CivilianBuilding.ini",
+    "blob": "9f8ebd7a29a005002e84cf822bbcdb1afb6ecd5c",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/CivilianBuilding.ini",
+    "sha256": "8b069015c008b8c09568169779d658cd5cc099d5cb64410f811490a01ee377ef"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/CivilianProp.ini",
+    "local": "zh/Object/CivilianProp.ini",
+    "blob": "1abecdad1166539adac3b7d80eeadfebe3d8c729",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/CivilianProp.ini",
+    "sha256": "41de5f94ce5a80ae6e465657e781fb24c518fde9d6d4876dbb491630785c5aa4"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/CivilianUnit.ini",
+    "local": "zh/Object/CivilianUnit.ini",
+    "blob": "c0a057132b2c855926d3a782a3d58d7f5a22085b",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/CivilianUnit.ini",
+    "sha256": "31866d1168c557dc8a4c5625a537120dcafad17d89ab82fd9edccee5f72e439c"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/DemoGeneral.ini",
+    "local": "zh/Object/DemoGeneral.ini",
+    "blob": "025f86455e48d1de1215c7057c1c1792a95a375c",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/DemoGeneral.ini",
+    "sha256": "5b78143d336b2b85f07830f8ec303d2a803200a5da943224e0318cb1ee93fd60"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/FactionBuilding.ini",
+    "local": "zh/Object/FactionBuilding.ini",
+    "blob": "174b9fe0b33b761519581540cc0c4f6104b3e039",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/FactionBuilding.ini",
+    "sha256": "39c80619c026b7382e2c82e30ccb87991a06f518ed67746e73a1d1c66edfb178"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/FactionProp.ini",
+    "local": "zh/Object/FactionProp.ini",
+    "blob": "9f4f36690c7d60ae5b7e887be1f56c7021f501d1",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/FactionProp.ini",
+    "sha256": "2219cdaacf53e8fd1e20abfc11d00cf229cac72746bd0362487a920c2d34aebf"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/FactionUnit.ini",
+    "local": "zh/Object/FactionUnit.ini",
+    "blob": "2077be502f54e039b6452f485cb78fb16ac9d1af",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/FactionUnit.ini",
+    "sha256": "1d079abecfbbbad54882c6fc1d6d7f6e466cbdbf68d8cac6d7d7313827d9cd85"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Chem_GLABuildings.ini",
+    "local": "zh/Object/GC_Chem_GLABuildings.ini",
+    "blob": "dc3edefbbb65930f8457aad784689dd16d29870f",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Chem_GLABuildings.ini",
+    "sha256": "8c40b78b15aeb32dd7750c805585f31fd2d7c559a261ae0cb9c41326f2bbff26"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Chem_GLASystem.ini",
+    "local": "zh/Object/GC_Chem_GLASystem.ini",
+    "blob": "03a2816a970c751d253688fc52dd5d34184b706a",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Chem_GLASystem.ini",
+    "sha256": "83f74a49a3f958941af250e87234a3f975054965b4e555ce1f70242fdc1883fb"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Chem_GLAUnits.ini",
+    "local": "zh/Object/GC_Chem_GLAUnits.ini",
+    "blob": "108b1e3a8495acfe71ad198ec6f9ed46c2558295",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Chem_GLAUnits.ini",
+    "sha256": "649749f7b73a0b0f8bdcec902393473315d7ae049a8b87425e926aef90b41239"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Slth_GLABuildings.ini",
+    "local": "zh/Object/GC_Slth_GLABuildings.ini",
+    "blob": "bd7422e32e5ebf9fa33a4c096bbf72b2cbb5141e",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Slth_GLABuildings.ini",
+    "sha256": "f5764bade8c5220c868699b4df12758a869eeaa6a1177f219898e0d15081b46d"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Slth_GLASystem.ini",
+    "local": "zh/Object/GC_Slth_GLASystem.ini",
+    "blob": "ce75924da585408fefc78cffd377f76cd5c0cbc0",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Slth_GLASystem.ini",
+    "sha256": "348bb64d1320ff3c1df73a7739ad6f8ce9303fe7d022e66bb7f6d4d50d3f7681"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Slth_GLAUnits.ini",
+    "local": "zh/Object/GC_Slth_GLAUnits.ini",
+    "blob": "69fe2311b8f3399d242ad76b7a9401a449042018",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GC_Slth_GLAUnits.ini",
+    "sha256": "133e3bae704b654eb0f0c8871199a0fc521ac3295066f4d5392b0d5dd4da48ad"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLAAir.ini",
+    "local": "zh/Object/GLAAir.ini",
+    "blob": "20a8a233fbbf2a98edc4b3acb8bc2c5ec7359859",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLAAir.ini",
+    "sha256": "e90c971cc94d8f495e7d9dda7bd514f546526840bff4abb107daadfbf2809e2f"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLACINEUnit.ini",
+    "local": "zh/Object/GLACINEUnit.ini",
+    "blob": "dbfb3d69de9d60b0984b2554c564f87dac536a42",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLACINEUnit.ini",
+    "sha256": "ac01fff5e2ec621a28eb26c8a6b2e1cb1f3df9eb261f8520d796f6efccaaba12"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLAInfantry.ini",
+    "local": "zh/Object/GLAInfantry.ini",
+    "blob": "e0a4caf7bebba0250584be08a1fa937f3267cefb",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLAInfantry.ini",
+    "sha256": "4d6170f6ae2b798f9074b1bf8fc65b2c8f55da9278f82741d9cfa8cc2928579d"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLAMiscUnit.ini",
+    "local": "zh/Object/GLAMiscUnit.ini",
+    "blob": "9ff0b8c0862a6e26742488bbd46f60e6a35de796",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLAMiscUnit.ini",
+    "sha256": "23aae3400d4f4f8cdc67582551ea565cb649d89bfdaabd2fe84011207fa8a439"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLAVehicle.ini",
+    "local": "zh/Object/GLAVehicle.ini",
+    "blob": "ea872dd38f8312bce3fa1e1ab593264f8369bc4c",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/GLAVehicle.ini",
+    "sha256": "5d104eb5f5c5fffb77dd7e2d2c53206b07c1fce81532e100d8f712a0fae8ea92"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/Hulk.ini",
+    "local": "zh/Object/Hulk.ini",
+    "blob": "fba6828a9fec78459213820efc1311de1111f2e1",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/Hulk.ini",
+    "sha256": "669258c182a55d63903c26d6afe6a9c33678e6392cc1dad0d3acd310d69c25ec"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/InfantryGeneral.ini",
+    "local": "zh/Object/InfantryGeneral.ini",
+    "blob": "0f2b161803adcb6ebc1a4bcb8eb8c0013d980223",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/InfantryGeneral.ini",
+    "sha256": "6b82ca567d6edb93bd8ed2fce66749d3f7e6e344ce58cea22ee251716c49e03e"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/LaserGeneral.ini",
+    "local": "zh/Object/LaserGeneral.ini",
+    "blob": "9a5c04306d67a692a1fbb4db2ead1dcb7f14cf3b",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/LaserGeneral.ini",
+    "sha256": "03d8711a5a48f8f7227abeb7e97270cf9b19079e5b4c46ec020004d77c62bc8e"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/NatureProp.ini",
+    "local": "zh/Object/NatureProp.ini",
+    "blob": "698d3061a8b6edfb52f50e320cbd2e68e16e20fd",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/NatureProp.ini",
+    "sha256": "6a4d09b9a972d5c93565af875330e6ebc4e3a6a2381e87b3a322d3a89289a2a0"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/NatureUnit.ini",
+    "local": "zh/Object/NatureUnit.ini",
+    "blob": "2600725dba61e8926210a0fdfe1b206f4bf1522c",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/NatureUnit.ini",
+    "sha256": "6a6f808675cb98d5f95c0df187b28ccafe991cd88923208ddbcabc18a5ff092d"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/NukeGeneral.ini",
+    "local": "zh/Object/NukeGeneral.ini",
+    "blob": "9a183fd41f86ac110b1f9765c6032cd7d3046199",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/NukeGeneral.ini",
+    "sha256": "30bf3178ffca127d55452cbb25c5200012ae5b12edb538a910274c02f187d9aa"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/SpecialPowerObjects.ini",
+    "local": "zh/Object/SpecialPowerObjects.ini",
+    "blob": "fab94ebcd231cd300e17f39b96cffc18fd32bef9",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/SpecialPowerObjects.ini",
+    "sha256": "47031f30b422259044e7c2af42d85da861b633570ecd4914b1a69f8919ce59eb"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/StealthGeneral.ini",
+    "local": "zh/Object/StealthGeneral.ini",
+    "blob": "5b69cb7358b2ba456849021012b13afb49b271aa",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/StealthGeneral.ini",
+    "sha256": "53e10fa0afa962159bb78a954132c6b5a9809598ff296e617767e61df48cb626"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/SuperWeaponGeneral.ini",
+    "local": "zh/Object/SuperWeaponGeneral.ini",
+    "blob": "dc05a678876e5f1187cb3a2367743af21ffc6fab",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/SuperWeaponGeneral.ini",
+    "sha256": "f939ebada0eabc26b05154b3afe3aef82ea941150761c9a9bc57c2f6f8671c5a"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/System.ini",
+    "local": "zh/Object/System.ini",
+    "blob": "4b3ec33b791c441927fe677f50b990bfe44e8dd5",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/System.ini",
+    "sha256": "511f022cc4c10f76fbff625f501a043015a6222f1fe60f06837cae0028107cb0"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/TankGeneral.ini",
+    "local": "zh/Object/TankGeneral.ini",
+    "blob": "65a5ee358e2412b23b109016bf19b05a4a63f87f",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/TankGeneral.ini",
+    "sha256": "6c2917528eb9b78dfaacef6d7ef9c35c08cf1edf31fba3ee822c30573ea61ac7"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/TechBuildings.ini",
+    "local": "zh/Object/TechBuildings.ini",
+    "blob": "0cd7717424459e1012b66331df38dcf8c296c048",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/TechBuildings.ini",
+    "sha256": "74585259b38d74fe72c8c0925e880b350c6f9374766434362407e48753a47b82"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Object/WeaponObjects.ini",
+    "local": "zh/Object/WeaponObjects.ini",
+    "blob": "fd1ef5b8c7ad82c82f3487f115e26055eae365c9",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Object/WeaponObjects.ini",
+    "sha256": "a065fced2a0506933e6f379abce957a257f729500d2febd4cb65d6c79e301f72"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/PlayerTemplate.ini",
+    "local": "zh/PlayerTemplate.ini",
+    "blob": "895020535d9f2551f9b94bbdde1f16b0f72d8c93",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/PlayerTemplate.ini",
+    "sha256": "7c392fb5f1f8867188b24d371015a7b38dee3ae3e14441ee6b18e800622bd51d"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Science.ini",
+    "local": "zh/Science.ini",
+    "blob": "4b1be229b48ec369cb0e4cf001c11ed92d1fefd9",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Science.ini",
+    "sha256": "4813b11b31715c53ffcf3272b59a989001b44716f767a8f601ac8c8f6bd13994"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/SpecialPower.ini",
+    "local": "zh/SpecialPower.ini",
+    "blob": "8ba1fbc9d19a1d0e86f0ac7495ce802eb302de84",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/SpecialPower.ini",
+    "sha256": "800cbd912c766fa1dba7353ab00b37f2d916b2619e23ee4619e44a5a4127b198"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Terrain.ini",
+    "local": "zh/Terrain.ini",
+    "blob": "0cdf4a31eeb04b27f8218bae74768a38b5a7f3c4",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Terrain.ini",
+    "sha256": "65e07fd46c61a4fab125dfbcd41ebbb11900981b5d448879a1f5e17aacb923d0"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Upgrade.ini",
+    "local": "zh/Upgrade.ini",
+    "blob": "bedd107ce88179fa7714f35bb9be82e508937cb4",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Upgrade.ini",
+    "sha256": "0845b5b37033881ef14d5da4d363a0b14d6787b48cb61929658752e008028eb4"
+  },
+  {
+    "profile": "zh",
+    "repo": "TheSuperHackers/GeneralsGamePatch",
+    "commit": "6c7f40d6af6a4babb77a33a4502ec7656446c13e",
+    "path": "Patch104pZH/GameFilesOriginalZH/Data/INI/Weapon.ini",
+    "local": "zh/Weapon.ini",
+    "blob": "8388247d795748970ffd05b846aa59c8b497c931",
+    "url": "https://github.com/TheSuperHackers/GeneralsGamePatch/blob/6c7f40d6af6a4babb77a33a4502ec7656446c13e/Patch104pZH/GameFilesOriginalZH/Data/INI/Weapon.ini",
+    "sha256": "2f40370e236bd72bf3e2a61bbffd12e2273b63dacd6d519ab67252fca2eb3b44"
+  },
+  {
+    "profile": "ts",
+    "repo": "Vinifera-Developers/Tiberian-Sun-INIs",
+    "commit": "820434dd9946ae524bd8972fac764195ef2939a0",
+    "path": "ART.INI",
+    "local": "westwood/art.ini",
+    "blob": "cf60c71d2465ba4b2d13e6a5539f5913ac9785de",
+    "url": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/ART.INI",
+    "sha256": "b52e3d6d5db5f2d62a43d9dac093d75694a4d35d6e69ff89fa4a28f78cf5d040"
+  },
+  {
+    "profile": "ts",
+    "repo": "Vinifera-Developers/Tiberian-Sun-INIs",
+    "commit": "820434dd9946ae524bd8972fac764195ef2939a0",
+    "path": "ARTFS.INI",
+    "local": "westwood/artfs.ini",
+    "blob": "9ce2579c0e06770bac0806bd8aa65d8f948d2a99",
+    "url": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/ARTFS.INI",
+    "sha256": "beb5affeaeb204bac6f6a07a75208e15feacd4d15aca3cd9c0e188ae3cc69400"
+  },
+  {
+    "profile": "ts",
+    "repo": "Vinifera-Developers/Tiberian-Sun-INIs",
+    "commit": "820434dd9946ae524bd8972fac764195ef2939a0",
+    "path": "FIRESTRM.INI",
+    "local": "westwood/firestrm.ini",
+    "blob": "d5c18919a59549f8c2e6049f9f822791fc1814ff",
+    "url": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/FIRESTRM.INI",
+    "sha256": "1f908783ae50b81dd81c3fa8518700ff18b2fe977568fbca24d17e9fb149f5c5"
+  },
+  {
+    "profile": "ts",
+    "repo": "Vinifera-Developers/Tiberian-Sun-INIs",
+    "commit": "820434dd9946ae524bd8972fac764195ef2939a0",
+    "path": "RULES.INI",
+    "local": "westwood/rules.ini",
+    "blob": "4be96a95297a788aa0cabf9ac0b4e06e2760e84c",
+    "url": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/RULES.INI",
+    "sha256": "cbae0282f612ea9d59d460e4174b2574f17e87f43b89ac609b752430a250e1d2"
+  },
+  {
+    "profile": "ra2",
+    "repo": "hamdirizal/red-alert-2-rules",
+    "commit": "b66200ab0130a24bae8d8359caa6ab03bd78e8f7",
+    "path": "rules-original.ini",
+    "local": "westwood/rules-original.ini",
+    "blob": "0ef680b53068e314a27b99f64b367c9f3e9d6bfa",
+    "url": "https://github.com/hamdirizal/red-alert-2-rules/blob/b66200ab0130a24bae8d8359caa6ab03bd78e8f7/rules-original.ini",
+    "sha256": "adc869ca037db5141f562f18092d022045e194de0d1204a46b9ec8372b2b826f"
+  },
+  {
+    "profile": "ra2",
+    "repo": "hamdirizal/red-alert-2-rules",
+    "commit": "b66200ab0130a24bae8d8359caa6ab03bd78e8f7",
+    "path": "rulesmd-original.ini",
+    "local": "westwood/rulesmd-original.ini",
+    "blob": "4c4b9bc5ecbcf4a528d132d49916d3fbf11fbe87",
+    "url": "https://github.com/hamdirizal/red-alert-2-rules/blob/b66200ab0130a24bae8d8359caa6ab03bd78e8f7/rulesmd-original.ini",
+    "sha256": "c8718ffd3d155fb2f60d15cbd0c3a8fd5c0b9bc786b3b78c7bd53dff1d42da57"
+  },
+  {
+    "profile": "ra1",
+    "repo": "electronicarts/CnC_Red_Alert",
+    "commit": "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
+    "path": "CODE/AADATA.CPP",
+    "local": "ra1-AADATA.CPP",
+    "blob": "222406d5e31c3a54712f871381ddc64ed8a2c862",
+    "url": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/AADATA.CPP",
+    "sha256": "f7418f660712f6f1fc7ee2ba12fd070ed99f2e305c30c57bbc11e6f7079e458d"
+  },
+  {
+    "profile": "ra1",
+    "repo": "electronicarts/CnC_Red_Alert",
+    "commit": "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
+    "path": "CODE/BDATA.CPP",
+    "local": "ra1-BDATA.CPP",
+    "blob": "e6b715c383bdc28798641f3cb62b24a75476b213",
+    "url": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/BDATA.CPP",
+    "sha256": "8aa724fcec9d62180cd25bd2aab9b6c847b1644e99a0875f5ea14cf50e62d627"
+  },
+  {
+    "profile": "ra1",
+    "repo": "electronicarts/CnC_Red_Alert",
+    "commit": "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
+    "path": "CODE/IDATA.CPP",
+    "local": "ra1-IDATA.CPP",
+    "blob": "a0a29cc2b8a761890d24d1b94f331351e7620132",
+    "url": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/IDATA.CPP",
+    "sha256": "8c4f19d9c6c1909707af9f80e2772676581fc3866008f69714f083d0be00b0d3"
+  },
+  {
+    "profile": "ra1",
+    "repo": "electronicarts/CnC_Red_Alert",
+    "commit": "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
+    "path": "CODE/UDATA.CPP",
+    "local": "ra1-UDATA.CPP",
+    "blob": "6c9c8eaed82d2930920cbc62fc4d858587c0ceb5",
+    "url": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/UDATA.CPP",
+    "sha256": "1cee301741e08b2d7596e69228e59c60ba960fcd263c65eafb27bdca7dd0fd51"
+  },
+  {
+    "profile": "ra1",
+    "repo": "electronicarts/CnC_Red_Alert",
+    "commit": "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
+    "path": "CODE/VDATA.CPP",
+    "local": "ra1-VDATA.CPP",
+    "blob": "4d24e9f0b102330c736d24e7fda4a086bc1be115",
+    "url": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/VDATA.CPP",
+    "sha256": "5fea6f01b635fb8e37fd2b4f876c78b75e4522a665881d30343a4ebdff9fb189"
+  },
+  {
+    "profile": "td",
+    "repo": "electronicarts/CnC_Tiberian_Dawn",
+    "commit": "e0d372dc582c053a699114942b984dad0457f9b3",
+    "path": "AADATA.CPP",
+    "local": "td-AADATA.CPP",
+    "blob": "c7893d284f5fadfe807169a937b062ce8d43ba51",
+    "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/AADATA.CPP",
+    "sha256": "7aae900605bbc3e05bf5cf19ab9665f508cccc39639d9bd09e260b6fc368b9c0"
+  },
+  {
+    "profile": "td",
+    "repo": "electronicarts/CnC_Tiberian_Dawn",
+    "commit": "e0d372dc582c053a699114942b984dad0457f9b3",
+    "path": "BDATA.CPP",
+    "local": "td-BDATA.CPP",
+    "blob": "04e2b93dd5f78ef4b332e447ada5464ab265ce53",
+    "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/BDATA.CPP",
+    "sha256": "b493a8482273bbcc91f3bb4385e1290d5f2e2901dc53c4aece4c21e4d2445a13"
+  },
+  {
+    "profile": "td",
+    "repo": "electronicarts/CnC_Tiberian_Dawn",
+    "commit": "e0d372dc582c053a699114942b984dad0457f9b3",
+    "path": "IDATA.CPP",
+    "local": "td-IDATA.CPP",
+    "blob": "538bfb271ff686d8a0c879e89d3567a3f30f47ce",
+    "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/IDATA.CPP",
+    "sha256": "d1152240ebc23bf0c0c1a2e7c96dc06d669af0c40f5fde3a584a911c15eaa4a3"
+  },
+  {
+    "profile": "td",
+    "repo": "electronicarts/CnC_Tiberian_Dawn",
+    "commit": "e0d372dc582c053a699114942b984dad0457f9b3",
+    "path": "UDATA.CPP",
+    "local": "td-UDATA.CPP",
+    "blob": "0426a7232acb926ce77858eabfd870aae1a307fd",
+    "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/UDATA.CPP",
+    "sha256": "01a5ed2e14fff192736e00e2dcd5f8b5a539b5780b99b924ce6d75e684c5906d"
+  },
+  {
+    "profile": "ra2-community-art",
+    "repo": "CnCNet/cncnet-yr-client-package",
+    "commit": "0e5bb2076fa600e13094daebdfbaf85f6b057b8a",
+    "path": "game-assets/ra2mode.pack/artmd.ini",
+    "local": "westwood/ra2-art.ini",
+    "blob": "b8380b6859fdcac34b35e9f268b1444da44b9760",
+    "url": "https://github.com/CnCNet/cncnet-yr-client-package/blob/0e5bb2076fa600e13094daebdfbaf85f6b057b8a/game-assets/ra2mode.pack/artmd.ini",
+    "sha256": "25dbb1f3adc2dd5b67cb04cac89bdef88bc7844c9b90ed3469605a1ca8672aa7",
+    "edition_status": "CnCNet maintained compatibility presentation profile; corroborate against retail ART/ARTMD before asserting original art timing"
+  },
+  {
+    "profile": "yr-community-art",
+    "repo": "CnCNet/cncnet-yr-client-package",
+    "commit": "0e5bb2076fa600e13094daebdfbaf85f6b057b8a",
+    "path": "game-assets/cncnet.pack/artmd.ini",
+    "local": "westwood/yr-art.ini",
+    "blob": "3d58a5c60f9c658d5559382c48014b503b9bc8d3",
+    "url": "https://github.com/CnCNet/cncnet-yr-client-package/blob/0e5bb2076fa600e13094daebdfbaf85f6b057b8a/game-assets/cncnet.pack/artmd.ini",
+    "sha256": "e28c0784bd0a21fd7e8ef7fb96e13cd590a337ca9c448190741a6f3ee242a982",
+    "edition_status": "CnCNet maintained compatibility presentation profile; corroborate against retail ART/ARTMD before asserting original art timing"
+  },
+  {
+    "profile": "ts-theater",
+    "repo": "Vinifera-Developers/Tiberian-Sun-INIs",
+    "commit": "820434dd9946ae524bd8972fac764195ef2939a0",
+    "path": "SNOW.INI",
+    "local": "westwood/snow.ini",
+    "blob": "a88f2d70fd7b0a32935ff7c496891767cf41b966",
+    "url": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/SNOW.INI",
+    "sha256": "55819f1919c56770cccd7fd721bc079cf78dddc27d142d17e182561ba0e81f16"
+  },
+  {
+    "profile": "ts-theater",
+    "repo": "Vinifera-Developers/Tiberian-Sun-INIs",
+    "commit": "820434dd9946ae524bd8972fac764195ef2939a0",
+    "path": "TEMPERAT.INI",
+    "local": "westwood/temperat.ini",
+    "blob": "4024db4b9d47c2e25018e17e2baf391e4d76be04",
+    "url": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/TEMPERAT.INI",
+    "sha256": "ade53cc9298540d5886cc500e2c327670cc531fb976462937ff468fbee0ff3c8"
+  }
+]

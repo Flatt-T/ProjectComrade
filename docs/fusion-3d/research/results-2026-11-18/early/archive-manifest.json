@@ -1,0 +1,426 @@
+{
+  "source_files": 92,
+  "profiles": {
+    "td": {
+      "archive": "td-facts.zip",
+      "size_bytes": 13403,
+      "sha256": "baf8f12f2b2c54c35cfbbe915c8781b7c9d56cea615929c45cb39607c44950fa",
+      "verified_source_anchors": 793,
+      "entities": 113,
+      "members": {
+        "td-definition-facts.jsonl": {
+          "rows": 113,
+          "bytes": 127583,
+          "sha256": "25602f1d32ae925371a647d762ca7a69bada20cb45a21ec7ddd51202e9414c80"
+        },
+        "td-infantry-action-facts.jsonl": {
+          "rows": 680,
+          "bytes": 181606,
+          "sha256": "d47d0a130421d4ef773ede79eb2680eb217faf41dcbbec1af88b0b1e566d4a97"
+        }
+      }
+    },
+    "ra1": {
+      "archive": "ra1-facts.zip",
+      "size_bytes": 57140,
+      "sha256": "aece3703ee6c46336ad93c6e18d120bb1d3fc4554f4b903ca4babcd65e5597d9",
+      "verified_source_anchors": 422,
+      "entities": 149,
+      "members": {
+        "ra1-definition-facts.jsonl": {
+          "rows": 149,
+          "bytes": 118519,
+          "sha256": "88b180ed093dd23d33423dc769190e00eee9fd5a1b6a74c0c3b88c5d9e1ebbcb"
+        },
+        "ra1-infantry-action-facts.jsonl": {
+          "rows": 273,
+          "bytes": 74015,
+          "sha256": "ec16c0e5aab6015fd92eae7d8a0075ba91ec0f9f6b48568ecdeb8f21d8f0d76c"
+        },
+        "ra1-portable-rule-layers.jsonl": {
+          "rows": 256,
+          "bytes": 52625,
+          "sha256": "2dde737752305f79ae96d2767071ae001169b259b2bb60e673d90e1603e42f91"
+        },
+        "ra1-portable-scenarios.jsonl": {
+          "rows": 274,
+          "bytes": 238554,
+          "sha256": "a9a69204ea4687a657d0361bd334a9b3a4e3e0a88aa4147f1cabad5fec026cf8"
+        }
+      }
+    },
+    "ts": {
+      "archive": "ts-facts.zip",
+      "size_bytes": 25768,
+      "sha256": "425e44f192b39af07f747d5173036dd9e954e6f55a00f34888465404611221c4",
+      "verified_source_anchors": 984,
+      "entities": 237,
+      "members": {
+        "ts-action-sequences.jsonl": {
+          "rows": 6,
+          "bytes": 2323,
+          "sha256": "d91dd0099f5d64bf077837039e386ceda730f89cef85febcf1b1fef236cd014f"
+        },
+        "ts-definition-facts.jsonl": {
+          "rows": 237,
+          "bytes": 219325,
+          "sha256": "3edec214c9419ccdae40c67c5013fdf5b9c7b032ee6fb14bf04bd2ec0acd94b9"
+        },
+        "ts-house-index.jsonl": {
+          "rows": 3,
+          "bytes": 14316,
+          "sha256": "f93d74f0a22535f4b41b0d795e7f8edee50056fd931df490fecaea5c53ac9318"
+        },
+        "ts-snow-tile-sets.jsonl": {
+          "rows": 71,
+          "bytes": 19641,
+          "sha256": "3af5cf43e45299ef9ea9275a50ea64160c2d3940687edec8ebcef68c5755114c"
+        },
+        "ts-temperat-tile-sets.jsonl": {
+          "rows": 82,
+          "bytes": 23379,
+          "sha256": "70277b0d3be56ec836f754e76975ba0770830ae67f8007332bbe12e33d6b96c8"
+        },
+        "ts-weapon-facts.jsonl": {
+          "rows": 40,
+          "bytes": 32676,
+          "sha256": "b04491334cfc558923f1a56c7314395d9d37c2b390f48f613274aaca1a4bade6"
+        }
+      }
+    },
+    "fs": {
+      "archive": "fs-facts.zip",
+      "size_bytes": 26472,
+      "sha256": "c6e8068521cd123fefed965b79c947cdbc0ae41b38b1f335872ad7b991c93f82",
+      "verified_source_anchors": 1068,
+      "entities": 265,
+      "members": {
+        "fs-action-sequences.jsonl": {
+          "rows": 6,
+          "bytes": 2418,
+          "sha256": "3e86549e7a7141acfd0979b67404eb08f806cff06f5131e96efc2e427888fa86"
+        },
+        "fs-definition-facts.jsonl": {
+          "rows": 265,
+          "bytes": 255284,
+          "sha256": "30bace288d2a307b5d080df0bccf31f727a2b2fbc5207de619f0de330652c3fe"
+        },
+        "fs-edition-delta.jsonl": {
+          "rows": 57,
+          "bytes": 18860,
+          "sha256": "721914864899f62d4564928d818fd80fa38034cc3129273e6e51c2a940a67830"
+        },
+        "fs-house-index.jsonl": {
+          "rows": 3,
+          "bytes": 17073,
+          "sha256": "09427887db678d31bd176d298755a4a218dd748781d174039373c1a6a1b97968"
+        },
+        "fs-weapon-facts.jsonl": {
+          "rows": 49,
+          "bytes": 40716,
+          "sha256": "50e700d3c9500c7a9467b62797114f5a0d71d227f6e4a24f722ef278e75eb0d0"
+        }
+      }
+    },
+    "ra2": {
+      "archive": "ra2-facts.zip",
+      "size_bytes": 48947,
+      "sha256": "4106398044a3e66b4cfef9278138fc6e66f8a5f754b3c852d561748d71f2341b",
+      "verified_source_anchors": 1651,
+      "entities": 409,
+      "members": {
+        "ra2-action-sequences.jsonl": {
+          "rows": 25,
+          "bytes": 13711,
+          "sha256": "3e64b371b9c2a2db7c41fb581ce876a4501a19297441ee5f1e1ef25f0106bbb3"
+        },
+        "ra2-definition-facts.jsonl": {
+          "rows": 409,
+          "bytes": 489315,
+          "sha256": "5872892f490cd48af1014bac8cb77191b4aa6f7ac2201ae8a8a99d3fadfefd4d"
+        },
+        "ra2-house-index.jsonl": {
+          "rows": 9,
+          "bytes": 98818,
+          "sha256": "5f5722dcd796af24448ef94f63246ba1f1bfc82b063c96ced5ec7ebc5b6fede9"
+        },
+        "ra2-weapon-facts.jsonl": {
+          "rows": 137,
+          "bytes": 121721,
+          "sha256": "6501892e2b428b176d8895ec660a8360f8b434393a1b5b53972c705e812d8597"
+        }
+      }
+    },
+    "yr": {
+      "archive": "yr-facts.zip",
+      "size_bytes": 80120,
+      "sha256": "fdfde2077a16676e3f5bd03c6ac5ecf2fb1f21eb617951069645d3e3cfce1a90",
+      "verified_source_anchors": 3157,
+      "entities": 559,
+      "members": {
+        "yr-action-sequences.jsonl": {
+          "rows": 37,
+          "bytes": 20296,
+          "sha256": "46f60b054d4d68e1da5ac7598cd68cc50bfe7562f2e9a3b4c80535783d22fdcf"
+        },
+        "yr-definition-facts.jsonl": {
+          "rows": 559,
+          "bytes": 672625,
+          "sha256": "1d66e800221024a379ac4c3821e1162d9cb0f0b02343736b350e7fb9a4f073cf"
+        },
+        "yr-edition-delta.jsonl": {
+          "rows": 504,
+          "bytes": 208676,
+          "sha256": "649f89d7e16ff0ed06751a704a25455181dd98e95f2757e927a6baae6c35a4d4"
+        },
+        "yr-house-index.jsonl": {
+          "rows": 10,
+          "bytes": 152146,
+          "sha256": "0f24cab4a62e3332d0d2aa8c55c4a63555bb1d9cb711287891a1e99cf06067a3"
+        },
+        "yr-weapon-facts.jsonl": {
+          "rows": 204,
+          "bytes": 181581,
+          "sha256": "3badc4811577cc42d2c05edba6b1179b9c8581098ab8b97301afc9ec3d544995"
+        }
+      }
+    },
+    "generals": {
+      "archive": "generals-facts.zip",
+      "size_bytes": 240804,
+      "sha256": "4be299c58f05d4c716d9b99f3dfaba9e079c60446b0d4a24b358b54dc09b6479",
+      "verified_source_anchors": 11739,
+      "entities": 1300,
+      "members": {
+        "generals-armor-facts.jsonl": {
+          "rows": 29,
+          "bytes": 13921,
+          "sha256": "3e14080698ee5594cf21438443200bc81fcd93af1c97846614b7988abb83a774"
+        },
+        "generals-faction-reachability.jsonl": {
+          "rows": 5,
+          "bytes": 3906,
+          "sha256": "5d915d25fa5914e6917caff11648c8df5f6204568fbd559f83fda7c660def9ac"
+        },
+        "generals-locomotor-facts.jsonl": {
+          "rows": 145,
+          "bytes": 69153,
+          "sha256": "504879d00883960b97a766193bd6c65a0d8ae7d15eaa317926311ade7a4832bc"
+        },
+        "generals-menu-edges.jsonl": {
+          "rows": 79,
+          "bytes": 43095,
+          "sha256": "1fbc42d8a062a6448f6c9cc08752db28328a676f64fbe2e1a49758789257bef0"
+        },
+        "generals-objects-01.jsonl": {
+          "rows": 400,
+          "bytes": 384358,
+          "sha256": "8e72605f887bb0769758c47b86f865708febaca1d5c565ac36603aa07ee133fe"
+        },
+        "generals-objects-02.jsonl": {
+          "rows": 400,
+          "bytes": 399030,
+          "sha256": "da0f608b47209ef778cfc946e2067a67b5fed2a82b86cbb1f7d06bdc94a77ec1"
+        },
+        "generals-objects-03.jsonl": {
+          "rows": 400,
+          "bytes": 475384,
+          "sha256": "3bcbe84ed0dc798e41f51f4cbcd059e59537953f5faa581e954d796d8081c122"
+        },
+        "generals-objects-04.jsonl": {
+          "rows": 100,
+          "bytes": 64421,
+          "sha256": "c892b04106e015b625829f45c83e7ea2bd78285faa002383767d0abd4cbbec09"
+        },
+        "generals-presentation-states-01.jsonl": {
+          "rows": 3000,
+          "bytes": 500016,
+          "sha256": "830031e3cd938d2ccbfbb83e2029b23bde75dc8d23663479dd7aadad92c92ce4"
+        },
+        "generals-presentation-states-02.jsonl": {
+          "rows": 3000,
+          "bytes": 680563,
+          "sha256": "65ac02a489b26c79fc275060e818d723bf1a2a3a1d3ee98dcca884e522d11589"
+        },
+        "generals-presentation-states-03.jsonl": {
+          "rows": 3000,
+          "bytes": 774683,
+          "sha256": "db2159b3d66783bc8beba76aa37cf2c6846d07da35b3632785f0c8ba916e72e8"
+        },
+        "generals-presentation-states-04.jsonl": {
+          "rows": 553,
+          "bytes": 100579,
+          "sha256": "b9e14f95920c768c065843beeca543e6a5a50ec8b3dd45a3967b4cb01d486589"
+        },
+        "generals-science-facts.jsonl": {
+          "rows": 53,
+          "bytes": 16430,
+          "sha256": "0c84e90fa6fb7302fb12e52aa2433b04664b1b136d98ffbe7a62c57c979c1c0f"
+        },
+        "generals-special-powers.jsonl": {
+          "rows": 42,
+          "bytes": 13587,
+          "sha256": "0a5747933e80293c9aec0427f7c4fa2e31142257383e5a023f66f34261325278"
+        },
+        "generals-terrain-facts.jsonl": {
+          "rows": 235,
+          "bytes": 58485,
+          "sha256": "1357831c78aa4743f48d46f466d6830124832107b73485fa6a1365cb3f0e18dc"
+        },
+        "generals-upgrade-facts.jsonl": {
+          "rows": 39,
+          "bytes": 11619,
+          "sha256": "8f0b4a8b122d5275703bd6e383604e99f8ac7ea52e4df61bbbf5d538d7ae24ff"
+        },
+        "generals-weapons.jsonl": {
+          "rows": 180,
+          "bytes": 81478,
+          "sha256": "1d6c32ad07ef2fc97db561c5106ff1f271687869a27ffc551afc68ac7bedb92f"
+        }
+      }
+    },
+    "zh": {
+      "archive": "zh-facts.zip",
+      "size_bytes": 694266,
+      "sha256": "8aa1105a2816ba6863366980a0bd58f3bb3643211aa5802d3410d296d4a840ed",
+      "verified_source_anchors": 32168,
+      "entities": 2103,
+      "members": {
+        "zh-armor-facts.jsonl": {
+          "rows": 53,
+          "bytes": 33543,
+          "sha256": "4ad0472cd84d8953a394f94346399601470eacc99441e0fcafa7dc1c3e68df11"
+        },
+        "zh-faction-reachability.jsonl": {
+          "rows": 15,
+          "bytes": 17158,
+          "sha256": "1754a8f20a197898aff334414b9b364f0686b5e19c9464bd202370d7880500a6"
+        },
+        "zh-locomotor-facts.jsonl": {
+          "rows": 182,
+          "bytes": 88509,
+          "sha256": "8b7a89da1b1542f0775362ee9ec1391bc9f2a5f12993e94fe64faedaf7017e65"
+        },
+        "zh-menu-edges.jsonl": {
+          "rows": 552,
+          "bytes": 315373,
+          "sha256": "8c38c02ca7ceb680659800bc75b8fc07ef6a2e064ed82d7f8d6d3383fbc30b23"
+        },
+        "zh-objects-01.jsonl": {
+          "rows": 400,
+          "bytes": 736503,
+          "sha256": "6fa37e307579f06a4e5e9cbca0a97499d99e4fffdc2f8709fdeb95a7e5f93f56"
+        },
+        "zh-objects-02.jsonl": {
+          "rows": 400,
+          "bytes": 341454,
+          "sha256": "b5988c4dc2fe335139ddee4fd11da7c22b717970d814f8bc691c32a7df5a238a"
+        },
+        "zh-objects-03.jsonl": {
+          "rows": 400,
+          "bytes": 400385,
+          "sha256": "19be644cf19ea19893eadf56720469365a6ecebdd2c1bb11be04d8f506124360"
+        },
+        "zh-objects-04.jsonl": {
+          "rows": 400,
+          "bytes": 835882,
+          "sha256": "148132a0a49edf7e19e06d8484a15a65cc7333276f7f65ce58f8098913586397"
+        },
+        "zh-objects-05.jsonl": {
+          "rows": 400,
+          "bytes": 573242,
+          "sha256": "3803234aa81cdc621f4b431b9d0cfb18c0aa8572f37ab0df3fae6ccc0779a798"
+        },
+        "zh-objects-06.jsonl": {
+          "rows": 103,
+          "bytes": 98844,
+          "sha256": "254606225e06e1e6815bf41e776edff7a203b6d12a5de90d84c23f865dceacb9"
+        },
+        "zh-presentation-states-01.jsonl": {
+          "rows": 3000,
+          "bytes": 844262,
+          "sha256": "22af69852e38cfa0d6f0f434c3e2eb94b32af52fabd80473af2dfc2fdcf6c797"
+        },
+        "zh-presentation-states-02.jsonl": {
+          "rows": 3000,
+          "bytes": 744950,
+          "sha256": "0cc2e886c7ce2c2a616a12e131b49afeb587bb80653f6459800cd1f93231fdf5"
+        },
+        "zh-presentation-states-03.jsonl": {
+          "rows": 3000,
+          "bytes": 515590,
+          "sha256": "b8f3aec73347d1b2841a090dea321afca037ca420ee2a0b75211981f76d18d25"
+        },
+        "zh-presentation-states-04.jsonl": {
+          "rows": 3000,
+          "bytes": 606650,
+          "sha256": "74a8aa8dcfc4dcf0db1e3f3751ac40ab8149d380fdddac49a2897185401587c5"
+        },
+        "zh-presentation-states-05.jsonl": {
+          "rows": 3000,
+          "bytes": 854160,
+          "sha256": "12570c3308040ae5012f87414b711262da1e4ca8edf21d8cf88c270fdee79724"
+        },
+        "zh-presentation-states-06.jsonl": {
+          "rows": 3000,
+          "bytes": 807021,
+          "sha256": "d0b82a47f7f3dbde31e788e5a71a48ef814d7544f5fd8e1829baead12be4a6d4"
+        },
+        "zh-presentation-states-07.jsonl": {
+          "rows": 3000,
+          "bytes": 828791,
+          "sha256": "e3b56333f1aaf19da23882955c9a80e455c4bd99c54d7d26d43f7aed2ca51ccc"
+        },
+        "zh-presentation-states-08.jsonl": {
+          "rows": 3000,
+          "bytes": 833822,
+          "sha256": "cfea2973ea686dd0c3eeb784a852a2a078a59c3ca3548f9561c2741894b37a52"
+        },
+        "zh-presentation-states-09.jsonl": {
+          "rows": 3000,
+          "bytes": 869996,
+          "sha256": "3e7051dbe0d28a8b3e917b065bcde9e0b1cf6cf09e2444136ab18f4f574b5a9d"
+        },
+        "zh-presentation-states-10.jsonl": {
+          "rows": 801,
+          "bytes": 207574,
+          "sha256": "70a0d7cbc9d94d371fbd3f75c21d021f6ada05e82b949828647d4469b83f7c25"
+        },
+        "zh-science-facts.jsonl": {
+          "rows": 96,
+          "bytes": 30887,
+          "sha256": "1dd5a2120ceb412bcb10024ab54200a5dc15f9da9fe889d0ea30b8b9d871fe85"
+        },
+        "zh-special-powers.jsonl": {
+          "rows": 79,
+          "bytes": 26622,
+          "sha256": "3d2d9af0380bc42c327f9f197a00b1b37b5f48a3bb31527c42095b78207863fa"
+        },
+        "zh-terrain-facts.jsonl": {
+          "rows": 290,
+          "bytes": 74851,
+          "sha256": "d2d4fda9050804b0b0aeac214fa924b2a6b98fa3873e64cc81078f32f9133253"
+        },
+        "zh-upgrade-facts.jsonl": {
+          "rows": 82,
+          "bytes": 25118,
+          "sha256": "c1b46a739e36e21b9bf5c0f4c4cc1c56c834af7d88da114ba8cdc65e614c67b4"
+        },
+        "zh-weapons.jsonl": {
+          "rows": 363,
+          "bytes": 171336,
+          "sha256": "09e1a678764e148af0638ea6d0d6ec6da2d66f6f9e0299b3d72c77499de37194"
+        }
+      }
+    }
+  },
+  "checks": [
+    "92 SHA256/git blob source locks (fetch_inputs.py --offline)",
+    "all GitHub line ranges in emitted JSONL exist within a locked file",
+    "source-class/profile entity counts checked",
+    "every archived member CRC and SHA256 checked",
+    "reskin parent references resolve",
+    "every emitted SAGE construction-button target resolves",
+    "edition-specific example checks passed"
+  ]
+}

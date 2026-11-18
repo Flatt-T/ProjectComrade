@@ -1,0 +1,56 @@
+{
+  "tier": "Community PortableRA redistributable comparator, includes bundled content and can contain modified balance or scenarios. Independent source hashes needed to assert retail identity.",
+  "archive_url": "https://iran.cnc-comm.com/ra/PortableRA.zip",
+  "archive_sha256": "a043b86b3a09e3e8bdf099f1a80038a7efa789f90c7176fd35b47ae29a8ca234",
+  "tables": {
+    "MISSION.INI": {
+      "zip_member": "PortableRA/main.mix",
+      "mix_parent_id": "7229e10e",
+      "mix_member_id": "aa331210",
+      "member_offset_in_outer_zip_member": 7747400,
+      "member_bytes": 12972,
+      "member_sha256": "64ae8c732da9750584a91b00dc0131dcb124d8dc7bed9214886a6862457b108b",
+      "sections": 42
+    },
+    "AFTRMATH.INI": {
+      "zip_member": "PortableRA/main.mix",
+      "mix_parent_id": "7229e10e",
+      "mix_member_id": "2347e4cd",
+      "member_offset_in_outer_zip_member": 7085178,
+      "member_bytes": 6371,
+      "member_sha256": "12d601e6d83d4c21253f9c7e715c0768f512e7d8a6fffb6d5c925702b17dee86",
+      "sections": 39
+    },
+    "MPLAYER.INI": {
+      "zip_member": "PortableRA/main.mix",
+      "mix_parent_id": "7229e10e",
+      "mix_member_id": "621f1a30",
+      "member_offset_in_outer_zip_member": 7683520,
+      "member_bytes": 294,
+      "member_sha256": "60a858a2c8585753e8d7fdfb111200b03b30df462de77adbd08d4e5eccf3ae02",
+      "sections": 8
+    },
+    "RULES.INI": {
+      "zip_member": "PortableRA/redalert.mix",
+      "mix_parent_id": "97a79a21",
+      "mix_member_id": "b1c3b238",
+      "member_offset_in_outer_zip_member": 2149629,
+      "member_bytes": 59867,
+      "member_sha256": "9e8975a50026a5669265b3d01472b41f25945f47fc9c4fecaba08687abd9a719",
+      "sections": 246
+    }
+  },
+  "rule_sections_with_selected_facts": {
+    "RULES.INI": 209,
+    "AFTRMATH.INI": 39,
+    "MPLAYER.INI": 8
+  },
+  "scenarios": 274,
+  "maps_with_hash_matched_name_candidate": 64,
+  "maps_with_local_entity_overrides": 46,
+  "theaters": {
+    "SNOW": 99,
+    "TEMPERATE": 171,
+    "INTERIOR": 4
+  }
+}

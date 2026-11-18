@@ -1,0 +1,1237 @@
+{
+  "subject": "existing COMRADE Fusion Dune 2000-style skirmish",
+  "sourceCommit": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+  "sha256OfCompiledFiles": {
+    "game.js": "823afd3672d5fcd6f89a10309005a12e0fa9c4649f91f75166601d6bf6a65ba5",
+    "packs/dune.js": "8de36faf7a61ec2e3e7b7bcaf1b1cb48f0a2bd3ec098aaa158ba1dd4eedc03ba",
+    "map.js": "f68666c1d55056715f0983be464bef7361c1f0693d36b383b191b05d8542d85f",
+    "rules.js": "2bceadf4590a96ec349505d01dfa438ff2a061298156d4385a5fa42997691c9d",
+    "core.js": "86620c0016f89cd464b6395a4409c005f483d1f9dca8b390de4bacea7d5d6506"
+  },
+  "setup": {
+    "mapId": "four-sietches",
+    "seed": 14077,
+    "credits": "standard",
+    "worms": 0,
+    "crates": 0,
+    "players": [
+      {
+        "name": "atreides",
+        "faction": "atreides",
+        "ai": false,
+        "team": 0
+      },
+      {
+        "name": "harkonnen",
+        "faction": "harkonnen",
+        "ai": false,
+        "team": 1
+      },
+      {
+        "name": "ordos",
+        "faction": "ordos",
+        "ai": false,
+        "team": 2
+      }
+    ]
+  },
+  "entryPoints": [
+    "Game",
+    "enqueue",
+    "step",
+    "canBuild",
+    "canPlace",
+    "checksum"
+  ],
+  "independentInstantiations": 2,
+  "fullResultSha256": "6e71f23a5f8b640b43b075738e072af547e12818509bc08c6e9ae631c65fef0d",
+  "result": {
+    "commands": [
+      {
+        "beforeTick": 0,
+        "slot": 0,
+        "command": {
+          "t": "deploy",
+          "ids": [
+            1
+          ]
+        }
+      },
+      {
+        "beforeTick": 0,
+        "slot": 1,
+        "command": {
+          "t": "deploy",
+          "ids": [
+            6
+          ]
+        }
+      },
+      {
+        "beforeTick": 0,
+        "slot": 2,
+        "command": {
+          "t": "deploy",
+          "ids": [
+            11
+          ]
+        }
+      },
+      {
+        "beforeTick": 1,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "concrete"
+        }
+      },
+      {
+        "beforeTick": 1,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "concrete"
+        }
+      },
+      {
+        "beforeTick": 14,
+        "slot": 0,
+        "command": {
+          "t": "place",
+          "item": "concrete",
+          "x": 12,
+          "y": 10
+        }
+      },
+      {
+        "beforeTick": 14,
+        "slot": 2,
+        "command": {
+          "t": "place",
+          "item": "concrete",
+          "x": 81,
+          "y": 10
+        }
+      },
+      {
+        "beforeTick": 15,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "windtrap"
+        }
+      },
+      {
+        "beforeTick": 15,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "windtrap"
+        }
+      },
+      {
+        "beforeTick": 15,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "windtrap"
+        }
+      },
+      {
+        "beforeTick": 196,
+        "slot": 0,
+        "command": {
+          "t": "place",
+          "item": "windtrap",
+          "x": 12,
+          "y": 10
+        }
+      },
+      {
+        "beforeTick": 196,
+        "slot": 1,
+        "command": {
+          "t": "place",
+          "item": "windtrap",
+          "x": 81,
+          "y": 79
+        }
+      },
+      {
+        "beforeTick": 196,
+        "slot": 2,
+        "command": {
+          "t": "place",
+          "item": "windtrap",
+          "x": 81,
+          "y": 10
+        }
+      },
+      {
+        "beforeTick": 197,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "refinery"
+        }
+      },
+      {
+        "beforeTick": 197,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "refinery"
+        }
+      },
+      {
+        "beforeTick": 197,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "refinery"
+        }
+      },
+      {
+        "beforeTick": 1101,
+        "slot": 0,
+        "command": {
+          "t": "place",
+          "item": "refinery",
+          "x": 14,
+          "y": 10
+        }
+      },
+      {
+        "beforeTick": 1101,
+        "slot": 1,
+        "command": {
+          "t": "place",
+          "item": "refinery",
+          "x": 83,
+          "y": 79
+        }
+      },
+      {
+        "beforeTick": 1101,
+        "slot": 2,
+        "command": {
+          "t": "place",
+          "item": "refinery",
+          "x": 83,
+          "y": 10
+        }
+      },
+      {
+        "beforeTick": 1102,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "barracks"
+        }
+      },
+      {
+        "beforeTick": 1102,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "barracks"
+        }
+      },
+      {
+        "beforeTick": 1102,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "barracks"
+        }
+      },
+      {
+        "beforeTick": 1283,
+        "slot": 0,
+        "command": {
+          "t": "place",
+          "item": "barracks",
+          "x": 10,
+          "y": 12
+        }
+      },
+      {
+        "beforeTick": 1283,
+        "slot": 1,
+        "command": {
+          "t": "place",
+          "item": "barracks",
+          "x": 79,
+          "y": 81
+        }
+      },
+      {
+        "beforeTick": 1283,
+        "slot": 2,
+        "command": {
+          "t": "place",
+          "item": "barracks",
+          "x": 79,
+          "y": 12
+        }
+      },
+      {
+        "beforeTick": 1284,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "trooper"
+        }
+      },
+      {
+        "beforeTick": 1284,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "trooper"
+        }
+      },
+      {
+        "beforeTick": 1284,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "trooper"
+        }
+      },
+      {
+        "beforeTick": 1339,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "lightfactory"
+        }
+      },
+      {
+        "beforeTick": 1339,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "lightfactory"
+        }
+      },
+      {
+        "beforeTick": 1339,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "lightfactory"
+        }
+      },
+      {
+        "beforeTick": 1641,
+        "slot": 0,
+        "command": {
+          "t": "place",
+          "item": "lightfactory",
+          "x": 15,
+          "y": 12
+        }
+      },
+      {
+        "beforeTick": 1641,
+        "slot": 1,
+        "command": {
+          "t": "place",
+          "item": "lightfactory",
+          "x": 84,
+          "y": 81
+        }
+      },
+      {
+        "beforeTick": 1641,
+        "slot": 2,
+        "command": {
+          "t": "place",
+          "item": "lightfactory",
+          "x": 84,
+          "y": 12
+        }
+      },
+      {
+        "beforeTick": 1642,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "raider"
+        }
+      },
+      {
+        "beforeTick": 1642,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "raider"
+        }
+      },
+      {
+        "beforeTick": 1642,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "trike"
+        }
+      },
+      {
+        "beforeTick": 1643,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "trike"
+        }
+      },
+      {
+        "beforeTick": 1643,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "trike"
+        }
+      },
+      {
+        "beforeTick": 1643,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "raider"
+        }
+      },
+      {
+        "beforeTick": 1824,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "outpost"
+        }
+      },
+      {
+        "beforeTick": 1824,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "outpost"
+        }
+      },
+      {
+        "beforeTick": 1824,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "outpost"
+        }
+      },
+      {
+        "beforeTick": 2276,
+        "slot": 0,
+        "command": {
+          "t": "place",
+          "item": "outpost",
+          "x": 10,
+          "y": 10
+        }
+      },
+      {
+        "beforeTick": 2276,
+        "slot": 1,
+        "command": {
+          "t": "place",
+          "item": "outpost",
+          "x": 79,
+          "y": 79
+        }
+      },
+      {
+        "beforeTick": 2276,
+        "slot": 2,
+        "command": {
+          "t": "place",
+          "item": "outpost",
+          "x": 79,
+          "y": 10
+        }
+      },
+      {
+        "beforeTick": 2277,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "thumper"
+        }
+      },
+      {
+        "beforeTick": 2398,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "heavyfactory"
+        }
+      },
+      {
+        "beforeTick": 2398,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "heavyfactory"
+        }
+      },
+      {
+        "beforeTick": 2398,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "heavyfactory"
+        }
+      },
+      {
+        "beforeTick": 3001,
+        "slot": 0,
+        "command": {
+          "t": "place",
+          "item": "heavyfactory",
+          "x": 9,
+          "y": 15
+        }
+      },
+      {
+        "beforeTick": 3001,
+        "slot": 1,
+        "command": {
+          "t": "place",
+          "item": "heavyfactory",
+          "x": 78,
+          "y": 84
+        }
+      },
+      {
+        "beforeTick": 3001,
+        "slot": 2,
+        "command": {
+          "t": "place",
+          "item": "heavyfactory",
+          "x": 78,
+          "y": 15
+        }
+      },
+      {
+        "beforeTick": 3002,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "combattank"
+        }
+      },
+      {
+        "beforeTick": 3002,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "combattank-h"
+        }
+      },
+      {
+        "beforeTick": 3002,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "combattank-o"
+        }
+      }
+    ],
+    "events": [
+      {
+        "label": "match created",
+        "tick": 0,
+        "checksum": 153430686,
+        "credits": [
+          7000,
+          7000,
+          7000
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ],
+        "startingRoster": [
+          {
+            "mcv": 1,
+            "lightinf": 2,
+            "trooper": 1,
+            "quad": 1
+          },
+          {
+            "mcv": 1,
+            "lightinf": 2,
+            "trooper": 1,
+            "quad": 1
+          },
+          {
+            "mcv": 1,
+            "lightinf": 2,
+            "trooper": 1,
+            "quad": 1
+          }
+        ]
+      },
+      {
+        "label": "three MCVs deployed",
+        "tick": 1,
+        "checksum": 1289536559,
+        "credits": [
+          7000,
+          7000,
+          7000
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "label": "placed concrete",
+        "tick": 15,
+        "checksum": 3863147985,
+        "credits": [
+          6980,
+          7000,
+          6980
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ],
+        "placements": [
+          {
+            "slot": 0,
+            "x": 12,
+            "y": 10,
+            "concreteCells": 4
+          },
+          {
+            "slot": 2,
+            "x": 81,
+            "y": 10,
+            "concreteCells": 4
+          }
+        ]
+      },
+      {
+        "label": "placed windtrap",
+        "tick": 197,
+        "checksum": 2245371411,
+        "credits": [
+          6680,
+          6700,
+          6680
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ],
+        "placements": [
+          {
+            "slot": 0,
+            "x": 12,
+            "y": 10,
+            "hp": 700,
+            "definitionHp": 700,
+            "exposed": false
+          },
+          {
+            "slot": 1,
+            "x": 81,
+            "y": 79,
+            "hp": 350,
+            "definitionHp": 700,
+            "exposed": true
+          },
+          {
+            "slot": 2,
+            "x": 81,
+            "y": 10,
+            "hp": 700,
+            "definitionHp": 700,
+            "exposed": false
+          }
+        ]
+      },
+      {
+        "label": "placed refinery",
+        "tick": 1102,
+        "checksum": 2473572686,
+        "credits": [
+          5180,
+          5200,
+          5180
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ],
+        "placements": [
+          {
+            "slot": 0,
+            "x": 14,
+            "y": 10,
+            "hp": 500,
+            "definitionHp": 1000,
+            "exposed": true
+          },
+          {
+            "slot": 1,
+            "x": 83,
+            "y": 79,
+            "hp": 500,
+            "definitionHp": 1000,
+            "exposed": true
+          },
+          {
+            "slot": 2,
+            "x": 83,
+            "y": 10,
+            "hp": 500,
+            "definitionHp": 1000,
+            "exposed": true
+          }
+        ]
+      },
+      {
+        "label": "all refineries provided one harvester",
+        "tick": 1102,
+        "checksum": 2473572686,
+        "credits": [
+          5180,
+          5200,
+          5180
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "label": "placed barracks",
+        "tick": 1284,
+        "checksum": 2350420463,
+        "credits": [
+          4880,
+          4900,
+          4880
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ],
+        "placements": [
+          {
+            "slot": 0,
+            "x": 10,
+            "y": 12,
+            "hp": 350,
+            "definitionHp": 700,
+            "exposed": true
+          },
+          {
+            "slot": 1,
+            "x": 79,
+            "y": 81,
+            "hp": 350,
+            "definitionHp": 700,
+            "exposed": true
+          },
+          {
+            "slot": 2,
+            "x": 79,
+            "y": 12,
+            "hp": 350,
+            "definitionHp": 700,
+            "exposed": true
+          }
+        ]
+      },
+      {
+        "label": "three troopers exited unupgraded barracks",
+        "tick": 1339,
+        "checksum": 1523551376,
+        "credits": [
+          4790,
+          4810,
+          4790
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "label": "placed lightfactory",
+        "tick": 1642,
+        "checksum": 915894439,
+        "credits": [
+          4290,
+          4310,
+          4290
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ],
+        "placements": [
+          {
+            "slot": 0,
+            "x": 15,
+            "y": 12,
+            "hp": 400,
+            "definitionHp": 800,
+            "exposed": true
+          },
+          {
+            "slot": 1,
+            "x": 84,
+            "y": 81,
+            "hp": 400,
+            "definitionHp": 800,
+            "exposed": true
+          },
+          {
+            "slot": 2,
+            "x": 84,
+            "y": 12,
+            "hp": 400,
+            "definitionHp": 800,
+            "exposed": true
+          }
+        ]
+      },
+      {
+        "label": "cross-house scouts rejected",
+        "tick": 1643,
+        "checksum": 2801551504,
+        "credits": [
+          4290,
+          4310,
+          4290
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "label": "house-specific scouts exited",
+        "tick": 1824,
+        "checksum": 1018768988,
+        "credits": [
+          3990,
+          4010,
+          3990
+        ],
+        "harvested": [
+          0,
+          0,
+          0
+        ],
+        "types": [
+          "trike",
+          "trike",
+          "raider"
+        ]
+      },
+      {
+        "label": "placed outpost",
+        "tick": 2277,
+        "checksum": 299446425,
+        "credits": [
+          3240,
+          3260,
+          3240
+        ],
+        "harvested": [
+          700,
+          595,
+          651
+        ],
+        "placements": [
+          {
+            "slot": 0,
+            "x": 10,
+            "y": 10,
+            "hp": 400,
+            "definitionHp": 800,
+            "exposed": true
+          },
+          {
+            "slot": 1,
+            "x": 79,
+            "y": 79,
+            "hp": 400,
+            "definitionHp": 800,
+            "exposed": true
+          },
+          {
+            "slot": 2,
+            "x": 79,
+            "y": 10,
+            "hp": 400,
+            "definitionHp": 800,
+            "exposed": true
+          }
+        ]
+      },
+      {
+        "label": "Atreides thumper exited",
+        "tick": 2398,
+        "checksum": 402034281,
+        "credits": [
+          3040,
+          3260,
+          3240
+        ],
+        "harvested": [
+          700,
+          700,
+          700
+        ]
+      },
+      {
+        "label": "placed heavyfactory",
+        "tick": 3002,
+        "checksum": 3403404334,
+        "credits": [
+          2040,
+          2260,
+          2240
+        ],
+        "harvested": [
+          700,
+          700,
+          700
+        ],
+        "placements": [
+          {
+            "slot": 0,
+            "x": 9,
+            "y": 15,
+            "hp": 550,
+            "definitionHp": 1100,
+            "exposed": true
+          },
+          {
+            "slot": 1,
+            "x": 78,
+            "y": 84,
+            "hp": 550,
+            "definitionHp": 1100,
+            "exposed": true
+          },
+          {
+            "slot": 2,
+            "x": 78,
+            "y": 15,
+            "hp": 550,
+            "definitionHp": 1100,
+            "exposed": true
+          }
+        ]
+      },
+      {
+        "label": "three different house combat tanks exited",
+        "tick": 3454,
+        "checksum": 440717404,
+        "credits": [
+          1733,
+          1874,
+          1540
+        ],
+        "harvested": [
+          1400,
+          1064,
+          700
+        ],
+        "types": [
+          "combattank",
+          "combattank-h",
+          "combattank-o"
+        ]
+      },
+      {
+        "label": "all three have banked spice",
+        "tick": 3454,
+        "checksum": 440717404,
+        "credits": [
+          1733,
+          1874,
+          1540
+        ],
+        "harvested": [
+          1400,
+          1064,
+          700
+        ]
+      }
+    ],
+    "menus": {
+      "afterYards": {
+        "atreides": {
+          "concrete": true,
+          "windtrap": true,
+          "refinery": false,
+          "barracks": false
+        },
+        "harkonnen": {
+          "concrete": true,
+          "windtrap": true,
+          "refinery": false,
+          "barracks": false
+        },
+        "ordos": {
+          "concrete": true,
+          "windtrap": true,
+          "refinery": false,
+          "barracks": false
+        }
+      },
+      "afterWindtraps": {
+        "atreides": {
+          "refinery": true,
+          "barracks": true,
+          "lightfactory": false
+        },
+        "harkonnen": {
+          "refinery": true,
+          "barracks": true,
+          "lightfactory": false
+        },
+        "ordos": {
+          "refinery": true,
+          "barracks": true,
+          "lightfactory": false
+        }
+      },
+      "levelZeroBarracks": {
+        "atreides": {
+          "lightinf": true,
+          "trooper": true,
+          "engineer": false,
+          "thumper": false
+        },
+        "harkonnen": {
+          "lightinf": true,
+          "trooper": true,
+          "engineer": false,
+          "thumper": false
+        },
+        "ordos": {
+          "lightinf": true,
+          "trooper": true,
+          "engineer": false,
+          "thumper": false
+        }
+      },
+      "lightFactory": {
+        "atreides": {
+          "trike": true,
+          "raider": false,
+          "quad": false,
+          "combattank": false,
+          "combattank-h": false,
+          "combattank-o": false
+        },
+        "harkonnen": {
+          "trike": true,
+          "raider": false,
+          "quad": false,
+          "combattank": false,
+          "combattank-h": false,
+          "combattank-o": false
+        },
+        "ordos": {
+          "trike": false,
+          "raider": true,
+          "quad": false,
+          "combattank": false,
+          "combattank-h": false,
+          "combattank-o": false
+        }
+      },
+      "withOutpost": {
+        "atreides": {
+          "thumper": true,
+          "sardaukar": false,
+          "sonictank": false,
+          "devastator": false,
+          "deviator": false
+        },
+        "harkonnen": {
+          "thumper": false,
+          "sardaukar": false,
+          "sonictank": false,
+          "devastator": false,
+          "deviator": false
+        },
+        "ordos": {
+          "thumper": false,
+          "sardaukar": false,
+          "sonictank": false,
+          "devastator": false,
+          "deviator": false
+        }
+      },
+      "heavyFactory": {
+        "atreides": {
+          "combattank": true,
+          "combattank-h": false,
+          "combattank-o": false,
+          "harvester": true,
+          "missiletank": false
+        },
+        "harkonnen": {
+          "combattank": false,
+          "combattank-h": true,
+          "combattank-o": false,
+          "harvester": true,
+          "missiletank": false
+        },
+        "ordos": {
+          "combattank": false,
+          "combattank-h": false,
+          "combattank-o": true,
+          "harvester": true,
+          "missiletank": false
+        }
+      }
+    },
+    "firstDeposits": {
+      "atreides": {
+        "tick": 1968,
+        "harvested": 7,
+        "checksum": 1581514832
+      },
+      "ordos": {
+        "tick": 2185,
+        "harvested": 7,
+        "checksum": 1735259254
+      },
+      "harkonnen": {
+        "tick": 2193,
+        "harvested": 7,
+        "checksum": 2462032276
+      }
+    },
+    "finalTick": 3454,
+    "finalChecksum": 440717404
+  },
+  "replayedFollowup": {
+    "windtrapsAtFinalBranchTick": [
+      {
+        "faction": "atreides",
+        "hp": 700,
+        "exposed": false
+      },
+      {
+        "faction": "harkonnen",
+        "hp": 350,
+        "exposed": true
+      },
+      {
+        "faction": "ordos",
+        "hp": 700,
+        "exposed": false
+      }
+    ],
+    "replayedCommands": 56,
+    "replayedChecksum": 440717404,
+    "fieldChecks": [
+      {
+        "tick": 1102,
+        "heavyFactoryEligible": [
+          false,
+          false,
+          false
+        ],
+        "lightFactoryEligible": [
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "tick": 1642,
+        "heavyFactoryEligible": [
+          true,
+          true,
+          true
+        ],
+        "lightFactoryEligible": [
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "branchCommands": [
+      {
+        "beforeTick": 3454,
+        "slot": 0,
+        "command": {
+          "t": "build",
+          "item": "upgrade:barracks"
+        }
+      },
+      {
+        "beforeTick": 3454,
+        "slot": 1,
+        "command": {
+          "t": "build",
+          "item": "upgrade:barracks"
+        }
+      },
+      {
+        "beforeTick": 3454,
+        "slot": 2,
+        "command": {
+          "t": "build",
+          "item": "upgrade:barracks"
+        }
+      }
+    ],
+    "upgradedBarracks": {
+      "tick": 3816,
+      "checksum": 1318883217,
+      "houses": [
+        {
+          "faction": "atreides",
+          "level": 1,
+          "thumper": true,
+          "engineer": true
+        },
+        {
+          "faction": "harkonnen",
+          "level": 1,
+          "thumper": false,
+          "engineer": true
+        },
+        {
+          "faction": "ordos",
+          "level": 1,
+          "thumper": false,
+          "engineer": true
+        }
+      ]
+    }
+  }
+}

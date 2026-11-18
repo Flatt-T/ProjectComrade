@@ -1,0 +1,91 @@
+{
+  "repo": "electronicarts/CnC_Modding_Support",
+  "commit": "3aad8e412961ab543192ae70f8503dc8e178e095",
+  "metadata_records": 522,
+  "families": {
+    "generals": {
+      "maps": 264,
+      "height_records": 264,
+      "texture_tables": 264,
+      "objects_lists": 264,
+      "maps_with_extraction_issues": 0,
+      "directories": {
+        "internal": 208,
+        "official_directory": 56
+      }
+    },
+    "kw": {
+      "maps": 398,
+      "height_records": 398,
+      "texture_tables": 398,
+      "objects_lists": 398,
+      "maps_with_extraction_issues": 0,
+      "directories": {
+        "library": 6,
+        "internal": 294,
+        "official_directory": 98
+      }
+    },
+    "ra3": {
+      "maps": 206,
+      "height_records": 206,
+      "texture_tables": 206,
+      "objects_lists": 206,
+      "maps_with_extraction_issues": 0,
+      "directories": {
+        "library": 9,
+        "internal": 101,
+        "official_directory": 96
+      }
+    },
+    "c4": {
+      "maps": 241,
+      "height_records": 241,
+      "texture_tables": 241,
+      "objects_lists": 241,
+      "maps_with_extraction_issues": 0,
+      "directories": {
+        "library": 10,
+        "internal": 84,
+        "other_archive_directory": 75,
+        "official_directory": 72
+      }
+    },
+    "tw": {
+      "maps": 352,
+      "height_records": 352,
+      "texture_tables": 352,
+      "objects_lists": 352,
+      "maps_with_extraction_issues": 0,
+      "directories": {
+        "library": 3,
+        "internal": 276,
+        "official_directory": 73
+      }
+    },
+    "uprising": {
+      "maps": 254,
+      "height_records": 254,
+      "texture_tables": 254,
+      "objects_lists": 254,
+      "maps_with_extraction_issues": 0,
+      "directories": {
+        "library": 11,
+        "internal": 96,
+        "official_directory": 147
+      }
+    },
+    "zh": {
+      "maps": 402,
+      "height_records": 402,
+      "texture_tables": 402,
+      "objects_lists": 402,
+      "maps_with_extraction_issues": 0,
+      "directories": {
+        "internal": 210,
+        "other_archive_directory": 74,
+        "official_directory": 118
+      }
+    }
+  }
+}

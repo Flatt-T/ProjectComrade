@@ -1,0 +1,484 @@
+{
+  "schema_version": 1,
+  "context": "research",
+  "records": [
+    {
+      "schema_version": 1,
+      "kind": "source_profile",
+      "id": "profile.td",
+      "profile_id": "profile.td",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/IDATA.CPP#L106-L140",
+          "revision": "e0d372dc582c053a699114942b984dad0457f9b3",
+          "locator": "E1 constructor, lines 106\u2013140",
+          "method": "source_declaration"
+        }
+      ],
+      "title": "Tiberian Dawn",
+      "edition": "public-source",
+      "platform": "pc",
+      "region": "undetermined",
+      "language": "undetermined",
+      "inherits": null,
+      "data_hashes": [],
+      "executable_hashes": [],
+      "repository": "https://github.com/electronicarts/CnC_Tiberian_Dawn",
+      "revision": "e0d372dc582c053a699114942b984dad0457f9b3",
+      "modification": "source_snapshot",
+      "authoritative_use": [
+        "discovery"
+      ],
+      "observation_environment": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.td",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "rights_id": "profile.td.rights",
+      "conflicts": [],
+      "lock_state": "provisional",
+      "locked_at": null
+    },
+    {
+      "schema_version": 1,
+      "kind": "asset_provenance",
+      "id": "profile.td.rights",
+      "profile_id": "profile.td",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/IDATA.CPP#L106-L140",
+          "revision": "e0d372dc582c053a699114942b984dad0457f9b3",
+          "locator": "E1 constructor, lines 106\u2013140",
+          "method": "source_declaration"
+        }
+      ],
+      "asset_class": "research_reference",
+      "creator": "Electronic Arts public source archive",
+      "origin": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/IDATA.CPP#L106-L140",
+      "rights_basis": "Cited developer source used for factual comparison",
+      "distribution": "reference_only",
+      "derivatives": [],
+      "artifact_sha256": null,
+      "review_evidence": []
+    },
+    {
+      "schema_version": 1,
+      "kind": "entity",
+      "id": "entity.td.e1",
+      "profile_id": "profile.td",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/IDATA.CPP#L106-L140",
+          "revision": "e0d372dc582c053a699114942b984dad0457f9b3",
+          "locator": "E1 constructor, lines 106\u2013140",
+          "method": "source_declaration"
+        }
+      ],
+      "identity": {
+        "source_title": "cnc-td",
+        "edition": "public-source",
+        "platform": "pc",
+        "source_faction": "shared",
+        "namespace": "InfantryTypeClass",
+        "source_object_id": "E1",
+        "form_id": "base"
+      },
+      "display_names": {},
+      "category": "unit",
+      "source_object_ids": [
+        "E1"
+      ],
+      "classification": "declared",
+      "disposition": "candidate",
+      "faction_ids": [],
+      "country_general_ids": [],
+      "class_ids": [],
+      "mode_ids": [],
+      "availability_rules": [],
+      "relations": [],
+      "acquisition": "unknown",
+      "facts": {
+        "availability": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "physical": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "combat": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "economy": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "presentation": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        }
+      },
+      "observation_ids": [],
+      "conflict_ids": [],
+      "adaptation_ids": [],
+      "asset_ids": [],
+      "capability_ids": [],
+      "fixture_ids": [],
+      "visual_family": null,
+      "visible": null,
+      "automatic_release": false
+    },
+    {
+      "schema_version": 1,
+      "kind": "source_profile",
+      "id": "profile.ra3",
+      "profile_id": "profile.ra3",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Japan/Units/JapanAntiAirVehicleTech1.xml#L635-L659",
+          "revision": "3aad8e412961ab543192ae70f8503dc8e178e095",
+          "locator": "lines 33\u201354, 70\u201376 and 635\u2013659, model condition and locomotor transition",
+          "method": "source_declaration"
+        }
+      ],
+      "title": "Red Alert 3",
+      "edition": "public-source",
+      "platform": "pc",
+      "region": "undetermined",
+      "language": "undetermined",
+      "inherits": null,
+      "data_hashes": [],
+      "executable_hashes": [],
+      "repository": "https://github.com/electronicarts/CnC_Modding_Support",
+      "revision": "3aad8e412961ab543192ae70f8503dc8e178e095",
+      "modification": "source_snapshot",
+      "authoritative_use": [
+        "discovery"
+      ],
+      "observation_environment": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.ra3",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        },
+        "tolerance": null
+      },
+      "rights_id": "profile.ra3.rights",
+      "conflicts": [],
+      "lock_state": "provisional",
+      "locked_at": null
+    },
+    {
+      "schema_version": 1,
+      "kind": "asset_provenance",
+      "id": "profile.ra3.rights",
+      "profile_id": "profile.ra3",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Japan/Units/JapanAntiAirVehicleTech1.xml#L635-L659",
+          "revision": "3aad8e412961ab543192ae70f8503dc8e178e095",
+          "locator": "lines 33\u201354, 70\u201376 and 635\u2013659, model condition and locomotor transition",
+          "method": "source_declaration"
+        }
+      ],
+      "asset_class": "research_reference",
+      "creator": "Electronic Arts public source archive",
+      "origin": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Japan/Units/JapanAntiAirVehicleTech1.xml#L635-L659",
+      "rights_basis": "Cited developer source used for factual comparison",
+      "distribution": "reference_only",
+      "derivatives": [],
+      "artifact_sha256": null,
+      "review_evidence": []
+    },
+    {
+      "schema_version": 1,
+      "kind": "entity",
+      "id": "entity.ra3.jaav.walker",
+      "profile_id": "profile.ra3",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Japan/Units/JapanAntiAirVehicleTech1.xml#L635-L659",
+          "revision": "3aad8e412961ab543192ae70f8503dc8e178e095",
+          "locator": "lines 33\u201354, 70\u201376 and 635\u2013659, model condition and locomotor transition",
+          "method": "source_declaration"
+        }
+      ],
+      "identity": {
+        "source_title": "cnc-ra3",
+        "edition": "public-source",
+        "platform": "pc",
+        "source_faction": "Japan",
+        "namespace": "GameObject",
+        "source_object_id": "JapanAntiAirVehicleTech1",
+        "form_id": "walker"
+      },
+      "display_names": {},
+      "category": "form",
+      "source_object_ids": [
+        "JapanAntiAirVehicleTech1"
+      ],
+      "classification": "referenced",
+      "disposition": "candidate",
+      "faction_ids": [],
+      "country_general_ids": [],
+      "class_ids": [],
+      "mode_ids": [],
+      "availability_rules": [],
+      "relations": [
+        {
+          "role": "form",
+          "target_id": "entity.ra3.jaav.air",
+          "evidence": [
+            {
+              "url": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Japan/Units/JapanAntiAirVehicleTech1.xml#L635-L659",
+              "revision": "3aad8e412961ab543192ae70f8503dc8e178e095",
+              "locator": "lines 33\u201354, 70\u201376 and 635\u2013659, model condition and locomotor transition",
+              "method": "source_declaration"
+            }
+          ],
+          "carry_state": [
+            "source object identity unchanged; health and ownership transfer require observation"
+          ]
+        }
+      ],
+      "acquisition": "unknown",
+      "facts": {
+        "availability": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "physical": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "combat": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "economy": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "presentation": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        }
+      },
+      "observation_ids": [],
+      "conflict_ids": [],
+      "adaptation_ids": [],
+      "asset_ids": [],
+      "capability_ids": [],
+      "fixture_ids": [],
+      "visual_family": null,
+      "visible": null,
+      "automatic_release": false
+    },
+    {
+      "schema_version": 1,
+      "kind": "entity",
+      "id": "entity.ra3.jaav.air",
+      "profile_id": "profile.ra3",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Japan/Units/JapanAntiAirVehicleTech1.xml#L635-L659",
+          "revision": "3aad8e412961ab543192ae70f8503dc8e178e095",
+          "locator": "lines 33\u201354, 70\u201376 and 635\u2013659, model condition and locomotor transition",
+          "method": "source_declaration"
+        }
+      ],
+      "identity": {
+        "source_title": "cnc-ra3",
+        "edition": "public-source",
+        "platform": "pc",
+        "source_faction": "Japan",
+        "namespace": "GameObject",
+        "source_object_id": "JapanAntiAirVehicleTech1",
+        "form_id": "supersonic"
+      },
+      "display_names": {},
+      "category": "form",
+      "source_object_ids": [
+        "JapanAntiAirVehicleTech1"
+      ],
+      "classification": "referenced",
+      "disposition": "candidate",
+      "faction_ids": [],
+      "country_general_ids": [],
+      "class_ids": [],
+      "mode_ids": [],
+      "availability_rules": [],
+      "relations": [
+        {
+          "role": "form",
+          "target_id": "entity.ra3.jaav.walker",
+          "evidence": [
+            {
+              "url": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Japan/Units/JapanAntiAirVehicleTech1.xml#L635-L659",
+              "revision": "3aad8e412961ab543192ae70f8503dc8e178e095",
+              "locator": "lines 33\u201354, 70\u201376 and 635\u2013659, model condition and locomotor transition",
+              "method": "source_declaration"
+            }
+          ],
+          "carry_state": [
+            "source object identity unchanged; health and ownership transfer require observation"
+          ]
+        }
+      ],
+      "acquisition": "unknown",
+      "facts": {
+        "availability": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "physical": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "combat": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "economy": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        },
+        "presentation": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "Verify an exact shipped build, mode and permitted acquisition or compare an independent retail observation."
+          }
+        }
+      },
+      "observation_ids": [],
+      "conflict_ids": [],
+      "adaptation_ids": [],
+      "asset_ids": [],
+      "capability_ids": [],
+      "fixture_ids": [],
+      "visual_family": null,
+      "visible": null,
+      "automatic_release": false
+    }
+  ]
+}

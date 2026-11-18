@@ -4,6 +4,10 @@
 
 Upgrade Fusion to a genuine 3D, fully animated, series-wide Command & Conquer homage. Deliver complete faction buildings and units, meaningful variants and abilities, comprehensive terrains, destructible and rebuildable bridges, and gameplay that preserves faction identity and tactical character. Preserve the separately contracted Classic experience and existing persistent-world state and protections. This is a complete staged programme, not a promise that a small vertical slice satisfies the whole request.
 
+## Research results available to the fleet
+
+Open the [source-indexed research register](research/results-2026-11-18/README.md) for the playable baselines, original 3D studies, map evidence, edition comparisons and each research issue’s actual results. The [cross-title lookup](research/results-2026-11-18/catalogue/README.md) gives a specialist one source record and its owning work order. The [Linear register](https://linear.app/thunderchild-creative/document/comrade-22-fusion-series-research-results-and-evidence-register-b28ae692c863) contains the native reports and complete downloadable deposit.
+
 ## Start the fleet
 
 1. Read this entry point, the [scope and authority](programme/01-authority-and-scope.md), [fleet contract](programme/02-fleet-execution.md), [verified audit](engine/01-engine-baseline-and-gap-audit.md), [architecture](engine/02-fusion-3d-architecture-and-contracts.md) and [existing work crosswalk](programme/05-existing-work-crosswalk.md).

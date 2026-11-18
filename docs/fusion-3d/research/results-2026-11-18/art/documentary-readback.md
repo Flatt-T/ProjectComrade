@@ -1,0 +1,12 @@
+# Independent check of four documentary frames
+
+I cropped the four 320 × 180 preview tiles directly from the original 3 × 3 sheets, verified each sheet against the SHA-256 in the documentary ledger, and viewed the tiles at native size. The interval between tiles is ten seconds. These are direct image observations. Identifying a game rule, movement time or spoken explanation requires other evidence.
+
+| Time, sheet, tile (zero-based) | Independent observation | Decision for the documentary ledger |
+|---|---|---|
+| [0:41:40](https://www.youtube.com/watch?v=BYlEgGHx4II&t=2500s), 27/7 | A mottled pale blue-grey region opens onto nearly solid black. A pink branching patch is visible on its upper-right edge. The narrow right sidebar has dark cells and a round gold mark at its top. | Confirms the colour, boundary and sidebar observations. Label black as visually consistent with unexplored terrain. Its exact visibility state and the identity of the pink feature need game evidence. |
+| [0:58:20](https://www.youtube.com/watch?v=BYlEgGHx4II&t=3500s), 38/8 | A dark rectangular opening and inward-running diagonal edges frame a green reticle-like cue near centre. A first-person weapon silhouette occupies the lower right. | Confirms first-person enclosed scale and cue contrast. The green cue could be a reticle or a marker. This tile alone cannot classify it as an objective or prove Renegade provenance. |
+| [1:31:40](https://www.youtube.com/watch?v=BYlEgGHx4II&t=5500s), 61/1 | A compact group of built forms on the left has an angled perimeter with a rounded corner. The centre shows mottled brown-green ground, small forms and surface marks. A circular minimap and command panel sit on the right. | Confirms the perimeter and ground readability observation. Caption the small forms neutrally where their unit classes or motion are uncertain. |
+| [2:21:40](https://www.youtube.com/watch?v=BYlEgGHx4II&t=8500s), 94/4 | A brown deck-like crossing spans a narrow winding blue-grey watercourse at left. A segmented ochre linear feature turns on the upper bank. A dark panel with a map and build images occupies the right quarter. | Confirms a visible crossing and orthogonal wall-like form. Mesh support, traffic direction, bridge destruction and repair are separate profile questions. |
+
+No footage, thumbnails or publisher art are distributed with this check. The gameplay QA prompts in the main ledger are present-day design applications.
