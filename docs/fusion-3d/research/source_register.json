@@ -1,0 +1,386 @@
+{
+  "schema_version": 1,
+  "method": "Primary-authored manuals remain primary evidence even when hosted by archival mirrors; host provenance and patch differences must be recorded. Secondary sources are discovery, not substitutes for shipped-build measurements.",
+  "sources": [
+    {
+      "id": "SRC-01",
+      "title": "EA Ultimate Collection release inventory",
+      "url": "https://news.ea.com/press-releases/press-releases-details/2012/EA-Gives-Strategy-Fans-the-Ultimate-Gift-with-the-17-Game-Compilation-Command--Conquer-The-Ultimate-Collection/default.aspx",
+      "kind": "primary publisher",
+      "access": "read",
+      "support": "Names the main Tiberium, Red Alert and Generals collection. Its historical marketing claim is not a complete census of all spinoffs or later releases.",
+      "retrieval_ref": "turn614879445view0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-02",
+      "title": "EA 2025 source and Workshop announcement",
+      "url": "https://www.ea.com/games/command-and-conquer/news/steam-workshop-support",
+      "kind": "primary publisher",
+      "access": "read",
+      "support": "Full recovered source availability for TD/RA1/Renegade/Generals+ZH; separate SAGE modding-support material.",
+      "retrieval_ref": "turn301936467view1",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-03",
+      "title": "EA Franchise Modding Guidelines",
+      "url": "https://www.ea.com/games/command-and-conquer/news/modding-faq",
+      "kind": "primary publisher",
+      "access": "read",
+      "support": "Official source URLs and supported mod/map categories; does not certify COMRADE distribution rights.",
+      "retrieval_ref": "turn301936467view0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-04",
+      "title": "EA Modding Support repository and licence",
+      "url": "https://github.com/electronicarts/CnC_Modding_Support/tree/3aad8e412961ab543192ae70f8503dc8e178e095",
+      "kind": "primary source",
+      "access": "tree and README and licence read",
+      "support": "Repository preservation material with GPL v3 and additional terms. Per-file rights and trademarks remain separately classified.",
+      "retrieval_ref": "turn506888065view2",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-05",
+      "title": "EA Modding Support additional terms",
+      "url": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/LICENSE.md",
+      "kind": "primary licence",
+      "access": "read",
+      "support": "Explicitly excludes trademark/publicity rights and requires origin and modification identification.",
+      "retrieval_ref": "turn849958710view0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-06",
+      "title": "TD official recovered definitions",
+      "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/tree/e0d372dc582c053a699114942b984dad0457f9b3",
+      "kind": "primary source",
+      "access": "IDATA UDATA AADATA BDATA DEFINES CONST MAP read",
+      "support": "113 syntactic type-definition candidates extracted; not playable total. Includes dormant, neutral and campaign candidates.",
+      "retrieval_ref": "turn506888065view3",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-07",
+      "title": "RA1 official recovered definitions",
+      "url": "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
+      "kind": "primary source",
+      "access": "CODE IDATA UDATA AADATA BDATA VDATA DEFINES CONST INFANTRY MAP read",
+      "support": "149 syntactic type-definition candidates; active/conditional/obsolete code needs build reconciliation.",
+      "retrieval_ref": "turn506888065view4",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-08",
+      "title": "Generals and Zero Hour official source",
+      "url": "https://github.com/electronicarts/CnC_Generals_Zero_Hour/tree/0a05454d8574207440a5fb15241b98ad0b435590",
+      "kind": "primary source",
+      "access": "repository metadata and README discovered",
+      "support": "Primary code source for mechanics, INI inheritance and buildability research; complete content audit remains assigned.",
+      "retrieval_ref": "turn646708085view4",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-09",
+      "title": "Tiberian Sun manual",
+      "url": "https://www.bestoldgames.net/download/games/command-and-conquer-tiberian-sun/command-and-conquer-tiberian-sun-win-manual.pdf",
+      "kind": "primary authored manual on archival mirror",
+      "access": "read",
+      "support": "GDI/Nod, source roster, bridge repair huts, engineer capture, tech and controls. Retail patch may differ from printed manual.",
+      "retrieval_ref": "turn614879445view4",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-10",
+      "title": "Firestorm manual",
+      "url": "https://manuals.plus/m/fd3065a2b65ec6e72aede1a1bca4ea970455fa6f6fadc1a299e958a59ec7a6f6_optim.pdf",
+      "kind": "primary authored manual on archival mirror",
+      "access": "PDF found; converted text read; scan checking required",
+      "support": "New environment and unit research baseline. Converted transcription is discovery only until checked against scan or shipped build.",
+      "retrieval_ref": "turn101790569view0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-11",
+      "title": "Red Alert 2 manual",
+      "url": "https://oldgamesdownload.com/manual/command-conquer-red-alert-2-windows-manual-english/",
+      "kind": "primary authored manual on archival mirror",
+      "access": "read",
+      "support": "Nine country specialisations, capture, garrisons, bridge repair hut and base-building reference.",
+      "retrieval_ref": "turn276668985view0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-12",
+      "title": "Yuri's Revenge manual",
+      "url": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/8/8e/Red_Alert_2_-_Yuri%27s_Revenge_-_English.pdf",
+      "kind": "primary authored manual on archival mirror",
+      "access": "read",
+      "support": "Yuri roster and structures, additions to Allies/Soviets, transformation and resource roles.",
+      "retrieval_ref": "turn392592664view1",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-13",
+      "title": "Generals manual",
+      "url": "https://files.cncnz.com/generals/Command_and_Conquer_-_Generals_-_UK_Manual_-_PC.pdf",
+      "kind": "primary authored manual on archival mirror",
+      "access": "read",
+      "support": "USA/China/GLA units structures and upgrades; construction and economy baseline.",
+      "retrieval_ref": "turn614879445view3",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-14",
+      "title": "Zero Hour manual",
+      "url": "https://static.wikia.nocookie.net/cnc_gamepedia_en/images/b/b1/CNC_Generals_Zero_Hour_Manual_2015.pdf/revision/latest?cb=20180801163919&format=original",
+      "kind": "primary authored manual on archival mirror",
+      "access": "read; OCR errors observed",
+      "support": "Nine specialist armies plus base-faction additions; names and numeric data require scan/source reconciliation.",
+      "retrieval_ref": "turn392592664view2",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-15",
+      "title": "Tiberium Wars manual",
+      "url": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/5/51/Command_and_Conquer_3_Tiberium_Wars_Manual.pdf?version=e3a413e2bebe68ced75463ebd8223e7f",
+      "kind": "primary authored manual on archival mirror",
+      "access": "read",
+      "support": "GDI/Nod/Scrin, production, power, squads, upgrades and support powers.",
+      "retrieval_ref": "turn646708085view0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-16",
+      "title": "Kane's Wrath manual",
+      "url": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/24810/manuals/CC3KWpcMANfinal.pdf?t=1741704747",
+      "kind": "primary publisher manual on Steam",
+      "access": "read",
+      "support": "Base factions plus six subfactions and epic-unit additions; inherited roster must be reconciled with TW baseline.",
+      "retrieval_ref": "turn614879445view1",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-17",
+      "title": "Red Alert 3 manual",
+      "url": "https://shared.steamstatic.com/store_item_assets/steam/apps/17480/manuals/manual_english.pdf?t=1712755099",
+      "kind": "primary publisher manual on Steam",
+      "access": "read",
+      "support": "Allies/Soviets/Empire infantry, vehicles, aircraft, ships, structures and abilities.",
+      "retrieval_ref": "turn301936467view2",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-18",
+      "title": "Uprising manual",
+      "url": "https://shared.steamstatic.com/store_item_assets/steam/apps/24800/manuals/CCRA3UPpcdMANukeng1.pdf?t=1741704725",
+      "kind": "primary publisher manual on Steam",
+      "access": "read",
+      "support": "Expansion unit additions and challenge/campaign inventory; name/OCR conflicts require object and shipped-game check.",
+      "retrieval_ref": "turn301936467view3",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-19",
+      "title": "Tiberian Twilight manual",
+      "url": "https://store.steampowered.com/manual/47700",
+      "kind": "primary publisher manual on Steam",
+      "access": "read",
+      "support": "GDI/Nod offence/defence/support classes, Crawlers, command points and separate upgrade resource economy.",
+      "retrieval_ref": "turn276668985view1",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-20",
+      "title": "Renegade manual",
+      "url": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/c/cd/Renegade_-_English.pdf?version=a080e5c0939b482517e097f5087def99",
+      "kind": "primary authored manual on archival mirror",
+      "access": "read",
+      "support": "FPS base-war economy/characters/beacons and building interactions; not an RTS construction roster.",
+      "retrieval_ref": "turn646708085view1",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-21",
+      "title": "Renegade official source",
+      "url": "https://github.com/electronicarts/CnC_Renegade",
+      "kind": "primary source",
+      "access": "repository discovered",
+      "support": "Follow-up source for building interiors, vehicles and entity definition research; no direct engine transplantation assumed.",
+      "retrieval_ref": "turn646708085view3",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-22",
+      "title": "Remastered official reveal",
+      "url": "https://www.ea.com/ea-play/news/official-reveal-trailer",
+      "kind": "primary publisher",
+      "access": "read",
+      "support": "TD and RA plus three expansions, 4K presentation and remastered music; quality reference, not a new faction set.",
+      "retrieval_ref": "turn926410130view2",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-23",
+      "title": "RA3 publisher Steam listing",
+      "url": "https://store.steampowered.com/app/17480",
+      "kind": "primary publisher storefront",
+      "access": "read",
+      "support": "Three factions, naval strategic role and Empire transformations.",
+      "retrieval_ref": "turn877047583view1",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-24",
+      "title": "Rivals publisher App Store listing",
+      "url": "https://apps.apple.com/gb/app/command-conquer-rivals-pvp/id1261165213",
+      "kind": "primary publisher storefront",
+      "access": "read",
+      "support": "GDI/Nod, commanders, army customisation and short mobile PvP; versioned live-service inventory required.",
+      "retrieval_ref": "turn877047583view0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-25",
+      "title": "Tiberium Alliances official FAQ",
+      "url": "https://www.ea.com/games/command-and-conquer/command-and-conquer-tiberium-alliances/faq",
+      "kind": "primary publisher",
+      "access": "partial; search indexed FAQ substantive, open returned heading only",
+      "support": "Primary discovery source; full text and current world/ruleset observations still required before implementation claims.",
+      "retrieval_ref": "turn614879445search0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-26",
+      "title": "Legions licensing announcement",
+      "url": "https://www.levelinfinite.com/news/level-infinite-reaches-agreement-with-ea-for-all-new-command-conquer-legions/",
+      "kind": "primary publisher",
+      "access": "read",
+      "support": "Announced C&C mobile adaptation, alliance/world-map mechanics; announcement does not prove current launch or full roster.",
+      "retrieval_ref": "turn877047583view2",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-27",
+      "title": "Legions Red Alert season announcement",
+      "url": "https://press.levelinfinite.com/en/Command-Conquer-Legions-Commences-Pre-Registration-for-Mobile-Strategy",
+      "kind": "primary publisher",
+      "access": "read",
+      "support": "Announced Red Alert-era seasonal content. Needs current region/build/service-state verification.",
+      "retrieval_ref": "turn392592664view5",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-28",
+      "title": "Sole Survivor overview",
+      "url": "https://cnc-comm.com/sole-survivor",
+      "kind": "secondary specialist archive",
+      "access": "read",
+      "support": "One-unit arena spinoff and roster discovery; do not treat community statements as exact shipped-rule proof.",
+      "retrieval_ref": "turn877047583view3",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-29",
+      "title": "Sole Survivor manual index",
+      "url": "https://cnc.fandom.com/wiki/Command_%26_Conquer%3A_Sole_Survivor_manual",
+      "kind": "secondary index of primary documents",
+      "access": "discovered",
+      "support": "Locate a lawful primary manual and retail build for RES-018.",
+      "retrieval_ref": "turn614879445search23",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-30",
+      "title": "Retaliation historical overview",
+      "url": "https://cnc-comm.com/red-alert/retaliation",
+      "kind": "secondary specialist archive",
+      "access": "discovered",
+      "support": "Console expansion/version delta research lead; no direct asset clearance.",
+      "retrieval_ref": "turn999569261search13",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-31",
+      "title": "Manuals directory including Dune lineage",
+      "url": "https://cnc.fandom.com/wiki/Category%3AManuals",
+      "kind": "secondary index of primary documents",
+      "access": "read index",
+      "support": "Locates legacy console, Dune and missing manuals. Index listings do not prove mechanical behavior.",
+      "retrieval_ref": "turn867888318search1",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-32",
+      "title": "User supplied documentary",
+      "url": "https://www.youtube.com/watch?v=BYlEgGHx4II",
+      "kind": "user supplied video",
+      "access": "blocked",
+      "support": "Direct youtu.be and youtube watch/oEmbed retrieval failed. Title, channel, transcript, frames and timestamps unverified.",
+      "retrieval_ref": "turn506888065view0",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-33",
+      "title": "Documentary link corroboration",
+      "url": "https://gaming.lenovo.com/general/post/new-excellent-documentary-on-command-conquer-mKKDFBQbT1K880J",
+      "kind": "secondary community post",
+      "access": "read",
+      "support": "Confirms a post linked the exact video ID; does not identify verified video content.",
+      "retrieval_ref": "turn301936467view4",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-34",
+      "title": "TD infantry type definitions",
+      "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/IDATA.CPP",
+      "kind": "primary source",
+      "access": "read",
+      "support": "Reference animation states and definition candidates; buildability is separate.",
+      "retrieval_ref": "",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-35",
+      "title": "RA1 engineer behavior",
+      "url": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/INFANTRY.CPP",
+      "kind": "primary source",
+      "access": "read",
+      "support": "Conditional damage/capture engineer policy and an obsolete bridge allowance illustrate build-guard caveats.",
+      "retrieval_ref": "",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-36",
+      "title": "RA1 bridge destruction",
+      "url": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/MAP.CPP",
+      "kind": "primary source",
+      "access": "read",
+      "support": "Bridge template changes and connectivity invalidation; still validate active reference build.",
+      "retrieval_ref": "",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-37",
+      "title": "TD theatre declarations",
+      "url": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/CONST.CPP",
+      "kind": "primary source",
+      "access": "read",
+      "support": "Theatre declarations include a Jungle candidate; declaration alone does not establish shipped assets/maps.",
+      "retrieval_ref": "",
+      "checked_at": "2026-11-18"
+    },
+    {
+      "id": "SRC-38",
+      "title": "RA1 theatre declarations",
+      "url": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/CONST.CPP",
+      "kind": "primary source",
+      "access": "read",
+      "support": "Temperate, snow and interior source theatre identifiers.",
+      "retrieval_ref": "",
+      "checked_at": "2026-11-18"
+    }
+  ]
+}
