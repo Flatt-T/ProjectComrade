@@ -5,7 +5,7 @@
     "title": "Lock the released-title scope, source hierarchy and reference profiles",
     "specialist": "Research lead and source provenance specialist",
     "status": "In Progress",
-    "observed_or_delivered": "Registered 56 distinct product or platform profiles and 50 source references. The register identifies the dated RA95 executable and the evidence level for editions known through source releases, manuals, announcements or storefront records. Two recordings of the English Covert Operations CD now corroborate the same three mission-bearing data members.",
+    "observed_or_delivered": "Registered 57 distinct product or platform profiles and 57 source references. The register identifies the dated RA95 executable and the evidence level for editions known through source releases, manuals, announcements or storefront records. Two recordings of the English Covert Operations CD now corroborate the same three mission-bearing data members.",
     "remaining_acceptance_work": "Lock missing region, revision, executable/data identity and obtainable reference for each retail profile. Preserve separate carrier SKUs, console mission sets, remaster art and live-service snapshots. Accept proven individual profiles while the others remain open.",
     "evidence_files": [
       "editions/reference-profiles.json",
@@ -63,13 +63,15 @@
     "title": "Research and reconcile Red Alert Counterstrike and The Aftermath",
     "specialist": "Red Alert Counterstrike and The Aftermath historian / rules and content census coordinator",
     "status": "In Progress",
-    "observed_or_delivered": "Indexed 149 constructors and 273 infantry-action rows, three rules layers and 274 PortableRA maps. In the original Windows demo, extracted global rules and three scenario overrides. In two controlled runs, selecting the same Allied Ranger and changing only the ground-order input moved it to the destination in the command run.",
+    "observed_or_delivered": "Indexed 149 constructors and 273 infantry-action rows, three rules layers and 274 PortableRA maps. In the original Windows demo, extracted global rules and three scenario overrides. In two controlled runs, selecting the same Allied Ranger and changing only the ground-order input moved it to the destination in the command run. The original three demo scenarios contain 131 trigger definitions, 58 teams and 401 cell-trigger assignments. Source-traced convoy victory, evacuation, forced bridge detonation and loss conditions have five execution fixtures.",
     "remaining_acceptance_work": "Separate Counterstrike and Aftermath retail mission/menu evidence from demo and community data. For each expansion, reconcile exclusive and mission-only objects, availability and special campaigns against its own install before closing.",
     "evidence_files": [
       "review/ra95-demo-runtime.md",
       "editions/ra95-demo-facts.json",
       "early/ra1-facts.zip",
-      "early/ra1-portable-summary.json"
+      "early/ra1-portable-summary.json",
+      "experience/ra-mission-script-dossier.md",
+      "experience/ra-mission-graph.json.gz"
     ]
   },
   {
@@ -78,13 +80,15 @@
     "title": "Research and reconcile Tiberian Sun",
     "specialist": "Tiberian Sun historian / rules and content census coordinator",
     "status": "In Progress",
-    "observed_or_delivered": "Measured 237 registered type/group pairs, 236 rule sections and 233 art matches in the base profile. The shared TS/Firestorm map comparison identifies 454 CABHUT placements in 73 of 100 maps. Tiberian Sun and RA2 comparator rules disagree on target/select behavior for the hut.",
+    "observed_or_delivered": "Measured 237 registered type/group pairs, 236 rule sections and 233 art matches in the base profile. The shared TS/Firestorm map comparison identifies 454 CABHUT placements in 73 of 100 maps. Tiberian Sun and RA2 comparator rules disagree on target/select behavior for the hut. The original Nod 1.08 and UK Firestorm 2.0 disc EXEs and complete target containers have independent fingerprints. At 1.08, all 8,636 shared base rules values agree with the comparison revision, with three later GuardRange additions and two changed art fields.",
     "remaining_acceptance_work": "Record a base 2.03 runtime path through a named bridge map, including selecting or targeting the hut, legal repair actor, occupant outcome, route reopening and saved-game behavior. Resolve JEEP registry-without-definition separately.",
     "evidence_files": [
       "early/ts-facts.zip",
       "world/early-maps.md",
       "world/bridge-hut-crosswalk.json",
-      "early/isometric-summary.json"
+      "early/isometric-summary.json",
+      "early/ts-retail-verification.md",
+      "early/ts-retail-verification.json"
     ]
   },
   {
@@ -93,12 +97,14 @@
     "title": "Research and reconcile Tiberian Sun Firestorm",
     "specialist": "Tiberian Sun Firestorm historian / rules and content census coordinator",
     "status": "In Progress",
-    "observed_or_delivered": "Merged expansion and base indexes without overwriting restarted numeric slots. The Firestorm profile has 265 registered pairs, 28 additions and 29 altered base pairs in selected fields. Map records preserve the Firestorm directory and theatre.",
+    "observed_or_delivered": "Merged expansion and base indexes without overwriting restarted numeric slots. The Firestorm profile has 265 registered pairs, 28 additions and 29 altered base pairs in selected fields. Map records preserve the Firestorm directory and theatre. Five complete historical comparator texts byte-match the UK Firestorm disc after line-ending normalization, including both rules and art files. Snow matches the separate Nod 1.08 disc.",
     "remaining_acceptance_work": "Verify expansion-only producer/mission paths and the 29 changes in the specified Firestorm build. Resolve explicit fallback and JEEP exceptions by title. Preserve the CABAL/campaign roles independently from selectable skirmish sides.",
     "evidence_files": [
       "early/fs-facts.zip",
       "world/ts-fs-campaign-maps.jsonl",
-      "early/01-faction-and-animation-briefs.md"
+      "early/01-faction-and-animation-briefs.md",
+      "early/ts-retail-verification.md",
+      "early/ts-retail-verification.json"
     ]
   },
   {
@@ -107,13 +113,15 @@
     "title": "Research and reconcile Red Alert 2",
     "specialist": "Red Alert 2 historian / rules and content census coordinator",
     "status": "In Progress",
-    "observed_or_delivered": "Indexed 409 type/group pairs, 403 rules sections, 402 art matches and 25 shared sequences. An independent byte-level check covered E1, GAPILE and HTNK. Hut targetability differs from the earlier Tiberian Sun comparator.",
+    "observed_or_delivered": "Indexed 409 type/group pairs, 403 rules sections, 402 art matches and 25 shared sequences. An independent byte-level check covered E1, GAPILE and HTNK. Hut targetability differs from the earlier Tiberian Sun comparator. The English 1.006 installer is fingerprinted. Its delta expects a 281,074,192-byte input RA2.MIX and writes a 281,888,480-byte target. This check alone establishes the input identity requirement.",
     "remaining_acceptance_work": "Match the two community-sourced rules and art inputs to a specified retail patch. Close six missing definitions and country, mode and deploy restrictions one by one. Verify actual repair topology on a named retail map.",
     "evidence_files": [
       "early/ra2-facts.zip",
       "early/isometric-summary.json",
       "world/bridge-hut-crosswalk.json",
-      "review/independent-acceptance.md"
+      "review/independent-acceptance.md",
+      "early/ra2-patch-provenance.md",
+      "early/ra2-patch-findings.json"
     ]
   },
   {
@@ -122,12 +130,14 @@
     "title": "Research and reconcile Red Alert 2 Yuri's Revenge",
     "specialist": "Red Alert 2 Yuri's Revenge historian / rules and content census coordinator",
     "status": "In Progress",
-    "observed_or_delivered": "Indexed 559 type/group pairs, 553 rule sections, 549 art matches and 37 shared sequences. The registry comparison identifies 156 additions and six removals. The faction brief distinguishes Yuri control and conversion from damage and normal production.",
-    "remaining_acceptance_work": "Validate Yuri capture, ownership change, release, deployment, country restrictions and campaign-only forms in a named build. Reconcile the six absent rule sections and retain each variant as an independent disposition.",
+    "observed_or_delivered": "Indexed 559 type/group pairs, 553 rule sections, 549 art matches and 37 shared sequences. The registry comparison identifies 156 additions and six removals. The faction brief distinguishes Yuri control and conversion from damage and normal production. The English 1.001 patch yields an original RULESMD.INI with 1,477 named sections. Of those, 1,452 match the comparison file’s ordered fields and 25 differ in actual values or key presence. CALA05 has CanOccupyFire=yes in the official patch.",
+    "remaining_acceptance_work": "Use official English 1.001 values for the 25 divergent sections. Recover an independent ARTMD.INI for timing and animation references and verify runtime mode, capture and ownership paths. Check the six former registry gaps against the selected shipped rules and mode.",
     "evidence_files": [
       "early/yr-facts.zip",
       "early/isometric-summary.json",
-      "early/01-faction-and-animation-briefs.md"
+      "early/01-faction-and-animation-briefs.md",
+      "early/ra2-patch-provenance.md",
+      "early/ra2-patch-findings.json"
     ]
   },
   {
@@ -344,13 +354,15 @@
     "title": "Define the capability framework and first-battle mechanic contracts",
     "specialist": "Mechanics historian with engine architect reviewer",
     "status": "In Review",
-    "observed_or_delivered": "Defined 15 first-battle capability contracts with producers, authoritative state, replay behavior and negative cases. Mapped 16 historical IDs to 17 live Fusion roles. Executed ordinary commands for separate Allied/Soviet barracks, infantry production, cancellation/refund and ore income.",
+    "observed_or_delivered": "Defined 15 first-battle capability contracts with producers, authoritative state, replay behavior and negative cases. Mapped 16 historical IDs to 17 live Fusion roles. Executed ordinary commands for separate Allied/Soviet barracks, infantry production, cancellation/refund and ore income. On the existing engine the same Ranger inflicted 36 damage per initial burst on infantry and 2 on a heavy MCV. Independently repeated encounters ended at ticks 605 and 4,648.",
     "remaining_acceptance_work": "Obtain the capability and engine peer decisions on timing, denial and negative fixtures. Integrated capture, air/naval layers and bridge restoration require their own evidence before claiming implementation.",
     "evidence_files": [
       "foundation/capabilities.json",
       "foundation/seed-entities.json",
       "foundation/first-battle.md",
-      "review/independent-acceptance.md"
+      "review/independent-acceptance.md",
+      "foundation/combat-ranger.md",
+      "foundation/combat-ranger-results.json"
     ]
   },
   {
@@ -379,7 +391,7 @@
     "title": "Define the game-feel rubric and first-battle benchmark scenes",
     "specialist": "RTS feel analyst with animation/audio/input reviewers",
     "status": "In Review",
-    "observed_or_delivered": "Specified six implementation recordings. Two newly constructed Fusion matches reproduced the tick-2,589 checksum 885793848. An original articulated tractor supplies three glTF clips and a 5.5-second review export. At a fixed 224 × 160 WebGL2 camera the braces, lift and scan changed 367, 596 and 420 pixels, and retract returned to the exact starting image. Device, latency, recognition and thermal gates are specified separately. Audio research traces 4,134 facts to 33 publisher files, including faction adviser priorities, contact markers, conditional loops and music states.",
+    "observed_or_delivered": "Specified six implementation recordings. Two newly constructed Fusion matches reproduced the tick-2,589 checksum 885793848. An original articulated tractor supplies three glTF clips and a 5.5-second review export. At a fixed 224 × 160 WebGL2 camera the braces, lift and scan changed 367, 596 and 420 pixels, and retract returned to the exact starting image. Device, latency, recognition and thermal gates are specified separately. Audio research traces 4,134 facts to 33 publisher files, including faction adviser priorities, contact markers, conditional loops and music states. Ranger first impact, enemy response, infantry death and heavy armor are measured in the normal simulation and provide event timestamps for presentation synchronization.",
     "remaining_acceptance_work": "Run integrated desktop and physical Android/iOS traces at the intended load. Capture blind readability and state recognition, trigger/animation/audio alignment and long-session frame-pacing distributions. Review the benchmark design independently of those later performance results.",
     "evidence_files": [
       "foundation/first-battle.md",
@@ -389,7 +401,8 @@
       "art/field-service-tractor.gltf",
       "art/service-cycle.webp",
       "experience/audio-direction.md",
-      "experience/command-and-ambient-audio.json.gz"
+      "experience/command-and-ambient-audio.json.gz",
+      "foundation/combat-ranger.md"
     ]
   },
   {
@@ -413,13 +426,19 @@
     "title": "Close the census and validate canonical per-entity task expansion",
     "specialist": "Catalogue release manager and task-graph tooling specialist",
     "status": "In Progress",
-    "observed_or_delivered": "Implemented deterministic catalogue-to-task projection and validated an eight-stage synthetic chain. The real nonrelease sample correctly emits zero content orders and withholds three candidate entities. The import retains all 3,040 existing candidates without promotion.",
+    "observed_or_delivered": "Implemented deterministic catalogue-to-task projection and validated an eight-stage synthetic chain. The real nonrelease sample correctly emits zero content orders and withholds three candidate entities. The import retains all 3,040 existing candidates without promotion. An offline index now resolves 23,723 observational keys back to the actual fact across 19 profile groups without promoting their production status. All 23,723 physical locators and keys were independently verified, alongside eleven full-record CLI results. Each key can generate one self-contained research assignment with its issue, source evidence and edition-specific checks.",
     "remaining_acceptance_work": "Close real availability/source/provenance/capability gaps first, run the full per-era census and then prove exactly one stable task per eligible stage under reruns. Record independent approval and native IDs for actual production leaves.",
     "evidence_files": [
       "foundation/catalogue/census_completion_report.json",
       "foundation/catalogue/task_generation_dry_run.md",
       "foundation/catalogue/implementation_task_manifest.json",
-      "review/catalogue-readback.md"
+      "review/catalogue-readback.md",
+      "catalogue/README.md",
+      "catalogue/source-lookup.jsonl.gz",
+      "catalogue/find.py",
+      "review/lookup-readback.json",
+      "catalogue/brief.py",
+      "catalogue/ranger-research-packet.md"
     ]
   },
   {
@@ -428,14 +447,15 @@
     "title": "Independently audit whole-series coverage and fleet readiness",
     "specialist": "Independent historian/QA reviewer who did not author the relevant package",
     "status": "In Progress",
-    "observed_or_delivered": "Independent checks cover demo bytes, a controlled original-executable unit order, all 2,117 source map payload digests across seven directory families, Fusion replay and oracle outputs, selected early/later object records, two original WebGL fixtures, the complete prior catalogue intake and corrected release-gate mutations. The catalogue retest exercised eight one-field negative controls and all 23 regression tests passed.",
+    "observed_or_delivered": "Independent checks cover demo bytes, a controlled original-executable unit order, all 2,117 source map payload digests across seven directory families, Fusion replay and oracle outputs, selected early/later object records, two original WebGL fixtures, the complete prior catalogue intake and corrected release-gate mutations. The catalogue retest exercised eight one-field negative controls and all 23 regression tests passed. The independent cross-title readback checked every one of the 23,723 keyed records against its backing source, including the search behavior for 4,098 records without an explicit side.",
     "remaining_acceptance_work": "Audit unobserved released per-faction/per-mode cells after source acquisition and review, including retail-minus-index and index-minus-retail lists. Sign closed counts against RES-028 and each era package. Each remaining hardware, client or media dependency has a specific owning issue.",
     "evidence_files": [
       "review/independent-acceptance.md",
       "review/map-demo-independent-results.json",
       "review/catalogue-readback.md",
       "review/ra95-demo-runtime.md",
-      "foundation/catalogue/era_delivery_gates.json"
+      "foundation/catalogue/era_delivery_gates.json",
+      "review/lookup-readback.json"
     ]
   }
 ]

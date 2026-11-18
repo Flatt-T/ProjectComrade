@@ -6,7 +6,7 @@ These are the original Linear work orders. Each row gives a concrete result, the
 
 **In Progress** · Research lead and source provenance specialist · [Open THU-2541](https://linear.app/thunderchild-creative/issue/THU-2541)
 
-Registered 56 distinct product or platform profiles and 50 source references. The register identifies the dated RA95 executable and the evidence level for editions known through source releases, manuals, announcements or storefront records. Two recordings of the English Covert Operations CD now corroborate the same three mission-bearing data members.
+Registered 57 distinct product or platform profiles and 57 source references. The register identifies the dated RA95 executable and the evidence level for editions known through source releases, manuals, announcements or storefront records. Two recordings of the English Covert Operations CD now corroborate the same three mission-bearing data members.
 
 **Next acceptance check.** Lock missing region, revision, executable/data identity and obtainable reference for each retail profile. Preserve separate carrier SKUs, console mission sets, remaster art and live-service snapshots. Accept proven individual profiles while the others remain open.
 
@@ -46,51 +46,51 @@ Indexed 113 TD constructors and 680 labelled infantry-action rows. Reconciled 79
 
 **In Progress** · Red Alert Counterstrike and The Aftermath historian / rules and content census coordinator · [Open THU-2549](https://linear.app/thunderchild-creative/issue/THU-2549)
 
-Indexed 149 constructors and 273 infantry-action rows, three rules layers and 274 PortableRA maps. In the original Windows demo, extracted global rules and three scenario overrides. In two controlled runs, selecting the same Allied Ranger and changing only the ground-order input moved it to the destination in the command run.
+Indexed 149 constructors and 273 infantry-action rows, three rules layers and 274 PortableRA maps. In the original Windows demo, extracted global rules and three scenario overrides. In two controlled runs, selecting the same Allied Ranger and changing only the ground-order input moved it to the destination in the command run. The original three demo scenarios contain 131 trigger definitions, 58 teams and 401 cell-trigger assignments. Source-traced convoy victory, evacuation, forced bridge detonation and loss conditions have five execution fixtures.
 
 **Next acceptance check.** Separate Counterstrike and Aftermath retail mission/menu evidence from demo and community data. For each expansion, reconcile exclusive and mission-only objects, availability and special campaigns against its own install before closing.
 
-[ra95-demo-runtime.md](../review/ra95-demo-runtime.md) · [ra95-demo-facts.json](../editions/ra95-demo-facts.json) · [ra1-facts.zip](../early/ra1-facts.zip) · [ra1-portable-summary.json](../early/ra1-portable-summary.json)
+[ra95-demo-runtime.md](../review/ra95-demo-runtime.md) · [ra95-demo-facts.json](../editions/ra95-demo-facts.json) · [ra1-facts.zip](../early/ra1-facts.zip) · [ra1-portable-summary.json](../early/ra1-portable-summary.json) · [ra-mission-script-dossier.md](../experience/ra-mission-script-dossier.md) · [ra-mission-graph.json.gz](../experience/ra-mission-graph.json.gz)
 
 ## RES-006 · Research and reconcile Tiberian Sun
 
 **In Progress** · Tiberian Sun historian / rules and content census coordinator · [Open THU-2550](https://linear.app/thunderchild-creative/issue/THU-2550)
 
-Measured 237 registered type/group pairs, 236 rule sections and 233 art matches in the base profile. The shared TS/Firestorm map comparison identifies 454 CABHUT placements in 73 of 100 maps. Tiberian Sun and RA2 comparator rules disagree on target/select behavior for the hut.
+Measured 237 registered type/group pairs, 236 rule sections and 233 art matches in the base profile. The shared TS/Firestorm map comparison identifies 454 CABHUT placements in 73 of 100 maps. Tiberian Sun and RA2 comparator rules disagree on target/select behavior for the hut. The original Nod 1.08 and UK Firestorm 2.0 disc EXEs and complete target containers have independent fingerprints. At 1.08, all 8,636 shared base rules values agree with the comparison revision, with three later GuardRange additions and two changed art fields.
 
 **Next acceptance check.** Record a base 2.03 runtime path through a named bridge map, including selecting or targeting the hut, legal repair actor, occupant outcome, route reopening and saved-game behavior. Resolve JEEP registry-without-definition separately.
 
-[ts-facts.zip](../early/ts-facts.zip) · [early-maps.md](../world/early-maps.md) · [bridge-hut-crosswalk.json](../world/bridge-hut-crosswalk.json) · [isometric-summary.json](../early/isometric-summary.json)
+[ts-facts.zip](../early/ts-facts.zip) · [early-maps.md](../world/early-maps.md) · [bridge-hut-crosswalk.json](../world/bridge-hut-crosswalk.json) · [isometric-summary.json](../early/isometric-summary.json) · [ts-retail-verification.md](../early/ts-retail-verification.md) · [ts-retail-verification.json](../early/ts-retail-verification.json)
 
 ## RES-007 · Research and reconcile Tiberian Sun Firestorm
 
 **In Progress** · Tiberian Sun Firestorm historian / rules and content census coordinator · [Open THU-2567](https://linear.app/thunderchild-creative/issue/THU-2567)
 
-Merged expansion and base indexes without overwriting restarted numeric slots. The Firestorm profile has 265 registered pairs, 28 additions and 29 altered base pairs in selected fields. Map records preserve the Firestorm directory and theatre.
+Merged expansion and base indexes without overwriting restarted numeric slots. The Firestorm profile has 265 registered pairs, 28 additions and 29 altered base pairs in selected fields. Map records preserve the Firestorm directory and theatre. Five complete historical comparator texts byte-match the UK Firestorm disc after line-ending normalization, including both rules and art files. Snow matches the separate Nod 1.08 disc.
 
 **Next acceptance check.** Verify expansion-only producer/mission paths and the 29 changes in the specified Firestorm build. Resolve explicit fallback and JEEP exceptions by title. Preserve the CABAL/campaign roles independently from selectable skirmish sides.
 
-[fs-facts.zip](../early/fs-facts.zip) · [ts-fs-campaign-maps.jsonl](../world/ts-fs-campaign-maps.jsonl) · [01-faction-and-animation-briefs.md](../early/01-faction-and-animation-briefs.md)
+[fs-facts.zip](../early/fs-facts.zip) · [ts-fs-campaign-maps.jsonl](../world/ts-fs-campaign-maps.jsonl) · [01-faction-and-animation-briefs.md](../early/01-faction-and-animation-briefs.md) · [ts-retail-verification.md](../early/ts-retail-verification.md) · [ts-retail-verification.json](../early/ts-retail-verification.json)
 
 ## RES-008 · Research and reconcile Red Alert 2
 
 **In Progress** · Red Alert 2 historian / rules and content census coordinator · [Open THU-2551](https://linear.app/thunderchild-creative/issue/THU-2551)
 
-Indexed 409 type/group pairs, 403 rules sections, 402 art matches and 25 shared sequences. An independent byte-level check covered E1, GAPILE and HTNK. Hut targetability differs from the earlier Tiberian Sun comparator.
+Indexed 409 type/group pairs, 403 rules sections, 402 art matches and 25 shared sequences. An independent byte-level check covered E1, GAPILE and HTNK. Hut targetability differs from the earlier Tiberian Sun comparator. The English 1.006 installer is fingerprinted. Its delta expects a 281,074,192-byte input RA2.MIX and writes a 281,888,480-byte target. This check alone establishes the input identity requirement.
 
 **Next acceptance check.** Match the two community-sourced rules and art inputs to a specified retail patch. Close six missing definitions and country, mode and deploy restrictions one by one. Verify actual repair topology on a named retail map.
 
-[ra2-facts.zip](../early/ra2-facts.zip) · [isometric-summary.json](../early/isometric-summary.json) · [bridge-hut-crosswalk.json](../world/bridge-hut-crosswalk.json) · [independent-acceptance.md](../review/independent-acceptance.md)
+[ra2-facts.zip](../early/ra2-facts.zip) · [isometric-summary.json](../early/isometric-summary.json) · [bridge-hut-crosswalk.json](../world/bridge-hut-crosswalk.json) · [independent-acceptance.md](../review/independent-acceptance.md) · [ra2-patch-provenance.md](../early/ra2-patch-provenance.md) · [ra2-patch-findings.json](../early/ra2-patch-findings.json)
 
 ## RES-009 · Research and reconcile Red Alert 2 Yuri's Revenge
 
 **In Progress** · Red Alert 2 Yuri's Revenge historian / rules and content census coordinator · [Open THU-2568](https://linear.app/thunderchild-creative/issue/THU-2568)
 
-Indexed 559 type/group pairs, 553 rule sections, 549 art matches and 37 shared sequences. The registry comparison identifies 156 additions and six removals. The faction brief distinguishes Yuri control and conversion from damage and normal production.
+Indexed 559 type/group pairs, 553 rule sections, 549 art matches and 37 shared sequences. The registry comparison identifies 156 additions and six removals. The faction brief distinguishes Yuri control and conversion from damage and normal production. The English 1.001 patch yields an original RULESMD.INI with 1,477 named sections. Of those, 1,452 match the comparison file’s ordered fields and 25 differ in actual values or key presence. CALA05 has CanOccupyFire=yes in the official patch.
 
-**Next acceptance check.** Validate Yuri capture, ownership change, release, deployment, country restrictions and campaign-only forms in a named build. Reconcile the six absent rule sections and retain each variant as an independent disposition.
+**Next acceptance check.** Use official English 1.001 values for the 25 divergent sections. Recover an independent ARTMD.INI for timing and animation references and verify runtime mode, capture and ownership paths. Check the six former registry gaps against the selected shipped rules and mode.
 
-[yr-facts.zip](../early/yr-facts.zip) · [isometric-summary.json](../early/isometric-summary.json) · [01-faction-and-animation-briefs.md](../early/01-faction-and-animation-briefs.md)
+[yr-facts.zip](../early/yr-facts.zip) · [isometric-summary.json](../early/isometric-summary.json) · [01-faction-and-animation-briefs.md](../early/01-faction-and-animation-briefs.md) · [ra2-patch-provenance.md](../early/ra2-patch-provenance.md) · [ra2-patch-findings.json](../early/ra2-patch-findings.json)
 
 ## RES-010 · Research and reconcile Command & Conquer Generals
 
@@ -236,11 +236,11 @@ Mapped 40 Dune 2000 manual reference rows against the 50 current Fusion definiti
 
 **In Review** · Mechanics historian with engine architect reviewer · [Open THU-2565](https://linear.app/thunderchild-creative/issue/THU-2565)
 
-Defined 15 first-battle capability contracts with producers, authoritative state, replay behavior and negative cases. Mapped 16 historical IDs to 17 live Fusion roles. Executed ordinary commands for separate Allied/Soviet barracks, infantry production, cancellation/refund and ore income.
+Defined 15 first-battle capability contracts with producers, authoritative state, replay behavior and negative cases. Mapped 16 historical IDs to 17 live Fusion roles. Executed ordinary commands for separate Allied/Soviet barracks, infantry production, cancellation/refund and ore income. On the existing engine the same Ranger inflicted 36 damage per initial burst on infantry and 2 on a heavy MCV. Independently repeated encounters ended at ticks 605 and 4,648.
 
 **Next acceptance check.** Obtain the capability and engine peer decisions on timing, denial and negative fixtures. Integrated capture, air/naval layers and bridge restoration require their own evidence before claiming implementation.
 
-[capabilities.json](../foundation/capabilities.json) · [seed-entities.json](../foundation/seed-entities.json) · [first-battle.md](../foundation/first-battle.md) · [independent-acceptance.md](../review/independent-acceptance.md)
+[capabilities.json](../foundation/capabilities.json) · [seed-entities.json](../foundation/seed-entities.json) · [first-battle.md](../foundation/first-battle.md) · [independent-acceptance.md](../review/independent-acceptance.md) · [combat-ranger.md](../foundation/combat-ranger.md) · [combat-ranger-results.json](../foundation/combat-ranger-results.json)
 
 ## RES-025 · Define terrain evidence schema and first-crossing reference fixtures
 
@@ -256,11 +256,11 @@ Read height samples, terrain material identifiers and placed-object records in a
 
 **In Review** · RTS feel analyst with animation/audio/input reviewers · [Open THU-2574](https://linear.app/thunderchild-creative/issue/THU-2574)
 
-Specified six implementation recordings. Two newly constructed Fusion matches reproduced the tick-2,589 checksum 885793848. An original articulated tractor supplies three glTF clips and a 5.5-second review export. At a fixed 224 × 160 WebGL2 camera the braces, lift and scan changed 367, 596 and 420 pixels, and retract returned to the exact starting image. Device, latency, recognition and thermal gates are specified separately. Audio research traces 4,134 facts to 33 publisher files, including faction adviser priorities, contact markers, conditional loops and music states.
+Specified six implementation recordings. Two newly constructed Fusion matches reproduced the tick-2,589 checksum 885793848. An original articulated tractor supplies three glTF clips and a 5.5-second review export. At a fixed 224 × 160 WebGL2 camera the braces, lift and scan changed 367, 596 and 420 pixels, and retract returned to the exact starting image. Device, latency, recognition and thermal gates are specified separately. Audio research traces 4,134 facts to 33 publisher files, including faction adviser priorities, contact markers, conditional loops and music states. Ranger first impact, enemy response, infantry death and heavy armor are measured in the normal simulation and provide event timestamps for presentation synchronization.
 
 **Next acceptance check.** Run integrated desktop and physical Android/iOS traces at the intended load. Capture blind readability and state recognition, trigger/animation/audio alignment and long-session frame-pacing distributions. Review the benchmark design independently of those later performance results.
 
-[first-battle.md](../foundation/first-battle.md) · [motion-and-acceptance.md](../art/motion-and-acceptance.md) · [webgl-verification.json](../art/webgl-verification.json) · [independent-acceptance.md](../review/independent-acceptance.md) · [field-service-tractor.gltf](../art/field-service-tractor.gltf) · [service-cycle.webp](../art/service-cycle.webp) · [audio-direction.md](../experience/audio-direction.md) · [command-and-ambient-audio.json.gz](../experience/command-and-ambient-audio.json.gz)
+[first-battle.md](../foundation/first-battle.md) · [motion-and-acceptance.md](../art/motion-and-acceptance.md) · [webgl-verification.json](../art/webgl-verification.json) · [independent-acceptance.md](../review/independent-acceptance.md) · [field-service-tractor.gltf](../art/field-service-tractor.gltf) · [service-cycle.webp](../art/service-cycle.webp) · [audio-direction.md](../experience/audio-direction.md) · [command-and-ambient-audio.json.gz](../experience/command-and-ambient-audio.json.gz) · [combat-ranger.md](../foundation/combat-ranger.md)
 
 ## RES-027 · Define profile adaptation rules and first-battle Fusion decisions
 
@@ -276,18 +276,18 @@ Recorded 20 era-specific adaptation entries, faction and subgroup scopes, histor
 
 **In Progress** · Catalogue release manager and task-graph tooling specialist · [Open THU-2602](https://linear.app/thunderchild-creative/issue/THU-2602)
 
-Implemented deterministic catalogue-to-task projection and validated an eight-stage synthetic chain. The real nonrelease sample correctly emits zero content orders and withholds three candidate entities. The import retains all 3,040 existing candidates without promotion.
+Implemented deterministic catalogue-to-task projection and validated an eight-stage synthetic chain. The real nonrelease sample correctly emits zero content orders and withholds three candidate entities. The import retains all 3,040 existing candidates without promotion. An offline index now resolves 23,723 observational keys back to the actual fact across 19 profile groups without promoting their production status. All 23,723 physical locators and keys were independently verified, alongside eleven full-record CLI results. Each key can generate one self-contained research assignment with its issue, source evidence and edition-specific checks.
 
 **Next acceptance check.** Close real availability/source/provenance/capability gaps first, run the full per-era census and then prove exactly one stable task per eligible stage under reruns. Record independent approval and native IDs for actual production leaves.
 
-[census_completion_report.json](../foundation/catalogue/census_completion_report.json) · [task_generation_dry_run.md](../foundation/catalogue/task_generation_dry_run.md) · [implementation_task_manifest.json](../foundation/catalogue/implementation_task_manifest.json) · [catalogue-readback.md](../review/catalogue-readback.md)
+[census_completion_report.json](../foundation/catalogue/census_completion_report.json) · [task_generation_dry_run.md](../foundation/catalogue/task_generation_dry_run.md) · [implementation_task_manifest.json](../foundation/catalogue/implementation_task_manifest.json) · [catalogue-readback.md](../review/catalogue-readback.md) · [README.md](../catalogue/README.md) · [source-lookup.jsonl.gz](../catalogue/source-lookup.jsonl.gz) · [find.py](../catalogue/find.py) · [lookup-readback.json](../review/lookup-readback.json) · [brief.py](../catalogue/brief.py) · [ranger-research-packet.md](../catalogue/ranger-research-packet.md)
 
 ## RES-029 · Independently audit whole-series coverage and fleet readiness
 
 **In Progress** · Independent historian/QA reviewer who did not author the relevant package · [Open THU-2607](https://linear.app/thunderchild-creative/issue/THU-2607)
 
-Independent checks cover demo bytes, a controlled original-executable unit order, all 2,117 source map payload digests across seven directory families, Fusion replay and oracle outputs, selected early/later object records, two original WebGL fixtures, the complete prior catalogue intake and corrected release-gate mutations. The catalogue retest exercised eight one-field negative controls and all 23 regression tests passed.
+Independent checks cover demo bytes, a controlled original-executable unit order, all 2,117 source map payload digests across seven directory families, Fusion replay and oracle outputs, selected early/later object records, two original WebGL fixtures, the complete prior catalogue intake and corrected release-gate mutations. The catalogue retest exercised eight one-field negative controls and all 23 regression tests passed. The independent cross-title readback checked every one of the 23,723 keyed records against its backing source, including the search behavior for 4,098 records without an explicit side.
 
 **Next acceptance check.** Audit unobserved released per-faction/per-mode cells after source acquisition and review, including retail-minus-index and index-minus-retail lists. Sign closed counts against RES-028 and each era package. Each remaining hardware, client or media dependency has a specific owning issue.
 
-[independent-acceptance.md](../review/independent-acceptance.md) · [map-demo-independent-results.json](../review/map-demo-independent-results.json) · [catalogue-readback.md](../review/catalogue-readback.md) · [ra95-demo-runtime.md](../review/ra95-demo-runtime.md) · [era_delivery_gates.json](../foundation/catalogue/era_delivery_gates.json)
+[independent-acceptance.md](../review/independent-acceptance.md) · [map-demo-independent-results.json](../review/map-demo-independent-results.json) · [catalogue-readback.md](../review/catalogue-readback.md) · [ra95-demo-runtime.md](../review/ra95-demo-runtime.md) · [era_delivery_gates.json](../foundation/catalogue/era_delivery_gates.json) · [lookup-readback.json](../review/lookup-readback.json)

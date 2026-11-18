@@ -1,996 +1,1074 @@
 {
- "scope_type": "Product/platform reference candidates. The 17 products in EA’s PC compilation are a starting denominator; regional patches, bundles and console reissues can refer to one underlying edition. An entry requires edition evidence before acceptance. Source commits may be community mirrors; see the per-file source lock.",
- "checked_date": "2026-11-18",
- "profiles": [
-  {
-   "id": "td.dos",
-   "title": "Command & Conquer",
-   "platform_scope": "DOS",
-   "task": "RES-004",
-   "source_refs": [
-    "TUC",
-    "SRC-06"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "e0d372dc582c053a699114942b984dad0457f9b3"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+  "scope_type": "Product/platform reference candidates. The 17 products in EA’s PC compilation are a starting denominator; regional patches, bundles and console reissues can refer to one underlying edition. An entry requires edition evidence before acceptance. Source commits may be community mirrors; see the per-file source lock.",
+  "checked_date": "2026-11-18",
+  "profiles": [
+    {
+      "id": "td.dos",
+      "title": "Command & Conquer",
+      "platform_scope": "DOS",
+      "task": "RES-004",
+      "source_refs": [
+        "TUC",
+        "SRC-06"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "e0d372dc582c053a699114942b984dad0457f9b3"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "td.gold",
+      "title": "Command & Conquer Gold",
+      "platform_scope": "Windows",
+      "task": "RES-004",
+      "source_refs": [
+        "CNC",
+        "SRC-06"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "e0d372dc582c053a699114942b984dad0457f9b3"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "td.covert",
+      "title": "The Covert Operations",
+      "platform_scope": "DOS / Windows",
+      "task": "RES-004",
+      "source_refs": [
+        "TUC",
+        "COVERT-A",
+        "COVERT-B"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "English PC COVERT volume. Two archived full tracks differ. Both yield byte-identical scenario packages.",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "e0d372dc582c053a699114942b984dad0457f9b3"
+      ],
+      "eligibility": "79 original package-level scenarios and paired terrain payloads verified. Runtime build eligibility, campaign transitions and the advertised multiplayer-new subset remain distinct checks.",
+      "source_package_members": {
+        "GENERAL.MIX": "5c098c77a2ab20c1c0dab6997b76f4dfbcfeb183714fd1a45e701fcfc8c19d26",
+        "INSTALL/SC-000.MIX": "e4b358312538e42316fe55039b773dc7a3f7e5f230024165a4b9d25760fb2a9a",
+        "INSTALL/SC-001.MIX": "4db08a5dfae0083d916ebc197fe41ade2bb4fdd9ee5e8153868b9efae0ab4d2b"
+      }
+    },
+    {
+      "id": "ra1.dos",
+      "title": "Red Alert",
+      "platform_scope": "DOS",
+      "task": "RES-005",
+      "source_refs": [
+        "TUC",
+        "SRC-07"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra1.windows",
+      "title": "Red Alert",
+      "platform_scope": "Windows",
+      "task": "RES-005",
+      "source_refs": [
+        "TUC",
+        "SRC-07"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra1.windows.demo",
+      "title": "Red Alert public demo",
+      "platform_scope": "Windows 95 / English",
+      "task": "RES-005",
+      "source_refs": [
+        "RA95"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "Westwood Red Alert Demo Windows 95 English. The enclosed readme is dated 3 February 1997.",
+      "executable_sha256": "52d282523555cba978a1d90ec739abb5035fdb32e5bc1f63e8225914599f2580",
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "demo data and three demo scenarios only; does not close the retail profile",
+      "demo_content_member_sha256": {
+        "REDALERT.MIX": "5471b50ab05ce449c08f4d81a79377223b5ed945efabe8afcdb8dd86798aa445",
+        "MAIN.MIX": "d54336e1b721a05a0f787a15a4cf46db4d39d900f0aeb9677ead37fbdfcd4201",
+        "RA95.EXE": "52d282523555cba978a1d90ec739abb5035fdb32e5bc1f63e8225914599f2580",
+        "README.WRI": "74cc032744feca71ed06a28a3b79de6c68df5238cc805ff9e39d7ccd48caf1b5"
+      },
+      "runtime_observations": [
+        "First Allied snow mission",
+        "Ranger selection and movement compared with a same-batch control"
+      ]
+    },
+    {
+      "id": "ra1.counterstrike",
+      "title": "Counterstrike",
+      "platform_scope": "PC",
+      "task": "RES-005",
+      "source_refs": [
+        "TUC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra1.aftermath",
+      "title": "The Aftermath",
+      "platform_scope": "PC",
+      "task": "RES-005",
+      "source_refs": [
+        "TUC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ts.windows",
+      "title": "Tiberian Sun",
+      "platform_scope": "Windows",
+      "task": "RES-006",
+      "source_refs": [
+        "TUC",
+        "SRC-09",
+        "TS-NOD-DISC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "Specific original disc is fingerprinted below. The 2.03-labelled research comparator, on-disc executable and installed game runtime have separate identities.",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "820434dd9946ae524bd8972fac764195ef2939a0"
+      ],
+      "eligibility": "Use the documented exact-text or per-field matches on this named disc. Runtime load order and mission overrides remain independently testable.",
+      "observed_retail_media": {
+        "edition": "ts-nod-early",
+        "volume": "TS2",
+        "file_version": "1.08",
+        "game_exe_sha256": "4d1175a530847a1a75fc2b6424312e416d87554812814518690f92fe4b685bfe",
+        "container": "INSTALL/TIBSUN.MIX",
+        "container_sha256": "23431290b211cd039315095e1987f1c411ecd3b6440861c4874572c92e5f6b2a",
+        "evidence": "early/ts-retail-verification.json"
+      }
+    },
+    {
+      "id": "fs.windows",
+      "title": "Firestorm",
+      "platform_scope": "Windows",
+      "task": "RES-007",
+      "source_refs": [
+        "TUC",
+        "SRC-10",
+        "FS-UK-DISC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "Specific original disc is fingerprinted below. The 2.03-labelled research comparator, on-disc executable and installed game runtime have separate identities.",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "Use the documented exact-text or per-field matches on this named disc. Runtime load order and mission overrides remain independently testable.",
+      "observed_retail_media": {
+        "edition": "fs-uk-retail",
+        "volume": "FIRESTORM",
+        "file_version": "2.0",
+        "game_exe_sha256": "6944afe138a623e0ccbcc8280f33bbde9724a2bdf0fbcec06755f7b0821c3b3c",
+        "container": "INSTALL/EXPAND01.MIX",
+        "container_sha256": "f1f37a7a9c14bc32dcd308474dcfa9ab7736d57b2a7cbf6e6be1d4d298af6cec",
+        "evidence": "early/ts-retail-verification.json"
+      }
+    },
+    {
+      "id": "ra2.windows",
+      "title": "Red Alert 2",
+      "platform_scope": "Windows",
+      "task": "RES-008",
+      "source_refs": [
+        "TUC",
+        "SRC-11"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "b66200ab0130a24bae8d8359caa6ab03bd78e8f7"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure",
+      "official_patch": {
+        "tag": "ra2_1006",
+        "installer_sha256": "9b66734863c12f7634c44ef9a401a136d897010eed10f3aafe28d5a424e48156",
+        "scope": "English Windows release",
+        "evidence": "early/ra2-patch-findings.json",
+        "interpretation": "Section-level per-field authority for the recovered Yuri rules; the RA2 updater describes its required precursor."
+      }
+    },
+    {
+      "id": "yr.windows",
+      "title": "Yuri’s Revenge",
+      "platform_scope": "Windows",
+      "task": "RES-009",
+      "source_refs": [
+        "TUC",
+        "SRC-12"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure",
+      "official_patch": {
+        "tag": "yr_1001",
+        "installer_sha256": "49acccbec1e5264bc1538b497682a8eae0cab790b5a4d858e9812a2b10e9b104",
+        "scope": "English Windows release",
+        "evidence": "early/ra2-patch-findings.json",
+        "interpretation": "Section-level per-field authority for the recovered Yuri rules; the RA2 updater describes its required precursor."
+      }
+    },
+    {
+      "id": "gen.windows",
+      "title": "Generals",
+      "platform_scope": "Windows",
+      "task": "RES-010",
+      "source_refs": [
+        "TUC",
+        "SRC-08",
+        "SRC-13"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "a01989802ff4e626395c014d1cba99ba2e97b09f"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "zh.windows",
+      "title": "Zero Hour",
+      "platform_scope": "Windows",
+      "task": "RES-011",
+      "source_refs": [
+        "TUC",
+        "SRC-08",
+        "SRC-14"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "6c7f40d6af6a4babb77a33a4502ec7656446c13e"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "tw.windows",
+      "title": "Tiberium Wars",
+      "platform_scope": "Windows",
+      "task": "RES-012",
+      "source_refs": [
+        "TUC",
+        "SRC-15",
+        "SRC-04"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "3aad8e412961ab543192ae70f8503dc8e178e095"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "kw.windows",
+      "title": "Kane’s Wrath",
+      "platform_scope": "Windows",
+      "task": "RES-013",
+      "source_refs": [
+        "TUC",
+        "SRC-16",
+        "SRC-04"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "3aad8e412961ab543192ae70f8503dc8e178e095"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra3.windows",
+      "title": "Red Alert 3",
+      "platform_scope": "Windows",
+      "task": "RES-014",
+      "source_refs": [
+        "TUC",
+        "SRC-17",
+        "SRC-04"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "3aad8e412961ab543192ae70f8503dc8e178e095"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "upr.windows",
+      "title": "Uprising",
+      "platform_scope": "Windows",
+      "task": "RES-015",
+      "source_refs": [
+        "TUC",
+        "SRC-18",
+        "SRC-04"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "3aad8e412961ab543192ae70f8503dc8e178e095"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "tt.windows",
+      "title": "Tiberian Twilight",
+      "platform_scope": "Windows",
+      "task": "RES-016",
+      "source_refs": [
+        "TUC",
+        "SRC-19",
+        "SRC-04"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "3aad8e412961ab543192ae70f8503dc8e178e095"
+      ],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ren.windows",
+      "title": "Renegade",
+      "platform_scope": "Windows",
+      "task": "RES-017",
+      "source_refs": [
+        "TUC",
+        "SRC-20",
+        "SRC-21"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ren.windows.multiplayerdemo1019",
+      "title": "Command & Conquer Renegade multiplayer demo 1.019",
+      "platform_scope": "Windows / English",
+      "task": "RES-017",
+      "source_refs": [
+        "REN-DEMO-CNCNZ",
+        "REN-DEMO-FRAG",
+        "REN-DEMO-GD"
+      ],
+      "role": "independent demo profile",
+      "edition_boundary": "Three byte-identical self-extracting installers. All three contain the same separately hashed RENEGADEDEMO.EXE. Two Under server profiles start the match at zero credits.",
+      "executable_sha256": "dd4a6893b5d15d856ee0adcb5e042793d5ba2129e360b845422733c04ea93264",
+      "installer_sha256": "a4f42065491f30fe969739abdd88e6169618b3790d8401871453caa66964024f",
+      "matching_retail_content_sha256": null,
+      "source_commits": [
+        "3e00c3a1b97381bb28be89a35b856375e0629a08"
+      ],
+      "eligibility": "Configured and illustrated terminal menus in the distributed demo. Simulation, retail equivalence and actual in-match prices require a separate observation."
+    },
+    {
+      "id": "ss.windows",
+      "title": "Sole Survivor",
+      "platform_scope": "Windows",
+      "task": "RES-018",
+      "source_refs": [
+        "SOLE",
+        "SRC-28"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "td.saturn",
+      "title": "Command & Conquer",
+      "platform_scope": "Sega Saturn",
+      "task": "RES-019",
+      "source_refs": [
+        "CNC"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "td.ps1",
+      "title": "Command & Conquer",
+      "platform_scope": "PlayStation",
+      "task": "RES-019",
+      "source_refs": [
+        "CNC",
+        "PSXC"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "td.n64",
+      "title": "Command & Conquer",
+      "platform_scope": "Nintendo 64",
+      "task": "RES-019",
+      "source_refs": [
+        "N64"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra1.ps1",
+      "title": "Red Alert",
+      "platform_scope": "PlayStation",
+      "task": "RES-019",
+      "source_refs": [
+        "RET"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ret.ps1",
+      "title": "Red Alert Retaliation",
+      "platform_scope": "PlayStation",
+      "task": "RES-019",
+      "source_refs": [
+        "RET",
+        "SRC-30"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "tw.x360",
+      "title": "Tiberium Wars",
+      "platform_scope": "Xbox 360",
+      "task": "RES-019",
+      "source_refs": [
+        "SRC-15"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "kw.x360",
+      "title": "Kane’s Wrath",
+      "platform_scope": "Xbox 360",
+      "task": "RES-019",
+      "source_refs": [
+        "SRC-16",
+        "KW360"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra3.x360",
+      "title": "Red Alert 3",
+      "platform_scope": "Xbox 360",
+      "task": "RES-019",
+      "source_refs": [
+        "PS3"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra3.ps3",
+      "title": "Red Alert 3 Ultimate Edition",
+      "platform_scope": "PlayStation 3",
+      "task": "RES-019",
+      "source_refs": [
+        "PS3"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "challenge.x360",
+      "title": "Commander’s Challenge",
+      "platform_scope": "Xbox 360",
+      "task": "RES-019",
+      "source_refs": [
+        "CCH"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "challenge.ps3",
+      "title": "Commander’s Challenge",
+      "platform_scope": "PlayStation 3",
+      "task": "RES-019",
+      "source_refs": [
+        "CCH"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "rem.td",
+      "title": "Remastered Tiberian Dawn and Covert Operations",
+      "platform_scope": "Windows",
+      "task": "RES-019",
+      "source_refs": [
+        "REMA"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "rem.ra",
+      "title": "Remastered Red Alert, Counterstrike and The Aftermath",
+      "platform_scope": "Windows",
+      "task": "RES-019",
+      "source_refs": [
+        "REMA"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ta.browser",
+      "title": "Tiberium Alliances",
+      "platform_scope": "browser / individual worlds",
+      "task": "RES-020",
+      "source_refs": [
+        "SRC-25"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "rivals.ios",
+      "title": "Rivals",
+      "platform_scope": "iOS",
+      "task": "RES-021",
+      "source_refs": [
+        "SRC-24"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "rivals.android",
+      "title": "Rivals",
+      "platform_scope": "Android",
+      "task": "RES-021",
+      "source_refs": [
+        "SRC-24"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "tw.featurephone",
+      "title": "Tiberium Wars Mobile",
+      "platform_scope": "feature phone / carrier",
+      "task": "RES-022",
+      "source_refs": [
+        "BREW"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra.featurephone",
+      "title": "Red Alert Mobile",
+      "platform_scope": "J2ME",
+      "task": "RES-022",
+      "source_refs": [
+        "RAJAVA"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra.iphone",
+      "title": "Red Alert Mobile",
+      "platform_scope": "iPhone / iPod touch",
+      "task": "RES-022",
+      "source_refs": [
+        "IPAD",
+        "IOS"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra.ipad",
+      "title": "Red Alert Mobile",
+      "platform_scope": "iPad",
+      "task": "RES-022",
+      "source_refs": [
+        "IPAD"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra.ios.empire",
+      "title": "Empire of the Rising Sun add-on",
+      "platform_scope": "iOS / entitlement",
+      "task": "RES-022",
+      "source_refs": [
+        "IOS"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "tt.j2me",
+      "title": "Tiberian Twilight Mobile",
+      "platform_scope": "J2ME",
+      "task": "RES-022",
+      "source_refs": [
+        "TTJAVA"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra.ol",
+      "title": "红警OL / Red Alert Online",
+      "platform_scope": "iOS / Android, mainland China",
+      "task": "RES-022",
+      "source_refs": [
+        "CN",
+        "CN-STORE"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "legions.soft",
+      "title": "Command & Conquer Legions",
+      "platform_scope": "iOS / Android / test markets",
+      "task": "RES-022",
+      "source_refs": [
+        "SRC-26",
+        "SRC-27",
+        "LEG-END"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "dune2.pc",
+      "title": "Dune II",
+      "platform_scope": "PC",
+      "task": "RES-023",
+      "source_refs": [
+        "DUNE2"
+      ],
+      "role": "lineage and existing-pack compatibility",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "dune2000.pc",
+      "title": "Dune 2000",
+      "platform_scope": "Windows",
+      "task": "RES-023",
+      "source_refs": [
+        "DUNE"
+      ],
+      "role": "lineage and existing-pack compatibility",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "dune2000.ps1",
+      "title": "Dune 2000",
+      "platform_scope": "PlayStation",
+      "task": "RES-023",
+      "source_refs": [
+        "SRC-31"
+      ],
+      "role": "lineage and existing-pack compatibility",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "emperor.pc",
+      "title": "Emperor Battle for Dune",
+      "platform_scope": "Windows",
+      "task": "RES-023",
+      "source_refs": [
+        "EMP"
+      ],
+      "role": "lineage and existing-pack compatibility",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "gen.mac",
+      "title": "Generals",
+      "platform_scope": "Mac OS X",
+      "task": "RES-010",
+      "source_refs": [
+        "EA-MAC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "zh.mac",
+      "title": "Zero Hour",
+      "platform_scope": "Mac OS X",
+      "task": "RES-011",
+      "source_refs": [
+        "EA-MAC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "gen.deluxe.mac",
+      "title": "Generals Deluxe Edition",
+      "platform_scope": "Mac App Store / 2015 distribution",
+      "task": "RES-010",
+      "source_refs": [
+        "ASPYR-DE",
+        "EA-MAC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra3.mac",
+      "title": "Red Alert 3",
+      "platform_scope": "Mac OS X",
+      "task": "RES-014",
+      "source_refs": [
+        "EA-MAC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "tw.mac",
+      "title": "Tiberium Wars",
+      "platform_scope": "Mac OS X",
+      "task": "RES-012",
+      "source_refs": [
+        "EA-MAC"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ta.steam",
+      "title": "Tiberium Alliances Steam client",
+      "platform_scope": "Steam / individual worlds",
+      "task": "RES-020",
+      "source_refs": [
+        "STEAM-TA"
+      ],
+      "role": "derivative / edition comparison",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    },
+    {
+      "id": "ra3.demo",
+      "title": "Red Alert 3 Demo",
+      "platform_scope": "Windows / public demo",
+      "task": "RES-014",
+      "source_refs": [
+        "RA3DEMO"
+      ],
+      "role": "baseline or extension",
+      "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
+      "executable_sha256": null,
+      "matching_retail_content_sha256": null,
+      "source_commits": [],
+      "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+    }
+  ],
+  "sources": {
+    "BREW": "https://s204.q4cdn.com/701424631/files/doc_news/2008/07/1/319091.pdf",
+    "CCH": "https://s204.q4cdn.com/701424631/files/doc_financials/2010/q2/Q2FY10_ER_FINAL_11-9-09.pdf",
+    "CN": "https://www.ea.com/zh-cn/games/red-alert-ol",
+    "CNC": "https://cnc-comm.com/command-and-conquer",
+    "DUNE": "https://oldgamesdownload.com/wp-content/uploads/manuals/dune-2000_win_manual_en_8jn.pdf",
+    "DUNE2": "https://trwglibsccninuamefls.supabase.co/storage/v1/object/public/assets/dune-2/dune-2.pdf",
+    "EMP": "https://oldgamesdownload.com/wp-content/uploads/manuals/emperor-battle-for-dune_win_manual_en_tu1.pdf",
+    "IOS": "https://www.pocketgamer.com/command-conquer-red-alert-ipad/command-conquer-red-alert-goes-cheap-on-iphone-and-ipad/",
+    "IPAD": "https://s204.q4cdn.com/701424631/files/doc_news/2010/04/1/456514.pdf",
+    "LEG-END": "https://www.cnc-inside.de/legions/news/cc-legions-offiziell-tot",
+    "N64": "https://manuals.plus/m/958faf86c804dc0e1faec8d4e8474812ae819d878a9bd4ffa787888288e39d50",
+    "PS3": "https://news.ea.com/press-releases/press-releases-details/2009/EA-Ships-Command--Conquer-Red-Alert-3-Ultimate-Edition-to-Retailers-Worldwide/default.aspx",
+    "PSXC": "https://www.ea.com/ea-play/news/official-reveal-trailer",
+    "RA95": "https://www.boxedwine.org/app/command-conquer-red-alert/",
+    "RAJAVA": "https://www.mobygames.com/game/112681/command-conquer-red-alert/releases/",
+    "REMA": "https://news.ea.com/press-releases/press-releases-details/2020/Command--Conquer-Remastered-Collection-Available-Now-on-Steam-and-Origin-Welcome-Back-Commanders/default.aspx",
+    "RET": "https://forums.cncnet.org/applications/core/interface/file/attachment.php?id=44927",
+    "SOLE": "https://oldgamesdownload.com/wp-content/uploads/manuals/command-and-conquer-sole-survivor_win_manual_en_2vc.pdf",
+    "SRC-04": "https://github.com/electronicarts/CnC_Modding_Support/tree/3aad8e412961ab543192ae70f8503dc8e178e095",
+    "SRC-06": "https://github.com/electronicarts/CnC_Tiberian_Dawn/tree/e0d372dc582c053a699114942b984dad0457f9b3",
+    "SRC-07": "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
+    "SRC-08": "https://github.com/electronicarts/CnC_Generals_Zero_Hour/tree/0a05454d8574207440a5fb15241b98ad0b435590",
+    "SRC-09": "https://www.bestoldgames.net/download/games/command-and-conquer-tiberian-sun/command-and-conquer-tiberian-sun-win-manual.pdf",
+    "SRC-10": "https://manuals.plus/m/fd3065a2b65ec6e72aede1a1bca4ea970455fa6f6fadc1a299e958a59ec7a6f6_optim.pdf",
+    "SRC-11": "https://oldgamesdownload.com/manual/command-conquer-red-alert-2-windows-manual-english/",
+    "SRC-12": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/8/8e/Red_Alert_2_-_Yuri%27s_Revenge_-_English.pdf",
+    "SRC-13": "https://files.cncnz.com/generals/Command_and_Conquer_-_Generals_-_UK_Manual_-_PC.pdf",
+    "SRC-14": "https://static.wikia.nocookie.net/cnc_gamepedia_en/images/b/b1/CNC_Generals_Zero_Hour_Manual_2015.pdf/revision/latest?cb=20180801163919&format=original",
+    "SRC-15": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/5/51/Command_and_Conquer_3_Tiberium_Wars_Manual.pdf?version=e3a413e2bebe68ced75463ebd8223e7f",
+    "SRC-16": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/24810/manuals/CC3KWpcMANfinal.pdf?t=1741704747",
+    "SRC-17": "https://shared.steamstatic.com/store_item_assets/steam/apps/17480/manuals/manual_english.pdf?t=1712755099",
+    "SRC-18": "https://shared.steamstatic.com/store_item_assets/steam/apps/24800/manuals/CCRA3UPpcdMANukeng1.pdf?t=1741704725",
+    "SRC-19": "https://store.steampowered.com/manual/47700",
+    "SRC-20": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/c/cd/Renegade_-_English.pdf?version=a080e5c0939b482517e097f5087def99",
+    "SRC-21": "https://github.com/electronicarts/CnC_Renegade",
+    "SRC-24": "https://apps.apple.com/gb/app/command-conquer-rivals-pvp/id1261165213",
+    "SRC-25": "https://www.ea.com/games/command-and-conquer/command-and-conquer-tiberium-alliances/faq",
+    "SRC-26": "https://www.levelinfinite.com/news/level-infinite-reaches-agreement-with-ea-for-all-new-command-conquer-legions/",
+    "SRC-27": "https://press.levelinfinite.com/en/Command-Conquer-Legions-Commences-Pre-Registration-for-Mobile-Strategy",
+    "SRC-28": "https://cnc-comm.com/sole-survivor",
+    "SRC-30": "https://cnc-comm.com/red-alert/retaliation",
+    "SRC-31": "https://cnc.fandom.com/wiki/Category%3AManuals",
+    "TTJAVA": "https://cncnz.com/games/tiberian-twilight-mobile/",
+    "TUC": "https://news.ea.com/press-releases/press-releases-details/2012/EA-Gives-Strategy-Fans-the-Ultimate-Gift-with-the-17-Game-Compilation-Command--Conquer-The-Ultimate-Collection/default.aspx",
+    "EA-MAC": "https://www.ea.com/legal/service-updates/a-h?setLocale=en-us",
+    "KW360": "https://s204.q4cdn.com/701424631/files/doc_news/2008/06/1/317761.pdf",
+    "ASPYR-DE": "https://www.macrumors.com/2015/03/12/command-and-conquer-generals-for-mac/",
+    "STEAM-TA": "https://store.steampowered.com/app/3106530/",
+    "RA3DEMO": "https://store.steampowered.com/app/24710/",
+    "CN-STORE": "https://apps.apple.com/cn/app/id1234954076",
+    "COVERT-A": "https://archive.org/details/redump-id-28908",
+    "COVERT-B": "https://archive.org/details/command-conquer-the-covert-operations",
+    "REN-DEMO-CNCNZ": "https://cncnz.com/downloads/renegade-downloads/",
+    "REN-DEMO-FRAG": "https://frag-net.com/game_renegade.html",
+    "REN-DEMO-GD": "https://ftpmirror1.infania.net/pub/gamesdomain/demos/renegadedemo_1019.exe",
+    "TS-NOD-DISC": "https://archive.org/details/cnc-tiberiansun-nod-108",
+    "FS-UK-DISC": "https://archive.org/details/firestorm_202412"
   },
-  {
-   "id": "td.gold",
-   "title": "Command & Conquer Gold",
-   "platform_scope": "Windows",
-   "task": "RES-004",
-   "source_refs": [
-    "CNC",
-    "SRC-06"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "e0d372dc582c053a699114942b984dad0457f9b3"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
+  "publisher_store_ids_observed_gb": {
+    "24790": "Command & Conquer 3 Tiberium Wars™",
+    "24810": "Command & Conquer™ 3: Kane’s Wrath",
+    "47700": "Command & Conquer™ 4 Tiberian Twilight",
+    "1213210": "Command & Conquer™ Remastered Collection",
+    "2229870": "Command & Conquer™ Generals",
+    "2229890": "Command & Conquer Renegade™",
+    "2732960": "Command & Conquer™ Generals Zero Hour",
+    "17480": "Command & Conquer™ Red Alert™ 3",
+    "2229880": "Command & Conquer™ Tiberian Sun™ and Firestorm™",
+    "2229830": "Command & Conquer™ and The Covert Operations™",
+    "24800": "Command & Conquer: Red Alert 3 - Uprising",
+    "2229850": "Command & Conquer Red Alert™ 2 and Yuri’s Revenge™",
+    "2229840": "Command & Conquer Red Alert™, Counterstrike™ and The Aftermath™",
+    "24710": "Command and Conquer: Red Alert 3 Demo",
+    "3106530": "Command & Conquer™ Tiberium Alliances"
   },
-  {
-   "id": "td.covert",
-   "title": "The Covert Operations",
-   "platform_scope": "DOS / Windows",
-   "task": "RES-004",
-   "source_refs": [
-    "TUC"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "e0d372dc582c053a699114942b984dad0457f9b3"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra1.dos",
-   "title": "Red Alert",
-   "platform_scope": "DOS",
-   "task": "RES-005",
-   "source_refs": [
-    "TUC",
-    "SRC-07"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra1.windows",
-   "title": "Red Alert",
-   "platform_scope": "Windows",
-   "task": "RES-005",
-   "source_refs": [
-    "TUC",
-    "SRC-07"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra1.windows.demo",
-   "title": "Red Alert public demo",
-   "platform_scope": "Windows 95 / English",
-   "task": "RES-005",
-   "source_refs": [
-    "RA95"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "Westwood Red Alert Demo Windows 95 English. The enclosed readme is dated 3 February 1997.",
-   "executable_sha256": "52d282523555cba978a1d90ec739abb5035fdb32e5bc1f63e8225914599f2580",
-   "matching_retail_content_sha256": "5471b50ab05ce449c08f4d81a79377223b5ed945efabe8afcdb8dd86798aa445",
-   "source_commits": [],
-   "eligibility": "demo data and three demo scenarios only; does not close the retail profile"
-  },
-  {
-   "id": "ra1.counterstrike",
-   "title": "Counterstrike",
-   "platform_scope": "PC",
-   "task": "RES-005",
-   "source_refs": [
-    "TUC"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra1.aftermath",
-   "title": "The Aftermath",
-   "platform_scope": "PC",
-   "task": "RES-005",
-   "source_refs": [
-    "TUC"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ts.windows",
-   "title": "Tiberian Sun",
-   "platform_scope": "Windows",
-   "task": "RES-006",
-   "source_refs": [
-    "TUC",
-    "SRC-09"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "820434dd9946ae524bd8972fac764195ef2939a0"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "fs.windows",
-   "title": "Firestorm",
-   "platform_scope": "Windows",
-   "task": "RES-007",
-   "source_refs": [
-    "TUC",
-    "SRC-10"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra2.windows",
-   "title": "Red Alert 2",
-   "platform_scope": "Windows",
-   "task": "RES-008",
-   "source_refs": [
-    "TUC",
-    "SRC-11"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "b66200ab0130a24bae8d8359caa6ab03bd78e8f7"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "yr.windows",
-   "title": "Yuri’s Revenge",
-   "platform_scope": "Windows",
-   "task": "RES-009",
-   "source_refs": [
-    "TUC",
-    "SRC-12"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "gen.windows",
-   "title": "Generals",
-   "platform_scope": "Windows",
-   "task": "RES-010",
-   "source_refs": [
-    "TUC",
-    "SRC-08",
-    "SRC-13"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "a01989802ff4e626395c014d1cba99ba2e97b09f"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "zh.windows",
-   "title": "Zero Hour",
-   "platform_scope": "Windows",
-   "task": "RES-011",
-   "source_refs": [
-    "TUC",
-    "SRC-08",
-    "SRC-14"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "6c7f40d6af6a4babb77a33a4502ec7656446c13e"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "tw.windows",
-   "title": "Tiberium Wars",
-   "platform_scope": "Windows",
-   "task": "RES-012",
-   "source_refs": [
-    "TUC",
-    "SRC-15",
-    "SRC-04"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "3aad8e412961ab543192ae70f8503dc8e178e095"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "kw.windows",
-   "title": "Kane’s Wrath",
-   "platform_scope": "Windows",
-   "task": "RES-013",
-   "source_refs": [
-    "TUC",
-    "SRC-16",
-    "SRC-04"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "3aad8e412961ab543192ae70f8503dc8e178e095"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra3.windows",
-   "title": "Red Alert 3",
-   "platform_scope": "Windows",
-   "task": "RES-014",
-   "source_refs": [
-    "TUC",
-    "SRC-17",
-    "SRC-04"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "3aad8e412961ab543192ae70f8503dc8e178e095"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "upr.windows",
-   "title": "Uprising",
-   "platform_scope": "Windows",
-   "task": "RES-015",
-   "source_refs": [
-    "TUC",
-    "SRC-18",
-    "SRC-04"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "3aad8e412961ab543192ae70f8503dc8e178e095"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "tt.windows",
-   "title": "Tiberian Twilight",
-   "platform_scope": "Windows",
-   "task": "RES-016",
-   "source_refs": [
-    "TUC",
-    "SRC-19",
-    "SRC-04"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [
-    "3aad8e412961ab543192ae70f8503dc8e178e095"
-   ],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ren.windows",
-   "title": "Renegade",
-   "platform_scope": "Windows",
-   "task": "RES-017",
-   "source_refs": [
-    "TUC",
-    "SRC-20",
-    "SRC-21"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ss.windows",
-   "title": "Sole Survivor",
-   "platform_scope": "Windows",
-   "task": "RES-018",
-   "source_refs": [
-    "SOLE",
-    "SRC-28"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "td.saturn",
-   "title": "Command & Conquer",
-   "platform_scope": "Sega Saturn",
-   "task": "RES-019",
-   "source_refs": [
-    "CNC"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "td.ps1",
-   "title": "Command & Conquer",
-   "platform_scope": "PlayStation",
-   "task": "RES-019",
-   "source_refs": [
-    "CNC",
-    "PSXC"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "td.n64",
-   "title": "Command & Conquer",
-   "platform_scope": "Nintendo 64",
-   "task": "RES-019",
-   "source_refs": [
-    "N64"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra1.ps1",
-   "title": "Red Alert",
-   "platform_scope": "PlayStation",
-   "task": "RES-019",
-   "source_refs": [
-    "RET"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ret.ps1",
-   "title": "Red Alert Retaliation",
-   "platform_scope": "PlayStation",
-   "task": "RES-019",
-   "source_refs": [
-    "RET",
-    "SRC-30"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "tw.x360",
-   "title": "Tiberium Wars",
-   "platform_scope": "Xbox 360",
-   "task": "RES-019",
-   "source_refs": [
-    "SRC-15"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "kw.x360",
-   "title": "Kane’s Wrath",
-   "platform_scope": "Xbox 360",
-   "task": "RES-019",
-   "source_refs": [
-    "SRC-16",
-    "KW360"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra3.x360",
-   "title": "Red Alert 3",
-   "platform_scope": "Xbox 360",
-   "task": "RES-019",
-   "source_refs": [
-    "PS3"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra3.ps3",
-   "title": "Red Alert 3 Ultimate Edition",
-   "platform_scope": "PlayStation 3",
-   "task": "RES-019",
-   "source_refs": [
-    "PS3"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "challenge.x360",
-   "title": "Commander’s Challenge",
-   "platform_scope": "Xbox 360",
-   "task": "RES-019",
-   "source_refs": [
-    "CCH"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "challenge.ps3",
-   "title": "Commander’s Challenge",
-   "platform_scope": "PlayStation 3",
-   "task": "RES-019",
-   "source_refs": [
-    "CCH"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "rem.td",
-   "title": "Remastered Tiberian Dawn and Covert Operations",
-   "platform_scope": "Windows",
-   "task": "RES-019",
-   "source_refs": [
-    "REMA"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "rem.ra",
-   "title": "Remastered Red Alert, Counterstrike and The Aftermath",
-   "platform_scope": "Windows",
-   "task": "RES-019",
-   "source_refs": [
-    "REMA"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ta.browser",
-   "title": "Tiberium Alliances",
-   "platform_scope": "browser / individual worlds",
-   "task": "RES-020",
-   "source_refs": [
-    "SRC-25"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "rivals.ios",
-   "title": "Rivals",
-   "platform_scope": "iOS",
-   "task": "RES-021",
-   "source_refs": [
-    "SRC-24"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "rivals.android",
-   "title": "Rivals",
-   "platform_scope": "Android",
-   "task": "RES-021",
-   "source_refs": [
-    "SRC-24"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "tw.featurephone",
-   "title": "Tiberium Wars Mobile",
-   "platform_scope": "feature phone / carrier",
-   "task": "RES-022",
-   "source_refs": [
-    "BREW"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra.featurephone",
-   "title": "Red Alert Mobile",
-   "platform_scope": "J2ME",
-   "task": "RES-022",
-   "source_refs": [
-    "RAJAVA"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra.iphone",
-   "title": "Red Alert Mobile",
-   "platform_scope": "iPhone / iPod touch",
-   "task": "RES-022",
-   "source_refs": [
-    "IPAD",
-    "IOS"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra.ipad",
-   "title": "Red Alert Mobile",
-   "platform_scope": "iPad",
-   "task": "RES-022",
-   "source_refs": [
-    "IPAD"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra.ios.empire",
-   "title": "Empire of the Rising Sun add-on",
-   "platform_scope": "iOS / entitlement",
-   "task": "RES-022",
-   "source_refs": [
-    "IOS"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "tt.j2me",
-   "title": "Tiberian Twilight Mobile",
-   "platform_scope": "J2ME",
-   "task": "RES-022",
-   "source_refs": [
-    "TTJAVA"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra.ol",
-   "title": "红警OL / Red Alert Online",
-   "platform_scope": "iOS / Android, mainland China",
-   "task": "RES-022",
-   "source_refs": [
-    "CN",
-    "CN-STORE"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "legions.soft",
-   "title": "Command & Conquer Legions",
-   "platform_scope": "iOS / Android / test markets",
-   "task": "RES-022",
-   "source_refs": [
-    "SRC-26",
-    "SRC-27",
-    "LEG-END"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "dune2.pc",
-   "title": "Dune II",
-   "platform_scope": "PC",
-   "task": "RES-023",
-   "source_refs": [
-    "DUNE2"
-   ],
-   "role": "lineage and existing-pack compatibility",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "dune2000.pc",
-   "title": "Dune 2000",
-   "platform_scope": "Windows",
-   "task": "RES-023",
-   "source_refs": [
-    "DUNE"
-   ],
-   "role": "lineage and existing-pack compatibility",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "dune2000.ps1",
-   "title": "Dune 2000",
-   "platform_scope": "PlayStation",
-   "task": "RES-023",
-   "source_refs": [
-    "SRC-31"
-   ],
-   "role": "lineage and existing-pack compatibility",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "emperor.pc",
-   "title": "Emperor Battle for Dune",
-   "platform_scope": "Windows",
-   "task": "RES-023",
-   "source_refs": [
-    "EMP"
-   ],
-   "role": "lineage and existing-pack compatibility",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "gen.mac",
-   "title": "Generals",
-   "platform_scope": "Mac OS X",
-   "task": "RES-010",
-   "source_refs": [
-    "EA-MAC"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "zh.mac",
-   "title": "Zero Hour",
-   "platform_scope": "Mac OS X",
-   "task": "RES-011",
-   "source_refs": [
-    "EA-MAC"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "gen.deluxe.mac",
-   "title": "Generals Deluxe Edition",
-   "platform_scope": "Mac App Store / 2015 distribution",
-   "task": "RES-010",
-   "source_refs": [
-    "ASPYR-DE",
-    "EA-MAC"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra3.mac",
-   "title": "Red Alert 3",
-   "platform_scope": "Mac OS X",
-   "task": "RES-014",
-   "source_refs": [
-    "EA-MAC"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "tw.mac",
-   "title": "Tiberium Wars",
-   "platform_scope": "Mac OS X",
-   "task": "RES-012",
-   "source_refs": [
-    "EA-MAC"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ta.steam",
-   "title": "Tiberium Alliances Steam client",
-   "platform_scope": "Steam / individual worlds",
-   "task": "RES-020",
-   "source_refs": [
-    "STEAM-TA"
-   ],
-   "role": "derivative / edition comparison",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  },
-  {
-   "id": "ra3.demo",
-   "title": "Red Alert 3 Demo",
-   "platform_scope": "Windows / public demo",
-   "task": "RES-014",
-   "source_refs": [
-    "RA3DEMO"
-   ],
-   "role": "baseline or extension",
-   "edition_boundary": "edition under research; exact retail patch, region and binary remain unverified",
-   "executable_sha256": null,
-   "matching_retail_content_sha256": null,
-   "source_commits": [],
-   "eligibility": "source/manual/edition evidence permits specified observations; independent producer/mode/mission census required for closure"
-  }
- ],
- "sources": {
-  "BREW": "https://s204.q4cdn.com/701424631/files/doc_news/2008/07/1/319091.pdf",
-  "CCH": "https://s204.q4cdn.com/701424631/files/doc_financials/2010/q2/Q2FY10_ER_FINAL_11-9-09.pdf",
-  "CN": "https://www.ea.com/zh-cn/games/red-alert-ol",
-  "CNC": "https://cnc-comm.com/command-and-conquer",
-  "DUNE": "https://oldgamesdownload.com/wp-content/uploads/manuals/dune-2000_win_manual_en_8jn.pdf",
-  "DUNE2": "https://trwglibsccninuamefls.supabase.co/storage/v1/object/public/assets/dune-2/dune-2.pdf",
-  "EMP": "https://oldgamesdownload.com/wp-content/uploads/manuals/emperor-battle-for-dune_win_manual_en_tu1.pdf",
-  "IOS": "https://www.pocketgamer.com/command-conquer-red-alert-ipad/command-conquer-red-alert-goes-cheap-on-iphone-and-ipad/",
-  "IPAD": "https://s204.q4cdn.com/701424631/files/doc_news/2010/04/1/456514.pdf",
-  "LEG-END": "https://www.cnc-inside.de/legions/news/cc-legions-offiziell-tot",
-  "N64": "https://manuals.plus/m/958faf86c804dc0e1faec8d4e8474812ae819d878a9bd4ffa787888288e39d50",
-  "PS3": "https://news.ea.com/press-releases/press-releases-details/2009/EA-Ships-Command--Conquer-Red-Alert-3-Ultimate-Edition-to-Retailers-Worldwide/default.aspx",
-  "PSXC": "https://www.ea.com/ea-play/news/official-reveal-trailer",
-  "RA95": "https://www.boxedwine.org/app/command-conquer-red-alert/",
-  "RAJAVA": "https://www.mobygames.com/game/112681/command-conquer-red-alert/releases/",
-  "REMA": "https://news.ea.com/press-releases/press-releases-details/2020/Command--Conquer-Remastered-Collection-Available-Now-on-Steam-and-Origin-Welcome-Back-Commanders/default.aspx",
-  "RET": "https://forums.cncnet.org/applications/core/interface/file/attachment.php?id=44927",
-  "SOLE": "https://oldgamesdownload.com/wp-content/uploads/manuals/command-and-conquer-sole-survivor_win_manual_en_2vc.pdf",
-  "SRC-04": "https://github.com/electronicarts/CnC_Modding_Support/tree/3aad8e412961ab543192ae70f8503dc8e178e095",
-  "SRC-06": "https://github.com/electronicarts/CnC_Tiberian_Dawn/tree/e0d372dc582c053a699114942b984dad0457f9b3",
-  "SRC-07": "https://github.com/electronicarts/CnC_Red_Alert/tree/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
-  "SRC-08": "https://github.com/electronicarts/CnC_Generals_Zero_Hour/tree/0a05454d8574207440a5fb15241b98ad0b435590",
-  "SRC-09": "https://www.bestoldgames.net/download/games/command-and-conquer-tiberian-sun/command-and-conquer-tiberian-sun-win-manual.pdf",
-  "SRC-10": "https://manuals.plus/m/fd3065a2b65ec6e72aede1a1bca4ea970455fa6f6fadc1a299e958a59ec7a6f6_optim.pdf",
-  "SRC-11": "https://oldgamesdownload.com/manual/command-conquer-red-alert-2-windows-manual-english/",
-  "SRC-12": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/8/8e/Red_Alert_2_-_Yuri%27s_Revenge_-_English.pdf",
-  "SRC-13": "https://files.cncnz.com/generals/Command_and_Conquer_-_Generals_-_UK_Manual_-_PC.pdf",
-  "SRC-14": "https://static.wikia.nocookie.net/cnc_gamepedia_en/images/b/b1/CNC_Generals_Zero_Hour_Manual_2015.pdf/revision/latest?cb=20180801163919&format=original",
-  "SRC-15": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/5/51/Command_and_Conquer_3_Tiberium_Wars_Manual.pdf?version=e3a413e2bebe68ced75463ebd8223e7f",
-  "SRC-16": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/24810/manuals/CC3KWpcMANfinal.pdf?t=1741704747",
-  "SRC-17": "https://shared.steamstatic.com/store_item_assets/steam/apps/17480/manuals/manual_english.pdf?t=1712755099",
-  "SRC-18": "https://shared.steamstatic.com/store_item_assets/steam/apps/24800/manuals/CCRA3UPpcdMANukeng1.pdf?t=1741704725",
-  "SRC-19": "https://store.steampowered.com/manual/47700",
-  "SRC-20": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/c/cd/Renegade_-_English.pdf?version=a080e5c0939b482517e097f5087def99",
-  "SRC-21": "https://github.com/electronicarts/CnC_Renegade",
-  "SRC-24": "https://apps.apple.com/gb/app/command-conquer-rivals-pvp/id1261165213",
-  "SRC-25": "https://www.ea.com/games/command-and-conquer/command-and-conquer-tiberium-alliances/faq",
-  "SRC-26": "https://www.levelinfinite.com/news/level-infinite-reaches-agreement-with-ea-for-all-new-command-conquer-legions/",
-  "SRC-27": "https://press.levelinfinite.com/en/Command-Conquer-Legions-Commences-Pre-Registration-for-Mobile-Strategy",
-  "SRC-28": "https://cnc-comm.com/sole-survivor",
-  "SRC-30": "https://cnc-comm.com/red-alert/retaliation",
-  "SRC-31": "https://cnc.fandom.com/wiki/Category%3AManuals",
-  "TTJAVA": "https://cncnz.com/games/tiberian-twilight-mobile/",
-  "TUC": "https://news.ea.com/press-releases/press-releases-details/2012/EA-Gives-Strategy-Fans-the-Ultimate-Gift-with-the-17-Game-Compilation-Command--Conquer-The-Ultimate-Collection/default.aspx",
-  "EA-MAC": "https://www.ea.com/legal/service-updates/a-h?setLocale=en-us",
-  "KW360": "https://s204.q4cdn.com/701424631/files/doc_news/2008/06/1/317761.pdf",
-  "ASPYR-DE": "https://www.macrumors.com/2015/03/12/command-and-conquer-generals-for-mac/",
-  "STEAM-TA": "https://store.steampowered.com/app/3106530/",
-  "RA3DEMO": "https://store.steampowered.com/app/24710/",
-  "CN-STORE": "https://apps.apple.com/cn/app/id1234954076"
- },
- "publisher_store_ids_observed_gb": {
-  "24790": "Command & Conquer 3 Tiberium Wars™",
-  "24810": "Command & Conquer™ 3: Kane’s Wrath",
-  "47700": "Command & Conquer™ 4 Tiberian Twilight",
-  "1213210": "Command & Conquer™ Remastered Collection",
-  "2229870": "Command & Conquer™ Generals",
-  "2229890": "Command & Conquer Renegade™",
-  "2732960": "Command & Conquer™ Generals Zero Hour",
-  "17480": "Command & Conquer™ Red Alert™ 3",
-  "2229880": "Command & Conquer™ Tiberian Sun™ and Firestorm™",
-  "2229830": "Command & Conquer™ and The Covert Operations™",
-  "24800": "Command & Conquer: Red Alert 3 - Uprising",
-  "2229850": "Command & Conquer Red Alert™ 2 and Yuri’s Revenge™",
-  "2229840": "Command & Conquer Red Alert™, Counterstrike™ and The Aftermath™",
-  "24710": "Command and Conquer: Red Alert 3 Demo",
-  "3106530": "Command & Conquer™ Tiberium Alliances"
- },
- "executable_or_data_hash_policy": "A source tree, manual, storefront ID, reviewed emulator or retail version label cannot substitute for an executable and content fingerprint.",
- "edition_exceptions": [
-  {
-   "subject": "Kane’s Wrath on Mac",
-   "finding": "EA groups the expansion with Tiberium Wars in a retired-service heading. A Mac-specific release, media ID or package is needed before treating it as a separately shipped edition.",
-   "source": "EA-MAC"
-  },
-  {
-   "subject": "Collective bundles, localisation, censorship, console emulation releases",
-   "finding": "The First Decade, Ultimate Collection, regional dubbed/edited data and emulated digital reissues may affect executable, presentation or missions. Record actual product ID, language, asset hashes and differences before inheriting a row."
-  },
-  {
-   "subject": "Cancelled or unshipped designs",
-   "finding": "Tiberium FPS, the cancelled 2013 Command & Conquer/Generals 2 project and unused source definitions remain outside the shipped-unit denominator; dedicated provenance required for influence."
-  }
- ]
+  "executable_or_data_hash_policy": "A source tree, manual, storefront ID, reviewed emulator or retail version label cannot substitute for an executable and content fingerprint.",
+  "edition_exceptions": [
+    {
+      "subject": "Kane’s Wrath on Mac",
+      "finding": "EA groups the expansion with Tiberium Wars in a retired-service heading. A Mac-specific release, media ID or package is needed before treating it as a separately shipped edition.",
+      "source": "EA-MAC"
+    },
+    {
+      "subject": "Collective bundles, localisation, censorship, console emulation releases",
+      "finding": "The First Decade, Ultimate Collection, regional dubbed/edited data and emulated digital reissues may affect executable, presentation or missions. Record actual product ID, language, asset hashes and differences before inheriting a row."
+    },
+    {
+      "subject": "Cancelled or unshipped designs",
+      "finding": "Tiberium FPS, the cancelled 2013 Command & Conquer/Generals 2 project and unused source definitions remain outside the shipped-unit denominator; dedicated provenance required for influence."
+    }
+  ]
 }

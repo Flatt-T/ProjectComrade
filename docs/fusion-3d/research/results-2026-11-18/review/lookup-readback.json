@@ -1,0 +1,177 @@
+{
+  "review": "Independent complete source-record and CLI readback of shipped object lookup, excluding supporting non-object ledgers",
+  "indexed_rows": 23723,
+  "unique_public_keys": 23723,
+  "unique_physical_locators": 23723,
+  "source_driven_records_matched": 23723,
+  "extra_source_or_index_rows": 0,
+  "field_checks": [
+    "key digest from physical identity",
+    "profile",
+    "identifier",
+    "kind including native list values",
+    "source side including missing values",
+    "archive member or JSON path or TSV data row"
+  ],
+  "counts_by_storage": {
+    "Dune-Fusion-JSON": 50,
+    "Dune-manual-JSON": 40,
+    "Generals-JSONL-members": 3403,
+    "SAGE-JSONL-object-members": 18099,
+    "SAGE-recovered-JSON-path": 13,
+    "Sole-Survivor-JSON-strings": 23,
+    "early-INI-registry": 1470,
+    "early-constructors": 262,
+    "ren.demo-TSV": 73,
+    "rivals-TSV": 96,
+    "ta-TSV": 194
+  },
+  "counts_by_profile": {
+    "dune.fusion": 50,
+    "dune.manual": 40,
+    "fs": 265,
+    "generals": 1300,
+    "kw": 2894,
+    "ra1": 149,
+    "ra2": 409,
+    "ra3": 4922,
+    "ren.demo": 73,
+    "rivals": 96,
+    "ss": 23,
+    "ta": 194,
+    "td": 113,
+    "ts": 237,
+    "tt": 3112,
+    "tw": 2127,
+    "uprising": 5057,
+    "yr": 559,
+    "zh": 2103
+  },
+  "cli_detail_cases": {
+    "early-INI-registry": {
+      "key": "147c0e797d30c062a415ff",
+      "profile": "fs",
+      "id": "SLAV",
+      "file": "early/fs-facts.zip",
+      "member": "fs-definition-facts.jsonl",
+      "locator": 17,
+      "returned_detail_exact_match": true
+    },
+    "Generals-JSONL-members": {
+      "key": "6b362fd38d6c4a820cf8fc",
+      "profile": "generals",
+      "id": "CivilianAirport",
+      "file": "early/generals-facts.zip",
+      "member": "generals-objects-01.jsonl",
+      "locator": 17,
+      "returned_detail_exact_match": true
+    },
+    "early-constructors": {
+      "key": "9d2e3140009cd20fd8197b",
+      "profile": "ra1",
+      "id": "SYRD",
+      "file": "early/ra1-facts.zip",
+      "member": "ra1-definition-facts.jsonl",
+      "locator": 17,
+      "returned_detail_exact_match": true
+    },
+    "SAGE-JSONL-object-members": {
+      "key": "c8b329e0a3b08e304273ba",
+      "profile": "kw",
+      "id": "AlienMotherShipBeamEffect50",
+      "file": "later/kw-source-facts.zip",
+      "member": "objects.jsonl",
+      "locator": 17,
+      "returned_detail_exact_match": true
+    },
+    "SAGE-recovered-JSON-path": {
+      "key": "2b3f8936afb5c08733eeec",
+      "profile": "tw",
+      "id": "GDIDropship",
+      "file": "later/sage-exception-recovery.json",
+      "member": null,
+      "locator": [
+        "xml_files",
+        0,
+        "projections",
+        0,
+        "declarations",
+        0
+      ],
+      "returned_detail_exact_match": true
+    },
+    "ta-TSV": {
+      "key": "7f966ea2c49fef0ecc5782",
+      "profile": "ta",
+      "id": "GDI_Harvester_Tiberium",
+      "file": "editions/rivals-ta-alliances-reference.tsv",
+      "member": null,
+      "locator": 18,
+      "returned_detail_exact_match": true
+    },
+    "rivals-TSV": {
+      "key": "fc3f5b6e139c4c9fd26462",
+      "profile": "rivals",
+      "id": "Battering ram",
+      "file": "editions/rivals-ta-rivals-reference.tsv",
+      "member": null,
+      "locator": 18,
+      "returned_detail_exact_match": true
+    },
+    "ren.demo-TSV": {
+      "key": "63584dc709c3a7335b8e1c",
+      "profile": "ren.demo",
+      "id": "CnC_Nod_FlameThrower_3Boss_Petrova",
+      "file": "later/renegade-demo-terminal.tsv",
+      "member": null,
+      "locator": 18,
+      "returned_detail_exact_match": true
+    },
+    "Sole-Survivor-JSON-strings": {
+      "key": "4c7601a303de90ab2f26aa",
+      "profile": "ss",
+      "id": "Rocket Launcher",
+      "file": "editions/sole-survivor-manual-facts.json",
+      "member": null,
+      "locator": [
+        "manual_units",
+        16
+      ],
+      "returned_detail_exact_match": true
+    },
+    "Dune-manual-JSON": {
+      "key": "9c0271fb73bc12a328aa14",
+      "profile": "dune.manual",
+      "id": "Palace",
+      "file": "editions/dune2000-manual-to-fusion.json",
+      "member": null,
+      "locator": [
+        "rows",
+        16
+      ],
+      "returned_detail_exact_match": true
+    },
+    "Dune-Fusion-JSON": {
+      "key": "29b11ba5fc9680b18c39a9",
+      "profile": "dune.fusion",
+      "id": "siegetank",
+      "file": "editions/dune2000-manual-to-fusion.json",
+      "member": null,
+      "locator": [
+        "comrade_pack_rows",
+        16
+      ],
+      "returned_detail_exact_match": true
+    }
+  },
+  "null_side_rows": 4098,
+  "literal_null_filter_matches": 0,
+  "filter_qa": "passed: unknown value does not satisfy a named-side query",
+  "index_gzip_sha256": "c68e95f3865838fdf1b01852a78cc9dcbfdc68447d52321ab766a61289d89bab",
+  "find_py_sha256_at_readback": "6b4f92fa7df6155091266c527e5dec58250a75018b1bf1d3d63457805a543b57",
+  "side_substring_check_after_fix": {
+    "term": "u",
+    "expected_named_side_rows": 3993,
+    "observed": 3993
+  }
+}

@@ -6,9 +6,9 @@
   "files": [
     {
       "path": "README.md",
-      "bytes": 8257,
-      "sha256": "7fadaab2a078746890e3043f00235a81a300092a9cca2b8ef1f9b6cbc6c18e0f",
-      "git": "9b7a9c06362968ebf5c3a20ec8f0994da52915d4"
+      "bytes": 8917,
+      "sha256": "781cd2e8fecafed6d4ae33e7460150fd58a4b354e023525ae455fb81baa25459",
+      "git": "3753e2603de48c13d9bed4155e5f27559eb268ac"
     },
     {
       "path": "art/README.md",
@@ -233,10 +233,40 @@
       "git": "1e1596f47f98f57feff61523a2c03e0a8d8c5e43"
     },
     {
+      "path": "catalogue/README.md",
+      "bytes": 4190,
+      "sha256": "92a023c5e2341ae2f8de3b838a84600d7314abc6a1fd59bcd7d3008d6e946dca",
+      "git": "b648e47df061df7970e12867a22ff7f16cb834f7"
+    },
+    {
+      "path": "catalogue/brief.py",
+      "bytes": 4868,
+      "sha256": "9dd099dccf7fdd32e1f663c071b4aa4183f454acda4a2646b1e8ccdf9ec5b200",
+      "git": "e7bae7382c1149b42b9f960caa7fc32c0101d5fa"
+    },
+    {
+      "path": "catalogue/find.py",
+      "bytes": 6170,
+      "sha256": "6b4f92fa7df6155091266c527e5dec58250a75018b1bf1d3d63457805a543b57",
+      "git": "39e9910eca3fa74299cb4e9ddfd0883a57402788"
+    },
+    {
+      "path": "catalogue/ranger-research-packet.md",
+      "bytes": 3160,
+      "sha256": "e5d15969c633cc4d143ef1eecc5fa288cfc5c6a6798dd3391f24dec68193207a",
+      "git": "b2a160372d9ed6ddded26b61dd7fc904ee4381a9"
+    },
+    {
+      "path": "catalogue/source-lookup.jsonl.gz",
+      "bytes": 579441,
+      "sha256": "c68e95f3865838fdf1b01852a78cc9dcbfdc68447d52321ab766a61289d89bab",
+      "git": "0dfc94d2264e53bb6dc99555624cbbddafdf5e61"
+    },
+    {
       "path": "early/00-historical-research.md",
-      "bytes": 9096,
-      "sha256": "a3f5f9549e746bf2b77f3866858b62ddae065cea3b212e42bf54bf10ae77bef8",
-      "git": "aae81c89d8c03d99c11bf6be2a9e924a53301d20"
+      "bytes": 9345,
+      "sha256": "0849ce7f76d6266bf77d925da3af59136c11284b9b1603bac201cfe1cd39987f",
+      "git": "32fc2b87220f4630520f55f0219b06fcc6fd95c9"
     },
     {
       "path": "early/01-faction-and-animation-briefs.md",
@@ -347,6 +377,24 @@
       "git": "aaffd8ad8f6794edae12f5e194e66acc466e9ad5"
     },
     {
+      "path": "early/ra2-patch-audit.py",
+      "bytes": 4739,
+      "sha256": "eb01bcec04ae7e71c478eb848553a59754cdc7af3b36a1bf7516aa705e0ebda9",
+      "git": "c06a4f9a5e71eeb5813617d49a48a44050ba2d31"
+    },
+    {
+      "path": "early/ra2-patch-findings.json",
+      "bytes": 252240,
+      "sha256": "e271bc1fba1332485e373a03b236d7e5a578d75dd14f6d55d2907dc8be95ddf4",
+      "git": "250277921de39ab1e8ec1b97fc77b4c50c2411dc"
+    },
+    {
+      "path": "early/ra2-patch-provenance.md",
+      "bytes": 3695,
+      "sha256": "c27ad309fa073395df64713bb21f4e18f33c9ef8ed6e2193acc5b6115d0e5aa3",
+      "git": "23b7156f089b45dae1525a288483d152c22e5247"
+    },
+    {
       "path": "early/sage-summary.json",
       "bytes": 980,
       "sha256": "36f925a5a77ac644a65889523fb99e9c043a2b6bc05f8f4a635ad9774f3c2fc4",
@@ -369,6 +417,24 @@
       "bytes": 25768,
       "sha256": "425e44f192b39af07f747d5173036dd9e954e6f55a00f34888465404611221c4",
       "git": "d16caed2a4d09c5c0809f8c1d0e8fa1377e14062"
+    },
+    {
+      "path": "early/ts-retail-verification.json",
+      "bytes": 10195,
+      "sha256": "a6b16822b58f11477382e75e35d9d7f24081e2286ce90eddc56fbe1e250dc44a",
+      "git": "e78128445e3273dc94fcbec7a0b220d51e0036f6"
+    },
+    {
+      "path": "early/ts-retail-verification.md",
+      "bytes": 3604,
+      "sha256": "20b68ac3cfca8870b21f3fa71f744f5f33b2d5b8102ca1e4ec5c3cdeede60eab",
+      "git": "3a794d4b8cbefc2794e955aff7784d9587523086"
+    },
+    {
+      "path": "early/ts-retail-verification.py",
+      "bytes": 6623,
+      "sha256": "e37a8e5b5cbd588cc4e9c789a13cf5038bfb1d972565f21ce60986856c48b8e1",
+      "git": "03995f6abcd1073c70a9a837e220f6e727cba387"
     },
     {
       "path": "early/world-system-summary.json",
@@ -420,9 +486,9 @@
     },
     {
       "path": "editions/reference-profiles.json",
-      "bytes": 39631,
-      "sha256": "adac6aff055ad1f375d4c3cd9408cb99ed35882b2f26ca9bf66b33c37624df8e",
-      "git": "cb9206a290e80a1ea25ee6f67c8e2a1f55f1e701"
+      "bytes": 46917,
+      "sha256": "2954e5e3de45116dbbc8ff474135c1a1c97f4b36b2a5ff7ef9d533be2f777f24",
+      "git": "2559815f0833e1dd4d82dd80cb0865a434ddb050"
     },
     {
       "path": "editions/rivals-ta-alliances-reference.tsv",
@@ -483,6 +549,12 @@
       "bytes": 8313,
       "sha256": "b106d6e05f1679a9d22e888551f5ae823a870f31af9fcc39c780e7232e620ac4",
       "git": "1e896765a204f737487ef440bb2c5e155eb504c2"
+    },
+    {
+      "path": "experience/ra-mission-script-dossier.md",
+      "bytes": 9542,
+      "sha256": "52bca0219c830bb7c7a7495deebaa9e811eac7eda4f17859c2a4ea717b5e2642",
+      "git": "93acf12005748fb3636b6fd04df13d4f8d1d0d51"
     },
     {
       "path": "experience/read_audio.py",
@@ -735,6 +807,24 @@
       "bytes": 4196,
       "sha256": "d26d6037e4d2ac244de37e382b88a1056c011076b1b7f0b036ed235f179ab5ec",
       "git": "d9feb7285f6362e3c28bcb38e2967b26a48e5877"
+    },
+    {
+      "path": "foundation/combat-ranger-results.json",
+      "bytes": 7184,
+      "sha256": "1827066e9ccb34625089e10da003cbebfc4422435ec64581443de2490c7b2d97",
+      "git": "fce443d6136346de2bdcd3f830fc59dabc52bd98"
+    },
+    {
+      "path": "foundation/combat-ranger.md",
+      "bytes": 3428,
+      "sha256": "11af47a05adfc8290afd25877474239187570b92921e026d7980b030f5ce5ece",
+      "git": "7dab196caf903735ecc0c5ae5f121fb6f9c8eb39"
+    },
+    {
+      "path": "foundation/combat-ranger.mjs",
+      "bytes": 4200,
+      "sha256": "81f9d6c8586e94cab829e5f2d4395f728d722df8c211379a2a0a1bca16722315",
+      "git": "62e40e589f36e2e9fae1fd16039549ddaad71e14"
     },
     {
       "path": "foundation/cross-era-interactions.json",
@@ -1007,6 +1097,12 @@
       "git": "5e29e09be437cfa95ee1f090ff1fec8278e42b53"
     },
     {
+      "path": "review/lookup-readback.json",
+      "bytes": 4966,
+      "sha256": "f8c5978982addc4c0676d63c89837f97b3d40ab09649beca6a6950d51b120338",
+      "git": "dd6f7ce9d4e162d0f1421c87fb6238be39838b6f"
+    },
+    {
       "path": "review/map-demo-independent-results.json",
       "bytes": 35797,
       "sha256": "6f59bbeba9e3ccfa91e9f0d346b85b6901fa5d24aa2f064bd656c684eb549494",
@@ -1020,15 +1116,15 @@
     },
     {
       "path": "review/task-results.json",
-      "bytes": 31500,
-      "sha256": "6d9608ebfe10a4961e7e670babb5f1c748e6a0f702d2c66b38a23e6f5a9aec87",
-      "git": "60ec28830824e4ee01f8ce378f854fa0fa0510fa"
+      "bytes": 34353,
+      "sha256": "2a0c5aeea50598dc5337312601df940147bee6ade7ff4a0756a83cf7dd90eea9",
+      "git": "7da23214424b58c93c00cd87bca428d46d3dee9b"
     },
     {
       "path": "review/task-results.md",
-      "bytes": 32314,
-      "sha256": "f8fc149c6d64d87cb1f27434aa474c4e93a6e4ca82888f045fd618ab500ab801",
-      "git": "29a498adcaad13434b88e7851c55e9a7bcba8ef9"
+      "bytes": 35604,
+      "sha256": "58a044d76f48fba8c24ae9c71df0cf4b00a7689bac084ac0e553b0f3dd5739c9",
+      "git": "d56646228c2191bec6991bec6d1eaf6c47dbfee8"
     },
     {
       "path": "review/verify_deposit.py",

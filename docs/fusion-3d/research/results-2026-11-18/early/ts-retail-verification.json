@@ -1,0 +1,240 @@
+{
+  "comparison": "Whole LF comparator converted to CRLF, searched as a literal byte span in the named disc container. No decoding of asset content or assumption about padding beyond the span.",
+  "disc_profiles": [
+    {
+      "profile": "ts-nod-early",
+      "item": "cnc-tiberiansun-nod-108",
+      "disc": "C&C Tiberian Sun (Nod CD).iso",
+      "volume": "TS2",
+      "sector_bytes": 2048,
+      "image_size": 700069888,
+      "file": "INSTALL/TIBSUN.MIX",
+      "lba": 11096,
+      "bytes": 75094736,
+      "container_sha256": "23431290b211cd039315095e1987f1c411ecd3b6440861c4874572c92e5f6b2a",
+      "archive_record": "https://archive.org/details/cnc-tiberiansun-nod-108",
+      "results": [
+        {
+          "ini": "rules.ini",
+          "comparator_lf_bytes": 228399,
+          "comparator_lf_sha256": "cbae0282f612ea9d59d460e4174b2574f17e87f43b89ac609b752430a250e1d2",
+          "crlf_bytes": 239399,
+          "crlf_sha256": "79c2251bc4dc9232e9571be6db7b344ed63134f7ea4cb0af2b8916bd410dda5e",
+          "exact_complete_text_offsets_in_container": [],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/RULES.INI",
+          "anchored_range_comparison": {
+            "start": 22483288,
+            "exclusive_end": 22722645,
+            "sha256": "0b8a10b2212e2e9e32f5899b61cabfc9475da04c3ea2d0c294051df509faa334",
+            "disc_index_keys": 8636,
+            "comparator_index_keys": 8639,
+            "common_keys": 8636,
+            "equal_values": 8636,
+            "changed": [],
+            "only_in_disc": [],
+            "only_in_comparator": [
+              {
+                "section": "GAFSDF",
+                "field": "GUARDRANGE",
+                "value": "5"
+              },
+              {
+                "section": "GAWALL",
+                "field": "GUARDRANGE",
+                "value": "5"
+              },
+              {
+                "section": "NAWALL",
+                "field": "GUARDRANGE",
+                "value": "5"
+              }
+            ]
+          }
+        },
+        {
+          "ini": "art.ini",
+          "comparator_lf_bytes": 80884,
+          "comparator_lf_sha256": "b52e3d6d5db5f2d62a43d9dac093d75694a4d35d6e69ff89fa4a28f78cf5d040",
+          "crlf_bytes": 86510,
+          "crlf_sha256": "972a9c1339b349233cb05cbe28acf88b936ac061fc730cc1bd4b1b5f05eee493",
+          "exact_complete_text_offsets_in_container": [],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/ART.INI",
+          "anchored_range_comparison": {
+            "start": 22396664,
+            "exclusive_end": 22483276,
+            "sha256": "86a5bd17ad73306415036834aa575ec0f2dcf2d81769f47b85e6451d8aae3b02",
+            "disc_index_keys": 3770,
+            "comparator_index_keys": 3770,
+            "common_keys": 3770,
+            "equal_values": 3768,
+            "changed": [
+              {
+                "section": "DOGGIESEQUENCE",
+                "field": "PRONE",
+                "disc": "74,1,0",
+                "comparator": "90,1,0"
+              },
+              {
+                "section": "MMCH",
+                "field": "PRIMARYFIREFLH",
+                "disc": "20,-50,100",
+                "comparator": "250,-50,100"
+              }
+            ],
+            "only_in_disc": [],
+            "only_in_comparator": []
+          }
+        },
+        {
+          "ini": "firestrm.ini",
+          "comparator_lf_bytes": 32722,
+          "comparator_lf_sha256": "1f908783ae50b81dd81c3fa8518700ff18b2fe977568fbca24d17e9fb149f5c5",
+          "crlf_bytes": 34504,
+          "crlf_sha256": "9e0d849e75d5d8cefce6c6d0f8a4440312e8aff93a301fb1e6579506025a9b5c",
+          "exact_complete_text_offsets_in_container": [],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/FIRESTRM.INI"
+        },
+        {
+          "ini": "artfs.ini",
+          "comparator_lf_bytes": 8763,
+          "comparator_lf_sha256": "beb5affeaeb204bac6f6a07a75208e15feacd4d15aca3cd9c0e188ae3cc69400",
+          "crlf_bytes": 9476,
+          "crlf_sha256": "d5ace7b2b42dc278a4933752a6ba9fe987dc49b7336ebcfb4b45ee812b4a95b0",
+          "exact_complete_text_offsets_in_container": [],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/ARTFS.INI"
+        },
+        {
+          "ini": "temperat.ini",
+          "comparator_lf_bytes": 23879,
+          "comparator_lf_sha256": "ade53cc9298540d5886cc500e2c327670cc531fb976462937ff468fbee0ff3c8",
+          "crlf_bytes": 25195,
+          "crlf_sha256": "403edc5924fc55fff120a081e0ebb48de5dd8427bf72d37c8f4d6b4be19fd5ee",
+          "exact_complete_text_offsets_in_container": [],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/TEMPERAT.INI"
+        },
+        {
+          "ini": "snow.ini",
+          "comparator_lf_bytes": 21066,
+          "comparator_lf_sha256": "55819f1919c56770cccd7fd721bc079cf78dddc27d142d17e182561ba0e81f16",
+          "crlf_bytes": 22239,
+          "crlf_sha256": "433c1de283ea469627e339028ba92352006e7b01409749040d2fa24895240b53",
+          "exact_complete_text_offsets_in_container": [
+            22755032
+          ],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/SNOW.INI"
+        }
+      ],
+      "installed_executable": {
+        "iso_path": "INSTALL/GAME.EXE",
+        "lba": 9118,
+        "bytes": 239351,
+        "sha256": "4d1175a530847a1a75fc2b6424312e416d87554812814518690f92fe4b685bfe",
+        "strings": {
+          "FileVersion": {
+            "version": "1.08",
+            "string_key_file_offset": 184732
+          },
+          "ProductVersion": {
+            "version": "1.08",
+            "string_key_file_offset": 185256
+          }
+        }
+      }
+    },
+    {
+      "profile": "fs-uk-retail",
+      "item": "firestorm_202412",
+      "disc": "FIRESTORM.bin",
+      "volume": "FIRESTORM",
+      "sector_bytes": 2352,
+      "image_size": 814043664,
+      "file": "INSTALL/EXPAND01.MIX",
+      "lba": 307542,
+      "bytes": 36972996,
+      "container_sha256": "f1f37a7a9c14bc32dcd308474dcfa9ab7736d57b2a7cbf6e6be1d4d298af6cec",
+      "archive_record": "https://archive.org/details/firestorm_202412",
+      "results": [
+        {
+          "ini": "rules.ini",
+          "comparator_lf_bytes": 228399,
+          "comparator_lf_sha256": "cbae0282f612ea9d59d460e4174b2574f17e87f43b89ac609b752430a250e1d2",
+          "crlf_bytes": 239399,
+          "crlf_sha256": "79c2251bc4dc9232e9571be6db7b344ed63134f7ea4cb0af2b8916bd410dda5e",
+          "exact_complete_text_offsets_in_container": [
+            409204
+          ],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/RULES.INI"
+        },
+        {
+          "ini": "art.ini",
+          "comparator_lf_bytes": 80884,
+          "comparator_lf_sha256": "b52e3d6d5db5f2d62a43d9dac093d75694a4d35d6e69ff89fa4a28f78cf5d040",
+          "crlf_bytes": 86510,
+          "crlf_sha256": "972a9c1339b349233cb05cbe28acf88b936ac061fc730cc1bd4b1b5f05eee493",
+          "exact_complete_text_offsets_in_container": [
+            313204
+          ],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/ART.INI"
+        },
+        {
+          "ini": "firestrm.ini",
+          "comparator_lf_bytes": 32722,
+          "comparator_lf_sha256": "1f908783ae50b81dd81c3fa8518700ff18b2fe977568fbca24d17e9fb149f5c5",
+          "crlf_bytes": 34504,
+          "crlf_sha256": "9e0d849e75d5d8cefce6c6d0f8a4440312e8aff93a301fb1e6579506025a9b5c",
+          "exact_complete_text_offsets_in_container": [
+            648612
+          ],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/FIRESTRM.INI"
+        },
+        {
+          "ini": "artfs.ini",
+          "comparator_lf_bytes": 8763,
+          "comparator_lf_sha256": "beb5affeaeb204bac6f6a07a75208e15feacd4d15aca3cd9c0e188ae3cc69400",
+          "crlf_bytes": 9476,
+          "crlf_sha256": "d5ace7b2b42dc278a4933752a6ba9fe987dc49b7336ebcfb4b45ee812b4a95b0",
+          "exact_complete_text_offsets_in_container": [
+            399716
+          ],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/ARTFS.INI"
+        },
+        {
+          "ini": "temperat.ini",
+          "comparator_lf_bytes": 23879,
+          "comparator_lf_sha256": "ade53cc9298540d5886cc500e2c327670cc531fb976462937ff468fbee0ff3c8",
+          "crlf_bytes": 25195,
+          "crlf_sha256": "403edc5924fc55fff120a081e0ebb48de5dd8427bf72d37c8f4d6b4be19fd5ee",
+          "exact_complete_text_offsets_in_container": [
+            754644
+          ],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/TEMPERAT.INI"
+        },
+        {
+          "ini": "snow.ini",
+          "comparator_lf_bytes": 21066,
+          "comparator_lf_sha256": "55819f1919c56770cccd7fd721bc079cf78dddc27d142d17e182561ba0e81f16",
+          "crlf_bytes": 22239,
+          "crlf_sha256": "433c1de283ea469627e339028ba92352006e7b01409749040d2fa24895240b53",
+          "exact_complete_text_offsets_in_container": [],
+          "source": "https://github.com/Vinifera-Developers/Tiberian-Sun-INIs/blob/820434dd9946ae524bd8972fac764195ef2939a0/SNOW.INI"
+        }
+      ],
+      "installed_executable": {
+        "iso_path": "INSTALL/GAME.EXE",
+        "lba": 325600,
+        "bytes": 3457296,
+        "sha256": "6944afe138a623e0ccbcc8280f33bbde9724a2bdf0fbcec06755f7b0821c3b3c",
+        "strings": {
+          "FileVersion": {
+            "version": "2.0",
+            "string_key_file_offset": 3442198
+          },
+          "ProductVersion": {
+            "version": "2.0",
+            "string_key_file_offset": 3442718
+          }
+        }
+      }
+    }
+  ]
+}
