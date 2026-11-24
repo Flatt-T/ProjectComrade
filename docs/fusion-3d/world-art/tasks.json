@@ -1,0 +1,2565 @@
+[
+  {
+    "id": "ART-001",
+    "title": "Reconcile every current runtime item with its art and source identity",
+    "workstream": "ART",
+    "phase": 0,
+    "owner": "content auditor",
+    "depends_on": [
+      "ENG-001"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "packages/fusion/src/packs/",
+      "packages/fusion/src/fusions/",
+      "packages/fusion/src/worldpack.ts",
+      "packages/fusion/src/art/models.ts",
+      "packages/fusion/src/render.ts"
+    ],
+    "scope": "Produce the evidence join between current unit/building catalogue, procedural shape aliases, icons, clips, sound hooks and source-era inventory. Audit actual runtime enumeration, not comments or marketing counts.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Enumerate all current packs and the universal world pack at the pinned revision; retain duplicate display names as distinct runtime IDs.",
+      "For each ID trace shape/style fallback resolution, icon rendering, currently exposed mechanics and available sound/animation hooks.",
+      "Join to source research identity when available and mark unresolved identity explicitly; distinguish existing non-C&C packs.",
+      "Classify each row reuse, adapt, replace or blocked with a code pointer and rationale; cross-reference THU-2447/2448 instead of reopening all prior work."
+    ],
+    "deliverables": [
+      "Machine-readable runtime-to-source-to-art matrix",
+      "Coverage counts with denominator and alias/fallback report",
+      "Reuse/replace decision table"
+    ],
+    "acceptance": [
+      "Every runtime ID occurs exactly once in reconciliation; missing/extra IDs fail",
+      "Every accepted reuse has code and visual evidence",
+      "No claim of all source content complete from runtime count alone"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G0",
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-002",
+    "title": "Define the art-direction framework and first-battle faction style sheets",
+    "workstream": "ART",
+    "phase": 1,
+    "owner": "art director",
+    "depends_on": [
+      "ART-001",
+      "RES-027"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/style/",
+      "Approved source inventory and provenance ledger"
+    ],
+    "scope": "Define common battlefield cohesion, a complete faction-style schema and independently accepted style sheets for the pinned first-battle seed. Every later faction/subfaction must extend this framework under ART-014 through ART-019 before its production leaves can close; this early task does not claim full-catalogue art completion.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Create a style-sheet schema covering architecture, infantry/vehicle silhouette, materials, wear, weapons, motion and audio; fully populate it for each pinned seed faction tuple, and assign explicit remaining faction extensions to ART-014 through ART-019.",
+      "Cite at least six useful source observations per family and identify deliberate Fusion adaptations separately.",
+      "Compare same-role silhouettes across the two seed factions and at least one contrasting original design study; do not claim the latter is source-verified shipped content.",
+      "Define light, scale, team-mask and contrast conventions; attach an original blockout guide and explicit prohibited generic substitutions."
+    ],
+    "deliverables": [
+      "Faction style-sheet register",
+      "Scale/silhouette/material guide",
+      "Art direction acceptance record"
+    ],
+    "acceptance": [
+      "Every seed faction/subfaction has an independently accepted sheet or justified shared-base variant; every remaining family has an owned extension requirement.",
+      "Distinct tactical roles remain identifiable without faction labels",
+      "References and original-production decisions are separate"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "All procedure/category lists below are schema coverage and an extension checklist. Execute source normalization, observations and decisions only for the exact pinned first-battle seed rows in this task. Non-seed items receive owned extension tasks; they are neither prerequisite completion nor permission to invent values. RES-028/029 and the corresponding era delivery gates enforce whole-series closure."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G1",
+    "gate_conditions": [
+      "Accepted pinned seed roster and adaptation; later faction sheets are owned by their production parents."
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-003",
+    "title": "Build authoring export validation and specify the runtime asset contract",
+    "workstream": "ART",
+    "phase": 2,
+    "owner": "technical artist and asset tooling engineer",
+    "depends_on": [
+      "ART-002",
+      "RES-003"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed packages/content-schema/",
+      "Proposed packages/fusion-renderer-3d/",
+      "Proposed tools/assets/"
+    ],
+    "scope": "Own editable-source export tooling, GLB validation and the asset contract specification. ENG-010 owns production content-schema implementation and runtime ingestion; do not duplicate those edits. This output can precede renderer selection because both candidate renderers consume the same GLB fixture.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Specify manifest fields and canonical IDs in a reviewed schema proposal; agree the interface with ENG-010, which owns its production implementation.",
+      "Implement the metre-to-cell import scale and +Y-up/forward conversion; prove a tank, infantry and asymmetric building retain orientation, normals and origin.",
+      "Validate finite transforms, bounds, skin/clip/socket requirements, external URLs, textures, budgets and content hashes.",
+      "Make export deterministic from pinned tooling and document one exact command; retain editable source and exporter settings."
+    ],
+    "deliverables": [
+      "Versioned asset manifest schema",
+      "Export/import validation command and fixtures",
+      "Three validated reference assets"
+    ],
+    "acceptance": [
+      "Bad orientation, missing socket/clip, mismatched hash or external texture is rejected",
+      "Round-trip asset dimensions agree with approved footprint/scale",
+      "Two clean exports agree or documented nondeterministic metadata is normalized"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G2",
+    "gate_conditions": [
+      "G1 source identity and authoring conventions accepted"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-004",
+    "title": "Specify animation pose bindings priorities and event fixtures",
+    "workstream": "ART",
+    "phase": 2,
+    "owner": "animation systems specialist",
+    "depends_on": [
+      "ART-003",
+      "ENG-006"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed packages/fusion-view/src/frame.ts",
+      "Proposed packages/fusion-renderer-3d/src/animation/"
+    ],
+    "scope": "Own the clip-binding specification, priority/interruption tables, required-state schema proposal and representative pose/event fixtures. ENG-015 owns the production animation controller and ENG-016 event delivery. This task provides their inputs and must not depend on those implementations.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read current HEAD, the immutable RenderFrame from ENG-006 and the accepted authoring contract; lease only animation specification and fixture paths.",
+      "Map every mechanic tag to required states, priority/interruption behavior and explicit non-applicability reasons; deliver these as versioned data.",
+      "Specify tick/state-start/event-ID mapping, root-motion prohibition, pose reconstruction and hull/turret/upper-body blending responsibilities.",
+      "Create synthetic frames/events for move/fire/death/teleport/transform/reconnect and independent expected pose/event counts.",
+      "Review the complete contract with ENG-015/016 owners; production validation and checksum evidence is completed by those engine tasks and later asset integration."
+    ],
+    "deliverables": [
+      "Versioned state-to-clip/priority contract",
+      "Synthetic pose/event fixtures with independent expected outcomes",
+      "Engine-owner interface review"
+    ],
+    "acceptance": [
+      "Every required state and interruption has a defined binding",
+      "No clip marker can mutate authoritative gameplay",
+      "Reconnect fixture requires one audiovisual event despite duplicate delivery",
+      "Contract supplies enough detail for ENG-015 without making up missing semantics"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G2",
+    "gate_conditions": [
+      "Engine read-only view and semantic event contract"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-005",
+    "title": "Enforce provenance and publish eligibility for every art input",
+    "workstream": "ART",
+    "phase": 1,
+    "owner": "asset provenance reviewer",
+    "depends_on": [
+      "ART-001",
+      "OPS-003"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Existing rights ledger and validators",
+      "Proposed packages/content-schema/",
+      "Proposed assets/manifests/"
+    ],
+    "scope": "Carry the existing rights ledger through editable sources, exported models, textures, sounds, music, icons and generated concepts. Produce a build-time eligibility decision for public bundles.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Resolve the existing ledger paths and statuses; do not replace its evidence with a generic license string.",
+      "Add per-asset creator/input/permission/derivative records and separate code permission from artwork/audio permission.",
+      "Construct a release-manifest filter that fails on unknown/blocked provenance and reports precise asset IDs.",
+      "Review at least one reused procedural asset, one new original model, one sound and one intentionally blocked source to prove the workflow."
+    ],
+    "deliverables": [
+      "Provenance schema and ledger links",
+      "Bundle eligibility validator",
+      "Reviewer decisions and blocked-input report"
+    ],
+    "acceptance": [
+      "Blocked or unknown inputs cannot enter public artifact manifests",
+      "Original asset claims retain editable/source evidence",
+      "No repository code license is treated as blanket art permission"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G1",
+    "gate_conditions": [
+      "G0 rights policy identified"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-006",
+    "title": "Produce the representative battle blockout set",
+    "workstream": "ART",
+    "phase": 2,
+    "owner": "3D generalist",
+    "depends_on": [
+      "ART-003",
+      "ART-005",
+      "ART-004"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/benchmark/",
+      "Proposed assets/manifests/benchmark/"
+    ],
+    "scope": "Create the limited, complete set needed for the renderer comparison and first battle: two opposed researched factions, infantry, vehicle, aircraft, naval, core base/economy structures, bridge and terrain. Blockouts remain visibly classified until full production tasks pass.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Use the representative-battle roster selected by the supervisor; record each item and required mechanic/animation.",
+      "Adapt eligible existing procedural geometry where useful; author missing silhouettes with correct pivots/sockets and low-detail meshes.",
+      "Create the minimal original benchmark rigs and idle/move/fire clips in GLB using the offline contract. Candidate renderers play those identical clips in their comparison harness; this does not require the completed ENG-015 controller or ENG-010 runtime ingestion.",
+      "Export the pinned GLB assets and a camera/light/pose comparison manifest, with offline reference previews. Supply identical bytes and scene settings to ENG-007/008; those downstream renderer tasks and ENG-009 produce and verify actual two-candidate captures.",
+      "Measure asset bytes and geometry and identify which blockouts need replacement before G4."
+    ],
+    "deliverables": [
+      "Pinned benchmark asset set",
+      "Reference views and size report",
+      "Blockout-to-final task links"
+    ],
+    "acceptance": [
+      "The immutable fixture package supplies identical asset bytes, camera/light/pose settings and expected metadata to both renderer candidates; actual input-equality and capture evidence is owned by ENG-007/008 and ENG-009.",
+      "Every major movement/render class is present",
+      "Blockout status cannot count toward full-roster completion"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G2",
+    "gate_conditions": [
+      "Identical offline benchmark GLB fixture manifest; both renderer spikes subsequently consume it."
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-007",
+    "title": "Build infantry rigs and specialist action animations",
+    "workstream": "ART",
+    "phase": 4,
+    "owner": "character animator",
+    "depends_on": [
+      "ART-004",
+      "ART-006",
+      "ENG-015"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/rigs/infantry/",
+      "Proposed packages/fusion-renderer-3d/src/animation/"
+    ],
+    "scope": "Provide reusable infantry rig families and complete state clips, then prove representative rifle, Engineer and specialist infantry. Per-entity jobs supply the remaining roster.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Rig locomotion/aim hierarchy and validated shared proportions; implement idle, start/stop, move, aim, primary fire, hit and death.",
+      "Add research-required prone, reload, repair, capture, enter/exit, swim, parachute, deploy and specialist ability families.",
+      "Test torso aiming over movement without root drift and align feet at declared slope limits.",
+      "Record per-clip applicability and use the independent review checklist at three gameplay zooms."
+    ],
+    "deliverables": [
+      "Rig families and clip library",
+      "Representative integrated infantry",
+      "Clip coverage and gameplay captures"
+    ],
+    "acceptance": [
+      "No rigid sliding stand-in for walking/running",
+      "Engineer work/capture events do not execute from clip callbacks",
+      "Death always interrupts incompatible poses",
+      "Shared rigs preserve required proportions"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-008",
+    "title": "Build tracked and wheeled vehicle articulation",
+    "workstream": "ART",
+    "phase": 4,
+    "owner": "vehicle technical artist",
+    "depends_on": [
+      "ART-004",
+      "ART-006",
+      "ENG-015"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/rigs/vehicles/",
+      "Proposed packages/fusion-renderer-3d/src/animation/"
+    ],
+    "scope": "Create vehicle component contracts and representative track/wheel/turret, harvester and transport animation systems.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Separate hull, turret, barrel, wheels/tracks, doors and effect sockets; validate opposing hull/turret headings.",
+      "Tie wheels/tracks to presented speed; use bounded visual suspension with no gameplay displacement.",
+      "Author attack/recoil, damage, repair, deploy, load/unload and destruction where applicable.",
+      "Show harvester collection/docking/unloading and transport doors against authoritative events."
+    ],
+    "deliverables": [
+      "Vehicle articulation library",
+      "Tracked/wheeled/harvester/transport exemplar assets",
+      "Timing and surface captures"
+    ],
+    "acceptance": [
+      "Turrets and hulls rotate independently",
+      "Stopped vehicles stop tread/wheel motion",
+      "Cargo and credit change only on authoritative events",
+      "No missing required doors/exits/sockets"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-009",
+    "title": "Build walker creature and subterranean animation families",
+    "workstream": "ART",
+    "phase": 5,
+    "owner": "creature and mechanical animator",
+    "depends_on": [
+      "ART-004",
+      "ART-006",
+      "ENG-015",
+      "ENG-027"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/rigs/walkers/",
+      "Proposed assets/source/rigs/creatures/"
+    ],
+    "scope": "Support mechanical/organic gaits, heavy turns, stance, melee and researched burrow/surface states. Exact eligible content comes from the signed inventory.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Create distinct gait rigs by body plan; tune stride to movement speed and turn radius without moving the authoritative root.",
+      "Author stop/brace/aim/fire/hit/collapse and applicable stomp/melee/jump/burrow transitions.",
+      "Expose ground-contact and ability sockets; ensure deformation retains silhouette at tactical zoom.",
+      "Test different elevation surfaces and death/interruption during special movement."
+    ],
+    "deliverables": [
+      "Walker/creature rig library",
+      "Special movement clip coverage",
+      "Representative gameplay evidence"
+    ],
+    "acceptance": [
+      "Walkers do not translate as rigid tanks",
+      "Burrowed units remain governed by detection policy",
+      "Foot placement cannot change passability or elevation",
+      "Every required form has entry/exit states"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "Engine special-movement capability fixtures"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-010",
+    "title": "Build aircraft naval and transforming unit animation families",
+    "workstream": "ART",
+    "phase": 4,
+    "owner": "air naval and transformation technical artist",
+    "depends_on": [
+      "ART-004",
+      "ART-006",
+      "ENG-015",
+      "ENG-027",
+      "ENG-034"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/rigs/air/",
+      "Proposed assets/source/rigs/naval/",
+      "Proposed packages/fusion-renderer-3d/src/animation/"
+    ],
+    "scope": "Cover flight, banking, rotor motion, launch/rearm, waterline/wake, submerge, amphibious transitions and multi-form silhouettes.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Implement independent flight/rotor/naval component families and identify which states are visual versus authoritative movement modes.",
+      "Author takeoff/landing/rearm, carrier/cargo actions, sink/death and applicable surface/submerge transitions.",
+      "For every transform exemplar author both forms and a complete transition, including interruption and reverse direction.",
+      "Validate waterline and wake against authoritative surface data and display multi-layer targeting unambiguously."
+    ],
+    "deliverables": [
+      "Air/naval/transform rig libraries",
+      "Complete exemplar transitions",
+      "Water/bridge/air overlap captures"
+    ],
+    "acceptance": [
+      "No hover-only substitute for fixed-wing behavior when source/spec requires flight",
+      "No instant close-view mesh swap without approved design",
+      "No submerged visibility leak",
+      "Waterline follows surface, not terrain-color inference"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "gate_conditions": [
+      "Engine multi-mode entity capability"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-011",
+    "title": "Build complete structure lifecycle animation",
+    "workstream": "ART",
+    "phase": 4,
+    "owner": "environment animator",
+    "depends_on": [
+      "ART-004",
+      "ART-006",
+      "ENG-015",
+      "ENG-030"
+    ],
+    "existing_issues": [
+      "THU-2447"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/structures/",
+      "Proposed packages/fusion-renderer-3d/src/animation/"
+    ],
+    "scope": "Author construction, functioning machinery, production doors/exit, low-power, damage, repair, ownership change, sell/pack and combat destruction families.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Stage construction as foundation/structural mass/machinery/operational finish; replace scale-up-only blockouts.",
+      "Tie production activity and exit doors to exact spawn timing without collision side effects.",
+      "Implement distinct sale/pack and combat destruction sequences plus rubble/cleared-footprint rendering.",
+      "Support applicable upgrade, garrison, superweapon and waterborne states through required capability tags."
+    ],
+    "deliverables": [
+      "Structure lifecycle library",
+      "Construction/sell/destruction exemplar scenes",
+      "Building animation coverage validator"
+    ],
+    "acceptance": [
+      "Build, sell and destruction are visually distinct",
+      "No spawned unit hidden indefinitely inside a closed factory",
+      "Low power and ownership changes correctly update materials and activity",
+      "Mesh bounds never redefine footprint"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-012",
+    "title": "Create distinct weapon ability and destruction effects",
+    "workstream": "ART",
+    "phase": 4,
+    "owner": "VFX artist",
+    "depends_on": [
+      "ART-004",
+      "ART-006",
+      "ENG-016",
+      "ENG-017"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "packages/fusion/src/art/fx.ts for migration reference",
+      "Proposed packages/fusion-renderer-3d/src/effects/"
+    ],
+    "scope": "Provide an effect family for every approved weapon/status mechanic, with low/high-quality parity and correct source/target/timing cues.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Reconcile existing WeaponVisual values with full researched capability list; add manifests for missing families instead of generic fallback.",
+      "Author launch/flight/impact and status start/sustain/end cues, anchored to validated sockets and authoritative event times.",
+      "Separate cosmetic fragments from gameplay wrecks and define bounded lifetimes/pools.",
+      "Provide reduced-effects variants retaining warnings, area boundaries and ownership readability; test fog/shadow/reflection/audio entitlements."
+    ],
+    "deliverables": [
+      "Effect manifest/library",
+      "Weapon/status coverage report",
+      "Low/high effect parity captures"
+    ],
+    "acceptance": [
+      "All included weapon families have distinct readable cues",
+      "No visual effect applies damage or blocks navigation",
+      "Low detail preserves gameplay-significant warnings",
+      "Hidden entities produce no unauthorised effect leak"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "gate_conditions": [
+      "Engine semantic events and visibility projection"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-013",
+    "title": "Expand the complete inventory into bounded per-entity work orders",
+    "workstream": "ART",
+    "phase": 2,
+    "owner": "content production coordinator",
+    "depends_on": [
+      "ART-001",
+      "ART-002",
+      "ART-003",
+      "ART-004",
+      "ART-005",
+      "RES-003",
+      "RES-027"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "world-art/04_per_entity_work_orders.md",
+      "Approved source inventory",
+      "Proposed tools/content-work-orders/"
+    ],
+    "scope": "Supply and validate only the asset-stage expansion in the single canonical F3D-ENTITY graph. RES-003 owns immutable identity; OPS-005 owns the sole ledger, publication/upsert and real Linear ID mapping. Include SIM and FX_AUDIO_UI predecessors before final entity integration/review. Deliver the generator fragment and seed validation fixtures before OPS-005 publication; OPS-005 later runs the end-to-end publication proof. Do not require an already completed publisher to accept this upstream fragment.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read RES-003 identity schema, OPS-005 publisher contract, approved inventory and asset specifications; record revisions and file lease.",
+      "For every included row derive required MODEL/RIG/ANIM parts and asset requirements for SPEC/FX_AUDIO_UI/INTEGRATE/REVIEW; SIM requirements are owned by the gameplay specialist in the same graph.",
+      "Use only F3D-ENTITY-<rowUid>-<stage>-<part> keys with stages SPEC,SIM,MODEL,RIG,ANIM,FX_AUDIO_UI,INTEGRATE,REVIEW; obtain rowUid from the canonical immutable identity and retain full hash/collision validation.",
+      "Apply one entity/form model per leaf, one rig family per technical job, at most six related clips per animation leaf and one independent complete-entity review per leaf.",
+      "Deliver expansion fragments and expected ID/dependency fixtures to OPS-005 for its single idempotent publisher. Unit-validate the schema and idempotence here; OPS-005 validates actual returned Linear IDs and completeness during its downstream publication proof. Do not create a parallel ART-ASSET publisher.",
+      "Ensure final INTEGRATE/REVIEW depends on verified SIM and all FX_AUDIO_UI parts as well as art assets; an art-only pass cannot complete the entity."
+    ],
+    "deliverables": [
+      "Asset-stage expansion fragment for the canonical entity manifest",
+      "Cross-stage dependency and required-clip validation",
+      "Seed and expected-ID coverage report plus the downstream real-ID reconciliation report template for OPS-005"
+    ],
+    "acceptance": [
+      "Every included entity/form has required art-stage jobs or approved alias rationale",
+      "One canonical identity/key scheme and one publisher are used",
+      "No unbounded all-faction asset job substitutes for bounded leaves",
+      "Final entity review requires verified SIM and FX_AUDIO_UI",
+      "Re-expansion of the upstream fragment is idempotent against expected semantic IDs and fixture inputs; OPS-005 owns proof against the actual published Linear ID map."
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "gate_conditions": [
+      "Accepted source identity, seed adaptation and asset-stage fragment fixtures; full-census closure is downstream RES-028/029."
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "ART-014",
+    "title": "Complete Tiberian Dawn and Red Alert era production",
+    "workstream": "ART",
+    "phase": 5,
+    "owner": "era content lead with per-asset specialists",
+    "depends_on": [
+      "ART-013",
+      "ART-007",
+      "ART-008",
+      "ART-010",
+      "ART-011",
+      "ART-012",
+      "OPS-005",
+      "RES-004",
+      "RES-005",
+      "RES-019"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Generated F3D-ENTITY work orders",
+      "Approved era source dossiers",
+      "Proposed assets/source/eras/"
+    ],
+    "scope": "Produce all approved original-game/expansion units, structures, campaign/neutral variants and presentation for the early C&C and Red Alert families, keeping source-era identity explicit.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Select every approved inventory row for Tiberian Dawn, The Covert Operations, console additions and Sole Survivor scope decisions; Red Alert, Counterstrike and The Aftermath; Remastered presentation comparisons; retain buildable, campaign, summoned, neutral and variant classifications.",
+      "Execute generated bounded work orders by available capability/rig; do not let an absent mechanic be concealed by a completed mesh.",
+      "Run each faction's complete production/ability/ownership/destruction journey using accepted source/adaptation specifications.",
+      "Review side-by-side role silhouettes, all forms/animations and terrain compatibility; close only after a relational inventory/runtime/asset/evidence join passes."
+    ],
+    "deliverables": [
+      "Complete era asset bundle and editable sources",
+      "Per-entity evidence links",
+      "Faction/variant coverage and blocker report"
+    ],
+    "acceptance": [
+      "100% of included rows have independently verified art, clips, effects and icons",
+      "Every unimplemented source row has an explicit remaining task or approved scope decision",
+      "No generic same-role placeholder used to claim faction completion",
+      "Existing runtime IDs migrate explicitly"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "Era mechanics and source data gate passed"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "ART-015",
+    "title": "Complete Tiberian Sun and Red Alert 2 era production",
+    "workstream": "ART",
+    "phase": 5,
+    "owner": "era content lead with per-asset specialists",
+    "depends_on": [
+      "ART-013",
+      "ART-007",
+      "ART-008",
+      "ART-009",
+      "ART-010",
+      "ART-011",
+      "ART-012",
+      "OPS-005",
+      "RES-006",
+      "RES-007",
+      "RES-008",
+      "RES-009"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Generated F3D-ENTITY work orders",
+      "Approved era source dossiers",
+      "Proposed assets/source/eras/"
+    ],
+    "scope": "Produce every approved GDI/Nod/mutant-related, Allied/Soviet/country and Yuri/expansion item with walkers, subterranean, psychic, naval and transport distinctions.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Select every approved inventory row for Tiberian Sun and Firestorm; Red Alert 2 and Yuri's Revenge, with all approved subfaction/country and campaign/neutral variants; retain buildable, campaign, summoned, neutral and variant classifications.",
+      "Execute generated bounded work orders by available capability/rig; do not let an absent mechanic be concealed by a completed mesh.",
+      "Run each faction's complete production/ability/ownership/destruction journey using accepted source/adaptation specifications.",
+      "Review side-by-side role silhouettes, all forms/animations and terrain compatibility; close only after a relational inventory/runtime/asset/evidence join passes."
+    ],
+    "deliverables": [
+      "Complete era asset bundle and editable sources",
+      "Per-entity evidence links",
+      "Faction/variant coverage and blocker report"
+    ],
+    "acceptance": [
+      "100% of included rows have independently verified art, clips, effects and icons",
+      "Every unimplemented source row has an explicit remaining task or approved scope decision",
+      "No generic same-role placeholder used to claim faction completion",
+      "Existing runtime IDs migrate explicitly"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "Era mechanics and source data gate passed"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "ART-016",
+    "title": "Complete Generals and Zero Hour production",
+    "workstream": "ART",
+    "phase": 5,
+    "owner": "era content lead with per-asset specialists",
+    "depends_on": [
+      "ART-013",
+      "ART-007",
+      "ART-008",
+      "ART-010",
+      "ART-011",
+      "ART-012",
+      "OPS-005",
+      "RES-010",
+      "RES-011"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Generated F3D-ENTITY work orders",
+      "Approved era source dossiers",
+      "Proposed assets/source/eras/"
+    ],
+    "scope": "Produce all three base factions, researched generals/subfactions, construction workers/dozers, upgrades, special units and powers; preserve construction/economy differences.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Select every approved inventory row for Generals and Zero Hour, including every approved general, challenge, civilian and campaign variant; retain buildable, campaign, summoned, neutral and variant classifications.",
+      "Execute generated bounded work orders by available capability/rig; do not let an absent mechanic be concealed by a completed mesh.",
+      "Run each faction's complete production/ability/ownership/destruction journey using accepted source/adaptation specifications.",
+      "Review side-by-side role silhouettes, all forms/animations and terrain compatibility; close only after a relational inventory/runtime/asset/evidence join passes."
+    ],
+    "deliverables": [
+      "Complete era asset bundle and editable sources",
+      "Per-entity evidence links",
+      "Faction/variant coverage and blocker report"
+    ],
+    "acceptance": [
+      "100% of included rows have independently verified art, clips, effects and icons",
+      "Every unimplemented source row has an explicit remaining task or approved scope decision",
+      "No generic same-role placeholder used to claim faction completion",
+      "Existing runtime IDs migrate explicitly"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "Era mechanics and source data gate passed"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "ART-017",
+    "title": "Complete Tiberium Wars and Kane's Wrath production",
+    "workstream": "ART",
+    "phase": 5,
+    "owner": "era content lead with per-asset specialists",
+    "depends_on": [
+      "ART-013",
+      "ART-007",
+      "ART-008",
+      "ART-009",
+      "ART-010",
+      "ART-011",
+      "ART-012",
+      "OPS-005",
+      "RES-012",
+      "RES-013"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Generated F3D-ENTITY work orders",
+      "Approved era source dossiers",
+      "Proposed assets/source/eras/"
+    ],
+    "scope": "Produce GDI, Nod, Scrin and all approved subfaction/squad/epic/upgrade forms; nonhuman silhouettes and motion must remain distinct.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Select every approved inventory row for Tiberium Wars and Kane's Wrath, including all approved subfactions, squads, epic units, structures and campaign/neutral forms; retain buildable, campaign, summoned, neutral and variant classifications.",
+      "Execute generated bounded work orders by available capability/rig; do not let an absent mechanic be concealed by a completed mesh.",
+      "Run each faction's complete production/ability/ownership/destruction journey using accepted source/adaptation specifications.",
+      "Review side-by-side role silhouettes, all forms/animations and terrain compatibility; close only after a relational inventory/runtime/asset/evidence join passes."
+    ],
+    "deliverables": [
+      "Complete era asset bundle and editable sources",
+      "Per-entity evidence links",
+      "Faction/variant coverage and blocker report"
+    ],
+    "acceptance": [
+      "100% of included rows have independently verified art, clips, effects and icons",
+      "Every unimplemented source row has an explicit remaining task or approved scope decision",
+      "No generic same-role placeholder used to claim faction completion",
+      "Existing runtime IDs migrate explicitly"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "Era mechanics and source data gate passed"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "ART-018",
+    "title": "Complete Red Alert 3 and Uprising production",
+    "workstream": "ART",
+    "phase": 5,
+    "owner": "era content lead with per-asset specialists",
+    "depends_on": [
+      "ART-013",
+      "ART-007",
+      "ART-008",
+      "ART-009",
+      "ART-010",
+      "ART-011",
+      "ART-012",
+      "OPS-005",
+      "RES-014",
+      "RES-015"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Generated F3D-ENTITY work orders",
+      "Approved era source dossiers",
+      "Proposed assets/source/eras/"
+    ],
+    "scope": "Produce Allied, Soviet and Empire identities with complete amphibious, transform, naval, core deployment and secondary-ability presentation.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Select every approved inventory row for Red Alert 3 and Uprising, including all approved challenge, special-campaign, naval/amphibious and alternate-form content; retain buildable, campaign, summoned, neutral and variant classifications.",
+      "Execute generated bounded work orders by available capability/rig; do not let an absent mechanic be concealed by a completed mesh.",
+      "Run each faction's complete production/ability/ownership/destruction journey using accepted source/adaptation specifications.",
+      "Review side-by-side role silhouettes, all forms/animations and terrain compatibility; close only after a relational inventory/runtime/asset/evidence join passes."
+    ],
+    "deliverables": [
+      "Complete era asset bundle and editable sources",
+      "Per-entity evidence links",
+      "Faction/variant coverage and blocker report"
+    ],
+    "acceptance": [
+      "100% of included rows have independently verified art, clips, effects and icons",
+      "Every unimplemented source row has an explicit remaining task or approved scope decision",
+      "No generic same-role placeholder used to claim faction completion",
+      "Existing runtime IDs migrate explicitly"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "Era mechanics and source data gate passed"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "ART-019",
+    "title": "Complete later-title and existing-pack presentation coverage",
+    "workstream": "ART",
+    "phase": 5,
+    "owner": "era content lead with per-asset specialists",
+    "depends_on": [
+      "ART-013",
+      "ART-007",
+      "ART-008",
+      "ART-009",
+      "ART-010",
+      "ART-011",
+      "ART-012",
+      "OPS-005",
+      "RES-016",
+      "RES-017",
+      "RES-018",
+      "RES-019",
+      "RES-020",
+      "RES-021",
+      "RES-022",
+      "RES-023"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Generated F3D-ENTITY work orders",
+      "Approved era source dossiers",
+      "Proposed assets/source/eras/"
+    ],
+    "scope": "Complete approved C&C4 mobile-base/class content and all explicit Renegade/browser/mobile/spin-off inclusion decisions; maintain existing Dune-style and other runtime packs without silently broadening franchise scope.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Select every approved inventory row for Tiberian Twilight classes and forms, Renegade references/units/structures, other released-title decisions, and every retained existing non-C&C runtime pack; retain buildable, campaign, summoned, neutral and variant classifications.",
+      "Execute generated bounded work orders by available capability/rig; do not let an absent mechanic be concealed by a completed mesh.",
+      "Run each faction's complete production/ability/ownership/destruction journey using accepted source/adaptation specifications.",
+      "Review side-by-side role silhouettes, all forms/animations and terrain compatibility; close only after a relational inventory/runtime/asset/evidence join passes."
+    ],
+    "deliverables": [
+      "Complete era asset bundle and editable sources",
+      "Per-entity evidence links",
+      "Faction/variant coverage and blocker report"
+    ],
+    "acceptance": [
+      "100% of included rows have independently verified art, clips, effects and icons",
+      "Every unimplemented source row has an explicit remaining task or approved scope decision",
+      "No generic same-role placeholder used to claim faction completion",
+      "Existing runtime IDs migrate explicitly"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "Era mechanics and source data gate passed"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "ART-020",
+    "title": "Verify complete roster presentation and close missing-asset defects",
+    "workstream": "ART",
+    "phase": 6,
+    "owner": "independent art and content auditors",
+    "depends_on": [
+      "ART-014",
+      "ART-015",
+      "ART-016",
+      "ART-017",
+      "ART-018",
+      "ART-019"
+    ],
+    "existing_issues": [
+      "THU-2447",
+      "THU-2448"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "All approved asset and source manifests",
+      "Generated F3D-ENTITY review records"
+    ],
+    "scope": "Independently verify every approved source/runtime/form row, not a sample. Reconcile all generated jobs and release eligibility.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Join source inventory, runtime catalogue, asset manifests, clip requirements and accepted evidence by stable identity.",
+      "Reject missing rows, fallback mesh aliases, unreviewed mandatory clips, broken icons, absent sounds and unresolved blocked mechanics.",
+      "Run pack-by-pack asset viewer plus gameplay journeys at all quality presets and record exact offending IDs.",
+      "Publish a signed coverage report and reopen precise child jobs for every discrepancy; retain excluded source content with owner-approved reason."
+    ],
+    "deliverables": [
+      "Final asset completeness report",
+      "Release-ready bundle manifest",
+      "Per-row review evidence and defect links"
+    ],
+    "acceptance": [
+      "Every included row has verified lifecycle and independent review",
+      "No unresolved blocker is excluded from denominator",
+      "All public assets pass provenance and runtime load checks"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G6",
+    "kind": "coverage_audit"
+  },
+  {
+    "id": "WORLD-001",
+    "title": "Define the terrain coverage framework and first-crossing source mapping",
+    "workstream": "WORLD",
+    "phase": 1,
+    "owner": "environment historian and world artist",
+    "depends_on": [
+      "RES-025"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Approved title/map research dossiers"
+    ],
+    "scope": "Define source-map-to-kit coverage for T01–T28 and extension rules for additional environments. Fully evidence the pinned first-crossing seed now. Whole-series mapping is extended by the era researchers and WORLD-003 through WORLD-006, reconciled by RES-028/029 and UX-008; unrelated source gaps do not prevent the bounded seed.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Define the all-title theatre/map coverage schema; populate exact shipped source maps for the pinned seed, distinguish source enums from shipped content, and assign each remaining title/theatre extension to its research and terrain-kit owner.",
+      "Map each to kit IDs, geometry, materials, props, ambience and interactive terrain mechanics.",
+      "Record evidence/conflicts for ice, tunnels, weather, contamination, garrisons and destructibles rather than assuming one universal rule.",
+      "Expand T14/T27 into named subkits wherever regional/special environments would otherwise be hidden under a generic label."
+    ],
+    "deliverables": [
+      "Complete source-map/kit matrix",
+      "Terrain mechanic evidence register",
+      "Expanded subkit work orders"
+    ],
+    "acceptance": [
+      "Every seed environment has evidenced coverage, and the full T01–T28 programme plus source-discovered additions have explicit extension owners and final reconciliation gates.",
+      "No enum-only or cut theatre claimed shipped",
+      "No color-only recolor counts as a distinct complete kit"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "All procedure/category lists below are schema coverage and an extension checklist. Execute source normalization, observations and decisions only for the exact pinned first-battle seed rows in this task. Non-seed items receive owned extension tasks; they are neither prerequisite completion nor permission to invent values. RES-028/029 and the corresponding era delivery gates enforce whole-series closure."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G1",
+    "gate_conditions": [
+      "Accepted pinned seed theatre evidence and complete extension schema."
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "WORLD-002",
+    "title": "Specify and verify height surface and transition fixtures",
+    "workstream": "WORLD",
+    "phase": 2,
+    "owner": "world simulation QA specialist",
+    "depends_on": [
+      "WORLD-001",
+      "ENG-019",
+      "ENG-021"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "packages/fusion/src/map.ts",
+      "packages/fusion/src/path.ts",
+      "Proposed packages/fusion/src/world-v2/"
+    ],
+    "scope": "Own the world-art acceptance fixtures for the engine's MapV2/layer/navigation contract. Engine owners implement authoritative data and algorithms.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Create tiny authored fixtures for flat ground, slope, cliff/ramp, deck-over-water, narrow channel, shore transition and blocked connector.",
+      "Specify integer heights, surface IDs, movement profiles, occupancy and expected routes independently of visual geometry.",
+      "Run identical topology queries in headless and rendered builds; compare mutation revisions after destruction.",
+      "Verify picking and drawing use the same permitted surfaces without deriving passability from a mesh."
+    ],
+    "deliverables": [
+      "Authored layered-world fixture set",
+      "Expected route/occupancy results",
+      "Render versus simulation conformance evidence"
+    ],
+    "acceptance": [
+      "Tank and ship coexist at same x/y on different surfaces",
+      "No cliff/bridge stale-edge traversal",
+      "Quality settings do not alter connectivity",
+      "Old flat maps retain exact state through supported adapter"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G2",
+    "gate_conditions": [
+      "Engine MapV2 and deterministic navigation implementation"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "WORLD-003",
+    "title": "Produce temperate forest and rural terrain kits",
+    "workstream": "WORLD",
+    "phase": 5,
+    "owner": "environment production lead with bounded kit artists",
+    "depends_on": [
+      "WORLD-001",
+      "WORLD-002",
+      "ART-003",
+      "ART-005",
+      "ENG-013",
+      "OPS-005"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/terrain/",
+      "Proposed packages/fusion-renderer-3d/src/terrain/",
+      "WORLD-001 coverage matrix"
+    ],
+    "scope": "Produce complete environment kits T01, T02, T03 and T16 and their researched subkits. Include road/track transitions, woodland density, seasonal vegetation, farms, fences and civilian/neutral distinctions.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Materialise one bounded geometry/material/prop/integration/review job per approved kit and subkit; record source maps and original-production provenance.",
+      "Author landform modules, texture/material variants, prop sets, destruction variants and ambience with compatible transition masks.",
+      "Build an authored representative map for each kit and validate movement/build/visibility/resource rules against its explicit profile.",
+      "Capture normal/close/far zoom, every team color, low/high detail and performance; a different reviewer closes each kit."
+    ],
+    "deliverables": [
+      "Complete kit assets/manifests/editable sources",
+      "Representative maps and blend rules",
+      "Per-kit gameplay/readability/performance evidence"
+    ],
+    "acceptance": [
+      "All listed kits/subkits have full geometry/material/prop/ambience coverage",
+      "No seams or passability mismatch at chunk borders",
+      "Distinct environment identity beyond hue change",
+      "Every gameplay obstacle has an authoritative and visible footprint"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "G2 renderer and G3 surface contracts"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "WORLD-004",
+    "title": "Produce cold arid mountain and Dune-compatible terrain kits",
+    "workstream": "WORLD",
+    "phase": 5,
+    "owner": "environment production lead with bounded kit artists",
+    "depends_on": [
+      "WORLD-001",
+      "WORLD-002",
+      "ART-003",
+      "ART-005",
+      "ENG-013",
+      "OPS-005"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/terrain/",
+      "Proposed packages/fusion-renderer-3d/src/terrain/",
+      "WORLD-001 coverage matrix"
+    ],
+    "scope": "Produce complete environment kits T04, T05, T06, T07, T08, T09, T17, T18 and T28 and their researched subkits. Include ice evidence gates, snow/rock blending, dunes, badlands, passes, ramps and existing sand/spice/rock/concrete compatibility.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Materialise one bounded geometry/material/prop/integration/review job per approved kit and subkit; record source maps and original-production provenance.",
+      "Author landform modules, texture/material variants, prop sets, destruction variants and ambience with compatible transition masks.",
+      "Build an authored representative map for each kit and validate movement/build/visibility/resource rules against its explicit profile.",
+      "Capture normal/close/far zoom, every team color, low/high detail and performance; a different reviewer closes each kit."
+    ],
+    "deliverables": [
+      "Complete kit assets/manifests/editable sources",
+      "Representative maps and blend rules",
+      "Per-kit gameplay/readability/performance evidence"
+    ],
+    "acceptance": [
+      "All listed kits/subkits have full geometry/material/prop/ambience coverage",
+      "No seams or passability mismatch at chunk borders",
+      "Distinct environment identity beyond hue change",
+      "Every gameplay obstacle has an authoritative and visible footprint"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "G2 renderer and G3 surface contracts"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "WORLD-005",
+    "title": "Produce urban contaminated and special terrain kits",
+    "workstream": "WORLD",
+    "phase": 5,
+    "owner": "environment production lead with bounded kit artists",
+    "depends_on": [
+      "WORLD-001",
+      "WORLD-002",
+      "ART-003",
+      "ART-005",
+      "ENG-013",
+      "OPS-005"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/terrain/",
+      "Proposed packages/fusion-renderer-3d/src/terrain/",
+      "WORLD-001 coverage matrix"
+    ],
+    "scope": "Produce complete environment kits T12, T13, every T14 subkit, T15, T22, T23, T24, T25, T26 and every T27 subkit and their researched subkits. Keep civilian garrisons, industrial props, rubble, contaminated resources, alien forms and mission interiors explicitly classified; research decides interactive effects.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Materialise one bounded geometry/material/prop/integration/review job per approved kit and subkit; record source maps and original-production provenance.",
+      "Author landform modules, texture/material variants, prop sets, destruction variants and ambience with compatible transition masks.",
+      "Build an authored representative map for each kit and validate movement/build/visibility/resource rules against its explicit profile.",
+      "Capture normal/close/far zoom, every team color, low/high detail and performance; a different reviewer closes each kit."
+    ],
+    "deliverables": [
+      "Complete kit assets/manifests/editable sources",
+      "Representative maps and blend rules",
+      "Per-kit gameplay/readability/performance evidence"
+    ],
+    "acceptance": [
+      "All listed kits/subkits have full geometry/material/prop/ambience coverage",
+      "No seams or passability mismatch at chunk borders",
+      "Distinct environment identity beyond hue change",
+      "Every gameplay obstacle has an authoritative and visible footprint"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "G2 renderer and G3 surface contracts"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "WORLD-006",
+    "title": "Produce water coast tropical and wetland terrain kits",
+    "workstream": "WORLD",
+    "phase": 5,
+    "owner": "environment production lead with bounded kit artists",
+    "depends_on": [
+      "WORLD-001",
+      "WORLD-002",
+      "ART-003",
+      "ART-005",
+      "WORLD-011",
+      "ENG-013",
+      "OPS-005"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/terrain/",
+      "Proposed packages/fusion-renderer-3d/src/terrain/",
+      "WORLD-001 coverage matrix"
+    ],
+    "scope": "Produce complete environment kits T10, T11, T19, T20 and T21 and their researched subkits. Include surf/shore banks, depth/clearance readability, islands, docks, rivers/canals and amphibious entry/exit modules; rendering cannot decide navigation.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Materialise one bounded geometry/material/prop/integration/review job per approved kit and subkit; record source maps and original-production provenance.",
+      "Author landform modules, texture/material variants, prop sets, destruction variants and ambience with compatible transition masks.",
+      "Build an authored representative map for each kit and validate movement/build/visibility/resource rules against its explicit profile.",
+      "Capture normal/close/far zoom, every team color, low/high detail and performance; a different reviewer closes each kit."
+    ],
+    "deliverables": [
+      "Complete kit assets/manifests/editable sources",
+      "Representative maps and blend rules",
+      "Per-kit gameplay/readability/performance evidence"
+    ],
+    "acceptance": [
+      "All listed kits/subkits have full geometry/material/prop/ambience coverage",
+      "No seams or passability mismatch at chunk borders",
+      "Distinct environment identity beyond hue change",
+      "Every gameplay obstacle has an authoritative and visible footprint"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "This is a bounded coordination/contract parent, not permission to implement an entire era or capability family in one context. Before substantive execution, materialize the required source/entity/capability children using the canonical work-order contract; delegate one bounded leaf per worker, retain every parent criterion, and close only after independent child evidence reconciles."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G5",
+    "gate_conditions": [
+      "G2 renderer and G3 surface contracts"
+    ],
+    "kind": "production_parent"
+  },
+  {
+    "id": "WORLD-007",
+    "title": "Specify bridge rules and independently authored acceptance fixtures",
+    "workstream": "WORLD",
+    "phase": 3,
+    "owner": "bridge gameplay designer and independent simulation reviewer",
+    "depends_on": [
+      "WORLD-002"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed packages/fusion/src/world-v2/",
+      "Existing persistent shield/capture tests"
+    ],
+    "scope": "Own the complete versioned fusion-bridge-v1 design and independent expected-state fixtures. ENG-023/024/025 implement it; ENG-026 and WORLD-010 verify durability, and UX-005 verifies the playable result. This specification task precedes implementation.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Record exact HP/cost/tick/Engineer/contest/neutral ownership/occupant/shipping rules from 02_terrain_and_bridges_contract.md as the isolated-build profile; no new permission request is needed for that delegated work.",
+      "Create fixtures for every bridge acceptance-matrix row, including deck occupants, ships below, cargo, simultaneous events, duplicate commands and blocked completion.",
+      "Write executable fixture inputs and exact expected state/economy/topology/event outcomes for ENG-023/024/025; report baseline unsupported results honestly rather than pretending the engine already implements them.",
+      "Have the design/engine leads review the complete policy and fixture expectations; playtest-driven changes later increment the profile and update tests/documents together.",
+      "Specify existing protection precedence and the reserved entry-bank refuge protocol for protected MCVs, temporary immunity and protected/mixed cargo. Include admission failure, new immunity/loading on deck, expiration, collapse, berth-loss recovery and duplicate event fixtures; never bypass damage policy or grant a replacement army."
+    ],
+    "deliverables": [
+      "Versioned bridge profile and decision record",
+      "Complete independently authored bridge acceptance fixture inputs/expected outputs",
+      "Design and engine interface review"
+    ],
+    "acceptance": [
+      "Each bridge matrix scenario has explicit expected state/economy/topology/event outcome",
+      "Retry/restart cases specify exactly one debit and Engineer consumption",
+      "The occupant rule, underpass shipping rule and immediate topology transition are unambiguous",
+      "First release region containment and later seam implementation are separately scheduled",
+      "Actual runtime pass is reserved for the engine bridge tasks and UX-005/WORLD-010",
+      "Protected support-loss fixtures preserve exact identity/state via reserved berths and recoverable ledger; no arbitrary fallback, immunity loss or duplicate cargo"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion.",
+      "Do not derive historical universal behavior from the new Fusion defaults",
+      "Do not edit engine-owned bridge algorithms from this review task"
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G3",
+    "gate_conditions": [
+      "Engine surface/navigation contracts established; bridge implementation follows this specification"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "WORLD-008",
+    "title": "Create bridge geometry lifecycle presentation and targeting",
+    "workstream": "WORLD",
+    "phase": 4,
+    "owner": "bridge technical artist and interaction specialist",
+    "depends_on": [
+      "WORLD-007",
+      "ART-004",
+      "ART-011",
+      "WORLD-011",
+      "ENG-024",
+      "ENG-025",
+      "ENG-016",
+      "ENG-012"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/world/bridges/",
+      "Proposed packages/fusion-renderer-3d/src/world/",
+      "apps/web/src/FusionBattle.tsx"
+    ],
+    "scope": "Build deck/support/hut/scaffold assets and collapse/repair animation, with layer-correct selection and status presentation.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Model the span kit and anchors to the actual bridge definition; supports/clearance/width must match authoritative geometry.",
+      "Bind damage/collapse/repair/reopen visuals to bridge events and leave navigation authority outside rendering.",
+      "Implement explicit bridge/hut targeting and ambiguous deck/ship chooser for mouse and touch.",
+      "Capture tank above ship during collapse/rebuild, with low effects and fog cases; verify owner/repair denial labels explain the actual state."
+    ],
+    "deliverables": [
+      "Bridge/hut/scaffold asset kit",
+      "Lifecycle animations and UI states",
+      "Multi-layer gameplay capture"
+    ],
+    "acceptance": [
+      "Deck and water remain spatially distinguishable",
+      "Cosmetic debris never blocks shipping or kills entities",
+      "Rebuild visual does not open route early",
+      "Fog hides current repair/damage detail when not entitled"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "gate_conditions": [
+      "Engine view bridge events",
+      "UI picking contract"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "WORLD-009",
+    "title": "Validate strategic generation and add world authoring inspection",
+    "workstream": "WORLD",
+    "phase": 3,
+    "owner": "world generation QA and tools engineer",
+    "depends_on": [
+      "WORLD-001",
+      "WORLD-002",
+      "WORLD-007",
+      "ENG-020",
+      "ENG-021"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "packages/fusion/src/worldgen.ts",
+      "Proposed packages/fusion/src/world-v2/",
+      "Proposed apps/web/src/world-tools/"
+    ],
+    "scope": "Build deterministic generation checks and a diagnostic authoring view for geometry, surfaces, navigation, bridges, resources and exclusion corridors.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Separate strategic connectivity, landforms and decoration; validate spawn/MCV deployment, resources, naval lanes, shore entry and infrastructure corridors.",
+      "Test fixed seeds, chunk-order permutations, border continuity and stable generator versions; cosmetic variation uses a separate seed stream.",
+      "Expose surface IDs/heights/movement classes/occupancy/topology/bridge spans in an authoring overlay with exportable reports.",
+      "Reject disconnected starts, unsuitable footprints, unreachably placed resources, illegal bridges and inconsistent water levels before a world is published."
+    ],
+    "deliverables": [
+      "World generation validator",
+      "Authored/fixed-seed fixture collection",
+      "Debug/authoring overlay and report export"
+    ],
+    "acceptance": [
+      "All fixtures produce expected geometry hashes/routes regardless of generation order",
+      "Existing persistent worlds are never re-seeded by an art update",
+      "Invalid topology is rejected with a useful reason",
+      "No live world mutation exposed as ordinary editor action"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G3",
+    "gate_conditions": [
+      "Engine deterministic generator/schema implementation"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "WORLD-010",
+    "title": "Verify world state recovery and schedule region seam bridges",
+    "workstream": "WORLD",
+    "phase": 7,
+    "owner": "persistent-world QA specialist",
+    "depends_on": [
+      "WORLD-007",
+      "WORLD-009",
+      "ENG-026",
+      "ENG-037",
+      "ENG-038",
+      "ENG-045"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "packages/fusion/src/persistent.ts",
+      "apps/service/src/mmo/runner.ts",
+      "Proposed packages/fusion/src/world-v2/"
+    ],
+    "scope": "Prove save/restart/handoff behavior for new world state, and retain an explicit follow-up for region-spanning bridges before removing the initial authoring restriction.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Snapshot/restore worlds with damaged bridges, active repair, blocked completion, destroyed props and mixed surfaces; compare uninterrupted versus resumed state.",
+      "Inject owner-region restart and duplicate command/event delivery and confirm no repeat debits, lost entities or topology disagreement.",
+      "Verify v1 flat-save adapter preserves all existing state and leaves bridges empty instead of regenerating a new world.",
+      "Independently verify ENG-045's completed region-seam protocol, single authority, traversal barrier, failure/recovery and cross-region ownership evidence. Keep authoring rejected until those tests pass; cross-region bridges are a scheduled implementation leaf, not a permanent deferral."
+    ],
+    "deliverables": [
+      "World recovery evidence package",
+      "Migration compatibility report",
+      "Independent ENG-045 region-seam bridge conformance report"
+    ],
+    "acceptance": [
+      "Resume equals uninterrupted results for all fixtures",
+      "No current world content silently regenerated",
+      "Cross-region bridge remains rejected before tested protocol exists",
+      "Rollback preserves the matching runtime, state snapshot and complete committed journal tail; replay/reconcile post-cutover writes or use an explicit forward recovery, never silently discard them"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G7",
+    "gate_conditions": [
+      "Engine schema migration and regional durability implementation"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "UX-001",
+    "title": "Adapt tactical camera picking and mouse touch orders to 3D",
+    "workstream": "UX",
+    "phase": 4,
+    "owner": "RTS interaction engineer",
+    "depends_on": [
+      "ART-004",
+      "WORLD-002",
+      "ENG-012"
+    ],
+    "existing_issues": [
+      "THU-2449"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "apps/web/src/FusionBattle.tsx",
+      "Proposed packages/fusion-renderer-3d/src/camera/",
+      "Proposed packages/fusion-view/src/picking.ts"
+    ],
+    "scope": "Own tactical input design, React/gesture command mapping, multi-layer target chooser and interaction acceptance. ENG-012 owns low-level renderer camera and ray/pick implementation. Preserve semantic orders and current hotkeys.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Specify and integrate bounded tactical pan/zoom/orientation reset through ENG-012; compare the chosen projection at close/normal/far views without duplicating renderer camera code.",
+      "Map GPU/mesh selection aids to permitted entity IDs and surface coordinates; support deck/ship/air overlap with explicit ambiguity resolution.",
+      "Implement gesture state/cancel rules so pinch/pan never sends an unintended build/sell/order command.",
+      "Verify placement/rally/box selection/selection cycling/keyboard navigation and tall-object occlusion with actual scenes."
+    ],
+    "deliverables": [
+      "Camera and input adapter",
+      "Picking/gesture contract tests",
+      "Desktop/mobile interaction captures"
+    ],
+    "acceptance": [
+      "Camera actions never mutate simulation or send orders",
+      "No invisible target can be selected",
+      "Wrong-surface commands are prevented or clearly explained",
+      "Existing known controls retain function"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "gate_conditions": [
+      "Engine renderer and view interfaces"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "UX-002",
+    "title": "Preserve HUD ownership labels and fog information rules",
+    "workstream": "UX",
+    "phase": 4,
+    "owner": "RTS HUD and information-security QA engineer",
+    "depends_on": [
+      "UX-001",
+      "ART-011",
+      "ENG-017"
+    ],
+    "existing_issues": [
+      "THU-2449",
+      "THU-2450"
+    ],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "packages/fusion/src/render.ts",
+      "apps/web/src/FusionBattle.tsx",
+      "apps/web/src/mmo.ts"
+    ],
+    "scope": "Own React HUD, status/action feedback and independent ownership/fog acceptance. ENG-017 owns renderer overlays/fog and ENG-039 server filtering; carry existing THU-2449/2450 behavior through their interfaces. The G4 battle checks presentation concealment through the permitted RenderFrame; legacy full-simulation/lockstep transport is explicitly not hidden-state secure. Secure persistent wire evidence is a later ENG-039/UX-007/ENG-042 gate.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Trace current HUD/label behavior and THU-2449/2450 acceptance; retain correct proximity, collision and visibility policies.",
+      "Implement current-versus-last-known status boundaries for labels, health, minimap, production and bridge repair.",
+      "Give explicit accepted/rejected feedback for contextual orders and ownership/shield/consent restrictions.",
+      "Test visible/remembered/hidden/stealth/disguised/spectator views including shadows, particles, tooltips and accessibility text."
+    ],
+    "deliverables": [
+      "3D-compatible HUD and label adapter",
+      "Information-entitlement matrix",
+      "Fog/ownership UI evidence"
+    ],
+    "acceptance": [
+      "Existing owner/Ally-Foe function retained",
+      "No live hidden HP/owner/production/repair leak",
+      "Every rejected meaningful command has a readable reason",
+      "HUD remains legible without covering essential map interaction",
+      "The report distinguishes presentation concealment from network confidentiality and does not certify a full-state lockstep client as hidden-state secure"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "gate_conditions": [
+      "Engine permitted RenderFrame and ENG-017 overlay contract; full wire security is a later persistent-mode gate"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "UX-003",
+    "title": "Add accessible visual audio and control settings",
+    "workstream": "UX",
+    "phase": 4,
+    "owner": "accessibility and UX specialist",
+    "depends_on": [
+      "UX-001",
+      "UX-002",
+      "ART-012"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "apps/web settings/HUD/input modules resolved from current tree"
+    ],
+    "scope": "Implement practical HUD/input/accessibility settings and measure their effect across all core scenes.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Provide UI/text scale, independent audio controls, team palettes with shape/pattern cues, reduced motion/flashing, shake off and supported remapping.",
+      "Measure text/non-text contrast and touch target sizes; target 44 CSS px controls while documenting WCAG minimum accurately.",
+      "Exercise menu/production/selected-unit actions with keyboard focus and without sound or color discrimination.",
+      "Confirm reduced effects retain all important area/warning/status information and expose no hidden enemies."
+    ],
+    "deliverables": [
+      "Settings and persisted preference schema",
+      "Accessibility checklist with measured captures",
+      "Known limitations and follow-up tasks"
+    ],
+    "acceptance": [
+      "Critical action has an alternative to gesture-only input",
+      "Meaningful status never relies solely on color/audio",
+      "No quality/accessibility option changes authoritative rules or visibility",
+      "No unsupported claim of complete battlefield screen-reader equivalence"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "UX-004",
+    "title": "Build faction audio voices alerts and event mixing",
+    "workstream": "UX",
+    "phase": 4,
+    "owner": "audio designer and browser audio engineer",
+    "depends_on": [
+      "ART-004",
+      "ART-005",
+      "ART-012",
+      "ENG-016"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "packages/fusion/src/audio.ts",
+      "packages/fusion/src/speech.ts",
+      "Proposed assets/source/audio/",
+      "Proposed packages/fusion-renderer-3d/src/audio/"
+    ],
+    "scope": "Create original/licensed audio coverage and a bounded runtime mix for units, weapons, base operations, environment and strategic alerts.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Map per-item sound requirements and faction audio identity; produce or license source files with explicit rights records.",
+      "Implement user-gesture audio start, volume buses, priorities, voice limits, selection-response coalescing, event deduplication and captions for key alerts.",
+      "Bind spatial audio to permitted presentation events, not all known enemy coordinates.",
+      "Test dense combat, mute/resume, background/foreground, reconnect and audio-context recovery across target browsers."
+    ],
+    "deliverables": [
+      "Audio manifests/editable masters/runtime assets",
+      "Event mixer and controls",
+      "Per-faction/event coverage and browser evidence"
+    ],
+    "acceptance": [
+      "No copied unapproved original-game music/voices",
+      "No hidden-enemy location leak",
+      "No repeated explosion/acknowledgement from duplicate delivery",
+      "Strategic alerts remain intelligible in dense combat and have visible equivalents"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "UX-005",
+    "title": "Prove the complete representative battle experience",
+    "workstream": "UX",
+    "phase": 4,
+    "owner": "gameplay director and independent presentation reviewer",
+    "depends_on": [
+      "ART-007",
+      "ART-008",
+      "ART-010",
+      "ART-011",
+      "ART-012",
+      "WORLD-008",
+      "UX-001",
+      "UX-002",
+      "UX-003",
+      "UX-004",
+      "ENG-024",
+      "ENG-025",
+      "ENG-026",
+      "ENG-046"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Engine end-to-end fixture contracts"
+    ],
+    "scope": "Run the first playable two-faction battle with a complete base/economy loop, mixed arms and destructive/rebuildable bridge. This is an early quality gate, not programme completion.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Build the pinned E01–E09 core fixtures and include all required unit/building lifecycle events, fog and input modes.",
+      "Capture actual interactive play at normal zoom plus deterministic journal/checksum and navigation-debug evidence.",
+      "Score the seven-category rubric; attach scene/tick/entity evidence to every defect and route it to the precise owner.",
+      "Require both mechanics and presentation reviewers to pass the fixture before mass era production continues."
+    ],
+    "deliverables": [
+      "Playable battle fixture",
+      "Real-time capture and deterministic evidence",
+      "Independent quality review and defect links"
+    ],
+    "acceptance": [
+      "All core loops work in local and synchronized Fusion modes",
+      "No placeholder construction or rigid infantry accepted",
+      "Bridge has real topology and ship underpass",
+      "All review categories >=4/5 proposed target with no blocker",
+      "Remaining roster and biome tasks remain open"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "gate_conditions": [
+      "Engine synchronized Fusion and bridge implementation"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "UX-006",
+    "title": "Measure performance budgets and implement asset streaming",
+    "workstream": "UX",
+    "phase": 4,
+    "owner": "graphics performance engineer",
+    "depends_on": [
+      "ART-003",
+      "ART-004",
+      "ART-006",
+      "WORLD-002",
+      "ENG-009"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed packages/fusion-renderer-3d/",
+      "Proposed assets/manifests/",
+      "apps/web/src/mmo.ts"
+    ],
+    "scope": "Own representative content scene/resource measurements, asset-bundle loading requirements and independent performance evidence. ENG-041 owns production renderer optimisation and ENG-009 budget selection. Do not duplicate their renderer changes or infer player capacity from visible-object counts.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Run the common 256-unit/64-building normal fixture plus small/stress scenes with exact device/browser/backend/viewport/power metadata.",
+      "Measure p50/p95/p99 CPU/GPU/frame timings, long tasks, bytes, resource allocations and repeated-load growth; add a 20-minute soak.",
+      "Provide measured recommendations for LOD, animation updates, instancing, culling, shadows and disposal to ENG-041; own only assigned asset-bundle/loading changes and rerun the independent benchmark.",
+      "Split immutable bundles, make critical readiness explicit, verify accepted low-detail representation and prevent hidden-type prefetch leakage."
+    ],
+    "deliverables": [
+      "Device benchmark report and reproducible scenes",
+      "Budget/LOD/streaming configuration",
+      "Context-loss/reconnect/disposal evidence"
+    ],
+    "acceptance": [
+      "Common ENG-009 targets pass or a specific unresolved blocker is reported",
+      "Low/high settings preserve all entities and gameplay states",
+      "No generic fallback counts as completed content",
+      "No monotonically growing resource counts across load/unload cycles",
+      "Asset requests do not reveal hidden unit types"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G4",
+    "gate_conditions": [
+      "ENG-009 measured reference devices and renderer baseline"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "UX-007",
+    "title": "Qualify real mobile browsers and crowded battlefield controls",
+    "workstream": "UX",
+    "phase": 7,
+    "owner": "mobile QA and interaction specialist",
+    "depends_on": [
+      "UX-003",
+      "UX-005",
+      "UX-006",
+      "WORLD-008",
+      "ENG-041",
+      "ENG-039",
+      "UX-008"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "apps/web input/HUD settings"
+    ],
+    "scope": "Test actual supported Android and iOS browser devices, including thermal soak, orientation, touch ambiguity and lifecycle recovery.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Freeze the intended device/browser set and collect cold-cache, sustained-load and battery/thermal conditions.",
+      "Run E13 touch journeys with selection, attack/move, pinch/pan, placement, transport and bridge/hut/ship overlap.",
+      "Exercise orientation, app background/foreground, WebGL/WebGPU loss where injectable, audio suspension and reconnect.",
+      "Reproduce defects on physical devices, not just browser emulation; keep exact traces and video for the responsible task."
+    ],
+    "deliverables": [
+      "Physical device qualification matrix",
+      "Crowded touch/lifecycle captures",
+      "Performance and defect evidence"
+    ],
+    "acceptance": [
+      "No ghost orders from gestures",
+      "HUD/actions remain reachable and readable at supported orientations",
+      "Resume restores presentation without duplicate gameplay events",
+      "Sustained frame targets pass on the declared minimum device or release remains blocked"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G7",
+    "gate_conditions": [
+      "G6 complete asset and experience candidates"
+    ],
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "UX-008",
+    "title": "Assemble and independently approve the full experience gallery",
+    "workstream": "UX",
+    "phase": 6,
+    "owner": "release experience reviewer",
+    "depends_on": [
+      "ART-020",
+      "WORLD-003",
+      "WORLD-004",
+      "WORLD-005",
+      "WORLD-006",
+      "UX-005",
+      "UX-006"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "All accepted F3D-ENTITY/terrain review records"
+    ],
+    "scope": "Produce all E01–E14 evidence across the full approved roster, biome and mechanic families. Close experience gaps beyond the first battle.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Expand the scene matrix so every biome, faction, special form and unique mechanic appears in a reviewed interactive fixture.",
+      "Generate per-entity and per-environment evidence links from accepted child work orders; identify any unrepresented row.",
+      "Independently review role recognition, motion/weight, environment coherence, command feedback, information, audio and pacing.",
+      "Publish an exact included/deferred/blocked scope report and route remaining defects; link mobile and persistence qualification as later release gates."
+    ],
+    "deliverables": [
+      "Complete interactive scene gallery and captures",
+      "Experience coverage join",
+      "Independent G6 acceptance and remaining release gates"
+    ],
+    "acceptance": [
+      "No roster/terrain omission hidden by a polished sample",
+      "Every E01–E14 scene has current-build evidence",
+      "No outstanding blocker receives a passing average score",
+      "G7/G8 operational and device requirements remain distinct from art completion"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G6",
+    "kind": "bounded_work_order"
+  },
+  {
+    "id": "WORLD-011",
+    "title": "Produce the representative river crossing and water kit",
+    "workstream": "WORLD",
+    "phase": 3,
+    "owner": "environment technical artist",
+    "depends_on": [
+      "WORLD-002",
+      "ART-003",
+      "ART-005",
+      "ENG-013"
+    ],
+    "existing_issues": [],
+    "context_files": [
+      "00-START-HERE.md",
+      "programme/02-fleet-execution.md",
+      "world-art/01_art_and_animation_contract.md",
+      "world-art/02_terrain_and_bridges_contract.md",
+      "world-art/03_experience_audio_and_quality_gates.md",
+      "engine/01-engine-baseline-and-gap-audit.md",
+      "engine/02-fusion-3d-architecture-and-contracts.md",
+      "Current repository AGENTS.md and approved programme decisions",
+      "Proposed assets/source/terrain/representative-crossing/",
+      "Proposed packages/fusion-renderer-3d/src/terrain/"
+    ],
+    "scope": "Create the bounded water/shore/bridge-approach subset needed by the first playable battle, independently of full G5 tropical/coastal/wetland production.",
+    "non_goals": [
+      "Production deployment or live-state migration",
+      "Unrelated mechanics or a global gameplay rebalance",
+      "Changes outside the file lease"
+    ],
+    "steps": [
+      "Read this task, the listed contracts and the exact dependency artifacts; record current HEAD, accepted profile version and the file lease before implementation.",
+      "Build one authored temperate river crossing with stable banks, a ship-capable underpass, legal bridge anchors, ramp approaches and reserved refuge candidate cells.",
+      "Provide original low/high water, bank, road/approach and support materials/meshes with exact surface-height alignment.",
+      "Validate tank/deck, ship/water, aircraft overlap and protected entry-bank refuge reservation readability in the real renderer.",
+      "Export the representative kit and fixture as the reusable starting subset for WORLD-006; leave every other T10/T11/T19/T20/T21 subkit scheduled."
+    ],
+    "deliverables": [
+      "Representative crossing/water asset kit",
+      "Authored multi-layer battle fixture",
+      "Surface/readability/performance proof"
+    ],
+    "acceptance": [
+      "First bridge battle can proceed without full-era water art",
+      "Underpass, bank access and refuge cells match authoritative surfaces",
+      "No decorative water/bridge shortcut",
+      "Full water-kit task retains complete coverage obligations"
+    ],
+    "guardrails": [
+      "Pin the implementation base commit and dependency evidence before editing; rebase/re-review if a shared contract changes.",
+      "Lease only the declared files. Simulation schemas, game.ts, rules.ts and protocol files remain engine-owner territory unless explicitly delegated.",
+      "A catalogue row, fallback model, stub, disabled assertion or self-reported completion is not acceptance evidence.",
+      "Keep Classic preservation behavior and existing persistent shields, allied capture consent, ownership labels and saved-state guarantees intact.",
+      "No public asset bundle may contain a provenance-blocked input. Record BLOCKED_SPEC, BLOCKED_RIGHTS or BLOCKED_TOOL with exact evidence instead of inventing completion."
+    ],
+    "handoff": "Submit commit/diff, changed-file list, artifact hashes, relevant command results, scene/tick evidence, acceptance checklist and unresolved defects. An independent specialist must reproduce the decisive checks; do not mark Done before that review. If a required tool or input is absent, preserve completed work and provide the precise blocker and next bounded task.",
+    "original_specialist_phase": "G3",
+    "gate_conditions": [
+      "G2 renderer and G3 surface contracts"
+    ],
+    "kind": "bounded_work_order"
+  }
+]
