@@ -13,6 +13,7 @@
 // append-only audit of ownership-affecting operations — immutable causes, never a
 // second writable copy of entity state.
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
+import { withMigrationLock } from '../migration-lock.js';
 import { MMO_MIGRATIONS } from './schema.js';
 
 export const MMO_SCHEMA = 'mmo';
@@ -71,8 +72,7 @@ export async function mmoTransaction<T>(work: (client: PoolClient) => Promise<T>
 
 /** Create the mmo schema if missing and apply any migrations this build is ahead on. */
 export async function mmoMigrate(): Promise<void> {
-  const client = await mmoDb().connect();
-  try {
+  await withMigrationLock(mmoDb(), MMO_SCHEMA, async client => {
     await client.query(`create schema if not exists ${MMO_SCHEMA}`);
     await client.query(`set search_path to ${MMO_SCHEMA}, public`);
     await client.query(`create table if not exists schema_migrations (
@@ -91,9 +91,7 @@ export async function mmoMigrate(): Promise<void> {
         throw error;
       }
     }
-  } finally {
-    client.release();
-  }
+  });
 }
 
 /** Drop and recreate the mmo schema. Test-only helper for disposable databases. */
