@@ -3,14 +3,17 @@
 // at its recorded tick, against REAL PostgreSQL and the REAL Fusion sim.
 // Requires MMO_TEST_DATABASE_URL (disposable database).
 import { randomUUID } from 'node:crypto';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import * as database from '../../apps/service/src/mmo/db.js';
 import {
-  closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
+  closeMmoDatabase, mmoOne, mmoQuery, mmoTransaction, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import { mmoEntityId, MMO_PROTOCOL, type MmoCommandMessage } from '../../packages/contracts/src/index.js';
 import { PACKS } from '../../packages/fusion/src/index';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
-import { acquireRegionLease } from '../../apps/service/src/mmo/store.js';
+import {
+  acquireRegionLease, appendRegionEvent, getRegion, markRegionEventApplied, recordSnapshot, recoverySnapshots,
+} from '../../apps/service/src/mmo/store.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
 
@@ -167,6 +170,65 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
     await resetMmoDatabase();
   }, 30000);
   afterAll(async () => { await closeMmoDatabase(); });
+
+  it('reads checkpoint payloads only as recovery advances through the history', async () => {
+    const fx = await seedFixtureWorld();
+    const addSnapshot = (seq: number) => recordSnapshot({
+      regionId: fx.regionId, epoch: fx.epoch, lastAppliedSeq: seq, lastCommittedSeq: seq,
+      tick: seq, engineArtifactSha256: 'fixture-engine-sha', rulesetVersion: MMO_PROTOCOL,
+      format: 'fixture', payload: Buffer.from(String(seq)),
+    });
+    await addSnapshot(1);
+    await addSnapshot(2);
+    const newest = await addSnapshot(3);
+    const list = vi.spyOn(database, 'mmoQuery');
+    const fetch = vi.spyOn(database, 'mmoOne');
+    try {
+      let selected: string | undefined;
+      for await (const checkpoint of recoverySnapshots(fx.regionId)) {
+        selected = checkpoint.snapshot_id;
+        break;
+      }
+      expect(selected).toBe(newest);
+      expect(list.mock.calls.filter(([sql]) => sql.includes('from region_snapshot')))
+        .toEqual([[expect.stringMatching(/^select snapshot_id from region_snapshot /), [fx.regionId]]]);
+      expect(fetch.mock.calls.filter(([sql]) => sql.includes('from region_snapshot')))
+        .toEqual([[expect.any(String), [fx.regionId, newest]]]);
+    } finally {
+      list.mockRestore();
+      fetch.mockRestore();
+    }
+  });
+
+  it('resumes the wall clock from the replayed tick after restoring a hibernated checkpoint', async () => {
+    const fx = await seedFixtureWorld({ leaseMs: 300_000 });
+    const original = mkRunner(fx, fx.workerId);
+    await original.start();
+    const hibernatedAt = Date.now();
+    const checkpointTick = gameOf(original).tick;
+    await (original as unknown as { hibernate(now: number): Promise<void> }).hibernate(hibernatedAt);
+    const recoveredWorker = randomUUID();
+    const lease = await acquireRegionLease({ regionId: fx.regionId, workerId: recoveredWorker, leaseMs: 300_000 });
+    const journalTick = checkpointTick + 5;
+    await mmoTransaction(async tx => {
+      for (const [sinceMs, tick] of [[hibernatedAt, checkpointTick], [hibernatedAt + 1, journalTick]]) {
+        const { eventSeq } = await appendRegionEvent(tx, {
+          regionId: fx.regionId, workerId: recoveredWorker, epoch: lease.epoch,
+          tick, kind: 'accrual', payload: { sinceMs, ticks: 0, rates: [] },
+        });
+        await markRegionEventApplied(tx, { regionId: fx.regionId, eventSeq, result: { advancedTicks: 0 } });
+      }
+    });
+    const recovered = mkRunner(fx, recoveredWorker);
+    try {
+      await recovered.start();
+      expect(gameOf(recovered).tick).toBe(journalTick);
+      const durableAnchor = Number((await getRegion(fx.regionId))?.started_at_ms);
+      expect(Math.floor((Date.now() - durableAnchor) / TICK_MS)).toBe(journalTick);
+    } finally {
+      await recovered.stop();
+    }
+  });
 
   it('control vs hard-killed runner with older checkpoint and applied rows after it', async () => {
     const control = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
