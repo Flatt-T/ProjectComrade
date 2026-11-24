@@ -1,7 +1,8 @@
 """Credential-free deployment of validated public GitHub release bundles.
 
 COMRADE_CHANNEL=production (default) follows the latest main-<sha> release on port 3001.
-COMRADE_CHANNEL=beta follows the newest beta-<sha> pre-release on port 3002 (BETA server).
+COMRADE_CHANNEL=beta follows the newest beta-<sha> pre-release on port 3002 by default.
+A dedicated guest can set its existing deployment root, Compose project and host port.
 """
 import fcntl
 import hashlib
@@ -17,8 +18,9 @@ CHANNEL = os.environ.get('COMRADE_CHANNEL', 'production')
 if CHANNEL not in ('production', 'beta'):
     raise SystemExit('COMRADE_CHANNEL must be production or beta')
 BETA = CHANNEL == 'beta'
-ROOT = Path('/opt/comrade-beta' if BETA else '/opt/comrade')
-PORT = '3002' if BETA else '3001'
+ROOT = Path(os.environ.get('COMRADE_DEPLOY_ROOT', '/opt/comrade-beta' if BETA else '/opt/comrade'))
+PROJECT = os.environ.get('COMRADE_COMPOSE_PROJECT', 'comrade-beta' if BETA else 'comrade')
+PORT = os.environ.get('COMRADE_HOST_PORT', '3002' if BETA else '3001')
 TAG = re.compile(r'(beta|main)-([0-9a-f]{40})')
 REPO = 'Flatt-T/ProjectComrade'
 BASE = f'https://api.github.com/repos/{REPO}'
@@ -71,7 +73,7 @@ def deploy_env(image):
 
 
 def compose(image):
-    subprocess.run(['docker', 'compose', '-p', 'comrade-beta' if BETA else 'comrade', '-f', str(ROOT / 'compose.yml'),
+    subprocess.run(['docker', 'compose', '-p', PROJECT, '-f', str(ROOT / 'compose.yml'),
                     'up', '-d', '--pull', 'never', '--wait', '--wait-timeout', '90'],
                    env=deploy_env(image), check=True)
 
@@ -175,10 +177,13 @@ def main():
                 image_id = manifest['image_id']
             try:
                 compose(image)
-                bind = deploy_env(image)['COMRADE_BIND_ADDRESS']
-                with request(f'http://{bind}:{PORT}/health') as response:
-                    if json.load(response).get('status') != 'ok':
-                        raise RuntimeError('Health response failed')
+                env = deploy_env(image)
+                bind = env['COMRADE_BIND_ADDRESS']
+                port = env['COMRADE_HOST_PORT']
+                with request(f'http://{bind}:{port}/health') as response:
+                    health = json.load(response)
+                    if health.get('status') != 'ok' or health.get('commit') != commit:
+                        raise RuntimeError('Local health did not report the expected release')
             except Exception:
                 if previous:
                     compose(f"ghcr.io/flatt-t/projectcomrade:{previous['commit']}")
