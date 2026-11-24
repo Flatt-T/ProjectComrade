@@ -195,6 +195,7 @@ export class RegionRunner {
   private pollTimer?: ReturnType<typeof setInterval>;
   private lastPoll = 0;
   private lastRenew = 0;
+  private lastRecoveryProgress = 0;
   private lastCheckpointTick = 0;
   private lastAppliedSeq = 0n;
   private wokeAtMs = 0;
@@ -491,6 +492,14 @@ export class RegionRunner {
 
     await this.catchUpTo(this.tickFor(now));
     await this.applyUnappliedEvents();
+    // A pre-wake checkpoint can have a later committed tail. Recovery must
+    // resume live ticking at the replayed state instead of waiting for the
+    // wall clock anchored at the older checkpoint to catch up again.
+    const resumedAt = this.opts.now();
+    if (hib && this.game.tick > this.tickFor(resumedAt)) {
+      this.startedAtMs = resumedAt - this.game.tick * this.opts.tickMs;
+      await setRegionSimStart(this.opts.regionId, this.startedAtMs);
+    }
     // PW10: the durable compound roster and any open shield selections must be
     // current before the first live tick — a restored snapshot may predate them.
     await this.syncCompoundsNow();
@@ -540,6 +549,10 @@ export class RegionRunner {
       this.stats.ticksStepped++;
       if (performance.now() - lastYield > 100) {
         lastYield = performance.now();
+        if (!this.running && lastYield - this.lastRecoveryProgress >= 30_000) {
+          this.lastRecoveryProgress = lastYield;
+          this.opts.log('region-recovery-progress', { regionId: this.opts.regionId, tick: game.tick, targetTick: tick });
+        }
         await new Promise(resolve => setImmediate(resolve));
       }
       if (this.epoch !== undefined

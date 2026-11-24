@@ -6,12 +6,14 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import * as database from '../../apps/service/src/mmo/db.js';
 import {
-  closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
+  closeMmoDatabase, mmoOne, mmoQuery, mmoTransaction, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import { mmoEntityId, MMO_PROTOCOL, type MmoCommandMessage } from '../../packages/contracts/src/index.js';
 import { PACKS } from '../../packages/fusion/src/index';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
-import { acquireRegionLease, recordSnapshot, recoverySnapshots } from '../../apps/service/src/mmo/store.js';
+import {
+  acquireRegionLease, appendRegionEvent, getRegion, markRegionEventApplied, recordSnapshot, recoverySnapshots,
+} from '../../apps/service/src/mmo/store.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
 
@@ -195,6 +197,36 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
     } finally {
       list.mockRestore();
       fetch.mockRestore();
+    }
+  });
+
+  it('resumes the wall clock from the replayed tick after restoring a hibernated checkpoint', async () => {
+    const fx = await seedFixtureWorld({ leaseMs: 300_000 });
+    const original = mkRunner(fx, fx.workerId);
+    await original.start();
+    const hibernatedAt = Date.now();
+    const checkpointTick = gameOf(original).tick;
+    await (original as unknown as { hibernate(now: number): Promise<void> }).hibernate(hibernatedAt);
+    const recoveredWorker = randomUUID();
+    const lease = await acquireRegionLease({ regionId: fx.regionId, workerId: recoveredWorker, leaseMs: 300_000 });
+    const journalTick = checkpointTick + 5;
+    await mmoTransaction(async tx => {
+      for (const [sinceMs, tick] of [[hibernatedAt, checkpointTick], [hibernatedAt + 1, journalTick]]) {
+        const { eventSeq } = await appendRegionEvent(tx, {
+          regionId: fx.regionId, workerId: recoveredWorker, epoch: lease.epoch,
+          tick, kind: 'accrual', payload: { sinceMs, ticks: 0, rates: [] },
+        });
+        await markRegionEventApplied(tx, { regionId: fx.regionId, eventSeq, result: { advancedTicks: 0 } });
+      }
+    });
+    const recovered = mkRunner(fx, recoveredWorker);
+    try {
+      await recovered.start();
+      expect(gameOf(recovered).tick).toBe(journalTick);
+      const durableAnchor = Number((await getRegion(fx.regionId))?.started_at_ms);
+      expect(Math.floor((Date.now() - durableAnchor) / TICK_MS)).toBe(journalTick);
+    } finally {
+      await recovered.stop();
     }
   });
 
