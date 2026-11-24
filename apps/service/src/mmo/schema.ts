@@ -735,4 +735,13 @@ export const MMO_MIGRATIONS: { version: number; name: string; sql: string }[] = 
     alter table notification add column journal_seq bigint;
     `,
   },
+  {
+    version: 21,
+    name: 'cross-region outbox routing',
+    sql: `
+    -- region_id and event_seq identify the source journal. A fan-out may
+    -- reach a different region whose journal has independent positions.
+    alter table outbox add column delivery_region_id uuid references region(region_id);
+    `,
+  },
 ];
