@@ -13,6 +13,7 @@ export interface OutboxEnvelope {
   eventId: string;
   regionId: string;
   eventSeq: string;
+  deliveryRegionId: string;
   topic: string;
   payload: unknown;
   attempts: number;
@@ -20,11 +21,13 @@ export interface OutboxEnvelope {
 
 interface OutboxRow {
   outbox_id: string; event_id: string; region_id: string; event_seq: string;
+  delivery_region_id: string | null;
   topic: string; payload: unknown; attempts: number;
 }
 
 const toEnvelope = (r: OutboxRow): OutboxEnvelope => ({
   outboxId: r.outbox_id, eventId: r.event_id, regionId: r.region_id,
+  deliveryRegionId: r.delivery_region_id ?? r.region_id,
   eventSeq: r.event_seq, topic: r.topic, payload: r.payload, attempts: r.attempts,
 });
 
@@ -56,7 +59,7 @@ export async function claimOutbox(args: {
          order by o.region_id, o.event_seq, o.outbox_id
          limit $3
          for update of o skip locked)
-      returning outbox_id, event_id, region_id, event_seq, topic, payload, attempts`,
+      returning outbox_id, event_id, region_id, event_seq, delivery_region_id, topic, payload, attempts`,
     [args.workerId, leaseUntil, limit]);
   return rows.map(toEnvelope);
 }

@@ -326,7 +326,7 @@ export class MmoGateway {
     if (!message) return; // topics not destined for browsers are acked and dropped here
     const audience = await this.audienceFor(envelope);
     for (const conn of this.conns) {
-      const sub = conn.subs.get(envelope.regionId);
+      const sub = conn.subs.get(envelope.deliveryRegionId);
       if (!sub) continue;
       if (audience && !audience.has(sub.playerId)) continue;
       try { send(conn.ws, message); } catch { conn.ws.terminate(); }
@@ -341,7 +341,8 @@ export class MmoGateway {
   private async audienceFor(envelope: OutboxEnvelope): Promise<Set<string> | null> {
     const payload = envelope.payload as Record<string, unknown>;
     if (envelope.topic === 'mmo.chat') {
-      if (payload.channel !== 'alliance') return null;
+      if (payload.channel === 'region') return null;
+      if (payload.channel !== 'alliance') return new Set();
       const allianceId = typeof payload.allianceId === 'string' ? payload.allianceId : '';
       return allianceId ? allianceAudience(allianceId) : new Set();
     }

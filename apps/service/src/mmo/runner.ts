@@ -1601,11 +1601,12 @@ export class RegionRunner {
         }
         for (const f of plan.fanout ?? []) {
           await tx.query(
-            `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,$4,$5)`,
-            [randomUUID(), f.regionId, event.event_seq, f.topic, JSON.stringify({
+            `insert into outbox (event_id, region_id, event_seq, topic, payload, delivery_region_id)
+             values ($1,$2,$3,$4,$5,$6)`,
+            [randomUUID(), this.opts.regionId, event.event_seq, f.topic, JSON.stringify({
               ...(f.payload as Record<string, unknown>),
               epoch: this.epoch, eventSeq: event.event_seq,
-            })]);
+            }), f.regionId === this.opts.regionId ? null : f.regionId]);
         }
       }
       return plan;
