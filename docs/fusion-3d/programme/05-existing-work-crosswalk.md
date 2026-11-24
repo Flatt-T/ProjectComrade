@@ -42,3 +42,7 @@ For each new task, read the related issue's latest comments, current code and ac
 ## New facts versus historical evidence
 
 The review inspected current source, enumerated Fusion definitions, and read current Linear records. It did not execute a full game qualification, inspect every rendered model, or establish current public deployment health. Source-proven limitations, prior reported outcomes, proposed architecture and unverified runtime conditions stay visibly separate throughout the programme.
+
+## 24 November source and runtime refresh
+
+The dated baseline records the observed source revisions, live Classic smoke, isolated PostgreSQL evidence, deployed-release manifests and open qualifications. It includes the opening Linear inventory and points to matching source history where available. The preservation record identifies the existing mode and recovery contracts. [Baseline](../baseline.json) · [Preservation record](../preservation-manifest.md)
