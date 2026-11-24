@@ -123,12 +123,15 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
     const fx = await seedFixtureWorld({ leaseMs: 300_000 });
     // Stay awake until the measurement is injected: a long min-awake keeps the
     // region ticking while we fix the sample window, then we force one evaluation.
+    let fixtureTime = Date.now() - 220 * TICK_MS;
     const runnerA = new RegionRunner({
       regionId: fx.regionId, workerId: fx.workerId, leaseMs: 60_000,
       tickMs: TICK_MS, pollMs: 20,
       quiescence: { ...QUIESCENCE, minAwakeMs: 600_000 },
+      now: () => fixtureTime,
     });
     await runnerA.start();
+    fixtureTime += 220 * TICK_MS;
     await waitFor(async () => (runnerA.currentGame?.tick ?? 0) > 200);
     const gA = runnerA.currentGame!;
     const creditsAtHibernate = gA.players[0].credits;
@@ -159,6 +162,7 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
     // Storage cap: accrual demand is far above headroom → pinned at capacity.
     expect(gB.players[0].credits).toBe(creditsAtHibernate + 500);
     expect(gB.players[0].stats.harvested).toBeGreaterThan(60_000);
+    const harvestedAtWake = gB.players[0].stats.harvested;
 
     // Simulate a crash before the post-wake checkpoint: a new worker force-takes the
     // lease while runnerB is still live; the latest snapshot still carries `hib`, so
@@ -172,10 +176,14 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
     const runnerC = new RegionRunner({
       regionId: fx.regionId, workerId: workerC, leaseMs: 60_000,
       tickMs: TICK_MS, pollMs: 20, quiescence: QUIESCENCE,
+      now: () => Date.now() + 10_000,
     });
     await runnerC.start();
     expect(runnerC.wakeLatencyMs).toBeDefined();
     expect(runnerC.currentGame!.players[0].credits).toBe(creditsAtHibernate + 500);
+    // Storage caps can hide extra accrual in the balance. Check the durable
+    // interval inputs by comparing total delivered harvest as well.
+    expect(runnerC.currentGame!.players[0].stats.harvested).toBe(harvestedAtWake);
 
     // Exactly one accrual journal record for this hibernation interval.
     const accrual = await mmoQuery<{ n: string }>(
@@ -277,6 +285,7 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
         const e = service.regions().find(r => r.regionId === fx.regionId);
         return e !== undefined && !e.awake; // runner exists but hibernated
       }, 15_000);
+      expect(service.metrics.hibernations).toBe(1);
       // Job due soon: inside the 5 s look-ahead, so the poller must wake the region.
       const jobId = await scheduleJob({
         regionId: fx.regionId, kind: 'wake_marker', dueAtMs: Date.now() + 400, payload: {},
@@ -296,7 +305,6 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
           'select state from scheduled_job where job_id = $1', [jobId]);
         return job?.state === 'done';
       }, 8_000);
-      expect(service.metrics.hibernations).toBe(1);
       expect(service.metrics.wakes).toBeGreaterThanOrEqual(1);
       expect(service.metrics.wakeLatenciesMs.length).toBeGreaterThanOrEqual(1);
       expect(service.metrics.wakeLatenciesMs[0]).toBeGreaterThanOrEqual(0);
