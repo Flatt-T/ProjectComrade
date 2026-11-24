@@ -7,10 +7,11 @@ import { handleOps, log } from './ops.js';
 import { fusionRequests } from './community.js';
 import { guestIdFromCookieHeader } from './auth.js';
 import { configSummary, platformEnabled } from './config.js';
-import { databaseConfigured, migrate } from './db.js';
+import { closeDatabase, databaseConfigured, migrate } from './db.js';
+import { assertBetaDatabaseTargets } from './beta-db.js';
 import { handleApi } from './http.js';
 import { publicFileCandidates } from './static.js';
-import { mmoDatabaseConfigured, mmoMigrate } from './mmo/db.js';
+import { closeMmoDatabase, mmoDatabaseConfigured, mmoMigrate } from './mmo/db.js';
 import { RegionService } from './mmo/regions.js';
 import { MmoGateway } from './mmo/gateway.js';
 // Importing the API module registers every route on the table in http.ts.
@@ -144,6 +145,14 @@ process.on('unhandledRejection', error => log('error', { where: 'promise', messa
  * DATABASE_URL degrades to free open play rather than an outage.
  */
 async function startup() {
+  try {
+    await assertBetaDatabaseTargets();
+  } catch {
+    log('beta-db-target-failed', { message: 'Both connections must use comrade_beta as comrade_beta_app before migrations' });
+    process.exitCode = 1;
+    await Promise.allSettled([closeDatabase(), closeMmoDatabase()]);
+    return;
+  }
   if (databaseConfigured()) {
     try {
       await migrate();

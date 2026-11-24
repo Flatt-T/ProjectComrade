@@ -36,7 +36,7 @@ def request(url):
 def deploy_env(image):
     env = {**os.environ, 'COMRADE_IMAGE': image,
            'COMRADE_BIND_ADDRESS': os.environ.get('COMRADE_BIND_ADDRESS', '10.10.0.60'),
-           'COMRADE_HOST_PORT': PORT}
+           'COMRADE_HOST_PORT': PORT, 'COMRADE_CHANNEL': CHANNEL}
     # Secrets live beside the state file, never in the repo or the image: the database URL,
     # the Cognito pool, the Stripe keys and the log-export token. Only
     # names the service actually reads are passed through, so a stray line cannot inject
