@@ -8,10 +8,19 @@ port 3001 behind the Cloudflare tunnel. Database `comrade_beta` + role
 ## Deploy / rollback
 
 - Deploys are automatic: `comrade-deploy.timer` on the guest runs
-  `/usr/local/lib/comrade-pull-deploy.py`, which follows the newest
-  `main-<sha>` GitHub release, verifies checksums, recreates the container
-  and rolls back to the previous image on health-check failure.
+  `/usr/local/lib/comrade-pull-deploy.py`, which verifies checksums, updates
+  the Compose service and restores the previous image on health-check failure.
+  The original isolated guest configuration followed `main-<sha>` releases.
+  Confirm the effective channel before publishing a beta release.
   State: `/opt/comrade/current.json`.
+- To subscribe the dedicated beta guest to the `beta-<sha>` channel, keep its
+  existing `/opt/comrade` state and Compose project. On LXC 283, install the
+  current pull deployer and add a `comrade-deploy.service` override with
+  `COMRADE_CHANNEL=beta`, `COMRADE_DEPLOY_ROOT=/opt/comrade`,
+  `COMRADE_COMPOSE_PROJECT=comrade` and `COMRADE_HOST_PORT=3001`. Check the
+  effective guest configuration, the existing rollback image and the database
+  backup before enabling its timer. GitHub verifies that the public beta
+  reports the expected commit with its database ready.
 - **Manual pin / rollback** (verified 2026-11-12):
   1. `systemctl stop comrade-deploy.timer` on the guest (otherwise the
      timer redeploys mid-drill).
