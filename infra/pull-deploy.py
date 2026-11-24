@@ -3,6 +3,7 @@
 COMRADE_CHANNEL=production (default) follows the latest main-<sha> release on port 3001.
 COMRADE_CHANNEL=beta follows the newest beta-<sha> pre-release on port 3002 by default.
 A dedicated guest can set its existing deployment root, Compose project and host port.
+COMRADE_RELEASE_TAG optionally selects an exact published tag for this invocation.
 """
 import fcntl
 import hashlib
@@ -104,8 +105,11 @@ def main():
     ROOT.mkdir(exist_ok=True)
     with (ROOT / 'deploy.lock').open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        pinned = os.environ.get('COMRADE_RELEASE_TAG')
         try:
-            if BETA:
+            if pinned:
+                release = {'tag_name': pinned}
+            elif BETA:
                 # Pre-releases never become "latest": take the newest beta- one.
                 # The releases list is not reliably ordered, so pick explicitly
                 # by publish time rather than trusting list position.
@@ -136,7 +140,6 @@ def main():
         if previous and previous['commit'] == commit:
             print(f'Already deployed {commit}')
             return
-        assets = {asset['name']: asset for asset in release['assets']}
         # Construct the fixed public download paths; never execute release prose.
         download = f'https://github.com/{REPO}/releases/download/{tag}/'
         with request(download + 'deploy.json') as response:
@@ -145,8 +148,10 @@ def main():
             raise RuntimeError('Invalid release manifest')
         if not re.fullmatch(r'[0-9a-f]{64}', manifest['archive_sha256']):
             raise RuntimeError('Invalid archive checksum')
-        if assets['comrade-image.tar.gz']['size'] > 2 * 1024**3:
-            raise RuntimeError('Deployment bundle exceeds 2 GiB')
+        if 'assets' in release:
+            assets = {asset['name']: asset for asset in release['assets']}
+            if assets['comrade-image.tar.gz']['size'] > 2 * 1024**3:
+                raise RuntimeError('Deployment bundle exceeds 2 GiB')
         archive = ROOT / 'incoming.tar.gz'
         try:
             checksum = hashlib.sha256()

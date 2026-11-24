@@ -21,6 +21,10 @@ port 3001 behind the Cloudflare tunnel. Database `comrade_beta` + role
   effective guest configuration, the existing rollback image and the database
   backup before enabling its timer. GitHub verifies that the public beta
   reports the expected commit with its database ready.
+- If GitHub release discovery is rate-limited, use the published
+  `beta-<commit>` tag as `COMRADE_RELEASE_TAG` for a single invocation with
+  the same guest settings. The deployer still checks the bundle checksum,
+  image ID and served commit. The timer continues to discover releases normally.
 - **Manual pin / rollback** (verified 2026-11-12):
   1. `systemctl stop comrade-deploy.timer` on the guest (otherwise the
      timer redeploys mid-drill).
