@@ -448,30 +448,20 @@ export class RegionRunner {
       }
     }
 
-    // PW22 wake: a hibernated region accounts for its quiescent interval as one
-    // journaled 'accrual' event, then re-anchors wall-clock so real-time resumes —
-    // the slept ticks are never re-simulated. This runs BEFORE tail replay: the
-    // accrual's arithmetic advance is tick-parity sensitive (upkeep cadence keys
-    // off the absolute sim tick), and its journal position must precede the
-    // post-wake commands the replay is about to reproduce.
+    // Journal a fresh wake before replay. The restored checkpoint may precede
+    // multiple committed wakes; apply every interval at its own journal tick.
+    const wakeStartedAt = performance.now();
+    if (hib) await this.journalWakeAccrual(hib);
+
+    // Reproduce committed simulation effects without writing their receipts,
+    // outbox messages or ledger entries again.
+    await this.replayCommittedTail(replayFrom);
     if (hib) {
-      const t0 = performance.now();
-      await this.applyWakeAccrual(hib);
-      this.wakeLatencyMs = performance.now() - t0;
-      this.region = await getRegion(this.opts.regionId);
+      this.wakeLatencyMs = performance.now() - wakeStartedAt;
       this.opts.log('region-wake', {
-        regionId: this.opts.regionId, sinceMs: hib.sinceMs,
-        wakeMs: this.wakeLatencyMs,
+        regionId: this.opts.regionId, sinceMs: hib.sinceMs, wakeMs: this.wakeLatencyMs,
       });
     }
-
-    // PW30: replay every committed, simulation-relevant journal event after the
-    // restored checkpoint — including rows already marked applied, whose durable
-    // receipts committed but whose sim effects the snapshot never saw. Replay is
-    // sim-only (no receipts, outbox or ledger writes) and runs before wall-clock
-    // catch-up so recorded atTicks still land in the future. 'accrual' rows are
-    // cursor entries here when a hib wake owns their advance.
-    await this.replayCommittedTail(replayFrom, { applyAccrual: !hib });
     // PW30/PW18: reconcile durable COMPLETED inbound transfers on EVERY start,
     // not only genesis. An arrival that committed after the restored snapshot
     // is absent from both the snapshot and the journal tail (the drain is not
@@ -480,11 +470,10 @@ export class RegionRunner {
     // re-materialized and rebound. Genesis replay needs the same pass.
     await this.rebindCompletedTransfers();
 
-    // Wall-clock ↔ sim-tick anchor. A region that was down fast-forwards through the
-    // elapsed ticks on recovery — the sim is the only authority, so there is no
-    // shortcut; quiescent accrual is PW22's concern, not this runner's.
+    // Active regions recover missed wall time. A hibernated checkpoint re-anchors
+    // after its tail: its slept time was already covered by journaled accrual.
     const now = this.opts.now();
-    const startedAt = this.region?.started_at_ms;
+    const startedAt = hib ? null : this.region?.started_at_ms;
     this.startedAtMs = startedAt != null
       ? Number(startedAt)
       : now - this.game.tick * this.opts.tickMs;
@@ -691,33 +680,21 @@ export class RegionRunner {
   // PW22: quiescence detection, hibernation and wake accrual
   // ------------------------------------------------------------------
 
-  /**
-   * Journal the quiescent interval exactly once, apply its arithmetic advance to the
-   * restored game, then re-anchor wall-clock so real-time stepping resumes from the
-   * hibernated tick.
-   *
-   * Exactly-once across crash: snapshots are only rewritten at checkpoints, so a
-   * crash between the wake transaction and the next checkpoint restores the
-   * pre-accrual snapshot with `hib` still attached. The accrual event may already be
-   * marked applied in that case, so the fast-forward is applied to the restored game
-   * unconditionally — restoreGame is deterministic, making the advance replay-safe.
-   * The journal record itself is deduplicated on `sinceMs`.
-   */
-  private async applyWakeAccrual(hib: { sinceMs: number; rates: number[]; sampleTick: number }): Promise<void> {
+  /** Record the wake once. Startup replays this interval from the durable journal. */
+  private async journalWakeAccrual(hib: { sinceMs: number; rates: number[]; sampleTick: number }): Promise<void> {
     const now = this.opts.now();
     const ticks = Math.floor(Math.max(0, now - hib.sinceMs) / this.opts.tickMs);
-    const interval = await mmoTransaction(async tx => {
+    await mmoTransaction(async tx => {
       await assertRegionFence(tx, {
         regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
       });
-      const existing = await tx.query<{ payload: { ticks: number; rates: number[] } }>(
-        `select payload from region_event
+      const existing = await tx.query(
+        `select 1 from region_event
           where region_id = $1 and event_kind = 'accrual' and payload->>'sinceMs' = $2
-          order by event_seq desc limit 1`,
+          limit 1`,
         [this.opts.regionId, String(hib.sinceMs)]);
-      // A restart can restore the pre-wake checkpoint after the accrual
-      // committed. The durable interval determines the effect on every replay.
-      if (existing.rows[0]) return existing.rows[0].payload;
+      if (existing.rows.length) return;
+
       const payload = { sinceMs: hib.sinceMs, rates: hib.rates, ticks, sampleTick: hib.sampleTick };
       const { eventSeq } = await appendRegionEvent(tx, {
         regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
@@ -730,18 +707,7 @@ export class RegionRunner {
         regionId: this.opts.regionId, eventSeq,
         result: { advancedTicks: ticks, dedupe: 'hib-' + hib.sinceMs },
       });
-      this.lastAppliedSeq = BigInt(eventSeq);
-      return payload;
     });
-    // Apply to the restored (pre-interval) game. Deterministic, so re-running it on a
-    // fresh restore produces identical state.
-    await this.quiescentAdvance(interval.ticks, interval.rates);
-    // Re-anchor: slept wall-time was consumed arithmetically, so the next tick is
-    // the hibernated tick stepping in real time again.
-    const anchor = now - this.game!.tick * this.opts.tickMs;
-    await setRegionSimStart(this.opts.regionId, anchor);
-    this.region = await getRegion(this.opts.regionId);
-    if (this.region) this.startedAtMs = Number(this.region.started_at_ms);
   }
 
   /** Refresh the harvest-rate sample once it spans a meaningful window. */
@@ -977,8 +943,7 @@ export class RegionRunner {
    * `simAppliedSeqs` marks replayed positions so a later receipt pass for a
    * committed-plan event does not enqueue its effects a second time.
    */
-  private async replayCommittedTail(afterSeq: bigint, opts?: { applyAccrual?: boolean }): Promise<void> {
-    const applyAccrual = opts?.applyAccrual !== false;
+  private async replayCommittedTail(afterSeq: bigint): Promise<void> {
     const kinds = ['command', 'scheduled', 'accrual'];
     let cursor = afterSeq;
     // Pre-plan fan-out is fetched lazily once and grouped by journal position.
@@ -1010,12 +975,8 @@ export class RegionRunner {
           // (observed: quiescent regions bricked after content-fingerprint
           // rejection forced a deep replay).
           await this.advanceTo(Number(ev.simulation_tick));
-          // Wake accrual owns its arithmetic advance (hib path dedupes on
-          // sinceMs); only replay accrual rows when no hib metadata will.
-          if (applyAccrual) {
-            const p = ev.payload as { ticks?: number; rates?: number[] };
-            await this.quiescentAdvance(Number(p.ticks ?? 0), p.rates ?? []);
-          }
+          const p = ev.payload as { ticks?: number; rates?: number[] };
+          await this.quiescentAdvance(Number(p.ticks ?? 0), p.rates ?? []);
           cursor = seq;
           continue;
         }

@@ -200,29 +200,48 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
     }
   });
 
-  it('resumes the wall clock from the replayed tick after restoring a hibernated checkpoint', async () => {
+  it('replays each committed wake interval from a hibernated checkpoint and resumes the clock', async () => {
     const fx = await seedFixtureWorld({ leaseMs: 300_000 });
     const original = mkRunner(fx, fx.workerId);
     await original.start();
     const hibernatedAt = Date.now();
     const checkpointTick = gameOf(original).tick;
+    const originalPlayer = gameOf(original).players[0];
+    const initialHarvest = originalPlayer.stats.harvested;
+    const initialCredits = originalPlayer.credits;
+    const rates = [2, 3];
+    const ticks = [4, 6];
+    const income = rates.reduce((total, rate, index) =>
+      total + ticks[index] * (rate + Math.floor(rate * originalPlayer.incomeBonus / 100)), 0);
+    const expectedCredits = originalPlayer.storage > 0
+      ? Math.max(initialCredits, Math.min(initialCredits + income, originalPlayer.storage))
+      : initialCredits + income;
     await (original as unknown as { hibernate(now: number): Promise<void> }).hibernate(hibernatedAt);
     const recoveredWorker = randomUUID();
     const lease = await acquireRegionLease({ regionId: fx.regionId, workerId: recoveredWorker, leaseMs: 300_000 });
     const journalTick = checkpointTick + 5;
     await mmoTransaction(async tx => {
-      for (const [sinceMs, tick] of [[hibernatedAt, checkpointTick], [hibernatedAt + 1, journalTick]]) {
+      const windows = [
+        { sinceMs: hibernatedAt, tick: checkpointTick, ticks: ticks[0], rates: [rates[0]] },
+        { sinceMs: hibernatedAt + 1, tick: journalTick, ticks: ticks[1], rates: [rates[1]] },
+      ];
+      for (const { tick, ...payload } of windows) {
         const { eventSeq } = await appendRegionEvent(tx, {
-          regionId: fx.regionId, workerId: recoveredWorker, epoch: lease.epoch,
-          tick, kind: 'accrual', payload: { sinceMs, ticks: 0, rates: [] },
+          regionId: fx.regionId, workerId: recoveredWorker, epoch: lease.epoch, tick, kind: 'accrual', payload,
         });
-        await markRegionEventApplied(tx, { regionId: fx.regionId, eventSeq, result: { advancedTicks: 0 } });
+        await markRegionEventApplied(tx, { regionId: fx.regionId, eventSeq, result: { advancedTicks: payload.ticks } });
       }
     });
     const recovered = mkRunner(fx, recoveredWorker);
     try {
       await recovered.start();
       expect(gameOf(recovered).tick).toBe(journalTick);
+      expect(gameOf(recovered).players[0].stats.harvested).toBe(initialHarvest + 26);
+      expect(gameOf(recovered).players[0].credits).toBe(expectedCredits);
+      const events = await mmoOne<{ count: string }>(
+        "select count(*) from region_event where region_id = $1 and event_kind = 'accrual'", [fx.regionId],
+      );
+      expect(events?.count).toBe('2');
       const durableAnchor = Number((await getRegion(fx.regionId))?.started_at_ms);
       expect(Math.floor((Date.now() - durableAnchor) / TICK_MS)).toBe(journalTick);
     } finally {
