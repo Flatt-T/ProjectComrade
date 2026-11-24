@@ -1,13 +1,12 @@
-import { publicUrl } from './config.js';
+import { betaDeployment } from './config.js';
 import { databaseConfigured, db } from './db.js';
 import { mmoDatabaseConfigured, mmoDb } from './mmo/db.js';
 
-const BETA_URL = 'https://beta.projectcomrade.co.uk';
 const BETA_DATABASE = 'comrade_beta';
 const BETA_ROLE = 'comrade_beta_app';
 
 export async function assertBetaDatabaseTargets(): Promise<void> {
-  if (process.env.COMRADE_CHANNEL !== 'beta' && publicUrl() !== BETA_URL) return;
+  if (!betaDeployment()) return;
   if (!databaseConfigured() || !mmoDatabaseConfigured()) {
     throw new Error('Beta requires both platform and persistent world database connections');
   }

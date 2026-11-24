@@ -16,6 +16,17 @@ export function publicUrl(): string {
   return text('COMRADE_PUBLIC_URL', 'https://projectcomrade.co.uk').replace(/\/$/, '');
 }
 
+const BETA_PUBLIC_ORIGIN = 'https://beta.projectcomrade.co.uk';
+
+export function betaDeployment(): boolean {
+  return text('COMRADE_CHANNEL') === 'beta' || publicUrl() === BETA_PUBLIC_ORIGIN;
+}
+
+/** Browsers always send an Origin for a WebSocket handshake. */
+export function allowsWebSocketOrigin(origin: string | undefined): boolean {
+  return !betaDeployment() || origin === undefined || origin === BETA_PUBLIC_ORIGIN;
+}
+
 export const cognito = {
   region: () => text('COGNITO_REGION', 'eu-west-2'),
   userPoolId: () => text('COGNITO_USER_POOL_ID'),

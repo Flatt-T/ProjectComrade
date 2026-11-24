@@ -12,6 +12,7 @@ vi.mock('../../apps/service/src/mmo/db.js', () => ({
 }));
 
 import { assertBetaDatabaseTargets } from '../../apps/service/src/beta-db.js';
+import { allowsWebSocketOrigin } from '../../apps/service/src/config.js';
 
 const identity = { rows: [{ database: 'comrade_beta', role: 'comrade_beta_app' }] };
 
@@ -58,5 +59,15 @@ describe('beta PostgreSQL identity', () => {
     await expect(assertBetaDatabaseTargets()).resolves.toBeUndefined();
     expect(worldQuery).not.toHaveBeenCalled();
     expect(platformQuery).not.toHaveBeenCalled();
+  });
+
+  it('accepts the beta browser origin and rejects cross-origin browser upgrades', () => {
+    expect(allowsWebSocketOrigin('https://beta.projectcomrade.co.uk')).toBe(true);
+    expect(allowsWebSocketOrigin('https://projectcomrade.co.uk')).toBe(false);
+    expect(allowsWebSocketOrigin('null')).toBe(false);
+    expect(allowsWebSocketOrigin(undefined)).toBe(true);
+    vi.stubEnv('COMRADE_CHANNEL', 'production');
+    vi.stubEnv('COMRADE_PUBLIC_URL', 'https://projectcomrade.co.uk');
+    expect(allowsWebSocketOrigin('https://www.projectcomrade.co.uk')).toBe(true);
   });
 });

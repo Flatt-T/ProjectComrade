@@ -6,7 +6,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Game, TICKS_PER_SECOND, type Command, type GameSetup } from '../../packages/fusion/src/index';
 import { CLASSIC_PACKS } from '../../packages/fusion/src/index';
-import { PersistentSession, type MmoConnection } from '../../apps/web/src/mmo.js';
+import { MmoConnection, PersistentSession } from '../../apps/web/src/mmo.js';
 
 const PACK = CLASSIC_PACKS[0];
 const STEP_MS = 1000 / TICKS_PER_SECOND;
@@ -44,6 +44,48 @@ function sessionFor(g: Game) {
 function steps(s: PersistentSession, n: number) {
   for (let i = 0; i < n; i++) s.update(STEP_MS + 1);
 }
+
+describe('persistent WebSocket reconnect', () => {
+  it('requests a fresh authority epoch and stops reconnecting after shutdown', () => {
+    const sockets: TestSocket[] = [];
+    class TestSocket {
+      static OPEN = 1;
+      readyState = 0;
+      onopen?: () => void;
+      onclose?: () => void;
+      onmessage?: (event: { data: string }) => void;
+      send = vi.fn();
+      constructor() { sockets.push(this); }
+      open() { this.readyState = TestSocket.OPEN; this.onopen?.(); }
+      close() { this.readyState = 3; this.onclose?.(); }
+    }
+    vi.useFakeTimers();
+    vi.stubGlobal('WebSocket', TestSocket);
+    const conn = new MmoConnection({}, 'ws://beta.example.invalid/mmo');
+    try {
+      conn.subscribe('fixture-region');
+      const [first] = sockets;
+      first.open();
+      first.onmessage?.({ data: JSON.stringify({ type: 'snapshot', epoch: '8', lastAppliedSeq: '37' }) });
+      first.close();
+
+      vi.advanceTimersByTime(2000);
+      const second = sockets[1];
+      second.open();
+      expect(JSON.parse(second.send.mock.calls[0][0])).toMatchObject({
+        type: 'subscribe', regionId: 'fixture-region', seenEpoch: '0', lastSeenEventSeq: '37',
+      });
+      second.close();
+      conn.close();
+      vi.advanceTimersByTime(2000);
+      expect(sockets).toHaveLength(2);
+    } finally {
+      conn.close();
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    }
+  });
+});
 
 describe('PW31 tick-ordered remote effects', () => {
   it('applies effects at their original tick in journal order', () => {

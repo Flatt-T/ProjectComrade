@@ -7,13 +7,17 @@ import { createServer, type Server } from 'node:http';
 import { createHmac, randomBytes, randomUUID } from 'node:crypto';
 import { connect as netConnect, type Socket } from 'node:net';
 import type { AddressInfo } from 'node:net';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import WebSocket from 'ws';
 import {
   closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import { createRegion, releaseRegionLease } from '../../apps/service/src/mmo/store.js';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
+import * as accounts from '../../apps/service/src/accounts.js';
+import * as cognito from '../../apps/service/src/cognito.js';
+import * as config from '../../apps/service/src/config.js';
+import { encodeSessionCookie, SESSION_COOKIE } from '../../apps/service/src/auth.js';
 import { MmoGateway } from '../../apps/service/src/mmo/gateway.js';
 import { RegionService } from '../../apps/service/src/mmo/regions.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
@@ -149,6 +153,41 @@ describeDb('mmo gateway (real PostgreSQL + real WebSocket)', () => {
       expect(service.hasSubscribers(fx.regionId)).toBe(true);
     } finally {
       client.close();
+    }
+    await waitFor(() => !service.hasSubscribers(fx.regionId), 5_000);
+  });
+
+  it('waits for the registered identity before handling the subscription sent on socket open', async () => {
+    const accountId = randomUUID();
+    let finishRefresh = () => {};
+    const refreshGate = new Promise<void>(resolve => { finishRefresh = resolve; });
+    const mocks = [
+      vi.spyOn(config, 'authEnabled').mockReturnValue(true),
+      vi.spyOn(cognito, 'refresh').mockImplementation(async () => {
+        await refreshGate;
+        return { accessToken: 'fixture-access', idToken: 'fixture-id', expiresIn: 3600 };
+      }),
+      vi.spyOn(cognito, 'getUser').mockResolvedValue({ sub: 'fixture-sub', email: 'fixture@example.invalid', emailVerified: true }),
+      vi.spyOn(accounts, 'accountBySub').mockResolvedValue({
+        id: accountId, display_name: 'Registered Fixture', handle: 'registered-fixture',
+      } as NonNullable<Awaited<ReturnType<typeof accounts.accountBySub>>>),
+    ];
+    let client: Client | undefined;
+    try {
+      client = await connect(port, `${SESSION_COOKIE}=${encodeSessionCookie('fixture-refresh')}`);
+      const opened = client;
+      opened.send({ type: 'subscribe', regionId: fx.regionId, seenEpoch: '0', lastSeenEventSeq: '0' });
+      await sleep(50);
+      expect(ofType(opened.messages, 'error')).toEqual([]);
+      finishRefresh();
+      await waitFor(() => ofType(opened.messages, 'snapshot').length === 1);
+      const [welcome] = ofType(opened.messages, 'welcome');
+      expect(await mmoOne('select account_id from player where player_id = $1', [welcome.playerId]))
+        .toEqual({ account_id: accountId });
+    } finally {
+      finishRefresh();
+      client?.close();
+      for (const mock of mocks) mock.mockRestore();
     }
     await waitFor(() => !service.hasSubscribers(fx.regionId), 5_000);
   });

@@ -46,6 +46,7 @@ export class MmoConnection {
   }
 
   private open() {
+    if (this.closed) return;
     const ws = new WebSocket(this.url);
     this.ws = ws;
     ws.onopen = () => { this.connected = true; this.handlers.onStatus?.(true); this.resubscribe(); };
@@ -108,7 +109,7 @@ export class MmoConnection {
     });
   }
 
-  private resubscribe() { if (this.regionId) this.subscribe(this.regionId); }
+  private resubscribe() { if (this.regionId) this.subscribe(this.regionId, true); }
 
   /** Ask for a fresh snapshot (gap recovery / checksum mismatch). */
   resync() { if (this.regionId) this.subscribe(this.regionId, true); }
