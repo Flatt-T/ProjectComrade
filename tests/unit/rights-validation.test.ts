@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'path';
 import { createHash } from 'crypto';
-import { loadLedger, validateLedger, validateAsset } from '../../tools/fingerprint/validate-rights';
+import { loadLedger, validateLedger, validateAsset, validatePackageManifest } from '../../tools/fingerprint/validate-rights';
 
 describe('Rights validation', () => {
   it('should load ledger without errors', () => {
@@ -94,11 +95,34 @@ describe('Rights validation', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('should allow approved test scaffolding files', () => {
+  it('allows exact original fixture bytes in a test bundle and refuses them in a public bundle', () => {
+    const root = mkdtempSync(join(tmpdir(), 'comrade-package-'));
     const ledger = loadLedger();
-    
-    // Test a file that would be approved as test scaffolding
-    const result = validateAsset('test-synthetic-asset.mix', ledger);
-    expect(result.valid).toBe(true);
+    const manifest = join(root, 'package.json');
+    const fixture = 'test-synthetic-asset.mix';
+    const fixtureHash = ledger.get('ledger-016')!.assetHashes!['TEST-SYNTHETIC-ASSET.MIX'];
+    const contents = 'Project Comrade original packaging fixture v1';
+    try {
+      writeFileSync(join(root, fixture), contents);
+      writeFileSync(manifest, JSON.stringify({ files: [{ name: fixture, sha256: fixtureHash }] }));
+      expect(validatePackageManifest(manifest, ledger, 'test')).toEqual({ valid: true, errors: [] });
+      expect(validatePackageManifest(manifest, ledger).valid).toBe(false);
+
+      writeFileSync(join(root, fixture), 'Unreviewed asset bytes');
+      expect(validatePackageManifest(manifest, ledger, 'test').errors).toEqual([
+        `Asset ${fixture} does not match its manifest SHA-256.`,
+      ]);
+
+      const unreviewed = 'test-placeholder.texture';
+      writeFileSync(join(root, fixture), contents);
+      writeFileSync(join(root, unreviewed), contents);
+      writeFileSync(manifest, JSON.stringify({ files: [fixture, unreviewed] }));
+      expect(validatePackageManifest(manifest, ledger, 'test').errors).toEqual([
+        `Asset ${unreviewed} has no approved ledger hash for test packaging.`,
+      ]);
+      expect(validateAsset('test-placeholder.mix', ledger, fixtureHash, 'test').valid).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
