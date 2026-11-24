@@ -686,20 +686,23 @@ export class RegionRunner {
   private async applyWakeAccrual(hib: { sinceMs: number; rates: number[]; sampleTick: number }): Promise<void> {
     const now = this.opts.now();
     const ticks = Math.floor(Math.max(0, now - hib.sinceMs) / this.opts.tickMs);
-    await mmoTransaction(async tx => {
+    const interval = await mmoTransaction(async tx => {
       await assertRegionFence(tx, {
         regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
       });
-      const existing = await tx.query<{ event_seq: string }>(
-        `select event_seq from region_event
+      const existing = await tx.query<{ payload: { ticks: number; rates: number[] } }>(
+        `select payload from region_event
           where region_id = $1 and event_kind = 'accrual' and payload->>'sinceMs' = $2
           order by event_seq desc limit 1`,
         [this.opts.regionId, String(hib.sinceMs)]);
-      if (existing.rows.length) return; // interval already on the journal
+      // A restart can restore the pre-wake checkpoint after the accrual
+      // committed. The durable interval determines the effect on every replay.
+      if (existing.rows[0]) return existing.rows[0].payload;
+      const payload = { sinceMs: hib.sinceMs, rates: hib.rates, ticks, sampleTick: hib.sampleTick };
       const { eventSeq } = await appendRegionEvent(tx, {
         regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
         tick: this.game!.tick, kind: 'accrual',
-        payload: { sinceMs: hib.sinceMs, rates: hib.rates, ticks, sampleTick: hib.sampleTick },
+        payload,
         outboxTopic: 'mmo.accrual',
         outboxPayload: { sinceMs: hib.sinceMs, ticks, regionId: this.opts.regionId },
       });
@@ -708,10 +711,11 @@ export class RegionRunner {
         result: { advancedTicks: ticks, dedupe: 'hib-' + hib.sinceMs },
       });
       this.lastAppliedSeq = BigInt(eventSeq);
+      return payload;
     });
     // Apply to the restored (pre-interval) game. Deterministic, so re-running it on a
     // fresh restore produces identical state.
-    await this.quiescentAdvance(ticks, hib.rates);
+    await this.quiescentAdvance(interval.ticks, interval.rates);
     // Re-anchor: slept wall-time was consumed arithmetically, so the next tick is
     // the hibernated tick stepping in real time again.
     const anchor = now - this.game!.tick * this.opts.tickMs;
