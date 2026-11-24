@@ -52,7 +52,8 @@ For a bundle with an asset manifest, run `node tools/fingerprint/validate-rights
 
 - EA C&C/RA source: GPLv3+ with additional terms. Must retain all notices, provide source correspondence, comply with licence.
 - Vanilla Conquer: Must retain the vanilla/License.txt, credit TheAssemblyArmada, pin specific commit.
-- Emscripten: Build tool with its own licence (MIT-style), must comply with runtime licence compliance.
+- Emscripten 6.0.12: MIT or NCSA for Emscripten code. Retain the pinned [licence and component notices](../../rights/snapshots/emscripten-6.0.12-license.txt).
+- SDL 2.32.10: the Emscripten port links SDL for browser video and input. Retain the pinned [Zlib notice](../../rights/snapshots/sdl-2.32.10-license.txt) for source distribution and identify any altered sources.
 
 ### Brand Usage
 
