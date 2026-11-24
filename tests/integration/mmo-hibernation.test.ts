@@ -278,18 +278,16 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
       wakePollMs: 80,
       log: (event, data) => logs.push(`${event} ${JSON.stringify(data ?? {})}`),
     });
-    service.start();
     try {
       await service.ensure(fx.regionId);
-      await waitFor(async () => {
-        const e = service.regions().find(r => r.regionId === fx.regionId);
-        return e !== undefined && !e.awake; // runner exists but hibernated
-      }, 15_000);
-      expect(service.metrics.hibernations).toBe(1);
+      // The runner stops ticking before its checkpoint and lease release.
+      // Schedule the test job after hibernation has actually completed.
+      await waitFor(() => logs.some(line => line.startsWith('region-hibernated ') && line.includes(fx.regionId)), 15_000);
       // Job due soon: inside the 5 s look-ahead, so the poller must wake the region.
       const jobId = await scheduleJob({
         regionId: fx.regionId, kind: 'wake_marker', dueAtMs: Date.now() + 400, payload: {},
       });
+      service.start();
       try {
         await waitFor(async () => fired.includes(jobId), 12_000);
       } catch (error) {
@@ -305,6 +303,7 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
           'select state from scheduled_job where job_id = $1', [jobId]);
         return job?.state === 'done';
       }, 8_000);
+      expect(service.metrics.hibernations).toBeGreaterThanOrEqual(1);
       expect(service.metrics.wakes).toBeGreaterThanOrEqual(1);
       expect(service.metrics.wakeLatenciesMs.length).toBeGreaterThanOrEqual(1);
       expect(service.metrics.wakeLatenciesMs[0]).toBeGreaterThanOrEqual(0);
