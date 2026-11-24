@@ -206,7 +206,7 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
     await original.start();
     const hibernatedAt = Date.now();
     const checkpointTick = gameOf(original).tick;
-    const originalPlayer = gameOf(original).players[0];
+    const originalPlayer = original.currentGame!.players[0];
     const initialHarvest = originalPlayer.stats.harvested;
     const initialCredits = originalPlayer.credits;
     const rates = [2, 3];
@@ -236,7 +236,7 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
     try {
       await recovered.start();
       expect(gameOf(recovered).tick).toBe(journalTick);
-      expect(gameOf(recovered).players[0].stats.harvested).toBe(initialHarvest + 26);
+      expect(recovered.currentGame!.players[0].stats.harvested).toBe(initialHarvest + 26);
       expect(gameOf(recovered).players[0].credits).toBe(expectedCredits);
       const events = await mmoOne<{ count: string }>(
         "select count(*) from region_event where region_id = $1 and event_kind = 'accrual'", [fx.regionId],
