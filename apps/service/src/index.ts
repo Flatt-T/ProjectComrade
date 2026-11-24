@@ -6,7 +6,7 @@ import { RoomCoordinator } from './rooms.js';
 import { handleOps, log } from './ops.js';
 import { fusionRequests } from './community.js';
 import { guestIdFromCookieHeader } from './auth.js';
-import { configSummary, platformEnabled } from './config.js';
+import { allowsWebSocketOrigin, configSummary, platformEnabled } from './config.js';
 import { closeDatabase, databaseConfigured, migrate } from './db.js';
 import { assertBetaDatabaseTargets } from './beta-db.js';
 import { handleApi } from './http.js';
@@ -88,6 +88,10 @@ const mmoService = mmoDatabaseConfigured()
   : undefined;
 const mmoGateway = mmoService ? new MmoGateway(mmoService) : undefined;
 server.on('upgrade', (req, socket, head) => {
+  if (!allowsWebSocketOrigin(req.headers.origin)) {
+    socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');
+    return;
+  }
   const pathname = new URL(req.url || '/', 'http://localhost').pathname;
   if (pathname === '/mmo' && mmoGateway) { mmoGateway.handleUpgrade(req, socket, head); return; }
   if (pathname === '/ws') {
