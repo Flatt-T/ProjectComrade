@@ -172,10 +172,12 @@ jobs:
           else:
               raise SystemExit('Public deployment did not reach the expected commit')
           PY
+  beta-qualification:
+    if: github.ref == 'refs/heads/beta' || github.base_ref == 'beta' || (github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main')
+    uses: ./.github/workflows/ci.yml
   deploy-beta:
-    # Merges into `beta` publish a pre-release; the BETA server (a second pull-deployer on the
-    # Project Comrade guest, COMRADE_CHANNEL=beta) deploys it for public testing.
-    needs: image
+    # Merges into `beta` publish a pre-release for the isolated beta guest.
+    needs: [image, beta-qualification]
     if: github.ref == 'refs/heads/beta' && github.event_name == 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -192,13 +194,17 @@ jobs:
         run: |
           gh release create beta-${{ github.sha }} deployment-bundle/* --repo ${{ github.repository }} --target ${{ github.sha }} --prerelease --latest=false --title 'Project Comrade BETA ${{ github.sha }}' --notes 'Public test build from the beta branch. Deployed to the BETA server only.'
       - name: Verify the BETA server picked it up
-        if: vars.COMRADE_BETA_URL != ''
         env:
           EXPECTED_COMMIT: ${{ github.sha }}
-          BETA_URL: ${{ vars.COMRADE_BETA_URL }}
+          BETA_URL: ${{ vars.COMRADE_BETA_URL || 'https://beta.projectcomrade.co.uk' }}
         run: |
           for i in $(seq 1 60); do
-            if curl -fsS "$BETA_URL/health" | grep -q "$EXPECTED_COMMIT"; then echo "BETA is on $EXPECTED_COMMIT"; exit 0; fi
+            if curl -fsS --max-time 10 "${BETA_URL%/}/health" | jq -e --arg commit "$EXPECTED_COMMIT" \
+              'select(.status == "ok" and .commit == $commit and .database == true)' >/dev/null; then
+              echo "BETA is healthy on $EXPECTED_COMMIT"
+              exit 0
+            fi
             sleep 15
           done
-          echo "BETA did not reach $EXPECTED_COMMIT"; exit 1
+          echo "BETA did not report $EXPECTED_COMMIT with its database ready"
+          exit 1

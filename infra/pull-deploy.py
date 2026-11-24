@@ -1,7 +1,9 @@
 """Credential-free deployment of validated public GitHub release bundles.
 
 COMRADE_CHANNEL=production (default) follows the latest main-<sha> release on port 3001.
-COMRADE_CHANNEL=beta follows the newest beta-<sha> pre-release on port 3002 (BETA server).
+COMRADE_CHANNEL=beta follows the newest beta-<sha> pre-release on port 3002 by default.
+A dedicated guest can set its existing deployment root, Compose project and host port.
+COMRADE_RELEASE_TAG optionally selects an exact published tag for this invocation.
 """
 import fcntl
 import hashlib
@@ -17,8 +19,9 @@ CHANNEL = os.environ.get('COMRADE_CHANNEL', 'production')
 if CHANNEL not in ('production', 'beta'):
     raise SystemExit('COMRADE_CHANNEL must be production or beta')
 BETA = CHANNEL == 'beta'
-ROOT = Path('/opt/comrade-beta' if BETA else '/opt/comrade')
-PORT = '3002' if BETA else '3001'
+ROOT = Path(os.environ.get('COMRADE_DEPLOY_ROOT', '/opt/comrade-beta' if BETA else '/opt/comrade'))
+PROJECT = os.environ.get('COMRADE_COMPOSE_PROJECT', 'comrade-beta' if BETA else 'comrade')
+PORT = os.environ.get('COMRADE_HOST_PORT', '3002' if BETA else '3001')
 TAG = re.compile(r'(beta|main)-([0-9a-f]{40})')
 REPO = 'Flatt-T/ProjectComrade'
 BASE = f'https://api.github.com/repos/{REPO}'
@@ -71,7 +74,7 @@ def deploy_env(image):
 
 
 def compose(image):
-    subprocess.run(['docker', 'compose', '-p', 'comrade-beta' if BETA else 'comrade', '-f', str(ROOT / 'compose.yml'),
+    subprocess.run(['docker', 'compose', '-p', PROJECT, '-f', str(ROOT / 'compose.yml'),
                     'up', '-d', '--pull', 'never', '--wait', '--wait-timeout', '90'],
                    env=deploy_env(image), check=True)
 
@@ -102,8 +105,11 @@ def main():
     ROOT.mkdir(exist_ok=True)
     with (ROOT / 'deploy.lock').open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        pinned = os.environ.get('COMRADE_RELEASE_TAG')
         try:
-            if BETA:
+            if pinned:
+                release = {'tag_name': pinned}
+            elif BETA:
                 # Pre-releases never become "latest": take the newest beta- one.
                 # The releases list is not reliably ordered, so pick explicitly
                 # by publish time rather than trusting list position.
@@ -134,7 +140,6 @@ def main():
         if previous and previous['commit'] == commit:
             print(f'Already deployed {commit}')
             return
-        assets = {asset['name']: asset for asset in release['assets']}
         # Construct the fixed public download paths; never execute release prose.
         download = f'https://github.com/{REPO}/releases/download/{tag}/'
         with request(download + 'deploy.json') as response:
@@ -143,8 +148,10 @@ def main():
             raise RuntimeError('Invalid release manifest')
         if not re.fullmatch(r'[0-9a-f]{64}', manifest['archive_sha256']):
             raise RuntimeError('Invalid archive checksum')
-        if assets['comrade-image.tar.gz']['size'] > 2 * 1024**3:
-            raise RuntimeError('Deployment bundle exceeds 2 GiB')
+        if 'assets' in release:
+            assets = {asset['name']: asset for asset in release['assets']}
+            if assets['comrade-image.tar.gz']['size'] > 2 * 1024**3:
+                raise RuntimeError('Deployment bundle exceeds 2 GiB')
         archive = ROOT / 'incoming.tar.gz'
         try:
             checksum = hashlib.sha256()
@@ -175,10 +182,13 @@ def main():
                 image_id = manifest['image_id']
             try:
                 compose(image)
-                bind = deploy_env(image)['COMRADE_BIND_ADDRESS']
-                with request(f'http://{bind}:{PORT}/health') as response:
-                    if json.load(response).get('status') != 'ok':
-                        raise RuntimeError('Health response failed')
+                env = deploy_env(image)
+                bind = env['COMRADE_BIND_ADDRESS']
+                port = env['COMRADE_HOST_PORT']
+                with request(f'http://{bind}:{port}/health') as response:
+                    health = json.load(response)
+                    if health.get('status') != 'ok' or health.get('commit') != commit:
+                        raise RuntimeError('Local health did not report the expected release')
             except Exception:
                 if previous:
                     compose(f"ghcr.io/flatt-t/projectcomrade:{previous['commit']}")

@@ -28,7 +28,7 @@ import { mmoOne, mmoTransaction } from './db.js';
 import {
   acquireRegionLease, appendRegionEvent, applyShieldTransition, assertRegionFence,
   claimDueJobs, finishJobTx, getRegion, getRegionEventForUpdate, listRegionEventsAfter, listSimFanout,
-  listSnapshots, listUnappliedRegionEvents,
+  recoverySnapshots, listUnappliedRegionEvents,
   markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot, storeRegionEventResolved,
   releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
   syncCompounds, updateMemberPowerScores, updateSettlementProtection,
@@ -195,6 +195,7 @@ export class RegionRunner {
   private pollTimer?: ReturnType<typeof setInterval>;
   private lastPoll = 0;
   private lastRenew = 0;
+  private lastRecoveryProgress = 0;
   private lastCheckpointTick = 0;
   private lastAppliedSeq = 0n;
   private wokeAtMs = 0;
@@ -323,11 +324,20 @@ export class RegionRunner {
     // checksum, parse or engine-restore validation is skipped so an older
     // verified checkpoint plus the journal tail is used instead; only when no
     // checkpoint validates does the region fall back to genesis + full replay.
-    const snaps = await listSnapshots(this.opts.regionId);
     let hib: SnapshotPayload['hib'];
     let replayFrom = 0n;
     let restored = false;
-    for (const snap of snaps) {
+    let attemptedSnapshots = 0;
+    let lastRestoreRenewal = performance.now();
+    for await (const snap of recoverySnapshots(this.opts.regionId)) {
+      attemptedSnapshots++;
+      if (performance.now() - lastRestoreRenewal > this.opts.leaseMs * 0.4) {
+        await acquireRegionLease({
+          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
+        });
+        this.lastRenew = this.opts.now();
+        lastRestoreRenewal = performance.now();
+      }
       const payload = this.validatedSnapshotPayload(snap);
       if (!payload) {
         this.opts.log('region-snapshot-rejected', { snapshotId: snap.snapshot_id });
@@ -367,8 +377,8 @@ export class RegionRunner {
       break;
     }
     if (!restored) {
-      if (snaps.length) {
-        this.opts.log('region-snapshots-exhausted', { regionId: this.opts.regionId, count: snaps.length });
+      if (attemptedSnapshots) {
+        this.opts.log('region-snapshots-exhausted', { regionId: this.opts.regionId, count: attemptedSnapshots });
       }
       this.simSeed = spec.seed;
       const pack = PACK_LIST.find(p => p.id === spec.packId);
@@ -425,9 +435,7 @@ export class RegionRunner {
     // — identical on every runner, before any tick or accrual runs.
     this.ensureRegionSites();
 
-    // Snapshot validation parses every retained payload; on a region with
-    // hundreds of checkpoints that can outlast the lease TTL before the first
-    // fenced write. Renew authority at each long-phase boundary.
+    // Renew authority before wake accrual and replay after restoring a checkpoint.
     if (this.epoch !== undefined) {
       try {
         await acquireRegionLease({
@@ -484,6 +492,14 @@ export class RegionRunner {
 
     await this.catchUpTo(this.tickFor(now));
     await this.applyUnappliedEvents();
+    // A pre-wake checkpoint can have a later committed tail. Recovery must
+    // resume live ticking at the replayed state instead of waiting for the
+    // wall clock anchored at the older checkpoint to catch up again.
+    const resumedAt = this.opts.now();
+    if (hib && this.game.tick > this.tickFor(resumedAt)) {
+      this.startedAtMs = resumedAt - this.game.tick * this.opts.tickMs;
+      await setRegionSimStart(this.opts.regionId, this.startedAtMs);
+    }
     // PW10: the durable compound roster and any open shield selections must be
     // current before the first live tick — a restored snapshot may predate them.
     await this.syncCompoundsNow();
@@ -533,6 +549,10 @@ export class RegionRunner {
       this.stats.ticksStepped++;
       if (performance.now() - lastYield > 100) {
         lastYield = performance.now();
+        if (!this.running && lastYield - this.lastRecoveryProgress >= 30_000) {
+          this.lastRecoveryProgress = lastYield;
+          this.opts.log('region-recovery-progress', { regionId: this.opts.regionId, tick: game.tick, targetTick: tick });
+        }
         await new Promise(resolve => setImmediate(resolve));
       }
       if (this.epoch !== undefined
@@ -686,20 +706,23 @@ export class RegionRunner {
   private async applyWakeAccrual(hib: { sinceMs: number; rates: number[]; sampleTick: number }): Promise<void> {
     const now = this.opts.now();
     const ticks = Math.floor(Math.max(0, now - hib.sinceMs) / this.opts.tickMs);
-    await mmoTransaction(async tx => {
+    const interval = await mmoTransaction(async tx => {
       await assertRegionFence(tx, {
         regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
       });
-      const existing = await tx.query<{ event_seq: string }>(
-        `select event_seq from region_event
+      const existing = await tx.query<{ payload: { ticks: number; rates: number[] } }>(
+        `select payload from region_event
           where region_id = $1 and event_kind = 'accrual' and payload->>'sinceMs' = $2
           order by event_seq desc limit 1`,
         [this.opts.regionId, String(hib.sinceMs)]);
-      if (existing.rows.length) return; // interval already on the journal
+      // A restart can restore the pre-wake checkpoint after the accrual
+      // committed. The durable interval determines the effect on every replay.
+      if (existing.rows[0]) return existing.rows[0].payload;
+      const payload = { sinceMs: hib.sinceMs, rates: hib.rates, ticks, sampleTick: hib.sampleTick };
       const { eventSeq } = await appendRegionEvent(tx, {
         regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
         tick: this.game!.tick, kind: 'accrual',
-        payload: { sinceMs: hib.sinceMs, rates: hib.rates, ticks, sampleTick: hib.sampleTick },
+        payload,
         outboxTopic: 'mmo.accrual',
         outboxPayload: { sinceMs: hib.sinceMs, ticks, regionId: this.opts.regionId },
       });
@@ -708,10 +731,11 @@ export class RegionRunner {
         result: { advancedTicks: ticks, dedupe: 'hib-' + hib.sinceMs },
       });
       this.lastAppliedSeq = BigInt(eventSeq);
+      return payload;
     });
     // Apply to the restored (pre-interval) game. Deterministic, so re-running it on a
     // fresh restore produces identical state.
-    await this.quiescentAdvance(ticks, hib.rates);
+    await this.quiescentAdvance(interval.ticks, interval.rates);
     // Re-anchor: slept wall-time was consumed arithmetically, so the next tick is
     // the hibernated tick stepping in real time again.
     const anchor = now - this.game!.tick * this.opts.tickMs;
