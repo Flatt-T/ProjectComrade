@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:source_profile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "source_profile"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "edition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "platform": {
+      "type": "string",
+      "minLength": 1
+    },
+    "region": {
+      "type": "string",
+      "minLength": 1
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inherits": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]*$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "data_hashes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "executable_hashes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "repository": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "modification": {
+      "enum": [
+        "unmodified",
+        "official_patch",
+        "community",
+        "unknown",
+        "source_snapshot",
+        "test_fixture"
+      ]
+    },
+    "authoritative_use": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "roster",
+          "rules",
+          "presentation",
+          "interface",
+          "history",
+          "discovery",
+          "synthetic"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "observation_environment": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "rights_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "lock_state": {
+      "enum": [
+        "provisional",
+        "locked"
+      ]
+    },
+    "locked_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "profile_id",
+    "evidence",
+    "owner",
+    "reviewer",
+    "blockers",
+    "title",
+    "edition",
+    "platform",
+    "region",
+    "language",
+    "inherits",
+    "data_hashes",
+    "executable_hashes",
+    "repository",
+    "revision",
+    "modification",
+    "authoritative_use",
+    "observation_environment",
+    "rights_id",
+    "conflicts",
+    "lock_state",
+    "locked_at"
+  ]
+}

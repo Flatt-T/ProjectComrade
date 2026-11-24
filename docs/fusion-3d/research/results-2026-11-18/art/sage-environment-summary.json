@@ -1,0 +1,341 @@
+{
+  "repo": "https://github.com/electronicarts/CnC_Modding_Support",
+  "commit": "3aad8e412961ab543192ae70f8503dc8e178e095",
+  "scope": "Xml/Civilian/**/*.xml direct GameObject declarations, three Terrain/Terrain.xml collections and four MapMetaData.xml files. Local declared fields only. Map records exclude the four cache containers and retain two sparse Tiberium Wars records without filenames. Blank fields may be inherited. Duplicates by released branch and source file retained.",
+  "errors": [
+    {
+      "game": "Red Alert 3",
+      "path": "Xml/Civilian/Mykonos_MY/Buildings/MY_Boat_01b.xml",
+      "blob": "3b11f87e9a2226f2278af19ad0c8fc7e47e587e8",
+      "error": "XML or text declaration not at start of entity: line 8, column 2",
+      "unvalidated_object_id_candidates": [
+        "MY_Boat_01b"
+      ]
+    },
+    {
+      "game": "Uprising",
+      "path": "Xml/Civilian/Mykonos_MY/Buildings/MY_Boat_01b.xml",
+      "blob": "3b11f87e9a2226f2278af19ad0c8fc7e47e587e8",
+      "error": "XML or text declaration not at start of entity: line 8, column 2",
+      "unvalidated_object_id_candidates": [
+        "MY_Boat_01b"
+      ]
+    }
+  ],
+  "non_civilian_sources": [
+    {
+      "game": "Red Alert 3",
+      "path": "Xml/MapMetaData.xml",
+      "git_blob": "395ba9908bfe3d4d6a7e042e1a33095acfb1d0a5"
+    },
+    {
+      "game": "Red Alert 3",
+      "path": "Xml/Terrain/Terrain.xml",
+      "git_blob": "aa1365ab4d132e0a08bc6fca0adec66b99bee7b1"
+    },
+    {
+      "game": "Red Alert 3",
+      "path": "Xml/dlcontent/packages/package1/MapMetaData.xml",
+      "git_blob": "db890779913f34afcb1cc3c8eb5bad0d8b5bbac2"
+    },
+    {
+      "game": "Tiberian Twilight",
+      "path": "Xml/Terrain/Terrain.xml",
+      "git_blob": "8c0bef431fd0aea60c70300db4055cb9eb695dc3"
+    },
+    {
+      "game": "Tiberium Wars",
+      "path": "Xml/MapMetaData.xml",
+      "git_blob": "8e9463ac225d1c4c13ebf093cdc84a1b04b5618f"
+    },
+    {
+      "game": "Uprising",
+      "path": "Xml/MapMetaData.xml",
+      "git_blob": "87e47dd14cd02fc80689dbea63d1f0808d013b72"
+    },
+    {
+      "game": "Uprising",
+      "path": "Xml/Terrain/Terrain.xml",
+      "git_blob": "40457136e0efb40c67b3e32c1f26e8c6b9c51647"
+    }
+  ],
+  "games": {
+    "ra3": {
+      "scanned": {
+        "civilian_files": 3442,
+        "map_files": 2,
+        "terrain_files": 1
+      },
+      "scenery_declarations": 3502,
+      "distinct_object_ids": 3468,
+      "direct_model_reference": 3165,
+      "direct_animation_reference": 148,
+      "direct_model_conditions": 498,
+      "first_folder": {
+        "Amsterdam_AM": 106,
+        "Brighton_Beach_BB": 80,
+        "Buildings": 107,
+        "Cannes_CA": 90,
+        "Cannes_CS": 36,
+        "Cape_Cod_CC": 70,
+        "Easter_Island_EI": 92,
+        "Floating_Island_FI": 57,
+        "Geneva_GE": 40,
+        "Gibraltar_GI": 74,
+        "Golf_Course_GC": 21,
+        "Gypsy_Village_GV": 69,
+        "Havana_HV": 177,
+        "Hawaii_HA": 71,
+        "Heidelberg_HB": 154,
+        "Iceland_IL": 51,
+        "Island_Fortress_IF": 45,
+        "Kremlin_KR": 116,
+        "Miyako_MI": 29,
+        "Mount_Fuji_MJ": 109,
+        "Mount_Rushmore_MR": 69,
+        "Mykonos_MY": 148,
+        "New_York_NY": 103,
+        "Northern_Russia_NR": 36,
+        "Odessa_OD": 114,
+        "Osaka_OK": 24,
+        "Props": 92,
+        "Romania_RM": 72,
+        "Sakhalin_Island_SI": 20,
+        "Santa_Monica_SA": 226,
+        "Shiro_Sanitarium_SS": 154,
+        "Snowy_Hot_Springs_SN": 10,
+        "Solvang_SV": 94,
+        "StPetersburg_ST": 249,
+        "Tokyo_Harbor_TH": 257,
+        "Units": 4,
+        "Vladivostok_VL": 58,
+        "Yosemite_Park_YP": 29,
+        "Yucatan_YU": 149
+      },
+      "maps": 196,
+      "terrain_assets": 406,
+      "terrain_folders": {
+        "Amsterdam": 5,
+        "Brighton_Beach": 6,
+        "Cannes": 13,
+        "Cape_Cod": 39,
+        "Easter_Island": 23,
+        "Geneva": 15,
+        "Gibraltar": 10,
+        "Golf_Course": 15,
+        "Gypsy_Village": 7,
+        "Havana": 9,
+        "Hawaii": 13,
+        "Heidelberg": 33,
+        "Hot_Springs": 20,
+        "Iceland": 24,
+        "Island_Fortress": 14,
+        "Kremlin": 14,
+        "Mount_Rushmore": 16,
+        "Mykonos": 14,
+        "New_York": 4,
+        "Odessa": 2,
+        "RA3": 6,
+        "Romania": 3,
+        "Saint_Petersburg": 9,
+        "Santa_Monica": 8,
+        "Solvang": 17,
+        "Tokyo_Harbor": 10,
+        "Vladivostok": 12,
+        "Yucatan": 45
+      }
+    },
+    "uprising": {
+      "scanned": {
+        "civilian_files": 3442,
+        "map_files": 1,
+        "terrain_files": 1
+      },
+      "scenery_declarations": 3502,
+      "distinct_object_ids": 3468,
+      "direct_model_reference": 3165,
+      "direct_animation_reference": 148,
+      "direct_model_conditions": 498,
+      "first_folder": {
+        "Amsterdam_AM": 106,
+        "Brighton_Beach_BB": 80,
+        "Buildings": 107,
+        "Cannes_CA": 90,
+        "Cannes_CS": 36,
+        "Cape_Cod_CC": 70,
+        "Easter_Island_EI": 92,
+        "Floating_Island_FI": 57,
+        "Geneva_GE": 40,
+        "Gibraltar_GI": 74,
+        "Golf_Course_GC": 21,
+        "Gypsy_Village_GV": 69,
+        "Havana_HV": 177,
+        "Hawaii_HA": 71,
+        "Heidelberg_HB": 154,
+        "Iceland_IL": 51,
+        "Island_Fortress_IF": 45,
+        "Kremlin_KR": 116,
+        "Miyako_MI": 29,
+        "Mount_Fuji_MJ": 109,
+        "Mount_Rushmore_MR": 69,
+        "Mykonos_MY": 148,
+        "New_York_NY": 103,
+        "Northern_Russia_NR": 36,
+        "Odessa_OD": 114,
+        "Osaka_OK": 24,
+        "Props": 92,
+        "Romania_RM": 72,
+        "Sakhalin_Island_SI": 20,
+        "Santa_Monica_SA": 226,
+        "Shiro_Sanitarium_SS": 154,
+        "Snowy_Hot_Springs_SN": 10,
+        "Solvang_SV": 94,
+        "StPetersburg_ST": 249,
+        "Tokyo_Harbor_TH": 257,
+        "Units": 4,
+        "Vladivostok_VL": 58,
+        "Yosemite_Park_YP": 29,
+        "Yucatan_YU": 149
+      },
+      "maps": 82,
+      "terrain_assets": 407,
+      "terrain_folders": {
+        "Amsterdam": 5,
+        "Brighton_Beach": 6,
+        "Cannes": 13,
+        "Cape_Cod": 39,
+        "Easter_Island": 23,
+        "Geneva": 15,
+        "Gibraltar": 10,
+        "Golf_Course": 15,
+        "Gypsy_Village": 7,
+        "Havana": 9,
+        "Hawaii": 13,
+        "Heidelberg": 33,
+        "Hot_Springs": 20,
+        "Iceland": 24,
+        "Island_Fortress": 14,
+        "Kremlin": 14,
+        "Mount_Rushmore": 16,
+        "Mykonos": 14,
+        "New_York": 4,
+        "Odessa": 2,
+        "RA3": 6,
+        "Romania": 3,
+        "Saint_Petersburg": 9,
+        "Sakhalin_Island": 1,
+        "Santa_Monica": 8,
+        "Solvang": 17,
+        "Tokyo_Harbor": 10,
+        "Vladivostok": 12,
+        "Yucatan": 45
+      }
+    },
+    "c4": {
+      "scanned": {
+        "civilian_files": 1891,
+        "terrain_files": 1
+      },
+      "scenery_declarations": 1918,
+      "distinct_object_ids": 1902,
+      "direct_model_reference": 1679,
+      "direct_animation_reference": 99,
+      "direct_model_conditions": 43,
+      "first_folder": {
+        "Arctic_AR": 296,
+        "AsianUtopia_AU": 122,
+        "Buildings": 36,
+        "CapitalCity_CC": 135,
+        "Goddard_Space_Center_GO": 1,
+        "Homeland": 62,
+        "JunkTown_JT": 438,
+        "PanAmerica_PA": 358,
+        "Placeholder_PH": 3,
+        "Polynesia_PO": 201,
+        "Props": 139,
+        "Shrubs": 3,
+        "TEST_TE": 1,
+        "Trees": 1,
+        "Units": 11,
+        "Washington_DC_DC": 9,
+        "XSlice_XS": 102
+      },
+      "maps": 0,
+      "terrain_assets": 656,
+      "terrain_folders": {
+        "": 338,
+        "Arctic": 61,
+        "Asian_Utopia": 45,
+        "CapitalCity": 28,
+        "JunkTown": 35,
+        "PanAmerica": 75,
+        "Polynesia": 73,
+        "Rock": 1
+      }
+    },
+    "kw": {
+      "scanned": {
+        "civilian_files": 975
+      },
+      "scenery_declarations": 1004,
+      "distinct_object_ids": 995,
+      "direct_model_reference": 806,
+      "direct_animation_reference": 189,
+      "direct_model_conditions": 188,
+      "first_folder": {
+        "Africa_AF": 17,
+        "Australia_AS": 64,
+        "Brazil_BR": 61,
+        "Buildings": 36,
+        "China_CH": 18,
+        "EEurope_EE": 80,
+        "Egypt_EG": 58,
+        "Germany_GR": 88,
+        "Goddard_Space_Center_GO": 10,
+        "Homeland": 62,
+        "Italy_IT": 76,
+        "North_Carolina_Badlands_NC": 21,
+        "Props": 136,
+        "Russia_RU": 18,
+        "Shrubs": 3,
+        "Trees": 1,
+        "Units": 4,
+        "Washington_DC_DC": 251
+      },
+      "maps": 0,
+      "terrain_assets": 0,
+      "terrain_folders": {}
+    },
+    "tw": {
+      "scanned": {
+        "civilian_files": 908,
+        "map_files": 1
+      },
+      "scenery_declarations": 937,
+      "distinct_object_ids": 928,
+      "direct_model_reference": 744,
+      "direct_animation_reference": 172,
+      "direct_model_conditions": 163,
+      "first_folder": {
+        "Australia_AS": 61,
+        "Brazil_BR": 61,
+        "Buildings": 36,
+        "EEurope_EE": 80,
+        "Egypt_EG": 58,
+        "Germany_GR": 88,
+        "Goddard_Space_Center_GO": 10,
+        "Homeland": 62,
+        "Italy_IT": 76,
+        "North_Carolina_Badlands_NC": 21,
+        "Props": 135,
+        "Shrubs": 3,
+        "Trees": 1,
+        "Units": 12,
+        "Washington_DC_DC": 233
+      },
+      "maps": 246,
+      "terrain_assets": 0,
+      "terrain_folders": {}
+    }
+  }
+}

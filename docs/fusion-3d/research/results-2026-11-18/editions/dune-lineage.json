@@ -1,0 +1,52 @@
+{
+  "dune_ii": {
+    "manual_url": "https://trwglibsccninuamefls.supabase.co/storage/v1/object/public/assets/dune-2/dune-2.pdf",
+    "sha256": "3c455de60d2476d81cc579e22b7fada76bee33b8ba5bc99a15bdee9e6cb8a8e5",
+    "house_pages": [
+      10,
+      11,
+      12
+    ],
+    "structure_section_pdf_pages": [
+      14,
+      22
+    ],
+    "unit_section_pdf_pages": [
+      23,
+      32
+    ],
+    "examples": {
+      "Atreides": "Fremen and Sonic Tank, PDF p29",
+      "Ordos": "Deviator and Raider, PDF p30; Saboteur p31",
+      "Harkonnen": "Death Hand p31, Devastator p32",
+      "shared": "Concrete Slab p14, Spice Silos p16, MCV p23, Trike and Quad p25, Combat Tank p26"
+    }
+  },
+  "emperor": {
+    "source_url": "https://oldgamesdownload.com/wp-content/uploads/manuals/emperor-battle-for-dune_win_manual_en_tu1.pdf",
+    "sha256": "1c0764a3a522847465ba3893fc3b411876a77ace6834aa732424812b603b29d1",
+    "source_type": "Westwood/EA manual, original printed spreads. PDF leaves counted from 1.",
+    "houses": [
+      "Atreides",
+      "Harkonnen",
+      "Ordos"
+    ],
+    "subhouse_choices": [
+      "Ix",
+      "Tleilaxu",
+      "Fremen",
+      "Imperial Sardaukar",
+      "Spacing Guild"
+    ],
+    "max_subhouse_selections": 2,
+    "subhouse_locator": "PDF leaves 9, 22\u201324, 27",
+    "examples": {
+      "Atreides APC and Minotaurus": "leaf 17",
+      "Ordos Deviator": "leaf 22",
+      "Tleilaxu Contaminator and Leech": "leaf 22",
+      "Guild NIAB and Maker, Ixian Projector and Infiltrator, Imperial Sardaukar and Elite, Fremen Warrior": "leaf 23",
+      "Fremen Fedaykin": "leaf 24"
+    },
+    "compatibility": "separate lineage reference, not inferred as C&C sides or Dune 2000 player units"
+  }
+}

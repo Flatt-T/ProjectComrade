@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:map_theme",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "map_theme"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "biome_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "theatre_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "feature_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "spawn_fairness": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "harvesting": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "routes": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "height_visibility": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "civilian_cover": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "path_recovery": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "bounds": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "objective": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "fixture_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "profile_id",
+    "evidence",
+    "owner",
+    "reviewer",
+    "blockers",
+    "biome_id",
+    "theatre_ids",
+    "feature_ids",
+    "spawn_fairness",
+    "harvesting",
+    "routes",
+    "height_visibility",
+    "civilian_cover",
+    "path_recovery",
+    "bounds",
+    "objective",
+    "fixture_ids"
+  ]
+}

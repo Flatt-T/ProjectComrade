@@ -1,0 +1,16 @@
+{
+  "checked_date": "2026-11-18",
+  "public_watch_page": "retrieved",
+  "oembed": "retrieved",
+  "storyboard_source": "playerStoryboards.normal provider frames",
+  "level": 3,
+  "preview_tiles_advertised": 946,
+  "sheets_fetched": 106,
+  "tile_size": [
+    320,
+    180
+  ],
+  "asr_track": "English listed; signed timedtext responses empty; transcript endpoint returned HTTP 400",
+  "audio_and_continuous_motion": "unverified",
+  "published_visual_material": "original written observations with hash receipts only"
+}

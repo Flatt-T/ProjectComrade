@@ -1,0 +1,4533 @@
+{
+ "workbook_url": "https://docs.google.com/spreadsheets/d/18Xe16mFIpLvy7OPxoF6-NHCaJwkMf2T6YKXv429woRI/edit",
+ "public_xlsx_export": "https://docs.google.com/spreadsheets/d/18Xe16mFIpLvy7OPxoF6-NHCaJwkMf2T6YKXv429woRI/export?format=xlsx",
+ "inspection_date_utc": "2026-11-18",
+ "intro_date_cell": "INTRO!B2",
+ "intro_date_as_stored": "2019-12-11",
+ "intro_level_claim": "Level 1; per-field level not independently verified",
+ "dated_version_evidence": "The EA Battering Ram showcase is dated 2022-12-05; this snapshot includes a Battering Ram row. The INTRO date does not date all the values.",
+ "game_build_id": null,
+ "source_column_maps": {
+  "LIVE Unit Values": {
+   "B": "damage_per_shot",
+   "D": "number_of_shots",
+   "E": "squad_size",
+   "F": "vs_infantry",
+   "G": "vs_vehicle",
+   "H": "vs_air",
+   "I": "vs_structure",
+   "J": "vs_harvester",
+   "K": "unit_type",
+   "N": "rate_of_fire",
+   "O": "initial_charge_up",
+   "P": "range",
+   "Q": "cost_by_column",
+   "R": "producer_by_column",
+   "S": "speed_band"
+  },
+  "Value Rank": {
+   "M": "health",
+   "Q": "cost",
+   "T": "speed_value"
+  },
+  "Live Additional Values": {
+   "B": "turn_rate",
+   "C": "hex_reservation"
+  }
+ },
+ "included_sheet_facts_sha256": "2a7f5733bb71f8279a6058c15f28c25d4437dccbde84bd3ee6b6d89e097ca5ab",
+ "source_scope": "Only selected factual cells and coordinates from these named statistical tabs are distributed. Empty fields remain missing. Formulas are read as cached numbers.",
+ "counts": {
+  "LIVE Unit Values": {
+   "combat_units_with_named_rows": 64,
+   "unit_or_mode_rows": 76,
+   "units_with_present_fields": {
+    "damage_per_shot": 64,
+    "number_of_shots": 64,
+    "squad_size": 64,
+    "vs_infantry": 63,
+    "vs_vehicle": 63,
+    "vs_air": 63,
+    "vs_structure": 64,
+    "vs_harvester": 63,
+    "unit_type": 64,
+    "rate_of_fire": 64,
+    "initial_charge_up": 64,
+    "range": 63,
+    "cost_by_column": 64,
+    "producer_by_column": 64,
+    "speed_band": 64
+   },
+   "units_with_numeric_fields": {
+    "damage_per_shot": 64,
+    "number_of_shots": 64,
+    "squad_size": 64,
+    "vs_infantry": 63,
+    "vs_vehicle": 63,
+    "vs_air": 63,
+    "vs_structure": 64,
+    "vs_harvester": 63,
+    "rate_of_fire": 64,
+    "initial_charge_up": 63,
+    "range": 63,
+    "cost_by_column": 64
+   }
+  },
+  "Value Rank": {
+   "combat_units_with_named_rows": 63,
+   "unit_or_mode_rows": 77,
+   "units_with_present_fields": {
+    "health": 63,
+    "cost": 63,
+    "speed_value": 63
+   },
+   "units_with_numeric_fields": {
+    "health": 63,
+    "cost": 63,
+    "speed_value": 63
+   }
+  },
+  "Live Additional Values": {
+   "combat_units_with_named_rows": 58,
+   "unit_or_mode_rows": 62,
+   "units_with_present_fields": {
+    "turn_rate": 37,
+    "hex_reservation": 37
+   },
+   "units_with_numeric_fields": {
+    "turn_rate": 37,
+    "hex_reservation": 30
+   }
+  }
+ },
+ "independent_showcase_cost_comparison": {
+  "uncompared": 44,
+  "different recorded values": 7,
+  "same value": 13
+ },
+ "units": [
+  {
+   "faction": "GDI",
+   "unit": "Riflemen",
+   "group": "infantry",
+   "roster_facility_context": "Barracks",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    10
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 10,
+      "label": "Riflemen",
+      "values": {
+       "damage_per_shot": 38,
+       "number_of_shots": 1,
+       "squad_size": 5,
+       "vs_infantry": 38,
+       "vs_vehicle": 15,
+       "vs_air": 0,
+       "vs_structure": 38,
+       "vs_harvester": 38,
+       "unit_type": "Infantry",
+       "rate_of_fire": 1.72,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 10,
+       "producer_by_column": "Barracks",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 59,
+      "label": "Riflemen",
+      "values": {
+       "health": 130,
+       "cost": 10,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 24,
+      "label": "Riflemen",
+      "values": {
+       "turn_rate": 300,
+       "hex_reservation": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Missile squad",
+   "group": "infantry",
+   "roster_facility_context": "Barracks",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    20
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 38,
+      "label": "Missile Squad",
+      "values": {
+       "damage_per_shot": 250,
+       "number_of_shots": 1,
+       "squad_size": 4,
+       "vs_infantry": 35,
+       "vs_vehicle": 250,
+       "vs_air": 250,
+       "vs_structure": 250,
+       "vs_harvester": 250,
+       "unit_type": "Infantry",
+       "rate_of_fire": 5,
+       "initial_charge_up": 0.25,
+       "range": 1,
+       "cost_by_column": 20,
+       "producer_by_column": "Barracks",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 46,
+      "label": "Missile Squad",
+      "values": {
+       "health": 220,
+       "cost": 20,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 14,
+      "label": "Missile Squad",
+      "values": {
+       "turn_rate": 300,
+       "hex_reservation": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "MG squad",
+   "group": "infantry",
+   "roster_facility_context": "Barracks",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 20,
+      "label": "MG Squad",
+      "values": {
+       "damage_per_shot": 28,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 28,
+       "vs_vehicle": 28,
+       "vs_air": 0,
+       "vs_structure": 28,
+       "vs_harvester": 28,
+       "unit_type": "Infantry",
+       "rate_of_fire": 0.2,
+       "initial_charge_up": 0,
+       "range": 2,
+       "cost_by_column": 30,
+       "producer_by_column": "Barracks",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 21,
+      "label": "MG Squad (Entrenched)",
+      "values": {
+       "damage_per_shot": 28,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 28,
+       "vs_vehicle": 28,
+       "vs_air": 0,
+       "vs_structure": 28,
+       "vs_harvester": 28,
+       "unit_type": "Infantry",
+       "rate_of_fire": 0.2,
+       "initial_charge_up": 0,
+       "range": 2,
+       "cost_by_column": 30,
+       "producer_by_column": "Barracks",
+       "speed_band": "None"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 42,
+      "label": "MG Squad",
+      "values": {
+       "health": 400,
+       "cost": 30,
+       "speed_value": 5.5424
+      }
+     },
+     {
+      "row": 43,
+      "label": "MG Squad (Entrenched)",
+      "values": {
+       "health": 800,
+       "cost": 30,
+       "speed_value": 1
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 13,
+      "label": "MG Squad",
+      "values": {
+       "turn_rate": 200,
+       "hex_reservation": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Jump jet troopers",
+   "group": "infantry",
+   "roster_facility_context": "Barracks",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    40
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 56,
+      "label": "Jump Jet Troopers",
+      "values": {
+       "damage_per_shot": 382,
+       "number_of_shots": 1,
+       "squad_size": 4,
+       "vs_infantry": 40,
+       "vs_vehicle": 382,
+       "vs_air": 0,
+       "vs_structure": 382,
+       "vs_harvester": 350,
+       "unit_type": "Infantry",
+       "rate_of_fire": 5,
+       "initial_charge_up": 0.25,
+       "range": 1,
+       "cost_by_column": 40,
+       "producer_by_column": "Barracks",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 36,
+      "label": "Jump Jet Troopers",
+      "values": {
+       "health": 220,
+       "cost": 40,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 9,
+      "label": "Jump Jet Troopers",
+      "values": {
+       "turn_rate": 720,
+       "hex_reservation": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Shockwave troopers",
+   "group": "infantry",
+   "roster_facility_context": "Barracks",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    40
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 40,
+      "label": "Shockwave Troopers",
+      "values": {
+       "damage_per_shot": 150,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 150,
+       "vs_vehicle": 30,
+       "vs_air": 0,
+       "vs_structure": 200,
+       "vs_harvester": 30,
+       "unit_type": "Infantry",
+       "rate_of_fire": 2,
+       "initial_charge_up": 0.5,
+       "range": 1,
+       "cost_by_column": 40,
+       "producer_by_column": "Barracks",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 67,
+      "label": "Shockwave Troopers",
+      "values": {
+       "health": 400,
+       "cost": 40,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 27,
+      "label": "Shockwave Troopers",
+      "values": {
+       "turn_rate": 900,
+       "hex_reservation": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Sniper team",
+   "group": "infantry",
+   "roster_facility_context": "Barracks",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    50
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 28,
+      "label": "Sniper Team",
+      "values": {
+       "damage_per_shot": 152,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 152,
+       "vs_vehicle": 20,
+       "vs_air": 0,
+       "vs_structure": 20,
+       "vs_harvester": 20,
+       "unit_type": "Infantry",
+       "rate_of_fire": 2.7,
+       "initial_charge_up": 1,
+       "range": 2,
+       "cost_by_column": 50,
+       "producer_by_column": "Barracks",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 69,
+      "label": "Sniper Team",
+      "values": {
+       "health": 250,
+       "cost": 50,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 29,
+      "label": "Sniper Team",
+      "values": {
+       "turn_rate": 900,
+       "hex_reservation": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Grenadier",
+   "group": "infantry",
+   "roster_facility_context": "Barracks",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    70
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-grenadier",
+    "publication_date": "2019-03-22",
+    "cost": 60,
+    "facility": "Barracks"
+   },
+   "independent_cost_comparison": "different recorded values",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 63,
+      "label": "Grenadier",
+      "values": {
+       "damage_per_shot": 340,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 27,
+       "vs_vehicle": 340,
+       "vs_air": 0,
+       "vs_structure": 340,
+       "vs_harvester": 340,
+       "unit_type": "Infantry",
+       "rate_of_fire": 2.64,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 70,
+       "producer_by_column": "Barracks",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 28,
+      "label": "Grenadier",
+      "values": {
+       "health": 550,
+       "cost": 70,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 5,
+      "label": "Grenadier",
+      "values": {
+       "turn_rate": 300,
+       "hex_reservation": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "War dogs",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    10
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 5,
+      "label": "War Dogs",
+      "values": {
+       "damage_per_shot": 22,
+       "number_of_shots": 1,
+       "squad_size": 4,
+       "vs_infantry": 22,
+       "vs_vehicle": 10,
+       "vs_air": 0,
+       "vs_structure": 22,
+       "vs_harvester": 10,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 1.7,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 10,
+       "producer_by_column": "War Factory",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 78,
+      "label": "War Dogs",
+      "values": {
+       "health": 300,
+       "cost": 10,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 34,
+      "label": "War Dogs",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": 2.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Rhino",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 58,
+      "label": "Rhino",
+      "values": {
+       "damage_per_shot": 80,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 80,
+       "vs_vehicle": 60,
+       "vs_air": 82,
+       "vs_structure": 80,
+       "vs_harvester": 60,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.75,
+       "initial_charge_up": 0.25,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "War Factory",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 58,
+      "label": "Rhino",
+      "values": {
+       "health": 1611,
+       "cost": 30,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 23,
+      "label": "Rhino",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": 2.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "M.S.V.",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    40
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-mobile-support-vehicle",
+    "publication_date": "2019-07-02",
+    "cost": 40,
+    "facility": "War Factory"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 2,
+      "label": "MSV",
+      "values": {
+       "damage_per_shot": 0,
+       "number_of_shots": 0,
+       "squad_size": 1,
+       "vs_infantry": 0,
+       "vs_vehicle": 0,
+       "vs_air": 0,
+       "vs_structure": 0,
+       "vs_harvester": 0,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3,
+       "initial_charge_up": 0,
+       "cost_by_column": 40,
+       "producer_by_column": "War Factory",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 49,
+      "label": "MSV",
+      "values": {
+       "health": 1750,
+       "cost": 40,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 17,
+      "label": "MSV",
+      "values": {
+       "turn_rate": 150,
+       "hex_reservation": "N/A"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Pitbull",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    40
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 19,
+      "label": "Pitbull",
+      "values": {
+       "damage_per_shot": 250,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 35,
+       "vs_vehicle": 250,
+       "vs_air": 250,
+       "vs_structure": 250,
+       "vs_harvester": 250,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 1.8,
+       "initial_charge_up": 0.75,
+       "range": 1,
+       "cost_by_column": 40,
+       "producer_by_column": "War Factory",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 54,
+      "label": "Pitbull",
+      "values": {
+       "health": 1611,
+       "cost": 40,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 20,
+      "label": "Pitbull",
+      "values": {
+       "turn_rate": 720,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Shatterer",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    50
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-shatterer",
+    "publication_date": "2019-05-31",
+    "cost": 50,
+    "facility": "War Factory"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 53,
+      "label": "Shatterer",
+      "values": {
+       "damage_per_shot": 210,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 210,
+       "vs_vehicle": 45,
+       "vs_air": 0,
+       "vs_structure": 210,
+       "vs_harvester": 45,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.7,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 50,
+       "producer_by_column": "War Factory",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 66,
+      "label": "Shatterer",
+      "values": {
+       "health": 1790,
+       "cost": 50,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 26,
+      "label": "Shatterer",
+      "values": {
+       "turn_rate": 300,
+       "hex_reservation": 4
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Slingshot",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    50
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-slingshot",
+    "publication_date": "2019-04-29",
+    "cost": 50,
+    "facility": "War Factory"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 55,
+      "label": "Slingshot",
+      "values": {
+       "damage_per_shot": 54,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 0,
+       "vs_vehicle": 0,
+       "vs_air": 54,
+       "vs_structure": 25,
+       "vs_harvester": 0,
+       "unit_type": "Air",
+       "rate_of_fire": 0.18,
+       "initial_charge_up": 0,
+       "range": 2,
+       "cost_by_column": 50,
+       "producer_by_column": "War Factory",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 68,
+      "label": "Slingshot",
+      "values": {
+       "health": 1500,
+       "cost": 50,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 28,
+      "label": "Slingshot",
+      "values": {
+       "turn_rate": 50,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "M.L.R.S.",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    70
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 64,
+      "label": "MLRS",
+      "values": {
+       "damage_per_shot": 666.666666666666,
+       "number_of_shots": 3,
+       "squad_size": 1,
+       "vs_infantry": 40,
+       "vs_vehicle": 666,
+       "vs_air": 0,
+       "vs_structure": 1000,
+       "vs_harvester": 666,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 5,
+       "initial_charge_up": 0.25,
+       "range": 2,
+       "cost_by_column": 70,
+       "producer_by_column": "War Factory",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 47,
+      "label": "MLRS",
+      "values": {
+       "health": 1500,
+       "cost": 70,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 15,
+      "label": "MLRS",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": 4
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Predator tank",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    70
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 44,
+      "label": "Predator Tank",
+      "values": {
+       "damage_per_shot": 830,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 96,
+       "vs_vehicle": 830,
+       "vs_air": 0,
+       "vs_structure": 830,
+       "vs_harvester": 830,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3.44,
+       "initial_charge_up": 1,
+       "range": 1,
+       "cost_by_column": 70,
+       "producer_by_column": "War Factory",
+       "speed_band": "Slow"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 55,
+      "label": "Predator Tank",
+      "values": {
+       "health": 2823,
+       "cost": 70,
+       "speed_value": 3.958857
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 21,
+      "label": "Predator Tank",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "A.P.C.",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    90
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 7,
+      "label": "APC",
+      "values": {
+       "damage_per_shot": 90,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 90,
+       "vs_vehicle": 45,
+       "vs_air": 90,
+       "vs_structure": 90,
+       "vs_harvester": 45,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.85,
+       "initial_charge_up": 0.5,
+       "range": 1,
+       "cost_by_column": 90,
+       "producer_by_column": "War Factory",
+       "speed_band": "Slow"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 2,
+      "label": "APC",
+      "values": {
+       "health": 3300,
+       "cost": 90,
+       "speed_value": 4.5
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 2,
+      "label": "APC",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Battering ram",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    90
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-battering-ram",
+    "publication_date": "2022-12-05",
+    "cost": 90,
+    "facility": "War Factory"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 82,
+      "label": "Battering Ram",
+      "values": {
+       "damage_per_shot": 3000,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_structure": 3000,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3,
+       "initial_charge_up": 1.2,
+       "range": 1,
+       "cost_by_column": 90,
+       "producer_by_column": "War Factory",
+       "speed_band": "Slow"
+      }
+     }
+    ],
+    "Value Rank": [],
+    "Live Additional Values": []
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Drone swarm",
+   "group": "aircraft",
+   "roster_facility_context": "Helipad",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    20
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-chem-buggy-drone-swarm",
+    "publication_date": "2018-10-22",
+    "cost": 10,
+    "facility": "Helipad"
+   },
+   "independent_cost_comparison": "different recorded values",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 22,
+      "label": "Drone Swarm",
+      "values": {
+       "damage_per_shot": 42,
+       "number_of_shots": 1,
+       "squad_size": 5,
+       "vs_infantry": 42,
+       "vs_vehicle": 7,
+       "vs_air": 0,
+       "vs_structure": 42,
+       "vs_harvester": 7,
+       "unit_type": "Air",
+       "rate_of_fire": 1.5,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 20,
+       "producer_by_column": "Helipad",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 21,
+      "label": "Drone Swarm",
+      "values": {
+       "health": 127,
+       "cost": 20,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 4,
+      "label": "Drone Swarm",
+      "values": {
+       "turn_rate": 1080,
+       "hex_reservation": 0
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Talon",
+   "group": "aircraft",
+   "roster_facility_context": "Helipad",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 14,
+      "label": "Talon (Ground)",
+      "values": {
+       "damage_per_shot": 57,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 57,
+       "vs_vehicle": 20,
+       "vs_air": 0,
+       "vs_structure": 57,
+       "vs_harvester": 20,
+       "unit_type": "Air",
+       "rate_of_fire": 0.5,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "Helipad",
+       "speed_band": "Faster"
+      }
+     },
+     {
+      "row": 30,
+      "label": "Talon (Air)",
+      "values": {
+       "damage_per_shot": 345,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 0,
+       "vs_vehicle": 0,
+       "vs_air": 345,
+       "vs_structure": 345,
+       "vs_harvester": 0,
+       "unit_type": "Air",
+       "rate_of_fire": 2,
+       "initial_charge_up": 0.1,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "Helipad",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 29,
+      "label": "Talon (Ground)",
+      "values": {
+       "health": 909,
+       "cost": 30
+      }
+     },
+     {
+      "row": 72,
+      "label": "Talon",
+      "values": {
+       "health": 909,
+       "cost": 30,
+       "speed_value": 8
+      }
+     },
+     {
+      "row": 73,
+      "label": "Talon (Ground)",
+      "values": {
+       "health": 909,
+       "cost": 30
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 32,
+      "label": "Talon",
+      "values": {
+       "turn_rate": 450,
+       "hex_reservation": "N/A"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Mohawk gunship",
+   "group": "aircraft",
+   "roster_facility_context": "Helipad",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    50
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-mohawk-gunship",
+    "publication_date": "2019-02-04",
+    "cost": 50,
+    "facility": "Helipad"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 52,
+      "label": "Mohawk Gunship",
+      "values": {
+       "damage_per_shot": 382,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 55,
+       "vs_vehicle": 382,
+       "vs_air": 0,
+       "vs_structure": 382,
+       "vs_harvester": 295,
+       "unit_type": "Air",
+       "rate_of_fire": 1.3,
+       "initial_charge_up": 0.075,
+       "range": 1,
+       "cost_by_column": 50,
+       "producer_by_column": "Helipad",
+       "speed_band": "Fast"
+      }
+     },
+     {
+      "row": 59,
+      "label": "Mohawk Gunship_ST",
+      "values": {
+       "damage_per_shot": 396,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 55,
+       "vs_vehicle": 396,
+       "vs_air": 0,
+       "vs_structure": 396,
+       "vs_harvester": 295,
+       "unit_type": "Air",
+       "rate_of_fire": 1.15,
+       "initial_charge_up": 0.25,
+       "range": 1,
+       "cost_by_column": 50,
+       "producer_by_column": "Helipad",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 19,
+      "label": "Mohawk Gunship_ST",
+      "values": {
+       "health": 1350,
+       "cost": 50
+      }
+     },
+     {
+      "row": 48,
+      "label": "Mohawk Gunship",
+      "values": {
+       "health": 1650,
+       "cost": 50,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 16,
+      "label": "Mohawk Gunship",
+      "values": {
+       "turn_rate": 350,
+       "hex_reservation": "N/A"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Razorback",
+   "group": "aircraft",
+   "roster_facility_context": "Helipad",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    60
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-razorback",
+    "publication_date": "2019-10-24",
+    "cost": 60,
+    "facility": "Helipad"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 32,
+      "label": "Razorback",
+      "values": {
+       "damage_per_shot": 70,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 70,
+       "vs_vehicle": 17,
+       "vs_air": 0,
+       "vs_structure": 28,
+       "vs_harvester": 17,
+       "unit_type": "Air",
+       "rate_of_fire": 0.4,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 60,
+       "producer_by_column": "Helipad",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 57,
+      "label": "Razorback",
+      "values": {
+       "health": 1500,
+       "cost": 60,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 22,
+      "label": "Razorback",
+      "values": {
+       "turn_rate": 300,
+       "hex_reservation": "N/A"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Orca",
+   "group": "aircraft",
+   "roster_facility_context": "Helipad",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    70
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 42,
+      "label": "Orca",
+      "values": {
+       "damage_per_shot": 510,
+       "number_of_shots": 4,
+       "squad_size": 1,
+       "vs_infantry": 75,
+       "vs_vehicle": 510,
+       "vs_air": 0,
+       "vs_structure": 510,
+       "vs_harvester": 510,
+       "unit_type": "Air",
+       "rate_of_fire": 9,
+       "initial_charge_up": 0.1,
+       "range": 1,
+       "cost_by_column": 70,
+       "producer_by_column": "Helipad",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 51,
+      "label": "Orca",
+      "values": {
+       "health": 1210,
+       "cost": 70,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 18,
+      "label": "Orca",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": "WIP"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Hammerhead",
+   "group": "aircraft",
+   "roster_facility_context": "Helipad",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    90
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 61,
+      "label": "Hammerhead",
+      "values": {
+       "damage_per_shot": 585,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 0,
+       "vs_vehicle": 0,
+       "vs_air": 585,
+       "vs_structure": 425,
+       "vs_harvester": 0,
+       "unit_type": "Air",
+       "rate_of_fire": 1.6,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 90,
+       "producer_by_column": "Helipad",
+       "speed_band": "Fastest"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 30,
+      "label": "Hammerhead",
+      "values": {
+       "health": 1950,
+       "cost": 90,
+       "speed_value": 9.237333
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 6,
+      "label": "Hammerhead",
+      "values": {
+       "turn_rate": 300,
+       "hex_reservation": "N/A"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Orca bomber",
+   "group": "aircraft",
+   "roster_facility_context": "Helipad",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    110
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-orca-bomber",
+    "publication_date": "2019-03-04",
+    "cost": 120,
+    "facility": "Helipad"
+   },
+   "independent_cost_comparison": "different recorded values",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 67,
+      "label": "Orca Bomber",
+      "values": {
+       "damage_per_shot": 800,
+       "number_of_shots": 6,
+       "squad_size": 1,
+       "vs_infantry": 270,
+       "vs_vehicle": 800,
+       "vs_air": 0,
+       "vs_structure": 800,
+       "vs_harvester": 400,
+       "unit_type": "Air",
+       "rate_of_fire": 12,
+       "initial_charge_up": 1.75,
+       "range": 1,
+       "cost_by_column": 110,
+       "producer_by_column": "Helipad",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 52,
+      "label": "Orca Bomber",
+      "values": {
+       "health": 1715,
+       "cost": 110,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 19,
+      "label": "Orca Bomber",
+      "values": {
+       "turn_rate": 100,
+       "hex_reservation": 5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Wolverine",
+   "group": "tech",
+   "roster_facility_context": "Tech lab",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    80
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 49,
+      "label": "Wolverine",
+      "values": {
+       "damage_per_shot": 45,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 45,
+       "vs_vehicle": 19,
+       "vs_air": 50,
+       "vs_structure": 45,
+       "vs_harvester": 19,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.19,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 80,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 80,
+      "label": "Wolverine",
+      "values": {
+       "health": 2800,
+       "cost": 80,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 35,
+      "label": "Wolverine",
+      "values": {
+       "turn_rate": 180,
+       "hex_reservation": 2.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Disruptor",
+   "group": "tech",
+   "roster_facility_context": "Tech lab",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    120
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 18,
+      "label": "Disruptor",
+      "values": {
+       "damage_per_shot": 26,
+       "number_of_shots": 20,
+       "squad_size": 1,
+       "vs_infantry": 26,
+       "vs_vehicle": 13,
+       "vs_air": 0,
+       "vs_structure": 300,
+       "vs_harvester": 13,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3.9,
+       "initial_charge_up": 3,
+       "range": 2,
+       "cost_by_column": 120,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Slow"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 20,
+      "label": "Disruptor",
+      "values": {
+       "health": 3300,
+       "cost": 120,
+       "speed_value": 3.958857
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 3,
+      "label": "Disruptor",
+      "values": {
+       "turn_rate": 200,
+       "hex_reservation": 4
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Juggernaut",
+   "group": "tech",
+   "roster_facility_context": "Tech lab",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    120
+   ],
+   "publisher_showcase": {
+    "url": "https://forums.ea.com/discussions/command-and-conquer-franchise-en/update-1-0-notes/7159073",
+    "publication_date": "2018-08-16",
+    "cost": 140,
+    "facility": "Tech Lab"
+   },
+   "independent_cost_comparison": "different recorded values",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 54,
+      "label": "Juggernaut",
+      "values": {
+       "damage_per_shot": 400,
+       "number_of_shots": 3,
+       "squad_size": 1,
+       "vs_infantry": 200,
+       "vs_vehicle": 400,
+       "vs_air": 0,
+       "vs_structure": 1000,
+       "vs_harvester": 400,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 4,
+       "initial_charge_up": 0.25,
+       "range": 3,
+       "cost_by_column": 120,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 81,
+      "label": "Juggernaut_ST",
+      "values": {
+       "damage_per_shot": 250,
+       "number_of_shots": 5,
+       "squad_size": 1,
+       "vs_infantry": 55,
+       "vs_vehicle": 250,
+       "vs_air": 0,
+       "vs_structure": 250,
+       "vs_harvester": 250,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 1.425,
+       "initial_charge_up": 0.25,
+       "range": 3,
+       "cost_by_column": 120,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 9,
+      "label": "Juggernaut_ST",
+      "values": {
+       "health": 2400,
+       "cost": 120
+      }
+     },
+     {
+      "row": 35,
+      "label": "Juggernaut",
+      "values": {
+       "health": 2400,
+       "cost": 120,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 8,
+      "label": "Juggernaut",
+      "values": {
+       "turn_rate": 100,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Zone trooper",
+   "group": "tech",
+   "roster_facility_context": "Tech lab",
+   "identity_match": "explicit roster alias",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    120
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 68,
+      "label": "Zone Troopers",
+      "values": {
+       "damage_per_shot": 620,
+       "number_of_shots": 1,
+       "squad_size": 2,
+       "vs_infantry": 90,
+       "vs_vehicle": 620,
+       "vs_air": 620,
+       "vs_structure": 620,
+       "vs_harvester": 620,
+       "unit_type": "Infantry",
+       "rate_of_fire": 3,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 120,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 69,
+      "label": "Zone Troopers_ST",
+      "values": {
+       "damage_per_shot": 620,
+       "number_of_shots": 1,
+       "squad_size": 2,
+       "vs_infantry": 125,
+       "vs_vehicle": 620,
+       "vs_air": 620,
+       "vs_structure": 620,
+       "vs_harvester": 620,
+       "unit_type": "Infantry",
+       "rate_of_fire": 3,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 120,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 44,
+      "label": "Zone Troopers_ST",
+      "values": {
+       "health": 1000,
+       "cost": 120
+      }
+     },
+     {
+      "row": 81,
+      "label": "Zone Troopers",
+      "values": {
+       "health": 875,
+       "cost": 120,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 36,
+      "label": "Zone Troopers",
+      "values": {
+       "turn_rate": 300,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Kodiak",
+   "group": "tech",
+   "roster_facility_context": "Tech lab",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    130
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 71,
+      "label": "Kodiak",
+      "values": {
+       "damage_per_shot": 1500,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 150,
+       "vs_vehicle": 1500,
+       "vs_air": 0,
+       "vs_structure": 1500,
+       "vs_harvester": 1500,
+       "unit_type": "Air",
+       "rate_of_fire": 3,
+       "initial_charge_up": 0.5,
+       "range": 1,
+       "cost_by_column": 130,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 38,
+      "label": "Kodiak",
+      "values": {
+       "health": 3465,
+       "cost": 130,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 10,
+      "label": "Kodiak",
+      "values": {
+       "turn_rate": 100,
+       "hex_reservation": 5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Sandstorm",
+   "group": "tech",
+   "roster_facility_context": "Tech lab",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    130
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 70,
+      "label": "Sandstorm",
+      "values": {
+       "damage_per_shot": 150,
+       "number_of_shots": 12,
+       "squad_size": 1,
+       "vs_infantry": 10,
+       "vs_vehicle": 100,
+       "vs_air": 150,
+       "vs_structure": 150,
+       "vs_harvester": 100,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 4,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 130,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 75,
+      "label": "Sandstorm_ST",
+      "values": {
+       "damage_per_shot": 150,
+       "number_of_shots": 12,
+       "squad_size": 1,
+       "vs_infantry": 25,
+       "vs_vehicle": 40,
+       "vs_air": 150,
+       "vs_structure": 150,
+       "vs_harvester": 40,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 130,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 31,
+      "label": "Sandstorm_ST",
+      "values": {
+       "health": 3550,
+       "cost": 130
+      }
+     },
+     {
+      "row": 61,
+      "label": "Sandstorm",
+      "values": {
+       "health": 3623,
+       "cost": 130,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 25,
+      "label": "Sandstorm",
+      "values": {
+       "turn_rate": 50,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Titan",
+   "group": "tech",
+   "roster_facility_context": "Tech lab",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    130
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 65,
+      "label": "Titan",
+      "values": {
+       "damage_per_shot": 2000,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 180,
+       "vs_vehicle": 2000,
+       "vs_air": 0,
+       "vs_structure": 2000,
+       "vs_harvester": 2000,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 5,
+       "initial_charge_up": 0.3,
+       "range": 1,
+       "cost_by_column": 130,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 76,
+      "label": "Titan",
+      "values": {
+       "health": 5500,
+       "cost": 130,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 33,
+      "label": "Titan",
+      "values": {
+       "turn_rate": 180,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "GDI",
+   "unit": "Mammoth tank",
+   "group": "tech",
+   "roster_facility_context": "Tech lab",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    230
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 72,
+      "label": "Mammoth Tank",
+      "values": {
+       "damage_per_shot": 1065,
+       "number_of_shots": 2,
+       "squad_size": 1,
+       "vs_infantry": 100,
+       "vs_vehicle": 1065,
+       "vs_air": 200,
+       "vs_structure": 1065,
+       "vs_harvester": 1065,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 4,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 230,
+       "producer_by_column": "Tech Lab",
+       "speed_band": "Slowest"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 41,
+      "label": "Mammoth Tank",
+      "values": {
+       "health": 6900,
+       "cost": 230,
+       "speed_value": 3
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 12,
+      "label": "Mammoth Tank",
+      "values": {
+       "turn_rate": 200,
+       "hex_reservation": 5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Militant",
+   "group": "infantry",
+   "roster_facility_context": "Hand of Nod",
+   "identity_match": "explicit roster alias",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    10
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 9,
+      "label": "Militants",
+      "values": {
+       "damage_per_shot": 38,
+       "number_of_shots": 1,
+       "squad_size": 5,
+       "vs_infantry": 38,
+       "vs_vehicle": 15,
+       "vs_air": 0,
+       "vs_structure": 38,
+       "vs_harvester": 15,
+       "unit_type": "Infantry",
+       "rate_of_fire": 1.72,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 10,
+       "producer_by_column": "Hand of Nod",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 45,
+      "label": "Militants",
+      "values": {
+       "health": 130,
+       "cost": 10,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 63,
+      "label": "Militants",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Laser squad",
+   "group": "infantry",
+   "roster_facility_context": "Hand of Nod",
+   "identity_match": "explicit roster alias",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    20
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 37,
+      "label": "Laser Troopers",
+      "values": {
+       "damage_per_shot": 250,
+       "number_of_shots": 1,
+       "squad_size": 4,
+       "vs_infantry": 35,
+       "vs_vehicle": 250,
+       "vs_air": 250,
+       "vs_structure": 250,
+       "vs_harvester": 250,
+       "unit_type": "Infantry",
+       "rate_of_fire": 5,
+       "initial_charge_up": 0.25,
+       "range": 1,
+       "cost_by_column": 20,
+       "producer_by_column": "Hand of Nod",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 40,
+      "label": "Laser Troopers",
+      "values": {
+       "health": 220,
+       "cost": 20,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 62,
+      "label": "Laser Troopers",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Fanatic",
+   "group": "infantry",
+   "roster_facility_context": "Hand of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-fanatic",
+    "publication_date": "2019-05-17",
+    "cost": 30,
+    "facility": "Hand of Nod"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 31,
+      "label": "Fanatic",
+      "values": {
+       "damage_per_shot": 49,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 49,
+       "vs_vehicle": 18,
+       "vs_air": 0,
+       "vs_structure": 49,
+       "vs_harvester": 18,
+       "unit_type": "Infantry",
+       "rate_of_fire": 0.85,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "Hand of Nod",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 22,
+      "label": "Fanatic",
+      "values": {
+       "health": 220,
+       "cost": 30,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": []
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Scavenger",
+   "group": "infantry",
+   "roster_facility_context": "Hand of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-scavenger",
+    "publication_date": "2019-06-18",
+    "cost": 30,
+    "facility": "Hand of Nod"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 29,
+      "label": "Scavenger",
+      "values": {
+       "damage_per_shot": 230,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 35,
+       "vs_vehicle": 230,
+       "vs_air": 240,
+       "vs_structure": 230,
+       "vs_harvester": 230,
+       "unit_type": "Infantry",
+       "rate_of_fire": 4,
+       "initial_charge_up": 0.15,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "Hand of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 63,
+      "label": "Scavenger",
+      "values": {
+       "health": 280,
+       "cost": 30,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": []
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Flame troopers",
+   "group": "infantry",
+   "roster_facility_context": "Hand of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    40
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 41,
+      "label": "Flame Troopers",
+      "values": {
+       "damage_per_shot": 75,
+       "number_of_shots": 2,
+       "squad_size": 3,
+       "vs_infantry": 75,
+       "vs_vehicle": 15,
+       "vs_air": 0,
+       "vs_structure": 100,
+       "vs_harvester": 15,
+       "unit_type": "Infantry",
+       "rate_of_fire": 2,
+       "initial_charge_up": 0.5,
+       "range": 1,
+       "cost_by_column": 40,
+       "producer_by_column": "Hand of Nod",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 24,
+      "label": "Flame Troopers",
+      "values": {
+       "health": 400,
+       "cost": 40,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 53,
+      "label": "Flame Troopers",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Scarabs",
+   "group": "infantry",
+   "roster_facility_context": "Hand of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    40
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 80,
+      "label": "Scarabs",
+      "values": {
+       "damage_per_shot": 2000,
+       "number_of_shots": 1,
+       "squad_size": 2,
+       "vs_infantry": 2000,
+       "vs_vehicle": 2000,
+       "vs_air": 2000,
+       "vs_structure": 2000,
+       "vs_harvester": 2000,
+       "unit_type": "Infantry",
+       "rate_of_fire": 5,
+       "initial_charge_up": 0.1,
+       "range": 1,
+       "cost_by_column": 40,
+       "producer_by_column": "Hand of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 62,
+      "label": "Scarabs",
+      "values": {
+       "health": 125,
+       "cost": 40,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 67,
+      "label": "Scarabs",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Chemical warriors",
+   "group": "infantry",
+   "roster_facility_context": "Hand of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    60
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 15,
+      "label": "Chemical Warriors",
+      "values": {
+       "damage_per_shot": 20,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 20,
+       "vs_vehicle": 10,
+       "vs_air": 0,
+       "vs_structure": 20,
+       "vs_harvester": 10,
+       "unit_type": "Infantry",
+       "rate_of_fire": 0.5,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 60,
+       "producer_by_column": "Hand of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 15,
+      "label": "Chemical Warriors",
+      "values": {
+       "health": 620,
+       "cost": 60,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 45,
+      "label": "Chemical Warriors",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Mutant marauders",
+   "group": "infantry",
+   "roster_facility_context": "Hand of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    60
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-mutant-marauder",
+    "publication_date": "2019-04-15",
+    "cost": 60,
+    "facility": "Hand of Nod"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 62,
+      "label": "Mutant Marauders",
+      "values": {
+       "damage_per_shot": 382,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 30,
+       "vs_vehicle": 382,
+       "vs_air": 0,
+       "vs_structure": 382,
+       "vs_harvester": 382,
+       "unit_type": "Infantry",
+       "rate_of_fire": 3,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 60,
+       "producer_by_column": "Hand of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 50,
+      "label": "Mutant Marauders",
+      "values": {
+       "health": 620,
+       "cost": 60,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": []
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Cyberwheel",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "explicit roster alias",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    10
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-cyberwheel",
+    "publication_date": "2019-02-18",
+    "cost": 10,
+    "facility": "War Factory"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 12,
+      "label": "Cyber Wheels",
+      "values": {
+       "damage_per_shot": 42,
+       "number_of_shots": 1,
+       "squad_size": 4,
+       "vs_infantry": 42,
+       "vs_vehicle": 10,
+       "vs_air": 0,
+       "vs_structure": 42,
+       "vs_harvester": 10,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 1.5,
+       "initial_charge_up": 0.3,
+       "range": 1,
+       "cost_by_column": 10,
+       "producer_by_column": "War Factory",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 17,
+      "label": "Cyber Wheels",
+      "values": {
+       "health": 200,
+       "cost": 10,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 49,
+      "label": "Cyber Wheels",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Attack bike",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "explicit roster alias",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 24,
+      "label": "Attack Bikes",
+      "values": {
+       "damage_per_shot": 210,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 40,
+       "vs_vehicle": 210,
+       "vs_air": 223,
+       "vs_structure": 244,
+       "vs_harvester": 200,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 4.25,
+       "initial_charge_up": 0.1,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "War Factory",
+       "speed_band": "Fastest"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 4,
+      "label": "Attack Bikes",
+      "values": {
+       "health": 435,
+       "cost": 30,
+       "speed_value": 9.237333
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 38,
+      "label": "Attack Bikes",
+      "values": {
+       "turn_rate": 300,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Buggy",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 51,
+      "label": "Buggy",
+      "values": {
+       "damage_per_shot": 76,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 76,
+       "vs_vehicle": 53,
+       "vs_air": 76,
+       "vs_structure": 76,
+       "vs_harvester": 47,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.68,
+       "initial_charge_up": 0.25,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "War Factory",
+       "speed_band": "Fastest"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 11,
+      "label": "Buggy",
+      "values": {
+       "health": 1320,
+       "cost": 30,
+       "speed_value": 9.237333
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 43,
+      "label": "Buggy",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Chem buggy",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    60
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-chem-buggy-drone-swarm",
+    "publication_date": "2018-10-22",
+    "cost": 60,
+    "facility": "War Factory"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 23,
+      "label": "Chem Buggy",
+      "values": {
+       "damage_per_shot": 72,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 72,
+       "vs_vehicle": 30,
+       "vs_air": 0,
+       "vs_structure": 72,
+       "vs_harvester": 30,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.5,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 60,
+       "producer_by_column": "War Factory",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 14,
+      "label": "Chem Buggy",
+      "values": {
+       "health": 1550,
+       "cost": 60,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 46,
+      "label": "Chem Buggy",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Scorpion tank",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    70
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 43,
+      "label": "Scorpion Tank",
+      "values": {
+       "damage_per_shot": 646,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 96,
+       "vs_vehicle": 646,
+       "vs_air": 0,
+       "vs_structure": 646,
+       "vs_harvester": 646,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 2.4,
+       "initial_charge_up": "1*",
+       "range": 1,
+       "cost_by_column": 70,
+       "producer_by_column": "War Factory",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 64,
+      "label": "Scorpion Tank",
+      "values": {
+       "health": 2197,
+       "cost": 70,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 68,
+      "label": "Scorpion Tank",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Tick tank",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    70
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 46,
+      "label": "Tick Tank",
+      "values": {
+       "damage_per_shot": 750,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 105,
+       "vs_vehicle": 750,
+       "vs_air": 0,
+       "vs_structure": 750,
+       "vs_harvester": 750,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3,
+       "initial_charge_up": "1*",
+       "range": 1,
+       "cost_by_column": 70,
+       "producer_by_column": "War Factory",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 47,
+      "label": "Tick Tank (Burrowed)",
+      "values": {
+       "damage_per_shot": 750,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 105,
+       "vs_vehicle": 750,
+       "vs_air": 0,
+       "vs_structure": 750,
+       "vs_harvester": 750,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3,
+       "initial_charge_up": 1,
+       "range": 1,
+       "cost_by_column": 70,
+       "producer_by_column": "War Factory",
+       "speed_band": "None"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 74,
+      "label": "Tick Tank",
+      "values": {
+       "health": 1800,
+       "cost": 70,
+       "speed_value": 5.5424
+      }
+     },
+     {
+      "row": 75,
+      "label": "Tick Tank (Burrowed)",
+      "values": {
+       "health": 6000,
+       "cost": 70,
+       "speed_value": 1
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 71,
+      "label": "Tick Tank",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Giga-cannon",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    80
+   ],
+   "publisher_showcase": {
+    "url": "https://forums.ea.com/discussions/command-and-conquer-franchise-en/update-1-0-notes/7159073",
+    "publication_date": "2018-08-16",
+    "cost": 100,
+    "facility": "War Factory"
+   },
+   "independent_cost_comparison": "different recorded values",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 33,
+      "label": "Giga Cannon",
+      "values": {
+       "damage_per_shot": 45,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 5,
+       "vs_vehicle": 45,
+       "vs_air": 0,
+       "vs_structure": 45,
+       "vs_harvester": 45,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.25,
+       "initial_charge_up": 0.5,
+       "range": 2,
+       "cost_by_column": 80,
+       "producer_by_column": "War Factory",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 60,
+      "label": "Giga Cannon (S2)",
+      "values": {
+       "damage_per_shot": 90,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 15,
+       "vs_vehicle": 90,
+       "vs_air": 0,
+       "vs_structure": 90,
+       "vs_harvester": 90,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.25,
+       "initial_charge_up": 0.5,
+       "range": 2,
+       "cost_by_column": 80,
+       "producer_by_column": "War Factory",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 74,
+      "label": "Giga Cannon (S3)",
+      "values": {
+       "damage_per_shot": 150,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 30,
+       "vs_vehicle": 150,
+       "vs_air": 0,
+       "vs_structure": 150,
+       "vs_harvester": 150,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.25,
+       "initial_charge_up": 0.5,
+       "range": 2,
+       "cost_by_column": 80,
+       "producer_by_column": "War Factory",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 25,
+      "label": "Giga Cannon",
+      "values": {
+       "health": 1455,
+       "cost": 80,
+       "speed_value": 5.5424
+      }
+     },
+     {
+      "row": 26,
+      "label": "Giga Cannon (S2)",
+      "values": {
+       "health": 1455,
+       "cost": 80,
+       "speed_value": 5.5424
+      }
+     },
+     {
+      "row": 27,
+      "label": "Giga Cannon (S3)",
+      "values": {
+       "health": 1455,
+       "cost": 80,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 54,
+      "label": "Giga Cannon",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": 3.5
+      }
+     },
+     {
+      "row": 55,
+      "label": "Giga Cannon (S2)",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": 3.5
+      }
+     },
+     {
+      "row": 56,
+      "label": "Giga Cannon (S3)",
+      "values": {
+       "turn_rate": 400,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Stealth tank",
+   "group": "vehicles",
+   "roster_facility_context": "War factory",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    100
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 34,
+      "label": "Stealth Tank",
+      "values": {
+       "damage_per_shot": 510,
+       "number_of_shots": 4,
+       "squad_size": 1,
+       "vs_infantry": 50,
+       "vs_vehicle": 382,
+       "vs_air": 510,
+       "vs_structure": 510,
+       "vs_harvester": 382,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 11.25,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 100,
+       "producer_by_column": "War Factory",
+       "speed_band": "Fastest"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 70,
+      "label": "Stealth Tank",
+      "values": {
+       "health": 1800,
+       "cost": 100,
+       "speed_value": 9.237333
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 70,
+      "label": "Stealth Tank",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Laser drone",
+   "group": "aircraft",
+   "roster_facility_context": "Air tower",
+   "identity_match": "explicit roster alias",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    20
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-laser-drone",
+    "publication_date": "2019-01-21",
+    "cost": 20,
+    "facility": "Air Tower"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 45,
+      "label": "Laser Drones",
+      "values": {
+       "damage_per_shot": 92,
+       "number_of_shots": 1,
+       "squad_size": 4,
+       "vs_infantry": 10,
+       "vs_vehicle": 92,
+       "vs_air": 0,
+       "vs_structure": 60,
+       "vs_harvester": 45,
+       "unit_type": "Air",
+       "rate_of_fire": 1.5,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 20,
+       "producer_by_column": "Air Tower",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 39,
+      "label": "Laser Drones",
+      "values": {
+       "health": 180,
+       "cost": 20,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 61,
+      "label": "Laser Drones",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Banshee",
+   "group": "aircraft",
+   "roster_facility_context": "Air tower",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 26,
+      "label": "Banshee",
+      "values": {
+       "damage_per_shot": 211,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 42,
+       "vs_vehicle": 211,
+       "vs_air": 270,
+       "vs_structure": 382,
+       "vs_harvester": 382,
+       "unit_type": "Air",
+       "rate_of_fire": 1.3,
+       "initial_charge_up": 0.5,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "Air Tower",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 6,
+      "label": "Banshee",
+      "values": {
+       "health": 909,
+       "cost": 30,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 40,
+      "label": "Banshee",
+      "values": {
+       "turn_rate": 450,
+       "hex_reservation": "N/A"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Venom",
+   "group": "aircraft",
+   "roster_facility_context": "Air tower",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    30
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 25,
+      "label": "Venom",
+      "values": {
+       "damage_per_shot": 60,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 60,
+       "vs_vehicle": 28,
+       "vs_air": 0,
+       "vs_structure": 28,
+       "vs_harvester": 28,
+       "unit_type": "Air",
+       "rate_of_fire": 0.4,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 30,
+       "producer_by_column": "Air Tower",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 77,
+      "label": "Venom",
+      "values": {
+       "health": 1210,
+       "cost": 30,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 72,
+      "label": "Venom",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Catalyst gunship",
+   "group": "aircraft",
+   "roster_facility_context": "Air tower",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    60
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-catalyst-gunship",
+    "publication_date": "2020-06-10",
+    "cost": 50,
+    "facility": "Helipad"
+   },
+   "independent_cost_comparison": "different recorded values",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 17,
+      "label": "Catalyst Gunship",
+      "values": {
+       "damage_per_shot": 200,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 200,
+       "vs_vehicle": 50,
+       "vs_air": 0,
+       "vs_structure": 200,
+       "vs_harvester": 60,
+       "unit_type": "Air",
+       "rate_of_fire": 1.6,
+       "initial_charge_up": 0.08,
+       "range": 1,
+       "cost_by_column": 60,
+       "producer_by_column": "Air Tower",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 12,
+      "label": "Catalyst Gunship",
+      "values": {
+       "health": 1485,
+       "cost": 60,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": []
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Shade",
+   "group": "aircraft",
+   "roster_facility_context": "Air tower",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    70
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-shade",
+    "publication_date": "2019-12-10",
+    "cost": 40,
+    "facility": "Air Tower"
+   },
+   "independent_cost_comparison": "different recorded values",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 36,
+      "label": "Shade",
+      "values": {
+       "damage_per_shot": 192,
+       "number_of_shots": 8,
+       "squad_size": 1,
+       "vs_infantry": 32,
+       "vs_vehicle": 192,
+       "vs_air": 0,
+       "vs_structure": 125,
+       "vs_harvester": 104,
+       "unit_type": "Air",
+       "rate_of_fire": 8,
+       "initial_charge_up": 0.1,
+       "range": 1,
+       "cost_by_column": 70,
+       "producer_by_column": "Air Tower",
+       "speed_band": "Faster"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 65,
+      "label": "Shade",
+      "values": {
+       "health": 1233,
+       "cost": 70,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": []
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Inferno",
+   "group": "aircraft",
+   "roster_facility_context": "Air tower",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    100
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 27,
+      "label": "Inferno",
+      "values": {
+       "damage_per_shot": 2000,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 500,
+       "vs_vehicle": 2040,
+       "vs_air": 0,
+       "vs_structure": 2040,
+       "vs_harvester": 2040,
+       "unit_type": "Air",
+       "rate_of_fire": 12,
+       "initial_charge_up": 0.2,
+       "range": 1,
+       "cost_by_column": 100,
+       "producer_by_column": "Air Tower",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 34,
+      "label": "Inferno",
+      "values": {
+       "health": 1715,
+       "cost": 100,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 57,
+      "label": "Inferno",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Phantom",
+   "group": "aircraft",
+   "roster_facility_context": "Air tower",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    100
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 35,
+      "label": "Phantom",
+      "values": {
+       "damage_per_shot": 378,
+       "number_of_shots": 4,
+       "squad_size": 1,
+       "vs_infantry": 0,
+       "vs_vehicle": 0,
+       "vs_air": 378,
+       "vs_structure": 450,
+       "vs_harvester": 0,
+       "unit_type": "Air",
+       "rate_of_fire": 8,
+       "initial_charge_up": 0.1,
+       "range": 1,
+       "cost_by_column": 100,
+       "producer_by_column": "Air Tower",
+       "speed_band": "Fastest"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 53,
+      "label": "Phantom",
+      "values": {
+       "health": 1665,
+       "cost": 100,
+       "speed_value": 8
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 65,
+      "label": "Phantom",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Widowmaker",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    80
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 8,
+      "label": "Widowmaker (Air)",
+      "values": {
+       "damage_per_shot": 80,
+       "number_of_shots": 6,
+       "squad_size": 1,
+       "vs_infantry": 0,
+       "vs_vehicle": 0,
+       "vs_air": 80,
+       "vs_structure": 300,
+       "vs_harvester": 100,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 1.4,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 80,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 11,
+      "label": "Widowmaker (Ground)",
+      "values": {
+       "damage_per_shot": 140,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 140,
+       "vs_vehicle": 50,
+       "vs_air": 0,
+       "vs_structure": 300,
+       "vs_harvester": 50,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.5,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 80,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 56,
+      "label": "Widowmaker (Air)",
+      "values": {
+       "health": 2800,
+       "cost": 80
+      }
+     },
+     {
+      "row": 79,
+      "label": "Widowmaker",
+      "values": {
+       "health": 2800,
+       "cost": 80,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 73,
+      "label": "Widowmaker (Ground)",
+      "values": {}
+     },
+     {
+      "row": 74,
+      "label": "Widowmaker (Air)",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Flame tank",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    110
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 79,
+      "label": "Flame Tank",
+      "values": {
+       "damage_per_shot": 380,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 380,
+       "vs_vehicle": 72,
+       "vs_air": 0,
+       "vs_structure": 300,
+       "vs_harvester": 72,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.5,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 110,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 23,
+      "label": "Flame Tank",
+      "values": {
+       "health": 3050,
+       "cost": 110,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 52,
+      "label": "Flame Tank",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Centurion",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    100
+   ],
+   "publisher_showcase": {
+    "url": "https://www.ea.com/able/news/new-unit-showcase-centurion",
+    "publication_date": "2019-02-25",
+    "cost": 100,
+    "facility": "Temple of Nod"
+   },
+   "independent_cost_comparison": "same value",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 57,
+      "label": "Centurion",
+      "values": {
+       "damage_per_shot": 555,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 100,
+       "vs_vehicle": 555,
+       "vs_air": 0,
+       "vs_structure": 555,
+       "vs_harvester": 555,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 1.72,
+       "initial_charge_up": 0.08,
+       "range": 1,
+       "cost_by_column": 100,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 13,
+      "label": "Centurion",
+      "values": {
+       "health": 3800,
+       "cost": 100,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 44,
+      "label": "Centurion",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Confessor",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    100
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 13,
+      "label": "Confessor",
+      "values": {
+       "damage_per_shot": 15,
+       "number_of_shots": 1,
+       "squad_size": 3,
+       "vs_infantry": 40,
+       "vs_vehicle": 15,
+       "vs_air": 45,
+       "vs_structure": 40,
+       "vs_harvester": 15,
+       "unit_type": "Infantry",
+       "rate_of_fire": 0.4,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 100,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 16,
+      "label": "Confessor",
+      "values": {
+       "health": 800,
+       "cost": 100,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 48,
+      "label": "Confessor",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Artillery",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    110
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 48,
+      "label": "Artillery",
+      "values": {
+       "damage_per_shot": 1000,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 285,
+       "vs_vehicle": 1000,
+       "vs_air": 0,
+       "vs_structure": 3000,
+       "vs_harvester": 1000,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3.9,
+       "initial_charge_up": 0.25,
+       "range": 3,
+       "cost_by_column": 110,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 3,
+      "label": "Artillery",
+      "values": {
+       "health": 1650,
+       "cost": 110,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 37,
+      "label": "Artillery",
+      "values": {
+       "turn_rate": 100,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Basilisk",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    120
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 39,
+      "label": "Basilisk",
+      "values": {
+       "damage_per_shot": 50,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 20,
+       "vs_vehicle": 50,
+       "vs_air": 0,
+       "vs_structure": 50,
+       "vs_harvester": 50,
+       "unit_type": "Air",
+       "rate_of_fire": 0.25,
+       "initial_charge_up": 0,
+       "range": 2,
+       "cost_by_column": 120,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 77,
+      "label": "Basilisk (Max)",
+      "values": {
+       "damage_per_shot": 175,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 50,
+       "vs_vehicle": 175,
+       "vs_air": 0,
+       "vs_structure": 175,
+       "vs_harvester": 175,
+       "unit_type": "Air",
+       "rate_of_fire": 0.25,
+       "initial_charge_up": 0,
+       "range": 2,
+       "cost_by_column": 120,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 7,
+      "label": "Basilisk",
+      "values": {
+       "health": 2500,
+       "cost": 120,
+       "speed_value": 5.5424
+      }
+     },
+     {
+      "row": 10,
+      "label": "Basilisk (Max)",
+      "values": {
+       "health": 2500,
+       "cost": 120,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 41,
+      "label": "Basilisk",
+      "values": {}
+     },
+     {
+      "row": 42,
+      "label": "Basilisk (Max)",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Rockworm",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    120
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 73,
+      "label": "Rockworm",
+      "values": {
+       "damage_per_shot": 2000,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 90,
+       "vs_vehicle": 2000,
+       "vs_air": 0,
+       "vs_structure": 500,
+       "vs_harvester": 2000,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 3.75,
+       "initial_charge_up": 0.233,
+       "range": 1,
+       "cost_by_column": 120,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 60,
+      "label": "Rockworm",
+      "values": {
+       "health": 5000,
+       "cost": 120,
+       "speed_value": 5.5424
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 66,
+      "label": "Rockworm",
+      "values": {
+       "turn_rate": 720,
+       "hex_reservation": 5
+      }
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Cyborg",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    130
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 66,
+      "label": "Cyborg",
+      "values": {
+       "damage_per_shot": 400,
+       "number_of_shots": 1,
+       "squad_size": 2,
+       "vs_infantry": 75,
+       "vs_vehicle": 400,
+       "vs_air": 400,
+       "vs_structure": 400,
+       "vs_harvester": 400,
+       "unit_type": "Infantry",
+       "rate_of_fire": 2,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 130,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Fast"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 18,
+      "label": "Cyborg",
+      "values": {
+       "health": 900,
+       "cost": 130,
+       "speed_value": 6.928
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 50,
+      "label": "Cyborg",
+      "values": {}
+     }
+    ]
+   }
+  },
+  {
+   "faction": "Nod",
+   "unit": "Avatar",
+   "group": "tech",
+   "roster_facility_context": "Temple of Nod",
+   "identity_match": "normalized name",
+   "numeric_evidence": "community workbook mixed-vintage field observations",
+   "version_confidence": "no single game version can be assigned",
+   "recorded_costs": [
+    230
+   ],
+   "publisher_showcase": {
+    "url": null,
+    "publication_date": null,
+    "cost": null,
+    "facility": null
+   },
+   "independent_cost_comparison": "uncompared",
+   "sheets": {
+    "LIVE Unit Values": [
+     {
+      "row": 50,
+      "label": "Avatar (Flamethrower)",
+      "values": {
+       "damage_per_shot": 140,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 140,
+       "vs_vehicle": 50,
+       "vs_air": 0,
+       "vs_structure": 300,
+       "vs_harvester": 0,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.5,
+       "initial_charge_up": 0,
+       "range": 1,
+       "cost_by_column": 230,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     },
+     {
+      "row": 76,
+      "label": "Avatar (Vehicle)",
+      "values": {
+       "damage_per_shot": 160,
+       "number_of_shots": 1,
+       "squad_size": 1,
+       "vs_infantry": 35,
+       "vs_vehicle": 160,
+       "vs_air": 0,
+       "vs_structure": 0,
+       "vs_harvester": 140,
+       "unit_type": "Vehicle",
+       "rate_of_fire": 0.25,
+       "initial_charge_up": 0.3,
+       "range": 1,
+       "cost_by_column": 230,
+       "producer_by_column": "Temple of Nod",
+       "speed_band": "Average"
+      }
+     }
+    ],
+    "Value Rank": [
+     {
+      "row": 5,
+      "label": "Avatar",
+      "values": {
+       "health": 6200,
+       "cost": 230,
+       "speed_value": 4.5
+      }
+     },
+     {
+      "row": 8,
+      "label": "Avatar (Vehicle)",
+      "values": {
+       "health": 6200,
+       "cost": 230
+      }
+     },
+     {
+      "row": 32,
+      "label": "Avatar (Vehicle)",
+      "values": {
+       "health": 6200,
+       "cost": 230
+      }
+     }
+    ],
+    "Live Additional Values": [
+     {
+      "row": 39,
+      "label": "Avatar",
+      "values": {
+       "turn_rate": 180,
+       "hex_reservation": 3.5
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

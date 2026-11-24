@@ -1,0 +1,80 @@
+{
+  "ts": {
+    "registry_rows": 237,
+    "by_kind": {
+      "infantry": 24,
+      "vehicle": 35,
+      "aircraft": 8,
+      "building": 170
+    },
+    "with_definition": 236,
+    "with_resolved_visual_section": 233,
+    "weapon_refs": 40,
+    "weapons_resolved": 40,
+    "art_sequences": 6,
+    "missing_sections": [
+      "JEEP"
+    ]
+  },
+  "fs": {
+    "registry_rows": 265,
+    "by_kind": {
+      "infantry": 29,
+      "vehicle": 46,
+      "aircraft": 8,
+      "building": 182
+    },
+    "with_definition": 264,
+    "with_resolved_visual_section": 260,
+    "weapon_refs": 49,
+    "weapons_resolved": 49,
+    "art_sequences": 6,
+    "missing_sections": [
+      "JEEP"
+    ]
+  },
+  "ra2": {
+    "registry_rows": 409,
+    "by_kind": {
+      "infantry": 45,
+      "vehicle": 55,
+      "aircraft": 9,
+      "building": 300
+    },
+    "with_definition": 403,
+    "with_resolved_visual_section": 402,
+    "weapon_refs": 137,
+    "weapons_resolved": 137,
+    "art_sequences": 25,
+    "missing_sections": [
+      "APACHE",
+      "NAWAST",
+      "GARADR",
+      "NAHPAD",
+      "CAEURO01",
+      "CAIRSFGL"
+    ]
+  },
+  "yr": {
+    "registry_rows": 559,
+    "by_kind": {
+      "infantry": 65,
+      "vehicle": 80,
+      "aircraft": 12,
+      "building": 402
+    },
+    "with_definition": 553,
+    "with_resolved_visual_section": 549,
+    "weapon_refs": 204,
+    "weapons_resolved": 204,
+    "art_sequences": 37,
+    "missing_sections": [
+      "YDUM",
+      "APACHE",
+      "CASYDN01",
+      "CATIME",
+      "CALA02",
+      "CALOND02"
+    ]
+  }
+}

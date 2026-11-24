@@ -1,0 +1,780 @@
+{
+ "pdf_url": "https://oldgamesdownload.com/wp-content/uploads/manuals/dune-2000_win_manual_en_8jn.pdf",
+ "pdf_sha256": "05e11724256310251458a93dd7866d38c3db917b757def582246e7b3621940a2",
+ "edition": "English Windows manual with March 2000 typesetting stamp",
+ "rows": [
+  {
+   "page": 36,
+   "name": "Concrete Slab",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Construction Yard",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 36,
+   "name": "Wall",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Wind Trap",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 36,
+   "name": "Construction Yard",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Nothing (Built by Mobile Construction Vehicle)",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 36,
+   "name": "Wind Trap",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Construction Yard",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 37,
+   "name": "Refinery",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Wind Trap",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 37,
+   "name": "Barracks",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Wind Trap",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 37,
+   "name": "Gun Turret",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Barracks",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 37,
+   "name": "Outpost",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Barracks",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 37,
+   "name": "Rocket Turret",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Outpost and upgraded Construction Yard",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 38,
+   "name": "High Tech Factory",
+   "entry": "Building",
+   "house_or_access": "Atreides can upgrade the High Tech Factory to build Ornithopters",
+   "requires": "Outpost",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 38,
+   "name": "Starport",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Heavy Factory and Outpost",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 38,
+   "name": "Light Factory",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Refinery",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 38,
+   "name": "Silo",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Refinery",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 39,
+   "name": "Heavy Factory",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Refinery",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 39,
+   "name": "Repair Pad",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Upgraded Heavy Factory",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 39,
+   "name": "IX Research Centre",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "Outpost and Upgraded Heavy Factory",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 39,
+   "name": "Palace",
+   "entry": "Building",
+   "house_or_access": null,
+   "requires": "IX Research Centre",
+   "manual_speed_km_h": null
+  },
+  {
+   "page": 40,
+   "name": "Light Infantry",
+   "entry": "Unit",
+   "house_or_access": "Any",
+   "requires": "Barracks",
+   "manual_speed_km_h": "10"
+  },
+  {
+   "page": 40,
+   "name": "Troopers",
+   "entry": "Unit",
+   "house_or_access": "Any",
+   "requires": "Upgraded Barracks",
+   "manual_speed_km_h": "6"
+  },
+  {
+   "page": 40,
+   "name": "Fremen",
+   "entry": "Unit",
+   "house_or_access": "Atreides",
+   "requires": "Atreides Palace",
+   "manual_speed_km_h": "17"
+  },
+  {
+   "page": 40,
+   "name": "Saboteur",
+   "entry": "Unit",
+   "house_or_access": "Ordos",
+   "requires": "Ordos Palace",
+   "manual_speed_km_h": "15"
+  },
+  {
+   "page": 41,
+   "name": "Sardaukar",
+   "entry": "Unit",
+   "house_or_access": "Imperial House",
+   "requires": "Barracks and Imperial Palace",
+   "manual_speed_km_h": "15"
+  },
+  {
+   "page": 41,
+   "name": "Engineer",
+   "entry": "Unit",
+   "house_or_access": "Any",
+   "requires": "Upgraded Barracks",
+   "manual_speed_km_h": "10"
+  },
+  {
+   "page": 41,
+   "name": "Thumper",
+   "entry": "Unit",
+   "house_or_access": "Any (multiplayer only)",
+   "requires": "Upgraded Barracks",
+   "manual_speed_km_h": "15"
+  },
+  {
+   "page": 41,
+   "name": "Trike",
+   "entry": "Unit",
+   "house_or_access": "Atreides, Harkonnen",
+   "requires": "Light Factory",
+   "manual_speed_km_h": "72"
+  },
+  {
+   "page": 42,
+   "name": "Raider",
+   "entry": "Unit",
+   "house_or_access": "Ordos",
+   "requires": "Light Factory",
+   "manual_speed_km_h": "90"
+  },
+  {
+   "page": 42,
+   "name": "Quad",
+   "entry": "Unit",
+   "house_or_access": "Any",
+   "requires": "Upgraded Light Factory",
+   "manual_speed_km_h": "59"
+  },
+  {
+   "page": 42,
+   "name": "Combat tank",
+   "entry": "Unit",
+   "house_or_access": "Any",
+   "requires": "Heavy Factory",
+   "manual_speed_km_h": "40"
+  },
+  {
+   "page": 42,
+   "name": "Mobile Construction Vehicle (MCV)",
+   "entry": "Unit",
+   "house_or_access": "Any",
+   "requires": "Upgraded Heavy Factory and Repair Pad",
+   "manual_speed_km_h": "15"
+  },
+  {
+   "page": 43,
+   "name": "Missile Tank",
+   "entry": "Unit",
+   "house_or_access": "Atreides and Harkonnen manufacture; Ordos may purchase through Starport",
+   "requires": "Upgraded Heavy Factory and Ix Research Centre",
+   "manual_speed_km_h": "40"
+  },
+  {
+   "page": 43,
+   "name": "Siege Tank",
+   "entry": "Unit",
+   "house_or_access": "Any",
+   "requires": "Upgraded Heavy Factory",
+   "manual_speed_km_h": "32"
+  },
+  {
+   "page": 43,
+   "name": "Sonic Tank",
+   "entry": "Unit",
+   "house_or_access": "Atreides",
+   "requires": "Heavy Factory and Ix Research Centre",
+   "manual_speed_km_h": "44"
+  },
+  {
+   "page": 44,
+   "name": "Devastator",
+   "entry": "Unit",
+   "house_or_access": "Harkonnen",
+   "requires": "Heavy Factory and Ix Research Centre",
+   "manual_speed_km_h": "30"
+  },
+  {
+   "page": 44,
+   "name": "Deviator",
+   "entry": "Unit",
+   "house_or_access": "Ordos",
+   "requires": "Heavy Factory and Ix Research Centre",
+   "manual_speed_km_h": "30"
+  },
+  {
+   "page": 44,
+   "name": "Ornithopter",
+   "entry": "Unit",
+   "house_or_access": "Atreides",
+   "requires": "Upgraded High Tech Factory",
+   "manual_speed_km_h": "340"
+  },
+  {
+   "page": 45,
+   "name": "Carryall",
+   "entry": "Unit",
+   "house_or_access": "Any",
+   "requires": "High Tech Factory",
+   "manual_speed_km_h": "160"
+  },
+  {
+   "page": 45,
+   "name": "Death Hand Missile",
+   "entry": "Unit",
+   "house_or_access": "Harkonnen",
+   "requires": "The Harkonnen Palace",
+   "manual_speed_km_h": "700"
+  },
+  {
+   "page": 45,
+   "name": "Frigate",
+   "entry": "Unit",
+   "house_or_access": "CHOAM Merchant Guild",
+   "requires": "Starport",
+   "manual_speed_km_h": "250"
+  },
+  {
+   "page": 45,
+   "name": "Sandworm",
+   "entry": "Unit",
+   "house_or_access": "N/A",
+   "requires": "N/A",
+   "manual_speed_km_h": "30"
+  },
+  {
+   "page": 16,
+   "name": "Spice Harvester",
+   "entry": "economy role",
+   "house_or_access": "see pp. 16\u201317, 37, 45",
+   "requires": "Refinery delivery / deposits harvested spice",
+   "manual_speed_km_h": null
+  }
+ ],
+ "comrade_pack_commit": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+ "comrade_pack_rows": [
+  {
+   "runtime_id": "lightinf",
+   "runtime_name": "Light Infantry",
+   "kind": "unit",
+   "repo_line": 171,
+   "manual_reference": "Light Infantry",
+   "page": 40,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "trooper",
+   "runtime_name": "Trooper",
+   "kind": "unit",
+   "repo_line": 172,
+   "manual_reference": "Troopers",
+   "page": 40,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "engineer",
+   "runtime_name": "Engineer",
+   "kind": "unit",
+   "repo_line": 173,
+   "manual_reference": "Engineer",
+   "page": 41,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "thumper",
+   "runtime_name": "Thumper Infantry",
+   "kind": "unit",
+   "repo_line": 174,
+   "manual_reference": "Thumper",
+   "page": 41,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "grenadier",
+   "runtime_name": "Grenadier",
+   "kind": "unit",
+   "repo_line": 175,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "sardaukar",
+   "runtime_name": "Sardaukar",
+   "kind": "unit",
+   "repo_line": 176,
+   "manual_reference": "Sardaukar",
+   "page": 41,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "fremen",
+   "runtime_name": "Fremen",
+   "kind": "unit",
+   "repo_line": 178,
+   "manual_reference": "Fremen",
+   "page": 40,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "saboteur",
+   "runtime_name": "Saboteur",
+   "kind": "unit",
+   "repo_line": 179,
+   "manual_reference": "Saboteur",
+   "page": 40,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "wormrider",
+   "runtime_name": "Worm Rider",
+   "kind": "unit",
+   "repo_line": 181,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "trike",
+   "runtime_name": "Trike",
+   "kind": "unit",
+   "repo_line": 182,
+   "manual_reference": "Trike",
+   "page": 41,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "raider",
+   "runtime_name": "Raider Trike",
+   "kind": "unit",
+   "repo_line": 183,
+   "manual_reference": "Raider",
+   "page": 42,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "stealthraider",
+   "runtime_name": "Stealth Raider",
+   "kind": "unit",
+   "repo_line": 184,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "quad",
+   "runtime_name": "Quad",
+   "kind": "unit",
+   "repo_line": 185,
+   "manual_reference": "Quad",
+   "page": 42,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "combattank",
+   "runtime_name": "Combat Tank",
+   "kind": "unit",
+   "repo_line": 187,
+   "manual_reference": "Combat tank",
+   "page": 42,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "combattank-h",
+   "runtime_name": "Harkonnen Combat Tank",
+   "kind": "unit",
+   "repo_line": 188,
+   "manual_reference": "Combat tank",
+   "page": 42,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "combattank-o",
+   "runtime_name": "Ordos Combat Tank",
+   "kind": "unit",
+   "repo_line": 189,
+   "manual_reference": "Combat tank",
+   "page": 42,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "siegetank",
+   "runtime_name": "Siege Tank",
+   "kind": "unit",
+   "repo_line": 190,
+   "manual_reference": "Siege Tank",
+   "page": 43,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "missiletank",
+   "runtime_name": "Missile Tank",
+   "kind": "unit",
+   "repo_line": 191,
+   "manual_reference": "Missile Tank",
+   "page": 43,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "sonictank",
+   "runtime_name": "Sonic Tank",
+   "kind": "unit",
+   "repo_line": 192,
+   "manual_reference": "Sonic Tank",
+   "page": 43,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "devastator",
+   "runtime_name": "Devastator",
+   "kind": "unit",
+   "repo_line": 193,
+   "manual_reference": "Devastator",
+   "page": 44,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "deviator",
+   "runtime_name": "Deviator",
+   "kind": "unit",
+   "repo_line": 194,
+   "manual_reference": "Deviator",
+   "page": 44,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "harvester",
+   "runtime_name": "Harvester",
+   "kind": "unit",
+   "repo_line": 195,
+   "manual_reference": "Spice Harvester",
+   "page": 16,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "heavyharvester",
+   "runtime_name": "Heavy Harvester",
+   "kind": "unit",
+   "repo_line": 196,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "mcv",
+   "runtime_name": "MCV",
+   "kind": "unit",
+   "repo_line": 197,
+   "manual_reference": "Mobile Construction Vehicle (MCV)",
+   "page": 42,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "carryall",
+   "runtime_name": "Carryall",
+   "kind": "unit",
+   "repo_line": 198,
+   "manual_reference": "Carryall",
+   "page": 45,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "heavycarryall",
+   "runtime_name": "Heavy Carryall",
+   "kind": "unit",
+   "repo_line": 199,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "assaultthopter",
+   "runtime_name": "Assault Ornithopter",
+   "kind": "unit",
+   "repo_line": 201,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "ornithopter",
+   "runtime_name": "Ornithopter",
+   "kind": "unit",
+   "repo_line": 202,
+   "manual_reference": "Ornithopter",
+   "page": 44,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "conyard",
+   "runtime_name": "Construction Yard",
+   "kind": "structure",
+   "repo_line": 205,
+   "manual_reference": "Construction Yard",
+   "page": 36,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "concrete",
+   "runtime_name": "Concrete Slab",
+   "kind": "structure",
+   "repo_line": 206,
+   "manual_reference": "Concrete Slab",
+   "page": 36,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "windtrap",
+   "runtime_name": "Windtrap",
+   "kind": "structure",
+   "repo_line": 207,
+   "manual_reference": "Wind Trap",
+   "page": 36,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "windtrap2",
+   "runtime_name": "Advanced Windtrap",
+   "kind": "structure",
+   "repo_line": 208,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "refinery",
+   "runtime_name": "Spice Refinery",
+   "kind": "structure",
+   "repo_line": 209,
+   "manual_reference": "Refinery",
+   "page": 37,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "barracks",
+   "runtime_name": "Barracks",
+   "kind": "structure",
+   "repo_line": 210,
+   "manual_reference": "Barracks",
+   "page": 37,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "silo",
+   "runtime_name": "Spice Silo",
+   "kind": "structure",
+   "repo_line": 211,
+   "manual_reference": "Silo",
+   "page": 38,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "lightfactory",
+   "runtime_name": "Light Factory",
+   "kind": "structure",
+   "repo_line": 212,
+   "manual_reference": "Light Factory",
+   "page": 38,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "heavyfactory",
+   "runtime_name": "Heavy Factory",
+   "kind": "structure",
+   "repo_line": 213,
+   "manual_reference": "Heavy Factory",
+   "page": 39,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "outpost",
+   "runtime_name": "Outpost",
+   "kind": "structure",
+   "repo_line": 214,
+   "manual_reference": "Outpost",
+   "page": 37,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "hitech",
+   "runtime_name": "High Tech Factory",
+   "kind": "structure",
+   "repo_line": 215,
+   "manual_reference": "High Tech Factory",
+   "page": 38,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "repairpad",
+   "runtime_name": "Repair Pad",
+   "kind": "structure",
+   "repo_line": 216,
+   "manual_reference": "Repair Pad",
+   "page": 39,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "starport",
+   "runtime_name": "Starport",
+   "kind": "structure",
+   "repo_line": 217,
+   "manual_reference": "Starport",
+   "page": 38,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "ix",
+   "runtime_name": "IX Research Centre",
+   "kind": "structure",
+   "repo_line": 218,
+   "manual_reference": "IX Research Centre",
+   "page": 39,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "palace",
+   "runtime_name": "Palace",
+   "kind": "structure",
+   "repo_line": 219,
+   "manual_reference": "Palace",
+   "page": 39,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "sonicarray",
+   "runtime_name": "Sonic Array",
+   "kind": "structure",
+   "repo_line": 227,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "droppad",
+   "runtime_name": "Drop Platform",
+   "kind": "structure",
+   "repo_line": 229,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "choam",
+   "runtime_name": "CHOAM Observation Post",
+   "kind": "structure",
+   "repo_line": 231,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "scrambler",
+   "runtime_name": "Scrambler Field",
+   "kind": "structure",
+   "repo_line": 233,
+   "manual_reference": null,
+   "page": null,
+   "disposition": "outside indexed manual selection; retain existing Fusion role pending edition research"
+  },
+  {
+   "runtime_id": "gunturret",
+   "runtime_name": "Gun Turret",
+   "kind": "structure",
+   "repo_line": 234,
+   "manual_reference": "Gun Turret",
+   "page": 37,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "rocketturret",
+   "runtime_name": "Rocket Turret",
+   "kind": "structure",
+   "repo_line": 235,
+   "manual_reference": "Rocket Turret",
+   "page": 37,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  },
+  {
+   "runtime_id": "wall",
+   "runtime_name": "Wall",
+   "kind": "structure",
+   "repo_line": 236,
+   "manual_reference": "Wall",
+   "page": 36,
+   "disposition": "role matched; exact gameplay and mode remain separate"
+  }
+ ]
+}

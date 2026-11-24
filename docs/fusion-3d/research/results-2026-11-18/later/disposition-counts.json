@@ -1,0 +1,42 @@
+{
+  "kw": {
+    "core_graph_build_target": 326,
+    "map_scoped_declaration": 109,
+    "other_source_declaration_availability_unverified": 1593,
+    "production_reference_outside_both_static_ends": 1,
+    "static_nonpurchase_or_unresolved_availability": 835,
+    "template_definition": 30
+  },
+  "ra3": {
+    "core_graph_build_target": 109,
+    "map_scoped_declaration": 616,
+    "other_source_declaration_availability_unverified": 3736,
+    "production_reference_outside_both_static_ends": 2,
+    "static_nonpurchase_or_unresolved_availability": 398,
+    "template_definition": 58
+  },
+  "tt": {
+    "core_graph_build_target": 87,
+    "map_scoped_declaration": 168,
+    "obsolete_directory_candidate": 299,
+    "other_source_declaration_availability_unverified": 2113,
+    "static_nonpurchase_or_unresolved_availability": 376,
+    "template_definition": 64
+  },
+  "tw": {
+    "core_graph_build_target": 101,
+    "map_scoped_declaration": 366,
+    "other_source_declaration_availability_unverified": 1067,
+    "production_reference_outside_both_static_ends": 2,
+    "static_nonpurchase_or_unresolved_availability": 560,
+    "template_definition": 29
+  },
+  "uprising": {
+    "core_graph_build_target": 120,
+    "map_scoped_declaration": 521,
+    "other_source_declaration_availability_unverified": 3874,
+    "production_reference_outside_both_static_ends": 2,
+    "static_nonpurchase_or_unresolved_availability": 478,
+    "template_definition": 59
+  }
+}

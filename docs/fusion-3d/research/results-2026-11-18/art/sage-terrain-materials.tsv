@@ -1,0 +1,1470 @@
+game	path	id	Class	WBFolder	Texture	BumpTexture
+ra3	Xml/Terrain/Terrain.xml	Pavement_Romania01	Road	Romania	Pavement_Romania01.tga	Pavement_Romania01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Romania01	Dirt	Romania	Dirt_Romania01.tga	Dirt_Romania01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dock_Romania01	Misc	Romania	Dock_Romania01.tga	Dock_Romania01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_HotSprings01	Dirt	Hot_Springs	TDirt_HotSprings01.tga	TDirt_HotSprings01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_HotSprings02	Dirt	Hot_Springs	TDirt_HotSprings02.tga	TDirt_HotSprings02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_HotSprings03	Dirt	Hot_Springs	TDirt_HotSprings03.tga	TDirt_HotSprings03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_HotSprings04	Dirt	Hot_Springs	TDirt_HotSprings04.tga	TDirt_HotSprings04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_HotSprings05	Dirt	Hot_Springs	TDirt_HotSprings05.tga	TDirt_HotSprings05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_HotSprings06	Dirt	Hot_Springs	TDirt_HotSprings06.tga	TDirt_HotSprings06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_HotSprings07	Dirt	Hot_Springs	TDirt_HotSprings07.tga	TDirt_HotSprings07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_HotSprings08	Dirt	Hot_Springs	TDirt_HotSprings08.tga	TDirt_HotSprings08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_HotSprings01	Grass	Hot_Springs	TGrass_HotSprings01.tga	TGrass_HotSprings01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_HotSprings02	Grass	Hot_Springs	TGrass_HotSprings02.tga	TGrass_HotSprings02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_HotSprings03	Grass	Hot_Springs	TGrass_HotSprings03.tga	TGrass_HotSprings03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_HotSprings04	Grass	Hot_Springs	TGrass_HotSprings04.tga	TGrass_HotSprings04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_HotSprings05	Grass	Hot_Springs	TGrass_HotSprings05.tga	TGrass_HotSprings05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_HotSprings06	Grass	Hot_Springs	TGrass_HotSprings06.tga	TGrass_HotSprings06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_HotSprings07	Grass	Hot_Springs	TGrass_HotSprings07.tga	TGrass_HotSprings07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_HotSprings08	Grass	Hot_Springs	TGrass_HotSprings08.tga	TGrass_HotSprings08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_HotSprings01	Grass	Hot_Springs	Transition_HotSprings01.tga	Transition_HotSprings01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_HotSprings02	Grass	Hot_Springs	Transition_HotSprings02.tga	Transition_HotSprings02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_HotSprings03	Grass	Hot_Springs	Transition_HotSprings03.tga	Transition_HotSprings03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_HotSprings04	Grass	Hot_Springs	Transition_HotSprings04.tga	Transition_HotSprings04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	SteelDeck01	Road	Island_Fortress	TMisc_SteelDeck01.tga	TMisc_SteelDeck01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	SteelDeck02	Road	Island_Fortress	TMisc_SteelDeck02.tga	TMisc_SteelDeck02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	SteelDeck03	Road	Island_Fortress	TMisc_SteelDeck03.tga	TMisc_SteelDeck03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	SteelDeck04	Road	Island_Fortress	TMisc_SteelDeck04.tga	TMisc_SteelDeck04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	SteelDeck05	Road	Island_Fortress	TMisc_SteelDeck05.tga	TMisc_SteelDeck05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	SteelDeck06	Road	Island_Fortress	TMisc_SteelDeck06.tga	TMisc_SteelDeck06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Asphalt01	Road	Island_Fortress	TMisc_Asphalt01.tga	TMisc_Asphalt01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Asphalt02	Road	Island_Fortress	TMisc_Asphalt02.tga	TMisc_Asphalt02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Asphalt03	Road	Island_Fortress	TMisc_Asphalt03.tga	TMisc_Asphalt03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Asphalt04	Road	Island_Fortress	TMisc_Asphalt04.tga	TMisc_Asphalt04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Asphalt05	Road	Island_Fortress	TMisc_Asphalt05.tga	TMisc_Asphalt05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	FortressBlackEdge	Mud	Island_Fortress	TMisc_BlackEdge.tga	TMisc_BlackEdge_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Mud_Fortress01	Mud	Island_Fortress	Mud_Fortress01.tga	Mud_Fortress01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Mud_Fortress02	Mud	Island_Fortress	Mud_Fortress02.tga	Mud_Fortress02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan01	Grass	Yucatan	TGrass_Yucatan01.tga	TGrass_Yucatan01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan02	Grass	Yucatan	TGrass_Yucatan02.tga	TGrass_Yucatan02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan03	Grass	Yucatan	TGrass_Yucatan03.tga	TGrass_Yucatan03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan04	Grass	Yucatan	TGrass_Yucatan04.tga	TGrass_Yucatan04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan05	Grass	Yucatan	TGrass_Yucatan05.tga	TGrass_Yucatan05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan06	Grass	Yucatan	TGrass_Yucatan06.tga	TGrass_Yucatan06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan07	Grass	Yucatan	TGrass_Yucatan07.tga	TGrass_Yucatan07_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan08	Grass	Yucatan	TGrass_Yucatan08.tga	TGrass_Yucatan08_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Yucatan09	Grass	Yucatan	TGrass_Yucatan09.tga	TGrass_Yucatan09_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Yucatan01	Rock	Yucatan	TRock_Yucatan01.tga	TRock_Yucatan01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Yucatan02	Rock	Yucatan	TRock_Yucatan02.tga	TRock_Yucatan02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Yucatan03	Rock	Yucatan	TRock_Yucatan03.tga	TRock_Yucatan03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Yucatan04	Rock	Yucatan	TRock_Yucatan04.tga	TRock_Yucatan04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Yucatan05	Rock	Yucatan	TRock_Yucatan05.tga	TRock_Yucatan05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Gravel_Yucatan01	Road	Yucatan	TGravel_Yucatan01.tga	TGravel_Yucatan01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Yucatan01	Dirt	Yucatan	TDirt_Yucatan01.tga	TDirt_Yucatan01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Yucatan02	Dirt	Yucatan	TDirt_Yucatan02.tga	TDirt_Yucatan02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Yucatan03	Dirt	Yucatan	TDirt_Yucatan03.tga	TDirt_Yucatan03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Yucatan04	Dirt	Yucatan	TDirt_Yucatan04.tga	TDirt_Yucatan04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Yucatan05	Dirt	Yucatan	TDirt_Yucatan05.tga	TDirt_Yucatan05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Yucatan06	Dirt	Yucatan	TDirt_Yucatan06.tga	TDirt_Yucatan06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Reef_Yucatan01	Rock	Yucatan	TReef_Yucatan01.tga	TReef_Yucatan01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Reef_Yucatan02	Rock	Yucatan	TReef_Yucatan02.tga	TReef_Yucatan02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Yucatan01	Road	Yucatan	TPavement_Yucatan01.tga	TPavement_Yucatan01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan01	Grass	Yucatan	TTransition_Yucatan01.tga	TTransition_Yucatan01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan02	Grass	Yucatan	TTransition_Yucatan02.tga	TTransition_Yucatan02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan03	Grass	Yucatan	TTransition_Yucatan03.tga	TTransition_Yucatan03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan04	Grass	Yucatan	TTransition_Yucatan04.tga	TTransition_Yucatan04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan05	Grass	Yucatan	TTransition_Yucatan05.tga	TTransition_Yucatan05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan06	Grass	Yucatan	TTransition_Yucatan06.tga	TTransition_Yucatan06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan07	Grass	Yucatan	TTransition_Yucatan07.tga	TTransition_Yucatan07_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan08	Grass	Yucatan	TTransition_Yucatan08.tga	TTransition_Yucatan08_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan09	Grass	Yucatan	TTransition_Yucatan09.tga	TTransition_Yucatan09_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan10	Grass	Yucatan	TTransition_Yucatan10.tga	TTransition_Yucatan10_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan11	Grass	Yucatan	TTransition_Yucatan11.tga	TTransition_Yucatan11_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan12	Grass	Yucatan	TTransition_Yucatan12.tga	TTransition_Yucatan12_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan13	Grass	Yucatan	TTransition_Yucatan13.tga	TTransition_Yucatan13_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan14	Grass	Yucatan	TTransition_Yucatan14.tga	TTransition_Yucatan14_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan15	Grass	Yucatan	TTransition_Yucatan15.tga	TTransition_Yucatan15_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan16	Grass	Yucatan	TTransition_Yucatan16.tga	TTransition_Yucatan16_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan17	Grass	Yucatan	TTransition_Yucatan17.tga	TTransition_Yucatan17_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan18	Grass	Yucatan	TTransition_Yucatan18.tga	TTransition_Yucatan18_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan19	Grass	Yucatan	TTransition_Yucatan19.tga	TTransition_Yucatan19_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan20	Grass	Yucatan	TTransition_Yucatan20.tga	TTransition_Yucatan20_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Yucatan21	Grass	Yucatan	TTransition_Yucatan21.tga	TTransition_Yucatan21_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Golf01	Road	Golf_Course	TPave_Golf01.tga	TPave_Golf01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Golf02	Road	Golf_Course	TPave_Golf02.tga	TPave_Golf02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Golf03	Road	Golf_Course	TPave_Golf03.tga	TPave_Golf03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Golf04	Road	Golf_Course	TPave_Golf04.tga	TPave_Golf04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Golf05	Road	Golf_Course	TPave_Golf05.tga	TPave_Golf05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Golf06	Road	Golf_Course	TPave_Golf06.tga	TPave_Golf06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Golf07	Road	Golf_Course	TPave_Golf07.tga	TPave_Golf07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Golf01	Grass	Golf_Course	TGrass_Golf01.tga	TGrass_Golf01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Golf02	Grass	Golf_Course	TGrass_Golf02.tga	TGrass_Golf02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Golf03	Grass	Golf_Course	TGrass_Golf03.tga	TGrass_Golf03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Golf04	Grass	Golf_Course	TGrass_Golf04.tga	TGrass_Golf04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Golf05	Grass	Golf_Course	TGrass_Golf05.tga	TGrass_Golf05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Golf06	Grass	Golf_Course	TGrass_Golf06.tga	TGrass_Golf06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Golf07	Grass	Golf_Course	TGrass_Golf07.tga	TGrass_Golf07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Golf08	Grass	Golf_Course	TGrass_Golf08.tga	TGrass_Golf08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang01	Snow	Solvang	TSnow_Solvang01.tga	TSnow_Solvang01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang02	Snow	Solvang	TSnow_Solvang02.tga	TSnow_Solvang02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang03	Snow	Solvang	TSnow_Solvang03.tga	TSnow_Solvang03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang04	Snow	Solvang	TSnow_Solvang04.tga	TSnow_Solvang04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang05	Snow	Solvang	TSnow_Solvang05.tga	TSnow_Solvang05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang06	Snow	Solvang	TSnow_Solvang06.tga	TSnow_Solvang06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang07	Snow	Solvang	TSnow_Solvang07.tga	TSnow_Solvang07_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang08	Snow	Solvang	TSnow_Solvang08.tga	TSnow_Solvang08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang09	Snow	Solvang	TSnow_Solvang09.tga	TSnow_Solvang09_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Solvang01	Cliff	Solvang	TClif_Solvang01.tga	TClif_Solvang01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Solvang02	Cliff	Solvang	TClif_Solvang02.tga	TClif_Solvang02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Solvang03	Cliff	Solvang	TClif_Solvang03.tga	TClif_Solvang03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Solvang04	Cliff	Solvang	TClif_Solvang04.tga	TClif_Solvang04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Solvang01	Rock	Solvang	TRock_Solvang01.tga	Temp_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Solvang02	Rock	Solvang	TRock_Solvang02.tga	Temp_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Solvang10	Snow	Solvang	TSnow_Solvang10.tga	Temp_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Solvang01	Road	Solvang	TPave_Solvang01.tga	TPave_Solvang01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg01	Grass	Heidelberg	Grass_Heidelberg01.tga	Grass_Heidelberg01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg02	Grass	Heidelberg	Grass_Heidelberg02.tga	Grass_Heidelberg02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg03	Grass	Heidelberg	Grass_Heidelberg03.tga	Grass_Heidelberg03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg04	Grass	Heidelberg	Grass_Heidelberg04.tga	Grass_Heidelberg04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg05	Grass	Heidelberg	Grass_Heidelberg05.tga	Grass_Heidelberg05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg06	Grass	Heidelberg	Grass_Heidelberg06.tga	Grass_Heidelberg06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg07	Grass	Heidelberg	Grass_Heidelberg07.tga	Grass_Heidelberg07_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg08	Grass	Heidelberg	Grass_Heidelberg08.tga	Grass_Heidelberg08_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg09	Grass	Heidelberg	Grass_Heidelberg09.tga	Grass_Heidelberg09_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg10	Grass	Heidelberg	Grass_Heidelberg10.tga	Grass_Heidelberg10_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Heidelberg11	Grass	Heidelberg	Grass_Heidelberg11.tga	Grass_Heidelberg11_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Heidelberg01	Grass	Heidelberg	Transition_Heidelberg01.tga	Transition_Heidelberg01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Heidelberg02	Grass	Heidelberg	Transition_Heidelberg02.tga	Transition_Heidelberg02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Heidelberg03	Grass	Heidelberg	Transition_Heidelberg03.tga	Transition_Heidelberg03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Heidelberg04	Grass	Heidelberg	Transition_Heidelberg04.tga	Transition_Heidelberg04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Heidelberg05	Grass	Heidelberg	Transition_Heidelberg05.tga	Transition_Heidelberg05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Heidelberg06	Grass	Heidelberg	Transition_Heidelberg06.tga	Transition_Heidelberg06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Heidelberg07	Grass	Heidelberg	Transition_Heidelberg07.tga	Transition_Heidelberg07_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Heidelberg08	Grass	Heidelberg	Transition_Heidelberg08.tga	Transition_Heidelberg08_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel01	Road	Heidelberg	TPave_Heidel01.tga	TPave_Heidel01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel02	Road	Heidelberg	TPave_Heidel02.tga	TPave_Heidel02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel03	Road	Heidelberg	TPave_Heidel03.tga	TPave_Heidel03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel04	Road	Heidelberg	TPave_Heidel04.tga	TPave_Heidel04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel05	Road	Heidelberg	TPave_Heidel05.tga	TPave_Heidel05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel06	Road	Heidelberg	TPave_Heidel06.tga	TPave_Heidel06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel07	Road	Heidelberg	TPave_Heidel07.tga	TPave_Heidel07_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel08	Road	Heidelberg	TPave_Heidel08.tga	TPave_Heidel08_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidel09	Road	Heidelberg	TPave_Heidel09.tga	TPave_Heidel09_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidelberg10	Road	Heidelberg	Pavement_Heidelberg10.tga	Pavement_Heidelberg10_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidelberg11	Road	Heidelberg	Pavement_Heidelberg11.tga	Pavement_Heidelberg11_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Heidelberg12	Road	Heidelberg	Pavement_Heidelberg12.tga	Pavement_Heidelberg12_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Gravel_Heidelberg01	Road	Heidelberg	Gravel_Heidelberg01.tga	Gravel_Heidelberg01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Heidelberg01	Dirt	Heidelberg	Dirt_Heidelberg01.tga	Dirt_Heidelberg01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Geneva01	Grass	Geneva	TGrass_Geneva01.tga	TGrass_Geneva01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Geneva02	Grass	Geneva	TGrass_Geneva02.tga	TGrass_Geneva02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Geneva03	Grass	Geneva	TGrass_Geneva03.tga	TGrass_Geneva03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Geneva04	Grass	Geneva	TGrass_Geneva04.tga	TGrass_Geneva04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Geneva05	Grass	Geneva	TGrass_Geneva05.tga	TGrass_Geneva05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_GenevaClockA	Grass	Geneva	TGrass_GenevaClockA.tga	TGrass_GenevaClockA_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_GenevaClockB	Grass	Geneva	TGrass_GenevaClockB.tga	TGrass_GenevaClockB_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_GenevaClockC	Grass	Geneva	TGrass_GenevaClockC.tga	TGrass_GenevaClockC_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_GenevaClockD	Grass	Geneva	TGrass_GenevaClockD.tga	TGrass_GenevaClockD_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Geneva01	Road	Geneva	TPave_Geneva01.tga	TPave_Geneva01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Geneva02	Road	Geneva	TPave_Geneva02.tga	TPave_Geneva02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Geneva03	Road	Geneva	TPave_Geneva03.tga	TPave_Geneva03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Geneva04	Road	Geneva	TPave_Geneva04.tga	TPave_Geneva04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Geneva05	Road	Geneva	TPave_Geneva05.tga	TPave_Geneva05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Geneva06	Road	Geneva	TPave_Geneva06.tga	TPave_Geneva06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes01	Sand	Cannes	TSand_Cannes01.tga	TSand_Cannes01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes02	Sand	Cannes	TSand_Cannes02.tga	TSand_Cannes02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes03	Sand	Cannes	TSand_Cannes03.tga	TSand_Cannes03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes04	Sand	Cannes	TSand_Cannes04.tga	TSand_Cannes04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes05	Sand	Cannes	TSand_Cannes05.tga	TSand_Cannes05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes06	Sand	Cannes	TSand_Cannes06.tga	TSand_Cannes06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes07	Sand	Cannes	TSand_Cannes07.tga	TSand_Cannes07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes08	Sand	Cannes	TSand_Cannes08.tga	TSand_Cannes08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes09	Sand	Cannes	TSand_Cannes09.tga	TSand_Cannes09_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Cannes10	Sand	Cannes	TSand_Cannes10.tga	TSand_Cannes10_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Cannes01	Road	Cannes	TPave_Cannes01.tga	TPave_Cannes01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Cannes02	Road	Cannes	TPave_Cannes02.tga	TPave_Cannes02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_Cannes03	Road	Cannes	TPave_Cannes03.tga	TPave_Cannes03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Mud_Havana01	Mud	Havana	Mud_Havana01.tga	Mud_Havana01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Mud_Havana02	Mud	Havana	Mud_Havana02.tga	Mud_Havana02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Havana01	Road	Havana	Pavement_Havana01.tga	Pavement_Havana01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Havana02	Road	Havana	Pavement_Havana02.tga	Pavement_Havana02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Havana03	Road	Havana	Pavement_Havana03.tga	Pavement_Havana03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Havana04	Road	Havana	Pavement_Havana04.tga	Pavement_Havana04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Havana05	Road	Havana	Pavement_Havana05.tga	Pavement_Havana05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Reef_Havana01	Rock	Havana	Reef_Havana01.tga	Reef_Havana01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Reef_Havana02	Rock	Havana	Reef_Havana02.tga	Reef_Havana02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Mykonos01	Road	Mykonos	TPave_Mykonos01.tga	TPave_Mykonos01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Mykonos02	Road	Mykonos	TPave_Mykonos02.tga	TPave_Mykonos02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Mykonos03	Road	Mykonos	TPave_Mykonos03.tga	TPave_Mykonos03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Mykonos04	Road	Mykonos	TPave_Mykonos04.tga	TPave_Mykonos04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Mykonos05	Road	Mykonos	TPave_Mykonos05.tga	TPave_Mykonos05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Mykonos01	Dirt	Mykonos	TDirt_Mykonos01.tga	TDirt_Mykonos01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Mykonos02	Dirt	Mykonos	TDirt_Mykonos02.tga	TDirt_Mykonos02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Mykonos03	Dirt	Mykonos	TDirt_Mykonos03.tga	TDirt_Mykonos03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Mykonos04	Dirt	Mykonos	TDirt_Mykonos04.tga	TDirt_Mykonos04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Mykonos05	Dirt	Mykonos	TDirt_Mykonos05.tga	TDirt_Mykonos05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Mykonos06	Dirt	Mykonos	TDirt_Mykonos06.tga	TDirt_Mykonos06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Mykonos07	Dirt	Mykonos	TDirt_Mykonos07.tga	TDirt_Mykonos07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Mykonos01	Grass	Mykonos	TGrass_Mykonos01.tga	TGrass_Mykonos01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Mykonos02	Grass	Mykonos	TGrass_Mykonos02.tga	TGrass_Mykonos02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Kremlin01	Road	Kremlin	Pavement_Kremlin01.tga	Pavement_Kremlin01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Kremlin02	Road	Kremlin	Pavement_Kremlin02.tga	Pavement_Kremlin02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Kremlin03	Road	Kremlin	Pavement_Kremlin03.tga	Pavement_Kremlin03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Kremlin04	Road	Kremlin	Pavement_Kremlin04.tga	Pavement_Kremlin04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Kremlin05	Road	Kremlin	Pavement_Kremlin05.tga	Pavement_Kremlin05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Kremlin06	Road	Kremlin	Pavement_Kremlin06.tga	Pavement_Kremlin06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Kremlin01	Snow	Kremlin	Transition_Kremlin01.tga	Transition_Kremlin01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Kremlin02	Snow	Kremlin	Transition_Kremlin02.tga	Transition_Kremlin02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Kremlin03	Snow	Kremlin	Transition_Kremlin03.tga	Transition_Kremlin03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Kremlin04	Snow	Kremlin	Transition_Kremlin04.tga	Transition_Kremlin04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Kremlin05	Snow	Kremlin	Transition_Kremlin05.tga	Transition_Kremlin05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Kremlin06	Snow	Kremlin	Transition_Kremlin06.tga	Transition_Kremlin06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Kremlin07	Snow	Kremlin	Transition_Kremlin07.tga	Transition_Kremlin07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Kremlin08	Snow	Kremlin	Transition_Kremlin08.tga	Transition_Kremlin08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Odessa01	Road	Odessa	Pavement_Odessa01.tga	Pavement_Odessa01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Odessa01	Rock	Odessa	Rock_Odessa01.tga	Rock_Odessa01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_SantaMonica01	Road	Santa_Monica	TPave_SantaMonica01.tga	TPave_SantaMonica01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_SantaMonica02	Road	Santa_Monica	TPave_SantaMonica02.tga	TPave_SantaMonica02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_SantaMonica03	Road	Santa_Monica	TPave_SantaMonica03.tga	TPave_SantaMonica03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_SantaMonica04	Road	Santa_Monica	TPave_SantaMonica04.tga	TPave_SantaMonica04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pave_SantaMonica05	Road	Santa_Monica	TPave_SantaMonica05.tga	TPave_SantaMonica05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_SantaMonica01	Sand	Santa_Monica	TSand_SantaMonica01.tga	TSand_SantaMonica01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_SantaMonica02	Sand	Santa_Monica	TSand_SantaMonica02.tga	TSand_SantaMonica02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_SantaMonica01	Grass	Santa_Monica	Grass_SantaMonica01.tga	Grass_SantaMonica01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg01	Road	Saint_Petersburg	Pavement_SaintPetersburg01.tga	Pavement_SaintPetersburg01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg02	Road	Saint_Petersburg	Pavement_SaintPetersburg02.tga	Pavement_SaintPetersburg02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg03	Road	Saint_Petersburg	Pavement_SaintPetersburg03.tga	Pavement_SaintPetersburg03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg04	Road	Saint_Petersburg	Pavement_SaintPetersburg04.tga	Pavement_SaintPetersburg04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg05	Road	Saint_Petersburg	Pavement_SaintPetersburg05.tga	Pavement_SaintPetersburg05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg06	Road	Saint_Petersburg	Pavement_SaintPetersburg06.tga	Pavement_SaintPetersburg06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg07	Road	Saint_Petersburg	Pavement_SaintPetersburg07.tga	Pavement_SaintPetersburg07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg08	Road	Saint_Petersburg	Pavement_SaintPetersburg08.tga	Pavement_SaintPetersburg08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_SaintPetersburg01	Grass	Saint_Petersburg	Grass_SaintPetersburg01.tga	Grass_SaintPetersburg01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter01	Dirt	Easter_Island	TDirt_Easter01.tga	TDirt_Easter01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter02	Dirt	Easter_Island	TDirt_Easter02.tga	TDirt_Easter02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter03	Dirt	Easter_Island	TDirt_Easter03.tga	TDirt_Easter03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter04	Dirt	Easter_Island	TDirt_Easter04.tga	TDirt_Easter04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter05	Dirt	Easter_Island	TDirt_Easter05.tga	TDirt_Easter05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter06	Dirt	Easter_Island	TDirt_Easter06.tga	TDirt_Easter06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter07	Dirt	Easter_Island	TDirt_Easter07.tga	TDirt_Easter07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter08	Dirt	Easter_Island	TDirt_Easter08.tga	TDirt_Easter08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter09	Dirt	Easter_Island	TDirt_Easter09.tga	TDirt_Easter09_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter10	Dirt	Easter_Island	TDirt_Easter10.tga	TDirt_Easter10_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter11	Dirt	Easter_Island	TDirt_Easter11.tga	TDirt_Easter11_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Easter12	Dirt	Easter_Island	TDirt_Easter12.tga	TDirt_Easter12_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Easter01	Grass	Easter_Island	TGrass_Easter01.tga	TGrass_Easter01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Easter02	Grass	Easter_Island	TGrass_Easter02.tga	TGrass_Easter02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Easter03	Grass	Easter_Island	TGrass_Easter03.tga	TGrass_Easter03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Easter04	Grass	Easter_Island	TGrass_Easter04.tga	TGrass_Easter04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Easter05	Grass	Easter_Island	TGrass_Easter05.tga	TGrass_Easter05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Easter06	Grass	Easter_Island	TGrass_Easter06.tga	TGrass_Easter06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Easter07	Grass	Easter_Island	TGrass_Easter07.tga	TGrass_Easter07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Easter01	Cliff	Easter_Island	TCliff_Easter01.tga	TCliff_Easter01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Easter02	Cliff	Easter_Island	TCliff_Easter02.tga	TCliff_Easter02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Easter03	Cliff	Easter_Island	TCliff_Easter03.tga	TCliff_Easter03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Easter04	Cliff	Easter_Island	TCliff_Easter04.tga	TCliff_Easter04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod01	Grass	Cape_Cod	TGrass_CapeCod01.tga	TGrass_CapeCod01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod02	Grass	Cape_Cod	TGrass_CapeCod02.tga	TGrass_CapeCod02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod03	Grass	Cape_Cod	TGrass_CapeCod03.tga	TGrass_CapeCod03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod04	Grass	Cape_Cod	TGrass_CapeCod04.tga	TGrass_CapeCod04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod05	Grass	Cape_Cod	TGrass_CapeCod05.tga	TGrass_CapeCod05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod06	Grass	Cape_Cod	TGrass_CapeCod06.tga	TGrass_CapeCod06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod07	Grass	Cape_Cod	TGrass_CapeCod07.tga	TGrass_CapeCod07_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod08	Grass	Cape_Cod	TGrass_CapeCod08.tga	TGrass_CapeCod08_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod09	Grass	Cape_Cod	TGrass_CapeCod09.tga	TGrass_CapeCod09_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod10	Grass	Cape_Cod	TGrass_CapeCod10.tga	TGrass_CapeCod10_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod11	Grass	Cape_Cod	TGrass_CapeCod11.tga	TGrass_CapeCod11_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod12	Grass	Cape_Cod	TGrass_CapeCod12.tga	TGrass_CapeCod12_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod13	Grass	Cape_Cod	TGrass_CapeCod13.tga	TGrass_CapeCod13_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod14	Grass	Cape_Cod	TGrass_CapeCod14.tga	TGrass_CapeCod14_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod15	Grass	Cape_Cod	TGrass_CapeCod15.tga	TGrass_CapeCod15_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod16	Grass	Cape_Cod	TGrass_CapeCod16.tga	TGrass_CapeCod16_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod17	Grass	Cape_Cod	TGrass_CapeCod17.tga	TGrass_CapeCod17_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod18	Grass	Cape_Cod	TGrass_CapeCod18.tga	TGrass_CapeCod18_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod19	Grass	Cape_Cod	TGrass_CapeCod19.tga	TGrass_CapeCod19_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod20	Grass	Cape_Cod	TGrass_CapeCod20.tga	TGrass_CapeCod20_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod21	Grass	Cape_Cod	TGrass_CapeCod21.tga	TGrass_CapeCod21_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod22	Grass	Cape_Cod	TGrass_CapeCod22.tga	TGrass_CapeCod22_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod23	Grass	Cape_Cod	TGrass_CapeCod23.tga	TGrass_CapeCod23_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_CapeCod24	Grass	Cape_Cod	TGrass_CapeCod24.tga	TGrass_CapeCod24_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_CapeCod01	Road	Cape_Cod	TPave_CapeCod01.tga	TPave_CapeCod01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_CapeCod02	Road	Cape_Cod	TPave_CapeCod02.tga	TPave_CapeCod02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_CapeCod01	Dirt	Cape_Cod	TDirt_CapeCod01.tga	TDirt_CapeCod01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_CapeCod02	Dirt	Cape_Cod	TDirt_CapeCod02.tga	TDirt_CapeCod02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_CapeCod03	Dirt	Cape_Cod	TDirt_CapeCod03.tga	TDirt_CapeCod03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_CapeCod04	Dirt	Cape_Cod	TDirt_CapeCod04.tga	TDirt_CapeCod04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_CapeCod05	Dirt	Cape_Cod	TDirt_CapeCod05.tga	TDirt_CapeCod05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_CapeCod06	Dirt	Cape_Cod	TDirt_CapeCod06.tga	TDirt_CapeCod06_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_CapeCod07	Dirt	Cape_Cod	TDirt_CapeCod07.tga	TDirt_CapeCod07_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_CapeCod08	Dirt	Cape_Cod	TDirt_CapeCod08.tga	TDirt_CapeCod08_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_CapeCod01	Cliff	Cape_Cod	TCliff_CapeCod01.tga	TCliff_CapeCod01_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_CapeCod02	Cliff	Cape_Cod	TCliff_CapeCod02.tga	TCliff_CapeCod02_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_CapeCod03	Cliff	Cape_Cod	TCliff_CapeCod03.tga	TCliff_CapeCod03_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_CapeCod04	Cliff	Cape_Cod	TCliff_CapeCod04.tga	TCliff_CapeCod04_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_CapeCod05	Cliff	Cape_Cod	TCliff_CapeCod05.tga	TCliff_CapeCod05_nrm.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_NewYork01	Road	New_York	TPave_NewYork01.tga	TPave_NewYork01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_NewYork02	Road	New_York	TPave_NewYork02.tga	TPave_NewYork02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_NewYork03	Road	New_York	TPave_NewYork03.tga	TPave_NewYork03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_NewYork01	Grass	New_York	TGrass_NewYork01.tga	TGrass_NewYork01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_MtRush01	Road	Mount_Rushmore	TPave_MtRush01.tga	TPave_MtRush01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush01	Grass	Mount_Rushmore	Grass_MtRush01.tga	Grass_MtRush01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush02	Grass	Mount_Rushmore	Grass_MtRush02.tga	Grass_MtRush02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush03	Grass	Mount_Rushmore	Grass_MtRush03.tga	Grass_MtRush03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush04	Grass	Mount_Rushmore	Grass_MtRush04.tga	Grass_MtRush04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush05	Grass	Mount_Rushmore	Grass_MtRush05.tga	Grass_MtRush05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush06	Grass	Mount_Rushmore	Grass_MtRush06.tga	Grass_MtRush06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush07	Grass	Mount_Rushmore	Grass_MtRush07.tga	Grass_MtRush07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush08	Grass	Mount_Rushmore	Grass_MtRush08.tga	Grass_MtRush08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush09	Grass	Mount_Rushmore	Grass_MtRush09.tga	Grass_MtRush09_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush10	Grass	Mount_Rushmore	Grass_MtRush10.tga	Grass_MtRush10_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush11	Grass	Mount_Rushmore	Grass_MtRush11.tga	Grass_MtRush11_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush12	Grass	Mount_Rushmore	Grass_MtRush12.tga	Grass_MtRush12_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_MtRush13	Grass	Mount_Rushmore	Grass_MtRush13.tga	Grass_MtRush13_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_MtRush01	Grass	Mount_Rushmore	Cliff_MtRush01.tga	Cliff_MtRush01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_MtRush02	Grass	Mount_Rushmore	Cliff_MtRush02.tga	Cliff_MtRush02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Amsterdam01	Road	Amsterdam	TPave_Amsterdam01.tga	TPave_Amsterdam01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Amsterdam02	Road	Amsterdam	TPave_Amsterdam02.tga	TPave_Amsterdam02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Amsterdam03	Road	Amsterdam	TPave_Amsterdam03.tga	TPave_Amsterdam03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Amsterdam04	Road	Amsterdam	TPave_Amsterdam04.tga	TPave_Amsterdam04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Amsterdam05	Road	Amsterdam	TPave_Amsterdam05.tga	TPave_Amsterdam05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Iceland01	Cliff	Iceland	TClif_Iceland01.tga	TClif_Iceland01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Iceland02	Cliff	Iceland	TClif_Iceland02.tga	TClif_Iceland02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Iceland03	Cliff	Iceland	TClif_Iceland03.tga	TClif_Iceland03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Iceland04	Cliff	Iceland	TClif_Iceland04.tga	TClif_Iceland04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Iceland05	Cliff	Iceland	TClif_Iceland05.tga	TClif_Iceland05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Iceland06	Cliff	Iceland	TClif_Iceland06.tga	TClif_Iceland06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Iceland07	Cliff	Iceland	TClif_Iceland07.tga	TClif_Iceland07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Iceland02	Snow	Iceland	TSnow_Iceland02.tga	TSnow_Iceland02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Iceland03	Snow	Iceland	TSnow_Iceland03.tga	TSnow_Iceland03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Iceland04	Snow	Iceland	TSnow_Iceland04.tga	TSnow_Iceland04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Snow_Iceland05	Snow	Iceland	TSnow_Iceland05.tga	TSnow_Iceland05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Iceland01	Rock	Iceland	TRock_Iceland01.tga	TRock_Iceland01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Iceland02	Rock	Iceland	TRock_Iceland02.tga	TRock_Iceland02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Iceland03	Rock	Iceland	TRock_Iceland03.tga	TRock_Iceland03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Rock_Iceland04	Rock	Iceland	TRock_Iceland04.tga	TRock_Iceland04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Iceland02	Dirt	Iceland	TDirt_Iceland02.tga	TDirt_Iceland02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Iceland03	Dirt	Iceland	TDirt_Iceland03.tga	TDirt_Iceland03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Iceland04	Dirt	Iceland	TDirt_Iceland04.tga	TDirt_Iceland04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Iceland05	Dirt	Iceland	TDirt_Iceland05.tga	TDirt_Iceland05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Iceland06	Dirt	Iceland	TDirt_Iceland06.tga	TDirt_Iceland06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Iceland01	Dirt	Iceland	Transition_Iceland01.tga	Transition_Iceland01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Iceland02	Dirt	Iceland	Transition_Iceland02.tga	Transition_Iceland02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Iceland03	Dirt	Iceland	Transition_Iceland03.tga	Transition_Iceland03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Transition_Iceland04	Dirt	Iceland	Transition_Iceland04.tga	Transition_Iceland04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor01	Road	Tokyo_Harbor	Pavement_TokyoHarbor01.tga	Pavement_TokyoHarbor01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor02	Road	Tokyo_Harbor	Pavement_TokyoHarbor02.tga	Pavement_TokyoHarbor02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor03	Road	Tokyo_Harbor	Pavement_TokyoHarbor03.tga	Pavement_TokyoHarbor03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor04	Road	Tokyo_Harbor	Pavement_TokyoHarbor04.tga	Pavement_TokyoHarbor04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor05	Road	Tokyo_Harbor	TPave_TokyoHarbor05.tga	TPave_TokyoHarbor05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor06	Road	Tokyo_Harbor	TPave_TokyoHarbor06.tga	TPave_TokyoHarbor06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor07	Road	Tokyo_Harbor	TPave_TokyoHarbor07.tga	TPave_TokyoHarbor07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor08	Road	Tokyo_Harbor	TPave_TokyoHarbor08.tga	TPave_TokyoHarbor08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor09	Road	Tokyo_Harbor	Pavement_TokyoHarbor09.tga	Pavement_TokyoHarbor09_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor10	Road	Tokyo_Harbor	TPave_TokyoHarbor10.tga	TPave_TokyoHarbor10_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	RA3_DeepOcean	Road	RA3	RA3_DeepOcean.tga	RA3_DeepOcean_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	RA3_ShallowSeaFloor	Road	RA3	RA3_ShallowSeaFloor.tga	RA3_ShallowSeaFloor_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	RA3_Elevation0	Road	RA3	RA3_Elevation0.tga	RA3_Elevation0_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	RA3_Elevation1	Road	RA3	RA3_Elevation1.tga	RA3_Elevation1_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	RA3_Elevation2	Road	RA3	RA3_Elevation2.tga	RA3_Elevation2_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	RA3Grid1	Misc	RA3	RA3Grid1.tga	RA3Grid1_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Gibraltar1	Cliff	Gibraltar	Cliff_Gibralter1.tga	Cliff_Gibralter1_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Cliff_Gibraltar2	Cliff	Gibraltar	Cliff_Gibralter2.tga	Cliff_Gibralter2_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Gibraltar1	Road	Gibraltar	Pavement_Gibraltar01.tga	Pavement_Gibraltar01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Gibraltar2	Road	Gibraltar	Pavement_Gibraltar02.tga	Pavement_Gibraltar02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Gibraltar3	Road	Gibraltar	Pavement_Gibraltar03.tga	Pavement_Gibraltar03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Gibraltar5	Road	Gibraltar	Pavement_GibraltarBoardwalk.tga	Pavement_GibraltarBoardwalk_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Gibraltar6	Road	Gibraltar	Pavement_Gibraltar04.tga	Pavement_Gibraltar04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Gibraltar1	Grass	Gibraltar	Grass_Gibraltar01.tga	Grass_Gibraltar01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Gibraltar2	Grass	Gibraltar	Grass_Gibraltar02.tga	Grass_Gibraltar02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Gibraltar3	Grass	Gibraltar	Grass_Gibraltar03.tga	Grass_Gibraltar03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Gypsy01	Grass	Gypsy_Village	TGrass_Gypsy01.tga	TGrass_Gypsy01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Gypsy02	Grass	Gypsy_Village	TGrass_Gypsy02.tga	TGrass_Gypsy02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Gypsy03	Grass	Gypsy_Village	TGrass_Gypsy03.tga	TGrass_Gypsy03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Gypsy04	Grass	Gypsy_Village	TGrass_Gypsy04.tga	TGrass_Gypsy04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Gypsy01	Dirt	Gypsy_Village	TDirt_Gypsy01.tga	TDirt_Gypsy01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Gypsy02	Dirt	Gypsy_Village	TDirt_Gypsy02.tga	TDirt_Gypsy02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Dirt_Gypsy03	Dirt	Gypsy_Village	TDirt_Gypsy03.tga	TDirt_Gypsy03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii01	Grass	Hawaii	Grass_Hawaii01.tga	Grass_Hawaii01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii02	Grass	Hawaii	Grass_Hawaii02.tga	Grass_Hawaii02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii03	Grass	Hawaii	Grass_Hawaii03.tga	Grass_Hawaii03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii04	Grass	Hawaii	Grass_Hawaii04.tga	Grass_Hawaii04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii05	Grass	Hawaii	Grass_Hawaii05.tga	Grass_Hawaii05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii06	Grass	Hawaii	Grass_Hawaii06.tga	Grass_Hawaii06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii07	Grass	Hawaii	Grass_Hawaii07.tga	Grass_Hawaii07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii08	Grass	Hawaii	Grass_Hawaii08.tga	Grass_Hawaii08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Grass_Hawaii09	Grass	Hawaii	Grass_Hawaii09.tga	Grass_Hawaii09_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Hawaii01	Sand	Hawaii	TSand_Hawaii01.tga	TSand_Hawaii01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Hawaii02	Sand	Hawaii	TSand_Hawaii02.tga	TSand_Hawaii02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Hawaii03	Sand	Hawaii	TSand_Hawaii03.tga	TSand_Hawaii03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Sand_Hawaii04	Sand	Hawaii	TSand_Hawaii04.tga	TSand_Hawaii04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad01	Road	Vladivostok	Pavement_Vlad01.tga	Pavement_Vlad01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad02	Road	Vladivostok	Pavement_Vlad02.tga	Pavement_Vlad02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad03	Road	Vladivostok	Pavement_Vlad03.tga	Pavement_Vlad03_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad04	Road	Vladivostok	Pavement_Vlad04.tga	Pavement_Vlad04_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad05	Road	Vladivostok	Pavement_Vlad05.tga	Pavement_Vlad05_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad06	Road	Vladivostok	Pavement_Vlad06.tga	Pavement_Vlad06_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad07	Road	Vladivostok	Pavement_Vlad07.tga	Pavement_Vlad07_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad08	Road	Vladivostok	Pavement_Vlad08.tga	Pavement_Vlad08_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad09	Road	Vladivostok	Pavement_Vlad09.tga	Pavement_Vlad09_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad10	Road	Vladivostok	Pavement_Vlad10.tga	Pavement_Vlad10_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad11	Road	Vladivostok	Pavement_Vlad11.tga	Pavement_Vlad11_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	Pavement_Vlad12	Road	Vladivostok	Pavement_Vlad12.tga	Pavement_Vlad12_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	BB_Gravel01	Road	Brighton_Beach	BB_Gravel01.tga	BB_Gravel01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	BB_Gravel02	Road	Brighton_Beach	BB_Gravel02.tga	BB_Gravel02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	BB_Dirt01	Sand	Brighton_Beach	BB_Dirt01.tga	BB_Dirt01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	BB_Dirt02	Sand	Brighton_Beach	BB_Dirt02.tga	BB_Dirt02_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	BB_Pavement01	Road	Brighton_Beach	BB_Pavement01.tga	BB_Pavement01_NRM.tga
+ra3	Xml/Terrain/Terrain.xml	BB_Pavement02	Road	Brighton_Beach	BB_Pavement02.tga	BB_Pavement02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CnC3Default	Misc		CnC3Default.tga	CnC3Default_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CnC3DefaultBlack	Misc		CnC3DefaultBlack.tga	CnC3DefaultBlack_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CnC3Grid1	Misc		CnC3Grid1.tga	CnC3Grid1_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CnC3Grid2	Misc		CnC3Grid2.tga	CnC3Grid2_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CnC3Grid3	Misc		CnC3Grid3.tga	CnC3Grid3_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CnC3Grid4	Misc		CnC3Grid4.tga	CnC3Grid4_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CnC3Grid10	Misc		CnC3Grid10.tga	CnC3Grid1_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Tiberium01	Misc		TMisc_Tiberium01.tga	TMisc_Tiberium01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Tiberium02	Misc		TMisc_Tiberium02.tga	TMisc_Tiberium02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Tiberium03	Misc		TMisc_Tiberium03.tga	TMisc_Tiberium03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Tiberium04	Misc		TMisc_Tiberium04.tga	TMisc_Tiberium04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Tiberium05	Misc		TMisc_Tiberium05.tga	TMisc_Tiberium05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementMojave01	Misc		TPave_Mojave01.tga	TPave_Mojave01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementMojave02	Misc		TPave_Mojave02.tga	TPave_Mojave02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementMojave03	Misc		TPave_Mojave03.tga	TPave_Mojave03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementMojave04	Misc		TPave_Mojave04.tga	TPave_Mojave04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementMojave05	Misc		TPave_Mojave05.tga	TPave_Mojave05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementMojave06	Misc		TPave_Mojave06.tga	TPave_Mojave06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementMojave07	Misc		TPave_Mojave07.tga	TPave_Mojave07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave01	Dirt		TDirt_Mojave01.tga	TDirt_Mojave01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave02	Dirt		TDirt_Mojave02.tga	TDirt_Mojave02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave03	Dirt		TDirt_Mojave03.tga	TDirt_Mojave03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave04	Dirt		TDirt_Mojave04.tga	TDirt_Mojave04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave05	Dirt		TDirt_Mojave05.tga	TDirt_Mojave05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave06	Dirt		TDirt_Mojave06.tga	TDirt_Mojave06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave07	Dirt		TDirt_Mojave07.tga	TDirt_Mojave07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave08	Dirt		TDirt_Mojave08.tga	TDirt_Mojave08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave09	Dirt		TDirt_Mojave09.tga	TDirt_Mojave09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave10	Dirt		TDirt_Mojave10.tga	TDirt_Mojave10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave11	Dirt		TDirt_Mojave11.tga	TDirt_Mojave11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave12	Dirt		TDirt_Mojave12.tga	TDirt_Mojave12_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave13	Dirt		TDirt_Mojave13.tga	TDirt_Mojave13_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave14	Dirt		TDirt_Mojave14.tga	TDirt_Mojave14_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave15	Dirt		TDirt_Mojave15.tga	TDirt_Mojave15_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave16	Dirt		TDirt_Mojave16.tga	TDirt_Mojave16_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave17	Dirt		TDirt_Mojave17.tga	TDirt_Mojave17_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave18	Dirt		TDirt_Mojave18.tga	TDirt_Mojave18_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtMojave19	Dirt		TDirt_Mojave19.tga	TDirt_Mojave19_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffMojave01	Rock		TClif_Mojave01.tga	TClif_Mojave01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffMojave02	Rock		TClif_Mojave02.tga	TClif_Mojave02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffMojave03	Rock		TClif_Mojave03.tga	TClif_Mojave03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_01	Grass		test_grass_01.tga	test_grass_01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_02	Grass		test_grass_02.tga	test_grass_02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_03	Grass		test_grass_03.tga	test_grass_03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_04	Grass		test_grass_04.tga	test_grass_04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_05	Grass		test_grass_05.tga	test_grass_05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_06	Grass		test_grass_06.tga	test_grass_06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_07	Grass		test_grass_07.tga	test_grass_07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_08	Grass		test_grass_08.tga	test_grass_08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_09	Grass		test_grass_09.tga	test_grass_09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_10	Grass		test_grass_10.tga	test_grass_10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_grass_11	Grass		test_grass_11.tga	test_grass_11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_cliff_01	Rock		test_cliff_01.tga	test_cliff_01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_cliff_02	Rock		test_cliff_02.tga	test_cliff_02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_cliff_03	Rock		test_cliff_03.tga	test_cliff_03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	test_cliff_04	Rock		test_cliff_04.tga	test_cliff_04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtHomelandAllianceFarm01	Dirt		TDirt_HAFrm01.tga	TDirt_HAFrm01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtHomelandAllianceFarm02	Dirt		TDirt_HAFrm02.tga	TDirt_HAFrm02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Pave_Homeland01	Misc		TPave_Homeland01.tga	TPave_Homeland01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Pave_Homeland02	Misc		TPave_Homeland02.tga	TPave_Homeland02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Pave_Homeland03	Misc		TPave_Homeland03.tga	TPave_Homeland03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Pave_Homeland04	Misc		TPave_Homeland04.tga	TPave_Homeland04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Grass_Homeland	Grass		TGrass_Homeland.tga	TGrass_Homeland_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Grass_Homeland02	Grass		TGrass_Homeland02.tga	TGrass_Homeland02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Grass_Homeland03	Grass		TGrass_Homeland03.tga	TGrass_Homeland03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Grass_Homeland04	Grass		TGrass_Homeland04.tga	TGrass_Homeland04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Grass_Homeland05	Grass		TGrass_Homeland05.tga	TGrass_Homeland05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffYellowZone01	Rock		TClif_YellowZone01.tga	TClif_YellowZone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffYellowZone02	Rock		TClif_YellowZone02.tga	TClif_YellowZone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone01	Dirt		TDirt_YellowZone01.tga	TDirt_YellowZone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone02	Dirt		TDirt_YellowZone02.tga	TDirt_YellowZone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone03	Dirt		TDirt_YellowZone03.tga	TDirt_YellowZone03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone03b	Dirt		TDirt_YellowZone03b.tga	TDirt_YellowZone03b_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone04	Dirt		TDirt_YellowZone04.tga	TDirt_YellowZone04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone04b	Dirt		TDirt_YellowZone04b.tga	TDirt_YellowZone04b_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone05	Dirt		TDirt_YellowZone05.tga	TDirt_YellowZone05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone06	Dirt		TDirt_YellowZone06.tga	TDirt_YellowZone06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone07	Dirt		TDirt_YellowZone07.tga	TDirt_YellowZone07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone07b	Dirt		TDirt_YellowZone07b.tga	TDirt_YellowZone07b_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone08	Dirt		TDirt_YellowZone08.tga	TDirt_YellowZone08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone09	Dirt		TDirt_YellowZone09.tga	TDirt_YellowZone09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone10	Dirt		TDirt_YellowZone10.tga	TDirt_YellowZone10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone11	Dirt		TDirt_YellowZone11.tga	TDirt_YellowZone11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone12	Dirt		TDirt_YellowZone12.tga	TDirt_YellowZone12_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone13	Dirt		TDirt_YellowZone13.tga	TDirt_YellowZone13_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone14	Dirt		TDirt_YellowZone14.tga	TDirt_YellowZone14_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone15	Dirt		TDirt_YellowZone15.tga	TDirt_YellowZone15_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone16	Dirt		TDirt_YellowZone16.tga	TDirt_YellowZone16_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone17	Dirt		TDirt_YellowZone17.tga	TDirt_YellowZone17_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone18	Dirt		TDirt_YellowZone18.tga	TDirt_YellowZone18_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone19	Dirt		TDirt_YellowZone19.tga	TDirt_YellowZone19_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone20	Dirt		TDirt_YellowZone20.tga	TDirt_YellowZone20_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtYellowZone21	Dirt		TDirt_YellowZone21.tga	TDirt_YellowZone21_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementPlaza01	Misc		TPave_Plaza01.tga	TPave_Plaza01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementPlaza02	Misc		TPave_Plaza02.tga	TPave_Plaza02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementPlaza03	Misc		TPave_Plaza03.tga	TPave_Plaza03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementPlaza05	Misc		TPave_Plaza05.tga	TPave_Plaza05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementPlaza04	Misc		TPave_Plaza04.tga	TPave_Plaza04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveYellowZone_01	Misc		TPave_YellowZone01.tga	TPave_YellowZone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveYellowZone_02	Misc		TPave_YellowZone02.tga	TPave_YellowZone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveYellowZone_03	Misc		TPave_YellowZone03.tga	TPave_YellowZone03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveYellowZone_04	Misc		TPave_YellowZone04.tga	TPave_YellowZone04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityRubble01	Rock		TRock_Rubble01.tga	TRock_Rubble01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityRubble02	Rock		TRock_Rubble02.tga	TRock_Rubble02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityRubble03	Rock		TRock_Rubble03.tga	TRock_Rubble03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityRubble04	Rock		TRock_Rubble04.tga	TRock_Rubble04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityRubble05	Rock		TRock_Rubble05.tga	TRock_Rubble05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityRubble06	Rock		TRock_Rubble06.tga	TRock_Rubble06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityGravel01	Rock		TRock_Gravel01.tga	TRock_Gravel01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityGravel02	Rock		TRock_Gravel02.tga	TRock_Gravel02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CityGravel03	Rock		TRock_Gravel03.tga	TRock_Gravel03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockJetty01	Rock		TRock_RockJetty01.tga	TRock_RockJetty01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockJetty02	Rock		TRock_RockJetty02.tga	TRock_RockJetty02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementEgypt01	Misc		TMisc_PavementEgypt01.tga	TMisc_PavementEgypt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementEgypt02	Misc		TMisc_PavementEgypt02.tga	TMisc_PavementEgypt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementEgypt03	Misc		TMisc_PavementEgypt03.tga	TMisc_PavementEgypt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementEgypt04	Misc		TMisc_PavementEgypt04.tga	TMisc_PavementEgypt04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementEgypt05	Misc		TMisc_PavementEgypt05.tga	TMisc_PavementEgypt05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementEgypt06	Misc		TMisc_PavementEgypt06.tga	TMisc_PavementEgypt06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementEgypt07	Misc		TMisc_PavementEgypt07.tga	TMisc_PavementEgypt07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt01	Dirt		TDirt_Egypt01.tga	TDirt_Egypt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt02	Dirt		TDirt_Egypt02.tga	TDirt_Egypt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt03	Dirt		TDirt_Egypt03.tga	TDirt_Egypt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt04	Dirt		TDirt_Egypt04.tga	TDirt_Egypt04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt05	Dirt		TDirt_Egypt05.tga	TDirt_Egypt05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt06	Dirt		TDirt_Egypt06.tga	TDirt_Egypt06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt07	Dirt		TDirt_Egypt07.tga	TDirt_Egypt07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt08	Dirt		TDirt_Egypt08.tga	TDirt_Egypt08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt09	Dirt		TDirt_Egypt09.tga	TDirt_Egypt09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtEgypt10	Dirt		TDirt_Egypt10.tga	TDirt_Egypt10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffEgypt01	Rock		TCliff_Egypt01.tga	TCliff_Egypt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffEgypt02	Rock		TCliff_Egypt02.tga	TCliff_Egypt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffEgypt03	Rock		TCliff_Egypt03.tga	TCliff_Egypt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffEgypt04	Rock		TCliff_Egypt04.tga	TCliff_Egypt04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffEgypt05	Rock		TCliff_Egypt05.tga	TCliff_Egypt05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockEgypt01	Rock		TRock_Egypt01.tga	TRock_Egypt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington01	Misc		TPave_Washington01.tga	TPave_Washington01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington02	Misc		TPave_Washington02.tga	TPave_Washington02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington03	Misc		TPave_Washington03.tga	TPave_Washington03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington04	Misc		TPave_Washington04.tga	TPave_Washington04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington05	Misc		TPave_Washington05.tga	TPave_Washington05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington06	Misc		TPave_Washington06.tga	TPave_Washington06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington07	Misc		TPave_Washington07.tga	TPave_Washington07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington08	Misc		TPave_Washington08.tga	TPave_Washington08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington09	Misc		TPave_Washington09.tga	TPave_Washington09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington10	Misc		TPave_Washington10.tga	TPave_Washington10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementWashington11	Misc		TPave_Washington11.tga	TPave_Washington11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtWashington01	Dirt		TDirt_Washington01.tga	TDirt_Washington01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtWashington02	Dirt		TDirt_Washington02.tga	TDirt_Washington02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassWashington01	Grass		TGrass_Washington01.tga	TGrass_Washington01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassWashington02	Grass		TGrass_Washington02.tga	TGrass_Washington02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassWashington03	Grass		TGrass_Washington03.tga	TGrass_Washington03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassWashington04	Grass		TGrass_Washington04.tga	TGrass_Washington04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassWashington05	Grass		TGrass_Washington05.tga	TGrass_Washington05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassWashington06	Grass		TGrass_Washington06.tga	TGrass_Washington06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassWashington07	Grass		TGrass_Washington07.tga	TGrass_Washington07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassWashington08	Grass		TGrass_Washington08.tga	TGrass_Washington08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementGermany01	Misc		TPave_Germany01.tga	TPave_Germany01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementGermany02	Misc		TPave_Germany02.tga	TPave_Germany02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementGermany03	Misc		TPave_Germany03.tga	TPave_Germany03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementGermany04	Misc		TPave_Germany04.tga	TPave_Germany04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementGermany05	Misc		TPave_Germany05.tga	TPave_Germany05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementGermany06	Misc		TPave_Germany06.tga	TPave_Germany06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementGermany07	Misc		TPave_Germany07.tga	TPave_Germany07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassGermany01	Grass		TGras_Germany01.tga	TGras_Germany01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassGermany02	Grass		TGras_Germany02.tga	TGras_Germany02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassGermany03	Grass		TGras_Germany03.tga	TGras_Germany03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassGermany04	Grass		TGras_Germany04.tga	TGras_Germany04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassGermany05	Grass		TGras_Germany05.tga	TGras_Germany05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassGermany06	Grass		TGras_Germany06.tga	TGras_Germany06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassGermany07	Grass		TGras_Germany07.tga	TGras_Germany07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtGermany01	Dirt		TDirt_Germany01.tga	TDirt_Germany01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtGermany02	Dirt		TDirt_Germany02.tga	TDirt_Germany02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtGermany03	Dirt		TDirt_Germany03.tga	TDirt_Germany03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtGermany04	Dirt		TDirt_Germany04.tga	TDirt_Germany04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtGermany05	Dirt		TDirt_Germany05.tga	TDirt_Germany05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtGermany06	Dirt		TDirt_Germany06.tga	TDirt_Germany06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtGermany07	Dirt		TDirt_Germany07.tga	TDirt_Germany07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtGermany08	Dirt		TDirt_Germany08.tga	TDirt_Germany08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockGermany01	Rock		TRock_Germany01.tga	TRock_Germany01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockGermany02	Rock		TRock_Germany02.tga	TRock_Germany02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAlbania01	Grass		TGras_Albania01.tga	TGras_Albania01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAlbania02	Grass		TGras_Albania02.tga	TGras_Albania02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAlbania03	Grass		TGras_Albania03.tga	TGras_Albania03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAlbania04	Grass		TGras_Albania04.tga	TGras_Albania04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAlbania05	Grass		TGras_Albania05.tga	TGras_Albania05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffAlbania01	Rock		TClif_Albania01.tga	TClif_Albania01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffAlbania02	Rock		TClif_Albania02.tga	TClif_Albania02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffAlbania03	Rock		TClif_Albania03.tga	TClif_Albania03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementAlbania01	Misc		TPave_Albania01.tga	TPave_Albania01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementAlbania02	Misc		TPave_Albania02.tga	TPave_Albania02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementAlbania03	Misc		TPave_Albania03.tga	TPave_Albania03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementAlbania04	Misc		TPave_Albania04.tga	TPave_Albania04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PavementAlbania05	Misc		TPave_Albania05.tga	TPave_Albania05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffAus01	Rock		TCliff_Aus01.tga	TCliff_Aus01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffAus02	Rock		TCliff_Aus02.tga	TCliff_Aus02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffAus03	Rock		TCliff_Aus03.tga	TCliff_Aus03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffAus04	Rock		TCliff_Aus04.tga	TCliff_Aus04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockAus01	Rock		TRock_Aus01.tga	TRock_Aus01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockAus02	Rock		TRock_Aus02.tga	TRock_Aus02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockAus03	Rock		TRock_Aus03.tga	TRock_Aus03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus01	Dirt		TDirt_Aus01.tga	TDirt_Aus01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus01b	Dirt		TDirt_Aus01b.tga	TDirt_Aus01b_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus02	Dirt		TDirt_Aus02.tga	TDirt_Aus02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus02b	Dirt		TDirt_Aus02b.tga	TDirt_Aus02b_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus03	Dirt		TDirt_Aus03.tga	TDirt_Aus03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus03b	Dirt		TDirt_Aus03b.tga	TDirt_Aus03b_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus04	Dirt		TDirt_Aus04.tga	TDirt_Aus04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus05	Dirt		TDirt_Aus05.tga	TDirt_Aus05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus06	Dirt		TDirt_Aus06.tga	TDirt_Aus06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus07	Dirt		TDirt_Aus07.tga	TDirt_Aus07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus08	Dirt		TDirt_Aus08.tga	TDirt_Aus08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus09	Dirt		TDirt_Aus09.tga	TDirt_Aus09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus10	Dirt		TDirt_Aus10.tga	TDirt_Aus10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus11	Dirt		TDirt_Aus11.tga	TDirt_Aus11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus12	Dirt		TDirt_Aus12.tga	TDirt_Aus12_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveAus04	Misc		TMisc_PavementAus01.tga	TMisc_PavementAus01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveAus05	Misc		TMisc_PavementAus02.tga	TMisc_PavementAus02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveAus06	Misc		TPave_Aus04.tga	TPave_Aus04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus13	Dirt		TDirt_Aus13.tga	TDirt_Aus13_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus14	Dirt		TDirt_Aus14.tga	TDirt_Aus14_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveAus01	Misc		TPave_Aus01.tga	TPave_Aus01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveAus02	Misc		TPave_Aus02.tga	TPave_Aus02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveAus03	Misc		TPave_Aus03.tga	TPave_Aus03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAus01	Grass		TGrass_Aus01.tga	TGrass_Aus01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAus02	Grass		TGrass_Aus02.tga	TGrass_Aus02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAus03	Grass		TGrass_Aus03.tga	TGrass_Aus03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAus04	Grass		TGrass_Aus04.tga	TGrass_Aus04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAus05	Grass		TGrass_Aus05.tga	TGrass_Aus05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassAus06	Grass		TGrass_Aus06.tga	TGrass_Aus06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RubbleAus01	Rock		TRock_AusRubble01.tga	TRock_AusRubble01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveAus07	Misc		TPave_Aus07.tga	TPave_Aus07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveAus08	Misc		TPave_Aus08.tga	TPave_Aus08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus15	Dirt		TDirt_Aus15.tga	TDirt_Aus15_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus16	Dirt		TDirt_Aus16.tga	TDirt_Aus16_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus17	Dirt		TDirt_Aus17.tga	TDirt_Aus17_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtAus18	Dirt		TDirt_Aus18.tga	TDirt_Aus18_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassBrazil01	Grass		TGrass_Brazil01.tga	TGrass_Brazil01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassBrazil02	Grass		TGrass_Brazil02.tga	TGrass_Brazil02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveSarajevo01	Misc		TPave_Sarajevo01.tga	TPave_Sarajevo01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffSarajevo01	Rock		TClif_Sar01.tga	TClif_Sar01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockSarajevo01	Rock		TRock_Sar01.tga	TRock_Sar01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo01	Dirt		TDirt_Sar01.tga	TDirt_Sar01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo02	Dirt		TDirt_Sar02.tga	TDirt_Sar02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo03	Dirt		TDirt_Sar03.tga	TDirt_Sar03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo04	Dirt		TDirt_Sar04.tga	TDirt_Sar04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo05	Dirt		TDirt_Sar05.tga	TDirt_Sar05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo06	Dirt		TDirt_Sar06.tga	TDirt_Sar06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo07	Dirt		TDirt_Sar07.tga	TDirt_Sar07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo08	Dirt		TDirt_Sar08.tga	TDirt_Sar08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo09	Dirt		TDirt_Sar09.tga	TDirt_Sar09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSarajevo10	Dirt		TDirt_Sar10.tga	TDirt_Sar10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtSlovenia01	Dirt		TDirt_Slo01.tga	TDirt_Slo01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtNCarolina01	Dirt		TDirt_NCarolina01.tga	TDirt_NCarolina01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtNCarolina02	Dirt		TDirt_NCarolina02.tga	TDirt_NCarolina02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtNCarolina03	Dirt		TDirt_NCarolina03.tga	TDirt_NCarolina03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassNCarolina01	Grass		TGras_NCarolina01.tga	TGras_NCarolina01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassNCarolina02	Grass		TGras_NCarolina02.tga	TGras_NCarolina02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassNCarolina03	Grass		TGras_NCarolina03.tga	TGras_NCarolina03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassNCarolina04	Grass		TGras_NCarolina04.tga	TGras_NCarolina04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveNCarolina01	Misc		TPave_NCarolina01.tga	TPave_NCarolina01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveNCarolina02	Misc		TPave_NCarolina02.tga	TPave_NCarolina02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveNCarolina03	Misc		TPave_NCarolina03.tga	TPave_NCarolina03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffNCarolina01	Rock		TClif_NCarolina01.tga	TClif_NCarolina01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	GrassNCarolina05	Grass		TGras_NCarolina05.tga	TGras_NCarolina05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtNCarolina04	Dirt		TDirt_NCarolina04.tga	TDirt_NCarolina04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffNCarolina03	Rock		TClif_NCarolina03.tga	TClif_NCarolina03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveNCarolina04	Misc		TPave_NCarolina04.tga	TPave_NCarolina04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtNCarolina05	Dirt		TDirt_NCarolina05.tga	TDirt_NCarolina05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone01	Dirt		TDirt_RedZone01.tga	TDirt_RedZone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone02	Dirt		TDirt_RedZone02.tga	TDirt_RedZone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone03	Dirt		TDirt_RedZone03.tga	TDirt_RedZone03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone04	Dirt		TDirt_RedZone04.tga	TDirt_RedZone04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone05	Dirt		TDirt_RedZone05.tga	TDirt_RedZone05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone06	Dirt		TDirt_RedZone06.tga	TDirt_RedZone06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone07	Dirt		TDirt_RedZone07.tga	TDirt_RedZone07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone08	Dirt		TDirt_RedZone08.tga	TDirt_RedZone08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone09	Dirt		TDirt_RedZone09.tga	TDirt_RedZone09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone10	Dirt		TDirt_RedZone10.tga	TDirt_RedZone10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone11	Dirt		TDirt_RedZone11.tga	TDirt_RedZone11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone12	Dirt		TDirt_RedZone12.tga	TDirt_RedZone12_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone13	Dirt		TDirt_RedZone13.tga	TDirt_RedZone13_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone14	Dirt		TDirt_RedZone14.tga	TDirt_RedZone14_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone15	Dirt		TDirt_RedZone15.tga	TDirt_RedZone15_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone16	Dirt		TDirt_RedZone16.tga	TDirt_RedZone16_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone17	Dirt		TDirt_RedZone17.tga	TDirt_RedZone17_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone18	Dirt		TDirt_RedZone18.tga	TDirt_RedZone18_nrm.tga
+c4	Xml/Terrain/Terrain.xml	DirtRedZone19	Dirt		TDirt_RedZone19.tga	TDirt_RedZone19_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffRedZone01	Rock		TCliff_RedZone01.tga	TCliff_RedZone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffRedZone02	Rock		TCliff_RedZone02.tga	TCliff_RedZone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CliffRedZone03	Rock		TCliff_RedZone03.tga	TCliff_RedZone03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone01	Rock		TRock_RedZone01.tga	TRock_RedZone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone02	Rock		TRock_RedZone02.tga	TRock_RedZone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone03	Rock		TRock_RedZone03.tga	TRock_RedZone03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone04	Rock		TRock_RedZone04.tga	TRock_RedZone04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone05	Rock		TRock_RedZone05.tga	TRock_RedZone05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone06	Rock		TRock_RedZone06.tga	TRock_RedZone06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone07	Rock		TRock_RedZone07.tga	TRock_RedZone07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone08	Rock		TRock_RedZone08.tga	TRock_RedZone08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone09	Rock		TRock_RedZone09.tga	TRock_RedZone09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone10	Rock		TRock_RedZone10.tga	TRock_RedZone10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	RockRedZone11	Rock		TRock_RedZone11.tga	TRock_RedZone11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveRedzone01	Misc		TPave_Redzone01.tga	TPave_Redzone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveRedzone02	Misc		TPave_Redzone02.tga	TPave_Redzone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveRedzone03	Misc		TPave_Redzone03.tga	TPave_Redzone03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PaveRedzone04	Misc		TPave_Redzone04.tga	TPave_Redzone04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia01	Grass		TGras_Asia01.tga	TGras_Asia01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia02	Grass		TGras_Asia02.tga	TGras_Asia02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia03	Grass		TGras_Asia03.tga	TGras_Asia03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia04	Grass		TGras_Asia04.tga	TGras_Asia04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia05	Grass		TGras_Asia05.tga	TGras_Asia05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia06	Grass		TGras_Asia06.tga	TGras_Asia06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia07	Grass		TGras_Asia07.tga	TGras_Asia07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia08	Grass		TGras_Asia08.tga	TGras_Asia08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia09	Grass		TGras_Asia09.tga	TGras_Asia09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia10	Grass		TGras_Asia10.tga	TGras_Asia10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia11	Grass		TGras_Asia11.tga	TGras_Asia11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia12	Grass		TGras_Asia12.tga	TGras_Asia12_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asia13	Grass		TGras_Asia13.tga	TGras_Asia13_nrm.tga
+c4	Xml/Terrain/Terrain.xml	TGras_Asiaramp01	Grass		TGras_Asiaramp01.tga	TGras_Asiaramp01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaWhitepanel01	Misc		TMisc_Asia01.tga	TMisc_Asia01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaWhitepanel02	Misc		TMisc_Asia02.tga	TMisc_Asia02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaPanel03	Misc		TMisc_Asia03.tga	TMisc_Asia03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaPanel04	Misc		TMisc_Asia04.tga	TMisc_Asia04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaPanel05	Misc		TMisc_Asia05.tga	TMisc_Asia05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaPanel06	Misc		TMisc_Asia06.tga	TMisc_Asia06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaPanel07	Misc		TMisc_Asia07.tga	TMisc_Asia07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaPanel08	Misc		TMisc_Asia08.tga	TMisc_Asia08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaPanel09	Misc		TMisc_Asia09.tga	TMisc_Asia09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaPanel10	Misc		TMisc_Asia10.tga	TMisc_Asia10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaRock01	Rock		TRock_Asia01.tga	TRock_Asia01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaRock02	Rock		TRock_Asia02.tga	TRock_Asia02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaRock03	Rock		TRock_Asia03.tga	TRock_Asia03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaRock04	Rock		TRock_Asia04.tga	TRock_Asia04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaRock05	Rock		TRock_Asia05.tga	TRock_Asia05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaRock06	Rock		TRock_Asia06.tga	TRock_Asia06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AsiaRock07	Rock		TRock_Asia07.tga	TRock_Asia07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	Vignette_Area	Misc		Vignette_Area01.tga	CnC3Default_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_stagedirt01	Dirt	Polynesia	POA_stagedirt01.tga	POA_stagedirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_stagedirt02	Dirt	Polynesia	POA_stagedirt02.tga	POA_stagedirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_stagedirt03	Dirt	Polynesia	POA_stagedirt03.tga	POA_stagedirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_stagedirt04	Dirt	Polynesia	POA_stagedirt04.tga	POA_stagedirt04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_stageramp01	Dirt	Polynesia	POA_stageramp01.tga	POA_stageramp01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_stagedirt01	Dirt	Polynesia	POV1_stagedirt01.tga	POV1_stagedirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_stagetech01	Metal	Polynesia	POV1_stagetech01.tga	POV1_stagetech01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_stagetech02	Metal	Polynesia	POV1_stagetech02.tga	POV1_stagetech02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_stagetech03	Metal	Polynesia	POV1_stagetech03.tga	POV1_stagetech03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_stagetech01	Metal	Polynesia	POV2_stagetech01.tga	POV2_stagetech01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt01	Dirt	Polynesia	POA_beachdirt01.tga	POA_beachdirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt02	Dirt	Polynesia	POA_beachdirt02.tga	POA_beachdirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt03	Dirt	Polynesia	POA_beachdirt03.tga	POA_beachdirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt04	Dirt	Polynesia	POA_beachdirt04.tga	POA_beachdirt04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt05	Dirt	Polynesia	POA_beachdirt05.tga	POA_beachdirt05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt06	Dirt	Polynesia	POA_beachdirt06.tga	POA_beachdirt06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt07	Dirt	Polynesia	POA_beachdirt07.tga	POA_beachdirt07_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt08	Dirt	Polynesia	POA_beachdirt08.tga	POA_beachdirt08_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt09	Dirt	Polynesia	POA_beachdirt09.tga	POA_beachdirt09_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt10	Dirt	Polynesia	POA_beachdirt10.tga	POA_beachdirt10_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachdirt11	Dirt	Polynesia	POA_beachdirt11.tga	POA_beachdirt11_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachgrass04	Grass	Polynesia	POA_beachgrass04.tga	POA_beachgrass04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_beachgrass05	Grass	Polynesia	POA_beachgrass05.tga	POA_beachgrass05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_beachgrass01	Grass	Polynesia	POV1_beachgrass01.tga	POV1_beachgrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_beachgrass02	Grass	Polynesia	POV1_beachgrass02.tga	POV1_beachgrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_beachgrass03	Grass	Polynesia	POV1_beachgrass03.tga	POV1_beachgrass03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_beachstone01	Stone	Polynesia	POV1_beachstone01.tga	POV1_beachstone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_beachstone02	Stone	Polynesia	POV1_beachstone02.tga	POV1_beachstone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_beachstone04	Stone	Polynesia	POV1_beachstone04.tga	POV1_beachstone04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_beachstone05	Stone	Polynesia	POV1_beachstone05.tga	POV1_beachstone05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_beachstone03	Stone	Polynesia	POV1_beachstone03.tga	POV1_beachstone03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_beachdirt01	Dirt	Polynesia	POV2_beachdirt01.tga	POV2_beachdirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_beachdirt02	Dirt	Polynesia	POV2_beachdirt01.tga	POV2_beachdirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_beachgrass01	Grass	Polynesia	POV2_beachgrass01.tga	POV2_beachgrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_beachgrass02	Grass	Polynesia	POV2_beachgrass02.tga	POV2_beachgrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_beachgrass03	Grass	Polynesia	POV2_beachgrass03.tga	POV2_beachgrass03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_beachgrass04	Grass	Polynesia	POV2_beachgrass04.tga	POV2_beachgrass04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_metal01	Metal	Polynesia	POA_metal01.tga	POA_metal01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_metal02	Metal	Polynesia	POA_metal02.tga	POA_metal02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_metal03	Metal	Polynesia	POA_metal03.tga	POA_metal03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_metal01	Metal	Polynesia	POV1_metal01.tga	POV1_metal01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_metal02	Metal	Polynesia	POV1_metal02.tga	POV1_metal02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV1_metal03	Metal	Polynesia	POV1_metal03.tga	POV1_metal03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_metal01	Metal	Polynesia	POV2_metal01.tga	POV2_metal01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_metal02	Metal	Polynesia	POV2_metal02.tga	POV2_metal02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_metal03	Metal	Polynesia	POV2_metal03.tga	POV2_metal03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_metal04	Metal	Polynesia	POV2_metal04.tga	POV2_metal04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_junglegrass01	Grass	Polynesia	POA_junglegrass01.tga	POA_junglegrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_junglegrass02	Grass	Polynesia	POA_junglegrass02.tga	POA_junglegrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_junglegrass03	Grass	Polynesia	POA_junglegrass03.tga	POA_junglegrass03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POV2_junglegrass01	Grass	Polynesia	POV2_junglegrass02.tga	POV2_junglegrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaingrass01	Grass	Polynesia	POA_mountaingrass01.tga	POA_mountaingrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaingrass02	Grass	Polynesia	POA_mountaingrass02.tga	POA_mountaingrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaingrass03	Grass	Polynesia	POA_mountaingrass03.tga	POA_mountaingrass03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaindirt01	Dirt	Polynesia	POA_mountaindirt01.tga	POA_mountaindirt01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaindirt02	Dirt	Polynesia	POA_mountaindirt02.tga	POA_mountaindirt02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaindirt03	Dirt	Polynesia	POA_mountaindirt03.tga	POA_mountaindirt03_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaindirt04	Dirt	Polynesia	POA_mountaindirt04.tga	POA_mountaindirt04_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaindirt05	Dirt	Polynesia	POA_mountaindirt05.tga	POA_mountaindirt05_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaincliff01	Rock	Polynesia	POA_mountaincliff01.tga	POA_mountaincliff01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountaincliff02	Cliff	Polynesia	POA_mountaincliff02.tga	POA_mountaincliff02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POA_mountainramp01	Misc	Polynesia	POA_mountainramp01.tga	POA_mountainramp01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV1_mountainstone01	Stone	Polynesia	POV1_mountainstone01.tga	POV1_mountainstone01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV1_mountainstone02	Stone	Polynesia	POV1_mountainstone02.tga	POV1_mountainstone02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_coral1	Misc	Polynesia	POV2_coral1.tga	POV2_coral1_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_coral2	Misc	Polynesia	POV2_coral2.tga	POV2_coral2_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_coral3	Misc	Polynesia	POV2_coral3.tga	POV2_coral3_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_coral4	Misc	Polynesia	POV2_coral4.tga	POV2_coral4_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_coral5	Misc	Polynesia	POV2_coral5.tga	POV2_coral5_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_coral6	Misc	Polynesia	POV2_coral6.tga	POV2_coral6_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_coral7	Misc	Polynesia	POV2_coral7.tga	POV2_coral7_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_infected01	Misc	Polynesia	POV2_infected01.tga	PAV2_infected02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	POV2_infected02	Misc	Polynesia	POV2_infected02.tga	PAV2_infected02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_powdersnow01	Snow	Arctic	ARA_powdersnow01.tga	ARA_powdersnow01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_powdersnow02	Snow	Arctic	ARA_powdersnow02.tga	ARA_powdersnow02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_powdersnow03	Snow	Arctic	ARA_powdersnow03.tga	ARA_powdersnow03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_powdersnow_mud01	Snow	Arctic	ARV1_powdersnow_mud01.tga	ARV1_powdersnow_mud01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_powdersnow_fracture01	Snow	Arctic	ARV1_powdersnow_fracture01.tga	ARV1_powdersnow_fracture01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_powdersnow_fracture02	Snow	Arctic	ARV1_powdersnow_fracture02.tga	ARV1_powdersnow_fracture02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_powdersnow_fracture03	Snow	Arctic	ARV1_powdersnow_fracture03.tga	ARV1_powdersnow_fracture03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_powdersnow01	Snow	Arctic	ARV2_powdersnow01.tga	ARV2_powdersnow01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_powdersnow02	Snow	Arctic	ARV2_powdersnow02.tga	ARV2_powdersnow02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_infected01	Misc	Arctic	ARV2_infected01.tga	ARV2_infected01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_infected02	Misc	Arctic	ARV2_infected02.tga	ARV2_infected02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_icysnow01	Snow	Arctic	ARA_icysnow01.tga	ARA_icysnow01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_icysnow02	Snow	Arctic	ARA_icysnow02.tga	ARA_icysnow02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_icysnow03	Snow	Arctic	ARA_icysnow03.tga	ARA_icysnow03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_icysnow_fracture01	Snow	Arctic	ARV1_icysnow_fracture01.tga	ARV1_icysnow_fracture01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_icysnow_fracture02	Snow	Arctic	ARV1_icysnow_fracture02.tga	ARV1_icysnow_fracture02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_icysnow_fracture03	Snow	Arctic	ARV1_icysnow_fracture03.tga	ARV1_icysnow_fracture03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_icysnow_mud01	Snow	Arctic	ARV1_icysnow_mud01.tga	ARV1_icysnow_mud01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_icysnow_fracture01	Snow	Arctic	ARV2_icysnow_fracture01.tga	ARV2_icysnow_fracture01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_icysnow01	Snow	Arctic	ARV2_icysnow01.tga	ARV2_icysnow01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_icysnow02	Snow	Arctic	ARV2_icysnow02.tga	ARV2_icysnow02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_ice01	Snow	Arctic	ARA_ice01.tga	ARA_ice01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_ice02	Snow	Arctic	ARA_ice02.tga	ARA_ice02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_ice03	Snow	Arctic	ARA_ice03.tga	ARA_ice03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_ice04	Snow	Arctic	ARA_ice04.tga	ARA_ice04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_ice01	Snow	Arctic	ARV1_ice01.tga	ARV1_ice01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_ice02	Snow	Arctic	ARV1_ice02.tga	ARV1_ice02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_ice03	Snow	Arctic	ARV1_ice03.tga	ARV1_ice03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_ice04	Snow	Arctic	ARV1_ice04.tga	ARV1_ice04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_tundradirt01	Dirt	Arctic	ARA_tundradirt01.tga	ARA_tundradirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_tundradirt02	Dirt	Arctic	ARA_tundradirt02.tga	ARA_tundradirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_tundradirt03	Dirt	Arctic	ARA_tundradirt03.tga	ARA_tundradirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_tundradirt04	Snow	Arctic	ARA_tundradirt04.tga	ARA_tundradirt04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_tundradirt05	Snow	Arctic	ARA_tundradirt05.tga	ARA_tundradirt05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_tundradirt06	Snow	Arctic	ARA_tundradirt06.tga	ARA_tundradirt06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_tundradirt_snow01	Snow	Arctic	ARV1_tundradirt_snow01.tga	ARV1_tundradirt_snow01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV1_tundradirt_snow02	Snow	Arctic	ARV1_tundradirt_snow02.tga	ARV1_tundradirt_snow02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_tundradirt_snow01	Snow	Arctic	ARV2_tundradirt_snow01.tga	ARV2_tundradirt_snow01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_tundradirt_snow02	Snow	Arctic	ARV2_tundradirt_snow02.tga	ARV2_tundradirt_snow02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_tundradirt_rocks01	Rock	Arctic	ARV2_tundradirt_rocks01.tga	ARV2_tundradirt_rocks01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_tundradirt_grass01	Grass	Arctic	ARV2_tundradirt_grass01.tga	ARV2_tundradirt_grass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_mountainrock01	Rock	Arctic	ARA_mountainrock01.tga	ARA_mountainrock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_mountainrock02	Rock	Arctic	ARA_mountainrock02.tga	ARA_mountainrock02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_mountainrock01	Rock	Arctic	ARV2_mountainrock01.tga	ARV2_mountainrock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_mountainrock02	Rock	Arctic	ARV2_mountainrock02.tga	ARV2_mountainrock02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_RampMetal01	Metal	Arctic	ARA_RampMetal01.tga	ARA_RampMetal01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_RampMetal02	Metal	Arctic	ARA_RampMetal02.tga	ARA_RampMetal01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_IceCliff01	Cliff	Arctic	ARA_IceCliff01.tga	ARA_IceCliff01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	ARA_IceCliff02	Cliff	Arctic	ARA_IceCliff02.tga	ARA_IceCliff02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonFloor01	Rock	Arctic	ARA_PrisonFloor01.tga	ARA_PrisonFloor01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonFloor02	Rock	Arctic	ARA_PrisonFloor02.tga	ARA_PrisonFloor02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonFloor03	Rock	Arctic	ARA_PrisonFloor03.tga	ARA_PrisonFloor03_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_PrisonFloor01	Rock	Arctic	ARV2_PrisonFloor01.tga	ARV2_PrisonFloor01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_PrisonFloor02	Rock	Arctic	ARV2_PrisonFloor02.tga	ARV2_PrisonFloor02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARV2_PrisonFloor03	Rock	Arctic	ARV2_PrisonFloor03.tga	ARV2_PrisonFloor02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonFloorPlate01	Metal	Arctic	ARA_PrisonFloorPlate01.tga	ARA_PrisonFloorPlate01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonFloorPlate02	Metal	Arctic	ARA_PrisonFloorPlate02.tga	ARA_PrisonFloorPlate01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonRoof01	Rock	Arctic	ARA_PrisonRoof01.tga	ARA_PrisonRoof01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonRoof02	Rock	Arctic	ARA_PrisonRoof02.tga	ARA_PrisonRoof02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonRoof03	Rock	Arctic	ARA_PrisonRoof03.tga	ARA_PrisonRoof03_NRM.tga
+c4	Xml/Terrain/Terrain.xml	ARA_PrisonRoof04	Rock	Arctic	ARA_PrisonRoof04.tga	ARA_PrisonRoof02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	AUA_Panel01	Misc	Asian_Utopia	AUA_Panel01.tga	AUA_Panel01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_Panel02	Misc	Asian_Utopia	AUA_Panel02.tga	AUA_Panel02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_GreenGrass01	Grass	Asian_Utopia	AUA_GreenGrass01.tga	AUA_GreenGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_GreenGrass02	Grass	Asian_Utopia	AUA_GreenGrass02.tga	AUA_GreenGrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_GreenGrass03	Grass	Asian_Utopia	AUA_GreenGrass03.tga	AUA_GreenGrass03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_BuildingGround01	Misc	Asian_Utopia	AUA_BuildingGround01.tga	AUA_BuildingGround01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_BuildingGround02	Misc	Asian_Utopia	AUA_BuildingGround02.tga	AUA_BuildingGround02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_BuildingGround03	Misc	Asian_Utopia	AUA_BuildingGround03.tga	AUA_BuildingGround03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_MeadowGrass01	Grass	Asian_Utopia	AUA_MeadowGrass01.tga	AUA_MeadowGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_MeadowGrass02	Grass	Asian_Utopia	AUA_MeadowGrass02.tga	AUA_MeadowGrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_MediumGrass01	Grass	Asian_Utopia	AUA_MediumGrass01.tga	AUA_MediumGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_MediumGrass02	Grass	Asian_Utopia	AUA_MediumGrass02.tga	AUA_MediumGrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_MediumGrass03	Grass	Asian_Utopia	AUA_MediumGrass03.tga	AUA_MediumGrass03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_MediumGrass04	Grass	Asian_Utopia	AUA_MediumGrass04.tga	AUA_MediumGrass04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_PatternGrass01	Grass	Asian_Utopia	AUA_PatternGrass01.tga	AUA_MediumGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_PatternGrass03	Grass	Asian_Utopia	AUA_PatternGrass03.tga	AUA_MediumGrass03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_cliffside01	Cliff	Asian_Utopia	AUA_cLiffside01.tga	AUA_cLiffside01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_cliffside02	Cliff	Asian_Utopia	AUA_cLiffside02.tga	AUA_cLiffside02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_cliffside03	Cliff	Asian_Utopia	AUA_cLiffside03.tga	AUA_cLiffside03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_Dirt_Ramp01	Dirt	Asian_Utopia	AUA_Dirt_Ramp01.tga	AUA_Dirt_Ramp01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_Dirt_Ramp03	Dirt	Asian_Utopia	AUA_Dirt_Ramp03.tga	AUA_Dirt_Ramp03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_Stone_Ramp01	Stone	Asian_Utopia	AUA_Stone_Ramp01.tga	AUA_Stone_Ramp01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_Stone_Ramp02	Stone	Asian_Utopia	AUA_Stone_Ramp02.tga	AUA_Stone_Ramp01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUA_Ramp01	Misc	Asian_Utopia	AUA_Ramp01.tga	AUA_Ramp01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_BuildingGround01	Misc	Asian_Utopia	AUV1_BuildingGround01.tga	AUV1_BuildingGround01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_BuildingAsphalt01	Misc	Asian_Utopia	AUV1_BuildingAsphalt01.tga	AUV1_BuildingAsphalt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_PatternRock01	Rock	Rock	AUV1_PatternRock01.tga	AUV1_PatternRock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_PatternRock02	Rock	Asian_Utopia	AUV1_PatternRock02.tga	AUV1_PatternRock02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_MeadowDirt01	Dirt	Asian_Utopia	AUV1_MeadowDirt01.tga	AUV1_MeadowDirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_MeadowDirt02	Dirt	Asian_Utopia	AUV1_MeadowDirt02.tga	AUV1_MeadowDirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_MediumDirt01	Dirt	Asian_Utopia	AUV1_MediumDirt01.tga	AUV1_MeadowDirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_Medium_Stone01	Stone	Asian_Utopia	AUV1_Medium_Stone01.tga	AUV1_Medium_Stone01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV1_Medium_Stone02	Stone	Asian_Utopia	AUV1_Medium_Stone02.tga	AUV1_Medium_Stone02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_MeadowGrass01	Grass	Asian_Utopia	AUV2_MeadowGrass01.tga	AUV2_MeadowGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_MeadowGrass02	Grass	Asian_Utopia	AUV2_MeadowGrass02.tga	AUV2_MeadowGrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_PatternGrass_dirt01	Grass	Asian_Utopia	AUV2_PatternGrass_dirt01.tga	AUV2_PatternGrass_dirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_PatternGrass_Rock01	Rock	Asian_Utopia	AUV2_PatternGrass_Rock01.tga	AUV2_PatternGrass_Rock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_Panel01_Glow	Misc	Asian_Utopia	AUV2_Panel01_Glow.tga	AUA_Panel01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_BuildingGround01	Misc	Asian_Utopia	AUV2_BuildingGround01.tga	AUV2_BuildingGround01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_BuildingGround02	Misc	Asian_Utopia	AUV2_BuildingGround02.tga	AUA_BuildingGround03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_BuildingGround03	Misc	Asian_Utopia	AUV2_BuildingGround03.tga	AUA_BuildingGround03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_MediumGrass_dirt01	Dirt	Asian_Utopia	AUV2_MediumGrass_dirt01.tga	AUV2_MediumGrass_dirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_MediumGrass_rock01	Rock	Asian_Utopia	AUV2_MediumGrass_rock01.tga	AUV2_MediumGrass_rock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_GreenGrass_Dirt01	Dirt	Asian_Utopia	AUV2_GreenGrass_Dirt01.tga	AUV2_GreenGrass_Dirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_GreenGrass_Dirt02	Dirt	Asian_Utopia	AUV2_GreenGrass_Dirt02.tga	AUV2_GreenGrass_Dirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	AUV2_Pond01	Misc	Asian_Utopia	AUV2_Pond01.tga	POV2_coral5_NRM.tga
+c4	Xml/Terrain/Terrain.xml	PAA_orangedirt01	Dirt	PanAmerica	PAA_orangedirt01.tga	PAA_orangedirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_orangedirt02	Dirt	PanAmerica	PAA_orangedirt02.tga	PAA_orangedirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_orangedirt03	Dirt	PanAmerica	PAA_orangedirt03.tga	PAA_orangedirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_orangedirt01	Dirt	PanAmerica	PAV2_orangedirt01.tga	PAV2_orangedirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_orangedirt02	Dirt	PanAmerica	PAV2_orangedirt02.tga	PAV2_orangedirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_orangedirt03	Dirt	PanAmerica	PAV2_orangedirt03.tga	PAV2_orangedirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_orangedirt01	Dirt	PanAmerica	PAV1_orangedirt01.tga	PAV1_orangedirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_orangedirt02	Dirt	PanAmerica	PAV1_orangedirt02.tga	PAV1_orangedirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_whitedirt01	Dirt	PanAmerica	PAA_whitedirt01.tga	PAA_whitedirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_whitedirt02	Dirt	PanAmerica	PAA_whitedirt02.tga	PAA_whitedirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_whitedirt03	Dirt	PanAmerica	PAA_whitedirt03.tga	PAA_whitedirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_whitedirt01	Dirt	PanAmerica	PAV2_whitedirt01.tga	PAV2_whitedirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_whitedirt02	Dirt	PanAmerica	PAV2_whitedirt02.tga	PAV2_whitedirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_whitedirt03	Dirt	PanAmerica	PAV2_whitedirt03.tga	PAV2_whitedirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_whitedirt01	Dirt	PanAmerica	PAV1_whitedirt01.tga	PAV1_whitedirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_whitedirt02	Dirt	PanAmerica	PAV1_whitedirt02.tga	PAV1_whitedirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_greydirt01	Dirt	PanAmerica	PAA_greydirt01.tga	PAA_greydirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_greydirt02	Dirt	PanAmerica	PAA_greydirt02.tga	PAA_greydirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_greydirt03	Dirt	PanAmerica	PAA_greydirt03.tga	PAA_greydirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_greydirt01	Dirt	PanAmerica	PAV2_greydirt01.tga	PAV2_greydirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_greydirt02	Dirt	PanAmerica	PAV2_greydirt02.tga	PAV2_greydirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_greydirt03	Dirt	PanAmerica	PAV2_greydirt03.tga	PAV2_greydirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_greydirt04	Dirt	PanAmerica	PAV2_greydirt04.tga	PAV2_greydirt04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_greydirt01	Dirt	PanAmerica	PAV1_greydirt01.tga	PAV1_greydirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_greydirt02	Dirt	PanAmerica	PAV1_greydirt02.tga	PAV1_greydirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_flatrock01	Rock	PanAmerica	PAA_flatrock01.tga	PAA_flatrock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_flatrock02	Rock	PanAmerica	PAA_flatrock02.tga	PAA_flatrock02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_flatrock03	Rock	PanAmerica	PAA_flatrock03.tga	PAA_flatrock03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_flatrock01	Rock	PanAmerica	PAV2_flatrock01.tga	PAV2_flatrock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_flatrock02	Rock	PanAmerica	PAV2_flatrock02.tga	PAV2_flatrock02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_flatrock03	Rock	PanAmerica	PAV2_flatrock03.tga	PAV2_flatrock03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_flatrock01	Rock	PanAmerica	PAV1_flatrock01.tga	PAV1_flatrock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_flatrock02	Rock	PanAmerica	PAV1_flatrock02.tga	PAV1_flatrock02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_Canyonrock01	Rock	PanAmerica	PAA_Canyonrock01.tga	PAA_flatrock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_Canyonrock02	Rock	PanAmerica	PAA_Canyonrock02.tga	PAA_flatrock02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_Canyonrock03	Rock	PanAmerica	PAA_Canyonrock03.tga	PAA_flatrock03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_Canyonrock01	Rock	PanAmerica	PAV2_Canyonrock01.tga	PAV2_flatrock01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_Canyonrock02	Rock	PanAmerica	PAV2_Canyonrock02.tga	PAV2_flatrock02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_Canyonrock03	Rock	PanAmerica	PAV2_Canyonrock03.tga	PAV2_flatrock03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_orangerockcliff01	Cliff	PanAmerica	PAA_orangerockcliff01.tga	PAA_orangerockcliff01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_orangerockcliff02	Cliff	PanAmerica	PAA_orangerockcliff02.tga	PAA_orangerockcliff02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_orangerockcliff01	Cliff	PanAmerica	PAV2_orangerockcliff01.tga	PAV2_orangerockcliff01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_orangerockcliff02	Cliff	PanAmerica	PAV2_orangerockcliff02.tga	PAV2_orangerockcliff02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_grassland01	Grass	PanAmerica	PAA_grassland01.tga	PAA_grassland01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_grassland02	Grass	PanAmerica	PAA_grassland02.tga	PAA_grassland02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_grassland03	Grass	PanAmerica	PAA_grassland03.tga	PAA_grassland03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_grassland01	Grass	PanAmerica	PAV2_grassland01.tga	PAV2_grassland01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_grassland02	Grass	PanAmerica	PAV2_grassland02.tga	PAV2_grassland02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_grassland03	Grass	PanAmerica	PAV2_grassland03.tga	PAV2_grassland03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_grassland01	Grass	PanAmerica	PAV1_grassland01.tga	PAV1_grassland01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_grassland02	Grass	PanAmerica	PAV1_grassland02.tga	PAV1_grassland02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_riverbed01	Mud	PanAmerica	PAA_riverbed01.tga	PAA_riverbed01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_riverbed02	Mud	PanAmerica	PAA_riverbed02.tga	PAA_riverbed02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_riverbed03	Mud	PanAmerica	PAA_riverbed03.tga	PAA_riverbed03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_riverbed01	Mud	PanAmerica	PAV2_riverbed01.tga	PAV2_riverbed01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_riverbed02	Mud	PanAmerica	PAV2_riverbed02.tga	PAV2_riverbed02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_riverbed01	Mud	PanAmerica	PAV1_riverbed01.tga	PAV1_riverbed01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_infected01	Misc	PanAmerica	PAA_infected01.tga	PAA_infected01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_infected02	Misc	PanAmerica	PAA_infected02.tga	PAA_infected02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_infected03	Misc	PanAmerica	PAA_infected03.tga	PAA_infected03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_infected01	Misc	PanAmerica	PAV2_infected01.tga	PAV2_infected01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_infected02	Misc	PanAmerica	PAV2_infected02.tga	PAV2_infected02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_infected03	Misc	PanAmerica	PAV2_infected03.tga	PAV2_infected03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_infected04	Misc	PanAmerica	PAV2_infected04.tga	PAV2_infected04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_infected05	Misc	PanAmerica	PAV2_infected05.tga	PAV2_infected05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_infected06	Misc	PanAmerica	PAV2_infected06.tga	PAV2_infected06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_infected07	Misc	PanAmerica	PAV2_infected07.tga	PAV2_infected05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_infected08	Misc	PanAmerica	PAV2_infected08.tga	PAV2_infected06_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV1_infected01	Misc	PanAmerica	PAV1_infected01.tga	PAV1_infected01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PATerrainScar_Temp	Misc	PanAmerica	PATerrainScar_Temp.tga	PATerrainScar_Temp_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PATerrainScarB_Temp	Misc	PanAmerica	PATerrainScarB_Temp.tga	PATerrainScar_Temp_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_science01	Misc	PanAmerica	PAA_science01.tga	PAA_science01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAA_science02	Misc	PanAmerica	PAA_science02.tga	PAA_science02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_science01	Misc	PanAmerica	PAV2_science01.tga	PAV2_science01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	PAV2_science02	Misc	PanAmerica	PAV2_science02.tga	PAV2_science02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_browndirt01	Dirt	JunkTown	JTA_browndirt01.tga	JTA_browndirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_browndirt02	Dirt	JunkTown	JTA_browndirt02.tga	JTA_browndirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_browndirt03	Dirt	JunkTown	JTA_browndirt03.tga	JTA_browndirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_browndirt01	Dirt	JunkTown	JTV2_browndirt01.tga	JTV2_browndirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_browndirt02	Dirt	JunkTown	JTV2_browndirt02.tga	JTV2_browndirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_browndirt03	Dirt	JunkTown	JTV2_browndirt03.tga	JTV2_browndirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_browndirt04	Dirt	JunkTown	JTV2_browndirt04.tga	JTV2_browndirt04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_browndirt05	Dirt	JunkTown	JTV2_browndirt05.tga	JTV2_browndirt05_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV1_browndirt01	Dirt	JunkTown	JTV1_browndirt01.tga	JTV1_browndirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_greendirt01	Dirt	JunkTown	JTA_greendirt01.tga	JTA_greendirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_greendirt02	Dirt	JunkTown	JTA_greendirt02.tga	JTA_greendirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_greendirt03	Dirt	JunkTown	JTA_greendirt03.tga	JTA_greendirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_greendirt01	Dirt	JunkTown	JTV2_greendirt01.tga	JTV2_greendirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_greendirt02	Dirt	JunkTown	JTV2_greendirt02.tga	JTV2_greendirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_greendirt03	Dirt	JunkTown	JTV2_greendirt03.tga	JTV2_greendirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_marsh01	Dirt	JunkTown	JTA_marsh01.tga	JTA_marsh01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_marsh02	Dirt	JunkTown	JTA_marsh02.tga	JTA_marsh02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_marsh03	Dirt	JunkTown	JTA_marsh03.tga	JTA_marsh03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_marsh01	Dirt	JunkTown	JTV2_marsh01.tga	JTV2_marsh01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_marsh02	Dirt	JunkTown	JTV2_marsh02.tga	JTV2_marsh02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_marsh03	Dirt	JunkTown	JTV2_marsh03.tga	JTV2_marsh03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_trash01	Trash	JunkTown	JTV2_trash01.tga	JTV2_trash01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_trash02	Trash	JunkTown	JTV2_trash02.tga	JTV2_trash02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_trash03	Trash	JunkTown	JTV2_trash03.tga	JTV2_trash03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_ConstructionDirt01	Dirt	JunkTown	JTA_ConstructionDirt01.tga	JTA_ConstructionDirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_ConstructionDirt02	Dirt	JunkTown	JTA_ConstructionDirt02.tga	JTA_ConstructionDirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTA_ConstructionDirt03	Dirt	JunkTown	JTA_ConstructionDirt03.tga	JTA_ConstructionDirt03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV1_ConstructionAsphalt01	Dirt	JunkTown	JTV1_ConstructionAsphalt01.tga	JTV1_ConstructionAsphalt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV1_ConstructionDirt01	Dirt	JunkTown	JTV1_ConstructionDirt01.tga	JTV1_ConstructionDirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_ConstructionDirt01	Dirt	JunkTown	JTV2_ConstructionDirt01.tga	JTV2_ConstructionDirt01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_ConstructionDirt02	Dirt	JunkTown	JTV2_ConstructionDirt02.tga	JTV2_ConstructionDirt02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_Infected01	Dirt	JunkTown	JTV2_Infected01.tga	JTV2_Infected01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_Infected02	Dirt	JunkTown	JTV2_Infected02.tga	JTV2_Infected02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_Infected03	Dirt	JunkTown	JTV2_Infected03.tga	JTV2_Infected03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	JTV2_Infected04	Dirt	JunkTown	JTV2_Infected04.tga	JTV2_Infected04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_CityCement01	Misc	CapitalCity	CCA_CityCement01.tga	CCA_CityCement01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCA_CityCement02	Misc	CapitalCity	CCA_CityCement02.tga	CCA_CityCement02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCA_CityCement03	Misc	CapitalCity	CCA_CityCement03.tga	CCA_CityCement03_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCA_CityCement04	Misc	CapitalCity	CCA_CityCement04.tga	CCA_CityCement04_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_CityCement01	Misc	CapitalCity	CCV2_CityCement01.tga	CCV2_CityCement01_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_CityCement02	Misc	CapitalCity	CCV2_CityCement02.tga	CCV2_CityCement02_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_CityCement03	Misc	CapitalCity	CCV2_CityCement03.tga	CCV2_CityCement03_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_CityCement04	Misc	CapitalCity	CCV2_CityCement04.tga	CCV2_CityCement04_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_CityCement05	Misc	CapitalCity	CCV2_CityCement05.tga	CCV2_CityCement05_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_CityCement06	Misc	CapitalCity	CCV2_CityCement06.tga	CCV2_CityCement06_NRM.tga
+c4	Xml/Terrain/Terrain.xml	CCA_CityGrass01	Grass	CapitalCity	CCA_CityGrass01.tga	CCA_ParkGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_CityGrass02	Grass	CapitalCity	CCA_CityGrass02.tga	CCA_ParkGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_CityGrass03	Grass	CapitalCity	CCA_CityGrass03.tga	CCA_ParkGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_ParkGrass01	Grass	CapitalCity	CCA_ParkGrass01.tga	CCA_ParkGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_ParkGrass02	Grass	CapitalCity	CCA_ParkGrass02.tga	CCA_ParkGrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_ParkGrass03	Grass	CapitalCity	CCA_ParkGrass03.tga	CCA_ParkGrass03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_ParkGrass04	Grass	CapitalCity	CCA_ParkGrass04.tga	CCA_ParkGrass04_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_ParkGrass01	Grass	CapitalCity	CCV2_ParkGrass01.tga	CCV2_ParkGrass01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_ParkGrass02	Grass	CapitalCity	CCV2_ParkGrass02.tga	CCV2_ParkGrass02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_suburbgrey01	Stone	CapitalCity	CCA_suburbgrey01.tga	CCA_suburbgrey01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_suburbgrey02	Stone	CapitalCity	CCA_suburbgrey02.tga	CCA_suburbgrey02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_suburbgrey03	Stone	CapitalCity	CCA_suburbgrey03.tga	CCA_suburbgrey03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_suburbgrey01	Stone	CapitalCity	CCV2_suburbgrey01.tga	CCV2_suburbgrey01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_suburbgrey02	Stone	CapitalCity	CCV2_suburbgrey02.tga	CCV2_suburbgrey02_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCV2_suburbgrey03	Stone	CapitalCity	CCV2_suburbgrey03.tga	CCV2_suburbgrey03_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_suburbblue01	Stone	CapitalCity	CCA_suburbblue01.tga	CCA_suburbblue01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_highway01	Stone	CapitalCity	CCA_highway01.tga	CCA_highway01_nrm.tga
+c4	Xml/Terrain/Terrain.xml	CCA_highway02	Stone	CapitalCity	CCA_highway02.tga	CCA_highway02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Sakhalin01	Dirt	Sakhalin_Island	Dirt_Sakhalin01.tga	Dirt_Sakhalin01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Romania01	Road	Romania	Pavement_Romania01.tga	Pavement_Romania01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Romania01	Dirt	Romania	Dirt_Romania01.tga	Dirt_Romania01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dock_Romania01	Misc	Romania	Dock_Romania01.tga	Dock_Romania01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_HotSprings01	Dirt	Hot_Springs	TDirt_HotSprings01.tga	TDirt_HotSprings01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_HotSprings02	Dirt	Hot_Springs	TDirt_HotSprings02.tga	TDirt_HotSprings02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_HotSprings03	Dirt	Hot_Springs	TDirt_HotSprings03.tga	TDirt_HotSprings03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_HotSprings04	Dirt	Hot_Springs	TDirt_HotSprings04.tga	TDirt_HotSprings04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_HotSprings05	Dirt	Hot_Springs	TDirt_HotSprings05.tga	TDirt_HotSprings05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_HotSprings06	Dirt	Hot_Springs	TDirt_HotSprings06.tga	TDirt_HotSprings06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_HotSprings07	Dirt	Hot_Springs	TDirt_HotSprings07.tga	TDirt_HotSprings07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_HotSprings08	Dirt	Hot_Springs	TDirt_HotSprings08.tga	TDirt_HotSprings08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_HotSprings01	Grass	Hot_Springs	TGrass_HotSprings01.tga	TGrass_HotSprings01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_HotSprings02	Grass	Hot_Springs	TGrass_HotSprings02.tga	TGrass_HotSprings02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_HotSprings03	Grass	Hot_Springs	TGrass_HotSprings03.tga	TGrass_HotSprings03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_HotSprings04	Grass	Hot_Springs	TGrass_HotSprings04.tga	TGrass_HotSprings04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_HotSprings05	Grass	Hot_Springs	TGrass_HotSprings05.tga	TGrass_HotSprings05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_HotSprings06	Grass	Hot_Springs	TGrass_HotSprings06.tga	TGrass_HotSprings06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_HotSprings07	Grass	Hot_Springs	TGrass_HotSprings07.tga	TGrass_HotSprings07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_HotSprings08	Grass	Hot_Springs	TGrass_HotSprings08.tga	TGrass_HotSprings08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_HotSprings01	Grass	Hot_Springs	Transition_HotSprings01.tga	Transition_HotSprings01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_HotSprings02	Grass	Hot_Springs	Transition_HotSprings02.tga	Transition_HotSprings02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_HotSprings03	Grass	Hot_Springs	Transition_HotSprings03.tga	Transition_HotSprings03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_HotSprings04	Grass	Hot_Springs	Transition_HotSprings04.tga	Transition_HotSprings04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	SteelDeck01	Road	Island_Fortress	TMisc_SteelDeck01.tga	TMisc_SteelDeck01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	SteelDeck02	Road	Island_Fortress	TMisc_SteelDeck02.tga	TMisc_SteelDeck02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	SteelDeck03	Road	Island_Fortress	TMisc_SteelDeck03.tga	TMisc_SteelDeck03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	SteelDeck04	Road	Island_Fortress	TMisc_SteelDeck04.tga	TMisc_SteelDeck04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	SteelDeck05	Road	Island_Fortress	TMisc_SteelDeck05.tga	TMisc_SteelDeck05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	SteelDeck06	Road	Island_Fortress	TMisc_SteelDeck06.tga	TMisc_SteelDeck06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Asphalt01	Road	Island_Fortress	TMisc_Asphalt01.tga	TMisc_Asphalt01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Asphalt02	Road	Island_Fortress	TMisc_Asphalt02.tga	TMisc_Asphalt02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Asphalt03	Road	Island_Fortress	TMisc_Asphalt03.tga	TMisc_Asphalt03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Asphalt04	Road	Island_Fortress	TMisc_Asphalt04.tga	TMisc_Asphalt04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Asphalt05	Road	Island_Fortress	TMisc_Asphalt05.tga	TMisc_Asphalt05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	FortressBlackEdge	Mud	Island_Fortress	TMisc_BlackEdge.tga	TMisc_BlackEdge_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Mud_Fortress01	Mud	Island_Fortress	Mud_Fortress01.tga	Mud_Fortress01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Mud_Fortress02	Mud	Island_Fortress	Mud_Fortress02.tga	Mud_Fortress02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan01	Grass	Yucatan	TGrass_Yucatan01.tga	TGrass_Yucatan01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan02	Grass	Yucatan	TGrass_Yucatan02.tga	TGrass_Yucatan02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan03	Grass	Yucatan	TGrass_Yucatan03.tga	TGrass_Yucatan03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan04	Grass	Yucatan	TGrass_Yucatan04.tga	TGrass_Yucatan04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan05	Grass	Yucatan	TGrass_Yucatan05.tga	TGrass_Yucatan05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan06	Grass	Yucatan	TGrass_Yucatan06.tga	TGrass_Yucatan06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan07	Grass	Yucatan	TGrass_Yucatan07.tga	TGrass_Yucatan07_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan08	Grass	Yucatan	TGrass_Yucatan08.tga	TGrass_Yucatan08_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Yucatan09	Grass	Yucatan	TGrass_Yucatan09.tga	TGrass_Yucatan09_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Yucatan01	Rock	Yucatan	TRock_Yucatan01.tga	TRock_Yucatan01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Yucatan02	Rock	Yucatan	TRock_Yucatan02.tga	TRock_Yucatan02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Yucatan03	Rock	Yucatan	TRock_Yucatan03.tga	TRock_Yucatan03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Yucatan04	Rock	Yucatan	TRock_Yucatan04.tga	TRock_Yucatan04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Yucatan05	Rock	Yucatan	TRock_Yucatan05.tga	TRock_Yucatan05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Gravel_Yucatan01	Road	Yucatan	TGravel_Yucatan01.tga	TGravel_Yucatan01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Yucatan01	Dirt	Yucatan	TDirt_Yucatan01.tga	TDirt_Yucatan01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Yucatan02	Dirt	Yucatan	TDirt_Yucatan02.tga	TDirt_Yucatan02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Yucatan03	Dirt	Yucatan	TDirt_Yucatan03.tga	TDirt_Yucatan03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Yucatan04	Dirt	Yucatan	TDirt_Yucatan04.tga	TDirt_Yucatan04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Yucatan05	Dirt	Yucatan	TDirt_Yucatan05.tga	TDirt_Yucatan05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Yucatan06	Dirt	Yucatan	TDirt_Yucatan06.tga	TDirt_Yucatan06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Reef_Yucatan01	Rock	Yucatan	TReef_Yucatan01.tga	TReef_Yucatan01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Reef_Yucatan02	Rock	Yucatan	TReef_Yucatan02.tga	TReef_Yucatan02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Yucatan01	Road	Yucatan	TPavement_Yucatan01.tga	TPavement_Yucatan01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan01	Grass	Yucatan	TTransition_Yucatan01.tga	TTransition_Yucatan01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan02	Grass	Yucatan	TTransition_Yucatan02.tga	TTransition_Yucatan02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan03	Grass	Yucatan	TTransition_Yucatan03.tga	TTransition_Yucatan03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan04	Grass	Yucatan	TTransition_Yucatan04.tga	TTransition_Yucatan04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan05	Grass	Yucatan	TTransition_Yucatan05.tga	TTransition_Yucatan05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan06	Grass	Yucatan	TTransition_Yucatan06.tga	TTransition_Yucatan06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan07	Grass	Yucatan	TTransition_Yucatan07.tga	TTransition_Yucatan07_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan08	Grass	Yucatan	TTransition_Yucatan08.tga	TTransition_Yucatan08_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan09	Grass	Yucatan	TTransition_Yucatan09.tga	TTransition_Yucatan09_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan10	Grass	Yucatan	TTransition_Yucatan10.tga	TTransition_Yucatan10_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan11	Grass	Yucatan	TTransition_Yucatan11.tga	TTransition_Yucatan11_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan12	Grass	Yucatan	TTransition_Yucatan12.tga	TTransition_Yucatan12_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan13	Grass	Yucatan	TTransition_Yucatan13.tga	TTransition_Yucatan13_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan14	Grass	Yucatan	TTransition_Yucatan14.tga	TTransition_Yucatan14_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan15	Grass	Yucatan	TTransition_Yucatan15.tga	TTransition_Yucatan15_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan16	Grass	Yucatan	TTransition_Yucatan16.tga	TTransition_Yucatan16_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan17	Grass	Yucatan	TTransition_Yucatan17.tga	TTransition_Yucatan17_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan18	Grass	Yucatan	TTransition_Yucatan18.tga	TTransition_Yucatan18_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan19	Grass	Yucatan	TTransition_Yucatan19.tga	TTransition_Yucatan19_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan20	Grass	Yucatan	TTransition_Yucatan20.tga	TTransition_Yucatan20_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Yucatan21	Grass	Yucatan	TTransition_Yucatan21.tga	TTransition_Yucatan21_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Golf01	Road	Golf_Course	TPave_Golf01.tga	TPave_Golf01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Golf02	Road	Golf_Course	TPave_Golf02.tga	TPave_Golf02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Golf03	Road	Golf_Course	TPave_Golf03.tga	TPave_Golf03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Golf04	Road	Golf_Course	TPave_Golf04.tga	TPave_Golf04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Golf05	Road	Golf_Course	TPave_Golf05.tga	TPave_Golf05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Golf06	Road	Golf_Course	TPave_Golf06.tga	TPave_Golf06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Golf07	Road	Golf_Course	TPave_Golf07.tga	TPave_Golf07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Golf01	Grass	Golf_Course	TGrass_Golf01.tga	TGrass_Golf01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Golf02	Grass	Golf_Course	TGrass_Golf02.tga	TGrass_Golf02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Golf03	Grass	Golf_Course	TGrass_Golf03.tga	TGrass_Golf03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Golf04	Grass	Golf_Course	TGrass_Golf04.tga	TGrass_Golf04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Golf05	Grass	Golf_Course	TGrass_Golf05.tga	TGrass_Golf05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Golf06	Grass	Golf_Course	TGrass_Golf06.tga	TGrass_Golf06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Golf07	Grass	Golf_Course	TGrass_Golf07.tga	TGrass_Golf07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Golf08	Grass	Golf_Course	TGrass_Golf08.tga	TGrass_Golf08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang01	Snow	Solvang	TSnow_Solvang01.tga	TSnow_Solvang01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang02	Snow	Solvang	TSnow_Solvang02.tga	TSnow_Solvang02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang03	Snow	Solvang	TSnow_Solvang03.tga	TSnow_Solvang03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang04	Snow	Solvang	TSnow_Solvang04.tga	TSnow_Solvang04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang05	Snow	Solvang	TSnow_Solvang05.tga	TSnow_Solvang05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang06	Snow	Solvang	TSnow_Solvang06.tga	TSnow_Solvang06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang07	Snow	Solvang	TSnow_Solvang07.tga	TSnow_Solvang07_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang08	Snow	Solvang	TSnow_Solvang08.tga	TSnow_Solvang08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang09	Snow	Solvang	TSnow_Solvang09.tga	TSnow_Solvang09_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Solvang01	Cliff	Solvang	TClif_Solvang01.tga	TClif_Solvang01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Solvang02	Cliff	Solvang	TClif_Solvang02.tga	TClif_Solvang02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Solvang03	Cliff	Solvang	TClif_Solvang03.tga	TClif_Solvang03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Solvang04	Cliff	Solvang	TClif_Solvang04.tga	TClif_Solvang04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Solvang01	Rock	Solvang	TRock_Solvang01.tga	Temp_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Solvang02	Rock	Solvang	TRock_Solvang02.tga	Temp_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Solvang10	Snow	Solvang	TSnow_Solvang10.tga	Temp_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Solvang01	Road	Solvang	TPave_Solvang01.tga	TPave_Solvang01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg01	Grass	Heidelberg	Grass_Heidelberg01.tga	Grass_Heidelberg01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg02	Grass	Heidelberg	Grass_Heidelberg02.tga	Grass_Heidelberg02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg03	Grass	Heidelberg	Grass_Heidelberg03.tga	Grass_Heidelberg03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg04	Grass	Heidelberg	Grass_Heidelberg04.tga	Grass_Heidelberg04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg05	Grass	Heidelberg	Grass_Heidelberg05.tga	Grass_Heidelberg05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg06	Grass	Heidelberg	Grass_Heidelberg06.tga	Grass_Heidelberg06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg07	Grass	Heidelberg	Grass_Heidelberg07.tga	Grass_Heidelberg07_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg08	Grass	Heidelberg	Grass_Heidelberg08.tga	Grass_Heidelberg08_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg09	Grass	Heidelberg	Grass_Heidelberg09.tga	Grass_Heidelberg09_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg10	Grass	Heidelberg	Grass_Heidelberg10.tga	Grass_Heidelberg10_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Heidelberg11	Grass	Heidelberg	Grass_Heidelberg11.tga	Grass_Heidelberg11_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Heidelberg01	Grass	Heidelberg	Transition_Heidelberg01.tga	Transition_Heidelberg01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Heidelberg02	Grass	Heidelberg	Transition_Heidelberg02.tga	Transition_Heidelberg02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Heidelberg03	Grass	Heidelberg	Transition_Heidelberg03.tga	Transition_Heidelberg03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Heidelberg04	Grass	Heidelberg	Transition_Heidelberg04.tga	Transition_Heidelberg04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Heidelberg05	Grass	Heidelberg	Transition_Heidelberg05.tga	Transition_Heidelberg05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Heidelberg06	Grass	Heidelberg	Transition_Heidelberg06.tga	Transition_Heidelberg06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Heidelberg07	Grass	Heidelberg	Transition_Heidelberg07.tga	Transition_Heidelberg07_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Heidelberg08	Grass	Heidelberg	Transition_Heidelberg08.tga	Transition_Heidelberg08_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel01	Road	Heidelberg	TPave_Heidel01.tga	TPave_Heidel01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel02	Road	Heidelberg	TPave_Heidel02.tga	TPave_Heidel02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel03	Road	Heidelberg	TPave_Heidel03.tga	TPave_Heidel03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel04	Road	Heidelberg	TPave_Heidel04.tga	TPave_Heidel04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel05	Road	Heidelberg	TPave_Heidel05.tga	TPave_Heidel05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel06	Road	Heidelberg	TPave_Heidel06.tga	TPave_Heidel06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel07	Road	Heidelberg	TPave_Heidel07.tga	TPave_Heidel07_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel08	Road	Heidelberg	TPave_Heidel08.tga	TPave_Heidel08_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidel09	Road	Heidelberg	TPave_Heidel09.tga	TPave_Heidel09_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidelberg10	Road	Heidelberg	Pavement_Heidelberg10.tga	Pavement_Heidelberg10_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidelberg11	Road	Heidelberg	Pavement_Heidelberg11.tga	Pavement_Heidelberg11_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Heidelberg12	Road	Heidelberg	Pavement_Heidelberg12.tga	Pavement_Heidelberg12_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Gravel_Heidelberg01	Road	Heidelberg	Gravel_Heidelberg01.tga	Gravel_Heidelberg01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Heidelberg01	Dirt	Heidelberg	Dirt_Heidelberg01.tga	Dirt_Heidelberg01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Geneva01	Grass	Geneva	TGrass_Geneva01.tga	TGrass_Geneva01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Geneva02	Grass	Geneva	TGrass_Geneva02.tga	TGrass_Geneva02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Geneva03	Grass	Geneva	TGrass_Geneva03.tga	TGrass_Geneva03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Geneva04	Grass	Geneva	TGrass_Geneva04.tga	TGrass_Geneva04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Geneva05	Grass	Geneva	TGrass_Geneva05.tga	TGrass_Geneva05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_GenevaClockA	Grass	Geneva	TGrass_GenevaClockA.tga	TGrass_GenevaClockA_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_GenevaClockB	Grass	Geneva	TGrass_GenevaClockB.tga	TGrass_GenevaClockB_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_GenevaClockC	Grass	Geneva	TGrass_GenevaClockC.tga	TGrass_GenevaClockC_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_GenevaClockD	Grass	Geneva	TGrass_GenevaClockD.tga	TGrass_GenevaClockD_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Geneva01	Road	Geneva	TPave_Geneva01.tga	TPave_Geneva01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Geneva02	Road	Geneva	TPave_Geneva02.tga	TPave_Geneva02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Geneva03	Road	Geneva	TPave_Geneva03.tga	TPave_Geneva03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Geneva04	Road	Geneva	TPave_Geneva04.tga	TPave_Geneva04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Geneva05	Road	Geneva	TPave_Geneva05.tga	TPave_Geneva05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Geneva06	Road	Geneva	TPave_Geneva06.tga	TPave_Geneva06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes01	Sand	Cannes	TSand_Cannes01.tga	TSand_Cannes01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes02	Sand	Cannes	TSand_Cannes02.tga	TSand_Cannes02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes03	Sand	Cannes	TSand_Cannes03.tga	TSand_Cannes03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes04	Sand	Cannes	TSand_Cannes04.tga	TSand_Cannes04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes05	Sand	Cannes	TSand_Cannes05.tga	TSand_Cannes05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes06	Sand	Cannes	TSand_Cannes06.tga	TSand_Cannes06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes07	Sand	Cannes	TSand_Cannes07.tga	TSand_Cannes07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes08	Sand	Cannes	TSand_Cannes08.tga	TSand_Cannes08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes09	Sand	Cannes	TSand_Cannes09.tga	TSand_Cannes09_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Cannes10	Sand	Cannes	TSand_Cannes10.tga	TSand_Cannes10_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Cannes01	Road	Cannes	TPave_Cannes01.tga	TPave_Cannes01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Cannes02	Road	Cannes	TPave_Cannes02.tga	TPave_Cannes02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_Cannes03	Road	Cannes	TPave_Cannes03.tga	TPave_Cannes03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Mud_Havana01	Mud	Havana	Mud_Havana01.tga	Mud_Havana01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Mud_Havana02	Mud	Havana	Mud_Havana02.tga	Mud_Havana02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Havana01	Road	Havana	Pavement_Havana01.tga	Pavement_Havana01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Havana02	Road	Havana	Pavement_Havana02.tga	Pavement_Havana02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Havana03	Road	Havana	Pavement_Havana03.tga	Pavement_Havana03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Havana04	Road	Havana	Pavement_Havana04.tga	Pavement_Havana04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Havana05	Road	Havana	Pavement_Havana05.tga	Pavement_Havana05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Reef_Havana01	Rock	Havana	Reef_Havana01.tga	Reef_Havana01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Reef_Havana02	Rock	Havana	Reef_Havana02.tga	Reef_Havana02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Mykonos01	Road	Mykonos	TPave_Mykonos01.tga	TPave_Mykonos01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Mykonos02	Road	Mykonos	TPave_Mykonos02.tga	TPave_Mykonos02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Mykonos03	Road	Mykonos	TPave_Mykonos03.tga	TPave_Mykonos03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Mykonos04	Road	Mykonos	TPave_Mykonos04.tga	TPave_Mykonos04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Mykonos05	Road	Mykonos	TPave_Mykonos05.tga	TPave_Mykonos05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Mykonos01	Dirt	Mykonos	TDirt_Mykonos01.tga	TDirt_Mykonos01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Mykonos02	Dirt	Mykonos	TDirt_Mykonos02.tga	TDirt_Mykonos02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Mykonos03	Dirt	Mykonos	TDirt_Mykonos03.tga	TDirt_Mykonos03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Mykonos04	Dirt	Mykonos	TDirt_Mykonos04.tga	TDirt_Mykonos04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Mykonos05	Dirt	Mykonos	TDirt_Mykonos05.tga	TDirt_Mykonos05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Mykonos06	Dirt	Mykonos	TDirt_Mykonos06.tga	TDirt_Mykonos06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Mykonos07	Dirt	Mykonos	TDirt_Mykonos07.tga	TDirt_Mykonos07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Mykonos01	Grass	Mykonos	TGrass_Mykonos01.tga	TGrass_Mykonos01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Mykonos02	Grass	Mykonos	TGrass_Mykonos02.tga	TGrass_Mykonos02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Kremlin01	Road	Kremlin	Pavement_Kremlin01.tga	Pavement_Kremlin01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Kremlin02	Road	Kremlin	Pavement_Kremlin02.tga	Pavement_Kremlin02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Kremlin03	Road	Kremlin	Pavement_Kremlin03.tga	Pavement_Kremlin03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Kremlin04	Road	Kremlin	Pavement_Kremlin04.tga	Pavement_Kremlin04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Kremlin05	Road	Kremlin	Pavement_Kremlin05.tga	Pavement_Kremlin05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Kremlin06	Road	Kremlin	Pavement_Kremlin06.tga	Pavement_Kremlin06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Kremlin01	Snow	Kremlin	Transition_Kremlin01.tga	Transition_Kremlin01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Kremlin02	Snow	Kremlin	Transition_Kremlin02.tga	Transition_Kremlin02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Kremlin03	Snow	Kremlin	Transition_Kremlin03.tga	Transition_Kremlin03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Kremlin04	Snow	Kremlin	Transition_Kremlin04.tga	Transition_Kremlin04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Kremlin05	Snow	Kremlin	Transition_Kremlin05.tga	Transition_Kremlin05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Kremlin06	Snow	Kremlin	Transition_Kremlin06.tga	Transition_Kremlin06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Kremlin07	Snow	Kremlin	Transition_Kremlin07.tga	Transition_Kremlin07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Kremlin08	Snow	Kremlin	Transition_Kremlin08.tga	Transition_Kremlin08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Odessa01	Road	Odessa	Pavement_Odessa01.tga	Pavement_Odessa01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Odessa01	Rock	Odessa	Rock_Odessa01.tga	Rock_Odessa01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_SantaMonica01	Road	Santa_Monica	TPave_SantaMonica01.tga	TPave_SantaMonica01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_SantaMonica02	Road	Santa_Monica	TPave_SantaMonica02.tga	TPave_SantaMonica02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_SantaMonica03	Road	Santa_Monica	TPave_SantaMonica03.tga	TPave_SantaMonica03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_SantaMonica04	Road	Santa_Monica	TPave_SantaMonica04.tga	TPave_SantaMonica04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pave_SantaMonica05	Road	Santa_Monica	TPave_SantaMonica05.tga	TPave_SantaMonica05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_SantaMonica01	Sand	Santa_Monica	TSand_SantaMonica01.tga	TSand_SantaMonica01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_SantaMonica02	Sand	Santa_Monica	TSand_SantaMonica02.tga	TSand_SantaMonica02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_SantaMonica01	Grass	Santa_Monica	Grass_SantaMonica01.tga	Grass_SantaMonica01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg01	Road	Saint_Petersburg	Pavement_SaintPetersburg01.tga	Pavement_SaintPetersburg01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg02	Road	Saint_Petersburg	Pavement_SaintPetersburg02.tga	Pavement_SaintPetersburg02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg03	Road	Saint_Petersburg	Pavement_SaintPetersburg03.tga	Pavement_SaintPetersburg03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg04	Road	Saint_Petersburg	Pavement_SaintPetersburg04.tga	Pavement_SaintPetersburg04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg05	Road	Saint_Petersburg	Pavement_SaintPetersburg05.tga	Pavement_SaintPetersburg05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg06	Road	Saint_Petersburg	Pavement_SaintPetersburg06.tga	Pavement_SaintPetersburg06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg07	Road	Saint_Petersburg	Pavement_SaintPetersburg07.tga	Pavement_SaintPetersburg07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_SaintPetersburg08	Road	Saint_Petersburg	Pavement_SaintPetersburg08.tga	Pavement_SaintPetersburg08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_SaintPetersburg01	Grass	Saint_Petersburg	Grass_SaintPetersburg01.tga	Grass_SaintPetersburg01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter01	Dirt	Easter_Island	TDirt_Easter01.tga	TDirt_Easter01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter02	Dirt	Easter_Island	TDirt_Easter02.tga	TDirt_Easter02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter03	Dirt	Easter_Island	TDirt_Easter03.tga	TDirt_Easter03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter04	Dirt	Easter_Island	TDirt_Easter04.tga	TDirt_Easter04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter05	Dirt	Easter_Island	TDirt_Easter05.tga	TDirt_Easter05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter06	Dirt	Easter_Island	TDirt_Easter06.tga	TDirt_Easter06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter07	Dirt	Easter_Island	TDirt_Easter07.tga	TDirt_Easter07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter08	Dirt	Easter_Island	TDirt_Easter08.tga	TDirt_Easter08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter09	Dirt	Easter_Island	TDirt_Easter09.tga	TDirt_Easter09_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter10	Dirt	Easter_Island	TDirt_Easter10.tga	TDirt_Easter10_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter11	Dirt	Easter_Island	TDirt_Easter11.tga	TDirt_Easter11_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Easter12	Dirt	Easter_Island	TDirt_Easter12.tga	TDirt_Easter12_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Easter01	Grass	Easter_Island	TGrass_Easter01.tga	TGrass_Easter01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Easter02	Grass	Easter_Island	TGrass_Easter02.tga	TGrass_Easter02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Easter03	Grass	Easter_Island	TGrass_Easter03.tga	TGrass_Easter03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Easter04	Grass	Easter_Island	TGrass_Easter04.tga	TGrass_Easter04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Easter05	Grass	Easter_Island	TGrass_Easter05.tga	TGrass_Easter05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Easter06	Grass	Easter_Island	TGrass_Easter06.tga	TGrass_Easter06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Easter07	Grass	Easter_Island	TGrass_Easter07.tga	TGrass_Easter07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Easter01	Cliff	Easter_Island	TCliff_Easter01.tga	TCliff_Easter01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Easter02	Cliff	Easter_Island	TCliff_Easter02.tga	TCliff_Easter02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Easter03	Cliff	Easter_Island	TCliff_Easter03.tga	TCliff_Easter03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Easter04	Cliff	Easter_Island	TCliff_Easter04.tga	TCliff_Easter04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod01	Grass	Cape_Cod	TGrass_CapeCod01.tga	TGrass_CapeCod01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod02	Grass	Cape_Cod	TGrass_CapeCod02.tga	TGrass_CapeCod02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod03	Grass	Cape_Cod	TGrass_CapeCod03.tga	TGrass_CapeCod03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod04	Grass	Cape_Cod	TGrass_CapeCod04.tga	TGrass_CapeCod04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod05	Grass	Cape_Cod	TGrass_CapeCod05.tga	TGrass_CapeCod05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod06	Grass	Cape_Cod	TGrass_CapeCod06.tga	TGrass_CapeCod06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod07	Grass	Cape_Cod	TGrass_CapeCod07.tga	TGrass_CapeCod07_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod08	Grass	Cape_Cod	TGrass_CapeCod08.tga	TGrass_CapeCod08_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod09	Grass	Cape_Cod	TGrass_CapeCod09.tga	TGrass_CapeCod09_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod10	Grass	Cape_Cod	TGrass_CapeCod10.tga	TGrass_CapeCod10_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod11	Grass	Cape_Cod	TGrass_CapeCod11.tga	TGrass_CapeCod11_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod12	Grass	Cape_Cod	TGrass_CapeCod12.tga	TGrass_CapeCod12_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod13	Grass	Cape_Cod	TGrass_CapeCod13.tga	TGrass_CapeCod13_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod14	Grass	Cape_Cod	TGrass_CapeCod14.tga	TGrass_CapeCod14_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod15	Grass	Cape_Cod	TGrass_CapeCod15.tga	TGrass_CapeCod15_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod16	Grass	Cape_Cod	TGrass_CapeCod16.tga	TGrass_CapeCod16_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod17	Grass	Cape_Cod	TGrass_CapeCod17.tga	TGrass_CapeCod17_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod18	Grass	Cape_Cod	TGrass_CapeCod18.tga	TGrass_CapeCod18_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod19	Grass	Cape_Cod	TGrass_CapeCod19.tga	TGrass_CapeCod19_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod20	Grass	Cape_Cod	TGrass_CapeCod20.tga	TGrass_CapeCod20_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod21	Grass	Cape_Cod	TGrass_CapeCod21.tga	TGrass_CapeCod21_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod22	Grass	Cape_Cod	TGrass_CapeCod22.tga	TGrass_CapeCod22_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod23	Grass	Cape_Cod	TGrass_CapeCod23.tga	TGrass_CapeCod23_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_CapeCod24	Grass	Cape_Cod	TGrass_CapeCod24.tga	TGrass_CapeCod24_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_CapeCod01	Road	Cape_Cod	TPave_CapeCod01.tga	TPave_CapeCod01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_CapeCod02	Road	Cape_Cod	TPave_CapeCod02.tga	TPave_CapeCod02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_CapeCod01	Dirt	Cape_Cod	TDirt_CapeCod01.tga	TDirt_CapeCod01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_CapeCod02	Dirt	Cape_Cod	TDirt_CapeCod02.tga	TDirt_CapeCod02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_CapeCod03	Dirt	Cape_Cod	TDirt_CapeCod03.tga	TDirt_CapeCod03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_CapeCod04	Dirt	Cape_Cod	TDirt_CapeCod04.tga	TDirt_CapeCod04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_CapeCod05	Dirt	Cape_Cod	TDirt_CapeCod05.tga	TDirt_CapeCod05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_CapeCod06	Dirt	Cape_Cod	TDirt_CapeCod06.tga	TDirt_CapeCod06_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_CapeCod07	Dirt	Cape_Cod	TDirt_CapeCod07.tga	TDirt_CapeCod07_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_CapeCod08	Dirt	Cape_Cod	TDirt_CapeCod08.tga	TDirt_CapeCod08_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_CapeCod01	Cliff	Cape_Cod	TCliff_CapeCod01.tga	TCliff_CapeCod01_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_CapeCod02	Cliff	Cape_Cod	TCliff_CapeCod02.tga	TCliff_CapeCod02_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_CapeCod03	Cliff	Cape_Cod	TCliff_CapeCod03.tga	TCliff_CapeCod03_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_CapeCod04	Cliff	Cape_Cod	TCliff_CapeCod04.tga	TCliff_CapeCod04_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_CapeCod05	Cliff	Cape_Cod	TCliff_CapeCod05.tga	TCliff_CapeCod05_nrm.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_NewYork01	Road	New_York	TPave_NewYork01.tga	TPave_NewYork01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_NewYork02	Road	New_York	TPave_NewYork02.tga	TPave_NewYork02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_NewYork03	Road	New_York	TPave_NewYork03.tga	TPave_NewYork03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_NewYork01	Grass	New_York	TGrass_NewYork01.tga	TGrass_NewYork01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_MtRush01	Road	Mount_Rushmore	TPave_MtRush01.tga	TPave_MtRush01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush01	Grass	Mount_Rushmore	Grass_MtRush01.tga	Grass_MtRush01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush02	Grass	Mount_Rushmore	Grass_MtRush02.tga	Grass_MtRush02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush03	Grass	Mount_Rushmore	Grass_MtRush03.tga	Grass_MtRush03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush04	Grass	Mount_Rushmore	Grass_MtRush04.tga	Grass_MtRush04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush05	Grass	Mount_Rushmore	Grass_MtRush05.tga	Grass_MtRush05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush06	Grass	Mount_Rushmore	Grass_MtRush06.tga	Grass_MtRush06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush07	Grass	Mount_Rushmore	Grass_MtRush07.tga	Grass_MtRush07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush08	Grass	Mount_Rushmore	Grass_MtRush08.tga	Grass_MtRush08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush09	Grass	Mount_Rushmore	Grass_MtRush09.tga	Grass_MtRush09_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush10	Grass	Mount_Rushmore	Grass_MtRush10.tga	Grass_MtRush10_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush11	Grass	Mount_Rushmore	Grass_MtRush11.tga	Grass_MtRush11_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush12	Grass	Mount_Rushmore	Grass_MtRush12.tga	Grass_MtRush12_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_MtRush13	Grass	Mount_Rushmore	Grass_MtRush13.tga	Grass_MtRush13_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_MtRush01	Grass	Mount_Rushmore	Cliff_MtRush01.tga	Cliff_MtRush01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_MtRush02	Grass	Mount_Rushmore	Cliff_MtRush02.tga	Cliff_MtRush02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Amsterdam01	Road	Amsterdam	TPave_Amsterdam01.tga	TPave_Amsterdam01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Amsterdam02	Road	Amsterdam	TPave_Amsterdam02.tga	TPave_Amsterdam02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Amsterdam03	Road	Amsterdam	TPave_Amsterdam03.tga	TPave_Amsterdam03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Amsterdam04	Road	Amsterdam	TPave_Amsterdam04.tga	TPave_Amsterdam04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Amsterdam05	Road	Amsterdam	TPave_Amsterdam05.tga	TPave_Amsterdam05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Iceland01	Cliff	Iceland	TClif_Iceland01.tga	TClif_Iceland01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Iceland02	Cliff	Iceland	TClif_Iceland02.tga	TClif_Iceland02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Iceland03	Cliff	Iceland	TClif_Iceland03.tga	TClif_Iceland03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Iceland04	Cliff	Iceland	TClif_Iceland04.tga	TClif_Iceland04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Iceland05	Cliff	Iceland	TClif_Iceland05.tga	TClif_Iceland05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Iceland06	Cliff	Iceland	TClif_Iceland06.tga	TClif_Iceland06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Iceland07	Cliff	Iceland	TClif_Iceland07.tga	TClif_Iceland07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Iceland02	Snow	Iceland	TSnow_Iceland02.tga	TSnow_Iceland02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Iceland03	Snow	Iceland	TSnow_Iceland03.tga	TSnow_Iceland03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Iceland04	Snow	Iceland	TSnow_Iceland04.tga	TSnow_Iceland04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Snow_Iceland05	Snow	Iceland	TSnow_Iceland05.tga	TSnow_Iceland05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Iceland01	Rock	Iceland	TRock_Iceland01.tga	TRock_Iceland01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Iceland02	Rock	Iceland	TRock_Iceland02.tga	TRock_Iceland02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Iceland03	Rock	Iceland	TRock_Iceland03.tga	TRock_Iceland03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Rock_Iceland04	Rock	Iceland	TRock_Iceland04.tga	TRock_Iceland04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Iceland02	Dirt	Iceland	TDirt_Iceland02.tga	TDirt_Iceland02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Iceland03	Dirt	Iceland	TDirt_Iceland03.tga	TDirt_Iceland03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Iceland04	Dirt	Iceland	TDirt_Iceland04.tga	TDirt_Iceland04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Iceland05	Dirt	Iceland	TDirt_Iceland05.tga	TDirt_Iceland05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Iceland06	Dirt	Iceland	TDirt_Iceland06.tga	TDirt_Iceland06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Iceland01	Dirt	Iceland	Transition_Iceland01.tga	Transition_Iceland01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Iceland02	Dirt	Iceland	Transition_Iceland02.tga	Transition_Iceland02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Iceland03	Dirt	Iceland	Transition_Iceland03.tga	Transition_Iceland03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Transition_Iceland04	Dirt	Iceland	Transition_Iceland04.tga	Transition_Iceland04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor01	Road	Tokyo_Harbor	Pavement_TokyoHarbor01.tga	Pavement_TokyoHarbor01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor02	Road	Tokyo_Harbor	Pavement_TokyoHarbor02.tga	Pavement_TokyoHarbor02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor03	Road	Tokyo_Harbor	Pavement_TokyoHarbor03.tga	Pavement_TokyoHarbor03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor04	Road	Tokyo_Harbor	Pavement_TokyoHarbor04.tga	Pavement_TokyoHarbor04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor05	Road	Tokyo_Harbor	TPave_TokyoHarbor05.tga	TPave_TokyoHarbor05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor06	Road	Tokyo_Harbor	TPave_TokyoHarbor06.tga	TPave_TokyoHarbor06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor07	Road	Tokyo_Harbor	TPave_TokyoHarbor07.tga	TPave_TokyoHarbor07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor08	Road	Tokyo_Harbor	TPave_TokyoHarbor08.tga	TPave_TokyoHarbor08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor09	Road	Tokyo_Harbor	Pavement_TokyoHarbor09.tga	Pavement_TokyoHarbor09_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_TokyoHarbor10	Road	Tokyo_Harbor	TPave_TokyoHarbor10.tga	TPave_TokyoHarbor10_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	RA3_DeepOcean	Road	RA3	RA3_DeepOcean.tga	RA3_DeepOcean_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	RA3_ShallowSeaFloor	Road	RA3	RA3_ShallowSeaFloor.tga	RA3_ShallowSeaFloor_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	RA3_Elevation0	Road	RA3	RA3_Elevation0.tga	RA3_Elevation0_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	RA3_Elevation1	Road	RA3	RA3_Elevation1.tga	RA3_Elevation1_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	RA3_Elevation2	Road	RA3	RA3_Elevation2.tga	RA3_Elevation2_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	RA3Grid1	Misc	RA3	RA3Grid1.tga	RA3Grid1_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Gibraltar1	Cliff	Gibraltar	Cliff_Gibralter1.tga	Cliff_Gibralter1_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Cliff_Gibraltar2	Cliff	Gibraltar	Cliff_Gibralter2.tga	Cliff_Gibralter2_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Gibraltar1	Road	Gibraltar	Pavement_Gibraltar01.tga	Pavement_Gibraltar01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Gibraltar2	Road	Gibraltar	Pavement_Gibraltar02.tga	Pavement_Gibraltar02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Gibraltar3	Road	Gibraltar	Pavement_Gibraltar03.tga	Pavement_Gibraltar03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Gibraltar5	Road	Gibraltar	Pavement_GibraltarBoardwalk.tga	Pavement_GibraltarBoardwalk_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Gibraltar6	Road	Gibraltar	Pavement_Gibraltar04.tga	Pavement_Gibraltar04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Gibraltar1	Grass	Gibraltar	Grass_Gibraltar01.tga	Grass_Gibraltar01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Gibraltar2	Grass	Gibraltar	Grass_Gibraltar02.tga	Grass_Gibraltar02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Gibraltar3	Grass	Gibraltar	Grass_Gibraltar03.tga	Grass_Gibraltar03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Gypsy01	Grass	Gypsy_Village	TGrass_Gypsy01.tga	TGrass_Gypsy01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Gypsy02	Grass	Gypsy_Village	TGrass_Gypsy02.tga	TGrass_Gypsy02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Gypsy03	Grass	Gypsy_Village	TGrass_Gypsy03.tga	TGrass_Gypsy03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Gypsy04	Grass	Gypsy_Village	TGrass_Gypsy04.tga	TGrass_Gypsy04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Gypsy01	Dirt	Gypsy_Village	TDirt_Gypsy01.tga	TDirt_Gypsy01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Gypsy02	Dirt	Gypsy_Village	TDirt_Gypsy02.tga	TDirt_Gypsy02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Dirt_Gypsy03	Dirt	Gypsy_Village	TDirt_Gypsy03.tga	TDirt_Gypsy03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii01	Grass	Hawaii	Grass_Hawaii01.tga	Grass_Hawaii01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii02	Grass	Hawaii	Grass_Hawaii02.tga	Grass_Hawaii02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii03	Grass	Hawaii	Grass_Hawaii03.tga	Grass_Hawaii03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii04	Grass	Hawaii	Grass_Hawaii04.tga	Grass_Hawaii04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii05	Grass	Hawaii	Grass_Hawaii05.tga	Grass_Hawaii05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii06	Grass	Hawaii	Grass_Hawaii06.tga	Grass_Hawaii06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii07	Grass	Hawaii	Grass_Hawaii07.tga	Grass_Hawaii07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii08	Grass	Hawaii	Grass_Hawaii08.tga	Grass_Hawaii08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Grass_Hawaii09	Grass	Hawaii	Grass_Hawaii09.tga	Grass_Hawaii09_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Hawaii01	Sand	Hawaii	TSand_Hawaii01.tga	TSand_Hawaii01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Hawaii02	Sand	Hawaii	TSand_Hawaii02.tga	TSand_Hawaii02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Hawaii03	Sand	Hawaii	TSand_Hawaii03.tga	TSand_Hawaii03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Sand_Hawaii04	Sand	Hawaii	TSand_Hawaii04.tga	TSand_Hawaii04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad01	Road	Vladivostok	Pavement_Vlad01.tga	Pavement_Vlad01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad02	Road	Vladivostok	Pavement_Vlad02.tga	Pavement_Vlad02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad03	Road	Vladivostok	Pavement_Vlad03.tga	Pavement_Vlad03_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad04	Road	Vladivostok	Pavement_Vlad04.tga	Pavement_Vlad04_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad05	Road	Vladivostok	Pavement_Vlad05.tga	Pavement_Vlad05_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad06	Road	Vladivostok	Pavement_Vlad06.tga	Pavement_Vlad06_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad07	Road	Vladivostok	Pavement_Vlad07.tga	Pavement_Vlad07_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad08	Road	Vladivostok	Pavement_Vlad08.tga	Pavement_Vlad08_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad09	Road	Vladivostok	Pavement_Vlad09.tga	Pavement_Vlad09_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad10	Road	Vladivostok	Pavement_Vlad10.tga	Pavement_Vlad10_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad11	Road	Vladivostok	Pavement_Vlad11.tga	Pavement_Vlad11_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	Pavement_Vlad12	Road	Vladivostok	Pavement_Vlad12.tga	Pavement_Vlad12_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	BB_Gravel01	Road	Brighton_Beach	BB_Gravel01.tga	BB_Gravel01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	BB_Gravel02	Road	Brighton_Beach	BB_Gravel02.tga	BB_Gravel02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	BB_Dirt01	Sand	Brighton_Beach	BB_Dirt01.tga	BB_Dirt01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	BB_Dirt02	Sand	Brighton_Beach	BB_Dirt02.tga	BB_Dirt02_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	BB_Pavement01	Road	Brighton_Beach	BB_Pavement01.tga	BB_Pavement01_NRM.tga
+uprising	Xml/Terrain/Terrain.xml	BB_Pavement02	Road	Brighton_Beach	BB_Pavement02.tga	BB_Pavement02_NRM.tga

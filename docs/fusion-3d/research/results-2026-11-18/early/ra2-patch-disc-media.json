@@ -1,0 +1,92 @@
+[
+ {
+  "item": "CC_Red_Alert_2_Europe_201708",
+  "track": "RA1.img",
+  "volume": "RA1",
+  "track_bytes": 793734144,
+  "catalogued_track_sha1": "de45484501e23644bff166d47919aeb88fc5a121",
+  "directory_files": 232,
+  "cab": {
+   "path": "INSTALL/GAME1.CAB",
+   "lba": 243773,
+   "size": 158758291
+  },
+  "cab_header_sha256": "6b862e35f87e77182a3c208b87c768a147ce7691f4b1eb763196a50c4977e830",
+  "header_declared_mixes": [
+   [
+    "language.mix",
+    53105368
+   ],
+   [
+    "ra2.mix",
+    281074192
+   ]
+  ],
+  "game_exe": {
+   "path": "INSTALL/GAME.EXE",
+   "lba": 241630,
+   "size": 4387088,
+   "sha256": "135a57a026aebd62d80ed71a896ad9b5ab56ada781cdf80be99727849db64743",
+   "fixed_file_version": [
+    65536,
+    1,
+    65536,
+    1
+   ],
+   "version_comp": [
+    1,
+    0,
+    0,
+    1
+   ]
+  }
+ },
+ {
+  "item": "CC_Red_Alert_2_Europe_201708",
+  "track": "RA2.img",
+  "volume": "RA2",
+  "track_bytes": 731761296,
+  "catalogued_track_sha1": "118db5405ce63b3911d1a274a10fa54f8e81be0d",
+  "directory_files": 232,
+  "cab": {
+   "path": "INSTALL/GAME1.CAB",
+   "lba": 217424,
+   "size": 158758291
+  },
+  "cab_header_sha256": "6b862e35f87e77182a3c208b87c768a147ce7691f4b1eb763196a50c4977e830",
+  "header_declared_mixes": [
+   [
+    "language.mix",
+    53105368
+   ],
+   [
+    "ra2.mix",
+    281074192
+   ]
+  ]
+ },
+ {
+  "item": "ra-2_20251001",
+  "track": "RA2.iso",
+  "volume": "RA2",
+  "track_bytes": 670351360,
+  "catalogued_track_sha1": "6beee4eaa462cee4e84068da76c3b5b056730613",
+  "directory_files": 232,
+  "cab": {
+   "path": "INSTALL/GAME1_07",
+   "lba": 233771,
+   "size": 158758291
+  },
+  "cab_header_sha256": "6b862e35f87e77182a3c208b87c768a147ce7691f4b1eb763196a50c4977e830",
+  "header_declared_mixes": [
+   [
+    "language.mix",
+    53105368
+   ],
+   [
+    "ra2.mix",
+    281074192
+   ]
+  ]
+ }
+]

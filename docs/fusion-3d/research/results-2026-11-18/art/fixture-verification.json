@@ -1,0 +1,131 @@
+{
+  "scope": "Offline Blender glTF import and motion evaluation on an original research fixture. CPU offline stills, no browser/mobile validation.",
+  "blender_version": "4.3.2",
+  "node_count": 46,
+  "mesh_nodes": 37,
+  "unique_meshes": 17,
+  "unique_mesh_triangles": 284,
+  "instantiated_triangles": 540,
+  "animation_bindings": {
+    "boom.shoulder": [
+      "service.scan",
+      "service.retract",
+      "service.deploy"
+    ],
+    "boom.yaw": [
+      "service.scan",
+      "service.retract",
+      "service.deploy"
+    ],
+    "foot.left": [
+      "service.scan",
+      "service.retract",
+      "service.deploy"
+    ],
+    "foot.right": [
+      "service.scan",
+      "service.retract",
+      "service.deploy"
+    ],
+    "stabilizer.left": [
+      "service.scan",
+      "service.retract",
+      "service.deploy"
+    ],
+    "stabilizer.right": [
+      "service.scan",
+      "service.retract",
+      "service.deploy"
+    ]
+  },
+  "poses": {
+    "travel": {
+      "clip": "service.deploy",
+      "time_s": 0,
+      "root_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "boom_world_position": [
+        0.0,
+        2.11,
+        1.36
+      ],
+      "left_shoe_min_z_m": 0.715,
+      "right_shoe_min_z_m": 0.715
+    },
+    "braced": {
+      "clip": "service.deploy",
+      "time_s": 0.6,
+      "root_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "boom_world_position": [
+        0.0,
+        2.11,
+        1.36
+      ],
+      "left_shoe_min_z_m": 0.011369,
+      "right_shoe_min_z_m": 0.011369
+    },
+    "working": {
+      "clip": "service.deploy",
+      "time_s": 1.7,
+      "root_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "boom_world_position": [
+        -0.17476,
+        1.50217,
+        2.51689
+      ],
+      "left_shoe_min_z_m": 0.011369,
+      "right_shoe_min_z_m": 0.011369
+    },
+    "scan": {
+      "clip": "service.scan",
+      "time_s": 0.5,
+      "root_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "boom_world_position": [
+        -0.32842,
+        1.45371,
+        2.51689
+      ],
+      "left_shoe_min_z_m": 0.011369,
+      "right_shoe_min_z_m": 0.011369
+    },
+    "return": {
+      "clip": "service.retract",
+      "time_s": 1.7,
+      "root_position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "boom_world_position": [
+        0.0,
+        2.11,
+        1.36
+      ],
+      "left_shoe_min_z_m": 0.715,
+      "right_shoe_min_z_m": 0.715
+    }
+  },
+  "checks": [
+    "glTF import completed",
+    "all six articulated nodes have deploy/scan/retract tracks",
+    "root stationary at five samples",
+    "both bracing pads finish 0\u201325 mm above ground in this metre-authored reference",
+    "working tool tip rises >0.8 m",
+    "retract returns tip to initial position"
+  ]
+}
