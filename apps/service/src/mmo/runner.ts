@@ -28,7 +28,7 @@ import { mmoOne, mmoTransaction } from './db.js';
 import {
   acquireRegionLease, appendRegionEvent, applyShieldTransition, assertRegionFence,
   claimDueJobs, finishJobTx, getRegion, getRegionEventForUpdate, listRegionEventsAfter, listSimFanout,
-  listSnapshots, listUnappliedRegionEvents,
+  recoverySnapshots, listUnappliedRegionEvents,
   markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot, storeRegionEventResolved,
   releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
   syncCompounds, updateMemberPowerScores, updateSettlementProtection,
@@ -323,11 +323,20 @@ export class RegionRunner {
     // checksum, parse or engine-restore validation is skipped so an older
     // verified checkpoint plus the journal tail is used instead; only when no
     // checkpoint validates does the region fall back to genesis + full replay.
-    const snaps = await listSnapshots(this.opts.regionId);
     let hib: SnapshotPayload['hib'];
     let replayFrom = 0n;
     let restored = false;
-    for (const snap of snaps) {
+    let attemptedSnapshots = 0;
+    let lastRestoreRenewal = performance.now();
+    for await (const snap of recoverySnapshots(this.opts.regionId)) {
+      attemptedSnapshots++;
+      if (performance.now() - lastRestoreRenewal > this.opts.leaseMs * 0.4) {
+        await acquireRegionLease({
+          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
+        });
+        this.lastRenew = this.opts.now();
+        lastRestoreRenewal = performance.now();
+      }
       const payload = this.validatedSnapshotPayload(snap);
       if (!payload) {
         this.opts.log('region-snapshot-rejected', { snapshotId: snap.snapshot_id });
@@ -367,8 +376,8 @@ export class RegionRunner {
       break;
     }
     if (!restored) {
-      if (snaps.length) {
-        this.opts.log('region-snapshots-exhausted', { regionId: this.opts.regionId, count: snaps.length });
+      if (attemptedSnapshots) {
+        this.opts.log('region-snapshots-exhausted', { regionId: this.opts.regionId, count: attemptedSnapshots });
       }
       this.simSeed = spec.seed;
       const pack = PACK_LIST.find(p => p.id === spec.packId);
@@ -425,9 +434,7 @@ export class RegionRunner {
     // — identical on every runner, before any tick or accrual runs.
     this.ensureRegionSites();
 
-    // Snapshot validation parses every retained payload; on a region with
-    // hundreds of checkpoints that can outlast the lease TTL before the first
-    // fenced write. Renew authority at each long-phase boundary.
+    // Renew authority before wake accrual and replay after restoring a checkpoint.
     if (this.epoch !== undefined) {
       try {
         await acquireRegionLease({

@@ -3,14 +3,15 @@
 // at its recorded tick, against REAL PostgreSQL and the REAL Fusion sim.
 // Requires MMO_TEST_DATABASE_URL (disposable database).
 import { randomUUID } from 'node:crypto';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import * as database from '../../apps/service/src/mmo/db.js';
 import {
   closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import { mmoEntityId, MMO_PROTOCOL, type MmoCommandMessage } from '../../packages/contracts/src/index.js';
 import { PACKS } from '../../packages/fusion/src/index';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
-import { acquireRegionLease } from '../../apps/service/src/mmo/store.js';
+import { acquireRegionLease, recordSnapshot, recoverySnapshots } from '../../apps/service/src/mmo/store.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
 
@@ -167,6 +168,35 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
     await resetMmoDatabase();
   }, 30000);
   afterAll(async () => { await closeMmoDatabase(); });
+
+  it('reads checkpoint payloads only as recovery advances through the history', async () => {
+    const fx = await seedFixtureWorld();
+    const addSnapshot = (seq: number) => recordSnapshot({
+      regionId: fx.regionId, epoch: fx.epoch, lastAppliedSeq: seq, lastCommittedSeq: seq,
+      tick: seq, engineArtifactSha256: 'fixture-engine-sha', rulesetVersion: MMO_PROTOCOL,
+      format: 'fixture', payload: Buffer.from(String(seq)),
+    });
+    await addSnapshot(1);
+    await addSnapshot(2);
+    const newest = await addSnapshot(3);
+    const list = vi.spyOn(database, 'mmoQuery');
+    const fetch = vi.spyOn(database, 'mmoOne');
+    try {
+      let selected: string | undefined;
+      for await (const checkpoint of recoverySnapshots(fx.regionId)) {
+        selected = checkpoint.snapshot_id;
+        break;
+      }
+      expect(selected).toBe(newest);
+      expect(list.mock.calls.filter(([sql]) => sql.includes('from region_snapshot')))
+        .toEqual([[expect.stringMatching(/^select snapshot_id from region_snapshot /), [fx.regionId]]]);
+      expect(fetch.mock.calls.filter(([sql]) => sql.includes('from region_snapshot')))
+        .toEqual([[expect.any(String), [fx.regionId, newest]]]);
+    } finally {
+      list.mockRestore();
+      fetch.mockRestore();
+    }
+  });
 
   it('control vs hard-killed runner with older checkpoint and applied rows after it', async () => {
     const control = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });

@@ -799,25 +799,33 @@ export async function recordSnapshot(args: {
   return id;
 }
 
+interface RegionSnapshotRow {
+  snapshot_id: string; authority_epoch: string; last_applied_seq: string; last_committed_seq: string;
+  tick: string; engine_artifact_sha256: string; ruleset_version: string; format: string;
+  payload: Buffer; payload_sha256: string;
+}
+
 export async function latestSnapshot(regionId: string) {
-  return mmoOne<{
-    snapshot_id: string; authority_epoch: string; last_applied_seq: string; last_committed_seq: string;
-    tick: string; engine_artifact_sha256: string; ruleset_version: string; format: string;
-    payload: Buffer; payload_sha256: string;
-  }>('select * from region_snapshot where region_id = $1 order by last_applied_seq desc, created_at desc limit 1', [regionId]);
+  return mmoOne<RegionSnapshotRow>(
+    'select * from region_snapshot where region_id = $1 order by last_applied_seq desc, created_at desc, snapshot_id desc limit 1',
+    [regionId]);
 }
 
 /**
- * PW30: every retained checkpoint, newest first. Recovery walks this list when
- * the latest payload fails validation — an older verified checkpoint plus the
- * journal tail is always preferable to a corrupt newest one.
+ * PW30: enumerate retained checkpoint IDs cheaply and fetch payloads on demand.
+ * Recovery normally validates one payload. If it is corrupt, the next older
+ * checkpoint remains available without transferring the entire history first.
  */
-export async function listSnapshots(regionId: string) {
-  return mmoQuery<{
-    snapshot_id: string; authority_epoch: string; last_applied_seq: string; last_committed_seq: string;
-    tick: string; engine_artifact_sha256: string; ruleset_version: string; format: string;
-    payload: Buffer; payload_sha256: string;
-  }>('select * from region_snapshot where region_id = $1 order by last_applied_seq desc, created_at desc', [regionId]);
+export async function* recoverySnapshots(regionId: string): AsyncGenerator<RegionSnapshotRow> {
+  const checkpoints = await mmoQuery<{ snapshot_id: string }>(
+    'select snapshot_id from region_snapshot where region_id = $1 order by last_applied_seq desc, created_at desc, snapshot_id desc',
+    [regionId]);
+  for (const { snapshot_id } of checkpoints) {
+    const row = await mmoOne<RegionSnapshotRow>(
+      'select * from region_snapshot where region_id = $1 and snapshot_id = $2',
+      [regionId, snapshot_id]);
+    if (row) yield row;
+  }
 }
 
 /**
