@@ -18,19 +18,12 @@ async function dismissConsent(page) {
       if (await btn.count()) await btn.click({ timeout: 2000 }).catch(() => {});
     }
     if (await fcRoot.count()) {
-      let clicked = false;
       for (const frame of page.frames()) {
-        for (const name of [/reject all/i, /accept all/i, /agree/i, /got it/i, /confirm/i]) {
-          const b = frame.getByRole('button', { name }).first();
-          if (await b.count().catch(() => 0)) { await b.click().catch(() => {}); clicked = true; break; }
+        const decline = frame.getByRole('button', { name: /^(do not consent|reject all)$/i }).first();
+        if (await decline.isVisible().catch(() => false)) {
+          await decline.click({ timeout: 2000 }).catch(() => {});
+          break;
         }
-        if (clicked) break;
-      }
-      if (!clicked) {
-        // Enter submits the name form if a text field has focus — only use it
-        // as a last resort when nothing editable is focused.
-        const focused = await page.evaluate(() => /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || ''));
-        if (!focused) await page.keyboard.press('Enter').catch(() => {});
       }
     }
     await page.waitForTimeout(500);
