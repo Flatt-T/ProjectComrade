@@ -1047,12 +1047,17 @@ export class RegionRunner {
         const x = ev.cell % g.map.w, y = Math.floor(ev.cell / g.map.w);
         const victimId = playerIdBySlot.get(ev.victimOwner) ?? null;
         const killerId = playerIdBySlot.get(ev.killerOwner) ?? null;
-        await tx.query(
+        const receipt = await tx.query(
           `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
-           values ($1,$2,$3,$4,'SALVAGE_SPAWN',$5,$6)`,
+           select $1,$2,$3,$4,'SALVAGE_SPAWN',$5,$6
+            where not exists (select 1 from economy_operation
+              where region_id = $2 and simulation_tick = $4 and kind = 'SALVAGE_SPAWN'
+                and authoritative_result->>'simId' = $7)
+           returning operation_id`,
           [opId, this.opts.regionId, this.epoch, String(ev.tick),
            JSON.stringify({ kind: 'SALVAGE_SPAWN', regionId: this.opts.regionId, x, y, credits: String(ev.credits) }),
-           JSON.stringify({ simId: ev.simId, victimOwner: ev.victimOwner, killerOwner: ev.killerOwner, victimType: ev.victimType, victimKind: ev.victimKind })]);
+           JSON.stringify({ simId: ev.simId, victimOwner: ev.victimOwner, killerOwner: ev.killerOwner, victimType: ev.victimType, victimKind: ev.victimKind }), String(ev.simId)]);
+        if (!receipt.rowCount) continue;
         // PW18: a unit that arrived via transfer keeps its cross-region id in
         // the ledger; everything else uses the region/sim-id bridge.
         const entityId = ev.durableId || mmoEntityId(this.opts.regionId, ev.simId);
@@ -1419,12 +1424,19 @@ export class RegionRunner {
         const siteId = mmoEntityId(this.opts.regionId, ev.simId);
         if (ev.kind === 'capture') {
           const toId = playerIdBySlot.get(ev.toOwner);
-          await tx.query(
+          // The region fence serializes receipts. Match the original audit
+          // identity so captures written by older workers are also recognized.
+          const receipt = await tx.query(
             `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
-             values ($1,$2,$3,$4,'SITE_CAPTURE',$5,$6)`,
+             select $1,$2,$3,$4,'SITE_CAPTURE',$5,$6
+              where not exists (select 1 from economy_operation
+                where region_id = $2 and simulation_tick = $4 and kind = 'SITE_CAPTURE'
+                  and canonical_action->>'siteId' = $7)
+             returning operation_id`,
             [randomUUID(), this.opts.regionId, this.epoch, String(ev.tick),
              JSON.stringify({ kind: 'SITE_CAPTURE', siteId, regionId: this.opts.regionId, ownerId: toId ?? null }),
-             JSON.stringify({ siteType: ev.siteType, siteKind: ev.siteKind, fromOwner: ev.fromOwner, toOwner: ev.toOwner, heldTicks: ev.heldTicks })]);
+             JSON.stringify({ siteType: ev.siteType, siteKind: ev.siteKind, fromOwner: ev.fromOwner, toOwner: ev.toOwner, heldTicks: ev.heldTicks }), siteId]);
+          if (!receipt.rowCount) continue;
           // Objective points for taking the site (neutral first capture counts).
           if (toId && ladder.capturePoints > 0) {
             await awardLadderPoints(tx, {
