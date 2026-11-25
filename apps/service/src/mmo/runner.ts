@@ -980,11 +980,19 @@ export class RegionRunner {
           ? ev.resolved as ResolvedPlan : null;
         const committed = plan !== null || ev.applied_at !== null;
         if (!committed) { cursor = seq; continue; } // never applied: normal apply owns it
-        await this.advanceTo(Number(ev.simulation_tick));
         const effects: SimEffect[] = plan
           ? plan.simEffects
           : (await fanoutFor(ev.event_seq))
             .map(f => ({ t: 'enqueue' as const, slot: f.slot, atTick: f.atTick, command: f.command }));
+        const action = (ev.payload as { action?: { t?: unknown } } | null)?.action?.t;
+        const result = (plan?.result ?? ev.application_result) as { accepted?: boolean } | null;
+        // A rejected order has no sim effect. An accepted simulation order
+        // requires a stored plan or its historical broadcast to be recoverable.
+        if (!Array.isArray(effects) || (!effects.length && ev.event_kind === 'command'
+          && typeof action === 'string' && SIM_ACTIONS.has(action) && result?.accepted !== false)) {
+          throw new MmoStoreError('MISSING_REPLAY_EFFECT', `missing simulation history for event ${ev.event_seq}`);
+        }
+        await this.advanceTo(Number(ev.simulation_tick));
         for (const fx of effects) await this.applySimEffect(fx);
         this.simAppliedSeqs.add(ev.event_seq);
         cursor = seq;
