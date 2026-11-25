@@ -87,7 +87,7 @@
       ],
       "sourceCorrespondence": {
         "eaSourceRepo": "https://github.com/electronicarts/CnC_Tiberian_Dawn",
-        "sourceCommit": "BLOCKED-awaiting-pin",
+        "sourceCommit": "e0d372dc582c053a699114942b984dad0457f9b3",
         "correspondenceNotes": "EA source provenance; README states raw release does not fully compile",
         "deviationsLedger": "references/deviations/td-classic.csv"
       }
@@ -256,7 +256,7 @@
       ],
       "sourceCorrespondence": {
         "eaSourceRepo": "https://github.com/electronicarts/CnC_Red_Alert",
-        "sourceCommit": "BLOCKED-awaiting-pin",
+        "sourceCommit": "0dc09bb1d6188d1ec79ab4765b22a48b75ffee32",
         "correspondenceNotes": "EA source provenance; separate licence review from TD",
         "deviationsLedger": "references/deviations/ra1-classic.csv"
       }
