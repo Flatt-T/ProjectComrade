@@ -104,6 +104,48 @@ describeDb('mmo engineer capture consent (PW34, real PostgreSQL)', () => {
     await closeMmoDatabase();
   });
 
+  it.each([0, 1])('orders same-tick alliance, consent and enter effects for requester slot %i', async requesterSlot => {
+    const fx = await seedFixtureWorld({ leaseMs: 60_000, playerCount: 2, mapId: 'td-tiberium-gardens' });
+    const runner = new RegionRunner({
+      regionId: fx.regionId, workerId: fx.workerId, leaseMs: 60_000,
+      tickMs: 60_000, pollMs: POLL_MS, quiescence: { enabled: false },
+      worldHandler: createWorldHandler(PERSISTENT_RULES_V1),
+    });
+    try {
+      await runner.start();
+      const local = { fx, regionId: fx.regionId, runner };
+      const ownerSlot = 1 - requesterSlot;
+      const requester = fx.players[requesterSlot].playerId;
+      const owner = fx.players[ownerSlot].playerId;
+      const created = await act(local, owner, { t: 'allianceCreate', name: 'SameTickConsent' });
+      expect(created.accepted).toBe(true);
+      const allianceId = created.allianceId as string;
+      expect((await act(local, owner, { t: 'allianceInvite', allianceId, playerId: requester })).accepted).toBe(true);
+      expect((await act(local, requester, { t: 'allianceJoin', allianceId })).accepted).toBe(true);
+
+      const { bld, eng } = engineerPair(local, ownerSlot, requesterSlot, 60, 60);
+      const buildingId = mmoEntityId(fx.regionId, bld.id);
+      const engineerId = mmoEntityId(fx.regionId, eng.id);
+      const requested = await act(local, requester, { t: 'engineerRequest', buildingId, engineerId });
+      expect(requested.accepted).toBe(true);
+      const requestId = requested.requestId as string;
+      expect((await act(local, owner, { t: 'engineerConsent', requestId, decision: 'accept' })).accepted).toBe(true);
+      expect((await act(local, requester, { t: 'enter', entityIds: [engineerId], targetId: buildingId })).accepted).toBe(true);
+
+      const game = runner.currentGame!;
+      expect(game.tick).toBe(0);
+      game.step();
+      expect(game.consents.some(grant => grant.requestId === requestId)).toBe(true);
+      for (let tick = 0; tick < 120 && bld.owner !== requesterSlot; tick++) game.step();
+      expect(bld.owner).toBe(requesterSlot);
+      expect(game.entities.get(eng.id)?.hp ?? 0).toBeLessThanOrEqual(0);
+      await waitFor(async () => (await mmoOne<{ state: string }>(
+        'select state from engineer_consent where request_id = $1', [requestId]))?.state === 'consumed');
+    } finally {
+      await runner.stop();
+    }
+  }, IT_TIMEOUT);
+
   it('runs request -> accept -> consented capture with durable audit', async () => {
     const [owner, requester] = p();
     // Alliance so the pair is a legal consent request.
