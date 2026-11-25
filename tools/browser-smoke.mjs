@@ -290,7 +290,10 @@ try {
       e.owner === slot && game.pack.structures[e.type]?.constructionYard));
   }, slots, { timeout: 30000 })));
 
-  await Promise.all(pages.map(page => page.waitForFunction(() => window.comradeFusion.game.tick > 450, null, { timeout: 90000 })));
+  const currentTicks = await Promise.all(pages.map(page => page.evaluate(() => window.comradeFusion.game.tick)));
+  const finishTick = Math.max(...currentTicks) + 450;
+  await Promise.all(pages.map(page => page.waitForFunction(tick => window.comradeFusion.game.tick >= tick,
+    finishTick, { timeout: 90000 })));
   const sums = await Promise.all(pages.map(page => page.evaluate(() => window.__sums)));
   const common = Object.keys(sums[0]).filter(t => sums.every(client => t in client));
   assert.ok(common.length >= 5, 'All four clients must reach shared checkpoints');
