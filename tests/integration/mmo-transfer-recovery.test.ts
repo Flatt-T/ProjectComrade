@@ -8,7 +8,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
-  closeMmoDatabase, mmoOne, mmoQuery, resetMmoDatabase,
+  closeMmoDatabase, mmoOne, mmoQuery, mmoTransaction, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import {
   acquireRegionLease, createRegion, releaseRegionLease,
@@ -318,4 +318,64 @@ describeDb('mmo transfer arrival crash window (PW18+PW30, real PostgreSQL)', () 
     expect(gameOf(runnerBf2).players[0].pid).toBe(p0());
     expect(tickControl).toBeGreaterThan(0);
   }, IT_TIMEOUT);
+  it('does not materialize legacy arrivals after a durable destruction or departure', async () => {
+    await ctx.bf.runner.checkpoint('before-legacy-arrivals');
+    const transfers: string[] = [];
+    for (let i = 0; i < 2; i++) {
+      const { ref } = loadedCarrier(ctx);
+      const result = await worldAction(ctx, ctx.a, p0(), {
+        t: 'regionTransfer', entityId: ref, destRegionId: ctx.bf.regionId,
+      });
+      expect(result.accepted).toBe(true);
+      const id = result.transferId as string;
+      await waitFor(async () => await transferState(id) === 'COMPLETED');
+      expect(arrivedCarrier(ctx.bf.runner, id)).toBeDefined();
+      transfers.push(id);
+    }
+    const [destroyedId, departedId] = transfers;
+
+    // Model terminal receipts after the two arrivals. The old checkpoint
+    // predates all four operations and has neither of these units.
+    const destructionId = randomUUID();
+    const onwardId = randomUUID();
+    await mmoTransaction(async tx => {
+      for (const [operationId, kind] of [[destructionId, 'SALVAGE_SPAWN'], [onwardId, 'REGION_TRANSFER']]) {
+        await tx.query(
+          `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action)
+            values ($1,$2,$3,$4,$5,$6)`,
+          [operationId, ctx.bf.regionId, ctx.bf.runner.authorityEpoch, gameOf(ctx.bf.runner).tick, kind, { kind }],
+        );
+      }
+      await tx.query(
+        `insert into region_transfer (transfer_id, entity_id, source_region_id, dest_region_id, state, completed_at)
+          values ($1,$2,$3,$4,'COMPLETED',clock_timestamp())`,
+        [onwardId, departedId, ctx.bf.regionId, ctx.bc.regionId],
+      );
+      await tx.query(
+        `insert into asset_ledger (operation_id, entity_id, region_id, kind, physical_state)
+          values ($1,$2,$3,'DESTROY','destroyed'), ($4,$4,$3,'TRANSFER_OUT','in_transit')`,
+        [destructionId, destroyedId, ctx.bf.regionId, onwardId],
+      );
+    });
+
+    const replacementWorker = randomUUID();
+    await acquireRegionLease({ regionId: ctx.bf.regionId, workerId: replacementWorker, leaseMs: 300_000, forceTakeover: true });
+    await waitFor(() => ctx.bf.runner.isFailed, 15000);
+    const replacement = new RegionRunner({
+      regionId: ctx.bf.regionId, workerId: replacementWorker, leaseMs: 300_000,
+      tickMs: TICK_MS, pollMs: POLL_MS, quiescence: { enabled: false },
+      worldHandler: createWorldHandler(PERSISTENT_RULES_V1),
+    });
+    ctx.bf.runner = replacement;
+    await replacement.start();
+    for (const id of transfers) {
+      expect(arrivedCarrier(replacement, id)).toBeUndefined();
+      expect(await transferState(id)).toBe('COMPLETED');
+    }
+    expect(await mmoOne(
+      'select count(*)::integer as count from asset_ledger where operation_id = any($1::uuid[])',
+      [[destructionId, onwardId]],
+    )).toEqual({ count: 2 });
+  }, IT_TIMEOUT);
+
 });
