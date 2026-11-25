@@ -469,6 +469,72 @@ describeDb('mmo transfer arrival crash window (PW18+PW30, real PostgreSQL)', () 
     }
   }, IT_TIMEOUT);
 
+  it('recovers a committed arrival when the worker dies before applying it', async () => {
+    const regionId = randomUUID();
+    const workerId = randomUUID();
+    const owner = ctx.fx.players[0];
+    await createRegion({
+      regionId, worldId: ctx.fx.worldId, label: 'dispatch-interruption-destination',
+      seed: { sim: { packId: 'td', mapId: 'td-tiberium-gardens', seed: 882,
+        players: [{ playerId: owner.playerId, name: owner.displayName, faction: PACKS.td.factions[0].id }] } },
+      rulesetVersion: MMO_PROTOCOL, engineArtifactSha256: 'fixture-engine-sha',
+    });
+    const wallTime = Date.now();
+    const original = startProcessWorker(regionId, workerId, wallTime);
+    let recovered: ReturnType<typeof startProcessWorker> | undefined;
+    try {
+      const initialized = await original.request({ type: 'start' });
+      await original.request({ type: 'checkpoint' });
+      const { ref } = loadedCarrier(ctx);
+      const released = await worldAction(ctx, ctx.a, owner.playerId, { t: 'regionTransfer', entityId: ref, destRegionId: regionId });
+      expect(released.accepted).toBe(true);
+      const id = released.transferId as string;
+      await waitFor(async () => await transferState(id) === 'SOURCE_RELEASED');
+      await original.request({ type: 'advance', tick: 19 });
+      await original.request({ type: 'pauseAfterCommit' });
+      const paused = once(original.child, 'message', { signal: AbortSignal.timeout(12_000) });
+      original.child.send({ type: 'poll' });
+      const [message] = await paused;
+      expect(message).toMatchObject({ committedEventSeq: expect.any(String) });
+      const event = await mmoOne<{ event_seq: string; simulation_tick: string; applied_at: Date | null;
+        payload: { placement: { simId: number; cell: number } } }>(
+        'select event_seq, simulation_tick, applied_at, payload from region_event where event_id = $1', [id]);
+      expect(event).toMatchObject({ event_seq: message.committedEventSeq, simulation_tick: '19', applied_at: null });
+      expect(await transferState(id)).toBe('COMPLETED');
+      expect((await original.request({ type: 'observeTransfer', transferId: id })).transfer).toBeUndefined();
+
+      const exited = once(original.child, 'exit');
+      expect(original.child.kill('SIGKILL')).toBe(true);
+      expect(await exited).toEqual([null, 'SIGKILL']);
+      const replacement = randomUUID();
+      await acquireRegionLease({ regionId, workerId: replacement, forceTakeover: true });
+      recovered = startProcessWorker(regionId, replacement, wallTime);
+      const restored = await recovered.request({ type: 'start' });
+      const actual = await recovered.request({ type: 'observeTransfer', transferId: id });
+      expect(restored.pid).not.toBe(initialized.pid);
+      expect(actual.tick).toBe(19);
+      expect(actual.transfer?.carrier.id).toBe(event?.payload.placement.simId);
+      expect(actual.transfer?.cargo).toHaveLength(1);
+      expect(actual.transfer?.cargo[0].carriedBy).toBe(actual.transfer?.carrier.id);
+      expect(await transferApplied(id)).toBe(true);
+      expect(await mmoQuery('select kind from asset_ledger where operation_id=$1 order by kind', [id]))
+        .toEqual([{ kind: 'TRANSFER_IN' }, { kind: 'TRANSFER_OUT' }]);
+      console.info('Transfer commit before dispatch', {
+        terminatedPid: initialized.pid, replacementPid: restored.pid,
+        eventSeq: event?.event_seq, tick: actual.tick, cell: event?.payload.placement.cell,
+      });
+      await recovered.request({ type: 'stop' });
+    } finally {
+      for (const worker of [original, recovered]) {
+        if (worker?.child.exitCode === null && worker.child.signalCode === null) {
+          const exit = once(worker.child, 'exit');
+          worker.child.kill();
+          await exit;
+        }
+      }
+    }
+  }, IT_TIMEOUT);
+
   it('does not materialize legacy arrivals after a durable destruction or departure', async () => {
     await ctx.bf.runner.checkpoint('before-legacy-arrivals');
     const transfers: string[] = [];
