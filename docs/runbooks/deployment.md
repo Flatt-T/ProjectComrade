@@ -47,3 +47,15 @@ Inspect deployment with `journalctl -u comrade-deploy.service`, `cat /opt/comrad
 ## Current limits
 
 The TD slice bundles pinned freeware content and an authored map. Classic artwork is scaled, not redrawn in HD. Full reference parity, deterministic headless stepping, synchronized multiplayer, campaigns and other games remain future work. Health confirms deployment identity; browser tests establish the playable slice. See ADR 006 for the updated project direction.
+
+## Separate beta migration and runtime identities
+
+Beta can use a deploy-time PostgreSQL migration role on the existing server. Enable this mode on the dedicated beta guest after verifying the database backup and the release rollback path. Images built before managed migrations need the previous beta ownership and grants for their startup migration path. The current production channel keeps its usual startup path.
+
+- Keep `DATABASE_URL` and `MMO_DATABASE_URL` in the beta guest's runtime configuration. Both must connect to `comrade_beta` as `comrade_beta_app`.
+- Provision `comrade_beta_migrator` to own the beta database and its migration-controlled objects. Scope it to the beta container network and the single beta database in PostgreSQL's connection rules. Keep it separate from both application roles.
+- Grant `comrade_beta_app` connect, schema usage, table reads and writes, and sequence usage on the beta objects it uses. Include privileges on future objects created by the migrator. Keep schema creation and migration ownership with the deploy-time identity.
+- Set `COMRADE_BETA_MIGRATOR_URL` in the root-owned `beta-migrator.env` in the beta deployment root. Use mode `0600`. Keep this file outside the runtime Compose environment. Enable `COMRADE_BETA_MANAGED_MIGRATIONS=true` on the beta deploy service and in the beta Compose environment.
+- The deployer verifies and loads the exact release image, runs its migration command once, then activates the runtime. The command asserts its actual database and role before migrations. The beta runtime checks both migration histories before it starts serving.
+
+The migration command retains existing persistent-world tables in `public` where that layout is already in use. Fresh managed databases start in `mmo`. Ambiguous layouts stop the migration. Check the expected histories, live application-role access and production connection denial before accepting a rollout. When schema versions change, use the release's reviewed rollback or the verified database restore procedure.

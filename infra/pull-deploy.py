@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import urllib.error
 import urllib.request
@@ -19,6 +20,7 @@ CHANNEL = os.environ.get('COMRADE_CHANNEL', 'production')
 if CHANNEL not in ('production', 'beta'):
     raise SystemExit('COMRADE_CHANNEL must be production or beta')
 BETA = CHANNEL == 'beta'
+MANAGED_BETA_MIGRATIONS = BETA and os.environ.get('COMRADE_BETA_MANAGED_MIGRATIONS') == 'true'
 ROOT = Path(os.environ.get('COMRADE_DEPLOY_ROOT', '/opt/comrade-beta' if BETA else '/opt/comrade'))
 PROJECT = os.environ.get('COMRADE_COMPOSE_PROJECT', 'comrade-beta' if BETA else 'comrade')
 PORT = os.environ.get('COMRADE_HOST_PORT', '3002' if BETA else '3001')
@@ -36,7 +38,9 @@ def request(url):
 def deploy_env(image):
     env = {**os.environ, 'COMRADE_IMAGE': image,
            'COMRADE_BIND_ADDRESS': os.environ.get('COMRADE_BIND_ADDRESS', '10.10.0.60'),
-           'COMRADE_HOST_PORT': PORT, 'COMRADE_CHANNEL': CHANNEL}
+           'COMRADE_HOST_PORT': PORT, 'COMRADE_CHANNEL': CHANNEL,
+           'COMRADE_BETA_MANAGED_MIGRATIONS': 'true' if MANAGED_BETA_MIGRATIONS else ''}
+    env.pop('COMRADE_BETA_MIGRATOR_URL', None)
     # Secrets live beside the state file, never in the repo or the image: the database URL,
     # the Cognito pool, the Stripe keys and the log-export token. Only
     # names the service actually reads are passed through, so a stray line cannot inject
@@ -77,6 +81,21 @@ def compose(image):
     subprocess.run(['docker', 'compose', '-p', PROJECT, '-f', str(ROOT / 'compose.yml'),
                     'up', '-d', '--pull', 'never', '--wait', '--wait-timeout', '90'],
                    env=deploy_env(image), check=True)
+
+
+def migrate_beta(image):
+    if not MANAGED_BETA_MIGRATIONS:
+        return
+    credentials = ROOT / 'beta-migrator.env'
+    metadata = credentials.lstat()
+    if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != 0 or metadata.st_mode & 0o077:
+        raise RuntimeError('Beta migrator credentials require a root-owned private file')
+    subprocess.run([
+        'docker', 'run', '--rm', '--read-only', '--cap-drop', 'ALL',
+        '--security-opt', 'no-new-privileges:true', '--memory', '256m',
+        '--env-file', str(credentials), '--env', 'COMRADE_CHANNEL=beta',
+        image, 'node', 'apps/service/dist/migrate-beta.js',
+    ], check=True, timeout=120)
 
 
 def prune_images(commit, previous_commit):
@@ -180,6 +199,7 @@ def main():
                     raise RuntimeError('Loaded image identity mismatch')
                 subprocess.run(['docker', 'tag', match, image], check=True)
                 image_id = manifest['image_id']
+            migrate_beta(image)
             try:
                 compose(image)
                 env = deploy_env(image)

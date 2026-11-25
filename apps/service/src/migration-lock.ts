@@ -13,3 +13,16 @@ export async function withMigrationLock(
     client.release(true);
   }
 }
+
+/** Runtime startup reads the schema history without requiring DDL privileges. */
+export async function assertSchemaHistory(
+  pool: Pool, schema: 'comrade' | 'mmo' | 'public',
+  expected: readonly { version: number; name: string }[],
+): Promise<void> {
+  const { rows } = await pool.query<{ version: number; name: string }>(
+    `select version, name from ${schema}.schema_migrations order by version`);
+  if (rows.length !== expected.length || rows.some((row, i) =>
+    row.version !== expected[i].version || row.name !== expected[i].name)) {
+    throw new Error(`Unexpected ${schema} migration history for this release`);
+  }
+}

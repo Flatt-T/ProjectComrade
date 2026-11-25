@@ -9,7 +9,7 @@
 // unmetered, no accounts. That keeps the live site working while the database, Cognito pool
 // and Stripe products are being provisioned, and makes the rollout reversible.
 import { Pool, PoolClient, QueryResultRow } from 'pg';
-import { withMigrationLock } from './migration-lock.js';
+import { assertSchemaHistory, withMigrationLock } from './migration-lock.js';
 import { log } from './ops.js';
 
 export const SCHEMA = 'comrade';
@@ -301,8 +301,8 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
 ];
 
 /** Create the schema if missing and apply any migrations this build is ahead on. */
-export async function migrate(): Promise<void> {
-  await withMigrationLock(db(), SCHEMA, async client => {
+export async function migrate(target = db()): Promise<void> {
+  await withMigrationLock(target, SCHEMA, async client => {
     await client.query(`create schema if not exists ${SCHEMA}`);
     await client.query(`set search_path to ${SCHEMA}, public`);
     await client.query(`create table if not exists schema_migrations (
@@ -324,6 +324,10 @@ export async function migrate(): Promise<void> {
       }
     }
   });
+}
+
+export function assertPlatformSchema(): Promise<void> {
+  return assertSchemaHistory(db(), SCHEMA, MIGRATIONS);
 }
 
 export async function closeDatabase(): Promise<void> {
