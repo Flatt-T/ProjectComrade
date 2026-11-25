@@ -5,16 +5,25 @@ import { createWorldHandler } from '../../../apps/service/src/mmo/world.js';
 type Game = NonNullable<RegionRunner['currentGame']>;
 
 export type WorkerRequest =
-  | { type: 'start' | 'poll' | 'checkpoint' | 'stop' }
+  | { type: 'start' | 'poll' | 'checkpoint' | 'pauseAfterCommit' | 'stop' }
   | { type: 'advance'; tick: number }
   | { type: 'observeTransfer'; transferId: string };
 
 const [regionId, workerId, wallTime] = process.argv.slice(2);
+let pauseAfterCommit = false;
 const runner = new RegionRunner({
   regionId, workerId, leaseMs: 30_000, tickMs: 60_000, pollMs: 60_000,
   now: () => Number(wallTime),
   quiescence: { enabled: false },
   worldHandler: createWorldHandler(),
+  faultHooks: {
+    afterPlanCommit: async sequence => {
+      if (!pauseAfterCommit) return;
+      pauseAfterCommit = false;
+      process.send?.({ committedEventSeq: sequence });
+      await new Promise<void>(() => undefined);
+    },
+  },
 });
 const clock = runner as unknown as { advanceTo(tick: number): Promise<void>; onPoll(): Promise<void> };
 
@@ -53,6 +62,7 @@ process.on('message', async (request: WorkerRequest) => {
       case 'advance': await clock.advanceTo(request.tick); break;
       case 'observeTransfer': break;
       case 'checkpoint': await runner.checkpoint('manual'); break;
+      case 'pauseAfterCommit': pauseAfterCommit = true; break;
       case 'stop':
         await runner.stop();
         await closeMmoDatabase();

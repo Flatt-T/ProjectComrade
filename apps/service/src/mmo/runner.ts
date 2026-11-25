@@ -1444,7 +1444,10 @@ export class RegionRunner {
           transferId: transfer.transfer_id, error: String(error).slice(0, 300),
         });
       }
-      if (eventSeq !== undefined) await this.receiptTransferArrival(eventSeq, arrival, tick);
+      if (eventSeq !== undefined) {
+        await this.opts.faultHooks?.afterPlanCommit?.(eventSeq);
+        await this.receiptTransferArrival(eventSeq, arrival, tick);
+      }
     }
   }
 
