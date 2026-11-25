@@ -27,6 +27,7 @@ export interface SubmitResult {
   commandId: string;
   regionId: string;
   eventSeq?: string;
+  tick?: string;
 }
 
 /**
@@ -68,7 +69,7 @@ async function submitCommandOnce(args: {
 
   return mmoTransaction(async tx => {
     // Lock the intent row first: stable lock order is intent → region fence → event.
-    const selectIntent = () => tx.query<{ payload_sha256: string; status: string; result: { eventSeq?: string } | null }>(
+    const selectIntent = () => tx.query<{ payload_sha256: string; status: string; result: { eventSeq?: string; tick?: string } | null }>(
       `select payload_sha256, status, result from command_intent
         where player_id = $1 and command_id = $2 for update`,
       [args.playerId, commandId]);
@@ -90,7 +91,15 @@ async function submitCommandOnce(args: {
         throw new MmoStoreError('COMMAND_CONFLICT', 'command id reused with a different payload');
       }
       if (prior.status === 'committed_pending_application' || prior.status === 'applied') {
-        return { status: 'deduplicated' as const, commandId, regionId, eventSeq: prior.result?.eventSeq };
+        const eventSeq = prior.result?.eventSeq;
+        let tick = prior.result?.tick;
+        if (tick === undefined && eventSeq !== undefined) {
+          const event = await tx.query<{ simulation_tick: string }>(
+            'select simulation_tick from region_event where region_id = $1 and event_seq = $2',
+            [regionId, eventSeq]);
+          tick = event.rows[0]?.simulation_tick;
+        }
+        return { status: 'deduplicated' as const, commandId, regionId, eventSeq, tick };
       }
       // 'received'/'accepted'/'rejected' cannot survive a committed transaction; treat
       // as a fresh submission (the previous attempt rolled back).
@@ -106,9 +115,11 @@ async function submitCommandOnce(args: {
     if (currentEpoch !== undefined && BigInt(message.seenEpoch) !== BigInt(currentEpoch)) {
       throw new MmoStoreError('STALE_EPOCH', 'command seenEpoch does not match the region authority epoch');
     }
-    const tick = regionRow.rows[0]
-      ? BigInt(regionRow.rows[0].last_committed_tick)
-      : BigInt(args.tick);
+    // The trusted worker supplies the tick it has already simulated. Keep
+    // that input boundary unless the durable journal is now further ahead.
+    const runnerTick = BigInt(args.tick);
+    const tailTick = BigInt(regionRow.rows[0]?.last_committed_tick ?? 0);
+    const tick = runnerTick < tailTick ? tailTick : runnerTick;
 
     const { eventSeq, eventId } = await appendRegionEvent(tx, {
       regionId, workerId: args.fence.workerId, epoch: args.fence.epoch, tick,
@@ -119,8 +130,8 @@ async function submitCommandOnce(args: {
     await tx.query(
       `update command_intent set status = 'committed_pending_application', result = $3, updated_at = clock_timestamp()
         where player_id = $1 and command_id = $2`,
-      [args.playerId, commandId, JSON.stringify({ eventSeq, eventId })]);
-    return { status: 'committed' as const, commandId, regionId, eventSeq };
+      [args.playerId, commandId, JSON.stringify({ eventSeq, eventId, tick: tick.toString() })]);
+    return { status: 'committed' as const, commandId, regionId, eventSeq, tick: tick.toString() };
   });
 }
 
