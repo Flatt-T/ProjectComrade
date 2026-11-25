@@ -535,6 +535,102 @@ describeDb('mmo transfer arrival crash window (PW18+PW30, real PostgreSQL)', () 
     }
   }, IT_TIMEOUT);
 
+  it('replays combat destruction of an arriving carrier and its cargo after a worker kill', async () => {
+    const owner = ctx.fx.players[0];
+    const opponent = ctx.fx.players[1];
+    const regionId = randomUUID();
+    const region = await createRegion({
+      regionId, worldId: ctx.fx.worldId, label: 'combat-replay-destination',
+      seed: { sim: { packId: 'td', mapId: 'td-tiberium-gardens', seed: 887,
+        players: [
+          { playerId: owner.playerId, name: owner.displayName, faction: 'gdi' },
+          { playerId: opponent.playerId, name: opponent.displayName, faction: 'nod',
+            starter: { credits: 3000, units: ['mcv', 'lighttank'] } },
+        ] } },
+      rulesetVersion: MMO_PROTOCOL, engineArtifactSha256: 'fixture-engine-sha',
+    });
+    const workerId = randomUUID();
+    const wallTime = Date.now();
+    const original = startProcessWorker(region.region_id, workerId, wallTime);
+    let recovered: ReturnType<typeof startProcessWorker> | undefined;
+    try {
+      const initial = await original.request({ type: 'start' });
+      await original.request({ type: 'checkpoint' });
+      const { ref } = loadedCarrier(ctx);
+      const launched = await worldAction(ctx, ctx.a, owner.playerId, {
+        t: 'regionTransfer', entityId: ref, destRegionId: regionId,
+      });
+      expect(launched.accepted).toBe(true);
+      const transferId = launched.transferId as string;
+      await waitFor(async () => await transferState(transferId) === 'SOURCE_RELEASED');
+      await original.request({ type: 'advance', tick: 20 });
+      await original.request({ type: 'poll' });
+      expect(await transferApplied(transferId)).toBe(true);
+      const arrival = (await original.request({ type: 'observeTransfer', transferId })).transfer;
+      expect(arrival?.cargo).toHaveLength(1);
+      const carrierId = arrival!.carrier.id;
+      const passengerId = arrival!.cargo[0].id;
+      const ready = await original.request({ type: 'observeCombat' });
+      const tank = ready.units?.find(unit => unit.owner === 1 && unit.type === 'lighttank');
+      expect(tank).toBeDefined();
+      const attack = await submitCommand({
+        playerId: opponent.playerId, fence: { workerId, epoch: ready.epoch }, tick: ready.tick,
+        rawMessage: { protocol: MMO_PROTOCOL, type: 'command', commandId: randomUUID(), regionId,
+          seenEpoch: ready.epoch, lastSeenEventSeq: ready.seq,
+          action: { t: 'attack', entityIds: [mmoEntityId(regionId, tank!.id)], targetId: transferId },
+        },
+      });
+      await original.request({ type: 'poll' });
+      expect(await mmoOne(
+        'select application_result from region_event where region_id=$1 and event_seq=$2',
+        [regionId, attack.eventSeq])).toEqual({ application_result: { accepted: true, action: 'attack', via: 'sim' } });
+
+      await original.request({ type: 'advance', tick: 1_400 });
+      await original.request({ type: 'poll' });
+      const beforeKill = await original.request({ type: 'observeCombat' });
+      expect(beforeKill.units?.map(unit => unit.id)).not.toContain(carrierId);
+      expect(beforeKill.units?.map(unit => unit.id)).not.toContain(passengerId);
+      const destroyReceipts = () => mmoQuery(
+        "select kind, engine_entity_key from asset_ledger where region_id=$1 and entity_id=$2 and kind='DESTROY'",
+        [regionId, transferId]);
+      expect(await destroyReceipts()).toEqual([{ kind: 'DESTROY', engine_entity_key: String(carrierId) }]);
+      const retain = await mmoOne('select array_agg(tick::text order by tick) as ticks from region_snapshot where region_id=$1',
+        [regionId]);
+      expect(retain).toEqual({ ticks: ['0'] });
+
+      const exit = once(original.child, 'exit');
+      expect(original.child.kill('SIGKILL')).toBe(true);
+      expect(await exit).toEqual([null, 'SIGKILL']);
+      const replacement = randomUUID();
+      await acquireRegionLease({ regionId, workerId: replacement, forceTakeover: true });
+      recovered = startProcessWorker(regionId, replacement, wallTime);
+      const resumed = await recovered.request({ type: 'start' });
+      expect(resumed.pid).not.toBe(initial.pid);
+      await recovered.request({ type: 'advance', tick: beforeKill.tick });
+      await recovered.request({ type: 'poll' });
+      const actual = await recovered.request({ type: 'observeCombat' });
+      expect(actual).toMatchObject({
+        tick: beforeKill.tick, checksum: beforeKill.checksum, credits: beforeKill.credits, units: beforeKill.units,
+      });
+      expect(await destroyReceipts()).toEqual([{ kind: 'DESTROY', engine_entity_key: String(carrierId) }]);
+      expect(await mmoQuery('select kind from asset_ledger where operation_id=$1 order by kind', [transferId]))
+        .toEqual([{ kind: 'TRANSFER_IN' }, { kind: 'TRANSFER_OUT' }]);
+      console.info('Fresh-process post-transfer combat replay', {
+        terminatedPid: initial.pid, replacementPid: resumed.pid, attackSeq: attack.eventSeq,
+        comparisonTick: actual.tick, checksum: actual.checksum, destroyedCarrier: carrierId, destroyedPassenger: passengerId,
+      });
+      await recovered.request({ type: 'stop' });
+    } finally {
+      for (const worker of [original, recovered]) {
+        if (worker?.child.exitCode === null && worker.child.signalCode === null) {
+          const exit = once(worker.child, 'exit');
+          worker.child.kill();
+          await exit;
+        }
+      }
+    }
+  }, IT_TIMEOUT);
+
   it('does not materialize legacy arrivals after a durable destruction or departure', async () => {
     await ctx.bf.runner.checkpoint('before-legacy-arrivals');
     const transfers: string[] = [];
