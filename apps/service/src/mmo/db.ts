@@ -13,7 +13,7 @@
 // append-only audit of ownership-affecting operations — immutable causes, never a
 // second writable copy of entity state.
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
-import { withMigrationLock } from '../migration-lock.js';
+import { assertSchemaHistory, withMigrationLock } from '../migration-lock.js';
 import { MMO_MIGRATIONS } from './schema.js';
 
 export const MMO_SCHEMA = 'mmo';
@@ -71,10 +71,10 @@ export async function mmoTransaction<T>(work: (client: PoolClient) => Promise<T>
 }
 
 /** Create the mmo schema if missing and apply any migrations this build is ahead on. */
-export async function mmoMigrate(): Promise<void> {
-  await withMigrationLock(mmoDb(), MMO_SCHEMA, async client => {
-    await client.query(`create schema if not exists ${MMO_SCHEMA}`);
-    await client.query(`set search_path to ${MMO_SCHEMA}, public`);
+export async function mmoMigrate(target = mmoDb(), schema: 'mmo' | 'public' = MMO_SCHEMA): Promise<void> {
+  await withMigrationLock(target, MMO_SCHEMA, async client => {
+    await client.query(`create schema if not exists ${schema}`);
+    await client.query(`set search_path to ${schema}, public`);
     await client.query(`create table if not exists schema_migrations (
       version integer primary key, name text not null, applied_at timestamptz not null default now())`);
     const { rows } = await client.query<{ version: number }>('select version from schema_migrations');
@@ -92,6 +92,26 @@ export async function mmoMigrate(): Promise<void> {
       }
     }
   });
+}
+
+/** Existing beta installations can keep the persistent tables in public. */
+export async function mmoSchemaForBeta(target = mmoDb()): Promise<'mmo' | 'public'> {
+  const { rows } = await target.query<{ schema: 'mmo' | 'public'; ledger: boolean }>(
+    `select n.nspname as schema,
+      bool_or(c.relname = 'schema_migrations') as ledger
+      from pg_catalog.pg_class c join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+      where c.relkind in ('r', 'p') and c.relname in ('region', 'schema_migrations')
+        and n.nspname in ('mmo', 'public')
+      group by n.nspname having bool_or(c.relname = 'region')`);
+  if (rows.length > 1 || (rows[0] && !rows[0].ledger)) {
+    throw new Error('Cannot identify one persistent world schema and its migration history');
+  }
+  return rows[0]?.schema ?? MMO_SCHEMA;
+}
+
+export async function assertMmoSchema(): Promise<void> {
+  const target = mmoDb();
+  await assertSchemaHistory(target, await mmoSchemaForBeta(target), MMO_MIGRATIONS);
 }
 
 /** Drop and recreate the mmo schema. Test-only helper for disposable databases. */

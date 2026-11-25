@@ -22,6 +22,10 @@ export function betaDeployment(): boolean {
   return text('COMRADE_CHANNEL') === 'beta' || publicUrl() === BETA_PUBLIC_ORIGIN;
 }
 
+export function managedBetaMigrations(): boolean {
+  return betaDeployment() && text('COMRADE_BETA_MANAGED_MIGRATIONS') === 'true';
+}
+
 /** Browsers always send an Origin for a WebSocket handshake. */
 export function allowsWebSocketOrigin(origin: string | undefined): boolean {
   return !betaDeployment() || origin === undefined || origin === BETA_PUBLIC_ORIGIN;
