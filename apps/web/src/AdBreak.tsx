@@ -13,6 +13,10 @@ import { configureAds, placementFilled, placementMissed, showInterstitial } from
 
 export default function AdBreak({ ad, onDone }: { ad: AdBreakSlot; onDone: () => void }) {
   const finished = useRef(false);
+  const onDoneRef = useRef(onDone);
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
   const startedAt = useRef(Date.now());
   const [house, setHouse] = useState(false);
   const [left, setLeft] = useState(ad.seconds);
@@ -28,7 +32,7 @@ export default function AdBreak({ ad, onDone }: { ad: AdBreakSlot; onDone: () =>
       api.adImpression({ token: ad.token, provider, filled, seconds: watched })
         .catch(() => undefined);
       recordEvent('ad-complete', { provider, filled });
-      onDone();
+      onDoneRef.current();
     };
 
     let cancelled = false;
@@ -45,7 +49,7 @@ export default function AdBreak({ ad, onDone }: { ad: AdBreakSlot; onDone: () =>
     })();
 
     return () => { cancelled = true; };
-  }, [ad, onDone]);
+  }, [ad]);
 
   useEffect(() => {
     if (!house) return;
@@ -59,11 +63,11 @@ export default function AdBreak({ ad, onDone }: { ad: AdBreakSlot; onDone: () =>
         api.adImpression({ token: ad.token, provider: 'house', filled: false, seconds: watched })
           .catch(() => undefined);
         recordEvent('ad-complete', { provider: 'house', filled: false });
-        onDone();
+        onDoneRef.current();
       }
     }, 250);
     return () => clearInterval(timer);
-  }, [house, ad, onDone]);
+  }, [house, ad]);
 
   return <div className="ad-break" role="dialog" aria-label="Advertisement before the match">
     <div className="ad-stage">

@@ -132,8 +132,11 @@ try {
     await dismissConsent(page);
     await page.getByRole('button', { name: /ENTER THE WAR ROOM/ }).click();
   };
+  const waitForMatchControls = page =>
+    page.locator('.ad-break').waitFor({ state: 'detached', timeout: 70000 });
   const fusionDeploy = async page => {
     await page.waitForFunction(() => window.comradeFusion?.game.tick > 30, null, { timeout: 30000 });
+    await waitForMatchControls(page);
     await page.evaluate(() => {
       const { game, slot, issue } = window.comradeFusion;
       const mcv = [...game.entities.values()].find(e => e.owner === slot && game.pack.units[e.type]?.deploysTo);
@@ -243,6 +246,7 @@ try {
 
   await host.getByRole('button', { name: /START OPERATION/ }).click();
   await Promise.all(pages.map(page => page.waitForFunction(() => !!window.comradeFusion, null, { timeout: 30000 })));
+  await Promise.all(pages.map(waitForMatchControls));
   const slots = await Promise.all(pages.map(page => page.evaluate(() => {
     window.__sums = {};
     const { game, slot } = window.comradeFusion;
@@ -286,7 +290,10 @@ try {
       e.owner === slot && game.pack.structures[e.type]?.constructionYard));
   }, slots, { timeout: 30000 })));
 
-  await Promise.all(pages.map(page => page.waitForFunction(() => window.comradeFusion.game.tick > 450, null, { timeout: 90000 })));
+  const currentTicks = await Promise.all(pages.map(page => page.evaluate(() => window.comradeFusion.game.tick)));
+  const finishTick = Math.max(...currentTicks) + 450;
+  await Promise.all(pages.map(page => page.waitForFunction(tick => window.comradeFusion.game.tick >= tick,
+    finishTick, { timeout: 90000 })));
   const sums = await Promise.all(pages.map(page => page.evaluate(() => window.__sums)));
   const common = Object.keys(sums[0]).filter(t => sums.every(client => t in client));
   assert.ok(common.length >= 5, 'All four clients must reach shared checkpoints');
