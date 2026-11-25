@@ -145,7 +145,7 @@ export class MmoGateway {
     conn.lastPong = Date.now();
     ws.on('pong', () => { conn.lastPong = Date.now(); });
     conn.interval = setInterval(() => {
-      conn.messages = 0;
+      if (conn.identity) conn.messages = 0;
       // Reap sockets that stopped answering pings (dead peer, vanished tab).
       conn.beat = (conn.beat ?? 0) + 1;
       if (conn.beat % Math.max(1, Math.round(wsPingMs() / 1000)) === 0) {
@@ -161,29 +161,38 @@ export class MmoGateway {
     }, 1000);
     log('mmo-connect', { peer: conn.id });
 
-    void resolveIdentity(req.headers.cookie).then(identity => {
-      conn.identity = identity;
-      if (!identity) { sendError(ws, 'UNAUTHENTICATED', 'Sign in or allow guest play to enter the persistent world'); return; }
-      // Numeric MMO_ALLOW_GUESTS caps concurrent guest sockets; 'open' is the
-      // legacy uncapped beta mode. The socket may already be gone — only count
-      // live connections so the tally cannot leak.
+    const authorized = resolveIdentity(req.headers.cookie).then(identity => {
+      if (ws.readyState !== ws.OPEN) return false;
+      if (!identity) {
+        sendError(ws, 'UNAUTHENTICATED', 'Sign in or allow guest play to enter the persistent world');
+        return false;
+      }
       const policy = mmoGuestPolicy();
       if (identity.kind === 'guest' && typeof policy === 'number') {
-        if (ws.readyState !== ws.OPEN) return;
         if (this.guestConns >= policy) {
           log('mmo-guest-cap', { guests: this.guestConns, max: policy });
           sendError(ws, 'GUEST_LIMIT', 'Guest capacity reached — sign in or try again later');
           ws.close(1013, 'Guest capacity reached');
-          return;
+          return false;
         }
         this.guestConns++;
         conn.guestCounted = true;
       }
+      conn.identity = identity;
+      return true;
+    }).catch(() => {
+      sendError(ws, 'UNAUTHENTICATED', 'Unable to verify the persistent world session');
+      return false;
     });
 
     ws.on('message', data => {
-      if (++conn.messages > 30) { ws.close(1008, 'Message rate exceeded'); return; }
-      void this.onMessage(conn, data.toString());
+      // Browsers subscribe as soon as the socket opens, while Cognito is still
+      // resolving a registered session. Bound the buffered messages during auth.
+      const limit = conn.identity ? 30 : MAX_SUBSCRIPTIONS;
+      if (++conn.messages > limit) { ws.close(1008, 'Message rate exceeded'); return; }
+      void authorized.then(accept => {
+        if (accept && ws.readyState === ws.OPEN) return this.onMessage(conn, data.toString());
+      });
     });
     ws.on('close', () => {
       if (conn.interval) clearInterval(conn.interval);
@@ -231,6 +240,7 @@ export class MmoGateway {
     if (!region) { sendError(conn.ws, 'NO_REGION', 'Unknown region'); return; }
 
     const runner = await this.service.ensure(regionId);
+    if (conn.ws.readyState !== conn.ws.OPEN) return;
     if (!runner || !runner.currentGame) { sendError(conn.ws, 'REGION_UNAVAILABLE', 'Region runner is not live'); return; }
     const epoch = runner.authorityEpoch ?? '0';
     if (seenEpoch !== '0' && BigInt(seenEpoch) !== BigInt(epoch)) {
@@ -239,6 +249,7 @@ export class MmoGateway {
     }
 
     const player = await this.service.playerFor(conn.identity, region.world_id);
+    if (conn.ws.readyState !== conn.ws.OPEN) return;
     const slot = runner.slotForPlayer(player.player_id) ?? null;
     conn.subs.set(regionId, { regionId, playerId: player.player_id, slot });
     // A live socket is presence even before settlement: the runner's

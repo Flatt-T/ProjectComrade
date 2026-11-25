@@ -2,7 +2,7 @@
 
 Scope: THU-2244 / PW20. Beta = `https://beta.projectcomrade.co.uk`, LXC 283
 `projectcomrade-beta-01` (10.10.0.61) on prx-h4, container `comrade-comrade-1`,
-port 3001 behind the Cloudflare tunnel. Database `comrade_beta` + role
+port 3001 behind Cloudflare and Nginx Proxy Manager host 54. Database `comrade_beta` + role
 `comrade_beta_app` on the shared PG VM (10.10.0.35), schema `mmo`.
 
 ## Deploy / rollback
@@ -43,6 +43,20 @@ port 3001 behind the Cloudflare tunnel. Database `comrade_beta` + role
   `9d9f45b…` (PW19) and `3384342…` (docs). Do not roll back across MMO
   schema migrations without a DB restore plan — migrations are
   append-only but older binaries may not understand newer columns.
+
+## PostgreSQL target checks
+
+Beta must open both platform and persistent-world connections to `comrade_beta` as
+`comrade_beta_app`. Startup checks the database and role reported by PostgreSQL
+before either migration runs. Each schema uses a PostgreSQL advisory lock to
+serialize concurrent migrators. On a target failure the service logs
+`beta-db-target-failed` and exits before opening HTTP or WebSocket listeners.
+
+The shared PostgreSQL instance permits `comrade_beta_app` over TLS from
+LXC 283 (`10.10.0.61`) to the `comrade_beta` database. Keep the beta role's
+explicit rejection rules ahead of the generic estate rules. Check the beta
+connection and confirm that the same role is rejected by the production database
+after changes to `pg_hba.conf`.
 
 ## Backup / restore
 
