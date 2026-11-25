@@ -853,9 +853,9 @@ export async function* recoverySnapshots(regionId: string): AsyncGenerator<Regio
 export async function listRegionEventsAfter(regionId: string, afterSeq: number | bigint, kinds: string[], limit = 500) {
   return mmoQuery<{
     event_seq: string; event_kind: string; payload: unknown; simulation_tick: string;
-    applied_at: Date | null; resolved: unknown;
+    applied_at: Date | null; application_result: unknown; resolved: unknown;
   }>(
-    `select event_seq, event_kind, payload, simulation_tick, applied_at, resolved
+    `select event_seq, event_kind, payload, simulation_tick, applied_at, application_result, resolved
        from region_event
       where region_id = $1 and event_seq > $2 and event_kind = any($3)
       order by event_seq limit $4`,
