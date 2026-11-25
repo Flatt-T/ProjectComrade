@@ -162,10 +162,11 @@ export class RegionService {
   }
 
   /** The fence a subscriber must present on submitCommand for this region. */
-  async fenceFor(regionId: string): Promise<{ workerId: string; epoch: string } | undefined> {
+  async fenceFor(regionId: string): Promise<{ workerId: string; epoch: string; tick: number } | undefined> {
     const entry = await this.entryFor(regionId, false);
     const epoch = entry?.runner.authorityEpoch;
-    return entry && epoch ? { workerId: entry.workerId, epoch } : undefined;
+    const tick = entry?.runner.currentGame?.tick;
+    return entry && epoch && tick !== undefined ? { workerId: entry.workerId, epoch, tick } : undefined;
   }
 
   /**
