@@ -190,45 +190,110 @@ try {
     await page.close();
   }
 
-  // Two real browsers in one lockstep match.
-  const contextA = await browser.newContext({ viewport: { width: 1400, height: 900 } });
-  const contextB = await browser.newContext({ viewport: { width: 1400, height: 900 } });
-  const a = await contextA.newPage(), b = await contextB.newPage();
+  // Four independent browser sessions in one invite-only lockstep match.
+  const names = ['Lockstep A', 'Lockstep B', 'Lockstep C', 'Lockstep D'];
+  const contexts = await Promise.all(names.map(() => browser.newContext({ viewport: { width: 1400, height: 900 } })));
+  const pages = await Promise.all(contexts.map(ctx => ctx.newPage()));
+  const [host, ...guests] = pages;
   const errors = [];
-  for (const page of [a, b]) page.on('pageerror', error => errors.push(error.message));
-  await a.goto(base);
-  await dismissConsent(a);
-  await enter(a, 'Lockstep A');
-  await a.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
-  await a.getByRole('button', { name: /START OPERATION/ }).waitFor();
-  await setSelect(a, 'Game style', 'dune2k');
-  await a.waitForFunction(() => document.querySelector('.room-head .eyebrow')?.textContent.includes('DUNE'));
-  const invite = await a.locator('.room-share code').innerText();
-  await b.goto(invite);
-  await dismissConsent(b);
-  await enter(b, 'Lockstep B');
-  await b.getByRole('button', { name: /READY UP/ }).click();
-  await a.waitForFunction(() => [...document.querySelectorAll('.player')].some(p => p.textContent.includes('Lockstep B') && p.querySelector('.pready.on')));
-  const record = page => page.evaluate(() => {
-    window.__sums = {};
-    const g = window.comradeFusion.game, step = g.step.bind(g);
-    g.step = () => { step(); if (g.tick % 30 === 0) window.__sums[g.tick] = g.checksum(); };
+  for (const page of pages) page.on('pageerror', error => errors.push(error.message));
+
+  let room;
+  host.on('websocket', socket => {
+    if (new URL(socket.url()).pathname !== '/ws') return;
+    socket.on('framereceived', ({ payload }) => {
+      const message = JSON.parse(payload.toString());
+      if (message.type === 'room') room = message;
+    });
   });
-  await a.getByRole('button', { name: /START OPERATION/ }).click();
-  for (const page of [a, b]) await page.waitForFunction(() => !!window.comradeFusion, null, { timeout: 30000 });
-  await record(a); await record(b);
-  await fusionDeploy(a);
-  // B's copy of the world must contain A's construction yard: commands crossed the relay.
-  await b.waitForFunction(() => {
+  const waitForRoom = async (predicate, description) => {
+    const deadline = Date.now() + 10000;
+    while (!room || !predicate(room)) {
+      if (Date.now() >= deadline) throw new Error(description);
+      await new Promise(resolve => setTimeout(resolve, 40));
+    }
+  };
+
+  await host.goto(base);
+  await dismissConsent(host);
+  await enter(host, names[0]);
+  await host.getByRole('button', { name: /CREATE A NEW GAME/ }).click();
+  await host.getByRole('button', { name: /START OPERATION/ }).waitFor();
+  await setSelect(host, 'Visibility', 'invite');
+  await waitForRoom(r => r.options.visibility === 'invite', 'Room did not become invite-only');
+  await setSelect(host, 'Game style', 'dune2k');
+  await waitForRoom(r => r.options.style === 'dune2k', 'Room did not select the Dune-style game');
+  await setSelect(host, 'Battlefield', 'four-sietches');
+  await waitForRoom(r => r.options.map === 'four-sietches', 'Room did not select Four Sietches');
+  await setSelect(host, 'AI opponents', '0');
+  await waitForRoom(r => r.options.settings.ai === 0, 'Room did not remove AI opponents');
+  await setSelect(host, 'Human players', '4');
+  await waitForRoom(r => r.options.maxPlayers === 4, 'Room did not open four human seats');
+
+  const invite = await host.locator('.room-share code').innerText();
+  for (const [index, guest] of guests.entries()) {
+    await guest.goto(invite);
+    await dismissConsent(guest);
+    await enter(guest, names[index + 1]);
+    await guest.getByRole('button', { name: /READY UP/ }).click();
+  }
+  await host.waitForFunction(expected => expected.every(name =>
+    [...document.querySelectorAll('.player')].some(p => p.textContent.includes(name) && p.querySelector('.pready.on')),
+  ), names.slice(1));
+
+  await host.getByRole('button', { name: /START OPERATION/ }).click();
+  await Promise.all(pages.map(page => page.waitForFunction(() => !!window.comradeFusion, null, { timeout: 30000 })));
+  const slots = await Promise.all(pages.map(page => page.evaluate(() => {
+    window.__sums = {};
+    const { game, slot } = window.comradeFusion;
+    const step = game.step.bind(game);
+    game.step = () => { step(); if (game.tick % 30 === 0) window.__sums[game.tick] = game.checksum(); };
+    return slot;
+  })));
+  assert.equal(new Set(slots).size, 4, 'All four players must hold separate slots');
+  const locations = await Promise.all(pages.map(page => page.evaluate(() => {
+    const { game, slot, issue } = window.comradeFusion;
+    const mcv = [...game.entities.values()].find(e => e.owner === slot && game.pack.units[e.type]?.deploysTo);
+    if (!mcv) throw new Error('Missing starting MCV');
+    const yardType = game.pack.units[mcv.type].deploysTo;
+    const yard = game.pack.structures[yardType];
+    const here = game.cellOf(mcv);
+    const originX = here % game.map.w, originY = Math.floor(here / game.map.w);
+    for (let radius = 0; radius <= 12; radius++) {
+      for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
+        const x = originX + dx, y = originY + dy;
+        const cell = y * game.map.w + x;
+        if (!game.canPlace(game.players[slot], yardType, x - (yard.w >> 1), y - (yard.h >> 1), true, mcv.id)) continue;
+        if (cell !== here && !game.pathFor(mcv, cell).length) continue;
+        if (cell !== here) issue({ t: 'move', ids: [mcv.id], x, y });
+        return { id: mcv.id, cell };
+      }
+    }
+    throw new Error(`No deployable ground near the starting MCV for slot ${slot}`);
+  })));
+  await Promise.all(pages.map((page, index) => page.waitForFunction(({ id, cell }) => {
     const { game } = window.comradeFusion;
-    return [...game.entities.values()].some(e => e.owner === 0 && game.pack.structures[e.type]?.constructionYard);
-  }, null, { timeout: 30000 });
-  for (const page of [a, b]) await page.waitForFunction(() => window.comradeFusion.game.tick > 450, null, { timeout: 90000 });
-  const [sa, sb] = await Promise.all([a, b].map(page => page.evaluate(() => window.__sums)));
-  const common = Object.keys(sa).filter(t => t in sb);
-  assert.ok(common.length >= 5, 'Both clients must reach shared checkpoints');
-  for (const t of common) assert.equal(sa[t], sb[t], `Lockstep checksum mismatch at tick ${t}`);
+    const mcv = game.entities.get(id);
+    return mcv && game.cellOf(mcv) === cell && mcv.order === 'idle';
+  }, locations[index], { timeout: 45000 })));
+  await Promise.all(pages.map((page, index) => page.evaluate(({ id }) => {
+    window.comradeFusion.issue({ t: 'deploy', ids: [id] });
+  }, locations[index])));
+  await Promise.all(pages.map(page => page.waitForFunction(expected => {
+    const { game } = window.comradeFusion;
+    return expected.every(slot => [...game.entities.values()].some(e =>
+      e.owner === slot && game.pack.structures[e.type]?.constructionYard));
+  }, slots, { timeout: 30000 })));
+
+  await Promise.all(pages.map(page => page.waitForFunction(() => window.comradeFusion.game.tick > 450, null, { timeout: 90000 })));
+  const sums = await Promise.all(pages.map(page => page.evaluate(() => window.__sums)));
+  const common = Object.keys(sums[0]).filter(t => sums.every(client => t in client));
+  assert.ok(common.length >= 5, 'All four clients must reach shared checkpoints');
+  for (const t of common) {
+    for (const client of sums.slice(1)) assert.equal(sums[0][t], client[t], `Lockstep checksum mismatch at tick ${t}`);
+  }
   assert.deepEqual(errors, [], 'Lockstep clients must not emit uncaught errors');
-  console.log(`Two-browser lockstep match stayed in sync across ${common.length} checkpoints`);
-  await contextA.close(); await contextB.close();
+  console.log(`Four-browser Fusion match stayed in sync across ${common.length} checkpoints`);
+  await Promise.all(contexts.map(context => context.close()));
 } finally { await browser.close(); }
