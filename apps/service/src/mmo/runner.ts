@@ -29,7 +29,7 @@ import {
   acquireRegionLease, appendRegionEvent, applyShieldTransition, assertRegionFence,
   claimDueJobs, finishJobTx, getRegion, getRegionEventForUpdate, listRegionEventsAfter, listSimFanout,
   recoverySnapshots, listUnappliedRegionEvents,
-  markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot, storeRegionEventResolved,
+  markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot, renewRegionLease, storeRegionEventResolved,
   releaseJobClaim, releaseRegionLease, saveProtectionRecord, scheduleJob, setRegionLifecycle, setRegionSimStart,
   syncCompounds, updateMemberPowerScores, updateSettlementProtection,
   openRecoveryEpisode, closeRecoveryEpisode, awardLadderPoints,
@@ -194,7 +194,7 @@ export class RegionRunner {
   private stepTimer?: ReturnType<typeof setInterval>;
   private pollTimer?: ReturnType<typeof setInterval>;
   private lastPoll = 0;
-  private lastRenew = 0;
+  private lastLeaseHeartbeat = 0;
   private lastRecoveryProgress = 0;
   private lastCheckpointTick = 0;
   private lastAppliedSeq = 0n;
@@ -295,6 +295,7 @@ export class RegionRunner {
    * start the real-time loop. Throws LEASE_HELD if another worker owns the region.
    */
   async start(): Promise<void> {
+    this.lastLeaseHeartbeat = performance.now();
     const lease = await acquireRegionLease({
       regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
     });
@@ -328,16 +329,9 @@ export class RegionRunner {
     let replayFrom = 0n;
     let restored = false;
     let attemptedSnapshots = 0;
-    let lastRestoreRenewal = performance.now();
     for await (const snap of recoverySnapshots(this.opts.regionId)) {
       attemptedSnapshots++;
-      if (performance.now() - lastRestoreRenewal > this.opts.leaseMs * 0.4) {
-        await acquireRegionLease({
-          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
-        });
-        this.lastRenew = this.opts.now();
-        lastRestoreRenewal = performance.now();
-      }
+      if (this.leaseHeartbeatDue()) await this.renewAuthority();
       const payload = this.validatedSnapshotPayload(snap);
       if (!payload) {
         this.opts.log('region-snapshot-rejected', { snapshotId: snap.snapshot_id });
@@ -435,18 +429,8 @@ export class RegionRunner {
     // — identical on every runner, before any tick or accrual runs.
     this.ensureRegionSites();
 
-    // Renew authority before wake accrual and replay after restoring a checkpoint.
-    if (this.epoch !== undefined) {
-      try {
-        await acquireRegionLease({
-          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
-        });
-        this.lastRenew = this.opts.now();
-      } catch (error) {
-        if (error instanceof MmoStoreError && error.code === 'LEASE_HELD') throw error;
-        this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
-      }
-    }
+    // Checkpoint restoration may use a substantial part of the lease.
+    await this.renewAuthority();
 
     // Journal a fresh wake before replay. The restored checkpoint may precede
     // multiple committed wakes; apply every interval at its own journal tick.
@@ -456,6 +440,9 @@ export class RegionRunner {
     // Reproduce committed simulation effects without writing their receipts,
     // outbox messages or ledger entries again.
     await this.replayCommittedTail(replayFrom);
+    // Replaying commits is read-only. Confirm authority before the first
+    // recovery write, even if the last replayed event took no time to apply.
+    await this.renewAuthority();
     if (hib) {
       this.wakeLatencyMs = performance.now() - wakeStartedAt;
       this.opts.log('region-wake', {
@@ -498,7 +485,7 @@ export class RegionRunner {
     await setRegionLifecycle(this.opts.regionId, 'active');
 
     this.running = true;
-    this.lastPoll = now; this.lastRenew = now;
+    this.lastPoll = now;
     this.wokeAtMs = now;
     this.lastHarvestSample = {
       tick: this.game.tick, harvested: this.game.players.map(p => p.stats.harvested),
@@ -517,14 +504,35 @@ export class RegionRunner {
     }
   }
 
+  private leaseHeartbeatDue(): boolean {
+    return this.epoch !== undefined && performance.now() - this.lastLeaseHeartbeat > this.opts.leaseMs * 0.4;
+  }
+
+  private async renewAuthority(): Promise<void> {
+    const heartbeatStarted = performance.now();
+    await renewRegionLease({
+      regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!, leaseMs: this.opts.leaseMs,
+    });
+    this.lastLeaseHeartbeat = heartbeatStarted;
+  }
+
+  private async renewDuringAdvance(): Promise<void> {
+    try {
+      await this.renewAuthority();
+    } catch (error) {
+      if (error instanceof MmoStoreError && error.code === 'FENCE_LOST') throw error;
+      // A transient database error leaves the heartbeat due for the next batch.
+      this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
+    }
+  }
+
   /** Step the sim forward to `tick`, bounded per call so the event loop stays live. */
   private async advanceTo(tick: number): Promise<void> {
     const game = this.game!;
     let guard = 0;
-    // Startup replay/catch-up can run far longer than the lease TTL while the
-    // poll-loop renewal is not yet armed; renew authority mid-catch-up or the
-    // first fenced write fails and the region crash-loops on every retry.
-    let lastBeat = performance.now();
+    // Short replay batches share a heartbeat. Check even if this event is
+    // already at the current tick and there are no steps to run.
+    if (this.leaseHeartbeatDue()) await this.renewDuringAdvance();
     // Deep replay/catch-up runs hundreds of thousands of ticks; without periodic
     // yields the event loop starves and every DB connect hits its timeout
     // (observed live: /api/mmo/* all crashing while a region replayed ~600k ticks).
@@ -544,21 +552,7 @@ export class RegionRunner {
         }
         await new Promise(resolve => setImmediate(resolve));
       }
-      if (this.epoch !== undefined
-        && performance.now() - lastBeat > this.opts.leaseMs * 0.4) {
-        try {
-          await acquireRegionLease({
-            regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
-          });
-          lastBeat = performance.now();
-        } catch (error) {
-          // A transient pool/connect failure must not kill a multi-hour replay:
-          // leave lastBeat stale so the next check retries almost immediately.
-          // LEASE_HELD means a real takeover — that stays fatal.
-          if (error instanceof MmoStoreError && error.code === 'LEASE_HELD') throw error;
-          this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
-        }
-      }
+      if (this.leaseHeartbeatDue()) await this.renewDuringAdvance();
     }
     if (game.tick < tick) this.opts.log('advance-capped', { tick, reached: game.tick });
   }
@@ -601,10 +595,7 @@ export class RegionRunner {
     this.busy = true;
     try {
       const now = this.opts.now();
-      if (now - this.lastRenew > this.opts.leaseMs * 0.4) {
-        await acquireRegionLease({ regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs });
-        this.lastRenew = now;
-      }
+      if (this.leaseHeartbeatDue()) await this.renewAuthority();
       await this.applyUnappliedEvents();
       await this.processDueJobs(now);
       if (now - this.lastCompoundSync >= this.opts.compoundSyncMs) {
@@ -641,10 +632,7 @@ export class RegionRunner {
       const stillOurs = !!row && row.owner_worker_id === this.opts.workerId
         && this.epoch !== undefined && BigInt(row.authority_epoch) === BigInt(this.epoch);
       if (stillOurs) {
-        await acquireRegionLease({
-          regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
-        });
-        this.lastRenew = this.opts.now();
+        await this.renewAuthority();
         this.opts.log('lease-recovered', { regionId: this.opts.regionId, epoch: this.epoch });
         return;
       }
@@ -875,21 +863,8 @@ export class RegionRunner {
   /** Apply every unapplied command/scheduled journal event in seq order. */
   private async applyUnappliedEvents(): Promise<void> {
     for (;;) {
-      // Recovery can reach here minutes after the last catch-up renewal (long
-      // quiescent fast-forwards, replay tails); fenced writes below die with
-      // FENCE_LOST if the lease lapsed in between. Throttled renewal keeps the
-      // gap bounded without adding a transaction per event.
-      if (this.epoch !== undefined && this.opts.now() - this.lastRenew > this.opts.leaseMs * 0.4) {
-        try {
-          await acquireRegionLease({
-            regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
-          });
-          this.lastRenew = this.opts.now();
-        } catch (error) {
-          if (error instanceof MmoStoreError && error.code === 'LEASE_HELD') throw error;
-          this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
-        }
-      }
+      // Renew before applying events, which can write through the fence.
+      if (this.leaseHeartbeatDue()) await this.renewDuringAdvance();
       const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual'], 64);
       if (!events.length) {
         await this.drainSalvageEvents();
@@ -1642,16 +1617,7 @@ export class RegionRunner {
     for (let done = 0; done < ticks; done += CHUNK) {
       this.game?.fastForwardQuiescent(Math.min(CHUNK, ticks - done), rates, done, remainders);
       await new Promise(resolve => setImmediate(resolve));
-      if (this.epoch !== undefined) {
-        try {
-          await acquireRegionLease({
-            regionId: this.opts.regionId, workerId: this.opts.workerId, leaseMs: this.opts.leaseMs,
-          });
-        } catch (error) {
-          if (error instanceof MmoStoreError && error.code === 'LEASE_HELD') throw error;
-          this.opts.log('lease-renew-failed', { regionId: this.opts.regionId, error: String(error) });
-        }
-      }
+      if (this.leaseHeartbeatDue()) await this.renewDuringAdvance();
     }
   }
 

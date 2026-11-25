@@ -178,6 +178,22 @@ export async function acquireRegionLease(args: {
 }
 
 /**
+ * Renew only the caller's existing authority. An expired lease may be renewed
+ * by that owner until another worker acquires it and increments the epoch.
+ */
+export async function renewRegionLease(args: {
+  regionId: string; workerId: string; epoch: string; leaseMs: number;
+}): Promise<void> {
+  const updated = await mmoQuery<{ authority_epoch: string }>(
+    `update region
+        set lease_expires_at = clock_timestamp() + $4::double precision * interval '1 millisecond'
+      where region_id = $1 and owner_worker_id = $2 and authority_epoch = $3
+      returning authority_epoch`,
+    [args.regionId, args.workerId, args.epoch, args.leaseMs]);
+  if (updated.length !== 1) throw new MmoStoreError('FENCE_LOST', 'region authority lost during renewal');
+}
+
+/**
  * The fence every journal/operation write must pass: correct owner, current epoch,
  * unexpired lease, monotone tick. Returns the committed event sequence to use.
  */

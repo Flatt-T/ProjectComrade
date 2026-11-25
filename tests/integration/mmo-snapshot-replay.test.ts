@@ -12,7 +12,7 @@ import { mmoEntityId, MMO_PROTOCOL, type MmoCommandMessage } from '../../package
 import { PACKS } from '../../packages/fusion/src/index';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
 import {
-  acquireRegionLease, appendRegionEvent, getRegion, markRegionEventApplied, recordSnapshot, recoverySnapshots,
+  acquireRegionLease, appendRegionEvent, assertRegionFence, getRegion, markRegionEventApplied, recordSnapshot, recoverySnapshots,
 } from '../../apps/service/src/mmo/store.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
@@ -248,6 +248,30 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
       await recovered.stop();
     }
   });
+
+  it('renews authority across a sequence of short replay batches', async () => {
+    const fx = await seedFixtureWorld({ leaseMs: 3_000 });
+    const runner = new RegionRunner({
+      regionId: fx.regionId, workerId: fx.workerId, leaseMs: 3_000,
+      tickMs: TICK_MS, pollMs: TICK_MS, quiescence: { enabled: false },
+    });
+    try {
+      await runner.start();
+      const epoch = runner.authorityEpoch!;
+      const replay = runner as unknown as { advanceTo(tick: number): Promise<void> };
+      // Each gap is shorter than the renewal interval. Together they exceed
+      // the lease, as can happen when a long replay ends in many small events.
+      for (let i = 0; i < 9; i++) {
+        await sleep(400);
+        await replay.advanceTo(gameOf(runner).tick + 1);
+      }
+      await expect(mmoTransaction(tx => assertRegionFence(tx, {
+        regionId: fx.regionId, workerId: fx.workerId, epoch,
+      }))).resolves.toBeUndefined();
+    } finally {
+      await runner.stop();
+    }
+  }, 15_000);
 
   it('control vs hard-killed runner with older checkpoint and applied rows after it', async () => {
     const control = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
