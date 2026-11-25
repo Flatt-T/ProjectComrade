@@ -6,12 +6,14 @@
 // uninterrupted control region. Real PostgreSQL, real Fusion sim.
 // Requires MMO_TEST_DATABASE_URL.
 import { randomUUID } from 'node:crypto';
+import { once } from 'node:events';
+import { startProcessWorker } from './fixtures/runner-process-client.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   closeMmoDatabase, mmoOne, mmoQuery, mmoTransaction, resetMmoDatabase,
 } from '../../apps/service/src/mmo/db.js';
 import {
-  acquireRegionLease, createRegion, releaseRegionLease,
+  acquireRegionLease, createRegion, createTransfer, releaseRegionLease, transitionTransfer,
 } from '../../apps/service/src/mmo/store.js';
 import { submitCommand, journalTail } from '../../apps/service/src/mmo/commands.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
@@ -116,6 +118,13 @@ function loadedCarrier(ctx: Ctx): { carrier: Entity; rider: Entity; ref: string 
 const transferState = async (id: string) =>
   (await mmoOne<{ state: string }>('select state from region_transfer where transfer_id = $1', [id]))?.state;
 
+async function transferApplied(transferId: string): Promise<boolean> {
+  const event = await mmoOne<{ applied_at: Date | null }>(
+    "select applied_at from region_event where event_id = $1 and event_kind = 'transfer'",
+    [transferId]);
+  return event?.applied_at != null;
+}
+
 interface SimGame {
   tick: number; checksum(): number; step(): void;
   entities: Map<number, { id: number; kind: string; type: string; owner: number; hp: number; x: number; y: number; facing: number; carriedBy: number; passengers: number[]; charge: number; xp: number; ammo: number; deployed: boolean; heldUntil: number; bound: number }>;
@@ -211,8 +220,8 @@ describeDb('mmo transfer arrival crash window (PW18+PW30, real PostgreSQL)', () 
     expect(m2.accepted).toBe(true);
     const id2 = m2.transferId as string;
 
-    await waitFor(async () => (await transferState(id1)) === 'COMPLETED'
-      && (await transferState(id2)) === 'COMPLETED', 45000);
+    await waitFor(async () => await transferApplied(id1)
+      && await transferApplied(id2), 45000);
 
     // Both carriers arrived with exactly one passenger each.
     for (const [side, tid] of [[ctx.bc, id1], [ctx.bf, id2]] as const) {
@@ -318,18 +327,175 @@ describeDb('mmo transfer arrival crash window (PW18+PW30, real PostgreSQL)', () 
     expect(gameOf(runnerBf2).players[0].pid).toBe(p0());
     expect(tickControl).toBeGreaterThan(0);
   }, IT_TIMEOUT);
+  it('replays a loaded transfer before a later move in a fresh destination process', async () => {
+    const regionId = randomUUID();
+    const workerId = randomUUID();
+    const owner = ctx.fx.players[0];
+    const mapId = 'td-tiberium-gardens';
+    await createRegion({
+      regionId, worldId: ctx.fx.worldId, label: 'process-destination',
+      seed: { sim: { packId: 'td', mapId, seed: 811,
+        players: [{ playerId: owner.playerId, name: owner.displayName, faction: PACKS.td.factions[0].id }] } },
+      rulesetVersion: MMO_PROTOCOL, engineArtifactSha256: 'fixture-engine-sha',
+    });
+
+    const wallTime = Date.now();
+    const original = startProcessWorker(regionId, workerId, wallTime);
+    let recovered: ReturnType<typeof startProcessWorker> | undefined;
+    try {
+      const initial = await original.request({ type: 'start' });
+      const checkpoint = await original.request({ type: 'checkpoint' });
+      expect(checkpoint.tick).toBe(0);
+
+      const { ref } = loadedCarrier(ctx);
+      const released = await worldAction(ctx, ctx.a, owner.playerId, { t: 'regionTransfer', entityId: ref, destRegionId: regionId });
+      expect(released.accepted).toBe(true);
+      const transferId = released.transferId as string;
+      await waitFor(async () => (await transferState(transferId)) === 'SOURCE_RELEASED');
+      await original.request({ type: 'advance', tick: 17 });
+      await original.request({ type: 'poll' });
+      expect(await transferState(transferId)).toBe('COMPLETED');
+
+      const atArrival = await original.request({ type: 'observeTransfer', transferId });
+      expect(atArrival.transfer?.cargo).toHaveLength(1);
+      const arrival = await mmoOne<{
+        simulation_tick: string; event_seq: string; applied_at: Date | null;
+        payload: { placement: { simId: number; cell: number } };
+      }>(`select simulation_tick, event_seq, applied_at, payload
+           from region_event where region_id = $1 and event_kind = 'transfer' and event_id = $2`,
+        [regionId, transferId]);
+      expect(arrival?.simulation_tick).toBe('17');
+      expect(arrival?.applied_at).toBeTruthy();
+      expect(arrival?.payload.placement.simId).toBe(atArrival.transfer?.carrier.id);
+
+      const beforeMove = await original.request({ type: 'advance', tick: 30 });
+      const move = await submitCommand({
+        playerId: owner.playerId, fence: { workerId, epoch: beforeMove.epoch }, tick: beforeMove.tick,
+        rawMessage: { protocol: MMO_PROTOCOL, type: 'command', commandId: randomUUID(), regionId,
+          seenEpoch: beforeMove.epoch, lastSeenEventSeq: beforeMove.seq,
+          action: { t: 'move', entityIds: [transferId], x: 41, y: 41 } },
+      });
+      await original.request({ type: 'poll' });
+      await original.request({ type: 'advance', tick: 100 });
+      const beforeKill = await original.request({ type: 'observeTransfer', transferId });
+      expect(beforeKill.transfer?.carrier.x !== atArrival.transfer?.carrier.x
+        || beforeKill.transfer?.carrier.y !== atArrival.transfer?.carrier.y).toBe(true);
+      expect(beforeKill.transfer?.cargo[0].carriedBy).toBe(beforeKill.transfer?.carrier.id);
+
+      const exit = once(original.child, 'exit');
+      expect(original.child.kill('SIGKILL')).toBe(true);
+      expect(await exit).toEqual([null, 'SIGKILL']);
+      const retained = await mmoOne<{ ticks: string[] }>(
+        'select array_agg(tick::text order by tick) as ticks from region_snapshot where region_id = $1', [regionId]);
+      expect(retained?.ticks).toEqual(['0']);
+
+      const replacement = randomUUID();
+      await acquireRegionLease({ regionId, workerId: replacement, forceTakeover: true });
+      recovered = startProcessWorker(regionId, replacement, wallTime);
+      const restarted = await recovered.request({ type: 'start' });
+      expect(restarted.pid).not.toBe(initial.pid);
+      expect(restarted.seq).toBe(move.eventSeq);
+      await recovered.request({ type: 'advance', tick: 100 });
+      const actual = await recovered.request({ type: 'observeTransfer', transferId });
+      expect(actual.tick).toBe(beforeKill.tick);
+      expect(actual.transfer).toEqual(beforeKill.transfer);
+      expect(actual.credits).toEqual(beforeKill.credits);
+      expect(actual.checksum).toBe(beforeKill.checksum);
+
+      const legs = await mmoQuery<{ kind: string }>(
+        'select kind from asset_ledger where operation_id = $1 order by kind', [transferId]);
+      expect(legs).toEqual([{ kind: 'TRANSFER_IN' }, { kind: 'TRANSFER_OUT' }]);
+      expect(await mmoOne(
+        `select count(*)::integer as n from region_event where event_id = $1 and event_kind = 'transfer'`, [transferId]))
+        .toEqual({ n: 1 });
+      console.info('Fresh-process transfer replay', {
+        terminatedPid: initial.pid, replacementPid: restarted.pid,
+        checkpointTick: checkpoint.tick, arrivalTick: arrival?.simulation_tick,
+        arrivalSeq: arrival?.event_seq, movementSeq: move.eventSeq,
+        comparisonTick: actual.tick, checksum: actual.checksum,
+      });
+      const onwardDestination = ctx.bc.regionId;
+      const onward = await submitCommand({
+        playerId: owner.playerId,
+        fence: { workerId: replacement, epoch: actual.epoch },
+        tick: actual.tick,
+        rawMessage: {
+          protocol: MMO_PROTOCOL, type: 'command', commandId: randomUUID(), regionId,
+          seenEpoch: actual.epoch, lastSeenEventSeq: actual.seq,
+          action: { t: 'regionTransfer', entityId: transferId, destRegionId: onwardDestination },
+        },
+      });
+      await recovered.request({ type: 'poll' });
+      const outbound = await mmoOne<{ application_result: { accepted: boolean; transferId: string } }>(
+        'select application_result from region_event where region_id = $1 and event_seq = $2',
+        [regionId, onward.eventSeq]);
+      expect(outbound?.application_result.accepted).toBe(true);
+      const onwardId = outbound!.application_result.transferId;
+      await recovered.request({ type: 'advance', tick: 1_800 });
+      await recovered.request({ type: 'poll' });
+      await waitFor(() => transferApplied(onwardId));
+      const departed = await recovered.request({ type: 'observeTransfer', transferId });
+      expect(departed.transfer).toBeUndefined();
+
+      const secondExit = once(recovered.child, 'exit');
+      expect(recovered.child.kill('SIGKILL')).toBe(true);
+      expect(await secondExit).toEqual([null, 'SIGKILL']);
+      expect(await mmoOne(
+        'select count(*)::integer as n from region_snapshot where region_id = $1', [regionId]))
+        .toEqual({ n: 1 });
+
+      const lastWorker = randomUUID();
+      await acquireRegionLease({ regionId, workerId: lastWorker, forceTakeover: true });
+      recovered = startProcessWorker(regionId, lastWorker, wallTime);
+      const resumed = await recovered.request({ type: 'start' });
+      expect(resumed.pid).not.toBe(restarted.pid);
+      await recovered.request({ type: 'advance', tick: 1_800 });
+      const afterOnward = await recovered.request({ type: 'observeTransfer', transferId });
+      expect(afterOnward.transfer).toBeUndefined();
+      expect(afterOnward.checksum).toBe(departed.checksum);
+      expect(await mmoQuery(
+        'select kind from asset_ledger where operation_id = $1 order by kind', [onwardId]))
+        .toEqual([{ kind: 'TRANSFER_IN' }, { kind: 'TRANSFER_OUT' }]);
+
+      await recovered.request({ type: 'stop' });
+    } finally {
+      for (const worker of [original, recovered]) {
+        if (worker?.child.exitCode === null && worker.child.signalCode === null) {
+          const exited = once(worker.child, 'exit');
+          worker.child.kill();
+          await exited;
+        }
+      }
+    }
+  }, IT_TIMEOUT);
+
   it('does not materialize legacy arrivals after a durable destruction or departure', async () => {
     await ctx.bf.runner.checkpoint('before-legacy-arrivals');
     const transfers: string[] = [];
     for (let i = 0; i < 2; i++) {
-      const { ref } = loadedCarrier(ctx);
-      const result = await worldAction(ctx, ctx.a, p0(), {
-        t: 'regionTransfer', entityId: ref, destRegionId: ctx.bf.regionId,
+      const { carrier, ref } = loadedCarrier(ctx);
+      const manifest = ctx.a.runner.currentGame!.transferManifest(carrier);
+      // The pre-journal format has a completed row and landing receipt only.
+      const id = await mmoTransaction(async tx => {
+        const out = await createTransfer({
+          entityId: ref, sourceRegionId: ctx.a.regionId, destRegionId: ctx.bf.regionId,
+          payload: { manifest, ownerPid: p0() }, sourceEpoch: ctx.a.runner.authorityEpoch,
+        }, tx);
+        await transitionTransfer(out.transfer_id, 'SOURCE_RELEASED', tx);
+        await transitionTransfer(out.transfer_id, 'DESTINATION_ACCEPTED', tx);
+        await transitionTransfer(out.transfer_id, 'COMPLETED', tx);
+        await tx.query(
+          `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action)
+            values ($1,$2,$3,$4,'REGION_TRANSFER',$5)`,
+          [out.transfer_id, ctx.a.regionId, ctx.a.runner.authorityEpoch, gameOf(ctx.a.runner).tick,
+            { kind: 'REGION_TRANSFER' }]);
+        await tx.query(
+          `insert into asset_ledger (operation_id, entity_id, region_id, kind, physical_state)
+            values ($1,$2,$3,'TRANSFER_IN','deployed')`,
+          [out.transfer_id, out.transfer_id, ctx.bf.regionId]);
+        return out.transfer_id;
       });
-      expect(result.accepted).toBe(true);
-      const id = result.transferId as string;
-      await waitFor(async () => await transferState(id) === 'COMPLETED');
-      expect(arrivedCarrier(ctx.bf.runner, id)).toBeDefined();
+      expect(await transferApplied(id)).toBe(false);
       transfers.push(id);
     }
     const [destroyedId, departedId] = transfers;
