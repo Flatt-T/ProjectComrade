@@ -5,7 +5,7 @@ import { createWorldHandler } from '../../../apps/service/src/mmo/world.js';
 type Game = NonNullable<RegionRunner['currentGame']>;
 
 export type WorkerRequest =
-  | { type: 'start' | 'poll' | 'checkpoint' | 'pauseAfterCommit' | 'stop' }
+  | { type: 'start' | 'poll' | 'checkpoint' | 'pauseAfterCommit' | 'observeCombat' | 'stop' }
   | { type: 'advance'; tick: number }
   | { type: 'observeTransfer'; transferId: string };
 
@@ -37,7 +37,7 @@ function rawTransfer(game: Game, id: number) {
   };
 }
 
-function observe(transferId?: string) {
+function observe(transferId?: string, observeCombat = false) {
   const game = runner.currentGame!;
   const unit = [...game.entities.values()].find(e => e.kind === 'unit' && e.owner === 0 && e.hp > 0);
   if (!unit) throw new Error('The fixture has no live unit');
@@ -50,6 +50,8 @@ function observe(transferId?: string) {
     pid: process.pid, epoch: runner.authorityEpoch!, seq: runner.appliedSeq,
     tick: game.tick, checksum: game.checksum(), credits: game.players.map(p => p.credits), transfer,
     unit: { id: unit.id, x: unit.x, y: unit.y, order: unit.order, facing: unit.facing, hp: unit.hp },
+    units: observeCombat ? [...game.entities.values()].filter(e => e.kind === 'unit')
+      .map(e => rawTransfer(game, e.id)) : undefined,
   };
 }
 export type WorkerState = ReturnType<typeof observe>;
@@ -60,7 +62,7 @@ process.on('message', async (request: WorkerRequest) => {
       case 'start': await runner.start(); break;
       case 'poll': await clock.onPoll(); break;
       case 'advance': await clock.advanceTo(request.tick); break;
-      case 'observeTransfer': break;
+      case 'observeTransfer': case 'observeCombat': break;
       case 'checkpoint': await runner.checkpoint('manual'); break;
       case 'pauseAfterCommit': pauseAfterCommit = true; break;
       case 'stop':
@@ -68,7 +70,9 @@ process.on('message', async (request: WorkerRequest) => {
         await closeMmoDatabase();
         break;
     }
-    process.send?.({ state: observe(request.type === 'observeTransfer' ? request.transferId : undefined) });
+    process.send?.({ state: observe(
+      request.type === 'observeTransfer' ? request.transferId : undefined, request.type === 'observeCombat',
+    ) });
     if (request.type === 'stop') process.disconnect?.();
   } catch (error) {
     process.send?.({ error: error instanceof Error ? error.message : String(error) });
