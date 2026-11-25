@@ -1016,8 +1016,32 @@ export class RegionRunner {
   private async rebindCompletedTransfers(): Promise<void> {
     const g = this.game;
     if (!g || this.epoch === undefined) return;
+    // The arrival ledger marks the start of this stay in the region. A later
+    // terminal receipt retires that arrival while leaving its audit trail intact.
     const rows = await mmoQuery<TransferRow>(
-      `select * from region_transfer where dest_region_id = $1 and state = 'COMPLETED'`,
+      `select t.* from region_transfer t
+        where t.dest_region_id = $1 and t.state = 'COMPLETED'
+          and not exists (
+            select 1 from asset_ledger arrival
+            where arrival.operation_id = t.transfer_id and arrival.region_id = t.dest_region_id
+              and arrival.kind = 'TRANSFER_IN'
+              and (
+                exists (
+                  select 1 from asset_ledger terminal
+                  where terminal.region_id = t.dest_region_id and terminal.ledger_id > arrival.ledger_id
+                    and terminal.entity_id in (t.entity_id, t.transfer_id)
+                    and terminal.kind in ('DESTROY', 'SELL_REFUND')
+                )
+                or exists (
+                  select 1 from region_transfer onward
+                  join asset_ledger departure on departure.operation_id = onward.transfer_id
+                    and departure.region_id = onward.source_region_id and departure.kind = 'TRANSFER_OUT'
+                  where onward.source_region_id = t.dest_region_id
+                    and onward.entity_id in (t.entity_id, t.transfer_id)
+                    and departure.ledger_id > arrival.ledger_id
+                )
+              )
+          )`,
       [this.opts.regionId]);
     let rebound = 0;
     for (const t of rows) {
