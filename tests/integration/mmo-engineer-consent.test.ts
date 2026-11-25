@@ -112,6 +112,11 @@ describeDb('mmo engineer capture consent (PW34, real PostgreSQL)', () => {
     const allianceId = created.allianceId as string;
     expect((await act(ctx, owner, { t: 'allianceInvite', allianceId, playerId: requester })).accepted).toBe(true);
     expect((await act(ctx, requester, { t: 'allianceJoin', allianceId })).accepted).toBe(true);
+    // The durable receipt precedes the tick that mirrors membership into Fusion.
+    await waitFor(() => {
+      const [ownerSlot, requesterSlot] = ctx.runner.currentGame!.players;
+      return ownerSlot.ally >= 0 && ownerSlot.ally === requesterSlot.ally;
+    });
 
     const { bld, eng } = engineerPair(ctx, 0, 1, 60, 60);
     const engId = mmoEntityId(ctx.regionId, eng.id);
@@ -135,7 +140,8 @@ describeDb('mmo engineer capture consent (PW34, real PostgreSQL)', () => {
     const dec = await act(ctx, owner, { t: 'engineerConsent', requestId, decision: 'accept' });
     expect(dec.accepted).toBe(true);
     expect(dec.decision).toBe('accepted');
-    await waitFor(() => (ctx.runner.currentGame!.consents?.length ?? 0) === 1);
+    await waitFor(() => ctx.runner.currentGame!.consents.some(grant =>
+      grant.requestId === requestId && !grant.used));
 
     // Private traffic reached only the intended players.
     const priv = await mmoQuery<{ payload: { playerId?: string; kind?: string } }>(
