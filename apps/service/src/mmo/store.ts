@@ -1695,8 +1695,8 @@ export async function applyShieldTransition(tx: PoolClient, args: {
  * materialized board upserts. 'all' accumulates forever; '30d' is refreshed
  * for the awarded subjects from the journal window on every call, so the
  * rolling board can be rebuilt from operations alone and never drifts.
- * Callers must dedupe (sim events fire once; hold/capture accounting is
- * event-driven, not polled).
+ * Callers hold the region fence and provide a stable refKey for each award.
+ * A replay can reproduce an event after its award has already committed.
  */
 export async function awardLadderPoints(tx: PoolClient, args: {
   worldId: string; playerId: string; points: number; reason: string;
@@ -1711,12 +1711,17 @@ export async function awardLadderPoints(tx: PoolClient, args: {
     [args.worldId, args.playerId]);
   const allianceId = al[0]?.alliance_id ?? null;
   const opId = randomUUID();
-  await tx.query(
+  const receipt = await tx.query(
     `insert into economy_operation (operation_id, region_id, authority_epoch, simulation_tick, kind, canonical_action, authoritative_result)
-     values ($1,$2,$3,$4,'LADDER_AWARD',$5,$6)`,
+     select $1,$2,$3,$4,'LADDER_AWARD',$5,$6
+      where not exists (select 1 from economy_operation
+        where region_id = $2 and simulation_tick = $4 and kind = 'LADDER_AWARD'
+          and authoritative_result->>'refKey' = $7)
+     returning operation_id`,
     [opId, args.regionId, args.epoch, String(args.tick),
      JSON.stringify({ kind: 'LADDER_AWARD', playerId: args.playerId, points: String(args.points), reason: args.reason }),
-     JSON.stringify({ allianceId, refKey: args.refKey })]);
+     JSON.stringify({ allianceId, refKey: args.refKey }), args.refKey]);
+  if (!receipt.rowCount) return;
   for (const period of ['all', '30d'] as const) {
     await tx.query(
       `insert into ladder_board (world_id, board, subject_id, period, points)

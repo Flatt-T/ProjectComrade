@@ -107,6 +107,52 @@ describeDb('mmo capturable sites + ladder (real PostgreSQL + runner)', () => {
     expect(Number(opsAfter?.n ?? 0)).toBe(Number(opsBefore?.n ?? 0) + 1);
   }, IT_TIMEOUT);
 
+  it('does not award the same site and salvage audit events again after replay', async () => {
+    const fx = await seedFixtureWorld({ leaseMs: 60_000, playerCount: 2 });
+    const runner = new RegionRunner({
+      regionId: fx.regionId, workerId: fx.workerId, leaseMs: 60_000,
+      tickMs: 60_000, pollMs: 60_000, quiescence: { enabled: false },
+    });
+    try {
+      await runner.start();
+      const game = runner.currentGame!;
+      const site = [...game.entities.values()].find(e => e.kind === 'structure' && game.structDef(e).site)!;
+      expect(site).toBeDefined();
+      const drain = runner as unknown as { drainSalvageEvents(): Promise<void> };
+      const auditEvents = async () => {
+        game.siteEvents.push({
+          kind: 'capture', tick: 10, simId: site.id, siteType: site.type,
+          siteKind: game.structDef(site).site!, fromOwner: -1, toOwner: 0, heldTicks: 0,
+        });
+        game.salvageEvents.push(
+          { kind: 'spawn', tick: 11, cell: 20, credits: 500, simId: 200,
+            victimOwner: 1, collectorOwner: -1, killerOwner: 0, victimType: 'mcv', victimKind: 'unit' },
+          { kind: 'collect', tick: 12, cell: 20, credits: 500, simId: 0,
+            victimOwner: -1, collectorOwner: 0, killerOwner: -1, victimType: '', victimKind: '' },
+        );
+        await drain.drainSalvageEvents();
+      };
+      const receipts = () => mmoQuery<{ kind: string; n: string }>(
+        `select kind, count(*)::text as n from economy_operation
+          where region_id = $1 and kind in ('SITE_CAPTURE', 'SALVAGE_SPAWN', 'LADDER_AWARD')
+          group by kind order by kind`, [fx.regionId]);
+      await auditEvents();
+      const before = await receipts();
+      expect(before).toEqual([
+        { kind: 'LADDER_AWARD', n: '2' },
+        { kind: 'SALVAGE_SPAWN', n: '1' },
+        { kind: 'SITE_CAPTURE', n: '1' },
+      ]);
+      const board = await ladderBoard(fx.worldId, 'player', 'all', 50);
+      expect(board).toHaveLength(1);
+      await auditEvents();
+      expect(await receipts()).toEqual(before);
+      expect(await ladderBoard(fx.worldId, 'player', 'all', 50)).toEqual(board);
+    } finally {
+      await runner.stop();
+    }
+  }, IT_TIMEOUT);
+
   it('ladder boards materialize and rebuild exactly from the journal', async () => {
     const worldId = ctx.fx.worldId;
     // Give the awards a moment to drain, then read both periods.
