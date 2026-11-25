@@ -75,7 +75,7 @@ async function allySyncSim(
   const out: { slot: number; command: Command }[] = [];
   for (const pid of present) {
     const slot = ctx.slotOf(pid)!;
-    out.push({ slot, command: { t: 'setAlly', slot, ally: keyByPlayer.get(pid) ?? -1 } });
+    out.push({ slot: -1, command: { t: 'setAlly', slot, ally: keyByPlayer.get(pid) ?? -1 } });
   }
   return out;
 }
@@ -1170,7 +1170,8 @@ export function createWorldHandler(rules: MmoRulesProfile = PERSISTENT_RULES_V1)
           return {
             result: { accepted: true, requestId: action.requestId, decision },
             sim: action.decision === 'accept' ? [{
-              slot: ownerSlot,
+              // Apply world state in journal order before unit orders at this tick.
+              slot: -1,
               command: {
                 t: 'consentGrant', requestId: action.requestId,
                 engineer: row.engineer_sim_id!, building: row.building_sim_id!,

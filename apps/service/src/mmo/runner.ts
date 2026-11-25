@@ -466,8 +466,10 @@ export class RegionRunner {
       : now - this.game.tick * this.opts.tickMs;
     if (startedAt == null) await setRegionSimStart(this.opts.regionId, this.startedAtMs);
 
-    await this.catchUpTo(this.tickFor(now));
+    // Resolve pending journal inputs at their recorded ticks before advancing
+    // the region through elapsed wall time.
     await this.applyUnappliedEvents();
+    await this.catchUpTo(this.tickFor(now));
     // A pre-wake checkpoint can have a later committed tail. Recovery must
     // resume live ticking at the replayed state instead of waiting for the
     // wall clock anchored at the older checkpoint to catch up again.

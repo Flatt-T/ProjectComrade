@@ -22,7 +22,6 @@ import {
   type MmoCommandResult, type MmoNotificationKind, type MmoServerMessage, type MmoWorldConfig,
 } from '@comrade/contracts';
 import { mmoOne } from './db.js';
-import { journalTail } from './commands.js';
 import { submitCommand } from './commands.js';
 import { MmoStoreError, allianceAudience, playerConnected, playerDisconnected, playersSeen } from './store.js';
 import { dispatchOutbox, type OutboxEnvelope } from './bus.js';
@@ -305,8 +304,6 @@ export class MmoGateway {
       fence = await this.service.fenceFor(message.regionId);
     }
     if (!fence) { sendError(conn.ws, 'REGION_UNAVAILABLE', 'Region runner is not live'); return; }
-    const tail = await journalTail(message.regionId);
-    const tick = tail ? BigInt(tail.tick) : 0n;
     const result = await submitCommand({
       playerId: sub.playerId,
       rawMessage: {
@@ -314,13 +311,13 @@ export class MmoGateway {
         regionId: message.regionId, seenEpoch: message.seenEpoch,
         lastSeenEventSeq: '0', action: message.action,
       },
-      fence, tick,
+      fence, tick: fence.tick,
     });
     const ack: MmoCommandResult = {
       protocol: MMO_PROTOCOL, type: 'commandResult', commandId: message.commandId,
       status: 'committed_pending_application',
       regionId: message.regionId, epoch: fence.epoch,
-      eventSeq: result.eventSeq ?? null, tick: tick.toString(),
+      eventSeq: result.eventSeq ?? null, tick: result.tick ?? String(fence.tick),
     };
     send(conn.ws, ack);
   }

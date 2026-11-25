@@ -3,6 +3,11 @@
 // at its recorded tick, against REAL PostgreSQL and the REAL Fusion sim.
 // Requires MMO_TEST_DATABASE_URL (disposable database).
 import { randomUUID } from 'node:crypto';
+import { fork } from 'node:child_process';
+import { once } from 'node:events';
+import { createRequire } from 'node:module';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import type { WorkerRequest, WorkerState } from './fixtures/mmo-runner-process.js';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import * as database from '../../apps/service/src/mmo/db.js';
 import {
@@ -164,6 +169,38 @@ async function hardKill(runner: RegionRunner, fx: FixtureWorld, usurper: string)
   await waitFor(async () => (runner as unknown as { isFailed: boolean }).isFailed, 15000, 30);
 }
 
+function startProcessWorker(fx: FixtureWorld, workerId: string, wallTime: number) {
+  const require = createRequire(new URL('../../apps/service/package.json', import.meta.url));
+  const loader = pathToFileURL(require.resolve('tsx')).href;
+  const child = fork(fileURLToPath(new URL('./fixtures/mmo-runner-process.ts', import.meta.url)),
+    [fx.regionId, workerId, String(wallTime)], {
+      execArgv: ['--import', loader],
+      env: { ...process.env, MMO_DATABASE_URL: DB_URL },
+      stdio: ['ignore', 'ignore', 'inherit', 'ipc'],
+    });
+  async function request(message: WorkerRequest): Promise<WorkerState> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+    try {
+      const result = Promise.race([
+        once(child, 'message', { signal: controller.signal }).then(([reply]) =>
+          reply as { state?: WorkerState; error?: string }),
+        once(child, 'exit', { signal: controller.signal }).then(([code, signal]) => {
+          throw new Error(`Replay worker exited before ${message.type} (${code ?? signal})`);
+        }),
+      ]);
+      child.send(message);
+      const reply = await result;
+      if (!reply.state) throw new Error(reply.error ?? 'Replay worker returned no state');
+      return reply.state;
+    } finally {
+      clearTimeout(timer);
+      controller.abort();
+    }
+  }
+  return { child, request };
+}
+
 describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)', () => {
   beforeAll(async () => {
     process.env.MMO_DATABASE_URL = DB_URL;
@@ -272,6 +309,106 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
       await runner.stop();
     }
   }, 15_000);
+
+  it('replays applied and pending commands after a separate worker is killed', async () => {
+    const control = await seedFixtureWorld({ playerCount: 1 });
+    const faulted = await seedFixtureWorld({ playerCount: 1 });
+    await pinIdenticalSim(control);
+    await pinIdenticalSim(faulted);
+    const wallTime = Date.now();
+    const stable = startProcessWorker(control, control.workerId, wallTime);
+    const victim = startProcessWorker(faulted, faulted.workerId, wallTime);
+    let recovered: ReturnType<typeof startProcessWorker> | undefined;
+    try {
+      const [initialC, initialF] = await Promise.all([
+        stable.request({ type: 'start' }), victim.request({ type: 'start' }),
+      ]);
+      expect(initialC.pid).not.toBe(initialF.pid);
+      expect(initialF.pid).not.toBe(process.pid);
+      expect(initialF.checksum).toBe(initialC.checksum);
+      const checkpoint = await victim.request({ type: 'checkpoint' });
+      expect(checkpoint.tick).toBe(0);
+      const checkpointCount = await snapshotCount(faulted);
+
+      const send = (fx: FixtureWorld, state: WorkerState, workerId: string, action: 'move' | 'stop') => {
+        const entityIds = [mmoEntityId(fx.regionId, state.unit.id)];
+        return submitCommand({
+          playerId: fx.players[0].playerId, fence: { workerId, epoch: state.epoch },
+          rawMessage: commandMessage(fx, action === 'move' ? { t: 'move', entityIds, x: 20, y: 20 }
+            : { t: 'stop', entityIds }, state.epoch),
+          tick: state.tick,
+        });
+      };
+      const both = (request: WorkerRequest) =>
+        Promise.all([stable.request(request), victim.request(request)]);
+      const [stateC, stateF] = await both({ type: 'advance', tick: 4 });
+      const [, applied] = await Promise.all([
+        send(control, stateC, control.workerId, 'move'), send(faulted, stateF, faulted.workerId, 'move'),
+      ]);
+      await both({ type: 'poll' });
+      expect(await eventApplied(faulted, applied.eventSeq!)).toBe(true);
+      const [movingC, movingF] = await both({ type: 'advance', tick: 35 });
+      expect(movingF.unit).toEqual(movingC.unit);
+      expect(movingF.unit.x !== initialF.unit.x || movingF.unit.y !== initialF.unit.y).toBe(true);
+      const [, pending] = await Promise.all([
+        send(control, movingC, control.workerId, 'stop'), send(faulted, movingF, faulted.workerId, 'stop'),
+      ]);
+      expect(await eventApplied(faulted, pending.eventSeq!)).toBe(false);
+      const tail = await journalTail(faulted);
+
+      const exited = once(victim.child, 'exit');
+      expect(victim.child.kill('SIGKILL')).toBe(true);
+      expect(await exited).toEqual([null, 'SIGKILL']);
+      expect(await snapshotCount(faulted)).toBe(checkpointCount);
+
+      await stable.request({ type: 'poll' });
+      const replacement = randomUUID();
+      await acquireRegionLease({ regionId: faulted.regionId, workerId: replacement, forceTakeover: true });
+      recovered = startProcessWorker(faulted, replacement, wallTime + 55 * 60_000);
+      const startup = await recovered.request({ type: 'start' });
+      expect(startup.pid).not.toBe(initialF.pid);
+      expect(BigInt(startup.epoch)).toBeGreaterThan(BigInt(initialF.epoch));
+      expect(startup.seq).toBe(pending.eventSeq);
+      expect(await eventApplied(faulted, pending.eventSeq!)).toBe(true);
+      expect(pending.tick).toBe('35');
+      expect(startup.tick).toBe(55);
+
+      const [expected, actual] = await Promise.all([
+        stable.request({ type: 'advance', tick: 70 }), recovered.request({ type: 'advance', tick: 70 }),
+      ]);
+      expect(actual.tick).toBe(expected.tick);
+      expect(actual.unit).toEqual(expected.unit);
+      expect(actual.credits).toEqual(expected.credits);
+      expect(actual.checksum).toBe(expected.checksum);
+      expect(await journalTail(faulted)).toEqual(tail);
+      const receipts = await mmoQuery<{ tick: string; at: string; copies: string }>(
+        `select e.simulation_tick::text as tick, e.resolved->'simEffects'->0->>'atTick' as at,
+          (select count(*)::text from outbox o where o.region_id = e.region_id
+            and o.event_seq = e.event_seq and o.topic = 'mmo.result') as copies
+          from region_event e where e.region_id = $1 and e.event_seq in ($2,$3) order by e.event_seq`,
+        [faulted.regionId, applied.eventSeq, pending.eventSeq]);
+      expect(receipts).toEqual([
+        { tick: '4', at: '5', copies: '1' },
+        { tick: '35', at: '36', copies: '1' },
+      ]);
+      console.info('Fresh-process replay', {
+        controlPid: initialC.pid, terminatedPid: initialF.pid, replacementPid: startup.pid,
+        checkpointTick: checkpoint.tick, checkpointSeq: checkpoint.seq,
+        journalSeq: tail.last_committed_seq, actionTicks: receipts.map(row => row.at),
+        comparisonTick: actual.tick, checksum: actual.checksum,
+      });
+      await recovered.request({ type: 'stop' });
+      await stable.request({ type: 'stop' });
+    } finally {
+      for (const worker of [stable, victim, recovered]) {
+        if (worker?.child.exitCode === null && worker.child.signalCode === null) {
+          const exited = once(worker.child, 'exit');
+          worker.child.kill();
+          await exited;
+        }
+      }
+    }
+  }, 45_000);
 
   it('control vs hard-killed runner with older checkpoint and applied rows after it', async () => {
     const control = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
