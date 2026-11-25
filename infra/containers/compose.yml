@@ -8,6 +8,7 @@ services:
     environment:
       NODE_ENV: production
       COMRADE_CHANNEL: ${COMRADE_CHANNEL:-production}
+      COMRADE_BETA_MANAGED_MIGRATIONS: ${COMRADE_BETA_MANAGED_MIGRATIONS:-}
       PORT: "3001"
       # Enables the internal /ops/logs export used by n8n (blank disables it).
       COMRADE_OPS_TOKEN: ${COMRADE_OPS_TOKEN:-}

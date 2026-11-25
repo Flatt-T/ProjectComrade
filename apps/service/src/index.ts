@@ -6,12 +6,12 @@ import { RoomCoordinator } from './rooms.js';
 import { handleOps, log } from './ops.js';
 import { fusionRequests } from './community.js';
 import { guestIdFromCookieHeader } from './auth.js';
-import { allowsWebSocketOrigin, configSummary, platformEnabled } from './config.js';
-import { closeDatabase, databaseConfigured, migrate } from './db.js';
+import { allowsWebSocketOrigin, configSummary, managedBetaMigrations, platformEnabled } from './config.js';
+import { assertPlatformSchema, closeDatabase, databaseConfigured, migrate } from './db.js';
 import { assertBetaDatabaseTargets } from './beta-db.js';
 import { handleApi } from './http.js';
 import { publicFileCandidates } from './static.js';
-import { closeMmoDatabase, mmoDatabaseConfigured, mmoMigrate } from './mmo/db.js';
+import { assertMmoSchema, closeMmoDatabase, mmoDatabaseConfigured, mmoMigrate } from './mmo/db.js';
 import { RegionService } from './mmo/regions.js';
 import { MmoGateway } from './mmo/gateway.js';
 // Importing the API module registers every route on the table in http.ts.
@@ -149,15 +149,17 @@ process.on('unhandledRejection', error => log('error', { where: 'promise', messa
  * DATABASE_URL degrades to free open play rather than an outage.
  */
 async function startup() {
+  const managed = managedBetaMigrations();
   try {
     await assertBetaDatabaseTargets();
+    if (managed) await Promise.all([assertPlatformSchema(), assertMmoSchema()]);
   } catch {
-    log('beta-db-target-failed', { message: 'Both connections must use comrade_beta as comrade_beta_app before migrations' });
+    log('beta-db-target-failed', { message: 'Beta database identity or migration history could not be verified' });
     process.exitCode = 1;
     await Promise.allSettled([closeDatabase(), closeMmoDatabase()]);
     return;
   }
-  if (databaseConfigured()) {
+  if (!managed && databaseConfigured()) {
     try {
       await migrate();
     } catch (error) {
@@ -169,7 +171,7 @@ async function startup() {
   }
   if (mmoGateway) {
     try {
-      await mmoMigrate();
+      if (!managed) await mmoMigrate();
       mmoGateway!.start();
       mmoService!.start();
       log('mmo-start', { configured: true });
