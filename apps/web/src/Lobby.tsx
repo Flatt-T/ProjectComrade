@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   AILevel, CRATES_MAX, CreditsPreset, DEFAULT_SETTINGS, Doctrine, GameStyle, LaunchRequest, Loadout, MapInfo, MASHUP_STYLE,
+  type ClientMessage,
   RENEWAL_CLASSIC, RENEWAL_MAX, RoomOptions, RoomState, RoomSummary,
   SPEED_MAX, SPEED_MIN, SPEED_STEP, STYLES, SUPER_CHARGE_MAX, SUPER_CHARGE_MIN, SUPER_CHARGE_STEP,
   playKind, styleAllowedFor, styleInfo, WORMS_MAX,
@@ -77,6 +78,7 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
   const [joinCode, setJoinCode] = useState(() => new URLSearchParams(location.search).get('room') || '');
   const [copied, setCopied] = useState(false);
   const launched = useRef(false);
+  const pendingJoin = useRef<Omit<Extract<ClientMessage, { type: 'join' }>, 'version'> | null>(null);
 
   // A registered commander arrives with a callsign already, so the gate is skipped.
   useEffect(() => {
@@ -116,6 +118,11 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
       if (conn.drops > 0 && !message.resumed) {
         setRoom(null);
         setError('This waiting room expired while disconnected. Rejoin with its invite link or create a new game.');
+      }
+      if (pendingJoin.current) {
+        const request = pendingJoin.current;
+        pendingJoin.current = null;
+        conn.send(request);
       }
     } else if (message.type === 'rooms') setRooms(message.rooms);
     else if (message.type === 'room') { setRoom(message); setError(''); }
@@ -185,9 +192,15 @@ export default function Lobby({ conn, onLaunch }: { conn: RoomConnection; onLaun
     const normalized = code.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 32);
     if (!/^[a-z0-9-]{3,32}$/.test(normalized)) { setError('Invalid game code.'); return; }
     launched.current = false;
-    conn.send({ type: 'join', room: normalized, name: name.trim() || 'Commander', faction: 'gdi' });
+    const request = { type: 'join', room: normalized, name: name.trim() || 'Commander', faction: 'gdi' } as const;
+    if (!conn.connected || !conn.id) {
+      pendingJoin.current = request;
+      return;
+    }
+    pendingJoin.current = null;
+    conn.send(request);
   }
-  const createGame = () => { launched.current = false; conn.send({ type: 'join', room: randomCode(), name: name.trim() || 'Commander', faction: 'gdi' }); };
+  const createGame = () => join(randomCode());
   const configure = (patch: Partial<RoomOptions>) => room && conn.send({ type: 'configure', options: { ...room.options, ...patch } });
   const configureSettings = (patch: Partial<RoomOptions['settings']>) => room && conn.send({ type: 'configure', options: { ...room.options, settings: { ...room.options.settings, ...patch } } });
   function changeStyle(style: GameStyle) {
