@@ -3,6 +3,9 @@
 // at its recorded tick, against REAL PostgreSQL and the REAL Fusion sim.
 // Requires MMO_TEST_DATABASE_URL (disposable database).
 import { randomUUID } from 'node:crypto';
+import { once } from 'node:events';
+import { startProcessWorker } from './fixtures/runner-process-client.js';
+import type { WorkerRequest, WorkerState } from './fixtures/mmo-runner-process.js';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import * as database from '../../apps/service/src/mmo/db.js';
 import {
@@ -12,7 +15,7 @@ import { mmoEntityId, MMO_PROTOCOL, type MmoCommandMessage } from '../../package
 import { PACKS } from '../../packages/fusion/src/index';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
 import {
-  acquireRegionLease, appendRegionEvent, assertRegionFence, getRegion, markRegionEventApplied, recordSnapshot, recoverySnapshots,
+  acquireRegionLease, appendRegionEvent, assertRegionFence, getRegion, markRegionEventApplied, recordSnapshot, recoverySnapshots, releaseRegionLease,
 } from '../../apps/service/src/mmo/store.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
@@ -273,6 +276,106 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
     }
   }, 15_000);
 
+  it('replays applied and pending commands after a separate worker is killed', async () => {
+    const control = await seedFixtureWorld({ playerCount: 1 });
+    const faulted = await seedFixtureWorld({ playerCount: 1 });
+    await pinIdenticalSim(control);
+    await pinIdenticalSim(faulted);
+    const wallTime = Date.now();
+    const stable = startProcessWorker(control.regionId, control.workerId, wallTime);
+    const victim = startProcessWorker(faulted.regionId, faulted.workerId, wallTime);
+    let recovered: ReturnType<typeof startProcessWorker> | undefined;
+    try {
+      const [initialC, initialF] = await Promise.all([
+        stable.request({ type: 'start' }), victim.request({ type: 'start' }),
+      ]);
+      expect(initialC.pid).not.toBe(initialF.pid);
+      expect(initialF.pid).not.toBe(process.pid);
+      expect(initialF.checksum).toBe(initialC.checksum);
+      const checkpoint = await victim.request({ type: 'checkpoint' });
+      expect(checkpoint.tick).toBe(0);
+      const checkpointCount = await snapshotCount(faulted);
+
+      const send = (fx: FixtureWorld, state: WorkerState, workerId: string, action: 'move' | 'stop') => {
+        const entityIds = [mmoEntityId(fx.regionId, state.unit.id)];
+        return submitCommand({
+          playerId: fx.players[0].playerId, fence: { workerId, epoch: state.epoch },
+          rawMessage: commandMessage(fx, action === 'move' ? { t: 'move', entityIds, x: 20, y: 20 }
+            : { t: 'stop', entityIds }, state.epoch),
+          tick: state.tick,
+        });
+      };
+      const both = (request: WorkerRequest) =>
+        Promise.all([stable.request(request), victim.request(request)]);
+      const [stateC, stateF] = await both({ type: 'advance', tick: 4 });
+      const [, applied] = await Promise.all([
+        send(control, stateC, control.workerId, 'move'), send(faulted, stateF, faulted.workerId, 'move'),
+      ]);
+      await both({ type: 'poll' });
+      expect(await eventApplied(faulted, applied.eventSeq!)).toBe(true);
+      const [movingC, movingF] = await both({ type: 'advance', tick: 35 });
+      expect(movingF.unit).toEqual(movingC.unit);
+      expect(movingF.unit.x !== initialF.unit.x || movingF.unit.y !== initialF.unit.y).toBe(true);
+      const [, pending] = await Promise.all([
+        send(control, movingC, control.workerId, 'stop'), send(faulted, movingF, faulted.workerId, 'stop'),
+      ]);
+      expect(await eventApplied(faulted, pending.eventSeq!)).toBe(false);
+      const tail = await journalTail(faulted);
+
+      const exited = once(victim.child, 'exit');
+      expect(victim.child.kill('SIGKILL')).toBe(true);
+      expect(await exited).toEqual([null, 'SIGKILL']);
+      expect(await snapshotCount(faulted)).toBe(checkpointCount);
+
+      await stable.request({ type: 'poll' });
+      const replacement = randomUUID();
+      await acquireRegionLease({ regionId: faulted.regionId, workerId: replacement, forceTakeover: true });
+      recovered = startProcessWorker(faulted.regionId, replacement, wallTime + 55 * 60_000);
+      const startup = await recovered.request({ type: 'start' });
+      expect(startup.pid).not.toBe(initialF.pid);
+      expect(BigInt(startup.epoch)).toBeGreaterThan(BigInt(initialF.epoch));
+      expect(startup.seq).toBe(pending.eventSeq);
+      expect(await eventApplied(faulted, pending.eventSeq!)).toBe(true);
+      expect(pending.tick).toBe('35');
+      expect(startup.tick).toBe(55);
+
+      const [expected, actual] = await Promise.all([
+        stable.request({ type: 'advance', tick: 70 }), recovered.request({ type: 'advance', tick: 70 }),
+      ]);
+      expect(actual.tick).toBe(expected.tick);
+      expect(actual.unit).toEqual(expected.unit);
+      expect(actual.credits).toEqual(expected.credits);
+      expect(actual.checksum).toBe(expected.checksum);
+      expect(await journalTail(faulted)).toEqual(tail);
+      const receipts = await mmoQuery<{ tick: string; at: string; copies: string }>(
+        `select e.simulation_tick::text as tick, e.resolved->'simEffects'->0->>'atTick' as at,
+          (select count(*)::text from outbox o where o.region_id = e.region_id
+            and o.event_seq = e.event_seq and o.topic = 'mmo.result') as copies
+          from region_event e where e.region_id = $1 and e.event_seq in ($2,$3) order by e.event_seq`,
+        [faulted.regionId, applied.eventSeq, pending.eventSeq]);
+      expect(receipts).toEqual([
+        { tick: '4', at: '5', copies: '1' },
+        { tick: '35', at: '36', copies: '1' },
+      ]);
+      console.info('Fresh-process replay', {
+        controlPid: initialC.pid, terminatedPid: initialF.pid, replacementPid: startup.pid,
+        checkpointTick: checkpoint.tick, checkpointSeq: checkpoint.seq,
+        journalSeq: tail.last_committed_seq, actionTicks: receipts.map(row => row.at),
+        comparisonTick: actual.tick, checksum: actual.checksum,
+      });
+      await recovered.request({ type: 'stop' });
+      await stable.request({ type: 'stop' });
+    } finally {
+      for (const worker of [stable, victim, recovered]) {
+        if (worker?.child.exitCode === null && worker.child.signalCode === null) {
+          const exited = once(worker.child, 'exit');
+          worker.child.kill();
+          await exited;
+        }
+      }
+    }
+  }, 45_000);
+
   it('control vs hard-killed runner with older checkpoint and applied rows after it', async () => {
     const control = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
     const faulted = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
@@ -444,6 +547,40 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
       await runnerC.stop().catch(() => undefined);
     }
   }, 120000);
+
+  it.each([true, false])('requires replay evidence for an accepted legacy order (%s)', async accepted => {
+    const fx = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
+    const appended = await mmoTransaction(async tx => {
+      const event = await appendRegionEvent(tx, {
+        regionId: fx.regionId, workerId: fx.workerId, epoch: fx.epoch, tick: 0, kind: 'command',
+        payload: {
+          playerId: fx.players[0].playerId, commandId: randomUUID(),
+          action: { t: 'move', entityIds: [mmoEntityId(fx.regionId, 1)], x: 20, y: 20 },
+        },
+      });
+      await markRegionEventApplied(tx, { regionId: fx.regionId, eventSeq: event.eventSeq, result: { accepted } });
+      return event;
+    });
+    const runner = mkRunner(fx, fx.workerId);
+    const before = await journalTail(fx);
+    try {
+      if (accepted) {
+        await expect(runner.start()).rejects.toMatchObject({
+          code: 'MISSING_REPLAY_EFFECT', message: expect.stringContaining(appended.eventSeq),
+        });
+        expect(runner.isRunning).toBe(false);
+        expect(await snapshotCount(fx)).toBe(0);
+      } else {
+        await runner.start();
+        expect(runner.appliedSeq).toBe(appended.eventSeq);
+        expect(runner.isRunning).toBe(true);
+      }
+      expect(await journalTail(fx)).toEqual(before);
+    } finally {
+      if (runner.isRunning) await runner.stop();
+      else await releaseRegionLease(fx.regionId, fx.workerId);
+    }
+  }, 15_000);
 
   it('a corrupt newest checkpoint falls back to the older verified one plus replay', async () => {
     const control = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });

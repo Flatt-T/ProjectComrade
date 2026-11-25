@@ -26,7 +26,7 @@ import {
 } from '@comrade/contracts';
 import { mmoOne, mmoTransaction } from './db.js';
 import {
-  acquireRegionLease, appendRegionEvent, applyShieldTransition, assertRegionFence,
+  acquireRegionLease, appendRegionEvent, applyShieldTransition, assertRegionFence, canonicalize,
   claimDueJobs, finishJobTx, getRegion, getRegionEventForUpdate, listRegionEventsAfter, listSimFanout,
   recoverySnapshots, listUnappliedRegionEvents,
   markRegionEventApplied, presenceIsOnline, reclaimExpiredJobs, recordSnapshot, renewRegionLease, storeRegionEventResolved,
@@ -168,6 +168,21 @@ export interface ResolvedPlan {
   intent?: { playerId: string; commandId: string };
   simEffects: SimEffect[];
   fanout?: { regionId: string; topic: string; payload: unknown }[];
+}
+
+interface TransferPlacement {
+  simId: number;
+  cell: number;
+  cargo: TransferPlacement[];
+}
+
+interface TransferArrival {
+  v: 1;
+  transferId: string;
+  entityId: string;
+  manifest: TransferManifestEntry;
+  entryCell: number;
+  placement: TransferPlacement;
 }
 
 const SIM_ACTIONS = new Set([
@@ -449,12 +464,8 @@ export class RegionRunner {
         regionId: this.opts.regionId, sinceMs: hib.sinceMs, wakeMs: this.wakeLatencyMs,
       });
     }
-    // PW30/PW18: reconcile durable COMPLETED inbound transfers on EVERY start,
-    // not only genesis. An arrival that committed after the restored snapshot
-    // is absent from both the snapshot and the journal tail (the drain is not
-    // a journaled event), so without this the carrier and its cargo vanish.
-    // Rows already bound by the snapshot are skipped; unbound ones are
-    // re-materialized and rebound. Genesis replay needs the same pass.
+    // Ordered arrivals replay from the tail. Older transfers still need the
+    // terminal-receipt and manifest check before live work resumes.
     await this.rebindCompletedTransfers();
 
     // Active regions recover missed wall time. A hibernated checkpoint re-anchors
@@ -466,8 +477,10 @@ export class RegionRunner {
       : now - this.game.tick * this.opts.tickMs;
     if (startedAt == null) await setRegionSimStart(this.opts.regionId, this.startedAtMs);
 
-    await this.catchUpTo(this.tickFor(now));
+    // Resolve pending journal inputs at their recorded ticks before advancing
+    // the region through elapsed wall time.
     await this.applyUnappliedEvents();
+    await this.catchUpTo(this.tickFor(now));
     // A pre-wake checkpoint can have a later committed tail. Recovery must
     // resume live ticking at the replayed state instead of waiting for the
     // wall clock anchored at the older checkpoint to catch up again.
@@ -865,7 +878,7 @@ export class RegionRunner {
     for (;;) {
       // Renew before applying events, which can write through the fence.
       if (this.leaseHeartbeatDue()) await this.renewDuringAdvance();
-      const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual'], 64);
+      const events = await listUnappliedRegionEvents(this.opts.regionId, ['command', 'scheduled', 'accrual', 'transfer'], 64);
       if (!events.length) {
         await this.drainSalvageEvents();
         await this.drainDepartEvents();
@@ -919,7 +932,7 @@ export class RegionRunner {
    * committed-plan event does not enqueue its effects a second time.
    */
   private async replayCommittedTail(afterSeq: bigint): Promise<void> {
-    const kinds = ['command', 'scheduled', 'accrual'];
+    const kinds = ['command', 'scheduled', 'accrual', 'transfer'];
     let cursor = afterSeq;
     // Pre-plan fan-out is fetched lazily once and grouped by journal position.
     let fanout: Map<string, { slot: number; atTick: number; command: Command }[]> | null = null;
@@ -942,6 +955,14 @@ export class RegionRunner {
       if (!events.length) break;
       for (const ev of events) {
         const seq = BigInt(ev.event_seq);
+        if (ev.event_kind === 'transfer') {
+          await this.advanceTo(Number(ev.simulation_tick));
+          this.applyTransferArrival(ev.payload, Number(ev.simulation_tick));
+          if (!ev.applied_at) this.simAppliedSeqs.add(ev.event_seq);
+          cursor = seq;
+          replayed++;
+          continue;
+        }
         if (ev.event_kind === 'accrual') {
           // The accrual's simulation_tick is the authoritative sim position at
           // its journal point: live ticks between the restored checkpoint and
@@ -959,11 +980,19 @@ export class RegionRunner {
           ? ev.resolved as ResolvedPlan : null;
         const committed = plan !== null || ev.applied_at !== null;
         if (!committed) { cursor = seq; continue; } // never applied: normal apply owns it
-        await this.advanceTo(Number(ev.simulation_tick));
         const effects: SimEffect[] = plan
           ? plan.simEffects
           : (await fanoutFor(ev.event_seq))
             .map(f => ({ t: 'enqueue' as const, slot: f.slot, atTick: f.atTick, command: f.command }));
+        const action = (ev.payload as { action?: { t?: unknown } } | null)?.action?.t;
+        const result = (plan?.result ?? ev.application_result) as { accepted?: boolean } | null;
+        // A rejected order has no sim effect. An accepted simulation order
+        // requires a stored plan or its historical broadcast to be recoverable.
+        if (!Array.isArray(effects) || (!effects.length && ev.event_kind === 'command'
+          && typeof action === 'string' && SIM_ACTIONS.has(action) && result?.accepted !== false)) {
+          throw new MmoStoreError('MISSING_REPLAY_EFFECT', `missing simulation history for event ${ev.event_seq}`);
+        }
+        await this.advanceTo(Number(ev.simulation_tick));
         for (const fx of effects) await this.applySimEffect(fx);
         this.simAppliedSeqs.add(ev.event_seq);
         cursor = seq;
@@ -980,19 +1009,43 @@ export class RegionRunner {
   }
 
   /**
-   * PW30/PW18: durable COMPLETED inbound transfers are not journaled sim
-   * events, so neither a snapshot taken before the arrival nor the journal
-   * tail can reproduce them. Reconcile on every start: genesis replay loses
-   * all sim-id bindings, and a checkpoint restore loses only post-snapshot
-   * arrivals. Rows already bound are skipped; unbound manifests are
-   * re-materialized and rebound. Best-effort: entities that already
-   * interacted during replayed ticks cannot be rewound.
+   * Reconcile legacy COMPLETED transfers without an arrival journal event.
+   * Their original cell and tick were never recorded. Only arrivals with no
+   * later terminal receipt can be re-materialized using the old fallback.
    */
   private async rebindCompletedTransfers(): Promise<void> {
     const g = this.game;
     if (!g || this.epoch === undefined) return;
+    // The arrival ledger marks the start of this stay in the region. A later
+    // terminal receipt retires that arrival while leaving its audit trail intact.
     const rows = await mmoQuery<TransferRow>(
-      `select * from region_transfer where dest_region_id = $1 and state = 'COMPLETED'`,
+      `select t.* from region_transfer t
+        where t.dest_region_id = $1 and t.state = 'COMPLETED'
+          and not exists (
+            select 1 from region_event arrival
+             where arrival.event_id = t.transfer_id and arrival.region_id = t.dest_region_id
+               and arrival.event_kind = 'transfer')
+          and not exists (
+            select 1 from asset_ledger arrival
+            where arrival.operation_id = t.transfer_id and arrival.region_id = t.dest_region_id
+              and arrival.kind = 'TRANSFER_IN'
+              and (
+                exists (
+                  select 1 from asset_ledger terminal
+                  where terminal.region_id = t.dest_region_id and terminal.ledger_id > arrival.ledger_id
+                    and terminal.entity_id in (t.entity_id, t.transfer_id)
+                    and terminal.kind in ('DESTROY', 'SELL_REFUND')
+                )
+                or exists (
+                  select 1 from region_transfer onward
+                  join asset_ledger departure on departure.operation_id = onward.transfer_id
+                    and departure.region_id = onward.source_region_id and departure.kind = 'TRANSFER_OUT'
+                  where onward.source_region_id = t.dest_region_id
+                    and onward.entity_id in (t.entity_id, t.transfer_id)
+                    and departure.ledger_id > arrival.ledger_id
+                )
+              )
+          )`,
       [this.opts.regionId]);
     let rebound = 0;
     for (const t of rows) {
@@ -1277,72 +1330,121 @@ export class RegionRunner {
       [this.opts.regionId]);
   }
 
+  private transferPlacement(game: Game, simId: number, manifest: TransferManifestEntry): TransferPlacement | null {
+    const unit = game.entities.get(simId);
+    if (!unit || unit.passengers.length !== (manifest.cargoUnits?.length ?? 0)) return null;
+    const cargo: TransferPlacement[] = [];
+    for (const [i, passengerId] of unit.passengers.entries()) {
+      const passenger = this.transferPlacement(game, passengerId, manifest.cargoUnits![i]);
+      if (!passenger) return null;
+      cargo.push(passenger);
+    }
+    return { simId, cell: toCell(unit.y) * game.map.w + toCell(unit.x), cargo };
+  }
+
+  private applyTransferArrival(payload: unknown, tick: number): void {
+    const arrival = payload as Partial<TransferArrival> | null;
+    const game = this.game!;
+    if (!arrival || arrival.v !== 1 || !arrival.manifest || !arrival.placement
+      || typeof arrival.transferId !== 'string' || typeof arrival.entityId !== 'string'
+      || arrival.entryCell === undefined || !Number.isSafeInteger(arrival.entryCell)
+      || arrival.entryCell < 0 || arrival.entryCell >= game.map.w * game.map.h || game.tick !== tick) {
+      throw new MmoStoreError('BAD_TRANSFER_ARRIVAL', 'invalid transfer arrival at its journal tick');
+    }
+    const id = game.spawnTransfer(arrival.manifest, arrival.entryCell, arrival.transferId);
+    const actual = id === null ? null : this.transferPlacement(game, id, arrival.manifest);
+    if (!actual || canonicalize(actual) !== canonicalize(arrival.placement)) {
+      throw new MmoStoreError('TRANSFER_REPLAY_DIVERGED', 'transfer arrival does not match its committed placement');
+    }
+    this.bindEntity(arrival.transferId, actual.simId);
+    this.bindEntity(arrival.entityId, actual.simId);
+  }
+
+  private async receiptTransferArrival(eventSeq: string, payload: unknown, tick: number): Promise<void> {
+    if (!this.simAppliedSeqs.has(eventSeq)) {
+      this.applyTransferArrival(payload, tick);
+      this.simAppliedSeqs.add(eventSeq);
+    }
+    await mmoTransaction(async tx => {
+      await assertRegionFence(tx, {
+        regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+      });
+      await markRegionEventApplied(tx, { regionId: this.opts.regionId, eventSeq, result: { arrived: true } });
+    });
+    this.simAppliedSeqs.delete(eventSeq);
+    if (BigInt(eventSeq) > this.lastAppliedSeq) this.lastAppliedSeq = BigInt(eventSeq);
+  }
+
   /**
-   * PW18 (inbound): pick up transfers other regions released. The manifest is
-   * spawned into the live sim first, then the durable transitions and ledger
-   * commit in one fenced transaction; a commit failure unspawns the entity so
-   * no ghost survives. spawnTransfer resolving no owner slot parks the row in
-   * RECOVERY_REQUIRED rather than silently dropping the asset.
+   * Stage an arrival on a disposable simulation. The full cargo must fit
+   * before the destination ledger and journal commit. Only then can the live
+   * engine allocate IDs, so transaction retries cannot consume sim IDs.
    */
   private async drainInboundTransfers(): Promise<void> {
-    const g = this.game;
-    if (!g || this.epoch === undefined) return;
-    for (const t of await inboundTransfers(this.opts.regionId)) {
-      const payload = t.payload as { manifest?: TransferManifestEntry; ownerPid?: string };
+    const game = this.game;
+    if (!game || this.epoch === undefined) return;
+    const fence = { regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch };
+    for (const transfer of await inboundTransfers(this.opts.regionId)) {
+      const payload = transfer.payload as { manifest?: TransferManifestEntry; ownerPid?: string };
       const manifest = payload.manifest;
-      if (!manifest) {
-        await transitionTransfer(t.transfer_id, 'RECOVERY_REQUIRED').catch(() => undefined);
-        continue;
+      const tick = game.tick;
+      let arrival: TransferArrival | undefined;
+      if (manifest) {
+        const entryCell = this.transferEntryCell(transfer);
+        const probe = restoreGame(captureGame(game, { seed: this.simSeed }), PACK_LIST);
+        const simId = probe.spawnTransfer(manifest, entryCell, transfer.transfer_id);
+        const placement = simId === null ? null : this.transferPlacement(probe, simId, manifest);
+        if (placement) {
+          arrival = {
+            v: 1, transferId: transfer.transfer_id, entityId: transfer.entity_id, manifest, entryCell, placement,
+          };
+        }
       }
-      const cell = this.transferEntryCell(t);
-      const simId = g.spawnTransfer(manifest, cell, t.transfer_id);
-      if (simId === null) {
-        await transitionTransfer(t.transfer_id, 'RECOVERY_REQUIRED').catch(() => undefined);
-        continue;
-      }
-      let raced = false;
+      let eventSeq: string | undefined;
       try {
-        await mmoTransaction(async tx => {
-          await assertRegionFence(tx, {
-            regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
+        eventSeq = await mmoTransaction(async tx => {
+          await assertRegionFence(tx, fence);
+          const current = (await tx.query<TransferRow>(
+            'select * from region_transfer where transfer_id = $1 for update', [transfer.transfer_id])).rows[0];
+          if (!current || (current.state !== 'SOURCE_RELEASED' && current.state !== 'RECOVERY_REQUIRED')) return;
+          if (canonicalize(current.payload) !== canonicalize(transfer.payload)) return;
+          if (!arrival) {
+            if (current.state === 'SOURCE_RELEASED') await transitionTransfer(current.transfer_id, 'RECOVERY_REQUIRED', tx);
+            return;
+          }
+          const { rows } = await tx.query<{ last_committed_tick: string }>(
+            'select last_committed_tick from region where region_id = $1', [fence.regionId]);
+          // An unapplied input may be ahead of the simulation. Retry the
+          // arrival after the runner has applied that boundary.
+          if (BigInt(rows[0].last_committed_tick) > BigInt(tick)) return;
+
+          await this.opts.faultHooks?.beforeTransferCommit?.(current.transfer_id);
+          const event = await appendRegionEvent(tx, {
+            ...fence, tick, kind: 'transfer', payload: arrival,
+            eventId: current.transfer_id, operationId: current.transfer_id,
           });
-          const fresh = (await tx.query<TransferRow>(
-            'select * from region_transfer where transfer_id = $1 for update', [t.transfer_id])).rows[0];
-          // RECOVERY_REQUIRED rows retry through the same commit path — the
-          // state machine allows RECOVERY_REQUIRED -> DESTINATION_ACCEPTED.
-          if (!fresh || (fresh.state !== 'SOURCE_RELEASED' && fresh.state !== 'RECOVERY_REQUIRED')) { raced = true; return; }
-          await this.opts.faultHooks?.beforeTransferCommit?.(t.transfer_id);
-          await transitionTransfer(t.transfer_id, 'DESTINATION_ACCEPTED', tx);
-          await transitionTransfer(t.transfer_id, 'COMPLETED', tx);
+          await transitionTransfer(current.transfer_id, 'DESTINATION_ACCEPTED', tx);
+          await transitionTransfer(current.transfer_id, 'COMPLETED', tx);
           await tx.query(
             `insert into asset_ledger (operation_id, entity_id, region_id, kind, from_owner, to_owner, physical_state, engine_entity_key, detail)
              values ($1,$2,$3,'TRANSFER_IN',$4,$5,$6,$7,$8)`,
-            [t.transfer_id, t.transfer_id, this.opts.regionId,
+            [current.transfer_id, current.transfer_id, fence.regionId,
              payload.ownerPid ?? null, payload.ownerPid ?? null,
-             manifest.packedType ? 'packed' : 'deployed', String(simId),
-             JSON.stringify({ transferId: t.transfer_id, sourceRegionId: t.source_region_id, simId })]);
-          // PW19: a completed crossing proves the owner's transfer objective.
+             arrival.manifest.packedType ? 'packed' : 'deployed', String(arrival.placement.simId),
+             JSON.stringify({ transferId: current.transfer_id, sourceRegionId: current.source_region_id,
+               simId: arrival.placement.simId, cell: arrival.placement.cell, tick })]);
           if (payload.ownerPid) {
             await bumpObjectiveProgress(tx, { playerId: payload.ownerPid, kind: 'transfer_unit' });
           }
+          return event.eventSeq;
         });
-        // Bind durable identities only after the commit lands — a rolled-back
-        // transaction must not leave bindings pointing at an unspawned sim id.
-        if (!raced) {
-          this.bindEntity(t.transfer_id, simId);
-          this.bindEntity(t.entity_id, simId);
-        }
       } catch (error) {
-        g.unspawnTransfer(simId);
-        // A lost fence must still fail the region; any other per-transfer
-        // failure (bad ledger ref, transient DB error) leaves the row parked
-        // for the next pass instead of killing the whole region runner.
         if (error instanceof MmoStoreError && error.code === 'FENCE_LOST') throw error;
         this.opts.log('transfer-inbound-error', {
-          transferId: t.transfer_id, error: String(error).slice(0, 300),
+          transferId: transfer.transfer_id, error: String(error).slice(0, 300),
         });
       }
-      if (raced) g.unspawnTransfer(simId);
+      if (eventSeq !== undefined) await this.receiptTransferArrival(eventSeq, arrival, tick);
     }
   }
 
@@ -1501,7 +1603,12 @@ export class RegionRunner {
     // the input applies, exactly as it would have in real time. Ticking is
     // deterministic catch-up, not an event effect — a rolled-back receipt leaves
     // the sim at the same point an uninterrupted retry would reach anyway.
-    await this.advanceTo(Number(event.simulation_tick));
+    const tick = Number(event.simulation_tick);
+    await this.advanceTo(tick);
+    if (event.event_kind === 'transfer') {
+      await this.receiptTransferArrival(event.event_seq, event.payload, tick);
+      return;
+    }
     const plan = await this.commitEventPlan(event);
     if (!plan) return; // already applied by this or a concurrent owner
     await this.opts.faultHooks?.afterPlanCommit?.(event.event_seq);
@@ -1573,11 +1680,12 @@ export class RegionRunner {
         }
         for (const f of plan.fanout ?? []) {
           await tx.query(
-            `insert into outbox (event_id, region_id, event_seq, topic, payload) values ($1,$2,$3,$4,$5)`,
-            [randomUUID(), f.regionId, event.event_seq, f.topic, JSON.stringify({
+            `insert into outbox (event_id, region_id, event_seq, topic, payload, delivery_region_id)
+             values ($1,$2,$3,$4,$5,$6)`,
+            [randomUUID(), this.opts.regionId, event.event_seq, f.topic, JSON.stringify({
               ...(f.payload as Record<string, unknown>),
               epoch: this.epoch, eventSeq: event.event_seq,
-            })]);
+            }), f.regionId === this.opts.regionId ? null : f.regionId]);
         }
       }
       return plan;
