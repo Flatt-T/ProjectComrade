@@ -24,9 +24,8 @@ port 3001 behind Cloudflare and Nginx Proxy Manager host 54. Database `comrade_b
 - Poll for beta releases every five minutes. LXC 283 uses the shared unit
   name, so set the cadence in
   `comrade-deploy.timer.d/40-beta-github-poll-budget.conf` below
-  `/etc/systemd/system`. Put `OnUnitActiveSec=` and then
-  `OnUnitActiveSec=5min` in its `[Timer]` section so only one recurring interval
-  remains. Production and beta share outbound access to GitHub. The interval
+  `/etc/systemd/system`. In its `[Timer]` section, reset the schedule with
+  `OnUnitActiveSec=` and then set `OnBootSec=20s` and `OnUnitActiveSec=5min`. Production and beta share outbound access to GitHub. The interval
   leaves room in the unauthenticated API allowance for both release watchers.
 - If GitHub release discovery is rate-limited, use the published
   `beta-<commit>` tag as `COMRADE_RELEASE_TAG` for a single invocation with
