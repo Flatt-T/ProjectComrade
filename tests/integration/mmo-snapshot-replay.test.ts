@@ -15,7 +15,7 @@ import { mmoEntityId, MMO_PROTOCOL, type MmoCommandMessage } from '../../package
 import { PACKS } from '../../packages/fusion/src/index';
 import { submitCommand } from '../../apps/service/src/mmo/commands.js';
 import {
-  acquireRegionLease, appendRegionEvent, assertRegionFence, getRegion, markRegionEventApplied, recordSnapshot, recoverySnapshots,
+  acquireRegionLease, appendRegionEvent, assertRegionFence, getRegion, markRegionEventApplied, recordSnapshot, recoverySnapshots, releaseRegionLease,
 } from '../../apps/service/src/mmo/store.js';
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
@@ -547,6 +547,40 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
       await runnerC.stop().catch(() => undefined);
     }
   }, 120000);
+
+  it.each([true, false])('requires replay evidence for an accepted legacy order (%s)', async accepted => {
+    const fx = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
+    const appended = await mmoTransaction(async tx => {
+      const event = await appendRegionEvent(tx, {
+        regionId: fx.regionId, workerId: fx.workerId, epoch: fx.epoch, tick: 0, kind: 'command',
+        payload: {
+          playerId: fx.players[0].playerId, commandId: randomUUID(),
+          action: { t: 'move', entityIds: [mmoEntityId(fx.regionId, 1)], x: 20, y: 20 },
+        },
+      });
+      await markRegionEventApplied(tx, { regionId: fx.regionId, eventSeq: event.eventSeq, result: { accepted } });
+      return event;
+    });
+    const runner = mkRunner(fx, fx.workerId);
+    const before = await journalTail(fx);
+    try {
+      if (accepted) {
+        await expect(runner.start()).rejects.toMatchObject({
+          code: 'MISSING_REPLAY_EFFECT', message: expect.stringContaining(appended.eventSeq),
+        });
+        expect(runner.isRunning).toBe(false);
+        expect(await snapshotCount(fx)).toBe(0);
+      } else {
+        await runner.start();
+        expect(runner.appliedSeq).toBe(appended.eventSeq);
+        expect(runner.isRunning).toBe(true);
+      }
+      expect(await journalTail(fx)).toEqual(before);
+    } finally {
+      if (runner.isRunning) await runner.stop();
+      else await releaseRegionLease(fx.regionId, fx.workerId);
+    }
+  }, 15_000);
 
   it('a corrupt newest checkpoint falls back to the older verified one plus replay', async () => {
     const control = await seedFixtureWorld({ leaseMs: 300_000, playerCount: 1 });
