@@ -3,10 +3,8 @@
 // at its recorded tick, against REAL PostgreSQL and the REAL Fusion sim.
 // Requires MMO_TEST_DATABASE_URL (disposable database).
 import { randomUUID } from 'node:crypto';
-import { fork } from 'node:child_process';
 import { once } from 'node:events';
-import { createRequire } from 'node:module';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { startProcessWorker } from './fixtures/runner-process-client.js';
 import type { WorkerRequest, WorkerState } from './fixtures/mmo-runner-process.js';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import * as database from '../../apps/service/src/mmo/db.js';
@@ -169,38 +167,6 @@ async function hardKill(runner: RegionRunner, fx: FixtureWorld, usurper: string)
   await waitFor(async () => (runner as unknown as { isFailed: boolean }).isFailed, 15000, 30);
 }
 
-function startProcessWorker(fx: FixtureWorld, workerId: string, wallTime: number) {
-  const require = createRequire(new URL('../../apps/service/package.json', import.meta.url));
-  const loader = pathToFileURL(require.resolve('tsx')).href;
-  const child = fork(fileURLToPath(new URL('./fixtures/mmo-runner-process.ts', import.meta.url)),
-    [fx.regionId, workerId, String(wallTime)], {
-      execArgv: ['--import', loader],
-      env: { ...process.env, MMO_DATABASE_URL: DB_URL },
-      stdio: ['ignore', 'ignore', 'inherit', 'ipc'],
-    });
-  async function request(message: WorkerRequest): Promise<WorkerState> {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 10_000);
-    try {
-      const result = Promise.race([
-        once(child, 'message', { signal: controller.signal }).then(([reply]) =>
-          reply as { state?: WorkerState; error?: string }),
-        once(child, 'exit', { signal: controller.signal }).then(([code, signal]) => {
-          throw new Error(`Replay worker exited before ${message.type} (${code ?? signal})`);
-        }),
-      ]);
-      child.send(message);
-      const reply = await result;
-      if (!reply.state) throw new Error(reply.error ?? 'Replay worker returned no state');
-      return reply.state;
-    } finally {
-      clearTimeout(timer);
-      controller.abort();
-    }
-  }
-  return { child, request };
-}
-
 describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)', () => {
   beforeAll(async () => {
     process.env.MMO_DATABASE_URL = DB_URL;
@@ -316,8 +282,8 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
     await pinIdenticalSim(control);
     await pinIdenticalSim(faulted);
     const wallTime = Date.now();
-    const stable = startProcessWorker(control, control.workerId, wallTime);
-    const victim = startProcessWorker(faulted, faulted.workerId, wallTime);
+    const stable = startProcessWorker(control.regionId, control.workerId, wallTime);
+    const victim = startProcessWorker(faulted.regionId, faulted.workerId, wallTime);
     let recovered: ReturnType<typeof startProcessWorker> | undefined;
     try {
       const [initialC, initialF] = await Promise.all([
@@ -364,7 +330,7 @@ describeDb('mmo snapshot tail replay (PW30, real PostgreSQL + real Fusion sim)',
       await stable.request({ type: 'poll' });
       const replacement = randomUUID();
       await acquireRegionLease({ regionId: faulted.regionId, workerId: replacement, forceTakeover: true });
-      recovered = startProcessWorker(faulted, replacement, wallTime + 55 * 60_000);
+      recovered = startProcessWorker(faulted.regionId, replacement, wallTime + 55 * 60_000);
       const startup = await recovered.request({ type: 'start' });
       expect(startup.pid).not.toBe(initialF.pid);
       expect(BigInt(startup.epoch)).toBeGreaterThan(BigInt(initialF.epoch));

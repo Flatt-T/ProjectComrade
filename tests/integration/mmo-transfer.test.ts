@@ -116,6 +116,13 @@ function edgeUnit(ctx: Ctx, edgeDist = 2): { simId: number; ref: string; e: Enti
 const transferState = async (id: string) =>
   (await mmoOne<{ state: string }>('select state from region_transfer where transfer_id = $1', [id]))?.state;
 
+async function transferApplied(transferId: string): Promise<boolean> {
+  const event = await mmoOne<{ applied_at: Date | null }>(
+    "select applied_at from region_event where event_id = $1 and event_kind = 'transfer'",
+    [transferId]);
+  return event?.applied_at != null;
+}
+
 describeDb('mmo region transfer (two live runners)', () => {
   let ctx: Ctx;
   let runnerB: RegionRunner | undefined;
@@ -180,7 +187,7 @@ describeDb('mmo region transfer (two live runners)', () => {
     expect(transferId).toBeTruthy();
 
     // Walk to the edge, release, pickup — all journaled, all fenced.
-    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(transferId), 30000);
 
     // Source: entity gone, no salvage spawned for the departure.
     expect(ctx.a.runner.currentGame!.entities.has(simId)).toBe(false);
@@ -228,7 +235,7 @@ describeDb('mmo region transfer (two live runners)', () => {
     });
     expect(made.accepted).toBe(true);
     const transferId = made.transferId as string;
-    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(transferId), 30000);
 
     const arrivedCarrier = [...ctx.b.runner.currentGame!.entities.values()]
       .find(x => x.durableId === transferId);
@@ -344,7 +351,7 @@ describeDb('mmo region transfer (two live runners)', () => {
     ctx.b.runner = runnerB2;
     runnerB = runnerB2;
     await runnerB2.start();
-    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(transferId), 30000);
 
     const arrived = [...runnerB2.currentGame!.entities.values()]
       .find(x => x.durableId === transferId);
@@ -392,7 +399,7 @@ describeDb('mmo region transfer (two live runners)', () => {
     await mmoQuery(
       `update region_transfer set payload = payload || $2::jsonb where transfer_id = $1`,
       [transferId, JSON.stringify({ manifest: { ...manifest, type: unitType } })]);
-    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(transferId), 30000);
 
     const arrived = [...ctx.b.runner.currentGame!.entities.values()]
       .find(x => x.durableId === transferId);
@@ -457,7 +464,7 @@ describeDb('mmo region transfer (two live runners)', () => {
     });
     expect(made.accepted).toBe(true);
     const transferId = made.transferId as string;
-    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(transferId), 30000);
 
     // Source authority ends at departure: the fighter is gone (no corpse, no
     // salvage), and the defender's stale target is cleared by the sim itself.
@@ -556,7 +563,7 @@ describeDb('mmo region transfer (two live runners)', () => {
       t: 'regionTransfer', entityId: ref, destRegionId: ctx.b.regionId,
     });
     const t1 = made.transferId as string;
-    await waitFor(async () => (await transferState(t1)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(t1), 30000);
 
     // Park the arrived unit beside B's edge so the return depart walk is short.
     const gB = ctx.b.runner.currentGame!;
@@ -581,7 +588,7 @@ describeDb('mmo region transfer (two live runners)', () => {
     });
     expect(back.accepted).toBe(true);
     const t2 = back.transferId as string;
-    await waitFor(async () => (await transferState(t2)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(t2), 30000);
 
     // Exactly one live copy, back in A; B holds none.
     const gA = ctx.a.runner.currentGame!;
@@ -642,7 +649,7 @@ describeDb('mmo region transfer (two live runners)', () => {
     }
 
     // Retry path delivers the same transfer exactly once.
-    await waitFor(async () => (await transferState(pendingId!)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(pendingId!), 30000);
     const gB = ctx.b.runner.currentGame!;
     const copies = [...gB.entities.values()].filter(x => x.durableId === pendingId);
     expect(copies).toHaveLength(1);
@@ -700,7 +707,7 @@ describeDb('mmo region transfer (two live runners)', () => {
     });
     expect(made.accepted).toBe(true);
     const transferId = made.transferId as string;
-    await waitFor(async () => (await transferState(transferId)) === 'COMPLETED', 30000);
+    await waitFor(async () => await transferApplied(transferId), 30000);
 
     // Destination: exactly one carrier, packed identity and hp preserved.
     const gB = ctx.b.runner.currentGame!;
