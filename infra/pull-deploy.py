@@ -90,12 +90,19 @@ def migrate_beta(image):
     metadata = credentials.lstat()
     if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != 0 or metadata.st_mode & 0o077:
         raise RuntimeError('Beta migrator credentials require a root-owned private file')
-    subprocess.run([
+    args = [
         'docker', 'run', '--rm', '--read-only', '--cap-drop', 'ALL',
         '--security-opt', 'no-new-privileges:true', '--memory', '256m',
         '--env-file', str(credentials), '--env', 'COMRADE_CHANNEL=beta',
-        image, 'node', 'apps/service/dist/migrate-beta.js',
-    ], check=True, timeout=120)
+    ]
+    ca = ROOT / 'beta-postgres-ca.pem'
+    if ca.is_file():
+        args.extend(['--mount', f'type=bind,src={ca},dst=/run/secrets/beta-postgres-ca.pem,readonly'])
+    pg_host = os.environ.get('COMRADE_BETA_PG_HOST_ENTRY')
+    if pg_host:
+        args.extend(['--add-host', pg_host])
+    args.extend([image, 'node', 'apps/service/dist/migrate-beta.js'])
+    subprocess.run(args, check=True, timeout=120)
 
 
 def prune_images(commit, previous_commit):
