@@ -14,14 +14,16 @@
 //    today's digest onto content we cannot verify would falsify provenance.
 //    Migrating them is an explicit operator action, never implicit.
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { packById } from '@comrade/fusion';
 import type { MmoRulesProfile } from '@comrade/contracts';
+import { betaDeployment } from '../config.js';
 import { canonicalize } from './store.js';
 import type { RegionSimSpec } from './runner.js';
 
 export interface RegionFingerprints {
   v: 1;
-  /** Deployed engine artifact identity (COMRADE_ENGINE_SHA at build/deploy). */
+  /** Pinned identity of the deployed engine artifact. */
   engine: string;
   /** sha256 of the canonical resolved pack definitions. */
   pack: string;
@@ -35,16 +37,23 @@ export interface RegionFingerprints {
 
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 
-/**
- * Engine artifact identity. Deploys inject COMRADE_ENGINE_SHA (the built
- * commit); local/dev runs share the 'dev' marker — honest, since dev builds
- * are not content-pinned artifacts.
- */
+// These 38 compiled Fusion and contracts modules matched in the two deployed
+// beta images. This is the historical engine ID already in their checkpoints.
+const VERIFIED_BETA_ENGINE = {
+  artifact: 'd762fef75c1f348ef519cef0b81f28fed42da6189f8005534e16707d1f3221fb',
+  checkpointEngine: 'ef42e0e3b2405da1fa149d181c8e4496ba436c85',
+};
+
 export function engineFingerprint(): string {
-  // COMRADE_ENGINE_SHA wins when set explicitly; the deploy image already
-  // carries COMRADE_COMMIT=<github.sha> as a build arg/env.
-  const explicit = process.env.COMRADE_ENGINE_SHA?.trim() || process.env.COMRADE_COMMIT?.trim();
-  return explicit || 'dev';
+  const explicit = process.env.COMRADE_ENGINE_SHA?.trim();
+  if (explicit) return explicit;
+  const artifactPath = process.env.COMRADE_ENGINE_ARTIFACT_PATH;
+  if (betaDeployment() && artifactPath) {
+    const digest = readFileSync(artifactPath, 'utf8').trim();
+    if (!/^[a-f0-9]{64}$/.test(digest)) throw new Error('Invalid beta engine artifact fingerprint');
+    return digest === VERIFIED_BETA_ENGINE.artifact ? VERIFIED_BETA_ENGINE.checkpointEngine : digest;
+  }
+  return process.env.COMRADE_COMMIT?.trim() || 'dev';
 }
 
 // Pack definitions only change across deploys; cache the digest per process.
