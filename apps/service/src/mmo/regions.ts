@@ -205,6 +205,11 @@ export class RegionService {
     return obs && epoch ? { ...obs, epoch, regionId } : undefined;
   }
 
+  /** The player's current sim slot in a live region (settlement can follow subscribe). */
+  liveSlotFor(regionId: string, playerId: string): number | null {
+    return this.entries.get(regionId)?.runner.slotForPlayer(playerId) ?? null;
+  }
+
   /** All live runners (ops/diagnostics). */
   regions(): { regionId: string; tick?: number; failed: boolean; awake: boolean }[] {
     return [...this.entries.entries()].map(([regionId, e]) => ({
