@@ -1,0 +1,879 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:fanout_input",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "catalogue_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "target_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ]
+    },
+    "rights_ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ]
+    },
+    "existing_issue_map": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ]
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]*$"
+          },
+          "row_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "stage_specs": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "SPEC": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permitted_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "output_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "acceptance_fixtures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "required_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "approved_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "shared_artifact": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "source_task": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "artifact_sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "reviewer": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "variant_fixture": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "source_task",
+                          "artifact_sha256",
+                          "reviewer",
+                          "variant_fixture"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "permitted_paths",
+                  "output_paths",
+                  "acceptance_fixtures",
+                  "required_contracts",
+                  "approved_contracts",
+                  "shared_artifact"
+                ]
+              },
+              "SIM": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permitted_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "output_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "acceptance_fixtures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "required_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "approved_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "shared_artifact": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "source_task": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "artifact_sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "reviewer": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "variant_fixture": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "source_task",
+                          "artifact_sha256",
+                          "reviewer",
+                          "variant_fixture"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "permitted_paths",
+                  "output_paths",
+                  "acceptance_fixtures",
+                  "required_contracts",
+                  "approved_contracts",
+                  "shared_artifact"
+                ]
+              },
+              "MODEL": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permitted_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "output_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "acceptance_fixtures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "required_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "approved_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "shared_artifact": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "source_task": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "artifact_sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "reviewer": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "variant_fixture": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "source_task",
+                          "artifact_sha256",
+                          "reviewer",
+                          "variant_fixture"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "permitted_paths",
+                  "output_paths",
+                  "acceptance_fixtures",
+                  "required_contracts",
+                  "approved_contracts",
+                  "shared_artifact"
+                ]
+              },
+              "RIG": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permitted_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "output_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "acceptance_fixtures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "required_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "approved_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "shared_artifact": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "source_task": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "artifact_sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "reviewer": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "variant_fixture": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "source_task",
+                          "artifact_sha256",
+                          "reviewer",
+                          "variant_fixture"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "permitted_paths",
+                  "output_paths",
+                  "acceptance_fixtures",
+                  "required_contracts",
+                  "approved_contracts",
+                  "shared_artifact"
+                ]
+              },
+              "ANIM": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permitted_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "output_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "acceptance_fixtures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "required_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "approved_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "shared_artifact": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "source_task": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "artifact_sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "reviewer": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "variant_fixture": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "source_task",
+                          "artifact_sha256",
+                          "reviewer",
+                          "variant_fixture"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "permitted_paths",
+                  "output_paths",
+                  "acceptance_fixtures",
+                  "required_contracts",
+                  "approved_contracts",
+                  "shared_artifact"
+                ]
+              },
+              "FX_AUDIO_UI": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permitted_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "output_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "acceptance_fixtures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "required_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "approved_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "shared_artifact": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "source_task": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "artifact_sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "reviewer": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "variant_fixture": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "source_task",
+                          "artifact_sha256",
+                          "reviewer",
+                          "variant_fixture"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "permitted_paths",
+                  "output_paths",
+                  "acceptance_fixtures",
+                  "required_contracts",
+                  "approved_contracts",
+                  "shared_artifact"
+                ]
+              },
+              "INTEGRATE": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permitted_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "output_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "acceptance_fixtures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "required_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "approved_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "shared_artifact": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "source_task": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "artifact_sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "reviewer": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "variant_fixture": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "source_task",
+                          "artifact_sha256",
+                          "reviewer",
+                          "variant_fixture"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "permitted_paths",
+                  "output_paths",
+                  "acceptance_fixtures",
+                  "required_contracts",
+                  "approved_contracts",
+                  "shared_artifact"
+                ]
+              },
+              "REVIEW": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "permitted_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "output_paths": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "acceptance_fixtures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                  },
+                  "required_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "approved_contracts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "minItems": 0
+                  },
+                  "shared_artifact": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "source_task": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "artifact_sha256": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "reviewer": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "variant_fixture": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "source_task",
+                          "artifact_sha256",
+                          "reviewer",
+                          "variant_fixture"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "permitted_paths",
+                  "output_paths",
+                  "acceptance_fixtures",
+                  "required_contracts",
+                  "approved_contracts",
+                  "shared_artifact"
+                ]
+              }
+            },
+            "required": [
+              "SPEC",
+              "SIM",
+              "MODEL",
+              "RIG",
+              "ANIM",
+              "FX_AUDIO_UI",
+              "INTEGRATE",
+              "REVIEW"
+            ]
+          }
+        },
+        "required": [
+          "entity_id",
+          "row_sha256",
+          "stage_specs"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "catalogue_sha256",
+    "target_profile",
+    "schema_revision",
+    "capability_registry",
+    "rights_ledger",
+    "existing_issue_map",
+    "entries"
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "scope": "Prior two inventories and illustrative fixture set only; whole-series denominators require edition reconciliation",
+  "original_discovery": {
+    "definition_candidate": 262,
+    "path_candidate": 2778
+  },
+  "combined_discovery_rows": 3040,
+  "original_intake_status_retained": true,
+  "import_promotions": 0,
+  "fixture_source_identities": 3,
+  "fixture_research_verified": 0,
+  "fixture_adaptation_approved": 0,
+  "fixture_data_implemented": 0,
+  "fixture_model_complete": 0,
+  "fixture_animation_complete": 0,
+  "fixture_audio_ui_complete": 0,
+  "fixture_integrated": 0,
+  "fixture_release_accepted": 0,
+  "real_projection_leaves": 0,
+  "withheld_entities": [
+    {
+      "entity_id": "entity.td.e1",
+      "reasons": [
+        "requires independently verified active included identity",
+        "requires locked profile and reviewed source row",
+        "requires row-specific acceptance fixture",
+        "requires accepted Fusion adaptation",
+        "open row research or conflict",
+        "requires OPS-005 intake with approved real file leases, acceptance fixtures and contract gates"
+      ]
+    },
+    {
+      "entity_id": "entity.ra3.jaav.walker",
+      "reasons": [
+        "requires independently verified active included identity",
+        "requires locked profile and reviewed source row",
+        "requires row-specific acceptance fixture",
+        "requires accepted Fusion adaptation",
+        "open row research or conflict",
+        "requires OPS-005 intake with approved real file leases, acceptance fixtures and contract gates"
+      ]
+    },
+    {
+      "entity_id": "entity.ra3.jaav.air",
+      "reasons": [
+        "requires independently verified active included identity",
+        "requires locked profile and reviewed source row",
+        "requires row-specific acceptance fixture",
+        "requires accepted Fusion adaptation",
+        "open row research or conflict",
+        "requires OPS-005 intake with approved real file leases, acceptance fixtures and contract gates"
+      ]
+    }
+  ],
+  "synthetic_projection_leaves": 8,
+  "whole_series_counts": {
+    "research_verified": null,
+    "built": null,
+    "animated": null,
+    "integrated": null,
+    "accepted": null
+  },
+  "resolution": "Reconcile each scoped edition using source enumeration and independent playable or mission evidence; merge completed era tables, adjudicated aliases and accepted adaptations before producing the whole-series count."
+}

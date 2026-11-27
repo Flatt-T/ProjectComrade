@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:completion",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "completion"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "subject_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "stage_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "stage": {
+            "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/stage"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "blocked",
+              "accepted",
+              "shared",
+              "not_applicable"
+            ]
+          },
+          "artifact_sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+            },
+            "uniqueItems": true,
+            "minItems": 0
+          },
+          "reviewer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "stage",
+          "state",
+          "artifact_sha256",
+          "evidence",
+          "reviewer",
+          "reason"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "release_state": {
+      "enum": [
+        "research",
+        "in_progress",
+        "blocked",
+        "release_ready"
+      ]
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "research",
+          "in_progress",
+          "blocked",
+          "release_ready"
+        ]
+      },
+      "minItems": 1
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "profile_id",
+    "evidence",
+    "owner",
+    "reviewer",
+    "blockers",
+    "subject_id",
+    "stage_records",
+    "release_state",
+    "history",
+    "author"
+  ]
+}

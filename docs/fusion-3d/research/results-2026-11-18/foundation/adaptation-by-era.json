@@ -1,0 +1,762 @@
+[
+ {
+  "era": "td",
+  "research_task": "RES-004",
+  "factions_and_subgroups_in_scope": [
+   "GDI",
+   "Brotherhood of Nod",
+   "civilian/neutral",
+   "scripted mission forces",
+   "dinosaurs and special-mission objects"
+  ],
+  "profile_application": "reference ruleset + Fusion role mapping",
+  "implementation_decision": "Compare airstrip delivery, fixed sidebar and field economy; use GDI/Nod role-specific producers.",
+  "source_or_document": "early/td-facts.zip",
+  "capability_extensions": [
+   "field harvesting",
+   "MCV deployment",
+   "sidebar construction",
+   "asymmetric production delivery",
+   "infantry crush",
+   "commando demolition",
+   "aircraft rearm",
+   "stealth and detection",
+   "superweapon charges"
+  ],
+  "terrain_extensions": [
+   "temperate",
+   "desert",
+   "winter",
+   "rivers and crossings",
+   "cliffs",
+   "villages/urban props"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "ra1",
+  "research_task": "RES-005",
+  "factions_and_subgroups_in_scope": [
+   "Allies",
+   "Soviets",
+   "country/house variants and availability by mode",
+   "campaign neutral/special houses",
+   "ant mission objects"
+  ],
+  "profile_application": "first battle",
+  "implementation_decision": "Resolve mission-local unlocks, ore/gems, naval/ground interfaces, aircraft servicing and country permissions.",
+  "source_or_document": "editions/ra95-demo-facts.json",
+  "capability_extensions": [
+   "ore/gems",
+   "naval and submarine war",
+   "airfield rearm",
+   "minelaying",
+   "radar jamming and gap",
+   "spy/infiltration",
+   "engineer damage/capture profile",
+   "Chronosphere",
+   "Iron Curtain",
+   "nuclear/air support"
+  ],
+  "terrain_extensions": [
+   "temperate",
+   "snow",
+   "interior",
+   "coasts",
+   "rivers",
+   "islands",
+   "bridges"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "ts",
+  "research_task": "RES-006",
+  "factions_and_subgroups_in_scope": [
+   "GDI",
+   "Brotherhood of Nod",
+   "Forgotten/mutant characters and creatures",
+   "civilian/neutral",
+   "mission-specific Nod/GDI forces"
+  ],
+  "profile_application": "profiled ruleset",
+  "implementation_decision": "Match subterranean approach, walk/turn gait and hut interaction to the theatre.",
+  "source_or_document": "world/bridge-hut-crosswalk.json",
+  "capability_extensions": [
+   "walkers",
+   "subterranean movement",
+   "deployable artillery",
+   "EMP",
+   "stealth field",
+   "walls/gates/pavement",
+   "Firestorm defence",
+   "bridge repair huts",
+   "terrain hazards",
+   "tiberium healing/damage"
+  ],
+  "terrain_extensions": [
+   "temperate",
+   "snow",
+   "mutated landscapes",
+   "cliffs/ramps",
+   "tunnels",
+   "ice candidate",
+   "elevated and low bridges",
+   "industrial ruins"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "firestorm",
+  "research_task": "RES-007",
+  "factions_and_subgroups_in_scope": [
+   "GDI",
+   "Brotherhood of Nod",
+   "CABAL campaign forces",
+   "Forgotten",
+   "Tiberium lifeforms"
+  ],
+  "profile_application": "edition overlay",
+  "implementation_decision": "Partition new rules and shared models; check terrain and campaign allies per mission.",
+  "source_or_document": "early/fs-facts.zip",
+  "capability_extensions": [
+   "mobile production",
+   "mobile stealth/EMP",
+   "reaper/snare interactions",
+   "mutant/flora hazards",
+   "random map environmental events"
+  ],
+  "terrain_extensions": [
+   "mutated environment",
+   "veinholes",
+   "lifeforms",
+   "ion-storm/time-of-day candidates"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "ra2",
+  "research_task": "RES-008",
+  "factions_and_subgroups_in_scope": [
+   "Allies: America",
+   "Allies: France",
+   "Allies: Germany",
+   "Allies: Great Britain",
+   "Allies: Korea",
+   "Soviets: Russia",
+   "Soviets: Cuba",
+   "Soviets: Libya",
+   "Soviets: Iraq",
+   "civilian/tech structures",
+   "campaign characters and scripted forces"
+  ],
+  "profile_application": "profile and country restrictions",
+  "implementation_decision": "Nine countries share core tech yet own distinct units. Require a per-country menu and captured-producer case.",
+  "source_or_document": "early/ra2-facts.zip",
+  "capability_extensions": [
+   "garrison fire",
+   "capture and bridge repair",
+   "veterancy",
+   "deployable infantry",
+   "mind control",
+   "disguise",
+   "chrono movement",
+   "aircraft carrier child units",
+   "giant squid/dolphin interactions",
+   "ore mining return variants"
+  ],
+  "terrain_extensions": [
+   "temperate",
+   "snow",
+   "urban",
+   "coastal/islands",
+   "landmarks",
+   "elevated/low bridges",
+   "garrisonable urban blocks"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "yr",
+  "research_task": "RES-009",
+  "factions_and_subgroups_in_scope": [
+   "nine inherited Allied/Soviet country variants",
+   "Yuri",
+   "campaign hero/civilian variants",
+   "lunar mission objects"
+  ],
+  "profile_application": "profile and control transfer",
+  "implementation_decision": "Separate mind control from permanent capture; retain controller capacity, original owner and release events.",
+  "source_or_document": "early/yr-facts.zip",
+  "capability_extensions": [
+   "slave mining and deployment",
+   "Bio Reactor garrisons",
+   "mind-control overload/release",
+   "Grinder recycling",
+   "magnetic lift",
+   "weapon-changing passengers",
+   "vehicle crushing",
+   "genetic mutation",
+   "force shield"
+  ],
+  "terrain_extensions": [
+   "desert",
+   "lunar",
+   "new urban",
+   "inherited temperate/snow/urban",
+   "special campaign sets"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "generals",
+  "research_task": "RES-010",
+  "factions_and_subgroups_in_scope": [
+   "USA",
+   "China",
+   "GLA",
+   "neutral tech buildings",
+   "civilian vehicles/buildings",
+   "campaign-only military and naval objects"
+  ],
+  "profile_application": "builder and supply profile",
+  "implementation_decision": "Distinguish USA dozer, Chinese dozer and GLA worker as actor-driven sites, supply types and upgrades.",
+  "source_or_document": "early/generals-facts.zip",
+  "capability_extensions": [
+   "dozer/worker site construction",
+   "supply collectors",
+   "GLA tunnel network",
+   "salvage/holes",
+   "garrison clearing",
+   "horde bonuses",
+   "secondary income",
+   "general powers",
+   "firestorm weapon interaction"
+  ],
+  "terrain_extensions": [
+   "arid desert",
+   "temperate",
+   "snow/alpine",
+   "urban/industrial",
+   "mountain/canyon",
+   "coastal mission set pieces"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "zh",
+  "research_task": "RES-011",
+  "factions_and_subgroups_in_scope": [
+   "USA base",
+   "China base",
+   "GLA base",
+   "USA Air Force General Granger",
+   "USA Laser General Townes",
+   "USA Superweapon General Alexander",
+   "China Infantry General Fai",
+   "China Nuclear General Tao",
+   "China Tank General Kwai",
+   "GLA Toxin General Thrax",
+   "GLA Demolition General Juhziz",
+   "GLA Stealth General Kassad",
+   "Challenge boss Leang and challenge-specific objects",
+   "campaign and neutral additions"
+  ],
+  "profile_application": "general delta profiles",
+  "implementation_decision": "Three base sides and nine specialist generals require their own restrictions; challenge boss and campaign only rows remain mode scoped.",
+  "source_or_document": "early/zh-facts.zip",
+  "capability_extensions": [
+   "specialist tech restrictions",
+   "bunker/transport loadouts",
+   "Helix/Overlord upgrades",
+   "combat drones",
+   "ECM",
+   "scrap salvage",
+   "stealth structures",
+   "sabotage",
+   "tunnels"
+  ],
+  "terrain_extensions": [
+   "inherited Generals biomes",
+   "expansion challenge maps",
+   "industrial/urban complexes",
+   "river and bridge chokepoints"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "tw",
+  "research_task": "RES-012",
+  "factions_and_subgroups_in_scope": [
+   "GDI",
+   "Brotherhood of Nod",
+   "Scrin",
+   "civilian/neutral tech",
+   "campaign variants",
+   "Forgotten/MUTANT hovel recruits"
+  ],
+  "profile_application": "formation, production and zone profile",
+  "implementation_decision": "Squad members, husks, garrisons and factions have independent acquisition and life cycles.",
+  "source_or_document": "later/tw-production-targets.tsv",
+  "capability_extensions": [
+   "squad infantry",
+   "ground-control construction",
+   "multiple queues",
+   "support powers",
+   "upgrade propagation",
+   "directional armour",
+   "walker wreck capture",
+   "Tiberium interactions",
+   "Scrin flight/teleport/ion effects"
+  ],
+  "terrain_extensions": [
+   "Blue Zone cities",
+   "Yellow Zone ruins/badlands",
+   "Red Zone alien infestation",
+   "coasts/bridges",
+   "industrial infrastructure"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "kw",
+  "research_task": "RES-013",
+  "factions_and_subgroups_in_scope": [
+   "GDI",
+   "Steel Talons",
+   "ZOCOM",
+   "Brotherhood of Nod",
+   "Black Hand",
+   "Marked of Kane",
+   "Scrin",
+   "Reaper-17",
+   "Traveler-59",
+   "global conquest strategic-map entities",
+   "campaign variants and neutral objects"
+  ],
+  "profile_application": "nine faction/subfaction profiles",
+  "implementation_decision": "Use actual producer graph and subfaction replacements. Show changed weapons, hardpoints and economic roles separately from shared geometry.",
+  "source_or_document": "later/kw-production-targets.tsv",
+  "capability_extensions": [
+   "epic units and garrison upgrades",
+   "subfaction doctrine",
+   "teleport/mind control",
+   "EMP/cyborg immunity",
+   "adaptive armour",
+   "global conquest meta rules disposition"
+  ],
+  "terrain_extensions": [
+   "TW zone families",
+   "expansion maps and regional scene variants"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "ra3",
+  "research_task": "RES-014",
+  "factions_and_subgroups_in_scope": [
+   "Allies",
+   "Soviets",
+   "Empire of the Rising Sun",
+   "AI commander personalities (not automatically separate factions)",
+   "civilian and campaign objects"
+  ],
+  "profile_application": "naval land and transformation profile",
+  "implementation_decision": "Bind Empire forms/cores and Allied and Soviet construction policy to the appropriate active surface and build order.",
+  "source_or_document": "later/ra3-production-targets.tsv",
+  "capability_extensions": [
+   "land/water construction",
+   "amphibious movement",
+   "unit transformations",
+   "secondary abilities",
+   "ore nodes",
+   "nanocore deployment",
+   "local tech clearance",
+   "water-based economy",
+   "magnetic/chrono/cryo effects"
+  ],
+  "terrain_extensions": [
+   "temperate",
+   "snow/arctic",
+   "tropical/island",
+   "urban/industrial",
+   "coastal/naval",
+   "Japanese architectural regions",
+   "special mission complexes"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "uprising",
+  "research_task": "RES-015",
+  "factions_and_subgroups_in_scope": [
+   "Allies",
+   "Soviets",
+   "Empire of the Rising Sun",
+   "FutureTech campaign force/assets",
+   "Yuriko campaign-specific entities",
+   "Commander Challenge variants"
+  ],
+  "profile_application": "era delta and scenario mode",
+  "implementation_decision": "Separate Yuriko-focused campaign controls, campaign-only forms, challenge progression and normal multiplayer availability.",
+  "source_or_document": "later/uprising-production-targets.tsv",
+  "capability_extensions": [
+   "new transforming/deploying units",
+   "hero abilities",
+   "amphibious siege",
+   "targeted jump/telekinetic events"
+  ],
+  "terrain_extensions": [
+   "inherited RA3 biomes",
+   "expansion facilities/interiors",
+   "Yuriko campaign spaces",
+   "challenge map variations"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "c4",
+  "research_task": "RES-016",
+  "factions_and_subgroups_in_scope": [
+   "GDI Offense",
+   "GDI Defense",
+   "GDI Support",
+   "Nod Offense",
+   "Nod Defense",
+   "Nod Support",
+   "Forgotten neutral/mercenary entities",
+   "campaign objects",
+   "obsolete source definitions"
+  ],
+  "profile_application": "crawler and objective profile",
+  "implementation_decision": "Use the six faction/class combinations, unit cap, tier unlock and node score, with class-specific production and packed/deployed forms.",
+  "source_or_document": "later/c4-class-tier-commands.tsv",
+  "capability_extensions": [
+   "mobile Crawler production",
+   "command-point cap/refund",
+   "upgrade-point resources",
+   "control-node victory",
+   "class swap/redeploy",
+   "support points",
+   "defence structures tied to crawler"
+  ],
+  "terrain_extensions": [
+   "TCN infrastructure",
+   "reclaimed/infested landscapes",
+   "ruined cities",
+   "mountain/coastal/industrial environments"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "renegade",
+  "research_task": "RES-017",
+  "factions_and_subgroups_in_scope": [
+   "GDI team/classes",
+   "Nod team/classes",
+   "Havoc and campaign characters",
+   "Black Hand variants",
+   "building interiors",
+   "neutral vehicles/props"
+  ],
+  "profile_application": "scenario and scale adaptation",
+  "implementation_decision": "FPS avatar, purchasable class, vehicle seat, terminal and structure economy keep distinct ownership/input contracts.",
+  "source_or_document": "later/renegade.md",
+  "capability_extensions": [
+   "enterable structures",
+   "vehicles with occupants",
+   "repair weapons",
+   "C4/beacons",
+   "physical scale and sound cues"
+  ],
+  "terrain_extensions": [
+   "interiors",
+   "base complexes",
+   "urban",
+   "desert/canyon",
+   "snow",
+   "islands/coasts"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "sole",
+  "research_task": "RES-018",
+  "factions_and_subgroups_in_scope": [
+   "single-unit selections derived from TD",
+   "dinosaurs",
+   "arena/crate objects"
+  ],
+  "profile_application": "optional arena",
+  "implementation_decision": "Use restricted picks, crate effects, CTF/football versus kill-scored matches. A single controlled unit never implies a full construction sidebar.",
+  "source_or_document": "editions/sole-survivor-manual-facts.json",
+  "capability_extensions": [
+   "single-unit control",
+   "arena modes",
+   "power-ups"
+  ],
+  "terrain_extensions": [
+   "arena maps and TD-derived theatre variants"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "remaster_console",
+  "research_task": "RES-019",
+  "factions_and_subgroups_in_scope": [
+   "inherited TD/RA1 factions",
+   "PS1 and Nintendo 64 exclusive missions",
+   "Retaliation mission/object deltas",
+   "remastered presentation assets"
+  ],
+  "profile_application": "presentation/mission deltas",
+  "implementation_decision": "Keep source-era simulation when verified. Separate port-exclusive missions, input, remaster art and controller/special challenges.",
+  "source_or_document": "editions/derivative-editions.md",
+  "capability_extensions": [
+   "modern readability",
+   "zoom",
+   "UI/accessibility comparison",
+   "port-specific control interpretation"
+  ],
+  "terrain_extensions": [
+   "edition-specific maps/sets"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "alliances",
+  "research_task": "RES-020",
+  "factions_and_subgroups_in_scope": [
+   "GDI",
+   "Nod",
+   "Forgotten NPC forces"
+  ],
+  "profile_application": "strategic world-layer reference",
+  "implementation_decision": "Treat adjacency, economy, waves and fortress victory as profile-owned. Keep every tactical/world currency separate.",
+  "source_or_document": "editions/rivals-ta-alliances-reference.tsv",
+  "capability_extensions": [
+   "world alliances",
+   "base relocation",
+   "asynchronous attack structure",
+   "separate world economy"
+  ],
+  "terrain_extensions": [
+   "world-map regions",
+   "tactical bases",
+   "resource and defence layout"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "rivals",
+  "research_task": "RES-021",
+  "factions_and_subgroups_in_scope": [
+   "GDI",
+   "Nod",
+   "commander abilities",
+   "versioned unit/variant inventory"
+  ],
+  "profile_application": "optional tactical objective",
+  "implementation_decision": "Track occupancy by hex then by pad before charging. Separate commander, power, squad, building and harvester.",
+  "source_or_document": "editions/rivals-ta-rivals-reference.tsv",
+  "capability_extensions": [
+   "touch micro",
+   "short match objectives",
+   "deck/commander selection",
+   "clear counters"
+  ],
+  "terrain_extensions": [
+   "compact objective maps",
+   "visual terrain vs walkability"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "other_mobile",
+  "research_task": "RES-022",
+  "factions_and_subgroups_in_scope": [
+   "must verify by exact released region/build",
+   "Red Alert mobile/iOS/J2ME candidates",
+   "Tiberium Wars mobile candidate",
+   "Red Alert Online candidate",
+   "Legions announced regional/season content"
+  ],
+  "profile_application": "regional and handset-specific deltas",
+  "implementation_decision": "Keep touch, phased feature-phone play, regional updates and test-market releases separate in the build ledger.",
+  "source_or_document": "editions/reference-profiles.json",
+  "capability_extensions": [
+   "document transferability only after source verification"
+  ],
+  "terrain_extensions": [
+   "catalogue after versioned evidence"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ },
+ {
+  "era": "dune",
+  "research_task": "RES-023",
+  "factions_and_subgroups_in_scope": [
+   "existing Dune 2000 Atreides/Harkonnen/Ordos",
+   "Dune II historical predecessor reference",
+   "Emperor Battle for Dune reference only",
+   "Emperor minor houses require explicit scope decision"
+  ],
+  "profile_application": "existing Dune 2000 compatibility + separate lineage",
+  "implementation_decision": "Pin rock/sand foundation, Starport access, harvester return and Carryall; compare each existing pack row.",
+  "source_or_document": "editions/dune2000-manual-to-fusion.json",
+  "capability_extensions": [
+   "spice/harvesters",
+   "rock/sand buildability",
+   "worms",
+   "sand/rock pathing",
+   "house-specific mechanics"
+  ],
+  "terrain_extensions": [
+   "rock",
+   "sand/dunes",
+   "spice fields",
+   "cliffs"
+  ],
+  "required_evidence": [
+   "edition/region/patch identity",
+   "mode-scoped access route or scenario grant",
+   "source data plus separate observation",
+   "existing COMRADE mapping or explicit new role",
+   "per-state model/rig/animation/FX and independent verification"
+  ],
+  "status": "researched evidence available; independently qualified release census remains open"
+ }
+]

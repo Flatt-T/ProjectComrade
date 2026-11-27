@@ -1,0 +1,36 @@
+{
+  "generals": {
+    "declarations": 1300,
+    "per_kind": {
+      "Object": 1129,
+      "ObjectReskin": 171
+    },
+    "source_duplicates": [],
+    "conditional_presentation_rows": 9553,
+    "explicit_menu_slots_building_or_unit": 79,
+    "targets_with_any_set_producer": 78,
+    "targets_linked_to_buttons": 78,
+    "buttons_targeting_absent_object": [],
+    "templates": 5,
+    "weapon_definitions": 180,
+    "special_power_definitions": 42,
+    "parent_references_not_present": []
+  },
+  "zh": {
+    "declarations": 2103,
+    "per_kind": {
+      "Object": 1868,
+      "ObjectReskin": 235
+    },
+    "source_duplicates": [],
+    "conditional_presentation_rows": 27801,
+    "explicit_menu_slots_building_or_unit": 552,
+    "targets_with_any_set_producer": 431,
+    "targets_linked_to_buttons": 431,
+    "buttons_targeting_absent_object": [],
+    "templates": 15,
+    "weapon_definitions": 363,
+    "special_power_definitions": 79,
+    "parent_references_not_present": []
+  }
+}

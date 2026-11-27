@@ -13,6 +13,7 @@ import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { createWorldHandler } from '../../apps/service/src/mmo/world.js';
 import { RegionService } from '../../apps/service/src/mmo/regions.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
+import { SUPPLY_UPKEEP_TICKS } from '../../packages/fusion/src/index.js';
 import { PERSISTENT_RULES_V1, mmoEntityId, type BarterOffer, type MmoCommandMessage, type MmoWorldAction } from '../../packages/contracts/src/index.js';
 
 const DB_URL = process.env.MMO_TEST_DATABASE_URL;
@@ -246,7 +247,15 @@ describeDb('mmo barter (real PostgreSQL + runner)', () => {
   }, IT_TIMEOUT);
 
   it('decline and cancel resolve without moving assets', async () => {
+    // The region keeps simulating: army upkeep deducts credits every
+    // SUPPLY_UPKEEP_TICKS, independent of barter. Start just after an upkeep
+    // boundary, prove "nothing moved" from the durable record, and compare
+    // live balances exactly whenever no upkeep boundary fell in the window.
+    const game = ctx.runner.currentGame!;
+    await waitFor(() => game.tick % SUPPLY_UPKEEP_TICKS < SUPPLY_UPKEEP_TICKS / 3, 30_000, 5);
+    const startTick = game.tick;
     const before0 = creditsOf(ctx, 0), before1 = creditsOf(ctx, 1);
+    const tail0 = BigInt((await journalTail(ctx.fx.regionId))?.seq ?? '0');
     const declined = offer(p(0), ctx.fx.regionId, p(1), [{ kind: 'credits', amount: 100 }], [{ kind: 'credits', amount: 100 }]);
     await worldAction(ctx, p(0), { t: 'barterOffer', offer: declined });
     const d = await worldAction(ctx, p(1), { t: 'barterDecline', offerId: declined.offerId });
@@ -267,8 +276,22 @@ describeDb('mmo barter (real PostgreSQL + runner)', () => {
     expect(wd.reason).toBe('NOT_RECIPIENT');
     await worldAction(ctx, p(0), { t: 'barterCancel', offerId: wrongDecline.offerId });
 
-    expect(creditsOf(ctx, 0)).toBe(before0);
-    expect(creditsOf(ctx, 1)).toBe(before1);
+    const offerIds = [declined.offerId, cancelled.offerId, wrongDecline.offerId];
+    const settled = await mmoQuery(
+      `select 1 from economy_operation where kind = 'BARTER' and canonical_action->>'offerId' = any($1::text[])`, [offerIds]);
+    expect(settled).toHaveLength(0);
+    const credited = await mmoQuery(
+      `select 1 from outbox where region_id = $1 and topic = 'mmo.sim' and event_seq > $2
+          and payload->'command'->>'t' = 'adjustCredits'`, [ctx.fx.regionId, tail0.toString()]);
+    expect(credited).toHaveLength(0);
+    if (Math.floor(game.tick / SUPPLY_UPKEEP_TICKS) === Math.floor(startTick / SUPPLY_UPKEEP_TICKS)) {
+      expect(creditsOf(ctx, 0)).toBe(before0);
+      expect(creditsOf(ctx, 1)).toBe(before1);
+    } else {
+      // Upkeep only ever deducts; a refund-less escrow would show up above.
+      expect(creditsOf(ctx, 0)).toBeLessThanOrEqual(before0);
+      expect(creditsOf(ctx, 1)).toBeLessThanOrEqual(before1);
+    }
   }, IT_TIMEOUT);
 
   it('reserves a unit across concurrent open offers', async () => {

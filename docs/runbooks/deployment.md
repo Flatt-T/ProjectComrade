@@ -15,7 +15,7 @@ Run `python tools/prepare-content.py` before the app build. Serve with `STATIC_R
 
 ## Proxmox service
 
-The service lives in unprivileged Debian 13 LXC **280**, `projectcomrade-01`, on **prx-h2 / 192.168.1.200**. It has **2 cores, 4 GiB RAM, 24 GiB local-lvm disk**, and **10.1.0.60/24** on `vmbr0v10`, gateway/DNS `10.1.0.1`. Docker nesting and keyctl are enabled. No existing guests were repurposed.
+The service lives in unprivileged Debian 13 LXC **280**, `projectcomrade-01`, on **prx-h4 / 192.168.1.204**. It has **2 cores, 4 GiB RAM, 24 GiB local-lvm disk**, and **10.10.0.60/22** on `vmbr0v10`, gateway `10.10.0.1`. Docker nesting and keyctl are enabled. No existing guests were repurposed.
 
 `infra/proxmox-stage.sh` records the creation recipe; it refuses to overwrite an existing guest. `infra/prepare-service.sh` prepares only the dedicated guest. Bootstrap SSH uses the existing operator key at its workstation secret location; no key material is stored in this repository.
 
@@ -30,17 +30,17 @@ Inside the guest, `comrade-deploy.timer` runs every two minutes. `/usr/local/lib
 The route uses the existing Nginx Proxy Manager edge rather than a new tunnel:
 
 - Cloudflare zone: `be11dbfdc06aa587b950cb6c6524f41f` (`projectcomrade.co.uk`).
-- Proxied A record: apex `projectcomrade.co.uk` → `109.145.201.162`.
+- Proxied CNAME: apex `projectcomrade.co.uk` → `thundercreative.ddns.net`. The dynamic DNS hostname follows the current edge address.
 - Proxied CNAME: `www.projectcomrade.co.uk` → `projectcomrade.co.uk`.
-- NPM: proxy host **50**, domains `projectcomrade.co.uk` and `www.projectcomrade.co.uk` → `http://10.1.0.60:3001`, WebSockets enabled, forced HTTPS, Let's Encrypt certificate **69**.
-- Previous hostname remains: Cloudflare zone `85400a3889dbd309007a2876f833c9f1`, proxied A `projectcomrade` → `109.145.201.162` (record `27280e70a44a06352e96ed03c7381cc7`); NPM host **49** / certificate **68**.
+- NPM: proxy host **50**, domains `projectcomrade.co.uk` and `www.projectcomrade.co.uk` → `http://10.10.0.60:3001`, WebSockets enabled, forced HTTPS, Let's Encrypt certificate **69**.
+- The previous hostname remains active. NPM host **49** uses certificate **68** and sends HTTPS and WebSocket traffic to the same production service.
 - Compose binds port 3001 to the guest's workload address. For local development it defaults to loopback unless `COMRADE_BIND_ADDRESS` is set.
 
 Operator credential locations are documented in `C:\ProjectsOnTheGo\AWS Cost optimisation`. Keep values outside this repository and workflow logs. Only the new DNS record, certificate and proxy host were created for this service.
 
 ## Rollback
 
-Stop `comrade-deploy.timer` before a manual rollback, or it will converge back to the latest release. On the guest, set `COMRADE_IMAGE=ghcr.io/flatt-t/projectcomrade:<previous-commit>` and `COMRADE_BIND_ADDRESS=10.1.0.60`, then run `docker compose -p comrade -f /opt/comrade/compose.yml up -d --pull never --wait`. Previous images remain loaded. Verify public `/health` and initialize both games. Restart the timer when ready to follow the latest release again.
+Stop `comrade-deploy.timer` before a manual rollback, or it will converge back to the latest release. On the guest, set `COMRADE_IMAGE=ghcr.io/flatt-t/projectcomrade:<previous-commit>` and `COMRADE_BIND_ADDRESS=10.10.0.60`, then run `docker compose -p comrade -f /opt/comrade/compose.yml up -d --pull never --wait`. Previous images remain loaded. Verify public `/health` and initialize both games. Restart the timer when ready to follow the latest release again.
 
 Inspect deployment with `journalctl -u comrade-deploy.service`, `cat /opt/comrade/current.json`, and `docker compose -p comrade -f /opt/comrade/compose.yml ps` (set the image/bind environment first). No player assets are persisted on the service.
 

@@ -1,0 +1,189 @@
+{
+  "strict_named_headers": {
+    "RA2 base vs 1.006 rules": {
+      "left_sha256": "f34900cbe115a593adc22a91a7b86e7d4e1511eff995b5170af7d89c8a254d0a",
+      "right_sha256": "fd1e95cea0306ea78049dc81c8cd816e18c28c496872a1ff02edd50bd082062f",
+      "left": 1190,
+      "right": 1190,
+      "equal": 1176,
+      "changed": 14,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "RA2 1.006 vs comparison rules": {
+      "left_sha256": "fd1e95cea0306ea78049dc81c8cd816e18c28c496872a1ff02edd50bd082062f",
+      "right_sha256": "adc869ca037db5141f562f18092d022045e194de0d1204a46b9ec8372b2b826f",
+      "left": 1190,
+      "right": 1190,
+      "equal": 1190,
+      "changed": 0,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "RA2 base vs 1.006 art": {
+      "left_sha256": "b477f861063a9509e87b7836b78190204c73bea5ea5595a842c456f5920ea223",
+      "right_sha256": "b477f861063a9509e87b7836b78190204c73bea5ea5595a842c456f5920ea223",
+      "left": 1299,
+      "right": 1299,
+      "equal": 1299,
+      "changed": 0,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "RA2 1.006 vs comparison art": {
+      "left_sha256": "b477f861063a9509e87b7836b78190204c73bea5ea5595a842c456f5920ea223",
+      "right_sha256": "25dbb1f3adc2dd5b67cb04cac89bdef88bc7844c9b90ed3469605a1ca8672aa7",
+      "left": 1299,
+      "right": 1414,
+      "equal": 1187,
+      "changed": 112,
+      "left_only": 0,
+      "right_only": 115
+    },
+    "YR 1.001 vs comparison rules": {
+      "left_sha256": "3d341ef8a13a4b5ab24af2eef48ac94931ac2bb87d950fe3330a07e2d25672ef",
+      "right_sha256": "c8718ffd3d155fb2f60d15cbd0c3a8fd5c0b9bc786b3b78c7bd53dff1d42da57",
+      "left": 1477,
+      "right": 1477,
+      "equal": 1452,
+      "changed": 25,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "YR base vs comparison rules": {
+      "left_sha256": "06761dd7f714e7d9400216ec3c06109ec5c1461f6a0727be7401eb9d8b0f6d05",
+      "right_sha256": "c8718ffd3d155fb2f60d15cbd0c3a8fd5c0b9bc786b3b78c7bd53dff1d42da57",
+      "left": 1477,
+      "right": 1477,
+      "equal": 1477,
+      "changed": 0,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "YR base vs 1.001 rules": {
+      "left_sha256": "06761dd7f714e7d9400216ec3c06109ec5c1461f6a0727be7401eb9d8b0f6d05",
+      "right_sha256": "3d341ef8a13a4b5ab24af2eef48ac94931ac2bb87d950fe3330a07e2d25672ef",
+      "left": 1477,
+      "right": 1477,
+      "equal": 1452,
+      "changed": 25,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "YR base vs community art": {
+      "left_sha256": "e1f0378394313c04ebbd5073f47785ee3e46f1b3c62d65724e8f3c310ee7ba31",
+      "right_sha256": "e28c0784bd0a21fd7e8ef7fb96e13cd590a337ca9c448190741a6f3ee242a982",
+      "left": 1581,
+      "right": 1600,
+      "equal": 1449,
+      "changed": 131,
+      "left_only": 1,
+      "right_only": 20
+    }
+  },
+  "allow_trailing_text_after_closing_bracket": {
+    "RA2 base vs 1.006 rules": {
+      "left_sha256": "f34900cbe115a593adc22a91a7b86e7d4e1511eff995b5170af7d89c8a254d0a",
+      "right_sha256": "fd1e95cea0306ea78049dc81c8cd816e18c28c496872a1ff02edd50bd082062f",
+      "left": 1191,
+      "right": 1191,
+      "equal": 1177,
+      "changed": 14,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "RA2 1.006 vs comparison rules": {
+      "left_sha256": "fd1e95cea0306ea78049dc81c8cd816e18c28c496872a1ff02edd50bd082062f",
+      "right_sha256": "adc869ca037db5141f562f18092d022045e194de0d1204a46b9ec8372b2b826f",
+      "left": 1191,
+      "right": 1191,
+      "equal": 1191,
+      "changed": 0,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "RA2 base vs 1.006 art": {
+      "left_sha256": "b477f861063a9509e87b7836b78190204c73bea5ea5595a842c456f5920ea223",
+      "right_sha256": "b477f861063a9509e87b7836b78190204c73bea5ea5595a842c456f5920ea223",
+      "left": 1299,
+      "right": 1299,
+      "equal": 1299,
+      "changed": 0,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "RA2 1.006 vs comparison art": {
+      "left_sha256": "b477f861063a9509e87b7836b78190204c73bea5ea5595a842c456f5920ea223",
+      "right_sha256": "25dbb1f3adc2dd5b67cb04cac89bdef88bc7844c9b90ed3469605a1ca8672aa7",
+      "left": 1299,
+      "right": 1414,
+      "equal": 1187,
+      "changed": 112,
+      "left_only": 0,
+      "right_only": 115
+    },
+    "YR 1.001 vs comparison rules": {
+      "left_sha256": "3d341ef8a13a4b5ab24af2eef48ac94931ac2bb87d950fe3330a07e2d25672ef",
+      "right_sha256": "c8718ffd3d155fb2f60d15cbd0c3a8fd5c0b9bc786b3b78c7bd53dff1d42da57",
+      "left": 1478,
+      "right": 1478,
+      "equal": 1453,
+      "changed": 25,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "YR base vs comparison rules": {
+      "left_sha256": "06761dd7f714e7d9400216ec3c06109ec5c1461f6a0727be7401eb9d8b0f6d05",
+      "right_sha256": "c8718ffd3d155fb2f60d15cbd0c3a8fd5c0b9bc786b3b78c7bd53dff1d42da57",
+      "left": 1478,
+      "right": 1478,
+      "equal": 1478,
+      "changed": 0,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "YR base vs 1.001 rules": {
+      "left_sha256": "06761dd7f714e7d9400216ec3c06109ec5c1461f6a0727be7401eb9d8b0f6d05",
+      "right_sha256": "3d341ef8a13a4b5ab24af2eef48ac94931ac2bb87d950fe3330a07e2d25672ef",
+      "left": 1478,
+      "right": 1478,
+      "equal": 1453,
+      "changed": 25,
+      "left_only": 0,
+      "right_only": 0
+    },
+    "YR base vs community art": {
+      "left_sha256": "e1f0378394313c04ebbd5073f47785ee3e46f1b3c62d65724e8f3c310ee7ba31",
+      "right_sha256": "e28c0784bd0a21fd7e8ef7fb96e13cd590a337ca9c448190741a6f3ee242a982",
+      "left": 1581,
+      "right": 1600,
+      "equal": 1449,
+      "changed": 131,
+      "left_only": 1,
+      "right_only": 20
+    }
+  },
+  "additional_names_under_second_reader": {
+    "base-rules.ini": [
+      "MirageWH"
+    ],
+    "patched-rules.ini": [
+      "MirageWH"
+    ],
+    "rules-original.ini": [
+      "MirageWH"
+    ],
+    "base-art.ini": [],
+    "patched-art.ini": [],
+    "ra2-art.ini": [],
+    "rulesmd.ini": [
+      "MirageWH"
+    ],
+    "rulesmd-original.ini": [
+      "MirageWH"
+    ],
+    "artmd.ini": [],
+    "yr-art.ini": []
+  },
+  "qualification": "Comparison uses two section-header conventions. The runtime loader determines whether a trailing non-INI comment becomes part of the preceding block or begins another named section."
+}

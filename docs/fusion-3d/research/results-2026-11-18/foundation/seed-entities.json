@@ -1,0 +1,870 @@
+[
+ {
+  "historical_id": "MCV",
+  "demo_reference": {
+   "section": "MCV",
+   "redalert_mix_byte": 5296170,
+   "facts": {
+    "Prerequisite": "weap,fix",
+    "Strength": "600",
+    "Armor": "light",
+    "TechLevel": "11",
+    "Sight": "4",
+    "Speed": "6",
+    "Owner": "allies,soviet",
+    "Cost": "2500",
+    "Points": "60",
+    "ROT": "5",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/UDATA.CPP#L345-L373"
+  ],
+  "source_known_initial_placement": [],
+  "fusion_id": "mcv",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L224",
+  "fusion_fields": {
+   "cost": 2500,
+   "hp": 600,
+   "speed": 18,
+   "tech": 6,
+   "deploysTo": "fact"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "FACT",
+  "demo_reference": {
+   "section": "FACT",
+   "redalert_mix_byte": 5305591,
+   "facts": {
+    "Strength": "1000",
+    "Armor": "heavy",
+    "TechLevel": "-1",
+    "Sight": "5",
+    "Owner": "allies,soviet",
+    "Cost": "2500",
+    "Points": "80",
+    "Power": "0",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/BDATA.CPP#L661-L689"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "BadGuy",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   }
+  ],
+  "fusion_id": "fact",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L239",
+  "fusion_fields": {
+   "cost": 2500,
+   "hp": 1000,
+   "power": 0,
+   "tech": 99
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "POWR",
+  "demo_reference": {
+   "section": "POWR",
+   "redalert_mix_byte": 5307255,
+   "facts": {
+    "Prerequisite": "fact",
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Owner": "allies,soviet",
+    "Cost": "300",
+    "Points": "40",
+    "Power": "100",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/BDATA.CPP#L991-L1019"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "USSR",
+    "count": 2,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "BadGuy",
+    "count": 2,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 4,
+    "category": "structures"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 2,
+    "category": "structures"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "USSR",
+    "count": 2,
+    "category": "structures"
+   }
+  ],
+  "fusion_id": "powr",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L240",
+  "fusion_fields": {
+   "cost": 300,
+   "hp": 400,
+   "power": 100,
+   "tech": 1
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "PROC",
+  "demo_reference": {
+   "section": "PROC",
+   "redalert_mix_byte": 5305754,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "900",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "6",
+    "Owner": "allies,soviet",
+    "Cost": "2000",
+    "Points": "80",
+    "Power": "-30",
+    "Storage": "2000",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/BDATA.CPP#L751-L779"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 1,
+    "category": "structures"
+   }
+  ],
+  "fusion_id": "proc",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L242",
+  "fusion_fields": {
+   "cost": 2000,
+   "hp": 900,
+   "power": -30,
+   "tech": 1,
+   "storage": 1000
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "HARV",
+  "demo_reference": {
+   "section": "HARV",
+   "redalert_mix_byte": 5295955,
+   "facts": {
+    "Prerequisite": "weap,proc",
+    "Strength": "600",
+    "Armor": "heavy",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Speed": "6",
+    "Owner": "allies,soviet",
+    "Cost": "1400",
+    "Points": "55",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/UDATA.CPP#L314-L342"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "USSR",
+    "count": 1,
+    "category": "units"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 1,
+    "category": "units"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 1,
+    "category": "units"
+   }
+  ],
+  "fusion_id": "harvester",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L223",
+  "fusion_fields": {
+   "cost": 1400,
+   "hp": 600,
+   "speed": 22,
+   "tech": 2
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "TENT",
+  "demo_reference": {
+   "section": "TENT",
+   "redalert_mix_byte": 5308322,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "800",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "5",
+    "Owner": "allies",
+    "Cost": "300",
+    "Points": "30",
+    "Power": "-20",
+    "Bib": "yes",
+    "Crewed": "yes",
+    "Capturable": "true"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/BDATA.CPP#L1172-L1200"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 1,
+    "category": "structures"
+   }
+  ],
+  "fusion_id": "tent",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L244",
+  "fusion_fields": {
+   "cost": 400,
+   "hp": 400,
+   "power": -20,
+   "tech": 1
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "BARR",
+  "demo_reference": {
+   "section": "BARR",
+   "redalert_mix_byte": 5308137,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "800",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "5",
+    "Owner": "soviet",
+    "Cost": "300",
+    "Points": "30",
+    "Power": "-20",
+    "Bib": "yes",
+    "Crewed": "yes",
+    "Capturable": "true"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/BDATA.CPP#L1141-L1170"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "BadGuy",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   }
+  ],
+  "fusion_id": "barr",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L245",
+  "fusion_fields": {
+   "cost": 400,
+   "hp": 400,
+   "power": -20,
+   "tech": 1
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "E1",
+  "demo_reference": {
+   "section": "E1",
+   "redalert_mix_byte": 5298266,
+   "facts": {
+    "Primary": "M1Carbine",
+    "Strength": "50",
+    "Armor": "none",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Speed": "4",
+    "Owner": "allies,soviet",
+    "Cost": "100",
+    "Points": "5"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/IDATA.CPP#L390-L407"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "BadGuy",
+    "count": 6,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY2",
+    "house": "Greece",
+    "count": 4,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY2",
+    "house": "USSR",
+    "count": 5,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "BadGuy",
+    "count": 2,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "Turkey",
+    "count": 1,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 2,
+    "category": "infantry"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 10,
+    "category": "infantry"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "USSR",
+    "count": 4,
+    "category": "infantry"
+   }
+  ],
+  "fusion_id": "rifleinf",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L200",
+  "fusion_fields": {
+   "cost": 100,
+   "hp": 50,
+   "speed": 14,
+   "tech": 1,
+   "weapon": "m1carbine"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "E1",
+  "demo_reference": {
+   "section": "E1",
+   "redalert_mix_byte": 5298266,
+   "facts": {
+    "Primary": "M1Carbine",
+    "Strength": "50",
+    "Armor": "none",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Speed": "4",
+    "Owner": "allies,soviet",
+    "Cost": "100",
+    "Points": "5"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/IDATA.CPP#L390-L407"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "BadGuy",
+    "count": 6,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY2",
+    "house": "Greece",
+    "count": 4,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY2",
+    "house": "USSR",
+    "count": 5,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "BadGuy",
+    "count": 2,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "Turkey",
+    "count": 1,
+    "category": "infantry"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 2,
+    "category": "infantry"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 10,
+    "category": "infantry"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "USSR",
+    "count": 4,
+    "category": "infantry"
+   }
+  ],
+  "fusion_id": "conscript",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L201",
+  "fusion_fields": {
+   "cost": 100,
+   "hp": 50,
+   "speed": 14,
+   "tech": 1,
+   "weapon": "ak47"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "E6",
+  "demo_reference": {
+   "section": "E6",
+   "redalert_mix_byte": 5298877,
+   "facts": {
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "5",
+    "Sight": "4",
+    "Speed": "4",
+    "Owner": "soviet,allies",
+    "Cost": "500",
+    "Points": "20",
+    "Infiltrate": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/IDATA.CPP#L470-L487"
+  ],
+  "source_known_initial_placement": [],
+  "fusion_id": "engineer",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L206",
+  "fusion_fields": {
+   "cost": 500,
+   "hp": 25,
+   "speed": 12,
+   "tech": 3
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "WEAP",
+  "demo_reference": {
+   "section": "WEAP",
+   "redalert_mix_byte": 5303824,
+   "facts": {
+    "Prerequisite": "proc",
+    "Strength": "1000",
+    "Armor": "light",
+    "TechLevel": "3",
+    "Sight": "4",
+    "Owner": "soviet,allies",
+    "Cost": "2000",
+    "Points": "80",
+    "Power": "-30",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/BDATA.CPP#L391-L419"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "BadGuy",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 1,
+    "category": "structures"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 1,
+    "category": "structures"
+   }
+  ],
+  "fusion_id": "weap",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L246",
+  "fusion_fields": {
+   "cost": 2000,
+   "hp": 800,
+   "power": -30,
+   "tech": 2
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "JEEP",
+  "demo_reference": {
+   "section": "JEEP",
+   "redalert_mix_byte": 5296372,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "M60mg",
+    "Strength": "150",
+    "Armor": "light",
+    "TechLevel": "3",
+    "Sight": "6",
+    "Speed": "10",
+    "Owner": "allies",
+    "Cost": "600",
+    "Points": "20",
+    "ROT": "10",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/UDATA.CPP#L376-L404"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "Greece",
+    "count": 2,
+    "category": "units"
+   },
+   {
+    "mission": "SOVIET2",
+    "house": "Greece",
+    "count": 3,
+    "category": "units"
+   }
+  ],
+  "fusion_id": "ranger",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L212",
+  "fusion_fields": {
+   "cost": 600,
+   "hp": 150,
+   "speed": 52,
+   "tech": 2,
+   "weapon": "m60mg"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "1TNK",
+  "demo_reference": {
+   "section": "1TNK",
+   "redalert_mix_byte": 5294601,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "75mm",
+    "Strength": "300",
+    "Armor": "heavy",
+    "TechLevel": "4",
+    "Sight": "4",
+    "Speed": "9",
+    "Owner": "allies",
+    "Cost": "700",
+    "Points": "30",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/UDATA.CPP#L97-L125"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY2",
+    "house": "Greece",
+    "count": 2,
+    "category": "units"
+   }
+  ],
+  "fusion_id": "lighttank",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L214",
+  "fusion_fields": {
+   "cost": 700,
+   "hp": 300,
+   "speed": 34,
+   "tech": 3,
+   "weapon": "105mm"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "3TNK",
+  "demo_reference": {
+   "section": "3TNK",
+   "redalert_mix_byte": 5294783,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "105mm",
+    "Secondary": "105mm",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "4",
+    "Sight": "5",
+    "Speed": "7",
+    "Owner": "soviet",
+    "Cost": "950",
+    "Points": "50",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/UDATA.CPP#L128-L156"
+  ],
+  "source_known_initial_placement": [
+   {
+    "mission": "ALLY5",
+    "house": "BadGuy",
+    "count": 1,
+    "category": "units"
+   },
+   {
+    "mission": "ALLY5",
+    "house": "USSR",
+    "count": 4,
+    "category": "units"
+   }
+  ],
+  "fusion_id": "heavytank",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L216",
+  "fusion_fields": {
+   "cost": 950,
+   "hp": 450,
+   "speed": 22,
+   "tech": 5,
+   "weapon": "105mm-heavy"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "4TNK",
+  "demo_reference": {
+   "section": "4TNK",
+   "redalert_mix_byte": 5295168,
+   "facts": {
+    "Prerequisite": "weap,stek",
+    "Primary": "120mm",
+    "Secondary": "MammothTusk",
+    "Strength": "600",
+    "Armor": "heavy",
+    "TechLevel": "10",
+    "Sight": "6",
+    "Speed": "4",
+    "Owner": "soviet",
+    "Cost": "1700",
+    "Points": "60",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/UDATA.CPP#L190-L218"
+  ],
+  "source_known_initial_placement": [],
+  "fusion_id": "mammoth",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L217",
+  "fusion_fields": {
+   "cost": 1700,
+   "hp": 600,
+   "speed": 18,
+   "tech": 9,
+   "weapon": "120mm"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "DD",
+  "demo_reference": {
+   "section": "DD",
+   "redalert_mix_byte": 5297320,
+   "facts": {
+    "Prerequisite": "syrd",
+    "Primary": "Stinger",
+    "Secondary": "DepthCharge",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "7",
+    "Sight": "6",
+    "Speed": "6",
+    "Owner": "allies",
+    "Cost": "1000",
+    "Points": "50",
+    "ROT": "7"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/VDATA.CPP#L76-L91"
+  ],
+  "source_known_initial_placement": [],
+  "fusion_id": "destroyer",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L234",
+  "fusion_fields": {
+   "cost": 1000,
+   "hp": 400,
+   "speed": 30,
+   "tech": 5,
+   "weapon": "2inch"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ },
+ {
+  "historical_id": "YAK",
+  "demo_reference": {
+   "section": "YAK",
+   "redalert_mix_byte": 5302217,
+   "facts": {
+    "Prerequisite": "afld",
+    "Primary": "ChainGun",
+    "Secondary": "ChainGun",
+    "Strength": "60",
+    "Armor": "light",
+    "TechLevel": "5",
+    "Sight": "0",
+    "Speed": "16",
+    "Owner": "soviet",
+    "Cost": "800",
+    "Points": "25",
+    "ROT": "5",
+    "Ammo": "15",
+    "Crewed": "yes",
+    "GuardRange": "30"
+   }
+  },
+  "cpp_definition_urls": [
+   "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/AADATA.CPP#L129-L149"
+  ],
+  "source_known_initial_placement": [],
+  "fusion_id": "yak",
+  "fusion_data_ref": "https://github.com/Flatt-T/ProjectComrade/blob/84f411478f01ed62365a2e4d1d316eb57d9e193c/packages/fusion/src/packs/ra1.ts#L228",
+  "fusion_fields": {
+   "cost": 800,
+   "hp": 110,
+   "speed": 76,
+   "tech": 6,
+   "weapon": "yakguns"
+  },
+  "disposition": "role comparison; retain both data sources and units"
+ }
+]

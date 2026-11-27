@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "context": "synthetic_test",
+  "records": [
+    {
+      "schema_version": 1,
+      "kind": "source_profile",
+      "id": "profile.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": "automated test reviewer",
+      "blockers": [],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "title": "Pipeline verification",
+      "edition": "public-source",
+      "platform": "pc",
+      "region": "undetermined",
+      "language": "undetermined",
+      "inherits": null,
+      "data_hashes": [],
+      "executable_hashes": [],
+      "repository": null,
+      "revision": "fixture-v1",
+      "modification": "test_fixture",
+      "authoritative_use": [
+        "synthetic"
+      ],
+      "observation_environment": {
+        "value": null,
+        "unit": "unspecified",
+        "status": "unknown",
+        "profile_id": "profile.synthetic",
+        "evidence": [],
+        "resolution": {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "This synthetic fixture has no retail environment."
+        },
+        "tolerance": null
+      },
+      "rights_id": "profile.synthetic.rights",
+      "conflicts": [],
+      "lock_state": "locked",
+      "locked_at": "2026-11-18"
+    },
+    {
+      "schema_version": 1,
+      "kind": "asset_provenance",
+      "id": "profile.synthetic.rights",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": null,
+      "blockers": [
+        {
+          "owner": "edition-evidence specialist",
+          "task": "RES-028",
+          "action": "This synthetic fixture has no retail environment."
+        }
+      ],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "asset_class": "research_reference",
+      "creator": "Electronic Arts public source archive",
+      "origin": "fixture:synthetic-square-agent",
+      "rights_basis": "Cited developer source used for factual comparison",
+      "distribution": "reference_only",
+      "derivatives": [],
+      "artifact_sha256": null,
+      "review_evidence": []
+    },
+    {
+      "schema_version": 1,
+      "kind": "entity",
+      "id": "entity.synthetic.sample",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": "automated test reviewer",
+      "blockers": [],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "identity": {
+        "source_title": "fixture",
+        "edition": "public-source",
+        "platform": "pc",
+        "source_faction": "Japan",
+        "namespace": "GameObject",
+        "source_object_id": "SyntheticSquare",
+        "form_id": "base"
+      },
+      "display_names": {},
+      "category": "unit",
+      "source_object_ids": [
+        "SyntheticSquare"
+      ],
+      "classification": "active",
+      "disposition": "verified_included",
+      "faction_ids": [],
+      "country_general_ids": [],
+      "class_ids": [],
+      "mode_ids": [],
+      "availability_rules": [],
+      "relations": [],
+      "acquisition": "starting",
+      "facts": {
+        "availability": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        },
+        "physical": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        },
+        "combat": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        },
+        "economy": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        },
+        "presentation": {
+          "group_unknown": {
+            "owner": "edition-evidence specialist",
+            "task": "RES-028",
+            "action": "This synthetic fixture has no retail environment."
+          }
+        }
+      },
+      "observation_ids": [],
+      "conflict_ids": [],
+      "adaptation_ids": [
+        "adapt.synthetic"
+      ],
+      "asset_ids": [],
+      "capability_ids": [],
+      "fixture_ids": [
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "visual_family": null,
+      "visible": true,
+      "automatic_release": false
+    },
+    {
+      "schema_version": 1,
+      "kind": "adaptation",
+      "id": "adapt.synthetic",
+      "profile_id": "profile.synthetic",
+      "owner": "research specialist",
+      "reviewer": "automated test reviewer",
+      "blockers": [],
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "subject_ids": [
+        "entity.synthetic.sample"
+      ],
+      "target_profile": "synthetic.unpublished",
+      "source_semantics": {
+        "value": "Synthetic fixed behavior",
+        "unit": "test_fixture",
+        "profile_id": "profile.synthetic",
+        "status": "authored",
+        "evidence": [
+          {
+            "url": "fixture:synthetic-square-agent",
+            "revision": "test-v1",
+            "locator": "test-only declaration",
+            "method": "test_fixture"
+          }
+        ],
+        "resolution": null,
+        "tolerance": null
+      },
+      "fusion_semantics": {
+        "value": "Synthetic fixed behavior",
+        "unit": "test_fixture",
+        "profile_id": "profile.synthetic",
+        "status": "authored",
+        "evidence": [
+          {
+            "url": "fixture:synthetic-square-agent",
+            "revision": "test-v1",
+            "locator": "test-only declaration",
+            "method": "test_fixture"
+          }
+        ],
+        "resolution": null,
+        "tolerance": null
+      },
+      "disposition": "direct",
+      "rationale": "Exercises a local graph contract.",
+      "approval": "accepted",
+      "fixture_ids": [
+        "fixture:construct-reload-synthetic-square"
+      ]
+    }
+  ]
+}

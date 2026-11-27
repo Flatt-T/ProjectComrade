@@ -1,0 +1,97 @@
+faction	navigation_group	label	commander_power_pair	facility_inferred_from_group	navigation_source_secondary	showcase_building_as_published	showcase_rarity	showcase_tiberium	showcase_unlock_level	showcase_publication_date	showcase_url	stat_source_url	documented_mechanic_original_summary	other_article_mentions_source_keys_only	discrepancy
+GDI	infantry	Riflemen		Barracks	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									chem-buggy-drone-swarm|mutant-marauder	
+GDI	infantry	Missile squad		Barracks	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									centurion|chem-buggy-drone-swarm|laser-drone|mohawk-gunship|shade|patch1	
+GDI	infantry	MG squad		Barracks	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									scavenger|slingshot	
+GDI	infantry	Jump jet troopers		Barracks	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									grenadier|patch1|patch23	
+GDI	infantry	Shockwave troopers		Barracks	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									cyberwheel|grenadier|mutant-marauder|scavenger|shatterer	
+GDI	infantry	Sniper team		Barracks	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									patch1	
+GDI	infantry	Grenadier		Barracks	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	Barracks	Common	60	33	2019-03-22	https://www.ea.com/able/news/new-unit-showcase-grenadier	https://www.ea.com/able/news/new-unit-showcase-grenadier	Squad throws EMP grenades. Vehicle movement and attack slow while the effect lasts.	mutant-marauder|shatterer|patch23	
+GDI	vehicles	War dogs		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									cyberwheel	
+GDI	vehicles	Rhino		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									chem-buggy-drone-swarm|grenadier|patch23	
+GDI	vehicles	M.S.V.		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	War Factory	Epic	40	34	2019-07-02	https://www.ea.com/able/news/new-unit-showcase-mobile-support-vehicle	https://www.ea.com/able/news/new-unit-showcase-mobile-support-vehicle	Unarmed vehicle sets up near friendly vehicles and boosts their combat output and speed.	patch23	
+GDI	vehicles	Pitbull		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									catalyst-gunship|chem-buggy-drone-swarm|cyberwheel|grenadier|meet-juggernaut-giga-cannon|razorback|scavenger|shatterer|slingshot|patch1	
+GDI	vehicles	Shatterer		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	War Factory	Rare	50	37	2019-05-31	https://www.ea.com/able/news/new-unit-showcase-shatterer	https://www.ea.com/able/news/new-unit-showcase-shatterer	Hover vehicle stuns infantry with a sonic attack. Airborne threats require allied support.	patch23	
+GDI	vehicles	Slingshot		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	War Factory	Rare	50	41	2019-04-29	https://www.ea.com/able/news/new-unit-showcase-slingshot	https://www.ea.com/able/news/new-unit-showcase-slingshot	Hover platform fires only at aircraft from up to two tiles away in the showcase.	mobile-support-vehicle|shatterer	
+GDI	vehicles	M.L.R.S.		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									centurion|patch1	
+GDI	vehicles	Predator tank		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									slingshot|patch1	
+GDI	vehicles	A.P.C.		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	vehicles	Battering ram		War factory	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	War Factory	Common	90	35	2022-12-05	https://www.ea.com/able/news/new-unit-showcase-battering-ram	https://www.ea.com/able/news/new-unit-showcase-battering-ram	Four-legged ground vehicle can occupy rock formations and strikes structures by ramming.		
+GDI	aircraft	Drone swarm		Helipad	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	Helipad	Common	10	6	2018-10-22	https://www.ea.com/able/news/new-unit-showcase-chem-buggy-drone-swarm	https://www.ea.com/able/news/new-unit-showcase-chem-buggy-drone-swarm	Multi-aircraft scout with extended sight and an anti-infantry attack.		
+GDI	aircraft	Talon		Helipad	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									chem-buggy-drone-swarm|fanatic|grenadier|laser-drone|mohawk-gunship|mutant-marauder|orca-bomber|slingshot|patch1	
+GDI	aircraft	Mohawk gunship		Helipad	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	Helipad	Common	50	49	2019-02-04	https://www.ea.com/able/news/new-unit-showcase-mohawk-gunship	https://www.ea.com/able/news/new-unit-showcase-mohawk-gunship	Aircraft specializes in ground vehicles. Anti-air infantry and aircraft can counter it.	centurion|cyberwheel|shatterer|slingshot	
+GDI	aircraft	Razorback		Helipad	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	Helipad	Rare	60	24	2019-10-24	https://www.ea.com/able/news/new-unit-showcase-razorback	https://www.ea.com/able/news/new-unit-showcase-razorback	Anti-infantry aircraft strafes with twin swiveling guns while moving.	patch23	
+GDI	aircraft	Orca		Helipad	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									centurion|chem-buggy-drone-swarm|meet-juggernaut-giga-cannon|mohawk-gunship|orca-bomber	
+GDI	aircraft	Hammerhead		Helipad	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									catalyst-gunship|chem-buggy-drone-swarm|laser-drone|mohawk-gunship|orca-bomber|razorback|shade|slingshot|patch1	
+GDI	aircraft	Orca bomber		Helipad	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	Helipad	Epic	120	43	2019-03-04	https://www.ea.com/able/news/new-unit-showcase-orca-bomber	https://www.ea.com/able/news/new-unit-showcase-orca-bomber	Flies over ground targets to drop a payload. The center hex receives more damage than surrounding hexes.	shatterer|patch23	
+GDI	tech	Wolverine		Tech lab	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									grenadier|mohawk-gunship	
+GDI	tech	Disruptor		Tech lab	https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	tech	Juggernaut		Tech lab	https://cnc.fandom.com/wiki/GDI_base_(Rivals)	Tech Lab	Epic	140	14	2018-08-16	https://www.ea.com/able/news/new-unit-showcase-meet-juggernaut-giga-cannon	https://forums.ea.com/discussions/command-and-conquer-franchise-en/update-1-0-notes/7159073	Three-cannon walker alternates travel and stationary bombardment. Showcase identifies six affected tiles and three-tile firing distance, leaving a blind zone.	patch1	
+GDI	tech	Zone trooper		Tech lab	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									centurion|laser-drone|razorback|shade	
+GDI	tech	Kodiak		Tech lab	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									mohawk-gunship|shatterer|patch1	
+GDI	tech	Sandstorm		Tech lab	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									catalyst-gunship	
+GDI	tech	Titan		Tech lab	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									centurion|meet-juggernaut-giga-cannon|mutant-marauder|shatterer|slingshot|patch1	
+GDI	tech	Mammoth tank		Tech lab	https://cnc.fandom.com/wiki/GDI_base_(Rivals)									meet-juggernaut-giga-cannon|patch1	
+GDI	commander	Lt. Strongarm	Minigun turret		https://cnc.fandom.com/wiki/GDI_base_(Rivals)									patch1|patch23	
+GDI	commander	Dr. Liang	Repair drone		https://cnc.fandom.com/wiki/GDI_base_(Rivals)									chem-buggy-drone-swarm|patch23	
+GDI	commander	Gen. Solomon	Ion cannon		https://cnc.fandom.com/wiki/GDI_base_(Rivals)									chem-buggy-drone-swarm|patch1	
+GDI	commander	Col. Jackson	Heroic charge		https://cnc.fandom.com/wiki/GDI_base_(Rivals)									mohawk-gunship|patch1	
+GDI	commander	Crd. McNeil	Resonance field		https://cnc.fandom.com/wiki/GDI_base_(Rivals)									patch23	
+GDI	power	Minigun turret	Lt. Strongarm		https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	power	Repair drone	Dr. Liang		https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	power	Ion cannon	Gen. Solomon		https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	power	Heroic charge	Col. Jackson		https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	power	Resonance field	Crd. McNeil		https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	building	Base			https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	building	Barracks			https://cnc.fandom.com/wiki/GDI_base_(Rivals)									grenadier|patch1	
+GDI	building	War factory			https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	building	Helipad			https://cnc.fandom.com/wiki/GDI_base_(Rivals)									catalyst-gunship|chem-buggy-drone-swarm|mohawk-gunship|orca-bomber|razorback|slingshot	
+GDI	building	Tech lab			https://cnc.fandom.com/wiki/GDI_base_(Rivals)									patch1	
+GDI	other	Mobile construction vehicle			https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+GDI	other	Harvester			https://cnc.fandom.com/wiki/GDI_base_(Rivals)										
+Nod	infantry	Militant		Hand of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									cyberwheel|mutant-marauder	
+Nod	infantry	Laser squad		Hand of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									centurion|chem-buggy-drone-swarm|laser-drone|mohawk-gunship|mutant-marauder|scavenger|shade|slingshot	
+Nod	infantry	Fanatic		Hand of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	Hand of Nod	Rare	30	39	2019-05-17	https://www.ea.com/able/news/new-unit-showcase-fanatic	https://www.ea.com/able/news/new-unit-showcase-fanatic	Deaths of individual squad members increase nearby allies’ attack and movement speeds.	patch23	
+Nod	infantry	Scavenger		Hand of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	Hand of Nod	Rare	30	25	2019-06-18	https://www.ea.com/able/news/new-unit-showcase-scavenger	https://www.ea.com/able/news/new-unit-showcase-scavenger	Collects Tiberium when nearby friendly or enemy units die. Multiple nearby Scavenger squads receive separate rewards.		
+Nod	infantry	Flame troopers		Hand of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									scavenger|shatterer|patch1	
+Nod	infantry	Scarabs		Hand of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									scavenger|patch1|patch23	
+Nod	infantry	Chemical warriors		Hand of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									grenadier|patch1	
+Nod	infantry	Mutant marauders		Hand of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	Hand of Nod	Common	60	35	2019-04-15	https://www.ea.com/able/news/new-unit-showcase-mutant-marauder	https://www.ea.com/able/news/new-unit-showcase-mutant-marauder	High-health anti-vehicle infantry carry oversized scavenged emitters. They require other units to cover air.	shatterer	
+Nod	vehicles	Cyberwheel		War factory	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	War Factory	Common	10	31	2019-02-18	https://www.ea.com/able/news/new-unit-showcase-cyberwheel	https://www.ea.com/able/news/new-unit-showcase-cyberwheel	Fast ground scout squad. The loss of individual members reduces damage output.		
+Nod	vehicles	Attack bike		War factory	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									catalyst-gunship|chem-buggy-drone-swarm|cyberwheel|meet-juggernaut-giga-cannon|mutant-marauder|razorback|scavenger|patch1|patch23	
+Nod	vehicles	Buggy		War factory	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									patch23	
+Nod	vehicles	Chem buggy		War factory	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	War Factory	Rare	60	8	2018-10-22	https://www.ea.com/able/news/new-unit-showcase-chem-buggy-drone-swarm	https://www.ea.com/able/news/new-unit-showcase-chem-buggy-drone-swarm	Moves while spraying ground tiles. Lingering gas can be ignited by Jade’s power.	patch23	
+Nod	vehicles	Scorpion tank		War factory	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									chem-buggy-drone-swarm|cyberwheel|slingshot|patch1	
+Nod	vehicles	Tick tank		War factory	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	vehicles	Giga-cannon		War factory	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	War Factory	Epic	100	6	2018-08-16	https://www.ea.com/able/news/new-unit-showcase-meet-juggernaut-giga-cannon	https://forums.ea.com/discussions/command-and-conquer-franchise-en/update-1-0-notes/7159073	Sustained beam ramps up and splits toward enemies adjacent to the target. Spread formations reduce secondary hits.	patch1|patch23	
+Nod	vehicles	Stealth tank		War factory	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									shade	
+Nod	aircraft	Laser drone		Air tower	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	Air Tower	Common	20	29	2019-01-21	https://www.ea.com/able/news/new-unit-showcase-laser-drone	https://www.ea.com/able/news/new-unit-showcase-laser-drone	Fast anti-vehicle air squad can contest a pad and harass an isolated harvester.		
+Nod	aircraft	Banshee		Air tower	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									centurion|chem-buggy-drone-swarm|cyberwheel|laser-drone|meet-juggernaut-giga-cannon|mohawk-gunship|mutant-marauder|orca-bomber|shatterer|patch23	
+Nod	aircraft	Venom		Air tower	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									fanatic|grenadier|mutant-marauder|razorback	
+Nod	aircraft	Catalyst gunship		Air tower	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	Helipad	Rare	50	33	2020-06-10	https://www.ea.com/able/news/new-unit-showcase-catalyst-gunship	https://www.ea.com/able/news/new-unit-showcase-catalyst-gunship	Air unit seeds a gas cloud and ignites the cloud. Its progress indicator sits on its back. The local explosion hits ground targets.	patch23	Publisher calls the production building Helipad in this article. Community Nod faction navigation names the aircraft facility Air tower. Keep both strings and validate in the reference build.
+Nod	aircraft	Shade		Air tower	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	Air Tower	Epic	40	43	2019-12-10	https://www.ea.com/able/news/new-unit-showcase-shade	https://www.ea.com/able/news/new-unit-showcase-shade	Stealthed VTOL with directed fire and a separate adjacent-hex EMP effect.		
+Nod	aircraft	Inferno		Air tower	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									centurion|mutant-marauder|orca-bomber|shade|shatterer|patch1|patch23	
+Nod	aircraft	Phantom		Air tower	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									catalyst-gunship|chem-buggy-drone-swarm|laser-drone|mohawk-gunship|orca-bomber|razorback|shade	
+Nod	tech	Widowmaker		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									catalyst-gunship|mohawk-gunship	
+Nod	tech	Flame tank		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	tech	Centurion		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal	Temple of Nod	Epic	100	9	2019-02-25	https://www.ea.com/able/news/new-unit-showcase-centurion	https://www.ea.com/able/news/new-unit-showcase-centurion	Walker shield absorbs incoming damage, including an opening ranged shot. Positioning changes who gets the first effective hit.	mutant-marauder|shatterer	
+Nod	tech	Confessor		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									mutant-marauder|patch1	
+Nod	tech	Artillery		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	tech	Basilisk		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									centurion|cyberwheel|shatterer|patch1	
+Nod	tech	Rockworm		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									centurion|cyberwheel|patch1	
+Nod	tech	Cyborg		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									centurion|laser-drone|razorback|shade|slingshot	
+Nod	tech	Avatar		Temple of Nod	https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	commander	Seth	Drill pod		https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	commander	Kane	Obelisk of Light		https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	commander	Jade	Catalyst missile		https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									catalyst-gunship|chem-buggy-drone-swarm|patch23	
+Nod	commander	Oxanna	Fanaticism		https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									patch1	
+Nod	power	Drill pod	Seth		https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	power	Obelisk of Light	Kane		https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	power	Catalyst missile	Jade		https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									catalyst-gunship|chem-buggy-drone-swarm	
+Nod	power	Fanaticism	Oxanna		https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	building	Base			https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	building	Hand of Nod			https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									fanatic|mutant-marauder|scavenger	
+Nod	building	War factory			https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	building	Air tower			https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									laser-drone|shade	
+Nod	building	Temple of Nod			https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal									centurion|patch1	
+Nod	other	Mobile construction vehicle			https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										
+Nod	other	Harvester			https://cnc.fandom.com/wiki/Category:Rivals_Nod_arsenal										

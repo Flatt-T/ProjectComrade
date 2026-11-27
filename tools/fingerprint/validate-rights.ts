@@ -4,9 +4,10 @@
  * Validates that no unapproved public assets are included in the build
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { createHash } from 'crypto';
-import { join, basename } from 'path';
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export interface LedgerEntry {
   id: string;
@@ -26,7 +27,8 @@ export interface ValidationResult {
   entryId?: string;
 }
 
-const RIGHTS_LEDGER_PATH = join(process.cwd(), 'rights', 'ledger.jsonl');
+const RIGHTS_LEDGER_PATH = fileURLToPath(new URL('../../rights/ledger.jsonl', import.meta.url));
+type PackageMode = 'public' | 'test';
 
 export function loadLedger(): Map<string, LedgerEntry> {
   const ledger = new Map<string, LedgerEntry>();
@@ -60,69 +62,39 @@ export function loadLedger(): Map<string, LedgerEntry> {
   return ledger;
 }
 
-export function validateAsset(filename: string, ledger: Map<string, LedgerEntry>, fileHash?: string): ValidationResult {
-  const lowerName = filename.toLowerCase();
-  // The bundled TD freeware slice is an explicit, hash-scoped project decision.
-  // It grants no blanket permission to retail media or other game packs.
-  if (fileHash) {
-    for (const [id, entry] of ledger) {
-      if (entry.category === 'pinned-freeware-pack' && entry.status === 'project-authorized-pinned-freeware'
-        && entry.assetHashes?.[basename(filename).toUpperCase()] === fileHash.toLowerCase()) {
-        return { valid: true, entryId: id };
-      }
-    }
+/** Match only the exact bytes approved for this distribution mode. */
+function approvedAsset(
+  filename: string, ledger: Map<string, LedgerEntry>, fileHash: string | undefined, mode: PackageMode,
+): LedgerEntry | undefined {
+  if (!fileHash || !/^[a-f0-9]{64}$/i.test(fileHash)) return undefined;
+  const name = filename.replaceAll('\\', '/').toUpperCase();
+  const hash = fileHash.toLowerCase();
+  for (const entry of ledger.values()) {
+    const pinned = entry.category === 'pinned-freeware-pack'
+      && entry.status === 'project-authorized-pinned-freeware'
+      && entry.publicDistribution === 'project-authorized-pinned-pack';
+    const testFixture = mode === 'test' && entry.category === 'test-assets'
+      && entry.status === 'approved-test-scaffolding';
+    if ((pinned || testFixture) && (
+      entry.assetHashes?.[name] === hash || entry.assetHashes?.[basename(name)] === hash
+    )) return entry;
   }
-  
-  // Check if file appears to be classic game asset
-  const assetPatterns = [
-    /\.mix$/i,
-    /(conquer|desert|general|scenario|sounds|temperat|winter|allies|hrides|main|local|ra2|soviet)\.mix$/i,
-    /\.shp$/i,
-    /(tiberian|redalert|dune|ra2)/i,
-    /\.(mix|pcx|pal|aud|wav)/i,
-  ];
+  return undefined;
+}
 
-  const isClassicAsset = assetPatterns.some(pattern => pattern.test(lowerName));
+export function validateAsset(
+  filename: string, ledger: Map<string, LedgerEntry>, fileHash?: string, mode: PackageMode = 'public',
+): ValidationResult {
+  const approval = approvedAsset(filename, ledger, fileHash, mode);
+  if (approval) return { valid: true, entryId: approval.id };
 
-  if (!isClassicAsset) {
-    return { valid: true };
-  }
+  // The loose-file command accepts repository code and metadata. The package
+  // command treats every declared entry as an asset regardless of its extension.
+  const looksLikeAsset = /\.(mix|shp|pcx|pal|aud|wav|png|jpe?g|webp|svg|ogg|mp3|glb|gltf|woff2?|ttf)$/i.test(filename)
+    || /(tiberian|redalert|dune|ra2)/i.test(filename);
+  if (!looksLikeAsset) return { valid: true };
 
-  // Check if file is test scaffolding (synthetic/placeholder)
-  const isTestScaffolding = lowerName.includes('test') || 
-                           lowerName.includes('synthetic') || 
-                           lowerName.includes('placeholder');
-
-  if (isTestScaffolding) {
-    // Test scaffolding must have a corresponding ledger entry with approved-test-scaffolding status
-    for (const [, entry] of ledger) {
-      if (entry.category === 'test-assets' && entry.status === 'approved-test-scaffolding') {
-        return { valid: true };
-      }
-    }
-    return { 
-      valid: false, 
-      reason: `File appears to be test scaffolding but no approved test-scaffolding entry found in ledger`,
-      entryId: 'test-assets'
-    };
-  }
-
-  // Check ledger for game assets - all should be blocked or conditional-unverified
-  for (const [id, entry] of ledger) {
-    if (entry.category === 'game-assets') {
-      if (entry.publicDistribution === 'blocked-until-approval' || 
-          entry.status === 'conditional-unverified-public-distribution' ||
-          entry.status === 'blocked-public-distribution-unknown') {
-        return {
-          valid: false,
-          reason: `File appears to be classic game asset but public distribution is blocked (ledger entry: ${id})`,
-          entryId: id
-        };
-      }
-    }
-  }
-
-  return { valid: true };
+  return { valid: false, reason: 'No approved ledger hash for this asset; public distribution is blocked.' };
 }
 
 export function validateLedger(ledger: Map<string, LedgerEntry>): { valid: boolean; errors: string[] } {
@@ -153,30 +125,45 @@ export function validateLedger(ledger: Map<string, LedgerEntry>): { valid: boole
   return { valid: errors.length === 0, errors };
 }
 
-export function validatePackageManifest(manifestPath: string, ledger: Map<string, LedgerEntry>): { valid: boolean; errors: string[] } {
+export function validatePackageManifest(
+  manifestPath: string, ledger: Map<string, LedgerEntry>, mode: PackageMode = 'public',
+): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
-
-  if (!existsSync(manifestPath)) {
-    errors.push(`Package manifest not found at ${manifestPath}`);
-    return { valid: false, errors };
-  }
-
   try {
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
-    
-    // Validate each file in the manifest
-    if (manifest.files && Array.isArray(manifest.files)) {
-      for (const file of manifest.files) {
-        const result = typeof file === 'string' ? validateAsset(file, ledger) : validateAsset(file.name, ledger, file.sha256);
-        if (!result.valid) {
-          errors.push(`File ${file}: ${result.reason}`);
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as { files?: unknown };
+    if (!Array.isArray(manifest?.files) || manifest.files.length === 0) {
+      return { valid: false, errors: ['The package manifest must list its asset files.'] };
+    }
+    const root = realpathSync(dirname(resolve(manifestPath)));
+    for (const file of manifest.files as unknown[]) {
+      const declared = typeof file === 'string' ? { name: file } : file as { name?: unknown; sha256?: unknown } | null;
+      const name = declared?.name;
+      if (typeof name !== 'string' || !name || /[\\:]/.test(name)
+          || name.split('/').some(segment => !segment || segment === '.' || segment === '..')) {
+        errors.push('The package manifest contains an invalid relative asset path.');
+        continue;
+      }
+
+      try {
+        const path = realpathSync(resolve(root, name));
+        const fromRoot = relative(root, path);
+        if (isAbsolute(fromRoot) || fromRoot === '..' || fromRoot.startsWith('..' + sep) || !statSync(path).isFile()) {
+          errors.push(`Asset ${name} is outside the package or is not a file.`);
+          continue;
         }
+        const hash = createHash('sha256').update(readFileSync(path)).digest('hex');
+        if (declared.sha256 !== undefined && (typeof declared.sha256 !== 'string' || declared.sha256.toLowerCase() !== hash)) {
+          errors.push(`Asset ${name} does not match its manifest SHA-256.`);
+          continue;
+        }
+        if (!approvedAsset(name, ledger, hash, mode)) errors.push(`Asset ${name} has no approved ledger hash for ${mode} packaging.`);
+      } catch {
+        errors.push(`Asset ${name} cannot be read.`);
       }
     }
-  } catch (e) {
-    errors.push(`Failed to parse package manifest: ${e}`);
+  } catch {
+    errors.push('The package manifest cannot be read as JSON.');
   }
-
   return { valid: errors.length === 0, errors };
 }
 
@@ -223,6 +210,20 @@ function main() {
 
     // Check provided file paths if any
     const filePaths = process.argv.slice(2);
+    if (filePaths[0] === '--package-manifest') {
+      const [, manifest, mode] = filePaths;
+      if (!manifest || filePaths.length > 3 || (mode !== undefined && mode !== 'test' && mode !== 'public')) {
+        console.error('Usage: validate-rights.ts --package-manifest <file> [public|test]');
+        process.exit(1);
+      }
+      const result = validatePackageManifest(manifest, ledger, mode);
+      if (!result.valid) {
+        for (const error of result.errors) console.error(error);
+        process.exit(1);
+      }
+      console.log('Package assets verified against the rights ledger.');
+      return;
+    }
     if (filePaths.length > 0) {
       console.log('\nValidating provided files:');
       let allValid = true;
@@ -255,6 +256,6 @@ function main() {
   }
 }
 
-if (require.main === module) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }

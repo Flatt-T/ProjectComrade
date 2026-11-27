@@ -1,0 +1,3410 @@
+{
+ "profile_id": "ra1.windows.en.demo.1997-02-03",
+ "archive_url": "https://www.boxedwine.org/wp-content/uploads/2018/03/ra95demo.zip",
+ "archive_sha256": "8c48bdb53523ea4d353a7914d9234ce4e3e6f5832eeb47b3b6b005853e8748d2",
+ "member_sha256": {
+  "REDALERT.MIX": "5471b50ab05ce449c08f4d81a79377223b5ed945efabe8afcdb8dd86798aa445",
+  "MAIN.MIX": "d54336e1b721a05a0f787a15a4cf46db4d39d900f0aeb9677ead37fbdfcd4201",
+  "RA95.EXE": "52d282523555cba978a1d90ec739abb5035fdb32e5bc1f63e8225914599f2580",
+  "README.WRI": "74cc032744feca71ed06a28a3b79de6c68df5238cc805ff9e39d7ccd48caf1b5"
+ },
+ "source_label": "Westwood Red Alert Demo Windows 95 English. The enclosed readme is dated 3 February 1997.",
+ "source_fields": "verbatim data identifiers and factual values, in source units; absent key means not extracted or inherited",
+ "global_section_count": 246,
+ "global_sections_with_selected_fields": [
+  {
+   "section": "General",
+   "redalert_mix_byte": 5271557,
+   "facts": {
+    "RefundPercent": "50%",
+    "RepairPercent": "20%",
+    "RepairRate": ".016",
+    "RepairStep": "7",
+    "BridgeStrength": "1000",
+    "BuildSpeed": ".8",
+    "GrowthRate": "2",
+    "OreGrows": "yes",
+    "OreSpreads": "yes"
+   }
+  },
+  {
+   "section": "MultiplayerDefaults",
+   "redalert_mix_byte": 5280846,
+   "facts": {
+    "OreGrows": "yes"
+   }
+  },
+  {
+   "section": "Maximums",
+   "redalert_mix_byte": 5281636,
+   "facts": {
+    "Projectile": "20",
+    "Warhead": "10"
+   }
+  },
+  {
+   "section": "AI",
+   "redalert_mix_byte": 5283272,
+   "facts": {
+    "PowerSurplus": "50"
+   }
+  },
+  {
+   "section": "England",
+   "redalert_mix_byte": 5288536,
+   "facts": {
+    "Armor": "1.1",
+    "ROF": "1.0",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "Germany",
+   "redalert_mix_byte": 5288640,
+   "facts": {
+    "Armor": "1.0",
+    "ROF": "1.0",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "France",
+   "redalert_mix_byte": 5288744,
+   "facts": {
+    "Armor": "1.0",
+    "ROF": "1.1",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "Ukraine",
+   "redalert_mix_byte": 5288847,
+   "facts": {
+    "Armor": "1.0",
+    "ROF": "1.0",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "USSR",
+   "redalert_mix_byte": 5288951,
+   "facts": {
+    "Armor": "1.0",
+    "ROF": "1.0",
+    "Cost": "0.9"
+   }
+  },
+  {
+   "section": "Greece",
+   "redalert_mix_byte": 5289052,
+   "facts": {
+    "Armor": "1.0",
+    "ROF": "1.0",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "Turkey",
+   "redalert_mix_byte": 5289155,
+   "facts": {
+    "Armor": "1.0",
+    "ROF": "1.0",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "Spain",
+   "redalert_mix_byte": 5289258,
+   "facts": {
+    "Armor": "1.0",
+    "ROF": "1.0",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "Easy",
+   "redalert_mix_byte": 5290607,
+   "facts": {
+    "Armor": "1.2",
+    "ROF": ".8",
+    "Cost": ".8"
+   }
+  },
+  {
+   "section": "Normal",
+   "redalert_mix_byte": 5290775,
+   "facts": {
+    "Armor": "1.0",
+    "ROF": "1.0",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "Difficult",
+   "redalert_mix_byte": 5290963,
+   "facts": {
+    "Armor": ".8",
+    "ROF": "1.2",
+    "Cost": "1.0"
+   }
+  },
+  {
+   "section": "V2RL",
+   "redalert_mix_byte": 5294388,
+   "facts": {
+    "Prerequisite": "weap,dome",
+    "Primary": "SCUD",
+    "Strength": "150",
+    "Armor": "light",
+    "TechLevel": "4",
+    "Sight": "5",
+    "Speed": "7",
+    "Owner": "soviet",
+    "Cost": "700",
+    "Points": "40",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Ammo": "1",
+    "Crewed": "yes",
+    "NoMovingFire": "yes"
+   }
+  },
+  {
+   "section": "1TNK",
+   "redalert_mix_byte": 5294601,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "75mm",
+    "Strength": "300",
+    "Armor": "heavy",
+    "TechLevel": "4",
+    "Sight": "4",
+    "Speed": "9",
+    "Owner": "allies",
+    "Cost": "700",
+    "Points": "30",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "3TNK",
+   "redalert_mix_byte": 5294783,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "105mm",
+    "Secondary": "105mm",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "4",
+    "Sight": "5",
+    "Speed": "7",
+    "Owner": "soviet",
+    "Cost": "950",
+    "Points": "50",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "2TNK",
+   "redalert_mix_byte": 5294984,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "90mm",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "6",
+    "Sight": "5",
+    "Speed": "8",
+    "Owner": "allies",
+    "Cost": "800",
+    "Points": "40",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "4TNK",
+   "redalert_mix_byte": 5295168,
+   "facts": {
+    "Prerequisite": "weap,stek",
+    "Primary": "120mm",
+    "Secondary": "MammothTusk",
+    "Strength": "600",
+    "Armor": "heavy",
+    "TechLevel": "10",
+    "Sight": "6",
+    "Speed": "4",
+    "Owner": "soviet",
+    "Cost": "1700",
+    "Points": "60",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "MRJ",
+   "redalert_mix_byte": 5295407,
+   "facts": {
+    "Prerequisite": "weap,dome",
+    "Strength": "110",
+    "Armor": "light",
+    "TechLevel": "12",
+    "Sight": "7",
+    "Speed": "9",
+    "Owner": "allies",
+    "Cost": "600",
+    "Points": "30",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "MGG",
+   "redalert_mix_byte": 5295590,
+   "facts": {
+    "Prerequisite": "weap,atek",
+    "Strength": "110",
+    "Armor": "light",
+    "TechLevel": "11",
+    "Sight": "4",
+    "Speed": "9",
+    "Owner": "allies",
+    "Cost": "600",
+    "Points": "40",
+    "ROT": "5",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "ARTY",
+   "redalert_mix_byte": 5295756,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "155mm",
+    "Strength": "75",
+    "Armor": "light",
+    "TechLevel": "8",
+    "Sight": "5",
+    "Speed": "6",
+    "Owner": "allies",
+    "Cost": "600",
+    "Points": "35",
+    "ROT": "2",
+    "Tracked": "yes",
+    "Crewed": "yes",
+    "NoMovingFire": "yes"
+   }
+  },
+  {
+   "section": "HARV",
+   "redalert_mix_byte": 5295955,
+   "facts": {
+    "Prerequisite": "weap,proc",
+    "Strength": "600",
+    "Armor": "heavy",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Speed": "6",
+    "Owner": "allies,soviet",
+    "Cost": "1400",
+    "Points": "55",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "MCV",
+   "redalert_mix_byte": 5296170,
+   "facts": {
+    "Prerequisite": "weap,fix",
+    "Strength": "600",
+    "Armor": "light",
+    "TechLevel": "11",
+    "Sight": "4",
+    "Speed": "6",
+    "Owner": "allies,soviet",
+    "Cost": "2500",
+    "Points": "60",
+    "ROT": "5",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "JEEP",
+   "redalert_mix_byte": 5296372,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "M60mg",
+    "Strength": "150",
+    "Armor": "light",
+    "TechLevel": "3",
+    "Sight": "6",
+    "Speed": "10",
+    "Owner": "allies",
+    "Cost": "600",
+    "Points": "20",
+    "ROT": "10",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "APC",
+   "redalert_mix_byte": 5296559,
+   "facts": {
+    "Prerequisite": "weap,tent",
+    "Primary": "M60mg",
+    "Strength": "200",
+    "Armor": "heavy",
+    "TechLevel": "5",
+    "Sight": "5",
+    "Speed": "10",
+    "Owner": "allies",
+    "Cost": "800",
+    "Points": "25",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Passengers": "5"
+   }
+  },
+  {
+   "section": "MNLY",
+   "redalert_mix_byte": 5296749,
+   "facts": {
+    "Prerequisite": "weap,fix",
+    "Strength": "100",
+    "Armor": "heavy",
+    "TechLevel": "3",
+    "Sight": "5",
+    "Speed": "9",
+    "Owner": "allies,soviet",
+    "Cost": "800",
+    "Points": "50",
+    "ROT": "5",
+    "Tracked": "yes",
+    "Ammo": "5",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "TRUK",
+   "redalert_mix_byte": 5296972,
+   "facts": {
+    "Strength": "110",
+    "Armor": "light",
+    "Owner": "soviet,allies",
+    "TechLevel": "-1",
+    "Sight": "3",
+    "Speed": "10",
+    "Cost": "500",
+    "Points": "5",
+    "ROT": "5",
+    "Passengers": "1"
+   }
+  },
+  {
+   "section": "SS",
+   "redalert_mix_byte": 5297147,
+   "facts": {
+    "Prerequisite": "spen",
+    "Primary": "TorpTube",
+    "Strength": "120",
+    "Armor": "light",
+    "TechLevel": "5",
+    "Sight": "6",
+    "Speed": "6",
+    "Owner": "soviet",
+    "Cost": "950",
+    "Points": "45",
+    "ROT": "7",
+    "Cloakable": "yes"
+   }
+  },
+  {
+   "section": "DD",
+   "redalert_mix_byte": 5297320,
+   "facts": {
+    "Prerequisite": "syrd",
+    "Primary": "Stinger",
+    "Secondary": "DepthCharge",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "7",
+    "Sight": "6",
+    "Speed": "6",
+    "Owner": "allies",
+    "Cost": "1000",
+    "Points": "50",
+    "ROT": "7"
+   }
+  },
+  {
+   "section": "CA",
+   "redalert_mix_byte": 5297512,
+   "facts": {
+    "Prerequisite": "syrd,atek",
+    "Primary": "8Inch",
+    "Secondary": "8Inch",
+    "Strength": "700",
+    "Armor": "heavy",
+    "TechLevel": "10",
+    "Sight": "7",
+    "Speed": "4",
+    "Owner": "allies",
+    "Cost": "2000",
+    "Points": "60",
+    "ROT": "5"
+   }
+  },
+  {
+   "section": "LST",
+   "redalert_mix_byte": 5297704,
+   "facts": {
+    "Strength": "350",
+    "Armor": "heavy",
+    "TechLevel": "3",
+    "Sight": "6",
+    "Speed": "14",
+    "Owner": "allies,soviet",
+    "Cost": "700",
+    "Points": "25",
+    "ROT": "10",
+    "Passengers": "5"
+   }
+  },
+  {
+   "section": "PT",
+   "redalert_mix_byte": 5297848,
+   "facts": {
+    "Prerequisite": "syrd",
+    "Primary": "2Inch",
+    "Secondary": "DepthCharge",
+    "Strength": "200",
+    "Armor": "heavy",
+    "TechLevel": "5",
+    "Sight": "7",
+    "Speed": "9",
+    "Owner": "allies",
+    "Cost": "500",
+    "Points": "30",
+    "ROT": "7"
+   }
+  },
+  {
+   "section": "DOG",
+   "redalert_mix_byte": 5298074,
+   "facts": {
+    "Prerequisite": "kenn",
+    "Primary": "DogJaw",
+    "Strength": "12",
+    "Armor": "none",
+    "TechLevel": "3",
+    "Sight": "5",
+    "Speed": "4",
+    "Owner": "soviet",
+    "Cost": "200",
+    "Points": "5",
+    "GuardRange": "7"
+   }
+  },
+  {
+   "section": "E1",
+   "redalert_mix_byte": 5298266,
+   "facts": {
+    "Primary": "M1Carbine",
+    "Strength": "50",
+    "Armor": "none",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Speed": "4",
+    "Owner": "allies,soviet",
+    "Cost": "100",
+    "Points": "5"
+   }
+  },
+  {
+   "section": "E2",
+   "redalert_mix_byte": 5298403,
+   "facts": {
+    "Primary": "Grenade",
+    "Strength": "50",
+    "Armor": "none",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Speed": "5",
+    "Owner": "soviet",
+    "Cost": "160",
+    "Points": "10",
+    "Explodes": "yes"
+   }
+  },
+  {
+   "section": "E3",
+   "redalert_mix_byte": 5298551,
+   "facts": {
+    "Primary": "RedEye",
+    "Secondary": "Dragon",
+    "Strength": "45",
+    "Armor": "none",
+    "TechLevel": "2",
+    "Sight": "4",
+    "Speed": "3",
+    "Owner": "allies",
+    "Cost": "300",
+    "Points": "10",
+    "DoubleOwned": "yes"
+   }
+  },
+  {
+   "section": "E4",
+   "redalert_mix_byte": 5298717,
+   "facts": {
+    "Prerequisite": "stek",
+    "Primary": "Flamer",
+    "Strength": "40",
+    "Armor": "none",
+    "TechLevel": "6",
+    "Sight": "4",
+    "Speed": "3",
+    "Owner": "soviet",
+    "Cost": "300",
+    "Points": "15",
+    "Explodes": "yes"
+   }
+  },
+  {
+   "section": "E6",
+   "redalert_mix_byte": 5298877,
+   "facts": {
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "5",
+    "Sight": "4",
+    "Speed": "4",
+    "Owner": "soviet,allies",
+    "Cost": "500",
+    "Points": "20",
+    "Infiltrate": "yes"
+   }
+  },
+  {
+   "section": "SPY",
+   "redalert_mix_byte": 5299006,
+   "facts": {
+    "Prerequisite": "dome",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "6",
+    "Sight": "5",
+    "Speed": "4",
+    "Owner": "allies",
+    "Cost": "500",
+    "Points": "15",
+    "Infiltrate": "yes"
+   }
+  },
+  {
+   "section": "THF",
+   "redalert_mix_byte": 5299150,
+   "facts": {
+    "Prerequisite": "atek",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "11",
+    "Sight": "5",
+    "Speed": "4",
+    "Owner": "allies",
+    "Cost": "500",
+    "Points": "10",
+    "Infiltrate": "yes"
+   }
+  },
+  {
+   "section": "E7",
+   "redalert_mix_byte": 5299295,
+   "facts": {
+    "Prerequisite": "atek",
+    "Primary": "Colt45",
+    "Secondary": "Colt45",
+    "Strength": "100",
+    "Armor": "none",
+    "TechLevel": "11",
+    "Sight": "6",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "1200",
+    "Points": "25",
+    "Infiltrate": "yes",
+    "DoubleOwned": "yes"
+   }
+  },
+  {
+   "section": "MEDI",
+   "redalert_mix_byte": 5299513,
+   "facts": {
+    "Primary": "Heal",
+    "Strength": "80",
+    "Armor": "none",
+    "TechLevel": "2",
+    "Sight": "3",
+    "Speed": "4",
+    "Owner": "allies",
+    "Cost": "800",
+    "Points": "15"
+   }
+  },
+  {
+   "section": "GNRL",
+   "redalert_mix_byte": 5299645,
+   "facts": {
+    "Primary": "Pistol",
+    "Strength": "80",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "3",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "0",
+    "Points": "15",
+    "Infiltrate": "yes"
+   }
+  },
+  {
+   "section": "C1",
+   "redalert_mix_byte": 5299797,
+   "facts": {
+    "Image": "C1",
+    "Primary": "Pistol",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1",
+    "Ammo": "10"
+   }
+  },
+  {
+   "section": "C2",
+   "redalert_mix_byte": 5299952,
+   "facts": {
+    "Image": "C1",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "C3",
+   "redalert_mix_byte": 5300082,
+   "facts": {
+    "Image": "C2",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "C4",
+   "redalert_mix_byte": 5300212,
+   "facts": {
+    "Image": "C2",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "C5",
+   "redalert_mix_byte": 5300342,
+   "facts": {
+    "Image": "C2",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "C6",
+   "redalert_mix_byte": 5300472,
+   "facts": {
+    "Image": "C1",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "C7",
+   "redalert_mix_byte": 5300602,
+   "facts": {
+    "Image": "C1",
+    "Primary": "Pistol",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1",
+    "Ammo": "10"
+   }
+  },
+  {
+   "section": "C8",
+   "redalert_mix_byte": 5300757,
+   "facts": {
+    "Image": "C1",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "C9",
+   "redalert_mix_byte": 5300887,
+   "facts": {
+    "Image": "C1",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "C10",
+   "redalert_mix_byte": 5301017,
+   "facts": {
+    "Image": "C1",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "EINSTEIN",
+   "redalert_mix_byte": 5301170,
+   "facts": {
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "DELPHI",
+   "redalert_mix_byte": 5301306,
+   "facts": {
+    "Primary": "Pistol",
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1",
+    "Ammo": "10"
+   }
+  },
+  {
+   "section": "CHAN",
+   "redalert_mix_byte": 5301457,
+   "facts": {
+    "Strength": "25",
+    "Armor": "none",
+    "TechLevel": "-1",
+    "Sight": "2",
+    "Speed": "5",
+    "Owner": "allies,soviet",
+    "Cost": "10",
+    "Points": "1"
+   }
+  },
+  {
+   "section": "BADR",
+   "redalert_mix_byte": 5301615,
+   "facts": {
+    "Prerequisite": "afld",
+    "Primary": "ParaBomb",
+    "Strength": "60",
+    "Armor": "light",
+    "TechLevel": "-1",
+    "Sight": "0",
+    "Speed": "16",
+    "Owner": "soviet",
+    "Cost": "10",
+    "Points": "20",
+    "ROT": "5",
+    "Ammo": "5",
+    "Passengers": "5"
+   }
+  },
+  {
+   "section": "U2",
+   "redalert_mix_byte": 5301809,
+   "facts": {
+    "Prerequisite": "afld",
+    "Primary": "Camera",
+    "Strength": "2000",
+    "Armor": "heavy",
+    "TechLevel": "-1",
+    "Sight": "0",
+    "Speed": "40",
+    "Owner": "soviet",
+    "Cost": "10",
+    "Points": "5",
+    "ROT": "7",
+    "Ammo": "1"
+   }
+  },
+  {
+   "section": "MIG",
+   "redalert_mix_byte": 5302005,
+   "facts": {
+    "Prerequisite": "afld",
+    "Primary": "Maverick",
+    "Secondary": "Maverick",
+    "Strength": "50",
+    "Armor": "light",
+    "TechLevel": "10",
+    "Sight": "0",
+    "Speed": "20",
+    "Owner": "soviet",
+    "Cost": "1200",
+    "Points": "50",
+    "ROT": "5",
+    "Ammo": "3",
+    "GuardRange": "30"
+   }
+  },
+  {
+   "section": "YAK",
+   "redalert_mix_byte": 5302217,
+   "facts": {
+    "Prerequisite": "afld",
+    "Primary": "ChainGun",
+    "Secondary": "ChainGun",
+    "Strength": "60",
+    "Armor": "light",
+    "TechLevel": "5",
+    "Sight": "0",
+    "Speed": "16",
+    "Owner": "soviet",
+    "Cost": "800",
+    "Points": "25",
+    "ROT": "5",
+    "Ammo": "15",
+    "Crewed": "yes",
+    "GuardRange": "30"
+   }
+  },
+  {
+   "section": "TRAN",
+   "redalert_mix_byte": 5302443,
+   "facts": {
+    "Prerequisite": "hpad",
+    "Strength": "90",
+    "Armor": "light",
+    "TechLevel": "11",
+    "Sight": "0",
+    "Speed": "12",
+    "Owner": "soviet",
+    "Cost": "1200",
+    "Points": "35",
+    "ROT": "5",
+    "Passengers": "5"
+   }
+  },
+  {
+   "section": "HELI",
+   "redalert_mix_byte": 5302617,
+   "facts": {
+    "Prerequisite": "hpad",
+    "Primary": "Hellfire",
+    "Secondary": "Hellfire",
+    "Strength": "225",
+    "Armor": "heavy",
+    "TechLevel": "9",
+    "Sight": "0",
+    "Speed": "16",
+    "Owner": "allies",
+    "Cost": "1200",
+    "Points": "50",
+    "ROT": "4",
+    "Ammo": "6",
+    "Crewed": "yes",
+    "GuardRange": "30"
+   }
+  },
+  {
+   "section": "HIND",
+   "redalert_mix_byte": 5302847,
+   "facts": {
+    "Prerequisite": "hpad",
+    "Primary": "ChainGun",
+    "Strength": "225",
+    "Armor": "heavy",
+    "TechLevel": "9",
+    "Sight": "0",
+    "Speed": "12",
+    "Owner": "soviet",
+    "Cost": "1200",
+    "Points": "40",
+    "ROT": "4",
+    "Ammo": "12",
+    "Crewed": "yes",
+    "GuardRange": "30"
+   }
+  },
+  {
+   "section": "IRON",
+   "redalert_mix_byte": 5303082,
+   "facts": {
+    "Prerequisite": "stek",
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "12",
+    "Sight": "10",
+    "Owner": "soviet",
+    "Cost": "2800",
+    "Points": "100",
+    "Power": "-200",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "FCOM",
+   "redalert_mix_byte": 5303279,
+   "facts": {
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "-1",
+    "Sight": "10",
+    "Owner": "soviet",
+    "Cost": "0",
+    "Points": "40",
+    "Power": "-200",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "ATEK",
+   "redalert_mix_byte": 5303446,
+   "facts": {
+    "Prerequisite": "weap,dome",
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "10",
+    "Sight": "10",
+    "Owner": "allies",
+    "Cost": "1500",
+    "Points": "85",
+    "Power": "-200",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "PDOX",
+   "redalert_mix_byte": 5303634,
+   "facts": {
+    "Prerequisite": "atek",
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "12",
+    "Sight": "10",
+    "Owner": "allies",
+    "Cost": "2800",
+    "Points": "100",
+    "Power": "-200",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "WEAP",
+   "redalert_mix_byte": 5303824,
+   "facts": {
+    "Prerequisite": "proc",
+    "Strength": "1000",
+    "Armor": "light",
+    "TechLevel": "3",
+    "Sight": "4",
+    "Owner": "soviet,allies",
+    "Cost": "2000",
+    "Points": "80",
+    "Power": "-30",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "SYRD",
+   "redalert_mix_byte": 5304008,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "1000",
+    "Armor": "light",
+    "TechLevel": "3",
+    "Sight": "4",
+    "Owner": "allies",
+    "Cost": "650",
+    "Points": "80",
+    "Power": "-30",
+    "Adjacent": "8",
+    "WaterBound": "yes",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "SPEN",
+   "redalert_mix_byte": 5304204,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "1000",
+    "Armor": "light",
+    "TechLevel": "3",
+    "Sight": "4",
+    "Owner": "soviet",
+    "Cost": "650",
+    "Points": "80",
+    "Power": "-30",
+    "Adjacent": "8",
+    "WaterBound": "yes",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "PBOX",
+   "redalert_mix_byte": 5304401,
+   "facts": {
+    "Prerequisite": "tent",
+    "Primary": "Vulcan",
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "2",
+    "Sight": "5",
+    "Owner": "allies",
+    "Cost": "400",
+    "Points": "50",
+    "Power": "-15",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "HBOX",
+   "redalert_mix_byte": 5304589,
+   "facts": {
+    "Prerequisite": "tent",
+    "Primary": "Vulcan",
+    "Strength": "600",
+    "Armor": "wood",
+    "TechLevel": "3",
+    "Sight": "5",
+    "Owner": "allies",
+    "Cost": "600",
+    "Points": "60",
+    "Power": "-15",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "TSLA",
+   "redalert_mix_byte": 5304767,
+   "facts": {
+    "Prerequisite": "weap",
+    "Primary": "TeslaZap",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "7",
+    "Sight": "8",
+    "Owner": "soviet",
+    "Cost": "1500",
+    "Points": "80",
+    "Power": "-150",
+    "Ammo": "3",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "GUN",
+   "redalert_mix_byte": 5304972,
+   "facts": {
+    "Prerequisite": "tent",
+    "Primary": "TurretGun",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "4",
+    "Sight": "6",
+    "Owner": "allies",
+    "Cost": "600",
+    "Points": "50",
+    "Power": "-40",
+    "Crewed": "yes",
+    "ROT": "12"
+   }
+  },
+  {
+   "section": "AGUN",
+   "redalert_mix_byte": 5305174,
+   "facts": {
+    "Prerequisite": "dome",
+    "Primary": "ZSU-23",
+    "Secondary": "ZSU-23",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "5",
+    "Sight": "6",
+    "Owner": "allies",
+    "Cost": "600",
+    "Points": "50",
+    "Power": "-50",
+    "Crewed": "yes",
+    "ROT": "15"
+   }
+  },
+  {
+   "section": "FTUR",
+   "redalert_mix_byte": 5305382,
+   "facts": {
+    "Prerequisite": "barr",
+    "Primary": "FireballLauncher",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "2",
+    "Sight": "6",
+    "Owner": "soviet",
+    "Cost": "600",
+    "Points": "65",
+    "Power": "-20",
+    "Explodes": "no",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "FACT",
+   "redalert_mix_byte": 5305591,
+   "facts": {
+    "Strength": "1000",
+    "Armor": "heavy",
+    "TechLevel": "-1",
+    "Sight": "5",
+    "Owner": "allies,soviet",
+    "Cost": "2500",
+    "Points": "80",
+    "Power": "0",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "PROC",
+   "redalert_mix_byte": 5305754,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "900",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "6",
+    "Owner": "allies,soviet",
+    "Cost": "2000",
+    "Points": "80",
+    "Power": "-30",
+    "Storage": "2000",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "SILO",
+   "redalert_mix_byte": 5305953,
+   "facts": {
+    "Prerequisite": "proc",
+    "Strength": "300",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Owner": "allies,soviet",
+    "Cost": "150",
+    "Points": "25",
+    "Power": "-10",
+    "Storage": "1500",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "HPAD",
+   "redalert_mix_byte": 5306125,
+   "facts": {
+    "Prerequisite": "dome",
+    "Strength": "800",
+    "Armor": "wood",
+    "TechLevel": "9",
+    "Sight": "5",
+    "Owner": "allies,soviet",
+    "Cost": "1500",
+    "Points": "70",
+    "Power": "-10",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "DOME",
+   "redalert_mix_byte": 5306312,
+   "facts": {
+    "Prerequisite": "proc",
+    "Strength": "1000",
+    "Armor": "wood",
+    "TechLevel": "3",
+    "Sight": "10",
+    "Owner": "allies,soviet",
+    "Cost": "1000",
+    "Points": "60",
+    "Power": "-40",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "GAP",
+   "redalert_mix_byte": 5306527,
+   "facts": {
+    "Prerequisite": "atek",
+    "Strength": "1000",
+    "Armor": "wood",
+    "TechLevel": "10",
+    "Sight": "10",
+    "Owner": "allies",
+    "Cost": "500",
+    "Points": "35",
+    "Power": "-60",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "SAM",
+   "redalert_mix_byte": 5306730,
+   "facts": {
+    "Prerequisite": "dome",
+    "Primary": "Nike",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "9",
+    "Sight": "5",
+    "Owner": "soviet",
+    "Cost": "750",
+    "Points": "50",
+    "Power": "-20",
+    "Crewed": "yes",
+    "ROT": "30"
+   }
+  },
+  {
+   "section": "MSLO",
+   "redalert_mix_byte": 5306907,
+   "facts": {
+    "Prerequisite": "stek",
+    "Primary": "none",
+    "Strength": "400",
+    "Armor": "heavy",
+    "TechLevel": "13",
+    "Sight": "5",
+    "Owner": "soviet,allies",
+    "Cost": "2500",
+    "Points": "90",
+    "Power": "-100",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "AFLD",
+   "redalert_mix_byte": 5307079,
+   "facts": {
+    "Prerequisite": "dome",
+    "Strength": "1000",
+    "Armor": "heavy",
+    "TechLevel": "5",
+    "Sight": "7",
+    "Owner": "soviet",
+    "Cost": "600",
+    "Points": "70",
+    "Power": "-30",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "POWR",
+   "redalert_mix_byte": 5307255,
+   "facts": {
+    "Prerequisite": "fact",
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "4",
+    "Owner": "allies,soviet",
+    "Cost": "300",
+    "Points": "40",
+    "Power": "100",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "APWR",
+   "redalert_mix_byte": 5307447,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "700",
+    "Armor": "wood",
+    "TechLevel": "8",
+    "Sight": "4",
+    "Owner": "allies,soviet",
+    "Cost": "500",
+    "Points": "50",
+    "Power": "200",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "STEK",
+   "redalert_mix_byte": 5307637,
+   "facts": {
+    "Prerequisite": "weap,dome",
+    "Strength": "600",
+    "Armor": "wood",
+    "TechLevel": "6",
+    "Sight": "4",
+    "Owner": "soviet",
+    "Cost": "1500",
+    "Points": "85",
+    "Power": "-100",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "HOSP",
+   "redalert_mix_byte": 5307829,
+   "facts": {
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "-1",
+    "Sight": "4",
+    "Owner": "",
+    "Cost": "",
+    "Points": "20",
+    "Power": "-20",
+    "Bib": "yes",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "BIO",
+   "redalert_mix_byte": 5308002,
+   "facts": {
+    "Strength": "600",
+    "Armor": "wood",
+    "TechLevel": "-1",
+    "Sight": "4",
+    "Owner": "",
+    "Cost": "",
+    "Points": "30",
+    "Power": "-40",
+    "Bib": "yes",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "BARR",
+   "redalert_mix_byte": 5308137,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "800",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "5",
+    "Owner": "soviet",
+    "Cost": "300",
+    "Points": "30",
+    "Power": "-20",
+    "Bib": "yes",
+    "Crewed": "yes",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "TENT",
+   "redalert_mix_byte": 5308322,
+   "facts": {
+    "Prerequisite": "powr",
+    "Strength": "800",
+    "Armor": "wood",
+    "TechLevel": "1",
+    "Sight": "5",
+    "Owner": "allies",
+    "Cost": "300",
+    "Points": "30",
+    "Power": "-20",
+    "Bib": "yes",
+    "Crewed": "yes",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "KENN",
+   "redalert_mix_byte": 5308515,
+   "facts": {
+    "Prerequisite": "barr",
+    "Strength": "400",
+    "Armor": "wood",
+    "TechLevel": "3",
+    "Sight": "4",
+    "Owner": "soviet",
+    "Cost": "200",
+    "Points": "25",
+    "Power": "-10"
+   }
+  },
+  {
+   "section": "FIX",
+   "redalert_mix_byte": 5308655,
+   "facts": {
+    "Prerequisite": "weap",
+    "Strength": "800",
+    "Armor": "wood",
+    "TechLevel": "3",
+    "Sight": "5",
+    "Owner": "allies,soviet",
+    "Cost": "1200",
+    "Points": "80",
+    "Power": "-30",
+    "Capturable": "true",
+    "Crewed": "yes"
+   }
+  },
+  {
+   "section": "SBAG",
+   "redalert_mix_byte": 5308830,
+   "facts": {
+    "Strength": "1",
+    "Armor": "none",
+    "TechLevel": "2",
+    "Sight": "0",
+    "Owner": "allies",
+    "Cost": "25",
+    "Points": "1",
+    "Repairable": "false",
+    "Adjacent": "1"
+   }
+  },
+  {
+   "section": "BRIK",
+   "redalert_mix_byte": 5308966,
+   "facts": {
+    "Strength": "1",
+    "Armor": "none",
+    "TechLevel": "8",
+    "Sight": "0",
+    "Owner": "allies,soviet",
+    "Cost": "100",
+    "Points": "5",
+    "Repairable": "false",
+    "Adjacent": "1"
+   }
+  },
+  {
+   "section": "FENC",
+   "redalert_mix_byte": 5309107,
+   "facts": {
+    "Strength": "1",
+    "Armor": "none",
+    "TechLevel": "2",
+    "Sight": "0",
+    "Owner": "soviet",
+    "Cost": "25",
+    "Points": "1",
+    "Repairable": "false",
+    "Adjacent": "1"
+   }
+  },
+  {
+   "section": "MISS",
+   "redalert_mix_byte": 5309259,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood",
+    "Bib": "yes",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "CYCL",
+   "redalert_mix_byte": 5309351,
+   "facts": {
+    "Strength": "1",
+    "Points": "1",
+    "Armor": "none",
+    "Cost": "75",
+    "Adjacent": "1",
+    "Sight": "0"
+   }
+  },
+  {
+   "section": "BARB",
+   "redalert_mix_byte": 5309462,
+   "facts": {
+    "Strength": "1",
+    "Points": "1",
+    "Armor": "wood",
+    "Cost": "25",
+    "Adjacent": "1",
+    "Sight": "0"
+   }
+  },
+  {
+   "section": "WOOD",
+   "redalert_mix_byte": 5309568,
+   "facts": {
+    "Strength": "1",
+    "Points": "1",
+    "Adjacent": "1",
+    "Sight": "0"
+   }
+  },
+  {
+   "section": "BARL",
+   "redalert_mix_byte": 5309650,
+   "facts": {
+    "Strength": "10",
+    "Repairable": "false",
+    "Adjacent": "0"
+   }
+  },
+  {
+   "section": "BRL3",
+   "redalert_mix_byte": 5309718,
+   "facts": {
+    "Strength": "10",
+    "Repairable": "false",
+    "Adjacent": "0"
+   }
+  },
+  {
+   "section": "MINV",
+   "redalert_mix_byte": 5309807,
+   "facts": {
+    "Strength": "1",
+    "Repairable": "false",
+    "Adjacent": "0",
+    "Invisible": "yes",
+    "Unsellable": "yes"
+   }
+  },
+  {
+   "section": "MINP",
+   "redalert_mix_byte": 5309928,
+   "facts": {
+    "Strength": "1",
+    "Repairable": "false",
+    "Adjacent": "0",
+    "Invisible": "yes",
+    "Unsellable": "yes"
+   }
+  },
+  {
+   "section": "FACF",
+   "redalert_mix_byte": 5310035,
+   "facts": {
+    "Image": "FACT",
+    "Owner": "allies",
+    "TechLevel": "1",
+    "Strength": "30",
+    "Cost": "50",
+    "Sight": "4",
+    "Power": "-2",
+    "Points": "15",
+    "Bib": "yes",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "WEAF",
+   "redalert_mix_byte": 5310177,
+   "facts": {
+    "Prerequisite": "proc",
+    "Image": "WEAP",
+    "Owner": "allies",
+    "TechLevel": "3",
+    "Cost": "50",
+    "Strength": "30",
+    "Sight": "4",
+    "Points": "15",
+    "Power": "-2",
+    "Bib": "yes",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "SYRF",
+   "redalert_mix_byte": 5310338,
+   "facts": {
+    "Prerequisite": "powr",
+    "Image": "SYRD",
+    "Strength": "30",
+    "TechLevel": "3",
+    "Sight": "4",
+    "Cost": "50",
+    "Owner": "allies",
+    "Power": "-2",
+    "Points": "15",
+    "WaterBound": "yes",
+    "Capturable": "true",
+    "Adjacent": "8"
+   }
+  },
+  {
+   "section": "SPEF",
+   "redalert_mix_byte": 5310518,
+   "facts": {
+    "Image": "SPEN",
+    "Strength": "30",
+    "TechLevel": "-1",
+    "Sight": "4",
+    "Cost": "50",
+    "Owner": "soviet",
+    "Power": "-2",
+    "Points": "15",
+    "WaterBound": "yes",
+    "Capturable": "true",
+    "Adjacent": "8"
+   }
+  },
+  {
+   "section": "DOMF",
+   "redalert_mix_byte": 5310680,
+   "facts": {
+    "Prerequisite": "proc",
+    "Image": "DOME",
+    "Strength": "30",
+    "Sight": "4",
+    "TechLevel": "3",
+    "Cost": "50",
+    "Owner": "allies",
+    "Power": "-2",
+    "Points": "15",
+    "Bib": "yes",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "V01",
+   "redalert_mix_byte": 5310864,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood",
+    "Capturable": "true"
+   }
+  },
+  {
+   "section": "V02",
+   "redalert_mix_byte": 5310944,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V03",
+   "redalert_mix_byte": 5311007,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V04",
+   "redalert_mix_byte": 5311070,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V05",
+   "redalert_mix_byte": 5311133,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V06",
+   "redalert_mix_byte": 5311196,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V07",
+   "redalert_mix_byte": 5311259,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V08",
+   "redalert_mix_byte": 5311322,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V09",
+   "redalert_mix_byte": 5311385,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V10",
+   "redalert_mix_byte": 5311448,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V11",
+   "redalert_mix_byte": 5311511,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V12",
+   "redalert_mix_byte": 5311574,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V13",
+   "redalert_mix_byte": 5311637,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V14",
+   "redalert_mix_byte": 5311700,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V15",
+   "redalert_mix_byte": 5311763,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V16",
+   "redalert_mix_byte": 5311826,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V17",
+   "redalert_mix_byte": 5311889,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V18",
+   "redalert_mix_byte": 5311952,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V19",
+   "redalert_mix_byte": 5312015,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V20",
+   "redalert_mix_byte": 5312078,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V21",
+   "redalert_mix_byte": 5312141,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V22",
+   "redalert_mix_byte": 5312204,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V23",
+   "redalert_mix_byte": 5312267,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V24",
+   "redalert_mix_byte": 5312330,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V25",
+   "redalert_mix_byte": 5312393,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V26",
+   "redalert_mix_byte": 5312456,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V27",
+   "redalert_mix_byte": 5312519,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V28",
+   "redalert_mix_byte": 5312582,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V29",
+   "redalert_mix_byte": 5312645,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V30",
+   "redalert_mix_byte": 5312708,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V31",
+   "redalert_mix_byte": 5312771,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V32",
+   "redalert_mix_byte": 5312834,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V33",
+   "redalert_mix_byte": 5312897,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V34",
+   "redalert_mix_byte": 5312960,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V35",
+   "redalert_mix_byte": 5313023,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V36",
+   "redalert_mix_byte": 5313086,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "V37",
+   "redalert_mix_byte": 5313149,
+   "facts": {
+    "Strength": "400",
+    "Points": "5",
+    "Armor": "wood"
+   }
+  },
+  {
+   "section": "Colt45",
+   "redalert_mix_byte": 5314154,
+   "facts": {
+    "Damage": "50",
+    "ROF": "5",
+    "Range": "5.75",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "HollowPoint"
+   }
+  },
+  {
+   "section": "ZSU-23",
+   "redalert_mix_byte": 5314296,
+   "facts": {
+    "Damage": "25",
+    "ROF": "10",
+    "Range": "6",
+    "Projectile": "Ack",
+    "Speed": "100",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "Vulcan",
+   "redalert_mix_byte": 5314432,
+   "facts": {
+    "Damage": "40",
+    "ROF": "40",
+    "Range": "5",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "SA"
+   }
+  },
+  {
+   "section": "Maverick",
+   "redalert_mix_byte": 5314598,
+   "facts": {
+    "Damage": "50",
+    "ROF": "3",
+    "Range": "6",
+    "Projectile": "HeatSeeker",
+    "Speed": "30",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "Camera",
+   "redalert_mix_byte": 5314711,
+   "facts": {
+    "Damage": "0",
+    "ROF": "10",
+    "Range": "2.75",
+    "Projectile": "Inivisble",
+    "Speed": "100",
+    "Warhead": "Super"
+   }
+  },
+  {
+   "section": "FireballLauncher",
+   "redalert_mix_byte": 5314843,
+   "facts": {
+    "Damage": "125",
+    "ROF": "50",
+    "Range": "4",
+    "Projectile": "Fireball",
+    "Speed": "12",
+    "Warhead": "Fire"
+   }
+  },
+  {
+   "section": "Flamer",
+   "redalert_mix_byte": 5314971,
+   "facts": {
+    "Damage": "70",
+    "ROF": "50",
+    "Range": "3.5",
+    "Projectile": "Fireball",
+    "Speed": "12",
+    "Warhead": "Fire"
+   }
+  },
+  {
+   "section": "Sniper",
+   "redalert_mix_byte": 5315074,
+   "facts": {
+    "Damage": "100",
+    "ROF": "5",
+    "Range": "3.75",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "HollowPoint"
+   }
+  },
+  {
+   "section": "ChainGun",
+   "redalert_mix_byte": 5315215,
+   "facts": {
+    "Damage": "40",
+    "ROF": "3",
+    "Range": "5",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "SA"
+   }
+  },
+  {
+   "section": "Pistol",
+   "redalert_mix_byte": 5315348,
+   "facts": {
+    "Damage": "1",
+    "ROF": "7",
+    "Range": "1.75",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "SA"
+   }
+  },
+  {
+   "section": "M1Carbine",
+   "redalert_mix_byte": 5315490,
+   "facts": {
+    "Damage": "15",
+    "ROF": "20",
+    "Range": "3",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "SA"
+   }
+  },
+  {
+   "section": "Dragon",
+   "redalert_mix_byte": 5315639,
+   "facts": {
+    "Damage": "35",
+    "ROF": "50",
+    "Range": "5",
+    "Projectile": "HeatSeeker",
+    "Speed": "25",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "Hellfire",
+   "redalert_mix_byte": 5315801,
+   "facts": {
+    "Damage": "40",
+    "ROF": "60",
+    "Range": "4",
+    "Projectile": "HeatSeeker",
+    "Speed": "30",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "Grenade",
+   "redalert_mix_byte": 5315921,
+   "facts": {
+    "Damage": "50",
+    "ROF": "60",
+    "Range": "4",
+    "Projectile": "Lobbed",
+    "Speed": "5",
+    "Warhead": "HE"
+   }
+  },
+  {
+   "section": "75mm",
+   "redalert_mix_byte": 5316029,
+   "facts": {
+    "Damage": "25",
+    "ROF": "40",
+    "Range": "4",
+    "Projectile": "Cannon",
+    "Speed": "40",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "90mm",
+   "redalert_mix_byte": 5316165,
+   "facts": {
+    "Damage": "30",
+    "ROF": "50",
+    "Range": "4.75",
+    "Projectile": "Cannon",
+    "Speed": "40",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "105mm",
+   "redalert_mix_byte": 5316305,
+   "facts": {
+    "Damage": "30",
+    "ROF": "70",
+    "Range": "4.75",
+    "Projectile": "Cannon",
+    "Speed": "40",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "120mm",
+   "redalert_mix_byte": 5316445,
+   "facts": {
+    "Damage": "40",
+    "ROF": "80",
+    "Range": "4.75",
+    "Projectile": "Cannon",
+    "Speed": "40",
+    "Warhead": "AP",
+    "Burst": "2"
+   }
+  },
+  {
+   "section": "TurretGun",
+   "redalert_mix_byte": 5316584,
+   "facts": {
+    "Damage": "40",
+    "ROF": "50",
+    "Range": "6",
+    "Projectile": "Cannon",
+    "Speed": "40",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "MammothTusk",
+   "redalert_mix_byte": 5316735,
+   "facts": {
+    "Damage": "75",
+    "ROF": "80",
+    "Range": "5",
+    "Projectile": "HeatSeeker",
+    "Speed": "30",
+    "Warhead": "HE",
+    "Burst": "2"
+   }
+  },
+  {
+   "section": "155mm",
+   "redalert_mix_byte": 5316871,
+   "facts": {
+    "Damage": "150",
+    "ROF": "65",
+    "Range": "6",
+    "Projectile": "Ballistic",
+    "Speed": "12",
+    "Warhead": "HE"
+   }
+  },
+  {
+   "section": "M60mg",
+   "redalert_mix_byte": 5317014,
+   "facts": {
+    "Damage": "15",
+    "ROF": "20",
+    "Range": "4",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "SA"
+   }
+  },
+  {
+   "section": "Napalm",
+   "redalert_mix_byte": 5317169,
+   "facts": {
+    "Damage": "100",
+    "ROF": "20",
+    "Range": "4.5",
+    "Projectile": "Bomblet",
+    "Speed": "5",
+    "Warhead": "Fire"
+   }
+  },
+  {
+   "section": "TeslaZap",
+   "redalert_mix_byte": 5317273,
+   "facts": {
+    "Damage": "100",
+    "ROF": "120",
+    "Range": "8.5",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "Super"
+   }
+  },
+  {
+   "section": "Nike",
+   "redalert_mix_byte": 5317442,
+   "facts": {
+    "Damage": "50",
+    "ROF": "20",
+    "Range": "7.5",
+    "Projectile": "AAMissile",
+    "Speed": "50",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "RedEye",
+   "redalert_mix_byte": 5317594,
+   "facts": {
+    "Damage": "50",
+    "ROF": "50",
+    "Range": "7.5",
+    "Projectile": "AAMissile",
+    "Speed": "50",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "8Inch",
+   "redalert_mix_byte": 5317736,
+   "facts": {
+    "Damage": "500",
+    "ROF": "160",
+    "Range": "22",
+    "Projectile": "Ballistic",
+    "Speed": "6",
+    "Warhead": "HE"
+   }
+  },
+  {
+   "section": "Stinger",
+   "redalert_mix_byte": 5317904,
+   "facts": {
+    "Damage": "30",
+    "ROF": "60",
+    "Range": "9",
+    "Projectile": "LaserGuided",
+    "Speed": "20",
+    "Warhead": "AP",
+    "Burst": "2"
+   }
+  },
+  {
+   "section": "TorpTube",
+   "redalert_mix_byte": 5318049,
+   "facts": {
+    "Damage": "90",
+    "ROF": "60",
+    "Range": "9",
+    "Projectile": "Torpedo",
+    "Speed": "15",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "2Inch",
+   "redalert_mix_byte": 5318185,
+   "facts": {
+    "Damage": "25",
+    "ROF": "60",
+    "Range": "5.5",
+    "Projectile": "Cannon",
+    "Speed": "25",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "DepthCharge",
+   "redalert_mix_byte": 5318322,
+   "facts": {
+    "Damage": "80",
+    "ROF": "60",
+    "Range": "5",
+    "Projectile": "Catapult",
+    "Speed": "5",
+    "Warhead": "AP"
+   }
+  },
+  {
+   "section": "ParaBomb",
+   "redalert_mix_byte": 5318427,
+   "facts": {
+    "Damage": "300",
+    "ROF": "4",
+    "Range": "4.5",
+    "Projectile": "Parachute",
+    "Speed": "5",
+    "Warhead": "HE"
+   }
+  },
+  {
+   "section": "DogJaw",
+   "redalert_mix_byte": 5318541,
+   "facts": {
+    "Damage": "100",
+    "ROF": "10",
+    "Range": "2.2",
+    "Projectile": "LeapDog",
+    "Speed": "20",
+    "Warhead": "Organic"
+   }
+  },
+  {
+   "section": "Heal",
+   "redalert_mix_byte": 5318663,
+   "facts": {
+    "Damage": "-50",
+    "ROF": "80",
+    "Range": "1.83",
+    "Projectile": "Invisible",
+    "Speed": "100",
+    "Warhead": "Organic"
+   }
+  },
+  {
+   "section": "SCUD",
+   "redalert_mix_byte": 5318786,
+   "facts": {
+    "Damage": "600",
+    "ROF": "400",
+    "Range": "10",
+    "Projectile": "FROG",
+    "Speed": "25",
+    "Warhead": "HE"
+   }
+  },
+  {
+   "section": "Invisible",
+   "redalert_mix_byte": 5320455,
+   "facts": {
+    "Image": "none"
+   }
+  },
+  {
+   "section": "LeapDog",
+   "redalert_mix_byte": 5320518,
+   "facts": {
+    "Image": "DOGBULLT",
+    "ROT": "20"
+   }
+  },
+  {
+   "section": "Cannon",
+   "redalert_mix_byte": 5320638,
+   "facts": {
+    "Image": "120MM"
+   }
+  },
+  {
+   "section": "Ack",
+   "redalert_mix_byte": 5320701,
+   "facts": {
+    "Image": "none"
+   }
+  },
+  {
+   "section": "Torpedo",
+   "redalert_mix_byte": 5320780,
+   "facts": {
+    "Image": "MISSILE"
+   }
+  },
+  {
+   "section": "FROG",
+   "redalert_mix_byte": 5320873,
+   "facts": {
+    "Image": "V2"
+   }
+  },
+  {
+   "section": "HeatSeeker",
+   "redalert_mix_byte": 5321040,
+   "facts": {
+    "Image": "DRAGON",
+    "ROT": "5"
+   }
+  },
+  {
+   "section": "LaserGuided",
+   "redalert_mix_byte": 5321238,
+   "facts": {
+    "Image": "DRAGON",
+    "ROT": "20"
+   }
+  },
+  {
+   "section": "AAMissile",
+   "redalert_mix_byte": 5321409,
+   "facts": {
+    "Image": "MISSILE",
+    "ROT": "20"
+   }
+  },
+  {
+   "section": "Lobbed",
+   "redalert_mix_byte": 5321588,
+   "facts": {
+    "Image": "BOMB"
+   }
+  },
+  {
+   "section": "Catapult",
+   "redalert_mix_byte": 5321702,
+   "facts": {
+    "Image": "BOMB"
+   }
+  },
+  {
+   "section": "Bomblet",
+   "redalert_mix_byte": 5321847,
+   "facts": {
+    "Image": "BOMBLET"
+   }
+  },
+  {
+   "section": "Ballistic",
+   "redalert_mix_byte": 5321980,
+   "facts": {
+    "Image": "120MM"
+   }
+  },
+  {
+   "section": "GPSSatellite",
+   "redalert_mix_byte": 5322196,
+   "facts": {
+    "Image": "SPUTNIK"
+   }
+  },
+  {
+   "section": "NukeUp",
+   "redalert_mix_byte": 5322292,
+   "facts": {
+    "Image": "ATOMICUP"
+   }
+  },
+  {
+   "section": "NukeDown",
+   "redalert_mix_byte": 5322385,
+   "facts": {
+    "Image": "ATOMICDN"
+   }
+  },
+  {
+   "section": "Fireball",
+   "redalert_mix_byte": 5322469,
+   "facts": {
+    "Image": "FB1"
+   }
+  },
+  {
+   "section": "SA",
+   "redalert_mix_byte": 5323993,
+   "facts": {
+    "Spread": "3",
+    "Verses": "100%,50%,60%,25%,25%"
+   }
+  },
+  {
+   "section": "HE",
+   "redalert_mix_byte": 5324094,
+   "facts": {
+    "Spread": "6",
+    "Wall": "yes",
+    "Verses": "90%,75%,60%,25%,100%"
+   }
+  },
+  {
+   "section": "AP",
+   "redalert_mix_byte": 5324238,
+   "facts": {
+    "Spread": "3",
+    "Wall": "yes",
+    "Verses": "30%,75%,75%,100%,50%"
+   }
+  },
+  {
+   "section": "Fire",
+   "redalert_mix_byte": 5324360,
+   "facts": {
+    "Spread": "8",
+    "Verses": "90%,100%,60%,25%,50%"
+   }
+  },
+  {
+   "section": "HollowPoint",
+   "redalert_mix_byte": 5324522,
+   "facts": {
+    "Spread": "1",
+    "Verses": "100%,5%,5%,5%,5%"
+   }
+  },
+  {
+   "section": "Super",
+   "redalert_mix_byte": 5324662,
+   "facts": {
+    "Spread": "1",
+    "Verses": "100%,100%,100%,100%,100%"
+   }
+  },
+  {
+   "section": "Organic",
+   "redalert_mix_byte": 5324801,
+   "facts": {
+    "Spread": "0",
+    "Verses": "100%,0%,0%,0%,0%"
+   }
+  },
+  {
+   "section": "Nuke",
+   "redalert_mix_byte": 5324895,
+   "facts": {
+    "Spread": "6",
+    "Wall": "yes",
+    "Verses": "90%,100%,60%,25%,50%"
+   }
+  },
+  {
+   "section": "Clear",
+   "redalert_mix_byte": 5325584,
+   "facts": {
+    "Foot": "90%",
+    "Track": "80%",
+    "Wheel": "60%",
+    "Float": "0%",
+    "Buildable": "yes"
+   }
+  },
+  {
+   "section": "Rough",
+   "redalert_mix_byte": 5325669,
+   "facts": {
+    "Foot": "80%",
+    "Track": "70%",
+    "Wheel": "40%",
+    "Float": "0%",
+    "Buildable": "no"
+   }
+  },
+  {
+   "section": "Road",
+   "redalert_mix_byte": 5325745,
+   "facts": {
+    "Foot": "100%",
+    "Track": "100%",
+    "Wheel": "100%",
+    "Float": "0%",
+    "Buildable": "yes"
+   }
+  },
+  {
+   "section": "Water",
+   "redalert_mix_byte": 5325829,
+   "facts": {
+    "Foot": "0%",
+    "Track": "0%",
+    "Wheel": "0%",
+    "Float": "100%",
+    "Buildable": "no"
+   }
+  },
+  {
+   "section": "Rock",
+   "redalert_mix_byte": 5325905,
+   "facts": {
+    "Foot": "0%",
+    "Track": "0%",
+    "Wheel": "0%",
+    "Float": "0%",
+    "Buildable": "no"
+   }
+  },
+  {
+   "section": "Wall",
+   "redalert_mix_byte": 5326006,
+   "facts": {
+    "Foot": "0%",
+    "Track": "0%",
+    "Wheel": "0%",
+    "Float": "0%",
+    "Buildable": "no"
+   }
+  },
+  {
+   "section": "Ore",
+   "redalert_mix_byte": 5326087,
+   "facts": {
+    "Foot": "90%",
+    "Track": "70%",
+    "Wheel": "50%",
+    "Float": "0%",
+    "Buildable": "no"
+   }
+  },
+  {
+   "section": "Beach",
+   "redalert_mix_byte": 5326167,
+   "facts": {
+    "Foot": "80%",
+    "Track": "70%",
+    "Wheel": "40%",
+    "Float": "0%",
+    "Buildable": "no"
+   }
+  },
+  {
+   "section": "River",
+   "redalert_mix_byte": 5326253,
+   "facts": {
+    "Foot": "0%",
+    "Track": "0%",
+    "Wheel": "0%",
+    "Float": "0%",
+    "Buildable": "no"
+   }
+  },
+  {
+   "section": "Powerups",
+   "redalert_mix_byte": 5326769,
+   "facts": {
+    "Armor": "10,ARMOR,2.0",
+    "Speed": "10,SPEED,1.7"
+   }
+  },
+  {
+   "section": "Sleep",
+   "redalert_mix_byte": 5328957,
+   "facts": {
+    "Rate": "1"
+   }
+  },
+  {
+   "section": "Harmless",
+   "redalert_mix_byte": 5329083,
+   "facts": {
+    "Rate": ".5"
+   }
+  },
+  {
+   "section": "Sticky",
+   "redalert_mix_byte": 5329192,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Attack",
+   "redalert_mix_byte": 5329304,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Move",
+   "redalert_mix_byte": 5329364,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "QMove",
+   "redalert_mix_byte": 5329452,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Retreat",
+   "redalert_mix_byte": 5329512,
+   "facts": {
+    "Rate": ".1"
+   }
+  },
+  {
+   "section": "Guard",
+   "redalert_mix_byte": 5329633,
+   "facts": {
+    "Rate": ".050"
+   }
+  },
+  {
+   "section": "Enter",
+   "redalert_mix_byte": 5329721,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Capture",
+   "redalert_mix_byte": 5329798,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Harvest",
+   "redalert_mix_byte": 5329911,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Area Guard",
+   "redalert_mix_byte": 5330029,
+   "facts": {
+    "Rate": ".080"
+   }
+  },
+  {
+   "section": "Hunt",
+   "redalert_mix_byte": 5330263,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Unload",
+   "redalert_mix_byte": 5330376,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Sabotage",
+   "redalert_mix_byte": 5330485,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Repair",
+   "redalert_mix_byte": 5330841,
+   "facts": {
+    "Rate": ".08"
+   }
+  },
+  {
+   "section": "Rescue",
+   "redalert_mix_byte": 5330897,
+   "facts": {
+    "Rate": ".016"
+   }
+  },
+  {
+   "section": "Missile",
+   "redalert_mix_byte": 5330968,
+   "facts": {
+    "Rate": ".1"
+   }
+  }
+ ],
+ "missions": [
+  {
+   "basic": {
+    "Name": "Five to one",
+    "Player": "Greece",
+    "Brief": "ALLY2",
+    "NewINIFormat": "3"
+   },
+   "map": {
+    "Theater": "SNOW",
+    "X": "43",
+    "Y": "44",
+    "Width": "50",
+    "Height": "42"
+   },
+   "scenario_start": 2192726,
+   "basic_offset": 2193001,
+   "exclusive_end": 2206708,
+   "span_sha256": "c69b42fca8de147bb124c5c51647cd26663f5bf2f73e71105daf758b6945a3b2",
+   "local_overrides": [
+    {
+     "id": "AI",
+     "offset": 2192726,
+     "facts": {
+      "AutocreateTime": "9"
+     }
+    },
+    {
+     "id": "JEEP",
+     "offset": 2192752,
+     "facts": {
+      "TechLevel": "2"
+     }
+    },
+    {
+     "id": "WEAP",
+     "offset": 2192775,
+     "facts": {
+      "TechLevel": "2"
+     }
+    },
+    {
+     "id": "1TNK",
+     "offset": 2192798,
+     "facts": {
+      "TechLevel": "2"
+     }
+    },
+    {
+     "id": "HBOX",
+     "offset": 2192821,
+     "facts": {
+      "Power": "-10"
+     }
+    },
+    {
+     "id": "PBOX",
+     "offset": 2192842,
+     "facts": {
+      "Power": "-10"
+     }
+    },
+    {
+     "id": "AGUN",
+     "offset": 2192863,
+     "facts": {
+      "Power": "-40"
+     }
+    },
+    {
+     "id": "FTUR",
+     "offset": 2192884,
+     "facts": {
+      "Power": "-40"
+     }
+    },
+    {
+     "id": "FACF",
+     "offset": 2192905,
+     "facts": {
+      "TechLevel": "16"
+     }
+    },
+    {
+     "id": "WEAF",
+     "offset": 2192929,
+     "facts": {
+      "TechLevel": "16"
+     }
+    },
+    {
+     "id": "SYRF",
+     "offset": 2192953,
+     "facts": {
+      "TechLevel": "16"
+     }
+    },
+    {
+     "id": "DOMF",
+     "offset": 2192977,
+     "facts": {
+      "TechLevel": "16"
+     }
+    }
+   ],
+   "initial_placements_by_house_and_ini_id": {
+    "units": {
+     "Greece:1TNK": 2,
+     "Greece:JEEP": 2,
+     "USSR:HARV": 1
+    },
+    "infantry": {
+     "BadGuy:DOG": 2,
+     "BadGuy:E1": 6,
+     "BadGuy:E2": 3,
+     "Greece:E1": 4,
+     "Greece:E3": 4,
+     "Greece:MEDI": 2,
+     "USSR:DOG": 3,
+     "USSR:E1": 5,
+     "USSR:E2": 7
+    },
+    "structures": {
+     "France:V19": 4,
+     "Germany:BRL3": 1,
+     "Neutral:V19": 2,
+     "USSR:BARL": 20,
+     "USSR:BARR": 1,
+     "USSR:BRL3": 16,
+     "USSR:FACT": 1,
+     "USSR:KENN": 1,
+     "USSR:POWR": 2,
+     "USSR:PROC": 1,
+     "USSR:WEAP": 1
+    }
+   },
+   "script_team_definitions": 13,
+   "trigger_definitions": 36
+  },
+  {
+   "basic": {
+    "Name": "<none>",
+    "Player": "Greece",
+    "Brief": "ALLY5",
+    "NewINIFormat": "3"
+   },
+   "map": {
+    "Theater": "TEMPERATE",
+    "X": "18",
+    "Y": "40",
+    "Width": "92",
+    "Height": "55"
+   },
+   "scenario_start": 2206708,
+   "basic_offset": 2207152,
+   "exclusive_end": 2228387,
+   "span_sha256": "bc665c35d0da5a18a903911c2a2cc541c7f8c3ee0afc8df16d9beaa3c3669fbd",
+   "local_overrides": [
+    {
+     "id": "General",
+     "offset": 2206708,
+     "facts": {
+      "ParaTech": "6"
+     }
+    },
+    {
+     "id": "HBOX",
+     "offset": 2206733,
+     "facts": {
+      "Power": "-10"
+     }
+    },
+    {
+     "id": "PBOX",
+     "offset": 2206754,
+     "facts": {
+      "Power": "-10"
+     }
+    },
+    {
+     "id": "AGUN",
+     "offset": 2206775,
+     "facts": {
+      "Power": "-40"
+     }
+    },
+    {
+     "id": "FTUR",
+     "offset": 2206796,
+     "facts": {
+      "Power": "-40"
+     }
+    },
+    {
+     "id": "SAM",
+     "offset": 2206817,
+     "facts": {
+      "Strength": "200",
+      "TechLevel": "5"
+     }
+    },
+    {
+     "id": "SS",
+     "offset": 2206853,
+     "facts": {
+      "TechLevel": "6"
+     }
+    },
+    {
+     "id": "FACF",
+     "offset": 2206874,
+     "facts": {
+      "TechLevel": "16"
+     }
+    },
+    {
+     "id": "WEAF",
+     "offset": 2206898,
+     "facts": {
+      "TechLevel": "16"
+     }
+    },
+    {
+     "id": "SYRF",
+     "offset": 2206922,
+     "facts": {
+      "TechLevel": "16"
+     }
+    },
+    {
+     "id": "DOMF",
+     "offset": 2206946,
+     "facts": {
+      "TechLevel": "16"
+     }
+    },
+    {
+     "id": "C1",
+     "offset": 2206970,
+     "facts": {
+      "Image": "C1",
+      "Primary": "M1Carbine",
+      "Strength": "25",
+      "Armor": "none",
+      "TechLevel": "-1",
+      "Sight": "2",
+      "Speed": "6",
+      "Owner": "allies,soviet",
+      "Cost": "10",
+      "Points": "1",
+      "Ammo": "10",
+      "Fraidycat": "yes"
+     }
+    },
+    {
+     "id": "Italy",
+     "offset": 2207128,
+     "facts": {
+      "TechLevel": "5"
+     }
+    }
+   ],
+   "initial_placements_by_house_and_ini_id": {
+    "units": {
+     "BadGuy:3TNK": 1,
+     "BadGuy:TRUK": 1,
+     "USSR:3TNK": 4,
+     "USSR:HARV": 1,
+     "USSR:V2RL": 2
+    },
+    "infantry": {
+     "BadGuy:DOG": 8,
+     "BadGuy:E1": 2,
+     "GoodGuy:C2": 1,
+     "GoodGuy:C5": 1,
+     "GoodGuy:C6": 1,
+     "GoodGuy:C8": 1,
+     "Turkey:E1": 1,
+     "USSR:DOG": 6,
+     "USSR:E1": 2
+    },
+    "structures": {
+     "BadGuy:BARL": 7,
+     "BadGuy:BARR": 1,
+     "BadGuy:BRL3": 7,
+     "BadGuy:FACT": 1,
+     "BadGuy:FTUR": 3,
+     "BadGuy:KENN": 1,
+     "BadGuy:POWR": 2,
+     "BadGuy:SILO": 2,
+     "BadGuy:SPEN": 1,
+     "BadGuy:WEAP": 1,
+     "Greece:BARL": 2,
+     "Greece:BRL3": 2,
+     "Multi3:BARL": 2,
+     "Multi3:BRL3": 2,
+     "Neutral:V01": 2,
+     "Neutral:V03": 2,
+     "Neutral:V04": 1,
+     "Neutral:V05": 1,
+     "Neutral:V06": 2,
+     "Neutral:V07": 1,
+     "Turkey:FTUR": 1,
+     "Turkey:MISS": 1,
+     "USSR:AFLD": 2,
+     "USSR:APWR": 2,
+     "USSR:BARL": 4,
+     "USSR:BARR": 1,
+     "USSR:BRL3": 10,
+     "USSR:DOME": 1,
+     "USSR:FACT": 1,
+     "USSR:FTUR": 6,
+     "USSR:KENN": 1,
+     "USSR:POWR": 4,
+     "USSR:PROC": 1,
+     "USSR:SAM": 4,
+     "USSR:SILO": 6,
+     "USSR:WEAP": 1
+    }
+   },
+   "script_team_definitions": 35,
+   "trigger_definitions": 65
+  },
+  {
+   "basic": {
+    "Name": "<none>",
+    "Player": "USSR",
+    "Brief": "SOVIET2",
+    "NewINIFormat": "3"
+   },
+   "map": {
+    "Theater": "TEMPERATE",
+    "X": "34",
+    "Y": "52",
+    "Width": "56",
+    "Height": "35"
+   },
+   "scenario_start": 2228387,
+   "basic_offset": 2228637,
+   "exclusive_end": 2239400,
+   "span_sha256": "73b0f00831cead750f2895c2a17bd38ba36b2b49be792fa9b1e7a4d5a0060890",
+   "local_overrides": [
+    {
+     "id": "HBOX",
+     "offset": 2228387,
+     "facts": {
+      "Power": "-10"
+     }
+    },
+    {
+     "id": "DOME",
+     "offset": 2228408,
+     "facts": {
+      "TechLevel": "2"
+     }
+    },
+    {
+     "id": "PBOX",
+     "offset": 2228431,
+     "facts": {
+      "Power": "-10"
+     }
+    },
+    {
+     "id": "AGUN",
+     "offset": 2228452,
+     "facts": {
+      "Power": "-40"
+     }
+    },
+    {
+     "id": "FCOM",
+     "offset": 2228473,
+     "facts": {
+      "Power": "100",
+      "Bib": "no"
+     }
+    },
+    {
+     "id": "AFLD",
+     "offset": 2228502,
+     "facts": {
+      "TechLevel": "2"
+     }
+    },
+    {
+     "id": "FTUR",
+     "offset": 2228525,
+     "facts": {
+      "Power": "-40"
+     }
+    },
+    {
+     "id": "Italy",
+     "offset": 2228546,
+     "facts": {
+      "TechLevel": "2"
+     }
+    },
+    {
+     "id": "YAK",
+     "offset": 2228570,
+     "facts": {
+      "TechLevel": "2"
+     }
+    },
+    {
+     "id": "DOG",
+     "offset": 2228592,
+     "facts": {
+      "TechLevel": "2"
+     }
+    },
+    {
+     "id": "KENN",
+     "offset": 2228614,
+     "facts": {
+      "TechLevel": "2"
+     }
+    }
+   ],
+   "initial_placements_by_house_and_ini_id": {
+    "units": {
+     "Greece:HARV": 1,
+     "Greece:JEEP": 3,
+     "Greece:TRUK": 1
+    },
+    "infantry": {
+     "Greece:E1": 10,
+     "Greece:E3": 2,
+     "USSR:DOG": 4,
+     "USSR:E1": 4,
+     "USSR:E2": 4
+    },
+    "structures": {
+     "Greece:BARL": 2,
+     "Greece:BRL3": 3,
+     "Greece:DOME": 1,
+     "Greece:FACT": 1,
+     "Greece:GUN": 2,
+     "Greece:POWR": 2,
+     "Greece:PROC": 1,
+     "Greece:TENT": 1,
+     "Greece:WEAP": 1,
+     "Spain:BARL": 6,
+     "Spain:BRL3": 8,
+     "Spain:V01": 2,
+     "Spain:V03": 1,
+     "Spain:V06": 1,
+     "USSR:FACT": 1,
+     "USSR:FCOM": 1,
+     "USSR:POWR": 2
+    }
+   },
+   "script_team_definitions": 10,
+   "trigger_definitions": 30
+  }
+ ]
+}

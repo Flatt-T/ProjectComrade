@@ -1,0 +1,783 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "PKG-001",
+      "title": "Complete Tiberian Dawn and Covert Operations content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-014",
+        "RES-004"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Tiberian Dawn and Covert Operations. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-004. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: GDI; Brotherhood of Nod.",
+        "Account separately for these additional/campaign/neutral groups and forms: civilian/neutral; scripted mission forces; dinosaurs and special-mission objects. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: DOS/Gold baseline selection; Covert Operations missions and additions; console-exclusive mission objects routed to RES-019; unused source records distinguished from shipped objects.",
+        "Check accepted capability contracts for field harvesting, MCV deployment, sidebar construction, asymmetric production delivery, infantry crush, commando demolition, aircraft rearm, stealth and detection, superweapon charges. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-002",
+      "title": "Complete Red Alert Counterstrike and Aftermath content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-014",
+        "RES-005"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Red Alert Counterstrike and Aftermath. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-005. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: Allies; Soviets.",
+        "Account separately for these additional/campaign/neutral groups and forms: country/house variants and availability by mode; campaign neutral/special houses; ant mission objects. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: base vs Counterstrike vs Aftermath; active playable countries vs house declarations; Retaliation differences routed to RES-019; unused Carrier/Phase Tank/source conditions.",
+        "Check accepted capability contracts for ore/gems, naval and submarine war, airfield rearm, minelaying, radar jamming and gap, spy/infiltration, engineer damage/capture profile, Chronosphere, Iron Curtain, nuclear/air support. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-003",
+      "title": "Complete Tiberian Sun and Firestorm content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-015",
+        "RES-006",
+        "RES-007"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Tiberian Sun and Firestorm. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-006, RES-007. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: GDI; Brotherhood of Nod; GDI; Brotherhood of Nod.",
+        "Account separately for these additional/campaign/neutral groups and forms: Forgotten/mutant characters and creatures; civilian/neutral; mission-specific Nod/GDI forces; CABAL campaign forces; Forgotten; Tiberium lifeforms. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: retail patch and rules/art INI baseline; multiplayer legality vs campaign ownership; inherit TS explicitly; CABAL available army vs authored homage faction proposal; new expansion-only objects.",
+        "Check accepted capability contracts for walkers, subterranean movement, deployable artillery, EMP, stealth field, walls/gates/pavement, Firestorm defence, bridge repair huts, terrain hazards, tiberium healing/damage, mobile production, mobile stealth/EMP, reaper/snare interactions, mutant/flora hazards, random map environmental events. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-004",
+      "title": "Complete Red Alert 2 and Yuri's Revenge content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-015",
+        "RES-008",
+        "RES-009"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Red Alert 2 and Yuri's Revenge. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-008, RES-009. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: Allies: America; Allies: France; Allies: Germany; Allies: Great Britain; Allies: Korea; Soviets: Russia; Soviets: Cuba; Soviets: Libya; Soviets: Iraq; nine inherited Allied/Soviet country variants; Yuri.",
+        "Account separately for these additional/campaign/neutral groups and forms: civilian/tech structures; campaign characters and scripted forces; campaign hero/civilian variants; lunar mission objects. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: country bonuses/special units; shared object vs country-specific object; base-game Yuri unit vs expansion faction; inherited vs replacement vs expansion-only definitions; Yuri complete production/research/defence tree; mode-specific countries and campaign objects.",
+        "Check accepted capability contracts for garrison fire, capture and bridge repair, veterancy, deployable infantry, mind control, disguise, chrono movement, aircraft carrier child units, giant squid/dolphin interactions, ore mining return variants, slave mining and deployment, Bio Reactor garrisons, mind-control overload/release, Grinder recycling, magnetic lift, weapon-changing passengers, vehicle crushing, genetic mutation, force shield. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-005",
+      "title": "Complete Generals and Zero Hour content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-016",
+        "RES-010",
+        "RES-011"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Generals and Zero Hour. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-010, RES-011. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: USA; China; GLA; USA base; China base; GLA base; USA Air Force General Granger; USA Laser General Townes; USA Superweapon General Alexander; China Infantry General Fai; China Nuclear General Tao; China Tank General Kwai; GLA Toxin General Thrax; GLA Demolition General Juhziz; GLA Stealth General Kassad.",
+        "Account separately for these additional/campaign/neutral groups and forms: neutral tech buildings; civilian vehicles/buildings; campaign-only military and naval objects; Challenge boss Leang and challenge-specific objects; campaign and neutral additions. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: faction INI construction/economy differences; active multiplayer vs scripted naval assets; general-specific exclusions as well as additions; vanilla/ZH patch split; boss/unused objects must not appear as ordinary multiplayer faction.",
+        "Check accepted capability contracts for dozer/worker site construction, supply collectors, GLA tunnel network, salvage/holes, garrison clearing, horde bonuses, secondary income, general powers, firestorm weapon interaction, specialist tech restrictions, bunker/transport loadouts, Helix/Overlord upgrades, combat drones, ECM, scrap salvage, stealth structures, sabotage, tunnels. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-006",
+      "title": "Complete Tiberium Wars and Kane's Wrath content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-017",
+        "RES-012",
+        "RES-013"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Tiberium Wars and Kane's Wrath. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-012, RES-013. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: GDI; Brotherhood of Nod; Scrin; GDI; Steel Talons; ZOCOM; Brotherhood of Nod; Black Hand; Marked of Kane; Scrin; Reaper-17; Traveler-59.",
+        "Account separately for these additional/campaign/neutral groups and forms: civilian/neutral tech; campaign variants; Forgotten/MUTANT hovel recruits; global conquest strategic-map entities; campaign variants and neutral objects. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: base game patch; XML definitions vs spawned helpers/FX; economy and build queue changes; inherit TW with explicit replacements; subfaction missing options; epic-unit uniqueness and hardpoints; strategic-mode versus battle-mode entities.",
+        "Check accepted capability contracts for squad infantry, ground-control construction, multiple queues, support powers, upgrade propagation, directional armour, walker wreck capture, Tiberium interactions, Scrin flight/teleport/ion effects, epic units and garrison upgrades, subfaction doctrine, teleport/mind control, EMP/cyborg immunity, adaptive armour, global conquest meta rules disposition. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-007",
+      "title": "Complete Red Alert 3 and Uprising content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-018",
+        "RES-014",
+        "RES-015"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Red Alert 3 and Uprising. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-014, RES-015. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: Allies; Soviets; Empire of the Rising Sun; Allies; Soviets; Empire of the Rising Sun.",
+        "Account separately for these additional/campaign/neutral groups and forms: AI commander personalities (not automatically separate factions); civilian and campaign objects; FutureTech campaign force/assets; Yuriko campaign-specific entities; Commander Challenge variants. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: faction construction policies; water-compatible buildings and producers; alternate forms are linked states; cooperative mission-only objects; new units vs inherited units; EP1 XML inclusion graph; campaign-only direct-control mechanics; FutureTech as campaign role vs newly authored faction.",
+        "Check accepted capability contracts for land/water construction, amphibious movement, unit transformations, secondary abilities, ore nodes, nanocore deployment, local tech clearance, water-based economy, magnetic/chrono/cryo effects, new transforming/deploying units, hero abilities, amphibious siege, targeted jump/telekinetic events. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-008",
+      "title": "Complete Tiberian Twilight faction and class content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-016"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Tiberian Twilight faction and class content. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-016. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: GDI Offense; GDI Defense; GDI Support; Nod Offense; Nod Defense; Nod Support.",
+        "Account separately for these additional/campaign/neutral groups and forms: Forgotten neutral/mercenary entities; campaign objects; obsolete source definitions. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: class is distinct from faction; Crawler vehicle/structure states linked; obsolete directories excluded from shipped denominator unless proven; progression locked/unlocked profile.",
+        "Check accepted capability contracts for mobile Crawler production, command-point cap/refund, upgrade-point resources, control-node victory, class swap/redeploy, support points, defence structures tied to crawler. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-009",
+      "title": "Complete Renegade content adaptations content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-017"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Renegade content adaptations. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-017. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: GDI team/classes; Nod team/classes.",
+        "Account separately for these additional/campaign/neutral groups and forms: Havoc and campaign characters; Black Hand variants; building interiors; neutral vehicles/props. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: FPS playable characters vs RTS unit identity; vehicle crew/occupants; purchasing and beacon victory are separate mode mechanics.",
+        "Check accepted capability contracts for enterable structures, vehicles with occupants, repair weapons, C4/beacons, physical scale and sound cues. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-010",
+      "title": "Complete Sole Survivor remaster and console deltas content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-018",
+        "RES-019"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Sole Survivor remaster and console deltas. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-018, RES-019. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: single-unit selections derived from TD; inherited TD/RA1 factions.",
+        "Account separately for these additional/campaign/neutral groups and forms: dinosaurs; arena/crate objects; PS1 and Nintendo 64 exclusive missions; Retaliation mission/object deltas; remastered presentation assets. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: individual units not ordinary base factions; retail versus revival server behavior; no duplication of identical inherited logical entities; console unit/control/map differences; presentation reference separate from permission.",
+        "Check accepted capability contracts for single-unit control, arena modes, power-ups, modern readability, zoom, UI/accessibility comparison, port-specific control interpretation. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-011",
+      "title": "Complete Released browser and mobile content dispositions content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-020",
+        "RES-021",
+        "RES-022"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Released browser and mobile content dispositions. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-020, RES-021, RES-022. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: GDI; Nod; GDI; Nod; must verify by exact released region/build.",
+        "Account separately for these additional/campaign/neutral groups and forms: Forgotten NPC forces; commander abilities; versioned unit/variant inventory; Red Alert mobile/iOS/J2ME candidates; Tiberium Wars mobile candidate; Red Alert Online candidate; Legions announced regional/season content. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: date/world/ruleset snapshot; offence/defence variants; browser live-service changes; timestamped live-service patch; level variants separated from entity identities; monetisation is not a requested feature; existence and release status verified per item; season and region pin; announcement does not prove shipped content; cancelled projects separate.",
+        "Check accepted capability contracts for world alliances, base relocation, asynchronous attack structure, separate world economy, touch micro, short match objectives, deck/commander selection, clear counters, document transferability only after source verification. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    },
+    {
+      "id": "PKG-012",
+      "title": "Complete Existing Dune and custom Fusion compatibility content delivery gate",
+      "workstream": "Era delivery",
+      "kind": "delivery_gate",
+      "phase": 5,
+      "owner": "Era integration lead with separate content specialists and reviewer",
+      "depends_on": [
+        "OPS-005",
+        "INT-001",
+        "ART-019",
+        "RES-023"
+      ],
+      "existing_issues": [
+        "THU-2421",
+        "THU-2241",
+        "THU-1331"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/04-content-work-order-contract.md",
+        "research/era_faction_matrix.json",
+        "world-art/01_art_and_animation_contract.md",
+        "programme/03-quality-and-release.md"
+      ],
+      "scope": "Deliver and independently accept the complete approved content family for Existing Dune and custom Fusion compatibility. This is a delivery-gate owner; implementation must be delegated to the generated bounded per-faction/per-entity leaves. It is not permission to ask one weak worker to build the whole family in one turn.",
+      "non_goals": [
+        "Do not reproduce full original campaigns or an FPS/mobile metagame without an explicit scope decision.",
+        "Do not substitute a generic reskin, unlicensed source asset or partial roster."
+      ],
+      "steps": [
+        "Read the accepted, pinned source census and its discrepancy/rights records for RES-023. Do not use discovery path counts as the entity denominator.",
+        "Account for these playable groups and their exact source-version differences: existing Dune 2000 Atreides/Harkonnen/Ordos.",
+        "Account separately for these additional/campaign/neutral groups and forms: Dune II historical predecessor reference; Emperor Battle for Dune reference only; Emperor minor houses require explicit scope decision. Require explicit approved availability/adaptation rather than omission.",
+        "Resolve these version and scope deltas: Dune is a separate franchise; existing Dune feature contract preserved; new Dune adaptation requires explicit scope and rights record.",
+        "Check accepted capability contracts for spice/harvesters, rock/sand buildability, worms, sand/rock pathing, house-specific mechanics. Create or link missing capability leaves before writing pack-specific shortcuts.",
+        "Preserve all current td/dune/ra1/ra2 and leviathan/conquer/irregular/holdout legacy profiles and their exact saved identities. Dune II, Dune 2000 and Emperor research must not be conflated; only explicitly scoped new lineage content is added, while existing Dune 2000 requirements remain intact.",
+        "Run OPS-005/ART-013 work-order expansion for every approved source row. Create bounded behaviour, model, animation, FX/audio, integration and independent-review children under this gate; copy full context and native blockers to each.",
+        "Integrate complete faction production/economy/tech graphs, required units/buildings/forms/support powers, source terrain associations and AI use. Keep shared base rows and faction deltas explicit.",
+        "Execute every generated entity/state acceptance, full build progression and mirrored/cross-faction scenarios. Include acquisition/ownership transfer and saved-profile behavior where supported.",
+        "Reconcile source, runtime, asset, clip, test and evidence sets. Route defects to the exact child; retain all mandatory incomplete rows and mark this gate open.",
+        "Publish a versioned family manifest, playable showcase and independent acceptance report for integration into the whole catalogue."
+      ],
+      "deliverables": [
+        "Accepted per-family census and source-to-Fusion mapping",
+        "Actual generated child issue map for every faction/entity/form/state",
+        "Versioned runtime pack, permitted live 3D asset/animation manifests and terrain dependencies",
+        "Faction tech/economy/AI scenarios, visual evidence and independent completeness report"
+      ],
+      "acceptance": [
+        "Every required source row and faction delta has accepted behaviour/art/animation/evidence or an explicit source-limited blocker; no silent drop.",
+        "All required production, economy, movement, combat, ability, death/capture/repair/transform states function in the real game.",
+        "Exact set reconciliation passes; shared assets remain justified and visually readable rather than inflating unique-asset totals.",
+        "Independent reviewer accepts gameplay identity, complete animation and tactical readability at desktop/mobile gameplay zoom.",
+        "The gate cannot close while a mandatory generated child is incomplete, rights-blocked for its promised release route or based on an unknown source fact."
+      ],
+      "guardrails": [
+        "Research names remain distinct from cleared public branding and distribution choices.",
+        "No numerical balance change enters Classic or existing saved profiles through shared pack mutation.",
+        "Campaign-only/civilian/unused/faction/source helpers are different categories; record the approved disposition of each.",
+        "An early slice proves the pipeline only; it does not close this whole-family gate."
+      ],
+      "handoff": "Return family and census hashes; real child IDs; source/runtime/art/animation/test set-difference report; build/review evidence; gaps and next exact action."
+    }
+  ]
+}

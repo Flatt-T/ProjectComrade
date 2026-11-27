@@ -1,0 +1,313 @@
+{
+  "commit": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+  "source": "Runtime enumeration of read-only pinned definitions; not gameplay validation",
+  "packs": [
+    {
+      "id": "td",
+      "name": "Tiberian Dawn Style",
+      "units": 27,
+      "structures": 27,
+      "factions": [
+        {
+          "id": "gdi",
+          "name": "GDI"
+        },
+        {
+          "id": "nod",
+          "name": "Nod"
+        }
+      ],
+      "terrains": [
+        "clear",
+        "road",
+        "sand",
+        "snow",
+        "rough",
+        "trees",
+        "cliff",
+        "water"
+      ],
+      "maps": 7
+    },
+    {
+      "id": "dune",
+      "name": "Dune Style",
+      "units": 28,
+      "structures": 22,
+      "factions": [
+        {
+          "id": "atreides",
+          "name": "Atreides"
+        },
+        {
+          "id": "harkonnen",
+          "name": "Harkonnen"
+        },
+        {
+          "id": "ordos",
+          "name": "Ordos"
+        }
+      ],
+      "terrains": [
+        "sand",
+        "dunes",
+        "rock",
+        "rough",
+        "cliff"
+      ],
+      "maps": 5
+    },
+    {
+      "id": "ra1",
+      "name": "Red Alert Style",
+      "units": 34,
+      "structures": 33,
+      "factions": [
+        {
+          "id": "allies",
+          "name": "Allies"
+        },
+        {
+          "id": "soviet",
+          "name": "Soviets"
+        }
+      ],
+      "terrains": [
+        "clear",
+        "road",
+        "sand",
+        "snow",
+        "rough",
+        "trees",
+        "cliff",
+        "water"
+      ],
+      "maps": 5
+    },
+    {
+      "id": "ra2",
+      "name": "Red Alert 2 Style",
+      "units": 44,
+      "structures": 43,
+      "factions": [
+        {
+          "id": "america",
+          "name": "America"
+        },
+        {
+          "id": "russia",
+          "name": "Russia"
+        },
+        {
+          "id": "korea",
+          "name": "Korea"
+        },
+        {
+          "id": "libya",
+          "name": "Libya"
+        },
+        {
+          "id": "france",
+          "name": "France"
+        },
+        {
+          "id": "iraq",
+          "name": "Iraq"
+        },
+        {
+          "id": "germany",
+          "name": "Germany"
+        },
+        {
+          "id": "cuba",
+          "name": "Cuba"
+        },
+        {
+          "id": "britain",
+          "name": "Great Britain"
+        }
+      ],
+      "terrains": [
+        "clear",
+        "road",
+        "sand",
+        "rough",
+        "trees",
+        "cliff",
+        "water"
+      ],
+      "maps": 6
+    },
+    {
+      "id": "leviathan",
+      "name": "Leviathan Isles",
+      "units": 44,
+      "structures": 43,
+      "factions": [
+        {
+          "id": "america",
+          "name": "America"
+        },
+        {
+          "id": "russia",
+          "name": "Russia"
+        },
+        {
+          "id": "korea",
+          "name": "Korea"
+        },
+        {
+          "id": "libya",
+          "name": "Libya"
+        },
+        {
+          "id": "france",
+          "name": "France"
+        },
+        {
+          "id": "iraq",
+          "name": "Iraq"
+        },
+        {
+          "id": "germany",
+          "name": "Germany"
+        },
+        {
+          "id": "cuba",
+          "name": "Cuba"
+        },
+        {
+          "id": "britain",
+          "name": "Great Britain"
+        }
+      ],
+      "terrains": [
+        "clear",
+        "road",
+        "sand",
+        "rough",
+        "trees",
+        "cliff",
+        "water"
+      ],
+      "maps": 1
+    },
+    {
+      "id": "conquer",
+      "name": "Star Wars Conquer",
+      "units": 127,
+      "structures": 43,
+      "factions": [
+        {
+          "id": "rebels",
+          "name": "Rebels"
+        },
+        {
+          "id": "empire",
+          "name": "Empire"
+        },
+        {
+          "id": "republic",
+          "name": "Republic"
+        },
+        {
+          "id": "cis",
+          "name": "CIS"
+        }
+      ],
+      "terrains": [
+        "clear",
+        "road",
+        "sand",
+        "dunes",
+        "rock",
+        "snow",
+        "rough",
+        "trees",
+        "cliff",
+        "water"
+      ],
+      "maps": 5
+    },
+    {
+      "id": "irregular",
+      "name": "Irregular Warfare",
+      "units": 64,
+      "structures": 27,
+      "factions": [
+        {
+          "id": "cadres",
+          "name": "Valley Cadres"
+        },
+        {
+          "id": "coastal",
+          "name": "Coastal Syndicate"
+        },
+        {
+          "id": "vanguard",
+          "name": "Northern Vanguard"
+        },
+        {
+          "id": "mandate",
+          "name": "Mandate Force"
+        }
+      ],
+      "terrains": [
+        "clear",
+        "road",
+        "urban",
+        "sand",
+        "scrub",
+        "rough",
+        "cliff",
+        "water"
+      ],
+      "maps": 4
+    },
+    {
+      "id": "holdout",
+      "name": "Holdouts",
+      "units": 63,
+      "structures": 27,
+      "factions": [
+        {
+          "id": "preppers",
+          "name": "The Compound"
+        },
+        {
+          "id": "hoa",
+          "name": "Pelican Point"
+        },
+        {
+          "id": "pirates",
+          "name": "Gull Reach"
+        },
+        {
+          "id": "vantage",
+          "name": "Vantage Risk Group"
+        }
+      ],
+      "terrains": [
+        "clear",
+        "lawn",
+        "tarmac",
+        "sand",
+        "hedge",
+        "scrub",
+        "water"
+      ],
+      "maps": 4
+    }
+  ],
+  "universalWorld": {
+    "units": 535,
+    "structures": 481,
+    "choices": {
+      "structures": 22,
+      "infantry": 24,
+      "vehicle": 24,
+      "aircraft": 21,
+      "naval": 17
+    }
+  }
+}

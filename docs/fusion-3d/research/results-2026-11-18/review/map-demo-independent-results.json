@@ -1,0 +1,1705 @@
+{
+  "sage": {
+    "pinned_archive_map_members": 2117,
+    "matched_map_content_digests": {
+      "c4-maps.jsonl": 241,
+      "generals-maps.jsonl": 264,
+      "kw-maps.jsonl": 398,
+      "ra3-maps.jsonl": 206,
+      "tw-maps.jsonl": 352,
+      "uprising-maps.jsonl": 254,
+      "zh-maps.jsonl": 402
+    },
+    "missing_map_paths": [],
+    "unexpected_paths": [],
+    "metadata_rows_with_all_retained_fields_matched": 522,
+    "metadata_source_files": [
+      "Red Alert 3/Xml/MapMetaData.xml",
+      "Red Alert 3/Xml/dlcontent/packages/package1/MapMetaData.xml",
+      "Tiberium Wars/Xml/MapMetaData.xml",
+      "Uprising/Xml/MapMetaData.xml"
+    ]
+  },
+  "demo": [
+    {
+      "brief": "ALLY2",
+      "theater": "SNOW",
+      "basic_marker_offset": 2193001,
+      "playable_cells": 2100,
+      "decoded_width": 128,
+      "decoded_height": 128,
+      "decoded_template_and_icon_sha256": "e0412c53bb6a5523116034aefb6da59db9ac66dc961e33b08ea87dcf781943d0",
+      "decoded_overlay_sha256": "ed4e61686409411a6e9caf86d347252140fd1d787f3e32b7d40f729d26a373cf",
+      "template_distribution_inside": [
+        {
+          "id": 106,
+          "cells": 1,
+          "name": "TEMPLATE_PATCH04"
+        },
+        {
+          "id": 110,
+          "cells": 2,
+          "name": "TEMPLATE_PATCH14"
+        },
+        {
+          "id": 112,
+          "cells": 14,
+          "name": "TEMPLATE_RIVER01"
+        },
+        {
+          "id": 113,
+          "cells": 17,
+          "name": "TEMPLATE_RIVER02"
+        },
+        {
+          "id": 114,
+          "cells": 13,
+          "name": "TEMPLATE_RIVER03"
+        },
+        {
+          "id": 115,
+          "cells": 12,
+          "name": "TEMPLATE_RIVER04"
+        },
+        {
+          "id": 116,
+          "cells": 18,
+          "name": "TEMPLATE_RIVER05"
+        },
+        {
+          "id": 117,
+          "cells": 18,
+          "name": "TEMPLATE_RIVER06"
+        },
+        {
+          "id": 119,
+          "cells": 8,
+          "name": "TEMPLATE_RIVER08"
+        },
+        {
+          "id": 120,
+          "cells": 4,
+          "name": "TEMPLATE_RIVER09"
+        },
+        {
+          "id": 121,
+          "cells": 4,
+          "name": "TEMPLATE_RIVER10"
+        },
+        {
+          "id": 122,
+          "cells": 8,
+          "name": "TEMPLATE_RIVER11"
+        },
+        {
+          "id": 123,
+          "cells": 12,
+          "name": "TEMPLATE_RIVER12"
+        },
+        {
+          "id": 127,
+          "cells": 12,
+          "name": "TEMPLATE_FALLS2"
+        },
+        {
+          "id": 129,
+          "cells": 27,
+          "name": "TEMPLATE_FORD1"
+        },
+        {
+          "id": 130,
+          "cells": 18,
+          "name": "TEMPLATE_FORD2"
+        },
+        {
+          "id": 133,
+          "cells": 9,
+          "name": "TEMPLATE_BRIDGE2"
+        },
+        {
+          "id": 135,
+          "cells": 12,
+          "name": "TEMPLATE_SLOPE01"
+        },
+        {
+          "id": 136,
+          "cells": 30,
+          "name": "TEMPLATE_SLOPE02"
+        },
+        {
+          "id": 137,
+          "cells": 12,
+          "name": "TEMPLATE_SLOPE03"
+        },
+        {
+          "id": 138,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE04"
+        },
+        {
+          "id": 139,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE05"
+        },
+        {
+          "id": 140,
+          "cells": 15,
+          "name": "TEMPLATE_SLOPE06"
+        },
+        {
+          "id": 141,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE07"
+        },
+        {
+          "id": 143,
+          "cells": 18,
+          "name": "TEMPLATE_SLOPE09"
+        },
+        {
+          "id": 144,
+          "cells": 16,
+          "name": "TEMPLATE_SLOPE10"
+        },
+        {
+          "id": 145,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE11"
+        },
+        {
+          "id": 146,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE12"
+        },
+        {
+          "id": 147,
+          "cells": 29,
+          "name": "TEMPLATE_SLOPE13"
+        },
+        {
+          "id": 148,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE14"
+        },
+        {
+          "id": 150,
+          "cells": 19,
+          "name": "TEMPLATE_SLOPE16"
+        },
+        {
+          "id": 151,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE17"
+        },
+        {
+          "id": 152,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE18"
+        },
+        {
+          "id": 153,
+          "cells": 16,
+          "name": "TEMPLATE_SLOPE19"
+        },
+        {
+          "id": 154,
+          "cells": 15,
+          "name": "TEMPLATE_SLOPE20"
+        },
+        {
+          "id": 155,
+          "cells": 2,
+          "name": "TEMPLATE_SLOPE21"
+        },
+        {
+          "id": 156,
+          "cells": 2,
+          "name": "TEMPLATE_SLOPE22"
+        },
+        {
+          "id": 157,
+          "cells": 39,
+          "name": "TEMPLATE_SLOPE23"
+        },
+        {
+          "id": 158,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE24"
+        },
+        {
+          "id": 159,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE25"
+        },
+        {
+          "id": 160,
+          "cells": 12,
+          "name": "TEMPLATE_SLOPE26"
+        },
+        {
+          "id": 161,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE27"
+        },
+        {
+          "id": 162,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE28"
+        },
+        {
+          "id": 163,
+          "cells": 16,
+          "name": "TEMPLATE_SLOPE29"
+        },
+        {
+          "id": 164,
+          "cells": 20,
+          "name": "TEMPLATE_SLOPE30"
+        },
+        {
+          "id": 165,
+          "cells": 10,
+          "name": "TEMPLATE_SLOPE31"
+        },
+        {
+          "id": 166,
+          "cells": 15,
+          "name": "TEMPLATE_SLOPE32"
+        },
+        {
+          "id": 167,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE33"
+        },
+        {
+          "id": 168,
+          "cells": 16,
+          "name": "TEMPLATE_SLOPE34"
+        },
+        {
+          "id": 169,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE35"
+        },
+        {
+          "id": 170,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE36"
+        },
+        {
+          "id": 171,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE37"
+        },
+        {
+          "id": 174,
+          "cells": 16,
+          "name": "TEMPLATE_ROAD02"
+        },
+        {
+          "id": 175,
+          "cells": 2,
+          "name": "TEMPLATE_ROAD03"
+        },
+        {
+          "id": 176,
+          "cells": 12,
+          "name": "TEMPLATE_ROAD04"
+        },
+        {
+          "id": 177,
+          "cells": 32,
+          "name": "TEMPLATE_ROAD05"
+        },
+        {
+          "id": 178,
+          "cells": 15,
+          "name": "TEMPLATE_ROAD06"
+        },
+        {
+          "id": 179,
+          "cells": 17,
+          "name": "TEMPLATE_ROAD07"
+        },
+        {
+          "id": 180,
+          "cells": 7,
+          "name": "TEMPLATE_ROAD08"
+        },
+        {
+          "id": 181,
+          "cells": 1,
+          "name": "TEMPLATE_ROAD09"
+        },
+        {
+          "id": 182,
+          "cells": 12,
+          "name": "TEMPLATE_ROAD10"
+        },
+        {
+          "id": 183,
+          "cells": 8,
+          "name": "TEMPLATE_ROAD11"
+        },
+        {
+          "id": 185,
+          "cells": 27,
+          "name": "TEMPLATE_ROAD13"
+        },
+        {
+          "id": 186,
+          "cells": 8,
+          "name": "TEMPLATE_ROAD14"
+        },
+        {
+          "id": 188,
+          "cells": 9,
+          "name": "TEMPLATE_ROAD16"
+        },
+        {
+          "id": 190,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD18"
+        },
+        {
+          "id": 191,
+          "cells": 9,
+          "name": "TEMPLATE_ROAD19"
+        },
+        {
+          "id": 192,
+          "cells": 1,
+          "name": "TEMPLATE_ROAD20"
+        },
+        {
+          "id": 193,
+          "cells": 12,
+          "name": "TEMPLATE_ROAD21"
+        },
+        {
+          "id": 194,
+          "cells": 7,
+          "name": "TEMPLATE_ROAD22"
+        },
+        {
+          "id": 195,
+          "cells": 25,
+          "name": "TEMPLATE_ROAD23"
+        },
+        {
+          "id": 201,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD29"
+        },
+        {
+          "id": 203,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD31"
+        },
+        {
+          "id": 204,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD32"
+        },
+        {
+          "id": 210,
+          "cells": 2,
+          "name": "TEMPLATE_ROAD38"
+        },
+        {
+          "id": 214,
+          "cells": 6,
+          "name": "TEMPLATE_ROAD42"
+        },
+        {
+          "id": 228,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD45"
+        },
+        {
+          "id": 255,
+          "cells": 1058,
+          "name": "raw_00FF_legacy_value_unresolved"
+        },
+        {
+          "id": 383,
+          "cells": 13,
+          "name": "TEMPLATE_BRIDGE2X"
+        },
+        {
+          "id": 65535,
+          "cells": 171,
+          "name": "TEMPLATE_NONE"
+        }
+      ],
+      "overlay_distribution_inside": [
+        {
+          "id": 5,
+          "cells": 42,
+          "name": "OVERLAY_GOLD1"
+        },
+        {
+          "id": 6,
+          "cells": 35,
+          "name": "OVERLAY_GOLD2"
+        },
+        {
+          "id": 7,
+          "cells": 36,
+          "name": "OVERLAY_GOLD3"
+        },
+        {
+          "id": 8,
+          "cells": 38,
+          "name": "OVERLAY_GOLD4"
+        },
+        {
+          "id": 21,
+          "cells": 1,
+          "name": "OVERLAY_WOOD_CRATE"
+        },
+        {
+          "id": 23,
+          "cells": 24,
+          "name": "OVERLAY_FENCE"
+        },
+        {
+          "id": 255,
+          "cells": 1924,
+          "name": "OVERLAY_NONE"
+        }
+      ],
+      "distinct_icon_indices_inside": 22,
+      "bridge_template_cells_inside": 22,
+      "initial_placement_groups_checked": 3,
+      "team_and_trigger_counts_checked": true
+    },
+    {
+      "brief": "ALLY5",
+      "theater": "TEMPERATE",
+      "basic_marker_offset": 2207152,
+      "playable_cells": 5060,
+      "decoded_width": 128,
+      "decoded_height": 128,
+      "decoded_template_and_icon_sha256": "86befe21806086de9503e9f89ef8d8e8c7cfcc1a253834448b72a6b57d71b4c9",
+      "decoded_overlay_sha256": "1c88e09e63a88fbf3d6b15651ec7ecf2d97e9b8a150b27cfd0801ea9afc6c477",
+      "template_distribution_inside": [
+        {
+          "id": 1,
+          "cells": 429,
+          "name": "TEMPLATE_WATER"
+        },
+        {
+          "id": 2,
+          "cells": 1039,
+          "name": "TEMPLATE_WATER2"
+        },
+        {
+          "id": 6,
+          "cells": 9,
+          "name": "TEMPLATE_SHORE04"
+        },
+        {
+          "id": 7,
+          "cells": 9,
+          "name": "TEMPLATE_SHORE05"
+        },
+        {
+          "id": 8,
+          "cells": 10,
+          "name": "TEMPLATE_SHORE06"
+        },
+        {
+          "id": 9,
+          "cells": 9,
+          "name": "TEMPLATE_SHORE07"
+        },
+        {
+          "id": 10,
+          "cells": 4,
+          "name": "TEMPLATE_SHORE08"
+        },
+        {
+          "id": 19,
+          "cells": 4,
+          "name": "TEMPLATE_SHORE17"
+        },
+        {
+          "id": 22,
+          "cells": 13,
+          "name": "TEMPLATE_SHORE20"
+        },
+        {
+          "id": 24,
+          "cells": 18,
+          "name": "TEMPLATE_SHORE22"
+        },
+        {
+          "id": 25,
+          "cells": 36,
+          "name": "TEMPLATE_SHORE23"
+        },
+        {
+          "id": 26,
+          "cells": 8,
+          "name": "TEMPLATE_SHORE24"
+        },
+        {
+          "id": 27,
+          "cells": 22,
+          "name": "TEMPLATE_SHORE25"
+        },
+        {
+          "id": 28,
+          "cells": 18,
+          "name": "TEMPLATE_SHORE26"
+        },
+        {
+          "id": 29,
+          "cells": 18,
+          "name": "TEMPLATE_SHORE27"
+        },
+        {
+          "id": 30,
+          "cells": 24,
+          "name": "TEMPLATE_SHORE28"
+        },
+        {
+          "id": 31,
+          "cells": 10,
+          "name": "TEMPLATE_SHORE29"
+        },
+        {
+          "id": 32,
+          "cells": 6,
+          "name": "TEMPLATE_SHORE30"
+        },
+        {
+          "id": 33,
+          "cells": 22,
+          "name": "TEMPLATE_SHORE31"
+        },
+        {
+          "id": 37,
+          "cells": 11,
+          "name": "TEMPLATE_SHORE35"
+        },
+        {
+          "id": 39,
+          "cells": 8,
+          "name": "TEMPLATE_SHORE37"
+        },
+        {
+          "id": 40,
+          "cells": 4,
+          "name": "TEMPLATE_SHORE38"
+        },
+        {
+          "id": 44,
+          "cells": 9,
+          "name": "TEMPLATE_SHORE42"
+        },
+        {
+          "id": 46,
+          "cells": 4,
+          "name": "TEMPLATE_SHORE44"
+        },
+        {
+          "id": 48,
+          "cells": 4,
+          "name": "TEMPLATE_SHORE46"
+        },
+        {
+          "id": 50,
+          "cells": 4,
+          "name": "TEMPLATE_SHORE48"
+        },
+        {
+          "id": 51,
+          "cells": 10,
+          "name": "TEMPLATE_SHORE49"
+        },
+        {
+          "id": 53,
+          "cells": 7,
+          "name": "TEMPLATE_SHORE51"
+        },
+        {
+          "id": 55,
+          "cells": 8,
+          "name": "TEMPLATE_SHORE53"
+        },
+        {
+          "id": 56,
+          "cells": 3,
+          "name": "TEMPLATE_SHORE54"
+        },
+        {
+          "id": 59,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF01"
+        },
+        {
+          "id": 60,
+          "cells": 7,
+          "name": "TEMPLATE_SHORECLIFF02"
+        },
+        {
+          "id": 61,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF03"
+        },
+        {
+          "id": 62,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF04"
+        },
+        {
+          "id": 64,
+          "cells": 15,
+          "name": "TEMPLATE_SHORECLIFF06"
+        },
+        {
+          "id": 65,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF07"
+        },
+        {
+          "id": 66,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF08"
+        },
+        {
+          "id": 67,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF09"
+        },
+        {
+          "id": 68,
+          "cells": 16,
+          "name": "TEMPLATE_SHORECLIFF10"
+        },
+        {
+          "id": 70,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF12"
+        },
+        {
+          "id": 71,
+          "cells": 18,
+          "name": "TEMPLATE_SHORECLIFF13"
+        },
+        {
+          "id": 72,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF14"
+        },
+        {
+          "id": 73,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF15"
+        },
+        {
+          "id": 74,
+          "cells": 16,
+          "name": "TEMPLATE_SHORECLIFF16"
+        },
+        {
+          "id": 75,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF17"
+        },
+        {
+          "id": 76,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF18"
+        },
+        {
+          "id": 77,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF19"
+        },
+        {
+          "id": 78,
+          "cells": 10,
+          "name": "TEMPLATE_SHORECLIFF20"
+        },
+        {
+          "id": 79,
+          "cells": 2,
+          "name": "TEMPLATE_SHORECLIFF21"
+        },
+        {
+          "id": 80,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF22"
+        },
+        {
+          "id": 81,
+          "cells": 24,
+          "name": "TEMPLATE_SHORECLIFF23"
+        },
+        {
+          "id": 82,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF24"
+        },
+        {
+          "id": 83,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF25"
+        },
+        {
+          "id": 84,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF26"
+        },
+        {
+          "id": 85,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF27"
+        },
+        {
+          "id": 86,
+          "cells": 6,
+          "name": "TEMPLATE_SHORECLIFF28"
+        },
+        {
+          "id": 87,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF29"
+        },
+        {
+          "id": 88,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF30"
+        },
+        {
+          "id": 89,
+          "cells": 16,
+          "name": "TEMPLATE_SHORECLIFF31"
+        },
+        {
+          "id": 90,
+          "cells": 9,
+          "name": "TEMPLATE_SHORECLIFF32"
+        },
+        {
+          "id": 92,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF34"
+        },
+        {
+          "id": 93,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF35"
+        },
+        {
+          "id": 97,
+          "cells": 1,
+          "name": "TEMPLATE_BOULDER1"
+        },
+        {
+          "id": 105,
+          "cells": 2,
+          "name": "TEMPLATE_PATCH03"
+        },
+        {
+          "id": 106,
+          "cells": 1,
+          "name": "TEMPLATE_PATCH04"
+        },
+        {
+          "id": 107,
+          "cells": 48,
+          "name": "TEMPLATE_PATCH07"
+        },
+        {
+          "id": 108,
+          "cells": 36,
+          "name": "TEMPLATE_PATCH08"
+        },
+        {
+          "id": 112,
+          "cells": 2,
+          "name": "TEMPLATE_RIVER01"
+        },
+        {
+          "id": 113,
+          "cells": 26,
+          "name": "TEMPLATE_RIVER02"
+        },
+        {
+          "id": 116,
+          "cells": 9,
+          "name": "TEMPLATE_RIVER05"
+        },
+        {
+          "id": 117,
+          "cells": 18,
+          "name": "TEMPLATE_RIVER06"
+        },
+        {
+          "id": 118,
+          "cells": 6,
+          "name": "TEMPLATE_RIVER07"
+        },
+        {
+          "id": 119,
+          "cells": 16,
+          "name": "TEMPLATE_RIVER08"
+        },
+        {
+          "id": 120,
+          "cells": 4,
+          "name": "TEMPLATE_RIVER09"
+        },
+        {
+          "id": 121,
+          "cells": 4,
+          "name": "TEMPLATE_RIVER10"
+        },
+        {
+          "id": 122,
+          "cells": 20,
+          "name": "TEMPLATE_RIVER11"
+        },
+        {
+          "id": 124,
+          "cells": 14,
+          "name": "TEMPLATE_RIVER13"
+        },
+        {
+          "id": 126,
+          "cells": 9,
+          "name": "TEMPLATE_FALLS1A"
+        },
+        {
+          "id": 129,
+          "cells": 9,
+          "name": "TEMPLATE_FORD1"
+        },
+        {
+          "id": 130,
+          "cells": 9,
+          "name": "TEMPLATE_FORD2"
+        },
+        {
+          "id": 133,
+          "cells": 9,
+          "name": "TEMPLATE_BRIDGE2"
+        },
+        {
+          "id": 135,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE01"
+        },
+        {
+          "id": 136,
+          "cells": 30,
+          "name": "TEMPLATE_SLOPE02"
+        },
+        {
+          "id": 137,
+          "cells": 12,
+          "name": "TEMPLATE_SLOPE03"
+        },
+        {
+          "id": 138,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE04"
+        },
+        {
+          "id": 140,
+          "cells": 5,
+          "name": "TEMPLATE_SLOPE06"
+        },
+        {
+          "id": 141,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE07"
+        },
+        {
+          "id": 144,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE10"
+        },
+        {
+          "id": 147,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE13"
+        },
+        {
+          "id": 149,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE15"
+        },
+        {
+          "id": 150,
+          "cells": 19,
+          "name": "TEMPLATE_SLOPE16"
+        },
+        {
+          "id": 151,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE17"
+        },
+        {
+          "id": 153,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE19"
+        },
+        {
+          "id": 155,
+          "cells": 2,
+          "name": "TEMPLATE_SLOPE21"
+        },
+        {
+          "id": 163,
+          "cells": 12,
+          "name": "TEMPLATE_SLOPE29"
+        },
+        {
+          "id": 164,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE30"
+        },
+        {
+          "id": 165,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE31"
+        },
+        {
+          "id": 166,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE32"
+        },
+        {
+          "id": 169,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE35"
+        },
+        {
+          "id": 173,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD01"
+        },
+        {
+          "id": 175,
+          "cells": 6,
+          "name": "TEMPLATE_ROAD03"
+        },
+        {
+          "id": 176,
+          "cells": 6,
+          "name": "TEMPLATE_ROAD04"
+        },
+        {
+          "id": 178,
+          "cells": 10,
+          "name": "TEMPLATE_ROAD06"
+        },
+        {
+          "id": 179,
+          "cells": 30,
+          "name": "TEMPLATE_ROAD07"
+        },
+        {
+          "id": 180,
+          "cells": 29,
+          "name": "TEMPLATE_ROAD08"
+        },
+        {
+          "id": 182,
+          "cells": 44,
+          "name": "TEMPLATE_ROAD10"
+        },
+        {
+          "id": 183,
+          "cells": 29,
+          "name": "TEMPLATE_ROAD11"
+        },
+        {
+          "id": 184,
+          "cells": 26,
+          "name": "TEMPLATE_ROAD12"
+        },
+        {
+          "id": 185,
+          "cells": 9,
+          "name": "TEMPLATE_ROAD13"
+        },
+        {
+          "id": 186,
+          "cells": 8,
+          "name": "TEMPLATE_ROAD14"
+        },
+        {
+          "id": 188,
+          "cells": 9,
+          "name": "TEMPLATE_ROAD16"
+        },
+        {
+          "id": 191,
+          "cells": 9,
+          "name": "TEMPLATE_ROAD19"
+        },
+        {
+          "id": 192,
+          "cells": 18,
+          "name": "TEMPLATE_ROAD20"
+        },
+        {
+          "id": 193,
+          "cells": 6,
+          "name": "TEMPLATE_ROAD21"
+        },
+        {
+          "id": 194,
+          "cells": 7,
+          "name": "TEMPLATE_ROAD22"
+        },
+        {
+          "id": 195,
+          "cells": 7,
+          "name": "TEMPLATE_ROAD23"
+        },
+        {
+          "id": 197,
+          "cells": 10,
+          "name": "TEMPLATE_ROAD25"
+        },
+        {
+          "id": 198,
+          "cells": 2,
+          "name": "TEMPLATE_ROAD26"
+        },
+        {
+          "id": 200,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD28"
+        },
+        {
+          "id": 203,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD31"
+        },
+        {
+          "id": 227,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD44"
+        },
+        {
+          "id": 228,
+          "cells": 8,
+          "name": "TEMPLATE_ROAD45"
+        },
+        {
+          "id": 229,
+          "cells": 4,
+          "name": "TEMPLATE_RIVER14"
+        },
+        {
+          "id": 230,
+          "cells": 4,
+          "name": "TEMPLATE_RIVER15"
+        },
+        {
+          "id": 231,
+          "cells": 8,
+          "name": "TEMPLATE_RIVERCLIFF01"
+        },
+        {
+          "id": 233,
+          "cells": 12,
+          "name": "TEMPLATE_RIVERCLIFF03"
+        },
+        {
+          "id": 235,
+          "cells": 18,
+          "name": "TEMPLATE_BRIDGE_1A"
+        },
+        {
+          "id": 238,
+          "cells": 20,
+          "name": "TEMPLATE_BRIDGE_2A"
+        },
+        {
+          "id": 241,
+          "cells": 20,
+          "name": "TEMPLATE_BRIDGE_3A"
+        },
+        {
+          "id": 380,
+          "cells": 10,
+          "name": "TEMPLATE_BRIDGE_1AX"
+        },
+        {
+          "id": 381,
+          "cells": 4,
+          "name": "TEMPLATE_BRIDGE_2AX"
+        },
+        {
+          "id": 383,
+          "cells": 13,
+          "name": "TEMPLATE_BRIDGE2X"
+        },
+        {
+          "id": 65535,
+          "cells": 2176,
+          "name": "TEMPLATE_NONE"
+        }
+      ],
+      "overlay_distribution_inside": [
+        {
+          "id": 1,
+          "cells": 77,
+          "name": "OVERLAY_CYCLONE_WALL"
+        },
+        {
+          "id": 2,
+          "cells": 88,
+          "name": "OVERLAY_BRICK_WALL"
+        },
+        {
+          "id": 5,
+          "cells": 72,
+          "name": "OVERLAY_GOLD1"
+        },
+        {
+          "id": 6,
+          "cells": 62,
+          "name": "OVERLAY_GOLD2"
+        },
+        {
+          "id": 7,
+          "cells": 84,
+          "name": "OVERLAY_GOLD3"
+        },
+        {
+          "id": 8,
+          "cells": 74,
+          "name": "OVERLAY_GOLD4"
+        },
+        {
+          "id": 9,
+          "cells": 4,
+          "name": "OVERLAY_GEMS1"
+        },
+        {
+          "id": 10,
+          "cells": 5,
+          "name": "OVERLAY_GEMS2"
+        },
+        {
+          "id": 11,
+          "cells": 7,
+          "name": "OVERLAY_GEMS3"
+        },
+        {
+          "id": 12,
+          "cells": 4,
+          "name": "OVERLAY_GEMS4"
+        },
+        {
+          "id": 23,
+          "cells": 27,
+          "name": "OVERLAY_FENCE"
+        },
+        {
+          "id": 255,
+          "cells": 4556,
+          "name": "OVERLAY_NONE"
+        }
+      ],
+      "distinct_icon_indices_inside": 30,
+      "bridge_template_cells_inside": 94,
+      "initial_placement_groups_checked": 3,
+      "team_and_trigger_counts_checked": true
+    },
+    {
+      "brief": "SOVIET2",
+      "theater": "TEMPERATE",
+      "basic_marker_offset": 2228637,
+      "playable_cells": 1960,
+      "decoded_width": 128,
+      "decoded_height": 128,
+      "decoded_template_and_icon_sha256": "a256130a0fa13b05da78b3c86796924eb8b03ac7208918ce85a755134806f8de",
+      "decoded_overlay_sha256": "c40e483ca6b7cd367a0c5ae6cbdf618fd1c44f2cfa0d9d92a0785ceff984db03",
+      "template_distribution_inside": [
+        {
+          "id": 1,
+          "cells": 96,
+          "name": "TEMPLATE_WATER"
+        },
+        {
+          "id": 2,
+          "cells": 99,
+          "name": "TEMPLATE_WATER2"
+        },
+        {
+          "id": 23,
+          "cells": 8,
+          "name": "TEMPLATE_SHORE21"
+        },
+        {
+          "id": 38,
+          "cells": 6,
+          "name": "TEMPLATE_SHORE36"
+        },
+        {
+          "id": 59,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF01"
+        },
+        {
+          "id": 60,
+          "cells": 14,
+          "name": "TEMPLATE_SHORECLIFF02"
+        },
+        {
+          "id": 61,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF03"
+        },
+        {
+          "id": 62,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF04"
+        },
+        {
+          "id": 63,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF05"
+        },
+        {
+          "id": 64,
+          "cells": 5,
+          "name": "TEMPLATE_SHORECLIFF06"
+        },
+        {
+          "id": 65,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF07"
+        },
+        {
+          "id": 66,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF08"
+        },
+        {
+          "id": 67,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF09"
+        },
+        {
+          "id": 68,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF10"
+        },
+        {
+          "id": 70,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF12"
+        },
+        {
+          "id": 71,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF13"
+        },
+        {
+          "id": 72,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF14"
+        },
+        {
+          "id": 73,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF15"
+        },
+        {
+          "id": 74,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF16"
+        },
+        {
+          "id": 76,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF18"
+        },
+        {
+          "id": 77,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF19"
+        },
+        {
+          "id": 78,
+          "cells": 5,
+          "name": "TEMPLATE_SHORECLIFF20"
+        },
+        {
+          "id": 79,
+          "cells": 2,
+          "name": "TEMPLATE_SHORECLIFF21"
+        },
+        {
+          "id": 80,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF22"
+        },
+        {
+          "id": 81,
+          "cells": 12,
+          "name": "TEMPLATE_SHORECLIFF23"
+        },
+        {
+          "id": 82,
+          "cells": 4,
+          "name": "TEMPLATE_SHORECLIFF24"
+        },
+        {
+          "id": 84,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF26"
+        },
+        {
+          "id": 85,
+          "cells": 18,
+          "name": "TEMPLATE_SHORECLIFF27"
+        },
+        {
+          "id": 86,
+          "cells": 6,
+          "name": "TEMPLATE_SHORECLIFF28"
+        },
+        {
+          "id": 87,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF29"
+        },
+        {
+          "id": 89,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF31"
+        },
+        {
+          "id": 91,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF33"
+        },
+        {
+          "id": 93,
+          "cells": 8,
+          "name": "TEMPLATE_SHORECLIFF35"
+        },
+        {
+          "id": 107,
+          "cells": 8,
+          "name": "TEMPLATE_PATCH07"
+        },
+        {
+          "id": 136,
+          "cells": 12,
+          "name": "TEMPLATE_SLOPE02"
+        },
+        {
+          "id": 137,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE03"
+        },
+        {
+          "id": 138,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE04"
+        },
+        {
+          "id": 140,
+          "cells": 10,
+          "name": "TEMPLATE_SLOPE06"
+        },
+        {
+          "id": 143,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE09"
+        },
+        {
+          "id": 144,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE10"
+        },
+        {
+          "id": 147,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE13"
+        },
+        {
+          "id": 149,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE15"
+        },
+        {
+          "id": 150,
+          "cells": 12,
+          "name": "TEMPLATE_SLOPE16"
+        },
+        {
+          "id": 151,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE17"
+        },
+        {
+          "id": 153,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE19"
+        },
+        {
+          "id": 154,
+          "cells": 5,
+          "name": "TEMPLATE_SLOPE20"
+        },
+        {
+          "id": 155,
+          "cells": 2,
+          "name": "TEMPLATE_SLOPE21"
+        },
+        {
+          "id": 161,
+          "cells": 9,
+          "name": "TEMPLATE_SLOPE27"
+        },
+        {
+          "id": 163,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE29"
+        },
+        {
+          "id": 164,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE30"
+        },
+        {
+          "id": 165,
+          "cells": 8,
+          "name": "TEMPLATE_SLOPE31"
+        },
+        {
+          "id": 166,
+          "cells": 6,
+          "name": "TEMPLATE_SLOPE32"
+        },
+        {
+          "id": 167,
+          "cells": 4,
+          "name": "TEMPLATE_SLOPE33"
+        },
+        {
+          "id": 173,
+          "cells": 6,
+          "name": "TEMPLATE_ROAD01"
+        },
+        {
+          "id": 174,
+          "cells": 4,
+          "name": "TEMPLATE_ROAD02"
+        },
+        {
+          "id": 175,
+          "cells": 4,
+          "name": "TEMPLATE_ROAD03"
+        },
+        {
+          "id": 176,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD04"
+        },
+        {
+          "id": 178,
+          "cells": 5,
+          "name": "TEMPLATE_ROAD06"
+        },
+        {
+          "id": 179,
+          "cells": 5,
+          "name": "TEMPLATE_ROAD07"
+        },
+        {
+          "id": 182,
+          "cells": 6,
+          "name": "TEMPLATE_ROAD10"
+        },
+        {
+          "id": 183,
+          "cells": 9,
+          "name": "TEMPLATE_ROAD11"
+        },
+        {
+          "id": 184,
+          "cells": 3,
+          "name": "TEMPLATE_ROAD12"
+        },
+        {
+          "id": 193,
+          "cells": 6,
+          "name": "TEMPLATE_ROAD21"
+        },
+        {
+          "id": 195,
+          "cells": 5,
+          "name": "TEMPLATE_ROAD23"
+        },
+        {
+          "id": 216,
+          "cells": 1,
+          "name": "TEMPLATE_ROUGH01"
+        },
+        {
+          "id": 217,
+          "cells": 3,
+          "name": "TEMPLATE_ROUGH02"
+        },
+        {
+          "id": 218,
+          "cells": 1,
+          "name": "TEMPLATE_ROUGH03"
+        },
+        {
+          "id": 219,
+          "cells": 1,
+          "name": "TEMPLATE_ROUGH04"
+        },
+        {
+          "id": 220,
+          "cells": 1,
+          "name": "TEMPLATE_ROUGH05"
+        },
+        {
+          "id": 221,
+          "cells": 1,
+          "name": "TEMPLATE_ROUGH06"
+        },
+        {
+          "id": 235,
+          "cells": 9,
+          "name": "TEMPLATE_BRIDGE_1A"
+        },
+        {
+          "id": 238,
+          "cells": 10,
+          "name": "TEMPLATE_BRIDGE_2A"
+        },
+        {
+          "id": 241,
+          "cells": 15,
+          "name": "TEMPLATE_BRIDGE_3A"
+        },
+        {
+          "id": 250,
+          "cells": 18,
+          "name": "TEMPLATE_F04"
+        },
+        {
+          "id": 251,
+          "cells": 18,
+          "name": "TEMPLATE_F05"
+        },
+        {
+          "id": 252,
+          "cells": 18,
+          "name": "TEMPLATE_F06"
+        },
+        {
+          "id": 380,
+          "cells": 5,
+          "name": "TEMPLATE_BRIDGE_1AX"
+        },
+        {
+          "id": 381,
+          "cells": 2,
+          "name": "TEMPLATE_BRIDGE_2AX"
+        },
+        {
+          "id": 65535,
+          "cells": 1250,
+          "name": "TEMPLATE_NONE"
+        }
+      ],
+      "overlay_distribution_inside": [
+        {
+          "id": 0,
+          "cells": 18,
+          "name": "OVERLAY_SANDBAG_WALL"
+        },
+        {
+          "id": 1,
+          "cells": 12,
+          "name": "OVERLAY_CYCLONE_WALL"
+        },
+        {
+          "id": 5,
+          "cells": 55,
+          "name": "OVERLAY_GOLD1"
+        },
+        {
+          "id": 6,
+          "cells": 64,
+          "name": "OVERLAY_GOLD2"
+        },
+        {
+          "id": 7,
+          "cells": 66,
+          "name": "OVERLAY_GOLD3"
+        },
+        {
+          "id": 8,
+          "cells": 49,
+          "name": "OVERLAY_GOLD4"
+        },
+        {
+          "id": 15,
+          "cells": 1,
+          "name": "OVERLAY_V14"
+        },
+        {
+          "id": 16,
+          "cells": 1,
+          "name": "OVERLAY_V15"
+        },
+        {
+          "id": 17,
+          "cells": 1,
+          "name": "OVERLAY_V16"
+        },
+        {
+          "id": 18,
+          "cells": 1,
+          "name": "OVERLAY_V17"
+        },
+        {
+          "id": 19,
+          "cells": 1,
+          "name": "OVERLAY_V18"
+        },
+        {
+          "id": 21,
+          "cells": 1,
+          "name": "OVERLAY_WOOD_CRATE"
+        },
+        {
+          "id": 22,
+          "cells": 1,
+          "name": "OVERLAY_STEEL_CRATE"
+        },
+        {
+          "id": 255,
+          "cells": 1689,
+          "name": "OVERLAY_NONE"
+        }
+      ],
+      "distinct_icon_indices_inside": 15,
+      "bridge_template_cells_inside": 41,
+      "initial_placement_groups_checked": 3,
+      "team_and_trigger_counts_checked": true
+    }
+  ],
+  "enum_header_sha256": "6ef52dead3d9f8685c5dce3d7067657a66e29f6395d4364376e16bd2932dd720"
+}

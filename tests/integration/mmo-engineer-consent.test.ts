@@ -134,6 +134,13 @@ describeDb('mmo engineer capture consent (PW34, real PostgreSQL)', () => {
 
       const game = runner.currentGame!;
       expect(game.tick).toBe(0);
+      // Step only while the runner is idle. A poll suspended inside
+      // drainCaptureEvents has already copied the (empty) capture queue; if
+      // these synchronous steps then kill the engineer, its stale-grant sweep
+      // invalidates the grant before the capture receipt can consume it. The
+      // live runner never steps mid-drain (ticks share the busy guard), so the
+      // test must not either. The steps below never yield.
+      await waitFor(() => !(runner as unknown as { busy: boolean }).busy, 10_000, 1);
       game.step();
       expect(game.consents.some(grant => grant.requestId === requestId)).toBe(true);
       for (let tick = 0; tick < 120 && bld.owner !== requesterSlot; tick++) game.step();

@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:adaptation",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "adaptation"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "subject_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "target_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_semantics": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "fusion_semantics": {
+      "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+    },
+    "disposition": {
+      "enum": [
+        "direct",
+        "translated",
+        "shared",
+        "restricted",
+        "excluded"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval": {
+      "enum": [
+        "proposed",
+        "accepted",
+        "rejected"
+      ]
+    },
+    "fixture_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "profile_id",
+    "evidence",
+    "owner",
+    "reviewer",
+    "blockers",
+    "subject_ids",
+    "target_profile",
+    "source_semantics",
+    "fusion_semantics",
+    "disposition",
+    "rationale",
+    "approval",
+    "fixture_ids"
+  ]
+}

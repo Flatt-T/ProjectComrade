@@ -14,6 +14,7 @@ import {
 import { RegionRunner } from '../../apps/service/src/mmo/runner.js';
 import { RegionService } from '../../apps/service/src/mmo/regions.js';
 import { seedFixtureWorld, type FixtureWorld } from '../../apps/service/src/mmo/fixture.js';
+import { registryPacks, restoreGame } from '../../packages/fusion/src/index.js';
 
 const DB_URL = process.env.MMO_TEST_DATABASE_URL;
 const describeDb = DB_URL ? describe : describe.skip;
@@ -59,7 +60,7 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
   beforeAll(async () => {
     process.env.MMO_DATABASE_URL = DB_URL;
     await resetMmoDatabase();
-  });
+  }, 30_000); // schema reset; same budget as the other real-PostgreSQL suites
   afterAll(async () => { await closeMmoDatabase(); });
 
   it('hibernates a quiescent region: checkpoint, lease release, ticking stops', { timeout: 60_000 }, async () => {
@@ -233,7 +234,11 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
 
   it('queued production due during quiescence exists at wake', { timeout: 60_000 }, async () => {
     const fx = await seedFixtureWorld({ leaseMs: 300_000 });
-    const runnerA = runnerFor(fx);
+    // Hold the region awake until the build is actually in the queue: pending
+    // sim commands are not part of the snapshot, so hibernating between the
+    // enqueue and its tick would silently drop the order (a CI-only race).
+    let holdAwake = true;
+    const runnerA = runnerFor(fx, { liveSubscribers: () => holdAwake });
     await runnerA.start();
     const gA = runnerA.currentGame!;
     // Deploy the MCV so a construction yard exists, then queue a defense.
@@ -241,16 +246,32 @@ describeDb('mmo region hibernation (PW22, real PostgreSQL + real Fusion sim)', (
       e.kind === 'unit' && e.owner === 0 && gA.pack.units[e.type]?.deploysTo)!;
     gA.enqueue(0, { t: 'deploy', ids: [mcv.id] });
     await waitFor(async () =>
-      [...runnerA.currentGame!.entities.values()].some(e =>
+      [...gA.entities.values()].some(e =>
         e.kind === 'structure' && e.owner === 0 && gA.pack.structures[e.type].constructionYard), 8_000);
-    const options = runnerA.currentGame!.buildOptions(runnerA.currentGame!.players[0], 'defense');
+    const options = gA.buildOptions(gA.players[0], 'defense');
     expect(options.length).toBeGreaterThan(0);
-    runnerA.currentGame!.players[0].credits = 1_000_000;
-    runnerA.currentGame!.enqueue(0, { t: 'build', item: options[0] });
-    await sleep(100); // build command applies; production now runs under quiescence FF
-    await waitFor(async () => (await regionRow(fx.regionId))?.lifecycle === 'quiescent', 15_000);
+    const kindA = gA.queueFor(options[0])!;
+    gA.players[0].credits = 1_000_000;
+    gA.enqueue(0, { t: 'build', item: options[0] });
+    await waitFor(() => gA.players[0].queues[kindA].items[0] === options[0] && gA.players[0].queues[kindA].paid > 0, 8_000);
 
-    await sleep(800);
+    // Measure how many slept ticks the remaining build needs on a copy, using
+    // the same quiescent fast-forward the wake applies, so the sleep below is
+    // derived from the build rather than tuned to one machine's speed.
+    const copy = restoreGame(runnerA.captureState()!.snapshot, registryPacks());
+    let remaining = 0;
+    while (!copy.players[0].queues[kindA].ready && remaining < 10_000) {
+      copy.fastForwardQuiescent(1, copy.players.map(() => 0));
+      remaining++;
+    }
+    expect(copy.players[0].queues[kindA].ready).toBe(true);
+    expect(gA.players[0].queues[kindA].ready).toBe(false); // still due during quiescence
+
+    holdAwake = false;
+    await waitFor(async () => (await regionRow(fx.regionId))?.lifecycle === 'quiescent', 15_000);
+    const quiescentAt = Date.now();
+    // Wall time maps to slept ticks at TICK_MS; 50 ticks of margin, never under 800 ms.
+    await sleep(Math.max(800, (remaining + 50) * TICK_MS - (Date.now() - quiescentAt)));
     const runnerB = runnerFor(fx);
     await runnerB.start();
     const gB = runnerB.currentGame!;
