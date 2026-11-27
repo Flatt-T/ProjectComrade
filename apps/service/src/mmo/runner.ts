@@ -109,6 +109,15 @@ export interface RegionRunnerOptions {
   now?: () => number;
   /** Durable compound roster resync cadence. Default 10 s. */
   compoundSyncMs?: number;
+  /**
+   * Longest unticked wall-clock gap a restore steps live. A checkpoint without
+   * hibernation metadata (the runner died or was stopped while nobody was
+   * there to keep it ticking) can sit days behind the wall clock; stepping all
+   * of it live blocks every subscriber for hours (beta 2026-11-27: 48 h of
+   * downtime = ~6 h of catch-up). Beyond this window the rest is journaled as
+   * slept time, exactly like a hibernation wake. Default 15 min; 0 disables.
+   */
+  maxLiveCatchUpMs?: number;
   /** Fresh-region sim setup, used when region.seed carries no `sim` block. */
   sim?: RegionSimSpec;
   worldHandler?: WorldActionHandler;
@@ -247,7 +256,8 @@ export class RegionRunner {
     const q = options.quiescence ?? {};
     this.opts = {
       leaseMs: 30_000, tickMs: TICK_MS, pollMs: 250, checkpointEveryTicks: 0,
-      maxJobAttempts: 8, compoundSyncMs: 10_000, now: () => Date.now(), ...options,
+      maxJobAttempts: 8, compoundSyncMs: 10_000, maxLiveCatchUpMs: 15 * 60_000,
+      now: () => Date.now(), ...options,
       jobHandlers: options.jobHandlers ?? {}, log: options.log ?? (() => undefined),
       rules,
       quiescence: {
@@ -480,7 +490,8 @@ export class RegionRunner {
     // Resolve pending journal inputs at their recorded ticks before advancing
     // the region through elapsed wall time.
     await this.applyUnappliedEvents();
-    await this.catchUpTo(this.tickFor(now));
+    if (!hib) await this.absorbDowntime();
+    await this.catchUpTo(this.tickFor(this.opts.now()));
     // A pre-wake checkpoint can have a later committed tail. Recovery must
     // resume live ticking at the replayed state instead of waiting for the
     // wall clock anchored at the older checkpoint to catch up again.
@@ -682,10 +693,13 @@ export class RegionRunner {
   // ------------------------------------------------------------------
 
   /** Record the wake once. Startup replays this interval from the durable journal. */
-  private async journalWakeAccrual(hib: { sinceMs: number; rates: number[]; sampleTick: number }): Promise<void> {
+  private async journalWakeAccrual(
+    hib: { sinceMs: number; rates: number[]; sampleTick: number }, extra: Record<string, unknown> = {},
+    alsoInTx?: (tx: PoolClient, nowMs: number) => Promise<void>,
+  ): Promise<number | null> {
     const now = this.opts.now();
     const ticks = Math.floor(Math.max(0, now - hib.sinceMs) / this.opts.tickMs);
-    await mmoTransaction(async tx => {
+    return mmoTransaction(async tx => {
       await assertRegionFence(tx, {
         regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
       });
@@ -694,9 +708,9 @@ export class RegionRunner {
           where region_id = $1 and event_kind = 'accrual' and payload->>'sinceMs' = $2
           limit 1`,
         [this.opts.regionId, String(hib.sinceMs)]);
-      if (existing.rows.length) return;
+      if (existing.rows.length) return null;
 
-      const payload = { sinceMs: hib.sinceMs, rates: hib.rates, ticks, sampleTick: hib.sampleTick };
+      const payload = { sinceMs: hib.sinceMs, rates: hib.rates, ticks, sampleTick: hib.sampleTick, ...extra };
       const { eventSeq } = await appendRegionEvent(tx, {
         regionId: this.opts.regionId, workerId: this.opts.workerId, epoch: this.epoch!,
         tick: this.game!.tick, kind: 'accrual',
@@ -708,6 +722,52 @@ export class RegionRunner {
         regionId: this.opts.regionId, eventSeq,
         result: { advancedTicks: ticks, dedupe: 'hib-' + hib.sinceMs },
       });
+      if (alsoInTx) await alsoInTx(tx, now);
+      return ticks;
+    });
+  }
+
+  /**
+   * Restore without hibernation metadata: bound the live catch-up. Step a short
+   * window live to sample harvest income, then journal the remaining gap as a
+   * slept-time accrual and fast-forward it — the same journaled, replayable
+   * mechanism a hibernation wake uses, so a later replay reproduces it exactly
+   * (replayCommittedTail steps to the accrual's tick, then fast-forwards).
+   * Re-anchor the tick clock afterwards, as the hibernated path does, because
+   * fastForwardQuiescent advances economy and production but not game.tick.
+   */
+  private async absorbDowntime(): Promise<void> {
+    const g = this.game!;
+    const limitTicks = Math.floor(this.opts.maxLiveCatchUpMs / this.opts.tickMs);
+    if (limitTicks <= 0 || this.tickFor(this.opts.now()) - g.tick <= limitTicks) return;
+    const fromTick = g.tick;
+    // ~100 s of sim: enough harvester cycles for a stable per-tick income rate.
+    const sampleTicks = Math.min(limitTicks, Math.ceil(100_000 / this.opts.tickMs));
+    this.lastHarvestSample = { tick: g.tick, harvested: g.players.map(p => p.stats.harvested) };
+    await this.advanceTo(g.tick + sampleTicks);
+    await this.drainSalvageEvents();
+    await this.drainDepartEvents();
+    await this.drainCaptureEvents();
+    const rates = this.harvestRates();
+    const sinceMs = this.startedAtMs + g.tick * this.opts.tickMs;
+    // The re-anchored clock commits with the accrual: a crash after this
+    // transaction restarts with a small gap (the tail replays the accrual), so
+    // the same slept interval can never be absorbed twice.
+    let anchor = this.opts.now() - g.tick * this.opts.tickMs;
+    const ticks = await this.journalWakeAccrual(
+      { sinceMs, rates, sampleTick: g.tick }, { downtime: true },
+      async (tx, nowMs) => {
+        anchor = nowMs - g.tick * this.opts.tickMs;
+        await tx.query('update region set started_at_ms = $2 where region_id = $1',
+          [this.opts.regionId, BigInt(Math.round(anchor)).toString()]);
+      });
+    if (ticks) await this.quiescentAdvance(ticks, rates);
+    else await setRegionSimStart(this.opts.regionId, anchor);
+    this.startedAtMs = anchor;
+    this.stats.catchUpTicks += g.tick - fromTick;
+    this.opts.log('region-downtime-absorbed', {
+      regionId: this.opts.regionId, fromTick, liveTicks: g.tick - fromTick, sleptTicks: ticks ?? 0,
+      deduplicated: ticks === null,
     });
   }
 

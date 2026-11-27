@@ -15,6 +15,9 @@ const runner = new RegionRunner({
   regionId, workerId, leaseMs: 30_000, tickMs: 60_000, pollMs: 60_000,
   now: () => Number(wallTime),
   quiescence: { enabled: false },
+  // One tick per wall minute: these crash/replay tests recover tens of
+  // "minutes" live by design. Downtime absorption has its own coverage.
+  maxLiveCatchUpMs: 0,
   worldHandler: createWorldHandler(),
   faultHooks: {
     afterPlanCommit: async sequence => {
