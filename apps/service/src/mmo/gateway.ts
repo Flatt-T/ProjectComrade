@@ -15,7 +15,7 @@
 import type { IncomingMessage } from 'node:http';
 import type { WebSocket } from 'ws';
 import { WebSocketServer } from 'ws';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   MMO_CAPABILITIES_MILESTONE1, MMO_DECISIONS_OPEN, MMO_PROTOCOL, MMO_RULESET_ID,
   PERSISTENT_RULES_V1, parseMmoClientMessage,
@@ -25,6 +25,7 @@ import { mmoOne } from './db.js';
 import { submitCommand } from './commands.js';
 import { MmoStoreError, allianceAudience, playerConnected, playerDisconnected, playersSeen } from './store.js';
 import { dispatchOutbox, type OutboxEnvelope } from './bus.js';
+import { simPayloadFor, snapshotStateFor } from './grant-privacy.js';
 import { identityUuid, type RegionIdentity, type RegionService } from './regions.js';
 import { guestIdFromCookieHeader, parseSessionCookie } from '../auth.js';
 import { authEnabled, mmoGuestPolicy, ses } from '../config.js';
@@ -287,7 +288,11 @@ export class MmoGateway {
       // different content is detectable at handshake rather than mid-game.
       fingerprints: region.fingerprints ?? null,
     });
-    send(conn.ws, snap.header);
+    // PW32: consent grants inside the engine state are scoped to their two
+    // participants; everyone else receives the opaque, history-free view.
+    const scoped = snapshotStateFor(snap.header.state as Parameters<typeof snapshotStateFor>[0], regionId, slot);
+    send(conn.ws, scoped === snap.header.state ? snap.header
+      : { ...snap.header, state: scoped, stateSha256: createHash('sha256').update(JSON.stringify(scoped)).digest('hex') });
     log('mmo-subscribe', { peer: conn.id, regionId: regionId.slice(0, 8), slot });
   }
 
@@ -333,11 +338,18 @@ export class MmoGateway {
     const message = this.toClientMessage(envelope);
     if (!message) return; // topics not destined for browsers are acked and dropped here
     const audience = await this.audienceFor(envelope);
+    const grant = message.type === 'event' && message.eventKind === 'sim'
+      && (message.payload as { command?: { t?: string } }).command?.t === 'consentGrant';
     for (const conn of this.conns) {
       const sub = conn.subs.get(envelope.deliveryRegionId);
       if (!sub) continue;
       if (audience && !audience.has(sub.playerId)) continue;
-      try { send(conn.ws, message); } catch { conn.ws.terminate(); }
+      // PW32: a consent grant is a region sim effect, but its request identity
+      // belongs to the two participants — observers get the opaque view.
+      const out = grant && message.type === 'event'
+        ? { ...message, payload: simPayloadFor(message.payload as Record<string, unknown>, envelope.regionId, this.service.liveSlotFor(envelope.regionId, sub.playerId) ?? sub.slot) }
+        : message;
+      try { send(conn.ws, out); } catch { conn.ws.terminate(); }
     }
   }
 
