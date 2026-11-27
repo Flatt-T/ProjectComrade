@@ -1,0 +1,195 @@
+context	faction_or_variant	adapter_identifier	layout_symbol	role_group_editorial	evidence	source_line
+base	GDI	GDI_Construction Yard	y	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L43
+base	GDI	GDI_Power Plant	p	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L44
+base	GDI	GDI_Refinery	r	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L45
+base	GDI	GDI_Silo	s	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L47
+base	GDI	GDI_Accumulator	a	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L48
+base	GDI	GDI_Command Center	e	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L49
+base	GDI	GDI_Barracks	b	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L50
+base	GDI	GDI_Factory	f	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L51
+base	GDI	GDI_Airport	d	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L52
+base	GDI	GDI_Defense HQ	q	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L53
+base	GDI	GDI_Defense Facility	w	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L54
+base	GDI	GDI_Support_Air	i	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L55
+base	GDI	GDI_Support_Ion	x	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L56
+base	GDI	GDI_Support_Art	z	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L57
+base	GDI	GDI_Harvester	h	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L58
+base	GDI	GDI_Harvester_Crystal	n	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L59
+base	GDI	GDI_Harvester_Tiberium	j	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L60
+base	Nod	NOD_Construction Yard	y	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L63
+base	Nod	NOD_Power Plant	p	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L64
+base	Nod	NOD_Refinery	r	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L65
+base	Nod	NOD_Silo	s	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L67
+base	Nod	NOD_Accumulator	a	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L68
+base	Nod	NOD_Command Post	e	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L69
+base	Nod	NOD_Barracks	b	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L70
+base	Nod	NOD_Factory	f	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L71
+base	Nod	NOD_Airport	d	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L72
+base	Nod	NOD_Defense HQ	q	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L73
+base	Nod	NOD_Defense Facility	w	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L74
+base	Nod	NOD_Support_Air	i	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L75
+base	Nod	NOD_Support_Ion	x	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L76
+base	Nod	NOD_Support_Art	z	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L77
+base	Nod	NOD_Harvester	h	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L78
+base	Nod	NOD_Harvester_Crystal	n	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L79
+base	Nod	NOD_Harvester_Tiberium	j	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L80
+base	Forgotten	FOR_Construction Yard	y	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L83
+base	Forgotten	FOR_Refinery	r	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L84
+base	Forgotten	FOR_Trade Center	u	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L85
+base	Forgotten	FOR_Silo	s	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L86
+base	Forgotten	FOR_Defense HQ	q	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L87
+base	Forgotten	FOR_Defense Facility	w	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L88
+base	Forgotten	FOR_Harvester_Crystal	n	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L89
+base	Forgotten	FOR_Harvester_Tiberium	j	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L90
+base	Forgotten	FOR_Crystal Booster	v	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L91
+base	Forgotten	FOR_Tiberium Booster	o	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L92
+base	Forgotten event	FOR_EVENT_Construction_Yard	y	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L95
+base	Forgotten infected GDI	FOR_GDI_Construction Yard	y	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L96
+base	Forgotten infected GDI	FOR_GDI_Power Plant	p	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L97
+base	Forgotten infected GDI	FOR_GDI_Refinery	r	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L98
+base	Forgotten infected GDI	FOR_GDI_Silo	s	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L100
+base	Forgotten infected GDI	FOR_GDI_Accumulator	a	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L101
+base	Forgotten infected GDI	FOR_GDI_Command Center	e	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L102
+base	Forgotten infected GDI	FOR_GDI_Barracks	b	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L103
+base	Forgotten infected GDI	FOR_GDI_Factory	f	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L104
+base	Forgotten infected GDI	FOR_GDI_Airport	d	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L105
+base	Forgotten infected GDI	FOR_GDI_Defense HQ	q	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L106
+base	Forgotten infected GDI	FOR_GDI_Defense Facility	w	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L107
+base	Forgotten infected GDI	FOR_GDI_Support_Air	i	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L108
+base	Forgotten infected GDI	FOR_GDI_Support_Ion	x	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L109
+base	Forgotten infected GDI	FOR_GDI_Support_Art	z	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L110
+base	Forgotten infected GDI	FOR_GDI_Harvester	h	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L111
+base	Forgotten infected GDI	FOR_GDI_Harvester_Crystal	n	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L112
+base	Forgotten infected GDI	FOR_GDI_Harvester_Tiberium	j	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L113
+base	Forgotten infected Nod	FOR_NOD_Construction Yard	y	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L115
+base	Forgotten infected Nod	FOR_NOD_Power Plant	p	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L116
+base	Forgotten infected Nod	FOR_NOD_Refinery	r	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L117
+base	Forgotten infected Nod	FOR_NOD_Silo	s	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L119
+base	Forgotten infected Nod	FOR_NOD_Accumulator	a	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L120
+base	Forgotten infected Nod	FOR_NOD_Command Post	e	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L121
+base	Forgotten infected Nod	FOR_NOD_Barracks	b	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L122
+base	Forgotten infected Nod	FOR_NOD_Factory	f	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L123
+base	Forgotten infected Nod	FOR_NOD_Airport	d	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L124
+base	Forgotten infected Nod	FOR_NOD_Defense HQ	q	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L125
+base	Forgotten infected Nod	FOR_NOD_Defense Facility	w	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L126
+base	Forgotten infected Nod	FOR_NOD_Support_Air	i	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L127
+base	Forgotten infected Nod	FOR_NOD_Support_Ion	x	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L128
+base	Forgotten infected Nod	FOR_NOD_Support_Art	z	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L129
+base	Forgotten infected Nod	FOR_NOD_Harvester	h	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L130
+base	Forgotten infected Nod	FOR_NOD_Harvester_Crystal	n	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L131
+base	Forgotten infected Nod	FOR_NOD_Harvester_Tiberium	j	base structure or placement variant	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L132
+defense	GDI	GDI_Wall	w	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L140
+defense	GDI	GDI_Def_Predator	d	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L141
+defense	GDI	GDI_Turret	m	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L142
+defense	GDI	GDI_Def_Pitbull	p	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L143
+defense	GDI	GDI_Barbwire	b	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L144
+defense	GDI	GDI_Def_Zone Trooper	z	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L145
+defense	GDI	GDI_Flak	f	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L146
+defense	GDI	GDI_Def_Missile Squad	q	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L147
+defense	GDI	GDI_Antitank Barrier	t	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L148
+defense	GDI	GDI_Def_Sniper	s	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L149
+defense	GDI	GDI_Cannon	c	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L150
+defense	GDI	GDI_Def_APC Guardian	g	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L151
+defense	GDI	GDI_Art Tank	a	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L152
+defense	GDI	GDI_Art Air	e	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L153
+defense	GDI	GDI_Art Inf	r	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L154
+defense	Nod	NOD_Def_Wall	w	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L157
+defense	Nod	NOD_Def_Scorpion Tank	d	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L158
+defense	Nod	NOD_Def_MG Nest	m	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L159
+defense	Nod	NOD_Def_Attack Bike	p	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L160
+defense	Nod	NOD_Def_Barbwire	b	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L161
+defense	Nod	NOD_Def_Black Hand	z	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L162
+defense	Nod	NOD_Def_Flak	f	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L163
+defense	Nod	NOD_Def_Militant Rocket Soldiers	q	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L164
+defense	Nod	NOD_Def_Antitank Barrier	t	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L165
+defense	Nod	NOD_Def_Confessor	s	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L166
+defense	Nod	NOD_Def_Cannon	c	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L167
+defense	Nod	NOD_Def_Reckoner	g	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L168
+defense	Nod	NOD_Def_Art Tank	a	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L169
+defense	Nod	NOD_Def_Art Air	e	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L170
+defense	Nod	NOD_Def_Art Inf	r	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L171
+defense	Forgotten	FOR_Wall	w	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L174
+defense	Forgotten	FOR_Mammoth	d	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L175
+defense	Forgotten	FOR_Turret_VS_Inf	m	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L176
+defense	Forgotten	FOR_Veh_VS_Air	p	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L177
+defense	Forgotten	FOR_Barbwire_VS_Inf	b	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L178
+defense	Forgotten	FOR_Inf_VS_Veh	z	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L179
+defense	Forgotten	FOR_Turret_VS_Air	f	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L180
+defense	Forgotten	FOR_Inf_VS_Air	q	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L181
+defense	Forgotten	FOR_Barrier_VS_Veh	t	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L182
+defense	Forgotten	FOR_Sniper	s	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L183
+defense	Forgotten	FOR_Turret_VS_Veh	c	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L184
+defense	Forgotten	FOR_Veh_VS_Inf	g	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L185
+defense	Forgotten	FOR_Turret_VS_Veh_ranged	a	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L186
+defense	Forgotten	FOR_Turret_VS_Air_ranged	e	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L187
+defense	Forgotten	FOR_Turret_VS_Inf_ranged	r	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L188
+defense	Forgotten	FOR_Inf_VS_Inf	i	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L190
+defense	Forgotten	FOR_Veh_VS_Veh	o	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L191
+defense	Forgotten fortress	FOR_Fortress_DEF_Sniper	s	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L194
+defense	Forgotten fortress	FOR_Fortress_DEF_Inf_VS_Inf	i	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L195
+defense	Forgotten fortress	FOR_Fortress_DEF_Veh_VS_Air	p	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L196
+defense	Forgotten fortress	FOR_Fortress_DEF_Turret_VS_Inf	m	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L197
+defense	Forgotten fortress	FOR_Fortress_DEF_Turret_VS_Veh	c	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L198
+defense	Forgotten fortress	FOR_Fortress_DEF_Turret_VS_Air	f	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L199
+defense	Forgotten fortress	FOR_Fortress_DEF_Turret_VS_Veh_ranged	a	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L200
+defense	Forgotten fortress	FOR_Fortress_DEF_Turret_VS_Air_ranged	e	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L201
+defense	Forgotten fortress	FOR_Fortress_DEF_Turret_VS_Inf_ranged	r	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L202
+defense	Forgotten fortress	FOR_Fortress_DEF_Mammoth	d	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L203
+defense	Forgotten infected GDI	FOR_GDI_Wall	w	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L206
+defense	Forgotten infected GDI	FOR_GDI_Def_Predator	d	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L207
+defense	Forgotten infected GDI	FOR_GDI_Turret	m	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L208
+defense	Forgotten infected GDI	FOR_GDI_Def_Pitbull	p	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L209
+defense	Forgotten infected GDI	FOR_GDI_Barbwire	b	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L210
+defense	Forgotten infected GDI	FOR_GDI_Def_Zone Trooper	z	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L211
+defense	Forgotten infected GDI	FOR_GDI_Flak	f	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L212
+defense	Forgotten infected GDI	FOR_GDI_Def_Missile Squad	q	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L213
+defense	Forgotten infected GDI	FOR_GDI_Antitank Barrier	t	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L214
+defense	Forgotten infected GDI	FOR_GDI_Def_Sniper	s	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L215
+defense	Forgotten infected GDI	FOR_GDI_Cannon	c	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L216
+defense	Forgotten infected GDI	FOR_GDI_Def_APC Guardian	g	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L217
+defense	Forgotten infected GDI	FOR_GDI_Art Tank	a	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L218
+defense	Forgotten infected GDI	FOR_GDI_Art Air	e	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L219
+defense	Forgotten infected GDI	FOR_GDI_Art Inf	r	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L220
+defense	Forgotten infected Nod	FOR_NOD_Def_Wall	w	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L223
+defense	Forgotten infected Nod	FOR_NOD_Def_Scorpion Tank	d	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L224
+defense	Forgotten infected Nod	FOR_NOD_Def_MG Nest	m	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L225
+defense	Forgotten infected Nod	FOR_NOD_Def_Attack Bike	p	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L226
+defense	Forgotten infected Nod	FOR_NOD_Def_Barbwire	b	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L227
+defense	Forgotten infected Nod	FOR_NOD_Def_Black Hand	z	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L228
+defense	Forgotten infected Nod	FOR_NOD_Def_Flak	f	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L229
+defense	Forgotten infected Nod	FOR_NOD_Def_Militant Rocket Soldiers	q	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L230
+defense	Forgotten infected Nod	FOR_NOD_Def_Antitank Barrier	t	obstacle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L231
+defense	Forgotten infected Nod	FOR_NOD_Def_Confessor	s	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L232
+defense	Forgotten infected Nod	FOR_NOD_Def_Cannon	c	emplacement	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L233
+defense	Forgotten infected Nod	FOR_NOD_Def_Reckoner	g	mobile vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L234
+defense	Forgotten infected Nod	FOR_NOD_Def_Art Tank	a	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L235
+defense	Forgotten infected Nod	FOR_NOD_Def_Art Air	e	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L236
+defense	Forgotten infected Nod	FOR_NOD_Def_Art Inf	r	ranged defense	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L237
+offense	GDI	GDI_Riflemen	i	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L245
+offense	GDI	GDI_Missile Squad	q	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L246
+offense	GDI	GDI_Zone Trooper	z	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L247
+offense	GDI	GDI_Commando	c	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L248
+offense	GDI	GDI_Sniper Team	s	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L249
+offense	GDI	GDI_APC Guardian	g	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L250
+offense	GDI	GDI_Pitbull	p	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L251
+offense	GDI	GDI_Predator	d	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L252
+offense	GDI	GDI_Juggernaut	j	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L253
+offense	GDI	GDI_Mammoth	a	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L254
+offense	GDI	GDI_Orca	v	aircraft	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L255
+offense	GDI	GDI_Firehawk	f	aircraft	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L256
+offense	GDI	GDI_Paladin	o	aircraft	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L257
+offense	GDI	GDI_Kodiak	k	aircraft	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L258
+offense	Nod	NOD_Militants	i	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L261
+offense	Nod	NOD_Militant Rocket Soldiers	q	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L262
+offense	Nod	NOD_Black Hand	z	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L263
+offense	Nod	NOD_Commando	c	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L264
+offense	Nod	NOD_Confessor	s	infantry	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L265
+offense	Nod	NOD_Reckoner	g	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L266
+offense	Nod	NOD_Attack Bike	p	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L267
+offense	Nod	NOD_Scorpion Tank	d	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L268
+offense	Nod	NOD_Specter Artilery	j	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L269
+offense	Nod	NOD_Avatar	a	vehicle	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L270
+offense	Nod	NOD_Venom	v	aircraft	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L271
+offense	Nod	NOD_Vertigo	f	aircraft	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L272
+offense	Nod	NOD_Cobra	o	aircraft	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L273
+offense	Nod	NOD_Salamander	k	aircraft	community exporter mapping	https://github.com/zbluebugz/CnC-TA-Opt/blob/13b64a25ee8897ea988ecfbaf2c4a96a203e5f12/CnCTAOpt.link.user.js#L274

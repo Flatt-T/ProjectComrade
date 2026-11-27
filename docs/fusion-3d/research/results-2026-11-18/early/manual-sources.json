@@ -1,0 +1,131 @@
+[
+  {
+    "profile": "td",
+    "publisher_document_mirror": "https://static.wikia.nocookie.net/cnc_gamepedia_en/images/1/10/CC-Manual-UK.pdf/revision/latest",
+    "sha256": "65808f7a85fc0e74e7ff7c1988f168fde688b79b11fa5737b6301f0b35c9f560",
+    "pdf_pages": 92,
+    "selected_pdf_pages_one_based": [
+      10,
+      11,
+      15,
+      16,
+      39,
+      53,
+      56,
+      61,
+      67
+    ]
+  },
+  {
+    "profile": "ra1",
+    "publisher_document_mirror": "https://static.wikia.nocookie.net/cnc_gamepedia_en/images/7/7b/Red_Alert_1_Manual.pdf/revision/latest",
+    "sha256": "636b792a12740c23144b4f7062a1e279e36558cd607e616f74c92e8329aa2915",
+    "pdf_pages": 99,
+    "selected_pdf_pages_one_based": [
+      12,
+      17,
+      26,
+      43,
+      48,
+      49,
+      52,
+      53,
+      54,
+      59
+    ]
+  },
+  {
+    "profile": "ts",
+    "publisher_document_mirror": "https://www.bestoldgames.net/download/games/command-and-conquer-tiberian-sun/command-and-conquer-tiberian-sun-win-manual.pdf",
+    "sha256": "38034d677d0bc2b7cb7c946aa44f73656437d6c3fc96bada405abec18a03beb1",
+    "pdf_pages": 56,
+    "selected_pdf_pages_one_based": [
+      8,
+      11,
+      12,
+      13,
+      17,
+      31,
+      43
+    ]
+  },
+  {
+    "profile": "fs",
+    "publisher_document_mirror": "https://static.wikia.nocookie.net/cnc_gamepedia_en/images/3/37/Manual_Firestorm.pdf/revision/latest",
+    "sha256": "abb9ebbed0fe5e783a072c1eb0842fd76002af971128d147f25e61b25050b4c6",
+    "pdf_pages": 13,
+    "selected_pdf_pages_one_based": [
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "profile": "ra2combined",
+    "publisher_document_mirror": "https://static.wikia.nocookie.net/cnc_gamepedia_en/images/3/3b/CCUC-RA2-pcMANOLeUS.pdf/revision/latest",
+    "sha256": "f9342058dc252f6d79b410b3f33d4102a34b9932c76f34aeecbcb2396ad3446a",
+    "pdf_pages": 14,
+    "selected_pdf_pages_one_based": [
+      5,
+      6,
+      7,
+      9,
+      12,
+      13
+    ]
+  },
+  {
+    "profile": "yr",
+    "publisher_document_mirror": "https://gamepedia.cursecdn.com/cnc_gamepedia_en/8/8e/Red_Alert_2_-_Yuri%27s_Revenge_-_English.pdf",
+    "sha256": "359694c4f42cf241dad9a0dc283edbbd95322f79581a8cc55b58485099c502e4",
+    "pdf_pages": 36,
+    "selected_pdf_pages_one_based": [
+      15,
+      16,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ]
+  },
+  {
+    "profile": "generals",
+    "publisher_document_mirror": "https://files.cncnz.com/generals/Command_and_Conquer_-_Generals_-_UK_Manual_-_PC.pdf",
+    "sha256": "804e6119712a55c6cec53ba915410e18e289b23fa9b9d9cb6046a5779c2aa8d2",
+    "pdf_pages": 65,
+    "selected_pdf_pages_one_based": [
+      15,
+      27,
+      29,
+      31,
+      34,
+      35,
+      36,
+      39,
+      45
+    ]
+  },
+  {
+    "profile": "zh",
+    "publisher_document_mirror": "https://static.wikia.nocookie.net/cnc_gamepedia_en/images/b/b1/CNC_Generals_Zero_Hour_Manual_2015.pdf/revision/latest?cb=20180801163919&format=original",
+    "sha256": "36a217e261f21734e6749e4456ff10155ea88578bbbff3be44e3eb0ccfd2c7bd",
+    "pdf_pages": 22,
+    "selected_pdf_pages_one_based": [
+      6,
+      8,
+      9,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ]
+  }
+]

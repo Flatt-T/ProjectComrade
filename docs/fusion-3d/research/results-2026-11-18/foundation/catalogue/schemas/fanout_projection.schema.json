@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:fanout_projection",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "mode": {
+      "const": "offline_projection"
+    },
+    "leaves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "task_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "row_uid": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{16}$"
+          },
+          "row_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "stage": {
+            "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/stage"
+          },
+          "part": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999
+          },
+          "entity_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]*$"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 0
+          },
+          "specialist": {
+            "type": "string",
+            "minLength": 1
+          },
+          "profile": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]*$"
+          },
+          "target_profile": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "context": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "permitted_paths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "procedure": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "acceptance": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "non_goals": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          },
+          "blocked_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 0
+          },
+          "handoff": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publishable": {
+            "const": false
+          }
+        },
+        "required": [
+          "task_key",
+          "row_uid",
+          "row_sha256",
+          "stage",
+          "part",
+          "entity_id",
+          "dependencies",
+          "specialist",
+          "profile",
+          "target_profile",
+          "evidence",
+          "context",
+          "permitted_paths",
+          "outputs",
+          "procedure",
+          "acceptance",
+          "non_goals",
+          "blocked_by",
+          "handoff",
+          "publishable"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "withheld": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]*$"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true,
+            "minItems": 1
+          }
+        },
+        "required": [
+          "entity_id",
+          "reasons"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "mode",
+    "leaves",
+    "withheld"
+  ]
+}

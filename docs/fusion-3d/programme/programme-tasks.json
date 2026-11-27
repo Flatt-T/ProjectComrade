@@ -1,0 +1,662 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "OPS-001",
+      "title": "Reconcile the live programme baseline and preserve current work",
+      "workstream": "Programme integration",
+      "phase": 0,
+      "owner": "Baseline and release evidence specialist",
+      "depends_on": [],
+      "existing_issues": [
+        "THU-2487",
+        "THU-1331",
+        "THU-2224",
+        "THU-2244"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Establish current code, deployment and saved-state facts once; reconcile stale Linear summaries without restarting completed work.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Read all programme scope and existing release links; fetch current main, open PRs, working branches and latest owning issue comments.",
+        "Inventory actual served revisions for Classic and beta through permitted read-only operational access; if unavailable record exactly which live fact is unverified.",
+        "Map every relevant existing ticket to code/artifact evidence and classify implemented, partial, source-only, claimed, unverified or regression.",
+        "Record current rules/content identities and saved-version formats; identify preserved states and rollback artifacts without exposing secrets or production data.",
+        "Record the native Classic order-propagation gap and stub-suite limitations separately from Fusion progress.",
+        "Publish a dated baseline and delta against this planning SHA; open or link only reproducible newly discovered defects."
+      ],
+      "deliverables": [
+        "baseline.json with source/runtime revisions and evidence classifications",
+        "existing-work crosswalk with exact owning issue links",
+        "preservation manifest and initial blocker list"
+      ],
+      "acceptance": [
+        "No b16fa6a-era statement is presented as current without refresh.",
+        "Every claimed served version has direct dated evidence or is explicitly unknown.",
+        "Existing entities/saves and prior completed mechanisms are accounted for; no state mutation is required to establish baseline.",
+        "An independent reviewer can distinguish source inspection, reported history and newly reproduced results."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "bounded_work_order"
+    },
+    {
+      "id": "OPS-002",
+      "title": "Publish the decision register and freeze the mode boundaries",
+      "workstream": "Programme integration",
+      "phase": 0,
+      "owner": "Programme coordinator and gameplay director",
+      "depends_on": [
+        "OPS-001"
+      ],
+      "existing_issues": [
+        "THU-2487",
+        "THU-2445",
+        "THU-2234"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Translate the new owner request and accepted existing rules into an unambiguous authority register for Classic, Fusion homage and persistent Fusion.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Read source mandates and exact later amendments rather than interpreting issue titles.",
+        "Record the new full-3D Fusion mandate, complete content/terrain scope and separate Classic fidelity contract.",
+        "List deliberate new design defaults for bridges, camera, capability translation, quality tiers and cross-era availability with rationale and affected tasks.",
+        "Identify actual conflicts requiring owner decision, and distinguish them from reversible choices already delegated to the team.",
+        "Publish a versioned decision log with status, source, owner, superseded clause and test impact.",
+        "Require dependent work to reference decision IDs and permit independent work to continue around unresolved rows."
+      ],
+      "deliverables": [
+        "decisions.json and authority precedence matrix",
+        "profile separation acceptance cases",
+        "source-limited owner decision briefs where needed"
+      ],
+      "acceptance": [
+        "The no-3D historical Classic clause cannot block new Fusion rendering or disappear from Classic.",
+        "Persistent shields, Engineer consent, recovery, ownership and legacy worlds retain their exact amended contract.",
+        "No ambiguous decision is silently resolved by the implementation; no routine design default creates an unnecessary permission block."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "bounded_work_order"
+    },
+    {
+      "id": "OPS-003",
+      "title": "Resolve content rights and the public distribution route",
+      "workstream": "Programme integration",
+      "phase": 1,
+      "owner": "Rights and provenance specialist",
+      "depends_on": [
+        "OPS-002"
+      ],
+      "existing_issues": [
+        "THU-1332",
+        "THU-1367"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Prepare a component-level route for original/cleared art and source use, including the existing commercial features; keep lawful independent engineering unblocked. Acceptance of this early policy task covers the component ledger schema, concrete public-route decision brief and cleared seed/test inputs; later per-component evidence remains mandatory at production/packaging gates and is never presumed cleared.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Read the exact licences and current official EA modding terms linked in the source register; record repository revisions and terms dates.",
+        "Separate source-code use, rules/data derivation, original models, source designs, audio/voices, maps, logos and product naming.",
+        "Reconcile existing rights ledger and ads/payment/access products with each proposed release route.",
+        "For every component classify cleared, permission-needed, reference-only or excluded-by-explicit-decision, linking actual evidence and conditions.",
+        "Produce concrete alternatives for any incompatible public commercial route without inventing legal permission or deleting the requested content.",
+        "Make packaging fail closed for uncleared distributable bytes while allowing original fixtures, tools and unrelated cleared content to progress."
+      ],
+      "deliverables": [
+        "updated component rights ledger",
+        "commercial/distribution decision brief and exact proposed product boundaries",
+        "packaging eligibility rules and licence/source attribution bundle"
+      ],
+      "acceptance": [
+        "Every seed/test input has an evidenced use/distribution basis; the ledger and packaging policy require this for every later shipped component. Source-code GPL is not treated as artwork permission.",
+        "The existing paid/ad features have a documented compatibility outcome for the selected content route.",
+        "A specific unresolved asset blocks only its dependent distribution work, not all engine/research tasks.",
+        "No unsupported statement that original modelling automatically clears copied designs or trademarks appears."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "bounded_work_order"
+    },
+    {
+      "id": "OPS-004",
+      "title": "Establish specialist dispatch file ownership and independent review",
+      "workstream": "Programme integration",
+      "phase": 0,
+      "owner": "Fleet coordinator",
+      "depends_on": [
+        "OPS-002"
+      ],
+      "existing_issues": [],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Make the bounded-agent workflow executable using the published task graph, current repo capabilities and available agent runtime.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Read the task schema and verify stable plan IDs and real Linear IDs.",
+        "Create a readiness report from native blockers and accepted artifact hashes; use a topological queue.",
+        "Assign named specialist lanes, file/interface leases and separate branches/worktrees; serialize shared schemas, game.ts, lockfiles and registry integration.",
+        "Generate a context packet for each ready task with its exact inputs, decisions, file boundaries and criteria.",
+        "Exercise a representative handoff and review rejection with synthetic metadata; make resumed work locate the existing diff.",
+        "Implement or document dispatch through tools actually available; if concurrent agents are unavailable use the same roles sequentially without fabricating execution."
+      ],
+      "deliverables": [
+        "dispatch/readiness manifest",
+        "context packet and HANDOFF templates",
+        "file ownership map and independent reviewer routing"
+      ],
+      "acceptance": [
+        "A task with an unsatisfied blocker is never assigned as implementation-ready.",
+        "Two tasks cannot concurrently claim the same shared file without an explicit integration plan.",
+        "Context exhaustion leaves recoverable work with exact next action and no false Done status.",
+        "Worker self-review cannot satisfy independent acceptance."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "bounded_work_order"
+    },
+    {
+      "id": "OPS-005",
+      "title": "Generate complete bounded content production work orders",
+      "workstream": "Programme integration",
+      "phase": 2,
+      "owner": "Content production coordinator",
+      "depends_on": [
+        "OPS-004",
+        "ART-013",
+        "RES-003",
+        "RES-027"
+      ],
+      "existing_issues": [],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Turn each accepted census into actual per-faction/per-entity/per-terrain work orders with complete dependencies; this task must precede bulk production. Close the generator and accepted seed-publication proof independently; later independently accepted era batches reuse it. Whole-census closure is RES-028/029, not a prerequisite for building this generator.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Read the content-work-order contract and accepted research/schema outputs.",
+        "Implement idempotent source-key-to-task mapping; record census hash, capability version and task generation version.",
+        "Use the sole canonical key F3D-ENTITY-<rowUid>-<stage>-<part>, full SHA-256 plus 16-hex collision-checked rowUid from RES-003 identity. Stages are SPEC,SIM,MODEL,RIG,ANIM,FX_AUDIO_UI,INTEGRATE,REVIEW. ART-013 contributes asset-stage validation and never creates a second independent issue map.",
+        "Expand each required entity into behaviour, model, rig/animation, FX/audio, integration and independent acceptance stages; combine only the bounded simple cases allowed by the contract.",
+        "Materialize bounded implementation and independent-review work orders for each referenced capability ID/version, including environment, weather/ice/fire/contamination/deformation where sourced, victory/objective/mode policies, and non-entity rules. Use F3D-CAPABILITY-<immutable-capability-version-hash>-<stage>-<part> with retained full digest/collision checks; the same single publisher owns these IDs.",
+        "Create distinct faction integration, tech-tree, AI and terrain-kit work orders; recursively resolve referenced forms/summons/upgrades/neutral objects.",
+        "Create real child issues under the corresponding delivery gate, include the full context packet and native blockers, and preserve IDs on regeneration.",
+        "Emit set reconciliation reports and deliberately test missing mappings, duplicate alias hiding, changed census versions and unsupported capability references."
+      ],
+      "deliverables": [
+        "deterministic work-order generator and schema",
+        "actual generated issue map and per-entity context packets",
+        "coverage reconciliation report and negative fixtures"
+      ],
+      "acceptance": [
+        "Every required source row in each published, independently accepted batch maps to all required work stages or an explicit accepted disposition; generator acceptance includes the complete pinned seed batch, while RES-028/029 checks the eventual full census.",
+        "A missing animation/form/capability cannot silently default to a generic implementation.",
+        "Re-running generation creates no duplicate tasks and preserves completed evidence identities.",
+        "Ordinary batches contain at most one complex entity or five justified simple variants.",
+        "Whole-entity REVIEW cannot complete before SIM and FX_AUDIO_UI plus all applicable model/rig/animation evidence are independently accepted.",
+        "Every non-entity capability/environment/objective reference resolves to an implementation/review work order and accepted fixtures; a declaration or prose mention alone cannot unlock a pack."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "bounded_work_order"
+    },
+    {
+      "id": "OPS-006",
+      "title": "Maintain requirement evidence and change control through integration",
+      "workstream": "Programme integration",
+      "phase": 1,
+      "owner": "Requirements and integration coordinator",
+      "depends_on": [
+        "OPS-004"
+      ],
+      "existing_issues": [],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Keep one traceable requirement-to-source-to-task-to-candidate ledger as specialist work and new research resolve details.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Assign immutable requirement IDs to owner requirements, source-derived mechanics, terrain and profile-preservation constraints.",
+        "Link each to its source/decision, task, test/visual criterion and exact candidate identity.",
+        "On a schema or rule change calculate downstream task/assets/test impact and reopen only affected evidence.",
+        "Require expected/actual raw results and reviewer identity; distinguish partial, blocked and failed criteria.",
+        "Validate the ledger at every integration candidate and reject missing references, removed mandatory rows or evidence from incompatible versions.",
+        "Publish concise progress by verified requirements and remaining blockers, not output volume or token use."
+      ],
+      "deliverables": [
+        "requirements/evidence schema and validator",
+        "versioned traceability ledger",
+        "change-impact and gate readiness reports"
+      ],
+      "acceptance": [
+        "Each sentence claiming completion resolves to accepted candidate-specific evidence.",
+        "Changing a pack/rule/schema invalidates the correct dependent evidence rather than all unrelated progress.",
+        "Mandatory failed/unverified rows prevent the relevant gate from closing."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "bounded_work_order"
+    },
+    {
+      "id": "INT-001",
+      "title": "Integrate and qualify the first complete 3D battle slice",
+      "workstream": "Programme integration",
+      "phase": 4,
+      "owner": "Integration lead with gameplay and visual reviewers",
+      "depends_on": [
+        "OPS-006",
+        "UX-005",
+        "UX-006",
+        "ENG-026",
+        "ENG-046"
+      ],
+      "existing_issues": [
+        "THU-2449",
+        "THU-2452"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Integrate accepted engine/world/art/input work into an actual opposing-client battle covering the representative lifecycle, without presenting it as final catalogue delivery.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Freeze exact participating faction/entity/terrain versions and source/rights records.",
+        "Integrate reviewed branches in dependency order and resolve interfaces through their owners.",
+        "Run the base-power-production-harvesting-scouting-combat loop with independent commands from both clients.",
+        "Exercise tank-on-bridge and ship-below, collapse with occupants, deterministic reroute and engineer rebuild, plus cargo/capture/damage/repair.",
+        "Run persistent reconnect/worker-restart continuation with the same assets and compare authoritative state.",
+        "Capture strategic/close views, animation transitions and device measurements; obtain independent game-feel/art review and file exact defects."
+      ],
+      "deliverables": [
+        "immutable slice build manifest",
+        "multi-client trace, captures and state checksums",
+        "slice acceptance record with remaining full-programme scope"
+      ],
+      "acceptance": [
+        "Client A and B each cause distinct authoritative outcomes visible to the other; matching initial seeds alone fails.",
+        "Required bridge/economy/combat/state transitions occur in the real game, not a test gallery.",
+        "Reviewer accepts faction identity and play readability; all serious slice defects resolved.",
+        "The full title/entity/terrain delivery gates remain open after the slice."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "integration_gate"
+    },
+    {
+      "id": "INT-002",
+      "title": "Validate faction identity tactical feel and cross-era balance",
+      "workstream": "Programme integration",
+      "phase": 6,
+      "owner": "Gameplay director and independent RTS playtest specialist",
+      "depends_on": [
+        "INT-001",
+        "PKG-001",
+        "PKG-002",
+        "PKG-003",
+        "PKG-004",
+        "PKG-005",
+        "PKG-006",
+        "PKG-007",
+        "PKG-008",
+        "PKG-009",
+        "PKG-010",
+        "PKG-011",
+        "PKG-012",
+        "UX-008",
+        "RES-026"
+      ],
+      "existing_issues": [
+        "THU-2241"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Evaluate intended faction differences and cross-era interactions using accepted source benchmarks and deliberate Fusion translations, with traceable balance changes.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Read era mechanics/feel fixtures and all approved Fusion adaptation records.",
+        "Create controlled mirrored and cross-faction scenarios covering economy timing, harassment, scouting, expansion, infantry/armour/artillery/air/naval counters and recovery.",
+        "Compare command response, acceleration/turn/turret timings, engagement/reload rhythms, harvest routes, production emergence, power pressure and tactical audio/animation cues.",
+        "Run human play sessions where required by the visual/gameplay gates and AI scenario sweeps separately; record device, seeds, rules and participants without unsupported capacity claims.",
+        "Investigate systematic uncounterable interactions and inaccessible build paths; propose smallest profile-scoped balance changes with before/after results.",
+        "Accept changes only through the decision log and rerun affected matchups, preserving Classic and saved legacy profile values."
+      ],
+      "deliverables": [
+        "game-feel scorecard with per-faction evidence",
+        "cross-era interaction and counter matrix",
+        "versioned balance proposals and regression results"
+      ],
+      "acceptance": [
+        "No faction is accepted solely on colour or renamed shared stats.",
+        "Each required faction has a viable economy/tech path and counterplay under the selected Fusion rules.",
+        "Deliberate differences from references are visible and justified; source history is not rewritten to match balance choices.",
+        "One attractive scenario cannot average away a failed mandatory faction."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "integration_gate"
+    },
+    {
+      "id": "INT-003",
+      "title": "Reconcile the entire catalogue and terrain coverage before qualification",
+      "workstream": "Programme integration",
+      "phase": 6,
+      "owner": "Independent completeness auditor",
+      "depends_on": [
+        "INT-002",
+        "ART-020",
+        "UX-008",
+        "RES-029"
+      ],
+      "existing_issues": [],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Perform whole-programme set reconciliation after every era delivery gate, including animations, variants, civilian/neutral content and existing legacy packs.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Load pinned accepted research census, source-to-Fusion mapping, runtime output, art/clip manifests, terrain matrix and evidence ledger.",
+        "Compare exact source/runtime/asset/state sets rather than count totals.",
+        "Verify shared asset aliases and subfaction deltas; inspect every unexplained generic fallback, missing form, upgrade or required clip.",
+        "Confirm every era, released derivative and restricted content disposition remains visible and no mandatory content was silently deferred.",
+        "Regenerate contact-sheet indexes and require in-game evidence for every mapped object/state; use automated checks and independent visual review together.",
+        "Publish signed coverage results; route missing rows to their original production owners and keep the gate open."
+      ],
+      "deliverables": [
+        "full set-difference and coverage reports",
+        "reviewed exceptions/dispositions with authority",
+        "whole-catalogue acceptance ledger"
+      ],
+      "acceptance": [
+        "Zero unexplained required source keys, runtime definitions, animations, states or terrain kits are missing.",
+        "535/481 legacy definition totals are never presented as unique model or full-series completion totals.",
+        "Every required era gate and generated child has accepted evidence or an explicit blocking gap.",
+        "No uncited rights or source assumption is converted into a completed row."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "integration_gate"
+    },
+    {
+      "id": "INT-004",
+      "title": "Assemble the integrated qualification candidate and migration dossier",
+      "workstream": "Programme integration",
+      "phase": 7,
+      "owner": "Release qualification integrator",
+      "depends_on": [
+        "INT-003",
+        "ENG-042",
+        "ENG-043",
+        "ENG-044",
+        "WORLD-010",
+        "UX-007"
+      ],
+      "existing_issues": [
+        "THU-2244",
+        "THU-1367",
+        "THU-2487"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Bind accepted specialist evidence to one reproducible candidate and prove compatibility, security, performance and preserved worlds before rollout.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Freeze engine/rules/content/world/render/assets/schema/migrations and build artifact identifiers.",
+        "Run genuine gate suites and inspect skipped tests; reject echo-only success and incompatible evidence from earlier heads.",
+        "Execute old-save migrations and rollback drills on isolated permitted copies, including stable IDs/owners/balances/orders/cargo/shields/consent/region transfers.",
+        "Run network failure, worker loss, wake/catchup, hidden-state/privacy, mobile thermal and active-command capacity scenarios under their owners.",
+        "Run each advertised Classic and Fusion multiplayer journey honestly, including two-way command propagation; unresolved pre-existing Classic failures remain visible with owning issues.",
+        "Publish go/no-go with exact remaining cases, compatible rollback route and operator instructions."
+      ],
+      "deliverables": [
+        "immutable release manifest",
+        "qualification evidence matrix and migration conservation report",
+        "candidate-specific rollout/rollback dossier"
+      ],
+      "acceptance": [
+        "All required evidence identifies this integrated artifact or a justified compatible unchanged component.",
+        "Data conservation and deterministic state checks pass across migration and failure windows.",
+        "Performance and capacity claims state measured workloads and devices.",
+        "No missing operational, rights, Classic or persistent gate is silently waived."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "integration_gate"
+    },
+    {
+      "id": "INT-005",
+      "title": "Deploy the qualified upgrade and verify actual player journeys",
+      "workstream": "Programme integration",
+      "phase": 8,
+      "owner": "Authorized release operator",
+      "depends_on": [
+        "INT-004",
+        "INT-006"
+      ],
+      "existing_issues": [
+        "THU-2487",
+        "THU-2244",
+        "THU-1367"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Promote the exact qualified artifacts under existing project authorization and verify real new/returning gameplay plus rollback readiness.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Read current deployment authority and the accepted candidate dossier; preserve isolated destinations and data boundaries.",
+        "Confirm backups, retained artifacts, rollback compatibility and operational readiness.",
+        "Promote through the established release channel, recording actual artifact and migration identities rather than relying on branch labels.",
+        "Observe actual serving revisions at each origin and complete new and resumed persistent-player journeys with saved assets.",
+        "Verify required Classic/Fusion opposing-client play, WSS, visibility and relevant account/platform regressions.",
+        "Watch health/performance/error signals and execute the documented rollback if its criteria are met; attach final evidence and remaining restrictions to existing and new release owners."
+      ],
+      "deliverables": [
+        "deployment and migration record",
+        "live player-journey evidence",
+        "operational handover and tested rollback readiness"
+      ],
+      "acceptance": [
+        "Served build matches the qualified manifest and required journeys pass after deployment.",
+        "Existing worlds and ownership survive; no new starter grant overwrites returning players.",
+        "All mandatory programme criteria are accepted before closing THU-2533.",
+        "Deployment failure yields an exact recovery state, not a false Done record."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "integration_gate"
+    },
+    {
+      "id": "INT-006",
+      "title": "Publish player developer and fleet maintenance documentation",
+      "workstream": "Programme integration",
+      "phase": 8,
+      "owner": "Technical documentation specialist",
+      "depends_on": [
+        "INT-004"
+      ],
+      "existing_issues": [
+        "THU-1963",
+        "THU-1982"
+      ],
+      "context_files": [
+        "00-START-HERE.md",
+        "programme/02-fleet-execution.md",
+        "programme/01-authority-and-scope.md",
+        "programme/03-quality-and-release.md",
+        "programme/04-content-work-order-contract.md",
+        "programme/05-existing-work-crosswalk.md"
+      ],
+      "scope": "Provide accurate user/developer documentation for the delivered experience and a reproducible process for future packs and fixes.",
+      "non_goals": [
+        "Do not replace another specialist's scoped implementation or certify it without evidence.",
+        "Do not reset saved worlds, change established protections or silently narrow the requested catalogue."
+      ],
+      "steps": [
+        "Read accepted source/mapping manifests and actual integrated runtime behavior.",
+        "Document controls, camera/mobile gestures, faction/tech differences, terrain/bridge interactions and persistent rules using verified screenshots.",
+        "Document pack/asset/animation schemas, source/provenance workflow, work-order generation and compatibility/migration process.",
+        "Update knowledgebase and onboarding for changed features without claiming unavailable modes or content.",
+        "Validate links, instructions and examples against the candidate; have a fresh agent execute the documented development onboarding.",
+        "Publish maintenance ownership, known restrictions and future-source revision intake without resetting the programme."
+      ],
+      "deliverables": [
+        "player and developer guides",
+        "verified onboarding and pack-authoring examples",
+        "maintenance and evidence update runbook"
+      ],
+      "acceptance": [
+        "A new contributor can follow the guide using only documented prerequisites and reach the accepted test scene.",
+        "Player guidance matches actual commands and rules on desktop and mobile.",
+        "No restricted or unfinished content is advertised as delivered."
+      ],
+      "guardrails": [
+        "Refresh exact source and candidate revisions before asserting implementation or deployment status.",
+        "A missing source, rights decision, skipped check or placeholder script remains explicitly unverified.",
+        "Use existing authorization; do not invent repeated approval requests for reversible work."
+      ],
+      "handoff": "Return the exact revision, changed records/files, criterion-by-criterion expected/actual/evidence/verdict, independent reviewer, remaining blockers and next ready task.",
+      "kind": "integration_gate"
+    }
+  ]
+}

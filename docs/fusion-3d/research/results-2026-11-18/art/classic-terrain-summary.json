@@ -1,0 +1,93 @@
+[
+  {
+    "game": "TD",
+    "table": "template",
+    "source": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/CDATA.CPP",
+    "git_blob": "2e499c607c7e1d027d9ad119790864560e086144",
+    "declarations": 217,
+    "distinct_ini": 216,
+    "theater_memberships": {
+      "WINTER": 141,
+      "DESERT": 167,
+      "TEMPERATE": 143,
+      "JUNGLE": 2
+    },
+    "conditional_declarations": {},
+    "category_text_keys": {
+      "TXT_CLEAR": 2,
+      "TXT_ROAD": 43,
+      "TXT_WATER": 65,
+      "TXT_SLOPE": 44,
+      "TXT_BRUSH": 10,
+      "TXT_PATCH": 16,
+      "TXT_RIVER": 37
+    }
+  },
+  {
+    "game": "TD",
+    "table": "prop",
+    "source": "https://github.com/electronicarts/CnC_Tiberian_Dawn/blob/e0d372dc582c053a699114942b984dad0457f9b3/TDATA.CPP",
+    "git_blob": "d5f728fec24e33c6f34a7fc8db012372d2519fcf",
+    "declarations": 32,
+    "distinct_ini": 32,
+    "theater_memberships": {
+      "WINTER": 22,
+      "TEMPERATE": 22,
+      "DESERT": 12
+    },
+    "conditional_declarations": {},
+    "category_text_keys": {
+      "TXT_TREE": 23,
+      "TXT_BLOSSOM_TREE": 2,
+      "TXT_ROCK": 7
+    }
+  },
+  {
+    "game": "RA1",
+    "table": "template",
+    "source": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/CDATA.CPP",
+    "git_blob": "39cf45c8235ceeac48f0e8cedf95b455896cf319",
+    "declarations": 402,
+    "distinct_ini": 401,
+    "theater_memberships": {
+      "TEMPERATE": 261,
+      "SNOW": 260,
+      "INTERIOR": 143
+    },
+    "conditional_declarations": {
+      "AntHill": "#ifdef FIXIT_ANTS"
+    },
+    "category_text_keys": {
+      "TXT_CLEAR": 2,
+      "TXT_ROAD": 45,
+      "TXT_WATER": 2,
+      "TXT_SHORE": 94,
+      "TXT_SLOPE": 44,
+      "TXT_PATCH": 9,
+      "TXT_RIVER": 31,
+      "TXT_BRIDGE": 22,
+      "TXT_ROCK": 12,
+      "TXT_INTERIOR": 141
+    }
+  },
+  {
+    "game": "RA1",
+    "table": "prop",
+    "source": "https://github.com/electronicarts/CnC_Red_Alert/blob/0dc09bb1d6188d1ec79ab4765b22a48b75ffee32/CODE/TDATA.CPP",
+    "git_blob": "aded174ec16ecddae3fcfef827c711d9b19a6080",
+    "declarations": 35,
+    "distinct_ini": 35,
+    "theater_memberships": {
+      "TEMPERATE": 21,
+      "SNOW": 26,
+      "INTERIOR": 9
+    },
+    "conditional_declarations": {},
+    "category_text_keys": {
+      "TXT_ORE_MINE": 1,
+      "TXT_CRATES": 9,
+      "TXT_ICE": 5,
+      "TXT_TREE": 20
+    }
+  }
+]

@@ -1,0 +1,2399 @@
+{
+  "xml_files": [
+    {
+      "path": "Tiberium Wars/Xml/GDI/Units/GDIDropShip.xml",
+      "blob": "883d6263f546eb4b764186662c57a93a251da780",
+      "line": 8,
+      "reason": "Opening and ending tag mismatch: AssetDeclaration line 4 and Includes, line 8, column 13",
+      "title": "tw",
+      "cause": "A comment precedes the XML declaration and the Includes opening tag is missing. The source comment designates the dropship as superseded.",
+      "projections": [
+        {
+          "operation": "omit misplaced prolog and restore missing open Includes",
+          "declarations": [
+            {
+              "source_line": 27,
+              "local_source_facts": {
+                "id": "GDIDropship",
+                "parent": "BaseVehicle",
+                "declared": {
+                  "Side": "GDI",
+                  "EditorSorting": "UNIT",
+                  "EditorName": "GDIDropship",
+                  "SelectPortrait": "Portrait_GDIOx",
+                  "ButtonImage": "Portrait_GDIOx",
+                  "BuildCost": "10",
+                  "BuildTime": "1.0",
+                  "CommandSet": "EmptyCommandSet",
+                  "ProductionQueueType": "AIRCRAFT",
+                  "UnitCategory": "AIRCRAFT",
+                  "TransportSlotCount": "0",
+                  "RadarPriority": "UNIT",
+                  "KindOf": "PRELOAD CAN_CAST_REFLECTIONS CAN_ATTACK SELECTABLE SCORE AIRCRAFT PRODUCED_AT_HELIPAD VEHICLE",
+                  "ThreatLevel": "10"
+                },
+                "name_key": "Name:GDIOx",
+                "movement": [
+                  {
+                    "Locomotor": "GDIDropshipLocomotor",
+                    "Condition": "NORMAL",
+                    "Speed": "160.0"
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "220.0"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "GDIDropshipArmor",
+                    "DamageFX": "VehicleDamageFX"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "GUDropShip_SKN"
+                    ]
+                  }
+                ],
+                "animation": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_IDLA",
+                        "AnimationMode": "LOOP"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "DOOR_1_OPENING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_OPNA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "DOOR_1_CLOSING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_CLSA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING TURN_LEFT_HIGH_SPEED",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_HSTL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING TURN_RIGHT_HIGH_SPEED",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_HSTR",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING TURN_LEFT",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_TRNL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING TURN_RIGHT",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_TRNR",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "ACCELERATE",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_ACCL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "DECELERATE",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_DECL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_FLYA",
+                        "AnimationMode": "LOOP",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "Physics",
+                  "ProductionUpdate",
+                  "FlammableUpdate",
+                  "DestroyDie",
+                  "FXListBehavior",
+                  "JetAIUpdate"
+                ],
+                "geometry": [
+                  {
+                    "Type": "BOX",
+                    "MajorRadius": "20.0",
+                    "MinorRadius": "3.0",
+                    "Height": "25.0"
+                  }
+                ],
+                "audio_events": [
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_PredatorVoiceSelect"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_PredatorVoiceSelect"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_PredatorVoiceSelect"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_PredatorVoiceSelect"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:FireHawkMoveStart"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_FireHawkAmbientLoop"
+                  }
+                ],
+                "production_modules": [
+                  {
+                    "type": "ProductionUpdate"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "180",
+                    "ShroudClearingRange": "600"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Tiberium Wars/Xml/Includes/GarrisonableStructureBehaviors.xml",
+      "blob": "050ede4b90df3b5b50e6deef85b67bdefec67fd8",
+      "line": 5,
+      "reason": "Start tag expected, '<' not found, line 5, column 1",
+      "title": "tw",
+      "cause": "Empty XML fragment. Raw bytes contain only a prolog, with a stray comment terminator in four editions.",
+      "projections": []
+    },
+    {
+      "path": "Tiberium Wars/Xml/Templates/Structure.xml",
+      "blob": "5f2a773a5ea7f23b2669175b2b56f01d085ada6a",
+      "line": 64,
+      "reason": "Opening and ending tag mismatch: Shape line 60 and Geometry, line 64, column 14",
+      "title": "tw",
+      "cause": "Template has an unterminated empty geometry Shape. The structure, side and display identifiers are author placeholders.",
+      "projections": [
+        {
+          "operation": "close empty Shape",
+          "declarations": [
+            {
+              "source_line": 21,
+              "local_source_facts": {
+                "id": "StructureName",
+                "declared": {
+                  "Side": "StructureNameSide",
+                  "EditorSorting": "STRUCTURE",
+                  "EditorName": "StructureName",
+                  "SelectPortrait": "SABarracks_L",
+                  "ButtonImage": "SABarracks",
+                  "BuildCost": "1",
+                  "BuildTime": "10.0",
+                  "CommandSet": "EmptyCommandSet",
+                  "TransportSlotCount": "1",
+                  "RadarPriority": "STRUCTURE",
+                  "KindOf": "STRUCTURE SELECTABLE IMMOBILE CAN_CAST_REFLECTIONS"
+                },
+                "name_key": "StructureName",
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "3000.0"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "StructureNameArmor",
+                    "DamageFX": "GenericStructureDamageFX"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "NBConYard"
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "StructureCollapseUpdate"
+                ],
+                "geometry": [
+                  {
+                    "Type": "CYLINDER",
+                    "MajorRadius": "50.0",
+                    "Height": "100.0"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "100",
+                    "ShroudClearingRange": "200"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Kanes Wrath/Xml/Includes/GarrisonableStructureBehaviors.xml",
+      "blob": "12338ba24052e51b68b666d435391072bf89e73b",
+      "line": 2,
+      "reason": "Start tag expected, '<' not found, line 2, column 1",
+      "title": "kw",
+      "cause": "Empty XML fragment. Raw bytes contain only a prolog, with a stray comment terminator in four editions.",
+      "projections": []
+    },
+    {
+      "path": "Red Alert 3/Xml/Civilian/Mykonos_MY/Buildings/MY_Boat_01b.xml",
+      "blob": "3b11f87e9a2226f2278af19ad0c8fc7e47e587e8",
+      "line": 8,
+      "reason": "XML declaration allowed only at the start of the document, line 8, column 8",
+      "title": "ra3",
+      "cause": "Complete second XML document embedded inside outer Includes list. Each document declares the same object ID with a different parent.",
+      "projections": [
+        {
+          "operation": "outer document, embedded document removed",
+          "declarations": [
+            {
+              "source_line": 133,
+              "local_source_facts": {
+                "id": "MY_Boat_01b",
+                "parent": "BaseCivilianStructureNoGarrison",
+                "declared": {
+                  "EditorSorting": "STRUCTURE",
+                  "EditorName": "MY_Boat_01b"
+                },
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "MY_Boat_01b"
+                    ]
+                  },
+                  {
+                    "conditions": "RUBBLE",
+                    "kind": "PARSE_NORMAL"
+                  }
+                ],
+                "animation": [
+                  {
+                    "kind": "PARSE_DEFAULT"
+                  }
+                ],
+                "behavior_classes": [
+                  "Physics",
+                  "BuildingDestructionBehavior",
+                  "FXListBehavior",
+                  "CreateObjectDie"
+                ],
+                "geometry": [
+                  {
+                    "Type": "BOX",
+                    "MajorRadius": "9.06941",
+                    "MinorRadius": "43.0412",
+                    "Height": "27.1076"
+                  }
+                ],
+                "audio_events": [
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "HumanFaction_MediumBuilding_LightDamageMS"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "HumanFaction_MediumBuilding_HeavyDamageMS"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        },
+        {
+          "operation": "embedded document parsed alone",
+          "declarations": [
+            {
+              "source_line": 24,
+              "local_source_facts": {
+                "id": "MY_Boat_01b",
+                "parent": "BaseCrushableObstacle",
+                "declared": {
+                  "EditorSorting": "STRUCTURE",
+                  "EditorName": "MY_Boat_01b"
+                },
+                "movement": [
+                  {
+                    "Locomotor": "AlliedAntiAirShipWaterLocomotor",
+                    "Condition": "NORMAL",
+                    "Speed": "125.0"
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "400"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "MY_Boat_01b"
+                    ]
+                  },
+                  {
+                    "conditions": "RUBBLE",
+                    "kind": "PARSE_NORMAL"
+                  }
+                ],
+                "animation": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "clips": [
+                      {
+                        "AnimationName": "MY_Boat_01b",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "Physics",
+                  "FXListBehavior",
+                  "CreateObjectDie"
+                ],
+                "geometry": [
+                  {
+                    "Type": "BOX",
+                    "MajorRadius": "53.0816",
+                    "MinorRadius": "11.9693",
+                    "Height": "89.689"
+                  }
+                ],
+                "audio_events": [
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "HumanFaction_MediumBuilding_LightDamageMS"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "HumanFaction_MediumBuilding_HeavyDamageMS"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Red Alert 3/Xml/Includes/GarrisonableStructureBehaviors.xml",
+      "blob": "050ede4b90df3b5b50e6deef85b67bdefec67fd8",
+      "line": 5,
+      "reason": "Start tag expected, '<' not found, line 5, column 1",
+      "title": "ra3",
+      "cause": "Empty XML fragment. Raw bytes contain only a prolog, with a stray comment terminator in four editions.",
+      "projections": []
+    },
+    {
+      "path": "Red Alert 3/Xml/Templates/Structure.xml",
+      "blob": "869b4b69091169bb67e74339bc8076c81ad507ad",
+      "line": 63,
+      "reason": "Opening and ending tag mismatch: Shape line 59 and Geometry, line 63, column 14",
+      "title": "ra3",
+      "cause": "Template has an unterminated empty geometry Shape. The structure, side and display identifiers are author placeholders.",
+      "projections": [
+        {
+          "operation": "close empty Shape",
+          "declarations": [
+            {
+              "source_line": 20,
+              "local_source_facts": {
+                "id": "StructureName",
+                "declared": {
+                  "Side": "StructureNameSide",
+                  "EditorSorting": "STRUCTURE",
+                  "EditorName": "StructureName",
+                  "SelectPortrait": "SABarracks_L",
+                  "ButtonImage": "SABarracks",
+                  "BuildTime": "10.0",
+                  "CommandSet": "EmptyCommandSet",
+                  "TransportSlotCount": "1",
+                  "RadarPriority": "STRUCTURE",
+                  "KindOf": "STRUCTURE SELECTABLE IMMOBILE CAN_CAST_REFLECTIONS"
+                },
+                "name_key": "StructureName",
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "3000.0"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "StructureNameArmor",
+                    "DamageFX": "GenericStructureDamageFX"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "NBConYard"
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "StructureCollapseUpdate"
+                ],
+                "geometry": [
+                  {
+                    "Type": "CYLINDER",
+                    "MajorRadius": "50.0",
+                    "Height": "100.0"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "100",
+                    "ShroudClearingRange": "200"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Uprising/Xml/Civilian/Mykonos_MY/Buildings/MY_Boat_01b.xml",
+      "blob": "3b11f87e9a2226f2278af19ad0c8fc7e47e587e8",
+      "line": 8,
+      "reason": "XML declaration allowed only at the start of the document, line 8, column 8",
+      "title": "uprising",
+      "cause": "Complete second XML document embedded inside outer Includes list. Each document declares the same object ID with a different parent.",
+      "projections": [
+        {
+          "operation": "outer document, embedded document removed",
+          "declarations": [
+            {
+              "source_line": 133,
+              "local_source_facts": {
+                "id": "MY_Boat_01b",
+                "parent": "BaseCivilianStructureNoGarrison",
+                "declared": {
+                  "EditorSorting": "STRUCTURE",
+                  "EditorName": "MY_Boat_01b"
+                },
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "MY_Boat_01b"
+                    ]
+                  },
+                  {
+                    "conditions": "RUBBLE",
+                    "kind": "PARSE_NORMAL"
+                  }
+                ],
+                "animation": [
+                  {
+                    "kind": "PARSE_DEFAULT"
+                  }
+                ],
+                "behavior_classes": [
+                  "Physics",
+                  "BuildingDestructionBehavior",
+                  "FXListBehavior",
+                  "CreateObjectDie"
+                ],
+                "geometry": [
+                  {
+                    "Type": "BOX",
+                    "MajorRadius": "9.06941",
+                    "MinorRadius": "43.0412",
+                    "Height": "27.1076"
+                  }
+                ],
+                "audio_events": [
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "HumanFaction_MediumBuilding_LightDamageMS"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "HumanFaction_MediumBuilding_HeavyDamageMS"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        },
+        {
+          "operation": "embedded document parsed alone",
+          "declarations": [
+            {
+              "source_line": 24,
+              "local_source_facts": {
+                "id": "MY_Boat_01b",
+                "parent": "BaseCrushableObstacle",
+                "declared": {
+                  "EditorSorting": "STRUCTURE",
+                  "EditorName": "MY_Boat_01b"
+                },
+                "movement": [
+                  {
+                    "Locomotor": "AlliedAntiAirShipWaterLocomotor",
+                    "Condition": "NORMAL",
+                    "Speed": "125.0"
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "400"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "MY_Boat_01b"
+                    ]
+                  },
+                  {
+                    "conditions": "RUBBLE",
+                    "kind": "PARSE_NORMAL"
+                  }
+                ],
+                "animation": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "clips": [
+                      {
+                        "AnimationName": "MY_Boat_01b",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "Physics",
+                  "FXListBehavior",
+                  "CreateObjectDie"
+                ],
+                "geometry": [
+                  {
+                    "Type": "BOX",
+                    "MajorRadius": "53.0816",
+                    "MinorRadius": "11.9693",
+                    "Height": "89.689"
+                  }
+                ],
+                "audio_events": [
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "HumanFaction_MediumBuilding_LightDamageMS"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "HumanFaction_MediumBuilding_HeavyDamageMS"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Uprising/Xml/Includes/GarrisonableStructureBehaviors.xml",
+      "blob": "050ede4b90df3b5b50e6deef85b67bdefec67fd8",
+      "line": 5,
+      "reason": "Start tag expected, '<' not found, line 5, column 1",
+      "title": "uprising",
+      "cause": "Empty XML fragment. Raw bytes contain only a prolog, with a stray comment terminator in four editions.",
+      "projections": []
+    },
+    {
+      "path": "Uprising/Xml/Templates/Structure.xml",
+      "blob": "869b4b69091169bb67e74339bc8076c81ad507ad",
+      "line": 63,
+      "reason": "Opening and ending tag mismatch: Shape line 59 and Geometry, line 63, column 14",
+      "title": "uprising",
+      "cause": "Template has an unterminated empty geometry Shape. The structure, side and display identifiers are author placeholders.",
+      "projections": [
+        {
+          "operation": "close empty Shape",
+          "declarations": [
+            {
+              "source_line": 20,
+              "local_source_facts": {
+                "id": "StructureName",
+                "declared": {
+                  "Side": "StructureNameSide",
+                  "EditorSorting": "STRUCTURE",
+                  "EditorName": "StructureName",
+                  "SelectPortrait": "SABarracks_L",
+                  "ButtonImage": "SABarracks",
+                  "BuildTime": "10.0",
+                  "CommandSet": "EmptyCommandSet",
+                  "TransportSlotCount": "1",
+                  "RadarPriority": "STRUCTURE",
+                  "KindOf": "STRUCTURE SELECTABLE IMMOBILE CAN_CAST_REFLECTIONS"
+                },
+                "name_key": "StructureName",
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "3000.0"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "StructureNameArmor",
+                    "DamageFX": "GenericStructureDamageFX"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "NBConYard"
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "StructureCollapseUpdate"
+                ],
+                "geometry": [
+                  {
+                    "Type": "CYLINDER",
+                    "MajorRadius": "50.0",
+                    "Height": "100.0"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "100",
+                    "ShroudClearingRange": "200"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Tiberian Twilight/Xml/BaseObjects/BaseCivilian.xml",
+      "blob": "713e4381f2a03dd0218c339bb7f6a8b8d0293544",
+      "line": 26,
+      "reason": "error parsing attribute name, line 26, column 3",
+      "title": "tt",
+      "cause": "GameObject opening tag lacks its terminal angle bracket before ArmorSet.",
+      "projections": [
+        {
+          "operation": "close opening GameObject tag",
+          "declarations": [
+            {
+              "source_line": 25,
+              "local_source_facts": {
+                "id": "BaseCivilian",
+                "parent": "BaseObject",
+                "declared": {
+                  "Side": "Civilian",
+                  "EditorSorting": "UNIT",
+                  "CommandSet": "EmptyCommandSet",
+                  "ProductionQueueType": "INFANTRY",
+                  "UnitCategory": "INFANTRY",
+                  "WeaponCategory": "GUN",
+                  "TransportSlotCount": "0",
+                  "RadarPriority": "UNIT",
+                  "KindOf": "NO_COLLIDE NOT_AUTOACQUIRABLE PATH_THROUGH_INFANTRY UNATTACKABLE CIVILIAN_UNIT MOVE_FOR_NOONE",
+                  "ThreatLevel": "10"
+                },
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "200.0"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "NoArmor",
+                    "DamageFX": "InfantryDamageFX"
+                  }
+                ],
+                "behavior_classes": [
+                  "Physics",
+                  "DestroyDie",
+                  "AttributeModifierPoolUpdate",
+                  "SquishCollide",
+                  "AnimalAIUpdate"
+                ],
+                "geometry": [
+                  {
+                    "Type": "CYLINDER",
+                    "MajorRadius": "1.0",
+                    "Height": "13.0"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "100",
+                    "ShroudClearingRange": "0"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUFemale1.xml",
+                  "line": 70
+                },
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUFemale2x.xml",
+                  "line": 73
+                },
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUFemale3x.xml",
+                  "line": 73
+                },
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUFemale4x.xml",
+                  "line": 73
+                },
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUMale1.xml",
+                  "line": 67
+                },
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUMale2x.xml",
+                  "line": 70
+                },
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUMale3x.xml",
+                  "line": 70
+                },
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUMale4x.xml",
+                  "line": 70
+                },
+                {
+                  "path": "Tiberian Twilight/Xml/Civilian/Units/CUMale5x.xml",
+                  "line": 70
+                }
+              ],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Tiberian Twilight/Xml/Includes/GarrisonableStructureBehaviors.xml",
+      "blob": "050ede4b90df3b5b50e6deef85b67bdefec67fd8",
+      "line": 5,
+      "reason": "Start tag expected, '<' not found, line 5, column 1",
+      "title": "tt",
+      "cause": "Empty XML fragment. Raw bytes contain only a prolog, with a stray comment terminator in four editions.",
+      "projections": []
+    },
+    {
+      "path": "Tiberian Twilight/Xml/Obsolete/GDI/Units/GDIDropShip.xml",
+      "blob": "f8e7a444ecdbc00e88569205defa0c781a97dbaa",
+      "line": 8,
+      "reason": "Opening and ending tag mismatch: AssetDeclaration line 4 and Includes, line 8, column 13",
+      "title": "tt",
+      "cause": "A comment precedes the XML declaration and the Includes opening tag is missing. The source comment designates the dropship as superseded.",
+      "projections": [
+        {
+          "operation": "omit misplaced prolog and restore missing open Includes",
+          "declarations": [
+            {
+              "source_line": 22,
+              "local_source_facts": {
+                "id": "GDIDropship",
+                "parent": "BaseAircraft",
+                "declared": {
+                  "Side": "GDI",
+                  "EditorName": "GDIDropship",
+                  "SelectPortrait": "Portrait_GDIOx",
+                  "ButtonImage": "Portrait_GDIOx",
+                  "BuildTime": "1.0",
+                  "CommandSet": "EmptyCommandSet",
+                  "TransportSlotCount": "0",
+                  "KindOf": "+PRODUCED_AT_HELIPAD -CAN_BE_FAVORITE_UNIT",
+                  "ThreatLevel": "10"
+                },
+                "name_key": "Name:GDIOx",
+                "movement": [
+                  {
+                    "Locomotor": "GDIDropshipLocomotor",
+                    "Condition": "NORMAL",
+                    "Speed": "160.0"
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "220.0"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "GDIDropshipArmor",
+                    "DamageFX": "VehicleDamageFX"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "GUDropShip_SKN"
+                    ]
+                  }
+                ],
+                "animation": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_IDLA",
+                        "AnimationMode": "LOOP"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "DOOR_1_OPENING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_OPNA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "DOOR_1_CLOSING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_CLSA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING TURN_LEFT_HIGH_SPEED",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_HSTL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING TURN_RIGHT_HIGH_SPEED",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_HSTR",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING TURN_LEFT",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_TRNL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING TURN_RIGHT",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_TRNR",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "ACCELERATE",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_ACCL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "DECELERATE",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_DECL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUDropShip_FLYA",
+                        "AnimationMode": "LOOP",
+                        "AnimationBlendTime": "15"
+                      }
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "Physics",
+                  "DestroyDie",
+                  "FXListBehavior",
+                  "JetAIUpdate"
+                ],
+                "geometry": [
+                  {
+                    "Type": "BOX",
+                    "MajorRadius": "20.0",
+                    "MinorRadius": "3.0",
+                    "Height": "25.0"
+                  }
+                ],
+                "audio_events": [
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_PredatorVoiceSelect"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_PredatorVoiceSelect"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_PredatorVoiceSelect"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_PredatorVoiceSelect"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:FireHawkMoveStart"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "AudioEvent:TEMP_FireHawkAmbientLoop"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "180",
+                    "ShroudClearingRange": "600"
+                  }
+                ],
+                "account_costs": [
+                  {
+                    "Account": "=$ACCOUNT_CREDIT",
+                    "Amount": "10"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Tiberian Twilight/Xml/Obsolete/GDI/Units/GDIInfantryL.xml",
+      "blob": "12b2613a83bc74592e09f075a7ad8e9b37090108",
+      "line": 141,
+      "reason": "Opening and ending tag mismatch: ScriptedModelDraw line 133 and ModelConditionState, line 141, column 27",
+      "title": "tt",
+      "cause": "An immediate duplicate ModelConditionState closing tag appears in the first draw block of the Obsolete definition.",
+      "projections": [
+        {
+          "operation": "discard one duplicated close tag",
+          "declarations": [
+            {
+              "source_line": 117,
+              "local_source_facts": {
+                "id": "GDIInfantryL",
+                "parent": "BaseInfantry",
+                "declared": {
+                  "Side": "GDI",
+                  "EditorSorting": "UNIT",
+                  "EditorName": "GDIInfantryL",
+                  "SelectPortrait": "Portrait_CombatEngineer",
+                  "ButtonImage": "Portrait_CombatEngineer",
+                  "BuildTime": "5",
+                  "CommandPoints": "5",
+                  "CommandSet": "GDIInfantryLCommandSet",
+                  "UnitCategory": "INFANTRY",
+                  "TransportSlotCount": "1",
+                  "RadarPriority": "UNIT",
+                  "KindOf": "+CAN_CAPTURE +SKIRMISH_AI_DONT_GARRISON +ENGINEER +CAN_BE_FAVORITE_UNIT +IGNORES_SELECT_ALL +NON_COMBATANT +HOTKEY_CYCLE_UNIT",
+                  "ThreatLevel": "10"
+                },
+                "name_key": "Name:GDIInfantryL",
+                "movement": [
+                  {
+                    "Locomotor": "HumanLocomotor",
+                    "Condition": "NORMAL",
+                    "Speed": "50"
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "300.0"
+                  }
+                ],
+                "weapons": [
+                  {
+                    "Template": "CombatEngineerWeapon",
+                    "Ordering": "PRIMARY_WEAPON"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "GDIInfantryLArmor",
+                    "DamageFX": "InfantryDamageFX"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "GUCEngineer_SKN"
+                    ]
+                  },
+                  {
+                    "conditions": "INSIDE_GARRISON",
+                    "kind": "PARSE_NORMAL"
+                  }
+                ],
+                "animation": [
+                  {
+                    "when": "FORMATION_PREVIEW",
+                    "kind": "PARSE_NORMAL"
+                  },
+                  {
+                    "state": "STATE_Bored",
+                    "kind": "PARSE_DEFAULT",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_BIDA",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_BIFA",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_BIFB",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_BIFC",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_BIFD",
+                        "AnimationMode": "ONCE"
+                      }
+                    ],
+                    "has_script": true
+                  },
+                  {
+                    "when": "STUNNED_FLAILING",
+                    "state": "STATE_stunned_flailing",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_FLYA",
+                        "AnimationMode": "LOOP"
+                      }
+                    ]
+                  },
+                  {
+                    "state": "STATE_stunned_landing",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_LNDA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "FRONTCRUSHED",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_CDTA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "BACKCRUSHED",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_CDTB",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "DYING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_DIEA",
+                        "AnimationMode": "ONCE",
+                        "AnimNickName": "DTA"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "FIRING_OR_PREATTACK_A",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUCEngineer_ATKA2",
+                        "AnimationMode": "LOOP"
+                      }
+                    ],
+                    "has_script": true
+                  },
+                  {
+                    "when": "MOVING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_RUNA",
+                        "AnimationMode": "LOOP",
+                        "AnimationSpeedFactorMin": "1.0",
+                        "AnimationSpeedFactorMax": "1.0"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "EMOTION_CELEBRATING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_CHRA",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_CHRB",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "SELECTED",
+                    "state": "STATE_Selected",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_AIDA",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_AIFA",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_AIFB",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_AIFC",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      }
+                    ],
+                    "has_script": true
+                  },
+                  {
+                    "state": "TRANS_boredToAttention",
+                    "kind": "PARSE_TRANSITION",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_BATA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "state": "TRANS_attentionToBored",
+                    "kind": "PARSE_TRANSITION",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_ABTA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "WeaponSetUpdate",
+                  "Physics",
+                  "SubObjectsUpgrade",
+                  "EmotionTrackerUpdate",
+                  "SlowDeath",
+                  "StancesBehavior",
+                  "GiveMoney",
+                  "include",
+                  "AIUpdate"
+                ],
+                "geometry": [
+                  {
+                    "Type": "CYLINDER",
+                    "MajorRadius": "7.0",
+                    "MinorRadius": "7.0",
+                    "Height": "13.0"
+                  }
+                ],
+                "audio_events": [
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceCreate"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceGarrison"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceMove"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceRepair"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceRetreat"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceSelectMS"
+                  },
+                  {
+                    "slot": "NamedEntry",
+                    "Sound": "GDI_Engineer_VoiceRepair"
+                  },
+                  {
+                    "slot": "NamedEntry",
+                    "Sound": "GDI_Engineer_VoiceCaptureBuilding"
+                  },
+                  {
+                    "slot": "NamedEntry",
+                    "Sound": "GDI_Engineer_VoiceCaptureHusk"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "260",
+                    "ShroudClearingRange": "100"
+                  }
+                ],
+                "account_costs": [
+                  {
+                    "Account": "=$ACCOUNT_CREDIT",
+                    "Amount": "500"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Tiberian Twilight/Xml/Obsolete/GDI/Units/GDIInfantryQ.xml",
+      "blob": "247a9eb89592355bb15f492f013d7dd9e90a22f6",
+      "line": 122,
+      "reason": "Opening and ending tag mismatch: ScriptedModelDraw line 114 and ModelConditionState, line 122, column 27",
+      "title": "tt",
+      "cause": "An immediate duplicate ModelConditionState closing tag appears in the first draw block of the Obsolete definition.",
+      "projections": [
+        {
+          "operation": "discard one duplicated close tag",
+          "declarations": [
+            {
+              "source_line": 98,
+              "local_source_facts": {
+                "id": "GDIInfantryQ",
+                "parent": "BaseInfantry",
+                "declared": {
+                  "Side": "GDI",
+                  "EditorSorting": "UNIT",
+                  "EditorName": "GDIInfantryQ",
+                  "SelectPortrait": "Portrait_GDIEngineer",
+                  "ButtonImage": "Portrait_GDIEngineer",
+                  "BuildTime": "5",
+                  "CommandPoints": "0",
+                  "CommandSet": "EmptyCommandSet",
+                  "UnitCategory": "INFANTRY",
+                  "TransportSlotCount": "1",
+                  "RadarPriority": "UNIT",
+                  "KindOf": "+CAN_CAPTURE +SKIRMISH_AI_DONT_GARRISON +ENGINEER +HOTKEY_CYCLE_UNIT +CAN_BE_FAVORITE_UNIT -CAN_ATTACK -SELECTABLE",
+                  "ThreatLevel": "10"
+                },
+                "name_key": "Name:GDIInfantryQ",
+                "movement": [
+                  {
+                    "Locomotor": "HumanLocomotor",
+                    "Condition": "NORMAL",
+                    "Speed": "50"
+                  }
+                ],
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "150.0"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "LightArmor",
+                    "DamageFX": "InfantryDamageFX"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "GUEngineer_SKN"
+                    ]
+                  },
+                  {
+                    "conditions": "INSIDE_GARRISON",
+                    "kind": "PARSE_NORMAL"
+                  }
+                ],
+                "animation": [
+                  {
+                    "when": "FORMATION_PREVIEW",
+                    "kind": "PARSE_NORMAL"
+                  },
+                  {
+                    "state": "STATE_Bored",
+                    "kind": "PARSE_DEFAULT",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_BIDA",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_BIFA",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_BIFB",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_BIFC",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_BIFD",
+                        "AnimationMode": "ONCE"
+                      }
+                    ],
+                    "has_script": true
+                  },
+                  {
+                    "when": "STUNNED_FLAILING",
+                    "state": "STATE_stunned_flailing",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_FLYA",
+                        "AnimationMode": "LOOP"
+                      }
+                    ]
+                  },
+                  {
+                    "state": "STATE_stunned_landing",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_LNDA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "FRONTCRUSHED",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_CDTA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "BACKCRUSHED",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_CDTB",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "DYING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_DIEA",
+                        "AnimationMode": "ONCE",
+                        "AnimNickName": "DTA"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "MOVING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_RUNA",
+                        "AnimationMode": "LOOP",
+                        "AnimationSpeedFactorMin": "1.0",
+                        "AnimationSpeedFactorMax": "1.0"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "EMOTION_CELEBRATING",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_CHRA",
+                        "AnimationMode": "ONCE"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_CHRB",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  },
+                  {
+                    "when": "SELECTED",
+                    "state": "STATE_Selected",
+                    "kind": "PARSE_NORMAL",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_AIDA",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_AIFA",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_AIFB",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      },
+                      {
+                        "AnimationName": "GUEngineer_AIFC",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      }
+                    ],
+                    "has_script": true
+                  },
+                  {
+                    "state": "TRANS_Deselected",
+                    "kind": "PARSE_TRANSITION",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_DSEL",
+                        "AnimationMode": "ONCE",
+                        "AnimationBlendTime": "5"
+                      }
+                    ]
+                  },
+                  {
+                    "state": "TRANS_boredToAttention",
+                    "kind": "PARSE_TRANSITION",
+                    "clips": [
+                      {
+                        "AnimationName": "GUEngineer_BATA",
+                        "AnimationMode": "ONCE"
+                      }
+                    ]
+                  }
+                ],
+                "behavior_classes": [
+                  "Physics",
+                  "SlowDeath",
+                  "LifetimeUpdate",
+                  "AIUpdate"
+                ],
+                "geometry": [
+                  {
+                    "Type": "CYLINDER",
+                    "MajorRadius": "7.0",
+                    "MinorRadius": "7.0",
+                    "Height": "13.0"
+                  }
+                ],
+                "audio_events": [
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceCreate"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceGarrison"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceMove"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceRepair"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceRetreat"
+                  },
+                  {
+                    "slot": "AudioEntry",
+                    "Sound": "GDI_Engineer_VoiceSelectMS"
+                  },
+                  {
+                    "slot": "NamedEntry",
+                    "Sound": "GDI_Engineer_VoiceRepair"
+                  },
+                  {
+                    "slot": "NamedEntry",
+                    "Sound": "GDI_Engineer_VoiceCaptureBuilding"
+                  },
+                  {
+                    "slot": "NamedEntry",
+                    "Sound": "GDI_Engineer_VoiceCaptureHusk"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "50",
+                    "ShroudClearingRange": "100"
+                  }
+                ],
+                "account_costs": [
+                  {
+                    "Account": "=$ACCOUNT_CREDIT",
+                    "Amount": "500"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "Tiberian Twilight/Xml/Templates/Structure.xml",
+      "blob": "b08725f9fe213a9b76d117e5dde93f5d87b9a1ff",
+      "line": 47,
+      "reason": "Opening and ending tag mismatch: Shape line 43 and Geometry, line 47, column 14",
+      "title": "tt",
+      "cause": "Template has an unterminated empty geometry Shape. The structure, side and display identifiers are author placeholders.",
+      "projections": [
+        {
+          "operation": "close empty Shape",
+          "declarations": [
+            {
+              "source_line": 18,
+              "local_source_facts": {
+                "id": "StructureName",
+                "declared": {
+                  "Side": "StructureNameSide",
+                  "EditorSorting": "STRUCTURE",
+                  "EditorName": "StructureName",
+                  "BuildTime": "10.0",
+                  "CommandSet": "EmptyCommandSet",
+                  "TransportSlotCount": "1",
+                  "RadarPriority": "STRUCTURE",
+                  "KindOf": "STRUCTURE SELECTABLE IMMOBILE CAN_CAST_REFLECTIONS"
+                },
+                "name_key": "StructureName",
+                "body": [
+                  {
+                    "type": "ActiveBody",
+                    "MaxHealth": "3000.0"
+                  }
+                ],
+                "armor": [
+                  {
+                    "Armor": "StructureNameArmor",
+                    "DamageFX": "GenericStructureDamageFX"
+                  }
+                ],
+                "models": [
+                  {
+                    "kind": "PARSE_DEFAULT",
+                    "models": [
+                      "NBConYard"
+                    ]
+                  }
+                ],
+                "geometry": [
+                  {
+                    "Type": "CYLINDER",
+                    "MajorRadius": "50.0",
+                    "Height": "100.0"
+                  }
+                ],
+                "vision": [
+                  {
+                    "VisionRange": "100",
+                    "ShroudClearingRange": "200"
+                  }
+                ]
+              },
+              "strict_baseline_other_declarations": [],
+              "baseline_children_inheriting_id": [],
+              "baseline_explicit_menu_targeted_by": [],
+              "baseline_existing_producer_namesakes": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "xinclude_occurrences": [
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDIAABattery.xml",
+      "line": 319,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDIGolumCannon.xml",
+      "line": 296,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDIIonCannonControl.xml",
+      "line": 312,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDIIonCannonControl.xml",
+      "line": 314,
+      "ref": "../../Includes/GenericEngineerContain.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericEngineerContain.xml",
+          "blob": "7adc30016a9c671ee5413a1ec6f0db9e89ade87d",
+          "fragment_root": "EngineerContain",
+          "descendant_count": 4
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDIPowerPlant.xml",
+      "line": 550,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDISpaceCommandUplink.xml",
+      "line": 347,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDISpaceCommandUplink.xml",
+      "line": 349,
+      "ref": "../../Includes/GenericEngineerContain.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericEngineerContain.xml",
+          "blob": "7adc30016a9c671ee5413a1ec6f0db9e89ade87d",
+          "fragment_root": "EngineerContain",
+          "descendant_count": 4
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDITerraformingStation.xml",
+      "line": 328,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDITerraformingStation.xml",
+      "line": 330,
+      "ref": "DATA:Includes/RepairAlliesEngineerContain.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/RepairAlliesEngineerContain.xml",
+          "blob": "b3102fd954634609294e59a4b81c5e5300e79928",
+          "fragment_root": "EngineerContain",
+          "descendant_count": 4
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/GDI/Structures/GDIWatchTower.xml",
+      "line": 374,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NODDisruptionTower.xml",
+      "line": 228,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NODLaserCannon.xml",
+      "line": 258,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NODObelisk.xml",
+      "line": 413,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NODPowerPlant.xml",
+      "line": 523,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NODRocketBunker.xml",
+      "line": 260,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NODShredderTurretHub.xml",
+      "line": 258,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NODTempleOfNOD.xml",
+      "line": 362,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NODTempleOfNOD.xml",
+      "line": 364,
+      "ref": "../../Includes/GenericEngineerContain.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericEngineerContain.xml",
+          "blob": "7adc30016a9c671ee5413a1ec6f0db9e89ade87d",
+          "fragment_root": "EngineerContain",
+          "descendant_count": 4
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NodPhantomTowerTemp.xml",
+      "line": 303,
+      "ref": "DATA:Includes/GenericPackPower.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/GenericPackPower.xml",
+          "blob": "6e1ce94341d17a89b8aca20f2227fa4a7267b02b",
+          "fragment_root": "SpecialPower",
+          "descendant_count": 0
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NodPhantomTowerTemp.xml",
+      "line": 313,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Structures/NodPhantomTowerTemp.xml",
+      "line": 319,
+      "ref": "../../Includes/GenericEngineerContain.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericEngineerContain.xml",
+          "blob": "7adc30016a9c671ee5413a1ec6f0db9e89ade87d",
+          "fragment_root": "EngineerContain",
+          "descendant_count": 4
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Units/NODInfantryA.xml",
+      "line": 777,
+      "ref": "DATA:Includes/NODTiberiumInfusionArmorUpgrade.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/NODTiberiumInfusionArmorUpgrade.xml",
+          "blob": "eca716230928d462cbd03fd90a99dd1401e1c8c0",
+          "fragment_root": "ArmorUpgrade",
+          "descendant_count": 1
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Units/NODInfantryE.xml",
+      "line": 506,
+      "ref": "DATA:Includes/NODTiberiumInfusionArmorUpgrade.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/NODTiberiumInfusionArmorUpgrade.xml",
+          "blob": "eca716230928d462cbd03fd90a99dd1401e1c8c0",
+          "fragment_root": "ArmorUpgrade",
+          "descendant_count": 1
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Units/NODInfantryG.xml",
+      "line": 570,
+      "ref": "DATA:Includes/NODTiberiumInfusionArmorUpgrade.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/NODTiberiumInfusionArmorUpgrade.xml",
+          "blob": "eca716230928d462cbd03fd90a99dd1401e1c8c0",
+          "fragment_root": "ArmorUpgrade",
+          "descendant_count": 1
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Units/NODInfantryH.xml",
+      "line": 463,
+      "ref": "DATA:Includes/NODTiberiumInfusionArmorUpgrade.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/NODTiberiumInfusionArmorUpgrade.xml",
+          "blob": "eca716230928d462cbd03fd90a99dd1401e1c8c0",
+          "fragment_root": "ArmorUpgrade",
+          "descendant_count": 1
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Units/NODInfantryK.xml",
+      "line": 598,
+      "ref": "DATA:Includes/NODTiberiumInfusionArmorUpgrade.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/NODTiberiumInfusionArmorUpgrade.xml",
+          "blob": "eca716230928d462cbd03fd90a99dd1401e1c8c0",
+          "fragment_root": "ArmorUpgrade",
+          "descendant_count": 1
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Units/NODInfantryL.xml",
+      "line": 464,
+      "ref": "../../Includes/NODInfantryLUpgradeModelCondition.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/NODInfantryLUpgradeModelCondition.xml",
+          "blob": "ca24aee531cec9fc48167737a873e5e6c78ba995",
+          "fragment_root": "ModelConditionUpgrade",
+          "descendant_count": 1
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Units/NODInfantryO.xml",
+      "line": 540,
+      "ref": "DATA:Includes/NODTiberiumInfusionArmorUpgrade.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/NODTiberiumInfusionArmorUpgrade.xml",
+          "blob": "eca716230928d462cbd03fd90a99dd1401e1c8c0",
+          "fragment_root": "ArmorUpgrade",
+          "descendant_count": 1
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/NOD/Units/NodVehicleK.xml",
+      "line": 190,
+      "ref": "DATA:Includes/GenericUnpackPower.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/GenericUnpackPower.xml",
+          "blob": "abac1c74d69f49d6c1854d0d9466760cd0b54724",
+          "fragment_root": "SpecialPower",
+          "descendant_count": 0
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/Neutral/Structures/DefensiveTower.xml",
+      "line": 170,
+      "ref": "../../Includes/GenericEngineerContain.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericEngineerContain.xml",
+          "blob": "7adc30016a9c671ee5413a1ec6f0db9e89ade87d",
+          "fragment_root": "EngineerContain",
+          "descendant_count": 4
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/Neutral/Structures/DefensiveTower.xml",
+      "line": 172,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/Neutral/Structures/SharedBaseGroundDefense.xml",
+      "line": 329,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/Neutral/Structures/SharedBaseGroundDefense.xml",
+      "line": 331,
+      "ref": "DATA:Includes/RepairAlliesEngineerContain.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Obsolete/Includes/RepairAlliesEngineerContain.xml",
+          "blob": "b3102fd954634609294e59a4b81c5e5300e79928",
+          "fragment_root": "EngineerContain",
+          "descendant_count": 4
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    },
+    {
+      "from": "Tiberian Twilight/Xml/Obsolete/Neutral/Structures/SharedBasePowerMakerTEMP.xml",
+      "line": 137,
+      "ref": "../../Includes/GenericBuildingRepair.xml",
+      "selector": "",
+      "error": "missing or cyclic fragment",
+      "title": "tt",
+      "alternative_same_basename": [
+        {
+          "path": "Tiberian Twilight/Xml/Includes/GenericBuildingRepair.xml",
+          "blob": "d7409268892e46922bcc7e52ebb415f6421af73b",
+          "fragment_root": "RepairUpdate",
+          "descendant_count": 2
+        }
+      ],
+      "classification": "unresolved at literal path; counterpart path is a research candidate"
+    }
+  ]
+}

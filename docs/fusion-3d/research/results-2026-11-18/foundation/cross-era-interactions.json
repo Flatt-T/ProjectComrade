@@ -1,0 +1,80 @@
+[
+ {
+  "case": "amphibious \u2192 shoreline \u2192 broken deck",
+  "resolver_order_or_state": "Query water/shore/deck by locomotion state and surface ID.",
+  "observable_expectation": "A valid water route survives the closure. A wheeled vehicle receives an alternate land route or no-path.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "airborne transform over a missing span",
+  "resolver_order_or_state": "Validate landing surface and space at transition commit.",
+  "observable_expectation": "Reject illegal landing; preserve current identity, cost and permitted visual state.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "teleport into a protected compound",
+  "resolver_order_or_state": "Check destination permissions after ability and targeting checks.",
+  "observable_expectation": "No crossed shield, displaced unrelated occupant or revealed hidden asset.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "mind control of a loaded transport",
+  "resolver_order_or_state": "Apply control permissions to the carrier separately from cargo policies.",
+  "observable_expectation": "Each passenger has one current owner/controller; recovery and expiry restore only eligible records.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "engineer at an allied reachable target",
+  "resolver_order_or_state": "Resolve consent scope to actor/building/owner generation, then check again on arrival.",
+  "observable_expectation": "Allow one matching grant once. Expired grant, changed owner or newly shielded target prevents capture.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "worker foundation in protected infrastructure",
+  "resolver_order_or_state": "Validate placement mask for the complete footprint, both ramp entries, huts and water clearance.",
+  "observable_expectation": "No partial debit or site, no route mutation in either region.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "Tiberium harvester at a spice or ore field",
+  "resolver_order_or_state": "Use the selected economy profile, cargo filter, return point and dock surface.",
+  "observable_expectation": "No silent cross-resource conversion. A sanctioned conversion requires its own explicit version.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "fixed-wing rearm and naval deployment",
+  "resolver_order_or_state": "Use an eligible, unoccupied dock/runway and current surface availability.",
+  "observable_expectation": "Cancellation or producer loss re-resolves destination rather than hovering indefinitely or duplicating ammo.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "superweapon carrier packed or traded",
+  "resolver_order_or_state": "Preserve binding/ownership, use the programme\u2019s deploy-charge rule, revalidate target and viewer.",
+  "observable_expectation": "A bar or queued FX cannot produce damage; protected infrastructure follows the declared immunity.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "fogged bridge or tunnel opening",
+  "resolver_order_or_state": "Track last-known state per viewer independently of authority topology.",
+  "observable_expectation": "Suppress unknown mesh, particles, progress, minimap and sound changes until the viewer can learn them.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "neutral hut and capturable civilian site",
+  "resolver_order_or_state": "Dispatch repair command or capture command by explicit target capability.",
+  "observable_expectation": "Hut remains neutral; an eligible capturable site uses its distinct ownership and score flow.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "snapshot/reconnect through effect and score event",
+  "resolver_order_or_state": "Store committed command and topology revision; deduplicate the presentation event.",
+  "observable_expectation": "One debit, one win/award, no replayed construction completion or voice/sound burst.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ },
+ {
+  "case": "tactical victory vs permanent world",
+  "resolver_order_or_state": "Isolate the optional arena result from persistent account inventory and map ownership.",
+  "observable_expectation": "No loss of an offline base, reset of permanent map or transfer of profile-specific points.",
+  "status": "authored acceptance case awaiting selected-profile engine integration"
+ }
+]

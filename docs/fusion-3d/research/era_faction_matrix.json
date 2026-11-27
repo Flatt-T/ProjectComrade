@@ -1,0 +1,813 @@
+{
+  "schema_version": 1,
+  "status": "Research and implementation-scope ledger, not a verified exhaustive entity roster.",
+  "policy": "Every released entry receives a disposition. Main RTS/expansion entities target full coverage; FPS/arena/mobile and campaign-exclusive entities receive explicit content and mechanical adaptation decisions. No silent omission. Cancelled/unreleased source objects are separate and never included in shipped-content denominator by default.",
+  "eras": [
+    {
+      "id": "td",
+      "title": "Command & Conquer Tiberian Dawn and The Covert Operations",
+      "research_task": "RES-004",
+      "classification": "core_rts",
+      "playable_groups": [
+        "GDI",
+        "Brotherhood of Nod"
+      ],
+      "additional_groups": [
+        "civilian/neutral",
+        "scripted mission forces",
+        "dinosaurs and special-mission objects"
+      ],
+      "required_deltas": [
+        "DOS/Gold baseline selection",
+        "Covert Operations missions and additions",
+        "console-exclusive mission objects routed to RES-019",
+        "unused source records distinguished from shipped objects"
+      ],
+      "signature_capabilities": [
+        "field harvesting",
+        "MCV deployment",
+        "sidebar construction",
+        "asymmetric production delivery",
+        "infantry crush",
+        "commando demolition",
+        "aircraft rearm",
+        "stealth and detection",
+        "superweapon charges"
+      ],
+      "terrain_candidates": [
+        "temperate",
+        "desert",
+        "winter",
+        "rivers and crossings",
+        "cliffs",
+        "villages/urban props"
+      ],
+      "source_only_candidates": [
+        "Jungle theatre declaration"
+      ],
+      "source_ids": [
+        "SRC-06",
+        "SRC-34",
+        "SRC-37"
+      ]
+    },
+    {
+      "id": "ra1",
+      "title": "Red Alert Counterstrike and The Aftermath",
+      "research_task": "RES-005",
+      "classification": "core_rts",
+      "playable_groups": [
+        "Allies",
+        "Soviets"
+      ],
+      "additional_groups": [
+        "country/house variants and availability by mode",
+        "campaign neutral/special houses",
+        "ant mission objects"
+      ],
+      "required_deltas": [
+        "base vs Counterstrike vs Aftermath",
+        "active playable countries vs house declarations",
+        "Retaliation differences routed to RES-019",
+        "unused Carrier/Phase Tank/source conditions"
+      ],
+      "signature_capabilities": [
+        "ore/gems",
+        "naval and submarine war",
+        "airfield rearm",
+        "minelaying",
+        "radar jamming and gap",
+        "spy/infiltration",
+        "engineer damage/capture profile",
+        "Chronosphere",
+        "Iron Curtain",
+        "nuclear/air support"
+      ],
+      "terrain_candidates": [
+        "temperate",
+        "snow",
+        "interior",
+        "coasts",
+        "rivers",
+        "islands",
+        "bridges"
+      ],
+      "source_ids": [
+        "SRC-07",
+        "SRC-35",
+        "SRC-36",
+        "SRC-38"
+      ]
+    },
+    {
+      "id": "ts",
+      "title": "Tiberian Sun",
+      "research_task": "RES-006",
+      "classification": "core_rts",
+      "playable_groups": [
+        "GDI",
+        "Brotherhood of Nod"
+      ],
+      "additional_groups": [
+        "Forgotten/mutant characters and creatures",
+        "civilian/neutral",
+        "mission-specific Nod/GDI forces"
+      ],
+      "required_deltas": [
+        "retail patch and rules/art INI baseline",
+        "multiplayer legality vs campaign ownership"
+      ],
+      "signature_capabilities": [
+        "walkers",
+        "subterranean movement",
+        "deployable artillery",
+        "EMP",
+        "stealth field",
+        "walls/gates/pavement",
+        "Firestorm defence",
+        "bridge repair huts",
+        "terrain hazards",
+        "tiberium healing/damage"
+      ],
+      "terrain_candidates": [
+        "temperate",
+        "snow",
+        "mutated landscapes",
+        "cliffs/ramps",
+        "tunnels",
+        "ice candidate",
+        "elevated and low bridges",
+        "industrial ruins"
+      ],
+      "source_ids": [
+        "SRC-09"
+      ]
+    },
+    {
+      "id": "firestorm",
+      "title": "Tiberian Sun Firestorm",
+      "research_task": "RES-007",
+      "classification": "core_rts_expansion",
+      "playable_groups": [
+        "GDI",
+        "Brotherhood of Nod"
+      ],
+      "additional_groups": [
+        "CABAL campaign forces",
+        "Forgotten",
+        "Tiberium lifeforms"
+      ],
+      "required_deltas": [
+        "inherit TS explicitly",
+        "CABAL available army vs authored homage faction proposal",
+        "new expansion-only objects"
+      ],
+      "signature_capabilities": [
+        "mobile production",
+        "mobile stealth/EMP",
+        "reaper/snare interactions",
+        "mutant/flora hazards",
+        "random map environmental events"
+      ],
+      "terrain_candidates": [
+        "mutated environment",
+        "veinholes",
+        "lifeforms",
+        "ion-storm/time-of-day candidates"
+      ],
+      "source_ids": [
+        "SRC-10"
+      ]
+    },
+    {
+      "id": "ra2",
+      "title": "Red Alert 2",
+      "research_task": "RES-008",
+      "classification": "core_rts",
+      "playable_groups": [
+        "Allies: America",
+        "Allies: France",
+        "Allies: Germany",
+        "Allies: Great Britain",
+        "Allies: Korea",
+        "Soviets: Russia",
+        "Soviets: Cuba",
+        "Soviets: Libya",
+        "Soviets: Iraq"
+      ],
+      "additional_groups": [
+        "civilian/tech structures",
+        "campaign characters and scripted forces"
+      ],
+      "required_deltas": [
+        "country bonuses/special units",
+        "shared object vs country-specific object",
+        "base-game Yuri unit vs expansion faction"
+      ],
+      "signature_capabilities": [
+        "garrison fire",
+        "capture and bridge repair",
+        "veterancy",
+        "deployable infantry",
+        "mind control",
+        "disguise",
+        "chrono movement",
+        "aircraft carrier child units",
+        "giant squid/dolphin interactions",
+        "ore mining return variants"
+      ],
+      "terrain_candidates": [
+        "temperate",
+        "snow",
+        "urban",
+        "coastal/islands",
+        "landmarks",
+        "elevated/low bridges",
+        "garrisonable urban blocks"
+      ],
+      "source_ids": [
+        "SRC-11"
+      ]
+    },
+    {
+      "id": "yr",
+      "title": "Red Alert 2 Yuri's Revenge",
+      "research_task": "RES-009",
+      "classification": "core_rts_expansion",
+      "playable_groups": [
+        "nine inherited Allied/Soviet country variants",
+        "Yuri"
+      ],
+      "additional_groups": [
+        "campaign hero/civilian variants",
+        "lunar mission objects"
+      ],
+      "required_deltas": [
+        "inherited vs replacement vs expansion-only definitions",
+        "Yuri complete production/research/defence tree",
+        "mode-specific countries and campaign objects"
+      ],
+      "signature_capabilities": [
+        "slave mining and deployment",
+        "Bio Reactor garrisons",
+        "mind-control overload/release",
+        "Grinder recycling",
+        "magnetic lift",
+        "weapon-changing passengers",
+        "vehicle crushing",
+        "genetic mutation",
+        "force shield"
+      ],
+      "terrain_candidates": [
+        "desert",
+        "lunar",
+        "new urban",
+        "inherited temperate/snow/urban",
+        "special campaign sets"
+      ],
+      "source_ids": [
+        "SRC-12"
+      ]
+    },
+    {
+      "id": "generals",
+      "title": "Command & Conquer Generals",
+      "research_task": "RES-010",
+      "classification": "core_rts",
+      "playable_groups": [
+        "USA",
+        "China",
+        "GLA"
+      ],
+      "additional_groups": [
+        "neutral tech buildings",
+        "civilian vehicles/buildings",
+        "campaign-only military and naval objects"
+      ],
+      "required_deltas": [
+        "faction INI construction/economy differences",
+        "active multiplayer vs scripted naval assets"
+      ],
+      "signature_capabilities": [
+        "dozer/worker site construction",
+        "supply collectors",
+        "GLA tunnel network",
+        "salvage/holes",
+        "garrison clearing",
+        "horde bonuses",
+        "secondary income",
+        "general powers",
+        "firestorm weapon interaction"
+      ],
+      "terrain_candidates": [
+        "arid desert",
+        "temperate",
+        "snow/alpine",
+        "urban/industrial",
+        "mountain/canyon",
+        "coastal mission set pieces"
+      ],
+      "source_ids": [
+        "SRC-08",
+        "SRC-13"
+      ]
+    },
+    {
+      "id": "zh",
+      "title": "Generals Zero Hour",
+      "research_task": "RES-011",
+      "classification": "core_rts_expansion",
+      "playable_groups": [
+        "USA base",
+        "China base",
+        "GLA base",
+        "USA Air Force General Granger",
+        "USA Laser General Townes",
+        "USA Superweapon General Alexander",
+        "China Infantry General Fai",
+        "China Nuclear General Tao",
+        "China Tank General Kwai",
+        "GLA Toxin General Thrax",
+        "GLA Demolition General Juhziz",
+        "GLA Stealth General Kassad"
+      ],
+      "additional_groups": [
+        "Challenge boss Leang and challenge-specific objects",
+        "campaign and neutral additions"
+      ],
+      "required_deltas": [
+        "general-specific exclusions as well as additions",
+        "vanilla/ZH patch split",
+        "boss/unused objects must not appear as ordinary multiplayer faction"
+      ],
+      "signature_capabilities": [
+        "specialist tech restrictions",
+        "bunker/transport loadouts",
+        "Helix/Overlord upgrades",
+        "combat drones",
+        "ECM",
+        "scrap salvage",
+        "stealth structures",
+        "sabotage",
+        "tunnels"
+      ],
+      "terrain_candidates": [
+        "inherited Generals biomes",
+        "expansion challenge maps",
+        "industrial/urban complexes",
+        "river and bridge chokepoints"
+      ],
+      "source_ids": [
+        "SRC-08",
+        "SRC-14"
+      ]
+    },
+    {
+      "id": "tw",
+      "title": "Command & Conquer 3 Tiberium Wars",
+      "research_task": "RES-012",
+      "classification": "core_rts",
+      "playable_groups": [
+        "GDI",
+        "Brotherhood of Nod",
+        "Scrin"
+      ],
+      "additional_groups": [
+        "civilian/neutral tech",
+        "campaign variants",
+        "Forgotten/MUTANT hovel recruits"
+      ],
+      "required_deltas": [
+        "base game patch",
+        "XML definitions vs spawned helpers/FX",
+        "economy and build queue changes"
+      ],
+      "signature_capabilities": [
+        "squad infantry",
+        "ground-control construction",
+        "multiple queues",
+        "support powers",
+        "upgrade propagation",
+        "directional armour",
+        "walker wreck capture",
+        "Tiberium interactions",
+        "Scrin flight/teleport/ion effects"
+      ],
+      "terrain_candidates": [
+        "Blue Zone cities",
+        "Yellow Zone ruins/badlands",
+        "Red Zone alien infestation",
+        "coasts/bridges",
+        "industrial infrastructure"
+      ],
+      "source_ids": [
+        "SRC-04",
+        "SRC-15"
+      ]
+    },
+    {
+      "id": "kw",
+      "title": "Command & Conquer 3 Kane's Wrath",
+      "research_task": "RES-013",
+      "classification": "core_rts_expansion",
+      "playable_groups": [
+        "GDI",
+        "Steel Talons",
+        "ZOCOM",
+        "Brotherhood of Nod",
+        "Black Hand",
+        "Marked of Kane",
+        "Scrin",
+        "Reaper-17",
+        "Traveler-59"
+      ],
+      "additional_groups": [
+        "global conquest strategic-map entities",
+        "campaign variants and neutral objects"
+      ],
+      "required_deltas": [
+        "inherit TW with explicit replacements",
+        "subfaction missing options",
+        "epic-unit uniqueness and hardpoints",
+        "strategic-mode versus battle-mode entities"
+      ],
+      "signature_capabilities": [
+        "epic units and garrison upgrades",
+        "subfaction doctrine",
+        "teleport/mind control",
+        "EMP/cyborg immunity",
+        "adaptive armour",
+        "global conquest meta rules disposition"
+      ],
+      "terrain_candidates": [
+        "TW zone families",
+        "expansion maps and regional scene variants"
+      ],
+      "source_ids": [
+        "SRC-04",
+        "SRC-16"
+      ]
+    },
+    {
+      "id": "ra3",
+      "title": "Red Alert 3",
+      "research_task": "RES-014",
+      "classification": "core_rts",
+      "playable_groups": [
+        "Allies",
+        "Soviets",
+        "Empire of the Rising Sun"
+      ],
+      "additional_groups": [
+        "AI commander personalities (not automatically separate factions)",
+        "civilian and campaign objects"
+      ],
+      "required_deltas": [
+        "faction construction policies",
+        "water-compatible buildings and producers",
+        "alternate forms are linked states",
+        "cooperative mission-only objects"
+      ],
+      "signature_capabilities": [
+        "land/water construction",
+        "amphibious movement",
+        "unit transformations",
+        "secondary abilities",
+        "ore nodes",
+        "nanocore deployment",
+        "local tech clearance",
+        "water-based economy",
+        "magnetic/chrono/cryo effects"
+      ],
+      "terrain_candidates": [
+        "temperate",
+        "snow/arctic",
+        "tropical/island",
+        "urban/industrial",
+        "coastal/naval",
+        "Japanese architectural regions",
+        "special mission complexes"
+      ],
+      "source_ids": [
+        "SRC-04",
+        "SRC-17",
+        "SRC-23"
+      ]
+    },
+    {
+      "id": "uprising",
+      "title": "Red Alert 3 Uprising",
+      "research_task": "RES-015",
+      "classification": "core_rts_expansion",
+      "playable_groups": [
+        "Allies",
+        "Soviets",
+        "Empire of the Rising Sun"
+      ],
+      "additional_groups": [
+        "FutureTech campaign force/assets",
+        "Yuriko campaign-specific entities",
+        "Commander Challenge variants"
+      ],
+      "required_deltas": [
+        "new units vs inherited units",
+        "EP1 XML inclusion graph",
+        "campaign-only direct-control mechanics",
+        "FutureTech as campaign role vs newly authored faction"
+      ],
+      "signature_capabilities": [
+        "new transforming/deploying units",
+        "hero abilities",
+        "amphibious siege",
+        "targeted jump/telekinetic events"
+      ],
+      "terrain_candidates": [
+        "inherited RA3 biomes",
+        "expansion facilities/interiors",
+        "Yuriko campaign spaces",
+        "challenge map variations"
+      ],
+      "source_ids": [
+        "SRC-04",
+        "SRC-18"
+      ]
+    },
+    {
+      "id": "c4",
+      "title": "Command & Conquer 4 Tiberian Twilight",
+      "research_task": "RES-016",
+      "classification": "alternate_rts_ruleset",
+      "playable_groups": [
+        "GDI Offense",
+        "GDI Defense",
+        "GDI Support",
+        "Nod Offense",
+        "Nod Defense",
+        "Nod Support"
+      ],
+      "additional_groups": [
+        "Forgotten neutral/mercenary entities",
+        "campaign objects",
+        "obsolete source definitions"
+      ],
+      "required_deltas": [
+        "class is distinct from faction",
+        "Crawler vehicle/structure states linked",
+        "obsolete directories excluded from shipped denominator unless proven",
+        "progression locked/unlocked profile"
+      ],
+      "signature_capabilities": [
+        "mobile Crawler production",
+        "command-point cap/refund",
+        "upgrade-point resources",
+        "control-node victory",
+        "class swap/redeploy",
+        "support points",
+        "defence structures tied to crawler"
+      ],
+      "terrain_candidates": [
+        "TCN infrastructure",
+        "reclaimed/infested landscapes",
+        "ruined cities",
+        "mountain/coastal/industrial environments"
+      ],
+      "source_ids": [
+        "SRC-04",
+        "SRC-19"
+      ]
+    },
+    {
+      "id": "renegade",
+      "title": "Command & Conquer Renegade",
+      "research_task": "RES-017",
+      "classification": "fps_content_and_feel_reference",
+      "playable_groups": [
+        "GDI team/classes",
+        "Nod team/classes"
+      ],
+      "additional_groups": [
+        "Havoc and campaign characters",
+        "Black Hand variants",
+        "building interiors",
+        "neutral vehicles/props"
+      ],
+      "required_deltas": [
+        "FPS playable characters vs RTS unit identity",
+        "vehicle crew/occupants",
+        "purchasing and beacon victory are separate mode mechanics"
+      ],
+      "signature_capabilities": [
+        "enterable structures",
+        "vehicles with occupants",
+        "repair weapons",
+        "C4/beacons",
+        "physical scale and sound cues"
+      ],
+      "terrain_candidates": [
+        "interiors",
+        "base complexes",
+        "urban",
+        "desert/canyon",
+        "snow",
+        "islands/coasts"
+      ],
+      "source_ids": [
+        "SRC-20",
+        "SRC-21"
+      ]
+    },
+    {
+      "id": "sole",
+      "title": "Command & Conquer Sole Survivor",
+      "research_task": "RES-018",
+      "classification": "arena_content_reference",
+      "playable_groups": [
+        "single-unit selections derived from TD"
+      ],
+      "additional_groups": [
+        "dinosaurs",
+        "arena/crate objects"
+      ],
+      "required_deltas": [
+        "individual units not ordinary base factions",
+        "retail versus revival server behavior"
+      ],
+      "signature_capabilities": [
+        "single-unit control",
+        "arena modes",
+        "power-ups"
+      ],
+      "terrain_candidates": [
+        "arena maps and TD-derived theatre variants"
+      ],
+      "source_ids": [
+        "SRC-28",
+        "SRC-29"
+      ]
+    },
+    {
+      "id": "remaster_console",
+      "title": "Remastered and console port deltas",
+      "research_task": "RES-019",
+      "classification": "edition_delta_reference",
+      "playable_groups": [
+        "inherited TD/RA1 factions"
+      ],
+      "additional_groups": [
+        "PS1 and Nintendo 64 exclusive missions",
+        "Retaliation mission/object deltas",
+        "remastered presentation assets"
+      ],
+      "required_deltas": [
+        "no duplication of identical inherited logical entities",
+        "console unit/control/map differences",
+        "presentation reference separate from permission"
+      ],
+      "signature_capabilities": [
+        "modern readability",
+        "zoom",
+        "UI/accessibility comparison",
+        "port-specific control interpretation"
+      ],
+      "terrain_candidates": [
+        "edition-specific maps/sets"
+      ],
+      "source_ids": [
+        "SRC-22",
+        "SRC-30",
+        "SRC-31"
+      ]
+    },
+    {
+      "id": "alliances",
+      "title": "Tiberium Alliances",
+      "research_task": "RES-020",
+      "classification": "persistent_browser_reference",
+      "playable_groups": [
+        "GDI",
+        "Nod"
+      ],
+      "additional_groups": [
+        "Forgotten NPC forces"
+      ],
+      "required_deltas": [
+        "date/world/ruleset snapshot",
+        "offence/defence variants",
+        "browser live-service changes"
+      ],
+      "signature_capabilities": [
+        "world alliances",
+        "base relocation",
+        "asynchronous attack structure",
+        "separate world economy"
+      ],
+      "terrain_candidates": [
+        "world-map regions",
+        "tactical bases",
+        "resource and defence layout"
+      ],
+      "source_ids": [
+        "SRC-25"
+      ]
+    },
+    {
+      "id": "rivals",
+      "title": "Command & Conquer Rivals",
+      "research_task": "RES-021",
+      "classification": "mobile_reference",
+      "playable_groups": [
+        "GDI",
+        "Nod"
+      ],
+      "additional_groups": [
+        "commander abilities",
+        "versioned unit/variant inventory"
+      ],
+      "required_deltas": [
+        "timestamped live-service patch",
+        "level variants separated from entity identities",
+        "monetisation is not a requested feature"
+      ],
+      "signature_capabilities": [
+        "touch micro",
+        "short match objectives",
+        "deck/commander selection",
+        "clear counters"
+      ],
+      "terrain_candidates": [
+        "compact objective maps",
+        "visual terrain vs walkability"
+      ],
+      "source_ids": [
+        "SRC-24"
+      ]
+    },
+    {
+      "id": "other_mobile",
+      "title": "Legacy and regional mobile titles and Legions",
+      "research_task": "RES-022",
+      "classification": "versioned_scope_disposition",
+      "playable_groups": [
+        "must verify by exact released region/build"
+      ],
+      "additional_groups": [
+        "Red Alert mobile/iOS/J2ME candidates",
+        "Tiberium Wars mobile candidate",
+        "Red Alert Online candidate",
+        "Legions announced regional/season content"
+      ],
+      "required_deltas": [
+        "existence and release status verified per item",
+        "season and region pin",
+        "announcement does not prove shipped content",
+        "cancelled projects separate"
+      ],
+      "signature_capabilities": [
+        "document transferability only after source verification"
+      ],
+      "terrain_candidates": [
+        "catalogue after versioned evidence"
+      ],
+      "source_ids": [
+        "SRC-26",
+        "SRC-27",
+        "SRC-31"
+      ]
+    },
+    {
+      "id": "dune",
+      "title": "Dune lineage and existing Dune 2000 compatibility",
+      "research_task": "RES-023",
+      "classification": "non_cnc_legacy_compatibility",
+      "playable_groups": [
+        "existing Dune 2000 Atreides/Harkonnen/Ordos"
+      ],
+      "additional_groups": [
+        "Dune II historical predecessor reference",
+        "Emperor Battle for Dune reference only",
+        "Emperor minor houses require explicit scope decision"
+      ],
+      "required_deltas": [
+        "Dune is a separate franchise",
+        "existing Dune feature contract preserved",
+        "new Dune adaptation requires explicit scope and rights record"
+      ],
+      "signature_capabilities": [
+        "spice/harvesters",
+        "rock/sand buildability",
+        "worms",
+        "sand/rock pathing",
+        "house-specific mechanics"
+      ],
+      "terrain_candidates": [
+        "rock",
+        "sand/dunes",
+        "spice fields",
+        "cliffs"
+      ],
+      "source_ids": [
+        "SRC-31"
+      ]
+    }
+  ]
+}

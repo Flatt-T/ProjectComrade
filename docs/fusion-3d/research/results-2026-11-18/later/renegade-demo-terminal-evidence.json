@@ -1,0 +1,178 @@
+{
+  "demo_exe_sha256": "a4f42065491f30fe969739abdd88e6169618b3790d8401871453caa66964024f",
+  "always_dbs_sha256": "cce4c7ff96626952033fe43fb8c1020a171a311b223e15ca01a709a67d684ef3",
+  "objects_ddb": {
+    "offset_in_ALWAYS_DBS": 3384544,
+    "sha256": "b3047ed621caac4141f1a2f967cba0c036281c7b6f219ca3db067fe9783640aa"
+  },
+  "strings_tdb": {
+    "offset_in_ALWAYS_DBS": 807416,
+    "sha256": "b7eb57f9b0469af1c527d0ec8d8c4cdf606408517b47a2ce9bee908bab7000c5"
+  },
+  "context_member_hashes": {
+    "README.HTM": "c337082b2bd86068c547b1dceb89552801c381ac4db42920b9c592c508884709",
+    "C&C_UNDER.MIX": "36d0f4ea101ad0396f81c17f8e19b0271532ab868517ab2efcabf128b25ab3dd",
+    "SCRN_GDI_CHARACTERS.JPG": "13a6f7c023d24e5d4471aae3f31f7f6e46d43c682cbe1fefb32edd59e02bf370",
+    "SCRN_GDI_MAIN.JPG": "4fef3b70e749c766c0d8f67ca348535034afad09989f0b996a04fa72907c3fb7",
+    "SCRN_GDI_VEHICLES.JPG": "53ba4e099c11497e27d5cf2e1acebb9a182d95838879a29289cc8de154e4c18c",
+    "SCRN_NOD_CHARACTERS.JPG": "987c4b46780220c8b768a43a0039b80b85fa73b29d4e19ddfbe30cee963e71a0",
+    "SCRN_NOD_MAIN.JPG": "44a2a94ec0366fe889609596e2050fd36c95b52e38495b8bf0e070603ad6ec29",
+    "SCRN_NOD_VEHICLES.JPG": "180cf6426462dd18824d58b92a2e8c5d8d60a33e0523bd8f11054c3174da8b26"
+  },
+  "map_local_files": {
+    "c&c_under.ddb": {
+      "offset_in_map_mix": 14795104,
+      "size": 215,
+      "sha256": "8842e99e8174f162bab72ab144c4cdc53b4b2299fce0f16db2e7a43a88651844",
+      "purchase_setting_chunks": 0
+    },
+    "c&c_under.ldd": {
+      "offset_in_map_mix": 18854776,
+      "size": 98268,
+      "sha256": "4582ee4b95191ab65cbd3c472e28158f279681db2a17608e4c8707a852e9eb45",
+      "purchase_setting_chunks": 0
+    },
+    "c&c_under.lsd": {
+      "offset_in_map_mix": 19281880,
+      "size": 1804813,
+      "sha256": "43d00e9bd91c7c492c93a08d41979eca3c0e3f0fbcc572910d29d67bef447fd6",
+      "purchase_setting_chunks": 0
+    }
+  },
+  "default_match_configs": {
+    "SVRCFG_CNC.INI": {
+      "MapName": "C&C_Under.mix",
+      "MapName00": "C&C_Under.mix",
+      "StartingCredits": "0"
+    },
+    "DEDICATED.INI": {
+      "MapName": "C&C_Under.mix",
+      "MapName00": "C&C_Under.mix",
+      "StartingCredits": "0"
+    }
+  },
+  "visible_in_manual_screens": 43,
+  "different_prices_among_rows_with_both_explicit_numbers": 20,
+  "settings_chunks": [
+    {
+      "team": "GDI",
+      "menu": "equipment",
+      "objects_ddb_offset": 4178058,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 0
+    },
+    {
+      "team": "Mutant GDI",
+      "menu": "equipment",
+      "objects_ddb_offset": 4178869,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 0
+    },
+    {
+      "team": "Nod",
+      "menu": "equipment",
+      "objects_ddb_offset": 4179677,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 0
+    },
+    {
+      "team": "GDI",
+      "menu": "secret characters",
+      "objects_ddb_offset": 4180500,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 4
+    },
+    {
+      "team": "Mutant GDI",
+      "menu": "characters",
+      "objects_ddb_offset": 4181423,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 0
+    },
+    {
+      "team": "GDI",
+      "menu": "secret vehicles",
+      "objects_ddb_offset": 4182237,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 4
+    },
+    {
+      "team": "Nod",
+      "menu": "secret vehicles",
+      "objects_ddb_offset": 4183132,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 3
+    },
+    {
+      "team": "Nod",
+      "menu": "secret characters",
+      "objects_ddb_offset": 4184017,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 6
+    },
+    {
+      "team": "Mutant Nod",
+      "menu": "characters",
+      "objects_ddb_offset": 4184960,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 0
+    },
+    {
+      "team": "GDI",
+      "menu": "characters",
+      "objects_ddb_offset": 4185776,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 10
+    },
+    {
+      "team": "Nod",
+      "menu": "characters",
+      "objects_ddb_offset": 4186895,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 10
+    },
+    {
+      "team": "Nod",
+      "menu": "vehicles",
+      "objects_ddb_offset": 4187977,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 8
+    },
+    {
+      "team": "GDI",
+      "menu": "vehicles",
+      "objects_ddb_offset": 4188943,
+      "slots_serialized": 10,
+      "nonzero_primary_definitions": 7
+    },
+    {
+      "team": "GDI",
+      "menu": "main",
+      "objects_ddb_offset": 4189883,
+      "enlisted_slots_serialized": 4
+    },
+    {
+      "team": "Nod",
+      "menu": "main",
+      "objects_ddb_offset": 4190207,
+      "enlisted_slots_serialized": 4
+    }
+  ],
+  "output_rows": 73,
+  "rows_by_side_and_menu": {
+    "GDI / beacon": 1,
+    "GDI / characters": 15,
+    "GDI / enlisted": 4,
+    "GDI / refill": 1,
+    "GDI / secret characters": 5,
+    "GDI / secret vehicles": 4,
+    "GDI / vehicles": 7,
+    "Nod / beacon": 1,
+    "Nod / characters": 13,
+    "Nod / enlisted": 4,
+    "Nod / refill": 1,
+    "Nod / secret characters": 6,
+    "Nod / secret vehicles": 3,
+    "Nod / vehicles": 8
+  }
+}

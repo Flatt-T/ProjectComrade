@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:conflict",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "conflict"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]*$"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/unresolved"
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    },
+    "subject_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]*$"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/datum"
+      },
+      "uniqueItems": true,
+      "minItems": 2
+    },
+    "impact": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "open",
+        "resolved"
+      ]
+    },
+    "resolution_task": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "profile_id",
+    "evidence",
+    "owner",
+    "reviewer",
+    "blockers",
+    "subject_ids",
+    "claims",
+    "impact",
+    "decision",
+    "status",
+    "resolution_task"
+  ]
+}

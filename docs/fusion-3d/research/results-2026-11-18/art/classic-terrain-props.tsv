@@ -1,0 +1,68 @@
+game	declaration	enum	theaters	guard	source_line	base_x	base_y	spawn	destroy_animation	transform_animation	flammable	crushable	selectable	legal_target	insignificant	immune	ini	text_key	strength_token	armor	occupy_cells	overlap_cells	water_based
+TD	Tree1Class	TERRAIN_TREE1	WINTER|TEMPERATE		81	11	41	false	true	false	true	false	false	false	true	false	T01	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree2Class	TERRAIN_TREE2	WINTER|TEMPERATE		102	11	44	false	true	false	true	false	false	false	true	false	T02	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree3Class	TERRAIN_TREE3	WINTER|TEMPERATE		123	12	45	false	true	false	true	false	false	false	true	false	T03	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree4Class	TERRAIN_TREE4	DESERT		144	8	9	false	true	false	true	false	false	false	true	false	T04	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:0		
+TD	Tree5Class	TERRAIN_TREE5	WINTER|TEMPERATE		166	15	41	false	true	false	true	false	false	false	true	false	T05	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree6Class	TERRAIN_TREE6	WINTER|TEMPERATE		187	16	37	false	true	false	true	false	false	false	true	false	T06	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree7Class	TERRAIN_TREE7	WINTER|TEMPERATE		208	15	41	false	true	false	true	false	false	false	true	false	T07	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree8Class	TERRAIN_TREE8	WINTER|TEMPERATE|DESERT		229	14	22	false	true	false	true	false	false	false	true	false	T08	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:0	1:0	
+TD	Tree9Class	TERRAIN_TREE9	DESERT		250	11	22	false	true	false	true	false	false	false	true	false	T09	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:0	1:0	
+TD	Tree10Class	TERRAIN_TREE10	WINTER|TEMPERATE		271	25	43	false	true	false	true	false	false	false	true	false	T10	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1|1:1	0:0|1:0	
+TD	Tree11Class	TERRAIN_TREE11	WINTER|TEMPERATE		292	23	44	false	true	false	true	false	false	false	true	false	T11	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1|1:1	0:0|1:0	
+TD	Tree12Class	TERRAIN_TREE12	WINTER|TEMPERATE		313	14	36	false	true	false	true	false	false	false	true	false	T12	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree13Class	TERRAIN_TREE13	WINTER|TEMPERATE		334	19	40	false	true	false	true	false	false	false	true	false	T13	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:0|1:1	
+TD	Tree14Class	TERRAIN_TREE14	WINTER|TEMPERATE		355	19	40	false	true	false	true	false	false	false	true	false	T14	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1|1:1	0:0|1:0	
+TD	Tree15Class	TERRAIN_TREE15	WINTER|TEMPERATE		376	19	40	false	true	false	true	false	false	false	true	false	T15	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1|1:1	0:0|1:0	
+TD	Tree16Class	TERRAIN_TREE16	WINTER|TEMPERATE		397	13	36	false	true	false	true	false	false	false	true	false	T16	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree17Class	TERRAIN_TREE17	WINTER|TEMPERATE		418	18	44	false	true	false	true	false	false	false	true	false	T17	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:1	
+TD	Tree18Class	TERRAIN_TREE18	DESERT		439	33	40	false	true	false	true	false	false	false	true	false	T18	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	1:1	0:0|1:0|2:0|0:1|2:1	
+TD	Split1Class	TERRAIN_BLOSSOMTREE1	TEMPERATE|WINTER		460	18	44	true	false	true	false	false	false	false	true	true	SPLIT2	TXT_BLOSSOM_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:0|1:1	
+TD	Split2Class	TERRAIN_BLOSSOMTREE2	TEMPERATE|WINTER|DESERT		481	18	44	true	false	true	false	false	false	false	true	true	SPLIT3	TXT_BLOSSOM_TREE	TREE_NORMAL	ARMOR_WOOD	0:1	0:0|1:0|1:1	
+TD	Clump1Class	TERRAIN_CLUMP1	WINTER|TEMPERATE		502	28	41	false	false	false	false	false	false	false	true	true	TC01	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1|1:1	0:0|1:0|2:1	
+TD	Clump2Class	TERRAIN_CLUMP2	WINTER|TEMPERATE		523	38	41	false	false	false	false	false	false	false	true	true	TC02	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	1:0|0:1|1:1	0:0|2:0|2:1	
+TD	Clump3Class	TERRAIN_CLUMP3	WINTER|TEMPERATE		544	33	35	false	false	false	false	false	false	false	true	true	TC03	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:0|1:0|0:1|1:1	2:0	
+TD	Clump4Class	TERRAIN_CLUMP4	WINTER|TEMPERATE		565	44	49	false	false	false	false	false	false	false	true	true	TC04	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	0:1|1:1|2:1|0:2	0:0|1:0|2:0|3:1|1:2|2:2	
+TD	Clump5Class	TERRAIN_CLUMP5	WINTER|TEMPERATE		586	49	58	false	false	false	false	false	false	false	true	true	TC05	TXT_TREE	TREE_NORMAL	ARMOR_WOOD	2:0|0:1|1:1|2:1|1:2|2:2	0:0|1:0|3:1|0:2|3:2	
+TD	Rock1Class	TERRAIN_ROCK1	DESERT		607	33	41	false	false	false	false	false	false	false	true	true	ROCK1	TXT_ROCK	1000	ARMOR_STEEL	0:1|1:1	0:0|1:0|2:0|2:1	
+TD	Rock2Class	TERRAIN_ROCK2	DESERT		628	24	23	false	false	false	false	false	false	false	true	true	ROCK2	TXT_ROCK	1000	ARMOR_STEEL	0:0|1:0	2:0	
+TD	Rock3Class	TERRAIN_ROCK3	DESERT		649	20	39	false	false	false	false	false	false	false	true	true	ROCK3	TXT_ROCK	1000	ARMOR_STEEL	0:1|1:1	0:0|1:0|2:1	
+TD	Rock4Class	TERRAIN_ROCK4	DESERT		670	12	20	false	false	false	false	false	false	false	true	true	ROCK4	TXT_ROCK	1000	ARMOR_STEEL	0:0	1:0	
+TD	Rock5Class	TERRAIN_ROCK5	DESERT		691	17	19	false	false	false	false	false	false	false	true	true	ROCK5	TXT_ROCK	1000	ARMOR_STEEL	0:0	1:0	
+TD	Rock6Class	TERRAIN_ROCK6	DESERT		712	28	40	false	false	false	false	false	false	false	true	true	ROCK6	TXT_ROCK	1000	ARMOR_STEEL	0:1|1:1|2:1	0:0|1:0	
+TD	Rock7Class	TERRAIN_ROCK7	DESERT		733	57	22	false	false	false	false	false	false	false	true	true	ROCK7	TXT_ROCK	1000	ARMOR_STEEL	0:0|1:0|2:0|3:0	4:0	
+RA1	Mine	TERRAIN_MINE	TEMPERATE|SNOW		79	12	24									true	MINE	TXT_ORE_MINE			0:0		false
+RA1	Boxes01	TERRAIN_BOXES01	INTERIOR		90	12	24									true	BOXES01	TXT_CRATES			0:0		false
+RA1	Boxes02	TERRAIN_BOXES02	INTERIOR		101	12	24									true	BOXES02	TXT_CRATES			0:0		false
+RA1	Boxes03	TERRAIN_BOXES03	INTERIOR		112	12	24									true	BOXES03	TXT_CRATES			0:0		false
+RA1	Boxes04	TERRAIN_BOXES04	INTERIOR		123	12	24									true	BOXES04	TXT_CRATES			0:0		false
+RA1	Boxes05	TERRAIN_BOXES05	INTERIOR		134	12	24									true	BOXES05	TXT_CRATES			0:0		false
+RA1	Boxes06	TERRAIN_BOXES06	INTERIOR		145	12	24									true	BOXES06	TXT_CRATES			0:0		false
+RA1	Boxes07	TERRAIN_BOXES07	INTERIOR		156	12	24									true	BOXES07	TXT_CRATES			0:0		false
+RA1	Boxes08	TERRAIN_BOXES08	INTERIOR		167	12	24									true	BOXES08	TXT_CRATES			0:0		false
+RA1	Boxes09	TERRAIN_BOXES09	INTERIOR		178	12	24									true	BOXES09	TXT_CRATES			0:0		false
+RA1	Ice01	TERRAIN_ICE01	SNOW		190	24	24									true	ICE01	TXT_ICE			0:0|1:0|0:1|1:1		true
+RA1	Ice02	TERRAIN_ICE02	SNOW		201	12	24									true	ICE02	TXT_ICE			0:0|0:1		true
+RA1	Ice03	TERRAIN_ICE03	SNOW		212	24	12									true	ICE03	TXT_ICE			0:0|1:0		true
+RA1	Ice04	TERRAIN_ICE04	SNOW		223	12	12									true	ICE04	TXT_ICE			0:0		true
+RA1	Ice05	TERRAIN_ICE05	SNOW		234	12	12									true	ICE05	TXT_ICE			0:0		true
+RA1	Tree1Class	TERRAIN_TREE1	TEMPERATE|SNOW		246	11	41									false	T01	TXT_TREE			0:1	0:0|1:1	false
+RA1	Tree2Class	TERRAIN_TREE2	TEMPERATE|SNOW		258	11	44									false	T02	TXT_TREE			0:1	0:0|1:1	false
+RA1	Tree3Class	TERRAIN_TREE3	TEMPERATE|SNOW		270	12	45									false	T03	TXT_TREE			0:1	0:0|1:1	false
+RA1	Tree5Class	TERRAIN_TREE5	TEMPERATE|SNOW		282	15	41									false	T05	TXT_TREE			0:1	0:0|1:1	false
+RA1	Tree6Class	TERRAIN_TREE6	TEMPERATE|SNOW		294	16	37									false	T06	TXT_TREE			0:1	0:0|1:1	false
+RA1	Tree7Class	TERRAIN_TREE7	TEMPERATE|SNOW		306	15	41									false	T07	TXT_TREE			0:1	0:0|1:1	false
+RA1	Tree8Class	TERRAIN_TREE8	TEMPERATE|SNOW		318	14	22									false	T08	TXT_TREE			0:0	1:0	false
+RA1	Tree10Class	TERRAIN_TREE10	TEMPERATE|SNOW		330	25	43									false	T10	TXT_TREE			0:1|1:1	0:0|1:0	false
+RA1	Tree11Class	TERRAIN_TREE11	TEMPERATE|SNOW		342	23	44									false	T11	TXT_TREE			0:1|1:1	0:0|1:0	false
+RA1	Tree12Class	TERRAIN_TREE12	TEMPERATE|SNOW		354	14	36									false	T12	TXT_TREE			0:1	0:0|1:1	false
+RA1	Tree13Class	TERRAIN_TREE13	TEMPERATE|SNOW		366	19	40									false	T13	TXT_TREE			0:1	0:0|1:0|1:1	false
+RA1	Tree14Class	TERRAIN_TREE14	TEMPERATE|SNOW		378	19	40									false	T14	TXT_TREE			0:1|1:1	0:0|1:0	false
+RA1	Tree15Class	TERRAIN_TREE15	TEMPERATE|SNOW		390	19	40									false	T15	TXT_TREE			0:1|1:1	0:0|1:0	false
+RA1	Tree16Class	TERRAIN_TREE16	TEMPERATE|SNOW		402	13	36									false	T16	TXT_TREE			0:1	0:0|1:1	false
+RA1	Tree17Class	TERRAIN_TREE17	TEMPERATE|SNOW		414	18	44									false	T17	TXT_TREE			0:1	0:0|1:1	false
+RA1	Clump1Class	TERRAIN_CLUMP1	TEMPERATE|SNOW		426	28	41									true	TC01	TXT_TREE			0:1|1:1	0:0|1:0|2:1	false
+RA1	Clump2Class	TERRAIN_CLUMP2	TEMPERATE|SNOW		438	38	41									true	TC02	TXT_TREE			1:0|0:1|1:1	0:0|2:0|2:1	false
+RA1	Clump3Class	TERRAIN_CLUMP3	TEMPERATE|SNOW		450	33	35									true	TC03	TXT_TREE			0:0|1:0|0:1|1:1	2:0	false
+RA1	Clump4Class	TERRAIN_CLUMP4	TEMPERATE|SNOW		462	44	49									true	TC04	TXT_TREE			0:1|1:1|2:1|0:2	0:0|1:0|2:0|3:1|1:2|2:2	false
+RA1	Clump5Class	TERRAIN_CLUMP5	TEMPERATE|SNOW		474	49	58									true	TC05	TXT_TREE			2:0|0:1|1:1|2:1|1:2|2:2	0:0|1:0|3:1|0:2|3:2	false

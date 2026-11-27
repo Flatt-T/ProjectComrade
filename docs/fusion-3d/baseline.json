@@ -1,0 +1,2044 @@
+{
+  "date": "2026-11-24",
+  "repository": "Flatt-T/ProjectComrade",
+  "source": {
+    "main": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+    "beta": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+    "integration": "9134dd793275c92e4d146a429fadc3577553660e",
+    "planningHead": "1b09c9d2e5616955d4aa111a9009640c7e718000",
+    "researchHead": "abe8ae94d66bde2d3ce47c84940e795ac1210a49"
+  },
+  "deployed": {
+    "publicClassic": {
+      "url": "https://projectcomrade.co.uk/health",
+      "commit": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+      "databaseReady": true
+    },
+    "publicBeta": {
+      "url": "https://beta.projectcomrade.co.uk/health",
+      "commit": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+      "databaseReady": true
+    },
+    "betaOrigin": {
+      "healthAgreesWithPublic": true,
+      "observedHost": "isolated guest documented in docs/persistent-world/BETA-OPS.md"
+    },
+    "edgeObservation": "One paired HTTP 521 observation on both public origins recovered on the next IPv4 checks. The beta origin returned HTTP 200 throughout the observed samples.",
+    "deploymentChannel": "Unverified on the operating guest. The documented guest follows main releases. Both release channels published this source commit, with different image IDs.",
+    "releasedImages": {
+      "main": "sha256:17028b1dd3ee8e42ec0edc8b034b52b2a67c69becc59732ca11366ac8115ba9c",
+      "beta": "sha256:3dc4c6461731691d87ddb1435f8e746b04b7241866de55f81a869187739284cb"
+    }
+  },
+  "evidence": [
+    {
+      "classification": "reproduced on live beta",
+      "check": "Native TD GDI and Nod browser journeys; same-release engine URLs and checksummed resources; lobby and WebSocket service smoke",
+      "pullRequests": [
+        98
+      ],
+      "issues": [
+        "THU-1940",
+        "THU-2487"
+      ]
+    },
+    {
+      "classification": "reproduced on live beta",
+      "check": "Synthetic guest entry succeeded, but the WebSocket did not deliver a world snapshot within 30 seconds; backend wake or replay state still needs operator evidence",
+      "issues": [
+        "THU-2244",
+        "THU-2487"
+      ]
+    },
+    {
+      "classification": "reproduced on live beta",
+      "check": "Blocking native TD engine JS displayed Deployment interrupted with the failed URL and Return to lobby",
+      "issues": [
+        "THU-1940"
+      ]
+    },
+    {
+      "classification": "reproduced on live beta",
+      "check": "Existing Fusion Dune and RA2 launch smoke and two-browser lockstep at 15 checkpoints",
+      "pullRequests": [
+        98
+      ],
+      "issues": [
+        "THU-2487",
+        "THU-2533"
+      ]
+    },
+    {
+      "classification": "reproduced only on integration candidate",
+      "check": "Fourteen PostgreSQL private-routing and outbox tests, including unequal region journals",
+      "pullRequests": [
+        99
+      ],
+      "issues": [
+        "THU-2443"
+      ]
+    },
+    {
+      "classification": "reproduced from versioned source",
+      "check": "138 planning work orders and 236 research payload manifest entries",
+      "pullRequests": [
+        95,
+        96
+      ],
+      "issues": [
+        "THU-2533"
+      ]
+    },
+    {
+      "classification": "source inspection",
+      "check": "Native TD and RA1 declare lockstep false; stand-alone parity, security and performance scripts are placeholders",
+      "issues": [
+        "THU-1331",
+        "THU-1365",
+        "THU-1367"
+      ]
+    },
+    {
+      "classification": "unverified",
+      "check": "Guest image IDs, installed channel, current data-compatible rollback and live state continuity across the candidate",
+      "pullRequests": [
+        100
+      ],
+      "issues": [
+        "THU-2226",
+        "THU-2244",
+        "THU-2487",
+        "THU-2671"
+      ]
+    },
+    {
+      "classification": "unverified",
+      "check": "Native four-client synchronization and full approved Classic reference and distribution evidence",
+      "issues": [
+        "THU-1351",
+        "THU-1359",
+        "THU-1367"
+      ]
+    },
+    {
+      "classification": "unverified",
+      "check": "Fusion 3D production renderer, full census implementation and exact released-player journeys",
+      "issues": [
+        "THU-2533",
+        "THU-2602",
+        "THU-2669",
+        "THU-2671"
+      ]
+    }
+  ],
+  "issueInventory": {
+    "asOf": "2026-11-24 opening snapshot",
+    "label": "Workflow states from Linear. Delivery evidence is recorded separately.",
+    "total": 230,
+    "open": 199,
+    "issues": [
+      {
+        "id": "THU-1331",
+        "scope": "Classic",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1331/comrade-master-delivery-epic-faithful-four-player-browser-rts-platform",
+        "historyReferences": [
+          {
+            "commit": "1134c6093506a01007f396df7d704315692ab804",
+            "subject": "Merge pull request #86 from Flatt-T/thu-1331-d2k-ra2-fixture-templates"
+          },
+          {
+            "commit": "07f056b7d545646128d44faa0a9c15aef2e7254d",
+            "subject": "docs(references): add D2K and RA2 parity fixture templates (THU-1331)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-1332",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1332/comrade-c01-establish-code-asset-and-brand-rights-ledger",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1333",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1333/comrade-c02-pin-original-reference-builds-and-independent-parity",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1334",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1334/comrade-c03-bootstrap-reproducible-monorepo-engine-toolchain-and-ci",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1335",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1335/comrade-c04-prove-vanilla-conquer-native-webassembly-and-headless",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1336",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1336/comrade-c05-establish-canonical-determinism-and-source-deviation",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1337",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1337/comrade-c06-evaluate-chatgpt-sites-eligibility-and-runtime-without",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1338",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1338/comrade-c07-implement-versioned-pack-adapter-and-immutable-match",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1339",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1339/comrade-c08-generate-complete-source-derived-unit-weapon-upgrade-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1340",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1340/comrade-c09-implement-guest-sessions-without-registration-or-name",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1341",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1341/comrade-c10-build-authoritative-four-seat-room-state-settings-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1342",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1342/comrade-c11-public-room-discovery-revocable-invites-and-bounded-room",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1343",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1343/comrade-c12-build-guest-to-lobby-to-match-browser-journey",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1344",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1344/comrade-c13-rights-aware-asset-conversion-local-import-and-immutable",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1345",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1345/comrade-c14-parse-validate-hash-and-preview-multiplayer-maps",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1346",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1346/comrade-c15-implement-faithful-canvas-rendering-camera-zoom-and-hidpi",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1347",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1347/comrade-c16-authentic-input-profiles-sidebar-selection-and-audio",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1348",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1348/comrade-c17-authoritative-wss-command-protocol-and-headless-match",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1349",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1349/comrade-c18-canonical-snapshots-durable-command-journals-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1350",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1350/comrade-c19-reconnect-tab-suspension-desync-and-server-crash-recovery",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1351",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1351/comrade-c20-integrate-and-demonstrate-a-real-four-browser-vertical",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1352",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1352/comrade-c21-complete-classic-candc-multiplayer-content-and-mechanics",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1353",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1353/comrade-c22-complete-red-alert-1-multiplayer-and-explicit-expansion",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1354",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1354/comrade-c23-close-complete-tdra1-controls-visual-and-audio-fidelity",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1355",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1355/comrade-c24-certify-varied-candc-and-ra1-map-libraries-for-two-to-four",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1356",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1356/comrade-c25-resolve-dune-2000-engine-strategy-rights-and-behavioural",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1357",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1357/comrade-c26-implement-dune-2000-adapter-economy-construction-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1358",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1358/comrade-c27-complete-dune-2000-houses-combat-abilities-controls-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1359",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1359/comrade-c28-certify-dune-2000-fidelity-map-library-and-four-player",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1360",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1360/comrade-c29-evaluate-red-alert-2-engine-integration-and-permission",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1361",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1361/comrade-c30-implement-and-certify-the-separately-licensed-red-alert-2",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1362",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1362/comrade-c31-publish-pack-sdk-conformance-tests-and-original-extension",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1363",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1363/comrade-c32-security-abuse-privacy-and-untrusted-content-hardening",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1364",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1364/comrade-c33-profile-client-performance-server-capacity-and-four-player",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1365",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1365/comrade-c34-independent-cross-browser-fidelity-and-full-core",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1366",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1366/comrade-c35-portable-deployment-observability-drain-backup-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1367",
+        "scope": "Classic",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1367/comrade-c36-final-rights-source-fidelity-and-owner-release-acceptance",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1923",
+        "scope": "Classic",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1923/comrade-provision-paid-platform-external-services-postgres-cognito-ses",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1940",
+        "scope": "Classic",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1940/comrade-classic-match-stuck-on-vanilla-conquer-enginecontent",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1941",
+        "scope": "Shared/release",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1941/comrade-watch-to-earn-match-credit-and-179-battle-pack",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1947",
+        "scope": "Shared/release",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1947/comrade-voucher-codes-at-checkout-and-50-gold-100percent-off-coupons",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1963",
+        "scope": "Shared/release",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1963/comrade-public-player-knowledgebase-kb",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-1968",
+        "scope": "Shared/release",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1968/comrade-conquer-dark-supers-walker-gaitrange-sand-people-raids",
+        "historyReferences": [
+          {
+            "commit": "45790ec9390385e3a9753d61a3cc962deec0eeaf",
+            "subject": "Merge pull request #5 from Flatt-T/thu-1968-conquer-playtest"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-1969",
+        "scope": "Shared/release",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1969/comrade-account-upgradecheckout-returns-generic-500",
+        "historyReferences": [
+          {
+            "commit": "10b741c9bf980717b7f2ed0e33c6d0cb73464b5e",
+            "subject": "Merge pull request #6 from Flatt-T/thu-1969-account-upgrade-checkout"
+          },
+          {
+            "commit": "a495f31691d2ec998f3a96b424530e98dc6ebfb4",
+            "subject": "merge: main into thu-1969-account-upgrade-checkout"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-1970",
+        "scope": "Shared/release",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1970/comrade-signed-in-users-sent-back-to-login-on-navigation-and-refresh",
+        "historyReferences": [
+          {
+            "commit": "fdc74701d0ad909ca8620bdeeb84a5011ce0b871",
+            "subject": "Merge pull request #7 from Flatt-T/thu-1970-session-persists"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-1974",
+        "scope": "Shared/release",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-1974/comrade-cut-over-public-fqdn-to-projectcomradecouk-and-add-ga4",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2000",
+        "scope": "Shared/release",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2000/comrade-wire-adsense-h5-adstxt-head-tag-preroll-and-reward-ads",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2224",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2224/comrade-pw00-persistent-world-beta-mode-and-backend",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2225",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2225/comrade-pw01-establish-the-beta-implementation-baseline-and-resolve",
+        "historyReferences": [
+          {
+            "commit": "39cbf2d6d7e8fa746d6796493a5e9f081ad26793",
+            "subject": "Merge pull request #13 from Flatt-T/thu-2225-pw01-persistent-baseline"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2226",
+        "scope": "Persistent world",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2226/comrade-pw02-create-the-isolated-proxmox-beta-container-and-direct",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2227",
+        "scope": "Persistent world",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2227/comrade-pw03-create-the-isolated-beta-postgresql-database-roles-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2228",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2228/comrade-pw04-define-versioned-persistent-world-commands-and-protection",
+        "historyReferences": [
+          {
+            "commit": "d16397a026636db41daa345cb5143fd824466156",
+            "subject": "Merge pull request #14 from Flatt-T/thu-2228-pw04-mmo-contracts"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2229",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2229/comrade-pw05-implement-durable-world-records-and-the-single-asset",
+        "historyReferences": [
+          {
+            "commit": "e9846a127f99eb6963f98e566598e1bd43eb239d",
+            "subject": "Merge pull request #15 from Flatt-T/thu-2229-pw05-durable-world"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2230",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2230/comrade-pw06-implement-ordered-authoritative-mutations-and-the",
+        "historyReferences": [
+          {
+            "commit": "1bd10a92bc695962a7eb8ced8a9743cd13bd3615",
+            "subject": "Merge pull request #16 from Flatt-T/thu-2230-pw06-event-bus"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2231",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2231/comrade-pw07-implement-durable-offline-scheduling-and-region",
+        "historyReferences": [
+          {
+            "commit": "aac888fb3e60ba67177889eef3f7cea6d2cdf7ea",
+            "subject": "Merge pull request #18 from Flatt-T/thu-2231-pw07-region-scheduler"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2232",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2232/comrade-pw08-integrate-the-authoritative-regional-engine-and-browser",
+        "historyReferences": [
+          {
+            "commit": "04ec47735a30e0e3de51014e87fb9db5c82eb725",
+            "subject": "Merge pull request #19 from Flatt-T/thu-2232-pw08-mmo-gateway"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2233",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2233/comrade-pw09-implement-persistent-identity-alliances-and-limited",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2234",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2234/comrade-pw10-implement-manual-offline-shields-and-the-allied",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2235",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2235/comrade-pw11-implement-safe-newcomer-settlement-and-the-one-hour-setup",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2236",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2236/comrade-pw12-implement-sell-for-credit-evacuation-defeat-and-protected",
+        "historyReferences": [
+          {
+            "commit": "093726108aebfb233a62686da65f9b7657a9dbd1",
+            "subject": "Merge pull request #76 from Flatt-T/thu-2236-recovery-edges"
+          },
+          {
+            "commit": "d8e26e26f9f410687f493d3d98e0deb50eefafa4",
+            "subject": "test(mmo): packed-carrier anchoring and runner-restart idempotency (THU-2236)"
+          },
+          {
+            "commit": "e550f02f504802fae77ae00571590d5155572f88",
+            "subject": "Merge pull request #73 from Flatt-T/thu-2236-worldwide-recovery"
+          },
+          {
+            "commit": "9737a979f2fd19edb6cfae504194a68b36c18cf1",
+            "subject": "test(mmo): drop stray timeout arg on world-wide recovery case (THU-2236)"
+          },
+          {
+            "commit": "908c4a9d9d785b42a307bfebf24d8a8cc451245f",
+            "subject": "mmo: world-wide recovery eligibility via published asset rosters and in-flight manifests (THU-2236)"
+          },
+          {
+            "commit": "1629b51ec47382b1cbba075276f64d8db290a59c",
+            "subject": "Merge pull request #25 from Flatt-T/thu-2236-pw12-recovery"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2237",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2237/comrade-pw13-implement-free-price-allied-barter-and-midbattle-unit",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2238",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2238/comrade-pw14-implement-packed-buildings-barter-carriers-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2239",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2239/comrade-pw15-implement-sea-or-air-transport-for-mcvs-and-packed",
+        "historyReferences": [
+          {
+            "commit": "33eb30eec354945c0b95ea6b861aeb27be515535",
+            "subject": "Merge pull request #74 from Flatt-T/thu-2239-naval-journey"
+          },
+          {
+            "commit": "6137807c856a4310539da545988bc7c47e5feb49",
+            "subject": "test(fusion): per-choice sea-lift journey on the universal pack (THU-2239)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2240",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2240/comrade-pw16-generate-varied-connected-terrain-and-persistent-frontier",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2241",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2241/comrade-pw17-implement-fixed-factions-compatible-mixed-forces-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2242",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2242/comrade-pw18-prove-region-handoff-crash-recovery-and-boundary-combat",
+        "historyReferences": [
+          {
+            "commit": "ccb8d476dc4d219bcc46c25d8e1669f6caccf19e",
+            "subject": "Merge pull request #81 from Flatt-T/thu-2242-depart-loss"
+          },
+          {
+            "commit": "ae50895d7c78a67309fb11c9c05e9fec793e0402",
+            "subject": "test(mmo): onward A-B-A transfer preserves identity and ledger legs (THU-2242)"
+          },
+          {
+            "commit": "1110bef6c72e284ea507d4f2c3e08e2ba736ef04",
+            "subject": "fix(mmo): bind transfer identities only after inbound commit lands (THU-2242)"
+          },
+          {
+            "commit": "428f98b3bd16331afcfb541d26feaac19058f4a5",
+            "subject": "test(mmo): packed-building carrier crosses regions and redeploys (THU-2242)"
+          },
+          {
+            "commit": "dc1d3000f985555bec61c0a2ca22d00dd1fcbf6b",
+            "subject": "fix(mmo): cancel transfers for units destroyed during the depart walk (THU-2242)"
+          },
+          {
+            "commit": "7ac0e6a0700f3d66bed1fe2a470d3f83e0a6fb2f",
+            "subject": "Merge pull request #75 from Flatt-T/thu-2242-transfer-orders"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2243",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2243/comrade-pw19-build-the-beta-player-flows-and-complete-the-persistent",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2244",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2244/comrade-pw20-validate-beta-isolation-backups-recovery-load-and-release",
+        "historyReferences": [
+          {
+            "commit": "46aafc5c07c01387212ff0f74e6e47c1c7e824e0",
+            "subject": "fix(mmo): yield on wall-clock budget during catch-up, not tick count (THU-2244)"
+          },
+          {
+            "commit": "add13cf6056391f13f4bbebaf92c73bf412b912e",
+            "subject": "fix(mmo): retry transient lease-renewal failures during catch-up (THU-2244)"
+          },
+          {
+            "commit": "a6b550a96c7031d86b34a45127a84eec9f819ac9",
+            "subject": "fix(mmo): yield event loop during deep catch-up replay (THU-2244)"
+          },
+          {
+            "commit": "940a553ba9f3d2c9cfc3105c5a2603382ae93fa9",
+            "subject": "fix(mmo): periodic region checkpoints — bound restart replay tail (THU-2244)"
+          },
+          {
+            "commit": "18782005e51589a7800405666baee56b2000efd5",
+            "subject": "fix(mmo): renew region lease during startup catch-up — unbricks beta region (THU-2244)"
+          },
+          {
+            "commit": "2da98ffefe3751243014a3a3a79d11ad7ccfe603",
+            "subject": "fix(mmo): replay accrual events at their authoritative tick (THU-2244)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2269",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2269/comrade-pw21-extend-the-fusion-engine-for-persistent-regions-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2270",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2270/comrade-pw22-implement-region-hibernation-and-capped-idle-accrual",
+        "historyReferences": [
+          {
+            "commit": "71c0979dc62257e5ce5ea82d969a20f809b672d6",
+            "subject": "Merge pull request #20 from Flatt-T/thu-2270-pw22-region-hibernation"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2271",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2271/comrade-pw24-implement-salvage-capturable-sites-and-the-ladder",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2272",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2272/comrade-pw25-build-the-return-loop-objectives-rewards-notifications",
+        "historyReferences": [
+          {
+            "commit": "290cb8bdc4d575d52043468107562d54496efcd4",
+            "subject": "Merge pull request #26 from Flatt-T/thu-2272-pw25-notifications"
+          },
+          {
+            "commit": "7e09c53be61bb7af45ec7b69ee918d13d1ff85fd",
+            "subject": "PW25 M1: opt-in rate-limited notifications and away report (THU-2272)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2273",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2273/comrade-pw26-close-economy-exploits-bound-assets-trade-limits-and",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2274",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2274/comrade-pw27-milestone-1-playable-single-region-persistent-world",
+        "historyReferences": [
+          {
+            "commit": "06272f0fc6806e86331d3d663e35ff8d87745206",
+            "subject": "Merge pull request #27 from Flatt-T/thu-2274-pw27-beta-plumbing"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2275",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2275/comrade-pw23-define-the-persistent-pacing-profile-and-anti-snowball",
+        "historyReferences": [
+          {
+            "commit": "d5456d328914704e0361fff2c250fb4e6ed2a36c",
+            "subject": "Merge pull request #21 from Flatt-T/thu-2275-pw23-pacing-profile"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2421",
+        "scope": "Persistent world",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2421/comrade-pw28-universal-persistent-world-all-fusion-factions-via-mashup",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2440",
+        "scope": "Persistent world",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2440/comrade-pw29-commit-regional-effects-before-changing-the-fusion",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2441",
+        "scope": "Persistent world",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2441/comrade-pw30-restore-every-committed-event-after-the-snapshot-at-its",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2442",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2442/comrade-pw31-apply-browser-events-in-authoritative-tick-order-and",
+        "historyReferences": [
+          {
+            "commit": "6eaf8bbfe53a6a78564e164e32c82f779c2e414b",
+            "subject": "Merge pull request #68 from Flatt-T/thu-2442-tick-order"
+          },
+          {
+            "commit": "a8019d91dd8fa74c7287d7d03c62f90a160ba7c9",
+            "subject": "web: tick-ordered remote effects and per-tick checksum history (THU-2442)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2443",
+        "scope": "Persistent world",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2443/comrade-pw32-restrict-alliance-chat-and-private-command-results-to",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2444",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2444/comrade-pw33-pin-engine-rules-pack-and-world-generation-content-across",
+        "historyReferences": [
+          {
+            "commit": "a6c382f29433fdfe6909b4037d057061261fb521",
+            "subject": "mmo: pin engine/pack/rules/worldgen content fingerprints (THU-2444) (#67)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2445",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2445/comrade-pw34-implement-allied-engineer-consent-and-unshielded-enemy",
+        "historyReferences": [
+          {
+            "commit": "9e4158a3eb1e549e01fff50486c37115c892f881",
+            "subject": "Merge pull request #84 from Flatt-T/thu-2445-consent-protection-waiver"
+          },
+          {
+            "commit": "9f446c921e885fc1f5e35ebda97387aec65697e6",
+            "subject": "fix(fusion): owner consent waives target newcomer protection at enter-issue (THU-2445)"
+          },
+          {
+            "commit": "93334caf577721e3e2b75fc09e8d1e72960f2701",
+            "subject": "Merge pull request #71 from Flatt-T/thu-2445-ownership-generation"
+          },
+          {
+            "commit": "f9c3d70fad8b94bb989947c7b9ddabe72b0eee85",
+            "subject": "mmo+fusion: bind Engineer orders and consent grants to ownership generation (THU-2445)"
+          },
+          {
+            "commit": "b16fa6a43a683c4cbf18591173544f40dbb2e33e",
+            "subject": "mmo+fusion: allied Engineer capture consent flow (PW34/THU-2445) (#64)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2446",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2446/comrade-pw35-give-each-universal-world-starter-its-full-approved",
+        "historyReferences": [
+          {
+            "commit": "d7d8ba935c1668eea0f37dfacf2440bb345454ce",
+            "subject": "Merge pull request #72 from Flatt-T/thu-2446-resume-proof"
+          },
+          {
+            "commit": "53979a24b2ff6b34af1a558a9609fc2529408ce7",
+            "subject": "test(mmo): prove existing-player resume keeps identical assets and credits (THU-2446)"
+          },
+          {
+            "commit": "f64b02415422ec50e2ce0705ee6b27f722cad588",
+            "subject": "fusion: approved 16-unit starter roster for every legal loadout (THU-2446) (#65)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2447",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2447/comrade-pw36-polish-every-persistent-world-building-and-verify-full",
+        "historyReferences": [
+          {
+            "commit": "d6d0e558e15a02e4b9034f861c40a20879a2f7d0",
+            "subject": "Merge pull request #80 from Flatt-T/thu-2447-2448-art-coverage"
+          },
+          {
+            "commit": "cd2cd90ea686d4b8627771cb56f79eff5b02581d",
+            "subject": "feat(tools): runtime art coverage manifest generator (THU-2447/2448)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2448",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2448/comrade-pw37-polish-every-persistent-world-unit-and-verify-full",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2449",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2449/comrade-pw38-polish-the-persistent-battlefield-hud-placement-camera",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2450",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2450/comrade-pw39-show-compact-owner-and-ally-or-foe-labels-on-unit",
+        "historyReferences": [
+          {
+            "commit": "9fea0fd3bbbd00ce60f7136d550a6d635e619a89",
+            "subject": "Merge pull request #78 from Flatt-T/thu-2450-owner-labels"
+          },
+          {
+            "commit": "e602d9e852bd4e1c18819765a1a52fc8e23a73b4",
+            "subject": "feat(fusion): owner-name Ally/Foe approach labels for persistent world (THU-2450)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2451",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2451/comrade-pw40-complete-opt-in-notification-delivery-and-verify-away",
+        "historyReferences": [
+          {
+            "commit": "9525844e4fa01ad769a725b915d3ad427074494d",
+            "subject": "Merge pull request #83 from Flatt-T/thu-2451-vapid-compose"
+          },
+          {
+            "commit": "f95830d14a7262e8ac3e38c4d6eeda0719baace6",
+            "subject": "fix(infra): pass VAPID env through compose and pull-deployer (THU-2451)"
+          },
+          {
+            "commit": "2185c3fe763ba8c511cf3410907a2a9fb929bf81",
+            "subject": "Merge pull request #82 from Flatt-T/thu-2451-away-journal-ptrs"
+          },
+          {
+            "commit": "b7f63c21f8d9815bd85fb9fedc303795ff4c0cfe",
+            "subject": "fix(mmo): journal pointers for durable-derived away-report entries (THU-2451)"
+          },
+          {
+            "commit": "50cd330990639b3b69b0558323759fffa996570f",
+            "subject": "Merge pull request #79 from Flatt-T/thu-2451-push-notify"
+          },
+          {
+            "commit": "f86a98c62c4eb8f00fbb33c90402795d78a21dd4",
+            "subject": "feat(mmo): real web-push channel + journal pointers on notifications (THU-2451)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2452",
+        "scope": "Persistent world",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2452/comrade-pw41-verify-multiplayer-protection-trading-capture-recovery",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2453",
+        "scope": "Persistent world",
+        "state": "Done",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2453/comrade-pw42-resolve-or-document-the-failing-dependency-audit",
+        "historyReferences": [
+          {
+            "commit": "7cb8e2adef24e5c6ca81ea47cbd5c40035447571",
+            "subject": "Merge pull request #77 from Flatt-T/thu-2453-minimatch-audit"
+          },
+          {
+            "commit": "9b931377fa623a879a932fb9879f5e655d2e57c0",
+            "subject": "fix(deps): override vulnerable minimatch range to >=11.0.1 (THU-2453)"
+          }
+        ],
+        "initialEvidence": "commit-subject references; acceptance remains unverified unless explicitly recorded"
+      },
+      {
+        "id": "THU-2487",
+        "scope": "Shared/release",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2487/comrade-complete-and-deploy-the-approved-classic-and-persistent-world",
+        "initialEvidence": "owning Linear record or COMRADE 20A; no ticket identifier in the pinned commit subjects"
+      },
+      {
+        "id": "THU-2533",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2533/comrade-f3d-upgrade-fusion-to-the-complete-3d-series-homage",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2534",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2534/f3d-ops-001-reconcile-the-live-programme-baseline-and-preserve-current",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2535",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2535/f3d-eng-001-freeze-the-verified-engine-baseline-and-inventory",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2536",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2536/f3d-ops-002-publish-the-decision-register-and-freeze-the-mode",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2537",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2537/f3d-art-001-reconcile-every-current-runtime-item-with-its-art-and",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2538",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2538/f3d-eng-002-replace-placeholder-test-commands-with-executable-engine",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2539",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2539/f3d-ops-003-resolve-content-rights-and-the-public-distribution-route",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2540",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2540/f3d-ops-004-establish-specialist-dispatch-file-ownership-and",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2541",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2541/f3d-res-001-lock-the-released-title-scope-source-hierarchy-and",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2542",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2542/f3d-eng-003-capture-deterministic-characterization-and-snapshot",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2543",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2543/f3d-art-005-enforce-provenance-and-publish-eligibility-for-every-art",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2544",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2544/f3d-ops-006-maintain-requirement-evidence-and-change-control-through",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2545",
+        "scope": "Fusion 3D",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2545/f3d-res-002-resolve-the-user-video-evidence-and-timestamp-the-design",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2546",
+        "scope": "Fusion 3D",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2546/f3d-res-003-implement-the-catalogue-schema-and-evidence-to-task",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2547",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2547/f3d-eng-004-introduce-explicit-native-legacy-fusion-and-homage-profile",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2548",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2548/f3d-res-004-research-and-reconcile-command-and-conquer-tiberian-dawn",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2549",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2549/f3d-res-005-research-and-reconcile-red-alert-counterstrike-and-the",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2550",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2550/f3d-res-006-research-and-reconcile-tiberian-sun",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2551",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2551/f3d-res-008-research-and-reconcile-red-alert-2",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2552",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2552/f3d-res-010-research-and-reconcile-command-and-conquer-generals",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2553",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2553/f3d-res-012-research-and-reconcile-command-and-conquer-3-tiberium-wars",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2554",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2554/f3d-res-014-research-and-reconcile-red-alert-3",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2555",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2555/f3d-res-016-research-and-reconcile-command-and-conquer-4-tiberian",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2556",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2556/f3d-res-017-research-and-reconcile-command-and-conquer-renegade",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2557",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2557/f3d-res-018-research-and-reconcile-command-and-conquer-sole-survivor",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2558",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2558/f3d-res-020-research-and-reconcile-tiberium-alliances",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2559",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2559/f3d-res-021-research-and-reconcile-command-and-conquer-rivals",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2560",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2560/f3d-res-022-research-and-reconcile-legacy-and-regional-mobile-titles",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2561",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2561/f3d-res-023-research-and-reconcile-dune-lineage-and-existing-dune-2000",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2562",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2562/f3d-eng-005-extract-deterministic-subsystems-from-game-without",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2563",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2563/f3d-eng-006-define-and-implement-the-immutable-simulation-to-view",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2564",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2564/f3d-res-019-research-and-reconcile-remastered-and-console-port-deltas",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2565",
+        "scope": "Fusion 3D",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2565/f3d-res-024-define-the-capability-framework-and-first-battle-mechanic",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2566",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2566/f3d-res-025-define-terrain-evidence-schema-and-first-crossing",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2567",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2567/f3d-res-007-research-and-reconcile-tiberian-sun-firestorm",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2568",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2568/f3d-res-009-research-and-reconcile-red-alert-2-yuris-revenge",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2569",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2569/f3d-res-011-research-and-reconcile-generals-zero-hour",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2570",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2570/f3d-res-013-research-and-reconcile-command-and-conquer-3-kanes-wrath",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2571",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2571/f3d-res-015-research-and-reconcile-red-alert-3-uprising",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2572",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2572/f3d-eng-031-implement-typed-capability-registration-and-finite-state",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2573",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2573/f3d-eng-019-define-authoritative-elevation-surface-and-topology",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2574",
+        "scope": "Fusion 3D",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2574/f3d-res-026-define-the-game-feel-rubric-and-first-battle-benchmark",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2575",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2575/f3d-world-001-define-the-terrain-coverage-framework-and-first-crossing",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2576",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2576/f3d-eng-020-implement-versioned-map-loading-and-immutable-generator",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2577",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2577/f3d-eng-037-version-snapshot-and-network-contracts-for-the-new-engine",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2578",
+        "scope": "Fusion 3D",
+        "state": "In Review",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2578/f3d-res-027-define-profile-adaptation-rules-and-first-battle-fusion",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2579",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2579/f3d-eng-021-implement-deterministic-layered-navigation-and-route",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2580",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2580/f3d-eng-038-implement-isolated-migration-verification-and-rollback",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2581",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2581/f3d-art-002-define-the-art-direction-framework-and-first-battle",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2582",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2582/f3d-eng-022-implement-movement-reservations-congestion-and-formation",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2583",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2583/f3d-eng-028-implement-height-aware-combat-visibility-and-projectile",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2584",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2584/f3d-world-002-specify-and-verify-height-surface-and-transition",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2585",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2585/f3d-art-003-build-authoring-export-validation-and-specify-the-runtime",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2586",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2586/f3d-eng-027-implement-locomotion-transitions-and-transport-surface",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2587",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2587/f3d-world-007-specify-bridge-rules-and-independently-authored",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2588",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2588/f3d-art-004-specify-animation-pose-bindings-priorities-and-event",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2589",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2589/f3d-eng-023-implement-bridge-identities-and-the-authoritative",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2590",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2590/f3d-world-009-validate-strategic-generation-and-add-world-authoring",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2591",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2591/f3d-art-006-produce-the-representative-battle-blockout-set",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2592",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2592/f3d-art-013-expand-the-complete-inventory-into-bounded-per-entity-work",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2593",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2593/f3d-eng-024-resolve-bridge-damage-collapse-and-occupants",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2594",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2594/f3d-eng-007-build-the-bounded-threejs-renderer-comparison-fixture",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2595",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2595/f3d-eng-008-build-the-bounded-babylonjs-renderer-comparison-fixture",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2596",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2596/f3d-ops-005-generate-complete-bounded-content-production-work-orders",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2597",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2597/f3d-eng-009-select-the-production-renderer-and-ratify-measured-budgets",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2598",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2598/f3d-eng-029-implement-pluggable-construction-and-economy-policies",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2599",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2599/f3d-eng-032-implement-occupation-cargo-garrison-and-portal-state",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2600",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2600/f3d-eng-033-implement-control-detection-and-timed-power-lifecycle",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2601",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2601/f3d-eng-046-implement-authoritative-match-objectives-and-result",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2602",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2602/f3d-res-028-close-the-census-and-validate-canonical-per-entity-task",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2603",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2603/f3d-eng-010-implement-versioned-3d-asset-manifests-and-ingestion",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2604",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2604/f3d-ux-006-measure-performance-budgets-and-implement-asset-streaming",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2605",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2605/f3d-eng-025-implement-bridge-repair-and-rebuilding-commands-with",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2606",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2606/f3d-eng-030-implement-technology-production-and-upgrade-dependency",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2607",
+        "scope": "Fusion 3D",
+        "state": "In Progress",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2607/f3d-res-029-independently-audit-whole-series-coverage-and-fleet",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2608",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2608/f3d-eng-011-implement-gpu-scene-lifecycle-and-robust-backend",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2609",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2609/f3d-eng-026-persist-and-replicate-bridge-and-topology-state-across",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2610",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2610/f3d-eng-034-implement-multi-mode-entities-hardpoints-and-squad",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2611",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2611/f3d-eng-036-build-release-content-completeness-and-semantic-coverage",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2612",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2612/f3d-eng-012-implement-rts-camera-height-aware-picking-and-command",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2613",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2613/f3d-eng-013-render-streamed-3d-terrain-chunks-and-water-surfaces",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2614",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2614/f3d-eng-014-render-entities-with-stable-identity-lod-and-measured",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2615",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2615/f3d-eng-018-isolate-browser-simulation-and-view-transport-from",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2616",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2616/f3d-eng-035-teach-ai-the-new-economy-surfaces-and-signature",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2617",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2617/f3d-eng-040-prove-mmo-authority-and-protection-invariants-under-new",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2618",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2618/f3d-eng-017-implement-readable-3d-fog-shroud-radar-and-ownership",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2619",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2619/f3d-ux-001-adapt-tactical-camera-picking-and-mouse-touch-orders-to-3d",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2620",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2620/f3d-world-003-produce-temperate-forest-and-rural-terrain-kits",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2621",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2621/f3d-world-004-produce-cold-arid-mountain-and-dune-compatible-terrain",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2622",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2622/f3d-world-005-produce-urban-contaminated-and-special-terrain-kits",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2623",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2623/f3d-world-011-produce-the-representative-river-crossing-and-water-kit",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2624",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2624/f3d-eng-015-implement-capability-driven-animation-controllers-and-clip",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2625",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2625/f3d-eng-045-coordinate-bridges-and-topology-across-region-boundaries",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2626",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2626/f3d-eng-039-implement-server-filtered-authoritative-view-replication",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2627",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2627/f3d-world-006-produce-water-coast-tropical-and-wetland-terrain-kits",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2628",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2628/f3d-art-007-build-infantry-rigs-and-specialist-action-animations",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2629",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2629/f3d-art-008-build-tracked-and-wheeled-vehicle-articulation",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2630",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2630/f3d-art-009-build-walker-creature-and-subterranean-animation-families",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2631",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2631/f3d-art-010-build-aircraft-naval-and-transforming-unit-animation",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2632",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2632/f3d-art-011-build-complete-structure-lifecycle-animation",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2633",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2633/f3d-eng-016-implement-semantic-effects-and-audio-event-delivery",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2634",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2634/f3d-world-010-verify-world-state-recovery-and-schedule-region-seam",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2635",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2635/f3d-ux-002-preserve-hud-ownership-labels-and-fog-information-rules",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2636",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2636/f3d-art-012-create-distinct-weapon-ability-and-destruction-effects",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2637",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2637/f3d-eng-041-meet-mobile-and-desktop-performance-budgets-without",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2638",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2638/f3d-world-008-create-bridge-geometry-lifecycle-presentation-and",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2639",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2639/f3d-art-014-complete-tiberian-dawn-and-red-alert-era-production",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2640",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2640/f3d-art-015-complete-tiberian-sun-and-red-alert-2-era-production",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2641",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2641/f3d-art-016-complete-generals-and-zero-hour-production",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2642",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2642/f3d-art-017-complete-tiberium-wars-and-kanes-wrath-production",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2643",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2643/f3d-art-018-complete-red-alert-3-and-uprising-production",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2644",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2644/f3d-art-019-complete-later-title-and-existing-pack-presentation",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2645",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2645/f3d-ux-003-add-accessible-visual-audio-and-control-settings",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2646",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2646/f3d-ux-004-build-faction-audio-voices-alerts-and-event-mixing",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2647",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2647/f3d-art-020-verify-complete-roster-presentation-and-close-missing",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2648",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2648/f3d-ux-005-prove-the-complete-representative-battle-experience",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2649",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2649/f3d-int-001-integrate-and-qualify-the-first-complete-3d-battle-slice",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2650",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2650/f3d-ux-008-assemble-and-independently-approve-the-full-experience",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2651",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2651/f3d-pkg-001-complete-tiberian-dawn-and-covert-operations-content",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2652",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2652/f3d-pkg-002-complete-red-alert-counterstrike-and-aftermath-content",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2653",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2653/f3d-pkg-003-complete-tiberian-sun-and-firestorm-content-delivery-gate",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2654",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2654/f3d-pkg-004-complete-red-alert-2-and-yuris-revenge-content-delivery",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2655",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2655/f3d-pkg-005-complete-generals-and-zero-hour-content-delivery-gate",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2656",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2656/f3d-pkg-006-complete-tiberium-wars-and-kanes-wrath-content-delivery",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2657",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2657/f3d-pkg-007-complete-red-alert-3-and-uprising-content-delivery-gate",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2658",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2658/f3d-pkg-008-complete-tiberian-twilight-faction-and-class-content",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2659",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2659/f3d-pkg-009-complete-renegade-content-adaptations-content-delivery",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2660",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2660/f3d-pkg-010-complete-sole-survivor-remaster-and-console-deltas-content",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2661",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2661/f3d-pkg-011-complete-released-browser-and-mobile-content-dispositions",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2662",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2662/f3d-pkg-012-complete-existing-dune-and-custom-fusion-compatibility",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2663",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2663/f3d-ux-007-qualify-real-mobile-browsers-and-crowded-battlefield",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2664",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2664/f3d-int-002-validate-faction-identity-tactical-feel-and-cross-era",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2665",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2665/f3d-eng-042-run-complete-play-and-synchronized-multiplayer-acceptance",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2666",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2666/f3d-int-003-reconcile-the-entire-catalogue-and-terrain-coverage-before",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2667",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2667/f3d-eng-043-prepare-controlled-beta-rollout-and-rehearsed-rollback",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2668",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2668/f3d-eng-044-reconcile-final-coverage-and-retire-temporary-paths-only",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2669",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2669/f3d-int-004-assemble-the-integrated-qualification-candidate-and",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2670",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2670/f3d-int-006-publish-player-developer-and-fleet-maintenance",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      },
+      {
+        "id": "THU-2671",
+        "scope": "Fusion 3D",
+        "state": "Backlog",
+        "url": "https://linear.app/thunderchild-creative/issue/THU-2671/f3d-int-005-deploy-the-qualified-upgrade-and-verify-actual-player",
+        "initialEvidence": "published work order or programme epic; see the task graph and research deposit"
+      }
+    ]
+  }
+}

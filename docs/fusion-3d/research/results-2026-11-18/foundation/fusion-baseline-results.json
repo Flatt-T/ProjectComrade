@@ -1,0 +1,308 @@
+{
+  "profile": "COMRADE existing RA1-style skirmish",
+  "sourceCommit": "84f411478f01ed62365a2e4d1d316eb57d9e193c",
+  "entryPoints": [
+    "Game constructor",
+    "Game.enqueue",
+    "Game.step",
+    "Game.canBuild",
+    "Game.canPlace",
+    "Game.checksum"
+  ],
+  "map": "ra1-bridgehead",
+  "seed": 14077,
+  "tickRateHz": 15,
+  "independentRuns": 2,
+  "results": {
+    "events": [
+      {
+        "action": "new match",
+        "tick": 0,
+        "checksum": 1037575320,
+        "credits": [
+          6000,
+          6000
+        ],
+        "power": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "two yards deployed",
+        "tick": 1,
+        "checksum": 4013436457,
+        "credits": [
+          6000,
+          6000
+        ],
+        "power": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "ready 0 powr",
+        "tick": 176,
+        "checksum": 4039016322,
+        "credits": [
+          5700,
+          6000
+        ],
+        "power": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "placed 0 powr",
+        "tick": 177,
+        "checksum": 3146748727,
+        "credits": [
+          5700,
+          6000
+        ],
+        "power": [
+          [
+            100,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "ready 1 powr",
+        "tick": 352,
+        "checksum": 255306057,
+        "credits": [
+          5700,
+          5700
+        ],
+        "power": [
+          [
+            100,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "placed 1 powr",
+        "tick": 353,
+        "checksum": 2890198602,
+        "credits": [
+          5700,
+          5700
+        ],
+        "power": [
+          [
+            100,
+            0
+          ],
+          [
+            100,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "ready 0 tent",
+        "tick": 586,
+        "checksum": 2474915294,
+        "credits": [
+          5300,
+          5700
+        ],
+        "power": [
+          [
+            100,
+            0
+          ],
+          [
+            100,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "placed 0 tent",
+        "tick": 587,
+        "checksum": 324164473,
+        "credits": [
+          5300,
+          5700
+        ],
+        "power": [
+          [
+            100,
+            20
+          ],
+          [
+            100,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "ready 1 barr",
+        "tick": 820,
+        "checksum": 2383934051,
+        "credits": [
+          5300,
+          5300
+        ],
+        "power": [
+          [
+            100,
+            20
+          ],
+          [
+            100,
+            0
+          ]
+        ]
+      },
+      {
+        "action": "placed 1 barr",
+        "tick": 821,
+        "checksum": 3679874274,
+        "credits": [
+          5300,
+          5300
+        ],
+        "power": [
+          [
+            100,
+            20
+          ],
+          [
+            100,
+            20
+          ]
+        ]
+      },
+      {
+        "action": "ready 0 proc",
+        "tick": 1984,
+        "checksum": 662954013,
+        "credits": [
+          3300,
+          5300
+        ],
+        "power": [
+          [
+            100,
+            20
+          ],
+          [
+            100,
+            20
+          ]
+        ]
+      },
+      {
+        "action": "placed 0 proc",
+        "tick": 1985,
+        "checksum": 4079959040,
+        "credits": [
+          3300,
+          5300
+        ],
+        "power": [
+          [
+            100,
+            50
+          ],
+          [
+            100,
+            20
+          ]
+        ]
+      },
+      {
+        "action": "rifle infantry exited producer",
+        "tick": 2044,
+        "checksum": 3365096835,
+        "credits": [
+          3200,
+          5300
+        ],
+        "power": [
+          [
+            100,
+            50
+          ],
+          [
+            100,
+            20
+          ]
+        ]
+      },
+      {
+        "action": "cancel refunded paid amount",
+        "tick": 2047,
+        "checksum": 2865815048,
+        "credits": [
+          3200,
+          5300
+        ],
+        "power": [
+          [
+            100,
+            50
+          ],
+          [
+            100,
+            20
+          ]
+        ]
+      },
+      {
+        "action": "harvester completed a resource deposit",
+        "tick": 2589,
+        "checksum": 885793848,
+        "credits": [
+          3200,
+          5300
+        ],
+        "power": [
+          [
+            100,
+            50
+          ],
+          [
+            100,
+            20
+          ]
+        ]
+      }
+    ],
+    "depositTotal": 50,
+    "refineryHarvesterCount": 1,
+    "finalChecksum": 885793848
+  }
+}

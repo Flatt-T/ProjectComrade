@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:common",
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "pattern": "^(https://|repo:|fixture:)"
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "enum": [
+            "publisher_manual",
+            "source_declaration",
+            "shipped_observation",
+            "community_comparison",
+            "authored",
+            "test_fixture"
+          ]
+        }
+      },
+      "required": [
+        "url",
+        "revision",
+        "locator",
+        "method"
+      ]
+    },
+    "datum": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {},
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "unknown",
+            "conflicting",
+            "source_reported",
+            "observed",
+            "authored",
+            "not_applicable"
+          ]
+        },
+        "profile_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]*$"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+          },
+          "uniqueItems": true,
+          "minItems": 0
+        },
+        "resolution": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "owner": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "task": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "owner",
+                "task",
+                "action"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tolerance": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "status",
+        "profile_id",
+        "evidence",
+        "resolution",
+        "tolerance"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "unknown",
+                  "conflicting"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              },
+              "resolution": {
+                "type": "object"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "evidence": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "source_reported",
+                  "observed",
+                  "authored"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "not": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "unresolved": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "owner",
+        "task",
+        "action"
+      ]
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "edition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_faction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_object_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "form_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "source_title",
+        "edition",
+        "platform",
+        "source_faction",
+        "namespace",
+        "source_object_id",
+        "form_id"
+      ]
+    },
+    "relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "alias",
+            "inherits",
+            "replaces",
+            "form",
+            "child",
+            "spawn",
+            "producer",
+            "required_all",
+            "required_any",
+            "forbidden",
+            "upgrade",
+            "weapon",
+            "ability",
+            "terrain_layer",
+            "capability",
+            "visual_family"
+          ]
+        },
+        "target_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]*$"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:fusion:research:catalogue:v1:common#/$defs/evidence"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "carry_state": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 0
+        }
+      },
+      "required": [
+        "role",
+        "target_id",
+        "evidence",
+        "carry_state"
+      ]
+    },
+    "stage": {
+      "enum": [
+        "SPEC",
+        "SIM",
+        "MODEL",
+        "RIG",
+        "ANIM",
+        "FX_AUDIO_UI",
+        "INTEGRATE",
+        "REVIEW"
+      ]
+    }
+  }
+}

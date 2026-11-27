@@ -1,0 +1,436 @@
+{
+ "source": {
+  "title": "Balance Patch Notes - Latest Patch August 2023 | EA Forums - 7276141",
+  "url": "https://forums.ea.com/discussions/command-and-conquer-franchise-en/balance-patch-notes---latest-patch-august-2023/7276141",
+  "source_type": "publisher-hosted, signed C&C Rivals Team, migrated author identity unverified",
+  "sha256_of_retrieved_html": "78af0502ee86c4e902f3621563cea3321569d34874e40dafff52cacb0ab4922a"
+ },
+ "stated_patch_period": "2023-08",
+ "patch_scope": "combat-unit portion only; commanders excluded",
+ "unit_level": null,
+ "source_value_units": "Retain numbers and authors\u2019 units. The two movement-speed headings use time wording; velocity units require runtime validation.",
+ "records": [
+  {
+   "unit": "Jump jet troopers",
+   "faction": "GDI",
+   "fields": [
+    {
+     "property": "jump_function_restored",
+     "previous": null,
+     "new": true,
+     "unit": "flag"
+    },
+    {
+     "property": "movement_speed_source_value",
+     "previous": 8,
+     "new": 9.3,
+     "unit": "as reported; source labels speed values seconds"
+    },
+    {
+     "property": "movement_speed_band",
+     "previous": "Faster",
+     "new": "Fastest",
+     "unit": "band"
+    }
+   ]
+  },
+  {
+   "unit": "Grenadier",
+   "faction": "GDI",
+   "fields": [
+    {
+     "property": "health",
+     "previous": 550,
+     "new": 620,
+     "unit": "HP"
+    },
+    {
+     "property": "movement_EMP_slow",
+     "previous": 60,
+     "new": 30,
+     "unit": "percent"
+    },
+    {
+     "property": "angular_EMP_slow",
+     "previous": 60,
+     "new": 30,
+     "unit": "percent"
+    }
+   ]
+  },
+  {
+   "unit": "M.S.V.",
+   "faction": "GDI",
+   "fields": [
+    {
+     "property": "attack_speed_buff",
+     "previous": 50,
+     "new": 5,
+     "unit": "percent"
+    },
+    {
+     "property": "reload_buff",
+     "previous": 55,
+     "new": 5,
+     "unit": "percent"
+    },
+    {
+     "property": "movement_buff",
+     "previous": 2.5,
+     "new": 4.5,
+     "unit": "source magnitude"
+    },
+    {
+     "property": "pack_up",
+     "previous": 2.25,
+     "new": 1.1,
+     "unit": "seconds"
+    }
+   ]
+  },
+  {
+   "unit": "Rhino",
+   "faction": "GDI",
+   "fields": [
+    {
+     "property": "movement_speed_source_value",
+     "previous": 6.928,
+     "new": 8,
+     "unit": "as reported; source labels speed values seconds"
+    },
+    {
+     "property": "sight",
+     "previous": 2,
+     "new": 3,
+     "unit": "tiles"
+    }
+   ]
+  },
+  {
+   "unit": "Shatterer",
+   "faction": "GDI",
+   "fields": [
+    {
+     "property": "damage_to_infantry",
+     "previous": 180,
+     "new": 210,
+     "unit": "damage"
+    }
+   ]
+  },
+  {
+   "unit": "Razorback",
+   "faction": "GDI",
+   "fields": [
+    {
+     "property": "health",
+     "previous": 1500,
+     "new": 1530,
+     "unit": "HP"
+    }
+   ]
+  },
+  {
+   "unit": "Orca bomber",
+   "faction": "GDI",
+   "fields": [
+    {
+     "property": "tiberium_cost",
+     "previous": 110,
+     "new": 100,
+     "unit": "Tiberium"
+    },
+    {
+     "property": "bomb_drop_interval",
+     "previous": 0.85,
+     "new": 0.5,
+     "unit": "seconds"
+    }
+   ]
+  },
+  {
+   "unit": "Fanatic",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "movement_buff",
+     "previous": 25,
+     "new": 40,
+     "unit": "percent"
+    },
+    {
+     "property": "attack_damage",
+     "previous": 49,
+     "new": 57,
+     "unit": "damage"
+    },
+    {
+     "property": "stat_page_fixed",
+     "previous": null,
+     "new": true,
+     "unit": "flag"
+    }
+   ]
+  },
+  {
+   "unit": "Scarabs",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "health",
+     "previous": 125,
+     "new": 250,
+     "unit": "HP"
+    }
+   ]
+  },
+  {
+   "unit": "Attack bike",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "initial_charge_delay",
+     "previous": 0.1,
+     "new": 0,
+     "unit": "seconds"
+    },
+    {
+     "property": "separation_delay",
+     "previous": 0.1,
+     "new": 0.25,
+     "unit": "seconds"
+    }
+   ]
+  },
+  {
+   "unit": "Buggy",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "sight",
+     "previous": 2,
+     "new": 3,
+     "unit": "tiles"
+    }
+   ]
+  },
+  {
+   "unit": "Chem buggy",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "cloud_spawn_time",
+     "previous": 1,
+     "new": 2.1,
+     "unit": "seconds"
+    }
+   ]
+  },
+  {
+   "unit": "Giga-cannon",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "stage_2_infantry_damage",
+     "previous": 15,
+     "new": 8,
+     "unit": "damage"
+    },
+    {
+     "property": "stage_3_infantry_damage",
+     "previous": 30,
+     "new": 12,
+     "unit": "damage"
+    },
+    {
+     "property": "charge_store_time",
+     "previous": 1,
+     "new": ">0.7",
+     "unit": "seconds; inequality is present in the source"
+    }
+   ]
+  },
+  {
+   "unit": "Banshee",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "fire_while_moving",
+     "previous": null,
+     "new": true,
+     "unit": "flag"
+    },
+    {
+     "property": "charge_delay",
+     "previous": 0.5,
+     "new": 0,
+     "unit": "seconds"
+    }
+   ]
+  },
+  {
+   "unit": "Catalyst gunship",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "damage_to_infantry",
+     "previous": 200,
+     "new": 270,
+     "unit": "damage"
+    },
+    {
+     "property": "health",
+     "previous": 1485,
+     "new": 1530,
+     "unit": "HP"
+    }
+   ]
+  },
+  {
+   "unit": "Inferno",
+   "faction": "Nod",
+   "fields": [
+    {
+     "property": "reload_interval",
+     "previous": 12,
+     "new": 13,
+     "unit": "seconds"
+    },
+    {
+     "property": "reload_movement_buff",
+     "previous": 45,
+     "new": 20,
+     "unit": "percent"
+    }
+   ]
+  }
+ ],
+ "community_comparison": {
+  "url": "https://cncrivals.blogspot.com/2023/06/new-balance-patch-july-2023.html",
+  "author_date": "2023-06-08",
+  "source_class": "firsthand community test report crediting Omeleet, without a build identifier or matching trial log",
+  "properties_with_matching_result": {
+   "Jump jet troopers": [
+    "movement_speed_band"
+   ],
+   "Grenadier": [
+    "health",
+    "movement_EMP_slow"
+   ],
+   "M.S.V.": [
+    "attack_speed_buff",
+    "reload_buff",
+    "movement_buff",
+    "pack_up"
+   ],
+   "Rhino": [
+    "sight"
+   ],
+   "Shatterer": [
+    "damage_to_infantry"
+   ],
+   "Razorback": [
+    "health"
+   ],
+   "Orca bomber": [
+    "tiberium_cost",
+    "bomb_drop_interval"
+   ],
+   "Fanatic": [],
+   "Scarabs": [
+    "health"
+   ],
+   "Attack bike": [
+    "initial_charge_delay",
+    "separation_delay"
+   ],
+   "Buggy": [
+    "sight"
+   ],
+   "Chem buggy": [
+    "cloud_spawn_time"
+   ],
+   "Giga-cannon": [
+    "stage_2_infantry_damage",
+    "stage_3_infantry_damage"
+   ],
+   "Banshee": [
+    "charge_delay",
+    "fire_while_moving"
+   ],
+   "Catalyst gunship": [
+    "damage_to_infantry",
+    "health"
+   ],
+   "Inferno": [
+    "reload_interval",
+    "reload_movement_buff"
+   ]
+  },
+  "distinct_or_differently_expressed": [
+   {
+    "unit": "Jump jet troopers",
+    "property": "jump_function",
+    "june_observation": "jump removed",
+    "august_note": "jump restored"
+   },
+   {
+    "unit": "Fanatic",
+    "property": "movement_buff",
+    "june_old": "25 percent",
+    "june_new": "flat 2.5",
+    "august_old": "25 percent",
+    "august_new": "40 percent"
+   },
+   {
+    "unit": "Giga-cannon",
+    "property": "charge_store_time",
+    "june_old_seconds": 1,
+    "june_new_seconds": 0.7,
+    "august_old_seconds": 1,
+    "august_new_as_printed": ">0.7"
+   },
+   {
+    "unit": "Rhino",
+    "property": "movement_speed",
+    "june_old": "Fast",
+    "june_new": "Faster",
+    "august_old_numeric": 6.928,
+    "august_new_numeric": 8
+   }
+  ],
+  "confidence": "Agreement between the two reports supports those specific changed properties at their respective dates. Neither report supplies a complete executable balance profile."
+ },
+ "coverage_supplement": {
+  "unit": "Battering ram",
+  "separate_source": "https://cnc.fandom.com/wiki/Battering_ram",
+  "source_class": "community-maintained release chronology; cites the community sheet; source independence unresolved",
+  "stated_release_date": "2022-12-05",
+  "reported_value_changes": {
+   "health": [
+    2300,
+    3300
+   ],
+   "cost": [
+    65,
+    90
+   ],
+   "structure_damage": [
+    2000,
+    3000
+   ],
+   "charge_up_seconds": [
+    0.5,
+    1.2
+   ],
+   "cooldown_seconds": [
+    2.75,
+    3
+   ]
+  },
+  "numeric_speed_as_listed": 3.958857,
+  "turn_rate_as_listed": 200,
+  "sight_range_as_listed": 2,
+  "scope": "Values are reported by this reference only unless a separate publisher observation exists. The workbook has a Battering Ram combat row but lacks a numeric health/speed ranking row."
+ }
+}

@@ -1,0 +1,393 @@
+{
+  "schema_version": 1,
+  "mode": "offline_projection",
+  "leaves": [
+    {
+      "task_key": "F3D-ENTITY-c80e173d50ed1490-SPEC-001",
+      "row_uid": "c80e173d50ed1490",
+      "row_sha256": "c80e173d50ed149086dccc615fe05b9208d13355cfa003fc27357a7c88b7a725",
+      "stage": "SPEC",
+      "part": 1,
+      "entity_id": "entity.synthetic.sample",
+      "dependencies": [],
+      "specialist": "reference and game design",
+      "profile": "profile.synthetic",
+      "target_profile": "synthetic.unpublished",
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "context": [
+        "fixture:synthetic-square-agent test-only declaration",
+        "catalogue record entity.synthetic.sample",
+        "approved adaptation adapt.synthetic"
+      ],
+      "permitted_paths": [
+        "research-projection/c80e173d50ed1490/spec/"
+      ],
+      "outputs": [
+        "source-to-Fusion record and lifecycle specification"
+      ],
+      "procedure": [
+        "Resolve permitted modes, producer, exclusions, state graph and authoritative events."
+      ],
+      "acceptance": [
+        "A legal and a forbidden acquisition plus one lifecycle transition agree with the approved disposition.",
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "non_goals": [
+        "Editing other entities or changing unapproved shared rules."
+      ],
+      "blocked_by": [],
+      "handoff": "Submit artifacts, content hashes, test results and unresolved issues to the coordinator; OPS-005 resolves runtime file leases and real issue IDs.",
+      "publishable": false
+    },
+    {
+      "task_key": "F3D-ENTITY-c80e173d50ed1490-SIM-001",
+      "row_uid": "c80e173d50ed1490",
+      "row_sha256": "c80e173d50ed149086dccc615fe05b9208d13355cfa003fc27357a7c88b7a725",
+      "stage": "SIM",
+      "part": 1,
+      "entity_id": "entity.synthetic.sample",
+      "dependencies": [
+        "F3D-ENTITY-c80e173d50ed1490-SPEC-001"
+      ],
+      "specialist": "deterministic simulation",
+      "profile": "profile.synthetic",
+      "target_profile": "synthetic.unpublished",
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "context": [
+        "fixture:synthetic-square-agent test-only declaration",
+        "catalogue record entity.synthetic.sample",
+        "approved adaptation adapt.synthetic"
+      ],
+      "permitted_paths": [
+        "research-projection/c80e173d50ed1490/sim/"
+      ],
+      "outputs": [
+        "runtime definition and replay fixture"
+      ],
+      "procedure": [
+        "Implement approved source-to-Fusion rules through normal production, interaction and save entry points."
+      ],
+      "acceptance": [
+        "Repeat the same input log at two render rates and compare simulation digests.",
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "non_goals": [
+        "Editing other entities or changing unapproved shared rules."
+      ],
+      "blocked_by": [
+        "resolve unknown source fields or record an approved scoped adaptation"
+      ],
+      "handoff": "Submit artifacts, content hashes, test results and unresolved issues to the coordinator; OPS-005 resolves runtime file leases and real issue IDs.",
+      "publishable": false
+    },
+    {
+      "task_key": "F3D-ENTITY-c80e173d50ed1490-MODEL-001",
+      "row_uid": "c80e173d50ed1490",
+      "row_sha256": "c80e173d50ed149086dccc615fe05b9208d13355cfa003fc27357a7c88b7a725",
+      "stage": "MODEL",
+      "part": 1,
+      "entity_id": "entity.synthetic.sample",
+      "dependencies": [
+        "F3D-ENTITY-c80e173d50ed1490-SPEC-001"
+      ],
+      "specialist": "3D model and materials",
+      "profile": "profile.synthetic",
+      "target_profile": "synthetic.unpublished",
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "context": [
+        "fixture:synthetic-square-agent test-only declaration",
+        "catalogue record entity.synthetic.sample",
+        "approved adaptation adapt.synthetic"
+      ],
+      "permitted_paths": [
+        "research-projection/c80e173d50ed1490/model/"
+      ],
+      "outputs": [
+        "original model, materials, team mask and LODs"
+      ],
+      "procedure": [
+        "Author against the reviewed footprint, camera, style sheet, contact points and rights record."
+      ],
+      "acceptance": [
+        "Compare front, rear and silhouette at minimum combat zoom, on two backgrounds, with two teams.",
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "non_goals": [
+        "Editing other entities or changing unapproved shared rules."
+      ],
+      "blocked_by": [
+        "obtain an approved original or licensed asset basis, or a reviewed stage exception",
+        "approved geometry and art-direction contract"
+      ],
+      "handoff": "Submit artifacts, content hashes, test results and unresolved issues to the coordinator; OPS-005 resolves runtime file leases and real issue IDs.",
+      "publishable": false
+    },
+    {
+      "task_key": "F3D-ENTITY-c80e173d50ed1490-RIG-001",
+      "row_uid": "c80e173d50ed1490",
+      "row_sha256": "c80e173d50ed149086dccc615fe05b9208d13355cfa003fc27357a7c88b7a725",
+      "stage": "RIG",
+      "part": 1,
+      "entity_id": "entity.synthetic.sample",
+      "dependencies": [
+        "F3D-ENTITY-c80e173d50ed1490-MODEL-001"
+      ],
+      "specialist": "rig and sockets",
+      "profile": "profile.synthetic",
+      "target_profile": "synthetic.unpublished",
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "context": [
+        "fixture:synthetic-square-agent test-only declaration",
+        "catalogue record entity.synthetic.sample",
+        "approved adaptation adapt.synthetic"
+      ],
+      "permitted_paths": [
+        "research-projection/c80e173d50ed1490/rig/"
+      ],
+      "outputs": [
+        "deformation or rigid-part rig and socket inventory"
+      ],
+      "procedure": [
+        "Bind the approved model, check pivots, heading conventions, attachment sockets and hierarchy."
+      ],
+      "acceptance": [
+        "Run the pose extremes and verify attachments and ground contact.",
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "non_goals": [
+        "Editing other entities or changing unapproved shared rules."
+      ],
+      "blocked_by": [
+        "obtain an approved original or licensed asset basis, or a reviewed stage exception"
+      ],
+      "handoff": "Submit artifacts, content hashes, test results and unresolved issues to the coordinator; OPS-005 resolves runtime file leases and real issue IDs.",
+      "publishable": false
+    },
+    {
+      "task_key": "F3D-ENTITY-c80e173d50ed1490-ANIM-001",
+      "row_uid": "c80e173d50ed1490",
+      "row_sha256": "c80e173d50ed149086dccc615fe05b9208d13355cfa003fc27357a7c88b7a725",
+      "stage": "ANIM",
+      "part": 1,
+      "entity_id": "entity.synthetic.sample",
+      "dependencies": [
+        "F3D-ENTITY-c80e173d50ed1490-RIG-001",
+        "F3D-ENTITY-c80e173d50ed1490-SPEC-001"
+      ],
+      "specialist": "animation",
+      "profile": "profile.synthetic",
+      "target_profile": "synthetic.unpublished",
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "context": [
+        "fixture:synthetic-square-agent test-only declaration",
+        "catalogue record entity.synthetic.sample",
+        "approved adaptation adapt.synthetic"
+      ],
+      "permitted_paths": [
+        "research-projection/c80e173d50ed1490/anim/"
+      ],
+      "outputs": [
+        "motion clips and transition graph"
+      ],
+      "procedure": [
+        "Bind idle, movement, firing and all applicable lifecycle transitions to the approved event contract."
+      ],
+      "acceptance": [
+        "Interrupt transitions, switch speeds and resume from a save. Confirm one effect per authoritative event.",
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "non_goals": [
+        "Editing other entities or changing unapproved shared rules."
+      ],
+      "blocked_by": [
+        "obtain an approved original or licensed asset basis, or a reviewed stage exception",
+        "approved pose, state and authoritative timing contract"
+      ],
+      "handoff": "Submit artifacts, content hashes, test results and unresolved issues to the coordinator; OPS-005 resolves runtime file leases and real issue IDs.",
+      "publishable": false
+    },
+    {
+      "task_key": "F3D-ENTITY-c80e173d50ed1490-FX_AUDIO_UI-001",
+      "row_uid": "c80e173d50ed1490",
+      "row_sha256": "c80e173d50ed149086dccc615fe05b9208d13355cfa003fc27357a7c88b7a725",
+      "stage": "FX_AUDIO_UI",
+      "part": 1,
+      "entity_id": "entity.synthetic.sample",
+      "dependencies": [
+        "F3D-ENTITY-c80e173d50ed1490-SPEC-001",
+        "F3D-ENTITY-c80e173d50ed1490-SIM-001"
+      ],
+      "specialist": "effects, audio and interface",
+      "profile": "profile.synthetic",
+      "target_profile": "synthetic.unpublished",
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "context": [
+        "fixture:synthetic-square-agent test-only declaration",
+        "catalogue record entity.synthetic.sample",
+        "approved adaptation adapt.synthetic"
+      ],
+      "permitted_paths": [
+        "research-projection/c80e173d50ed1490/fx_audio_ui/"
+      ],
+      "outputs": [
+        "event effect, cleared audio, icon and action feedback"
+      ],
+      "procedure": [
+        "Bind accepted events to readable, scoped feedback including fog, ownership and accessibility."
+      ],
+      "acceptance": [
+        "Check selective visibility, event idempotency, action acknowledgement and provenance.",
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "non_goals": [
+        "Editing other entities or changing unapproved shared rules."
+      ],
+      "blocked_by": [
+        "obtain an approved original or licensed asset basis, or a reviewed stage exception"
+      ],
+      "handoff": "Submit artifacts, content hashes, test results and unresolved issues to the coordinator; OPS-005 resolves runtime file leases and real issue IDs.",
+      "publishable": false
+    },
+    {
+      "task_key": "F3D-ENTITY-c80e173d50ed1490-INTEGRATE-001",
+      "row_uid": "c80e173d50ed1490",
+      "row_sha256": "c80e173d50ed149086dccc615fe05b9208d13355cfa003fc27357a7c88b7a725",
+      "stage": "INTEGRATE",
+      "part": 1,
+      "entity_id": "entity.synthetic.sample",
+      "dependencies": [
+        "F3D-ENTITY-c80e173d50ed1490-SIM-001",
+        "F3D-ENTITY-c80e173d50ed1490-MODEL-001",
+        "F3D-ENTITY-c80e173d50ed1490-RIG-001",
+        "F3D-ENTITY-c80e173d50ed1490-ANIM-001",
+        "F3D-ENTITY-c80e173d50ed1490-FX_AUDIO_UI-001"
+      ],
+      "specialist": "gameplay integration",
+      "profile": "profile.synthetic",
+      "target_profile": "synthetic.unpublished",
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "context": [
+        "fixture:synthetic-square-agent test-only declaration",
+        "catalogue record entity.synthetic.sample",
+        "approved adaptation adapt.synthetic"
+      ],
+      "permitted_paths": [
+        "research-projection/c80e173d50ed1490/integrate/"
+      ],
+      "outputs": [
+        "production, world, replay and performance evidence"
+      ],
+      "procedure": [
+        "Instantiate through a legal acquisition path. Exercise state, terrain, AI, save and render paths on target hardware."
+      ],
+      "acceptance": [
+        "Record state and visual evidence in combat, under interruption and across transfer or reload.",
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "non_goals": [
+        "Editing other entities or changing unapproved shared rules."
+      ],
+      "blocked_by": [],
+      "handoff": "Submit artifacts, content hashes, test results and unresolved issues to the coordinator; OPS-005 resolves runtime file leases and real issue IDs.",
+      "publishable": false
+    },
+    {
+      "task_key": "F3D-ENTITY-c80e173d50ed1490-REVIEW-001",
+      "row_uid": "c80e173d50ed1490",
+      "row_sha256": "c80e173d50ed149086dccc615fe05b9208d13355cfa003fc27357a7c88b7a725",
+      "stage": "REVIEW",
+      "part": 1,
+      "entity_id": "entity.synthetic.sample",
+      "dependencies": [
+        "F3D-ENTITY-c80e173d50ed1490-SIM-001",
+        "F3D-ENTITY-c80e173d50ed1490-FX_AUDIO_UI-001",
+        "F3D-ENTITY-c80e173d50ed1490-INTEGRATE-001"
+      ],
+      "specialist": "independent verification",
+      "profile": "profile.synthetic",
+      "target_profile": "synthetic.unpublished",
+      "evidence": [
+        {
+          "url": "fixture:synthetic-square-agent",
+          "revision": "test-v1",
+          "locator": "test-only declaration",
+          "method": "test_fixture"
+        }
+      ],
+      "context": [
+        "fixture:synthetic-square-agent test-only declaration",
+        "catalogue record entity.synthetic.sample",
+        "approved adaptation adapt.synthetic"
+      ],
+      "permitted_paths": [
+        "research-projection/c80e173d50ed1490/review/"
+      ],
+      "outputs": [
+        "independent whole-entity decision"
+      ],
+      "procedure": [
+        "Reproduce the acceptance fixtures, inspect files and verify rights, SIM, presentation and integration evidence."
+      ],
+      "acceptance": [
+        "Approve only when each required stage and the row-specific negative fixture have artifact evidence.",
+        "fixture:construct-reload-synthetic-square"
+      ],
+      "non_goals": [
+        "Editing other entities or changing unapproved shared rules."
+      ],
+      "blocked_by": [],
+      "handoff": "Submit artifacts, content hashes, test results and unresolved issues to the coordinator; OPS-005 resolves runtime file leases and real issue IDs.",
+      "publishable": false
+    }
+  ],
+  "withheld": []
+}

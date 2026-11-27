@@ -1,0 +1,5354 @@
+[
+  {
+    "authored_fusion_scene": "Turn an original three-legged walker while it advances, stops, receives EMP, resumes, dies and becomes a recoverable wreck. Inspect footfall synchronisation at tactical zoom; an animation event cannot deal extra damage.",
+    "object": {
+      "animation": [
+        {
+          "kind": "PARSE_NORMAL",
+          "when": "FORMATION_PREVIEW"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_BIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_DEFAULT",
+          "state": "STATE_bored"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUAnlTrpd_DIEA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "DYING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "MANUAL",
+              "AnimationName": "AUAnlTrpd_BIDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "AFFECTED_BY_EMP"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUAnlTrpd_GTPA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "USER_5"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_WLKA",
+              "Distance": "45"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_TRNL",
+              "Distance": "60"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_WLKA",
+              "Distance": "45"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_TRNR",
+              "Distance": "60"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_WLKA",
+              "Distance": "45"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_AIDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "ATTACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_WLKA",
+              "Distance": "45"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUAnlTrpd_AIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_Selected",
+          "when": "SELECTED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUAnlTrpd_BATA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUAnlTrpd_ABTA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_attentionToBored"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUAnlTrpd_BATA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_IdleToSelected"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUAnlTrpd_ABTA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_SelectedToIdle"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "Physics",
+        "FXListBehavior",
+        "CreateObjectDie",
+        "DestroyDie",
+        "SweepingLaserState",
+        "StatusBitsUpgrade",
+        "ShieldBodyUpdate",
+        "UncombineSpecialPower",
+        "ModelConditionUpgrade",
+        "AudioLoopUpgrade",
+        "AIUpdate",
+        "AnimationSoundClientBehavior"
+      ],
+      "body": [
+        {
+          "MaxHealth": "7500",
+          "type": "ShieldBody"
+        }
+      ],
+      "clip_events": [
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "6",
+          "state": "STATE_moving",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "55",
+          "state": "STATE_moving",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "12",
+          "state": "STATE_moving",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "29",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT MOVING"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "9",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT MOVING"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "20",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT MOVING"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "29",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "9",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "20",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "9",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT MOVING"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "29",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT MOVING"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "19",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT MOVING"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "9",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "29",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "19",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "59",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "20",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "59",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "20",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "47",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "35",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "49",
+          "state": "TRANS_attentionToBored"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "TRANS_attentionToBored"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "73",
+          "state": "TRANS_attentionToBored"
+        }
+      ],
+      "effective_scalar": {
+        "BuildCost": "3000",
+        "BuildTime": "30",
+        "ButtonImage": "Portrait_AlienAnnihilatorTripod",
+        "CommandPoints": "100",
+        "CommandSet": "AlienAnnihilatorTripodCommandSet",
+        "EditorName": "AlienAnnihilatorTripod",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "VEHICLE",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_AlienAnnihilatorTripod",
+        "Side": "ALIEN",
+        "TransportSlotCount": "1",
+        "UnitCategory": "VEHICLE",
+        "WeaponCategory": "CANNON"
+      },
+      "id": "AlienAnnihilatorTripod",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "AUAnlTrpd_SKN"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAnlTrpd_FP"
+          ]
+        },
+        {
+          "conditions": "DYING USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAnlTrpdR_SKN"
+          ]
+        },
+        {
+          "conditions": "DAMAGED USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAnlTrpd_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAnlTrpd_SKN"
+          ]
+        },
+        {
+          "conditions": "DYING",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAnlTrpdR_SKN"
+          ]
+        },
+        {
+          "conditions": "DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAnlTrpd_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAnlTrpd_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAnlTrpd_SKN"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "COMBINED_PARENT",
+          "kind": "PARSE_NORMAL"
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "USER_1",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXShldTripod"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "AlienAnnihilatorTripodLocomotor",
+          "Speed": "60.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 81,
+        "path": "Tiberium Wars/Xml/Alien/Units/AlienAnnihilatorTripod.xml"
+      },
+      "tech": [
+        {
+          "group": "GameDependency",
+          "kind": "RequiredObject",
+          "value": "AlienReactor"
+        }
+      ],
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienAnnihilatorPulseCannonA"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienAnnihilatorPulseCannonB"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienAnnihilatorPulseCannonC"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienAnnihilatorEMPCannon"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructAlienAnnihilatorTripod",
+      "command_membership_source": {
+        "line": 839,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "command_set": "AlienGatewayCommandSet",
+      "command_source": {
+        "line": 1220,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "AlienGateway",
+      "producer_source": {
+        "line": 69,
+        "path": "Tiberium Wars/Xml/Alien/Structures/AlienGateway.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "AlienGatewayCommandSet",
+      "set_inherited_membership": false,
+      "set_source": {
+        "line": 833,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "AlienAnnihilatorTripod",
+      "target_source": {
+        "line": 81,
+        "path": "Tiberium Wars/Xml/Alien/Units/AlienAnnihilatorTripod.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Tiberium%20Wars/Xml/Alien/Units/AlienAnnihilatorTripod.xml#L81",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "tw"
+  },
+  {
+    "authored_fusion_scene": "Select a mixed armour column, traverse a slope and fire at a legal target. Preserve hull mass, turret independence and a visible discharge cue. Record the distinct attack-domain slots and their prerequisites.",
+    "object": {
+      "animation": [
+        {
+          "has_script": true,
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUMamm_CRSH1"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "VEHICLE_CRUSH_CENTER"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "FIRING_OR_RELOADING_A MOVING BACKING_UP"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "FIRING_OR_RELOADING_A TURN_LEFT"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "FIRING_OR_RELOADING_A TURN_RIGHT"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "FIRING_OR_RELOADING_A MOVING"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "FIRING_OR_RELOADING_A"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING BACKING_UP"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING ACCELERATE"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING DECELERATE"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_LEFT"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_RIGHT"
+        },
+        {
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING"
+        },
+        {
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING"
+        },
+        {
+          "kind": "PARSE_NORMAL",
+          "when": "DYING"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "LaserState",
+        "Physics",
+        "SlowDeath",
+        "FXListBehavior",
+        "ProductionUpdate",
+        "AutoHealBehavior",
+        "StatusBitsUpgrade",
+        "SubObjectsUpgrade",
+        "ModelConditionUpgrade",
+        "AudioLoopUpgrade",
+        "AIUpdate"
+      ],
+      "body": [
+        {
+          "MaxHealth": "10000",
+          "type": "ActiveBody"
+        }
+      ],
+      "effective_scalar": {
+        "BuildCost": "2500",
+        "BuildTime": "25",
+        "ButtonImage": "Portrait_GDIMammothTank",
+        "CommandPoints": "100",
+        "CommandSet": "GDIMammothCommandSet",
+        "EditorName": "GDIMammoth",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "VEHICLE",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_GDIMammothTank",
+        "Side": "GDI",
+        "ThreatLevel": "10",
+        "TransportSlotCount": "1",
+        "UnitCategory": "VEHICLE",
+        "WeaponCategory": "CANNON"
+      },
+      "id": "GDIMammoth",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "GUMamm_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED USER_5",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUMamm_SKN"
+          ]
+        },
+        {
+          "conditions": "DYING USER_5",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUMamm_R"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUMamm_SKN"
+          ]
+        },
+        {
+          "conditions": "DYING",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUMamm_R"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUMamm_FP"
+          ]
+        },
+        {
+          "conditions": "USER_5",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUMamm_SKN"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "GUMamm_FX"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "GDIMammothLocomotor",
+          "Speed": "40.0"
+        },
+        {
+          "Condition": "NORMAL_UPGRADED",
+          "Locomotor": "GDIMammothLocomotor",
+          "Speed": "80.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 68,
+        "path": "Tiberium Wars/Xml/GDI/Units/GDIMammoth.xml"
+      },
+      "tech": [
+        {
+          "group": "GameDependency",
+          "kind": "RequiredObject",
+          "value": "GDIArmory"
+        }
+      ],
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "GDIMammothTankRocketPods"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "GDIMammothTankRocketPods"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "GDIMammothTankGun"
+        },
+        {
+          "ObjectStatus": "WEAPON_UPGRADED_01",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "MammothTankRailCannon"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructGDIMammoth",
+      "command_membership_source": {
+        "line": 82,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "command_set": "GDIWarFactoryCommandSet",
+      "command_source": {
+        "line": 237,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "GDIWarFactory",
+      "producer_source": {
+        "line": 93,
+        "path": "Tiberium Wars/Xml/GDI/Structures/GDIWarfactory.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "GDIWarFactoryCommandSet",
+      "set_inherited_membership": false,
+      "set_source": {
+        "line": 75,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "GDIMammoth",
+      "target_source": {
+        "line": 68,
+        "path": "Tiberium Wars/Xml/GDI/Units/GDIMammoth.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Tiberium%20Wars/Xml/GDI/Units/GDIMammoth.xml#L68",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "tw"
+  },
+  {
+    "authored_fusion_scene": "Reveal a moving vehicle via a detector, fire and reacquire concealment under profile rules. Compare two opposing clients for hidden effects and target identity.",
+    "object": {
+      "animation": [
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_IDLA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_HSTL"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_HSTR"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_TRNL"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_LEFT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_TRNR"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_RIGHT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_IDLA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_IDLA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DYING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_IDLA"
+            }
+          ],
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_HSTL"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_HSTR"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_TRNL"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_LEFT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_TRNR"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_RIGHT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_IDLA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "NUStlthTnk_IDLA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DYING"
+        }
+      ],
+      "behavior_classes": [
+        "Physics",
+        "ProductionUpdate",
+        "WeaponSetUpdate",
+        "InvisibilityUpdate",
+        "SlowDeath",
+        "FXListBehavior",
+        "StatusBitsUpgrade",
+        "AIUpdate"
+      ],
+      "body": [
+        {
+          "MaxHealth": "1875",
+          "type": "ActiveBody"
+        }
+      ],
+      "effective_scalar": {
+        "BuildCost": "1500",
+        "BuildTime": "15",
+        "ButtonImage": "Portrait_NODStealthTank",
+        "CommandPoints": "100",
+        "CommandSet": "NODStealthTankCommandSet",
+        "EditorName": "NODStealthTank",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "VEHICLE",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_NODStealthTank",
+        "Side": "NOD",
+        "TransportSlotCount": "1",
+        "UnitCategory": "VEHICLE",
+        "WeaponCategory": "MISSILE"
+      },
+      "id": "NODStealthTank",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "NUStlthTnk_SKN"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "NUStlthTnk_FP"
+          ]
+        },
+        {
+          "conditions": "DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "NUStlthTnk_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "NUStlthTnk_SKN"
+          ]
+        },
+        {
+          "conditions": "DYING",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "NUStlthTnkR_SKN"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "NUStlthTnkStlth"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "NODStealthTankLocomotor",
+          "Speed": "120.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 60,
+        "path": "Tiberium Wars/Xml/NOD/Units/NODStealthTank.xml"
+      },
+      "tech": [
+        {
+          "group": "GameDependency",
+          "kind": "RequiredObject",
+          "value": "NODTechAssemblyPlant"
+        }
+      ],
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "NODStealthTankRocket"
+        },
+        {
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "NODStealthTankRocket"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructNODStealthTank",
+      "command_membership_source": {
+        "line": 585,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "command_set": "NODDropZoneCommandSet",
+      "command_source": {
+        "line": 874,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "NODDropZone",
+      "producer_source": {
+        "line": 86,
+        "path": "Tiberium Wars/Xml/NOD/Structures/NODDropZone.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "NODDropZoneCommandSet",
+      "set_inherited_membership": false,
+      "set_source": {
+        "line": 578,
+        "path": "Tiberium Wars/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "NODStealthTank",
+      "target_source": {
+        "line": 60,
+        "path": "Tiberium Wars/Xml/NOD/Units/NODStealthTank.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Tiberium%20Wars/Xml/NOD/Units/NODStealthTank.xml#L60",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "tw"
+  },
+  {
+    "authored_fusion_scene": "Produce through its subfaction factory, occupy the vehicle where the source permits, fire, destroy and inspect the wreck/occupant outcomes. Compare the appearance and role against the related GDI artillery unit.",
+    "object": {
+      "animation": [
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_BIDA",
+              "AnimationSpeedFactorMax": "1.2",
+              "AnimationSpeedFactorMin": "0.8"
+            },
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_BIFA",
+              "AnimationSpeedFactorMax": "1.2",
+              "AnimationSpeedFactorMin": "0.8"
+            },
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_BIFB",
+              "AnimationSpeedFactorMax": "1.2",
+              "AnimationSpeedFactorMin": "0.8"
+            },
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_BIFC",
+              "AnimationSpeedFactorMax": "1.2",
+              "AnimationSpeedFactorMin": "0.8"
+            },
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_BIFD",
+              "AnimationSpeedFactorMax": "1.2",
+              "AnimationSpeedFactorMin": "0.8"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_DEFAULT",
+          "state": "STATE_bored"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehmBlda_BLDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_built",
+          "when": "USER_17"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehmBlda_BLDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_built",
+          "when": "COMING_OUT_OF_FACTORY"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_DIEB"
+            },
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_DIEC"
+            },
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_DIED"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DYING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "MANUAL",
+              "AnimationName": "GUBehemoth_BIDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "AFFECTED_BY_EMP"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_GTPA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "USER_5"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_ATKB1"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "UNPACKING SPECIAL_WEAPON_ONE"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_ATKB2"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "SPECIAL_WEAPON_ONE"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_ATKA1"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "UNPACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_ATKA3"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "PACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "MANUAL",
+              "AnimationName": "GUBehemoth_ATKA2"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DEPLOYED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUBehemoth_WLKA",
+              "Distance": "45"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUBehemoth_WLKA",
+              "Distance": "45"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUBehemoth_TRNL"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "TURN_LEFT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUBehemoth_TRNR"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_ACCL"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "ACCELERATE"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_DECL"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DECELERATE"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUBehemoth_WLKA",
+              "Distance": "45"
+            },
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUBehemoth_WLKB",
+              "Distance": "45"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_AIDA",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            },
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_AIFB",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            },
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_AIFC",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            },
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_AIFD",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            },
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_AIFA",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_Selected",
+          "when": "SELECTED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_BATA",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            },
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_BATB",
+              "AnimationSpeedFactorMax": "1.2",
+              "AnimationSpeedFactorMin": "0.8"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_IdleToSelected"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUBehemoth_ABTA",
+              "AnimationSpeedFactorMax": "1.2",
+              "AnimationSpeedFactorMin": "0.8"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_SelectedToIdle"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "FireWeaponUpdate",
+        "ProductionUpdate",
+        "HordeTransportContain",
+        "MoveToPositionAndEvacuateSpecialPower",
+        "Physics",
+        "SubObjectsUpgrade",
+        "CreateObjectDie",
+        "DestroyDie",
+        "FXListBehavior",
+        "ModelConditionUpgrade",
+        "DeployStyleAIUpdate",
+        "AnimationSoundClientBehavior"
+      ],
+      "body": [
+        {
+          "MaxHealth": "5500",
+          "type": "ActiveBody"
+        }
+      ],
+      "clip_events": [
+        {
+          "Bone": "B_FOOTL",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "1",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "B_FOOTR",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "25",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "B_FOOTL",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "1",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "B_FOOTR",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "25",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "B_FOOTL",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "15",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "B_FOOTR",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "B_FOOTR",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "15",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "B_FOOTL",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "B_FOOTL",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "1",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "B_FOOTR",
+          "Effect": "FX_GDIJuggernaughtFootprint",
+          "FireWhenSkipped": "true",
+          "Frame": "25",
+          "when": "MOVING"
+        }
+      ],
+      "effective_scalar": {
+        "BuildCost": "2200",
+        "BuildTime": "22",
+        "ButtonImage": "Portrait_SF1WalkerArtillery",
+        "CommandPoints": "100",
+        "CommandSet": "SteelTalonsBehemothCommandSet",
+        "EditorName": "SteelTalonsBehemoth",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "VEHICLE",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_SF1WalkerArtillery",
+        "Side": "SteelTalons",
+        "ThreatLevel": "10",
+        "TransportSlotCount": "1",
+        "UnitCategory": "VEHICLE",
+        "WeaponCategory": "CANNON"
+      },
+      "id": "SteelTalonsBehemoth",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "GUBehemoth_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUBehemoth_SKND"
+          ]
+        },
+        {
+          "conditions": "DYING USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUBehemoth_SKNR"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUBehemoth_SKND"
+          ]
+        },
+        {
+          "conditions": "DYING",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUBehemoth_SKNR"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUBehemoth_FP"
+          ]
+        },
+        {
+          "conditions": "USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUBehemoth_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_17",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUBehmBlda_SKN"
+          ]
+        },
+        {
+          "conditions": "COMING_OUT_OF_FACTORY",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUBehmBlda_SKN"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "JuggernaughtLocomotor",
+          "Speed": "40.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 152,
+        "path": "Kanes Wrath/Xml/SteelTalons/Units/SteelTalonsBehemoth.xml"
+      },
+      "tech": [
+        {
+          "group": "GameDependency",
+          "kind": "RequiredObject",
+          "value": "SteelTalonsTechCenter"
+        }
+      ],
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "SteelTalonsBehemothArtillery"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructSteelTalonsBehemoth",
+      "command_membership_source": {
+        "line": 2454,
+        "path": "Kanes Wrath/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "command_set": "SteelTalonsReclamatorHubCommandSet",
+      "command_source": {
+        "line": 1635,
+        "path": "Kanes Wrath/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "MG_SteelTalons_ReclamatorHub",
+      "producer_source": {
+        "line": 17,
+        "path": "Kanes Wrath/Xml/SteelTalons/Structures/MG_SteelTalons_ReclamatorHub.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "SteelTalonsReclamatorHubCommandSet",
+      "set_inherited_membership": false,
+      "set_source": {
+        "line": 2444,
+        "path": "Kanes Wrath/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "SteelTalonsBehemoth",
+      "target_source": {
+        "line": 152,
+        "path": "Kanes Wrath/Xml/SteelTalons/Units/SteelTalonsBehemoth.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Kanes%20Wrath/Xml/SteelTalons/Units/SteelTalonsBehemoth.xml#L152",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "kw"
+  },
+  {
+    "authored_fusion_scene": "Exercise loadout/weapon-state and gait combinations. Keep occupied state distinct from base model; replay must retain loadout and event order.",
+    "object": {
+      "animation": [
+        {
+          "kind": "PARSE_NORMAL",
+          "when": "FORMATION_PREVIEW"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_BIDZ"
+            },
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_BIDB"
+            },
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_BIDC"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_DEFAULT",
+          "state": "STATE_bored"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "DIEA",
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_DIEA"
+            },
+            {
+              "AnimNickName": "DIEB",
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_DIEA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DYING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "MANUAL",
+              "AnimationName": "AUEradHex_BIDZ"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "AFFECTED_BY_EMP"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "MANUAL",
+              "AnimationName": "AUEradHex_BLDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_built",
+          "when": "COMING_OUT_OF_FACTORY"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_GTPA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "USER_5"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_ATKA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "WLKA",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKA",
+              "Distance": "70"
+            },
+            {
+              "AnimNickName": "WLKB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKB",
+              "Distance": "70"
+            },
+            {
+              "AnimNickName": "WLKC",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKC",
+              "Distance": "70"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_TRNL",
+              "Distance": "60"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_TRNR",
+              "Distance": "60"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_AIDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "ATTACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "WLKA",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKA",
+              "Distance": "60"
+            },
+            {
+              "AnimNickName": "WLKB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKB",
+              "Distance": "60"
+            },
+            {
+              "AnimNickName": "WLKC",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKC",
+              "Distance": "60"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "WLKA",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKA",
+              "Distance": "60"
+            },
+            {
+              "AnimNickName": "WLKB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKB",
+              "Distance": "60"
+            },
+            {
+              "AnimNickName": "WLKC",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKC",
+              "Distance": "60"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_TRNL",
+              "Distance": "60"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_TRNR",
+              "Distance": "60"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "WLKA",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKA",
+              "Distance": "70"
+            },
+            {
+              "AnimNickName": "WLKB",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKB",
+              "Distance": "70"
+            },
+            {
+              "AnimNickName": "WLKC",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_WLKC",
+              "Distance": "70"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimNickName": "ATNB",
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUEradHex_AIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_Selected",
+          "when": "SELECTED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_BATA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE_BACKWARDS",
+              "AnimationName": "AUEradHex_BATA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_attentionToBored"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_BLDA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_built"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUEradHex_BATA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_IdleToSelected"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE_BACKWARDS",
+              "AnimationName": "AUEradHex_BATA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_SelectedToIdle"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "SlaughterHordeContain",
+        "SubObjectsUpgrade",
+        "Physics",
+        "FXListBehavior",
+        "SlowDeath",
+        "SweepingLaserState",
+        "ModelConditionUpgrade",
+        "AudioLoopUpgrade",
+        "SalvagerInfo",
+        "AttributeModifierAuraUpdate",
+        "AutoHealBehavior",
+        "UnpauseSpecialPowerUpgrade",
+        "SpecialPower",
+        "TeleportSpecialAbilityUpdate",
+        "AISpecialPowerUpdate",
+        "AIUpdate",
+        "AnimationSoundClientBehavior"
+      ],
+      "body": [
+        {
+          "MaxHealth": "15000.0",
+          "type": "ActiveBody"
+        }
+      ],
+      "clip_events": [
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienTripodFP",
+          "FireWhenSkipped": "true",
+          "Frame": "6",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_FRONTRIGHT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_FRONTLEFT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "55",
+          "when": "DYING"
+        },
+        {
+          "Bone": "B_BACK",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "12",
+          "when": "DYING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "11",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "19",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "34",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "14",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "19",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "37",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "49",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "117",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "129",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "52",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "117",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "129",
+          "when": "FIRING_OR_PREATTACK_A"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "32",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "49",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "50",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "27",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "32",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "49",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "50",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "27",
+          "state": "STATE_moving",
+          "when": "MOVING ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "16",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "14",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "20",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "11",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "20",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "16",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "14",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "44",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT ATTACKING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "25",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "21",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "22",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "16",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "55",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "51",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "60",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "60",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "52",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "46",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "25",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "21",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "22",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "16",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "55",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "51",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "60",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "60",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "52",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "46",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "16",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "14",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "20",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_LEFT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "11",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "20",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "16",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "23",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "14",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "45",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "39",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "44",
+          "state": "STATE_moving",
+          "when": "TURN_RIGHT"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "32",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "48",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "50",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "27",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "32",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "48",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "50",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "27",
+          "state": "STATE_moving",
+          "when": "MOVING"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "16",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_LEFTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTFRONT",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTMID",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "16",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "Bone": "FX_FOOTPRINT_RIGHTREAR",
+          "Effect": "FX_AlienEradicatorFP",
+          "FireWhenSkipped": "true",
+          "Frame": "30",
+          "state": "TRANS_boredToAttention"
+        }
+      ],
+      "effective_scalar": {
+        "BuildCost": "5000",
+        "BuildTime": "50",
+        "ButtonImage": "Portrait_Eradicator",
+        "CommandPoints": "100",
+        "CommandSet": "AlienEradicatorHexapodCommandSet",
+        "EditorName": "AlienEradicatorHexapod",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "VEHICLE",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_Eradicator",
+        "Side": "ALIEN",
+        "TransportSlotCount": "1",
+        "UnitCategory": "VEHICLE",
+        "WeaponCategory": "CANNON"
+      },
+      "id": "AlienEradicatorHexapod",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "AUEradHex_SKN"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUEradHex_FP"
+          ]
+        },
+        {
+          "conditions": "DYING USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUEradHex_D1"
+          ]
+        },
+        {
+          "conditions": "DAMAGED USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUEradHex_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUEradHex_SKN"
+          ]
+        },
+        {
+          "conditions": "DYING",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUEradHex_D1"
+          ]
+        },
+        {
+          "conditions": "DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUEradHex_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUEradHex_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_6",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUEradHex_SKN"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "SELECTED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXInvisBone"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "COMBINED_PARENT",
+          "kind": "PARSE_NORMAL"
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "USER_1",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXShldTripod"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "AlienEradicatorHexapodLocomotor",
+          "Speed": "40.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 128,
+        "path": "Kanes Wrath/Xml/Alien/Units/AlienEradicatorHexapod.xml"
+      },
+      "tech": [
+        {
+          "group": "GameDependency",
+          "kind": "RequiredObject",
+          "value": "AlienReactor"
+        }
+      ],
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorPlasmaDiskBatteryG"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShockTrooperUpgradePlasmaDisk"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShockTrooperUpgradePlasmaDisk"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShockTrooperUpgradePlasmaDisk"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShockTrooperUpgradePlasmaDisk"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShockTrooperUpgradePlasmaDisk"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShockTrooperUpgradePlasmaDisk"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorLaserWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorLaserWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorLaserWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorLaserWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorLaserWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorLaserWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShardWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShardWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShardWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShardWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShardWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlienEradicatorShardWeapon"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructAlienMetaUnit",
+      "command_membership_source": {
+        "line": 2481,
+        "path": "Kanes Wrath/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "command_set": "AlienMetaHiveCommandSet",
+      "command_source": {
+        "line": 3696,
+        "path": "Kanes Wrath/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "MG_Alien_Hive",
+      "producer_source": {
+        "line": 133,
+        "path": "Kanes Wrath/Xml/Alien/Structures/MG_Alien_Hive.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "AlienMetaHiveCommandSet",
+      "set_inherited_membership": false,
+      "set_source": {
+        "line": 2473,
+        "path": "Kanes Wrath/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "AlienEradicatorHexapod",
+      "target_source": {
+        "line": 128,
+        "path": "Kanes Wrath/Xml/Alien/Units/AlienEradicatorHexapod.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Kanes%20Wrath/Xml/Alien/Units/AlienEradicatorHexapod.xml#L128",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "kw"
+  },
+  {
+    "authored_fusion_scene": "Exercise both ground and air command states. Resolve target legality, selected identity and pose transition across the change. Validate every orientation at tactical zoom.",
+    "object": {
+      "account_costs": [
+        {
+          "Account": "=$ACCOUNT_ORE",
+          "Amount": "800"
+        }
+      ],
+      "animation": [
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "JUAntiInfantryVehicle_TRANS"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "USER_1 USER_3"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "JUAntiInfantryVehicleFlying_TRANS"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_AirToGround",
+          "when": "USER_3"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicle_BIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_DEFAULT",
+          "state": "STATE_Idle"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "10",
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicleFlying_RUNA",
+              "Distance": "100"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_Run",
+          "when": "MOVING USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicle_RUNA",
+              "Distance": "75"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_Run",
+          "when": "MOVING OVER_WATER"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicle_RUNA",
+              "Distance": "75"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_Run",
+          "when": "MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicleFlying_IDLA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicle_ATKA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "ATTACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicle_AIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_Selected",
+          "when": "OVER_WATER SELECTED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicle_AIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_Selected",
+          "when": "SELECTED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUAntiInfantryVehicle_BIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "OVER_WATER"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "JUAntiInfantryVehicle_BATA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_IdleToSelected"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "JUAntiInfantryVehicle_ABTA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_SelectedToIdle"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "Physics",
+        "DestroyDie",
+        "CreateObjectDie",
+        "FXListBehavior",
+        "SpecialPower",
+        "ToggleStatusSpecialAbilityUpdate",
+        "StatusBitsUpgrade",
+        "FireWeaponWhenDead",
+        "AIUpdate",
+        "ModelConditionSoundSelectorClientBehavior"
+      ],
+      "body": [
+        {
+          "MaxHealth": "350",
+          "type": "ActiveBody"
+        }
+      ],
+      "effective_scalar": {
+        "BuildTime": "10",
+        "ButtonImage": "Button_JapanAntiInfantryVehicle_mecha",
+        "CommandPoints": "1",
+        "CommandSet": "JapanAntiInfantryVehicleCommandSet",
+        "EditorName": "JapanAntiInfantryVehicle",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "VEHICLE",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_JapanAntiInfantryVehicle_mecha",
+        "Side": "Japan",
+        "ThreatLevel": "10",
+        "TransportSlotCount": "5",
+        "UnitCategory": "VEHICLE",
+        "WeaponCategory": "GUN"
+      },
+      "id": "JapanAntiInfantryVehicle",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "JUAntiInfantryVehicle_SKN"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW USER_1",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicle_FP"
+          ]
+        },
+        {
+          "conditions": "UNPACKING DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicleFlying_SKN"
+          ]
+        },
+        {
+          "conditions": "UNPACKING REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicleFlying_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_3",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicleFlying_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_1 DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicleFlying_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_1 REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicleFlying_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_1",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicleFlying_SKN"
+          ]
+        },
+        {
+          "conditions": "DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicle_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUAntiInfantryVehicle_SKN"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "JapanAntiInfantryVehicleLocomotor",
+          "Speed": "100.0"
+        },
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "JapanAntiInfantryVehicle_WaterLocomotor",
+          "Speed": "80.0"
+        },
+        {
+          "Condition": "SUPERSONIC",
+          "Locomotor": "JapanFighterAircraftLocomotor",
+          "Speed": "200.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 49,
+        "path": "Red Alert 3/Xml/Japan/Units/JapanAntiInfantryVehicle.xml"
+      },
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanAntiInfantryVehicleGun"
+        },
+        {
+          "ObjectStatus": "AIRBORNE_TARGET",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFighterAircraftGun"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructJapanAntiInfantryVehicle",
+      "command_membership_source": {
+        "line": 752,
+        "path": "Red Alert 3/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "command_set": "JapanWarFactoryCommandSet",
+      "command_source": {
+        "line": 1720,
+        "path": "Red Alert 3/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "JapanWarFactory",
+      "producer_source": {
+        "line": 74,
+        "path": "Red Alert 3/Xml/Japan/Structures/JapanWarFactory.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "JapanWarFactoryCommandSetBase",
+      "set_inherited_membership": true,
+      "set_source": {
+        "line": 749,
+        "path": "Red Alert 3/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "JapanAntiInfantryVehicle",
+      "target_source": {
+        "line": 49,
+        "path": "Red Alert 3/Xml/Japan/Units/JapanAntiInfantryVehicle.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Japan/Units/JapanAntiInfantryVehicle.xml#L49",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "ra3"
+  },
+  {
+    "authored_fusion_scene": "Fly a strike, expend ordnance, return and rearm. Judge turn radius and attack readability against the source profile while checking fog and team identification.",
+    "object": {
+      "account_costs": [
+        {
+          "Account": "=$ACCOUNT_ORE",
+          "Amount": "1200"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "Physics",
+        "CreateObjectDie",
+        "DynamicsUpdate",
+        "DestroyDie",
+        "FXListBehavior",
+        "SubObjectsUpgrade",
+        "ReturnToProducerSpecialPower",
+        "LUAEventList",
+        "AttributeModifierUpgrade",
+        "StatusBitsUpgrade",
+        "JetAIUpdate"
+      ],
+      "body": [
+        {
+          "MaxHealth": "350",
+          "type": "ActiveBody"
+        }
+      ],
+      "effective_scalar": {
+        "BuildTime": "15",
+        "ButtonImage": "Button_AlliedAntiGroundAircraft_on",
+        "CommandPoints": "1",
+        "CommandSet": "AlliedAntiGroundAircraftCommandSet",
+        "EditorName": "AlliedAntiGroundAircraft",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "AIRCRAFT",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_AlliedAntiGroundAircraft",
+        "Side": "Allies",
+        "ThreatLevel": "10",
+        "TransportSlotCount": "5",
+        "UnitCategory": "AIRCRAFT",
+        "WeaponCategory": "MISSILE"
+      },
+      "id": "AlliedAntiGroundAircraft",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "AUAntiGroundAircraft"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED USER_2",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAntiGroundAircraft"
+          ]
+        },
+        {
+          "conditions": "DAMAGED USER_2",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAntiGroundAircraft"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW USER_2",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAntiGroundAircraft_FP"
+          ]
+        },
+        {
+          "conditions": "USER_2",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAntiGroundAircraft"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAntiGroundAircraft"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAntiGroundAircraft_FP"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "AUAntiGroundAircraft_FX"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "AUAntiGroundAircraft_FX"
+          ]
+        },
+        {
+          "conditions": "DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAntiGroundAircraft_FX"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUAntiGroundAircraft_FX"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "TAXIING",
+          "Locomotor": "BasicHelicopterTaxiLocomotor",
+          "Speed": "10"
+        },
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "AlliedAntiGroundAircraftLocomotor",
+          "Speed": "180.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 39,
+        "path": "Red Alert 3/Xml/Allied/Units/AlliedAntiGroundAircraft.xml"
+      },
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlliedAntiGroundAircraftMissilePodWeapon"
+        },
+        {
+          "ObjectStatus": "WEAPON_UPGRADED_01",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlliedAntiGroundAircraftMissilePodWeapon_AirPower"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructAlliedAntiGroundAircraft",
+      "command_membership_source": {
+        "line": 68,
+        "path": "Red Alert 3/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "command_set": "AlliedAirfieldCommandSet",
+      "command_source": {
+        "line": 369,
+        "path": "Red Alert 3/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "AlliedAirfield",
+      "producer_source": {
+        "line": 45,
+        "path": "Red Alert 3/Xml/Allied/Structures/AlliedAirfield.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "AlliedAirfieldCommandSet",
+      "set_inherited_membership": false,
+      "set_source": {
+        "line": 67,
+        "path": "Red Alert 3/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "AlliedAntiGroundAircraft",
+      "target_source": {
+        "line": 39,
+        "path": "Red Alert 3/Xml/Allied/Units/AlliedAntiGroundAircraft.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Red%20Alert%203/Xml/Allied/Units/AlliedAntiGroundAircraft.xml#L39",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "ra3"
+  },
+  {
+    "authored_fusion_scene": "Exercise basic and alternate fire and record variant aim/effect states. Test the expansion-specific prerequisite and resource account.",
+    "object": {
+      "account_costs": [
+        {
+          "Account": "=$ACCOUNT_ORE",
+          "Amount": "3000"
+        }
+      ],
+      "animation": [
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUFutureTank_BIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_DEFAULT",
+          "state": "STATE_Bored"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "MANUAL",
+              "AnimationName": "AUFutureTank_BATB"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_LaserWeapon",
+          "when": "MOVING SPECIAL_POWER_SELECTED_PENDING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "MANUAL",
+              "AnimationName": "AUFutureTank_BATB"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_LaserWeapon",
+          "when": "MOVING USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUFutureTank_XMOVA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "JUST_BUILT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUFutureTank_MOVA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_SelectedPose",
+          "when": "MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "MANUAL",
+              "AnimationName": "AUFutureTank_ATKD"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_LaserWeapon",
+          "when": "SPECIAL_POWER_SELECTED_PENDING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "MANUAL",
+              "AnimationName": "AUFutureTank_ATKD"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_LaserWeapon",
+          "when": "USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "AUFutureTank_ATKG"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "PREATTACK_A"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUFutureTank_ATKE"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "ATTACKING WEAPONBARREL_01"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUFutureTank_ATKF"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "ATTACKING WEAPONBARREL_02"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUFutureTank_AIDA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_SelectedPose",
+          "when": "SELECTED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUFutureTank_BATB"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_boredToLaserWeapon"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE_BACKWARDS",
+              "AnimationName": "AUFutureTank_BATB"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_LaserWeaponToBored"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUFutureTank_BATA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_boredToAttention"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "AUFutureTank_ABTA"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_attentionToBored"
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE",
+              "AnimationName": "EXFutureTankCharge"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "ATTACKING WEAPONBARREL_02"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE_BACKWARDS",
+              "AnimationName": "EXFutureTankCharge"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "ATTACKING WEAPONBARREL_01"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE",
+              "AnimationName": "EXFutureTankCharge"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "PREATTACK_A"
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE",
+              "AnimationName": "EXFutureTankCharge"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "ATTACKING WEAPONBARREL_01"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE_BACKWARDS",
+              "AnimationName": "EXFutureTankCharge"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "ATTACKING WEAPONBARREL_02"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "ONCE",
+              "AnimationName": "EXFutureTankCharge"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "PREATTACK_A"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "StatusBitsUpgrade",
+        "CreateObjectDie",
+        "DestroyDie",
+        "FXListBehavior",
+        "Physics",
+        "AutoHealBehavior",
+        "SpecialPower",
+        "BeamSpecialAbilityUpdate",
+        "LaserState",
+        "AIUpdate",
+        "ModelConditionSoundSelectorClientBehavior"
+      ],
+      "body": [
+        {
+          "MaxHealth": "3000",
+          "type": "ActiveBody"
+        }
+      ],
+      "effective_scalar": {
+        "BuildTime": "30",
+        "ButtonImage": "Button_AlliedFutureTank",
+        "CommandPoints": "1",
+        "CommandSet": "AlliedFutureTankCommandSet",
+        "EditorName": "AlliedFutureTank",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "VEHICLE",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_AlliedFutureTank",
+        "Side": "Allies",
+        "TransportSlotCount": "5",
+        "UnitCategory": "VEHICLE",
+        "WeaponCategory": "CANNON"
+      },
+      "id": "AlliedFutureTank",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "AUFutureTank_SKN"
+          ]
+        },
+        {
+          "conditions": "DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUFutureTank_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "AUFutureTank_SKN"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "PREATTACK_A",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "EXFutureTankCharge"
+          ]
+        },
+        {
+          "conditions": "ATTACKING WEAPONBARREL_01",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "EXFutureTankCharge"
+          ]
+        },
+        {
+          "conditions": "ATTACKING WEAPONBARREL_02",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "EXFutureTankCharge"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "PREATTACK_A",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "EXFutureTankCharge"
+          ]
+        },
+        {
+          "conditions": "ATTACKING WEAPONBARREL_02",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "EXFutureTankCharge"
+          ]
+        },
+        {
+          "conditions": "ATTACKING WEAPONBARREL_01",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "EXFutureTankCharge"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "NIGHT",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "EX_Headlights"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "NIGHT",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "EX_Headlights"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "AlliedFutureTankLocomotor",
+          "Speed": "45.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 59,
+        "path": "Uprising/Xml/EP1/Allied/Units/AlliedFutureTank.xml"
+      },
+      "tech": [
+        {
+          "group": "GameDependency",
+          "kind": "NeededUpgrade",
+          "value": "Upgrade_AlliedTech3"
+        },
+        {
+          "group": "GameDependency",
+          "kind": "RequiredObject",
+          "value": "AlliedTechStructure"
+        }
+      ],
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlliedFutureTankNeutronScrambler"
+        },
+        {
+          "ObjectStatus": "WEAPON_UPGRADED_02",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "AlliedFutureTankNeutronScrambler_Veteran"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructAlliedFutureTank",
+      "command_membership_source": {
+        "line": 198,
+        "path": "Uprising/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "command_set": "AlliedWarFactoryCommandSet",
+      "command_source": {
+        "line": 516,
+        "path": "Uprising/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "AlliedWarFactory",
+      "producer_source": {
+        "line": 39,
+        "path": "Uprising/Xml/Allied/Structures/AlliedWarFactory.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "AlliedWarFactoryCommandSet",
+      "set_inherited_membership": false,
+      "set_source": {
+        "line": 190,
+        "path": "Uprising/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "AlliedFutureTank",
+      "target_source": {
+        "line": 59,
+        "path": "Uprising/Xml/EP1/Allied/Units/AlliedFutureTank.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Uprising/Xml/EP1/Allied/Units/AlliedFutureTank.xml#L59",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "uprising"
+  },
+  {
+    "authored_fusion_scene": "Issue a ship order and a transformation order near a coast. Follow the newly valid surface and attack envelope. Preserve selection and ownership through the form change.",
+    "object": {
+      "account_costs": [
+        {
+          "Account": "=$ACCOUNT_ORE",
+          "Amount": "6300"
+        }
+      ],
+      "animation": [
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUFortressShip_IDLA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_DEFAULT",
+          "state": "STATE_onWater"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "MATCH_UNPACKING",
+              "AnimationName": "JUFortressShip_BLD2"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "STRUCTURE_UNPACKING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "JUFortressShip_TRANS"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "USER_1 USER_3"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE_BACKWARDS",
+              "AnimationName": "JUFortressShip_TRANS"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_AirToGround",
+          "when": "USER_3"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUFortressShipHead_IDLA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_inAir",
+          "when": "USER_1 MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUFortressShipHead_IDLA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_inAir",
+          "when": "USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "JUFortressShip_IDLA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_onWater",
+          "when": "MOVING"
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "0",
+              "AnimationMode": "MATCH_UNPACKING",
+              "AnimationName": "JUFortressShip_BLD"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "STRUCTURE_UNPACKING"
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "MATCH_UNPACKING",
+              "AnimationName": "JUEgg_Unpack"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "STRUCTURE_UNPACKING"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "Physics",
+        "AutoHealBehavior",
+        "SpecialPower",
+        "ToggleStatusSpecialAbilityUpdate",
+        "CreateObjectDie",
+        "DestroyDie",
+        "FXListBehavior",
+        "UnitUnpackUpdate",
+        "SweepingLaserState",
+        "AttributeModifierUpgrade",
+        "StatusBitsUpgrade",
+        "FireWeaponWhenDead",
+        "AIUpdate",
+        "ModelConditionSoundSelectorClientBehavior",
+        "AnimationSoundClientBehavior"
+      ],
+      "body": [
+        {
+          "MaxHealth": "5000.0",
+          "type": "ActiveBody"
+        }
+      ],
+      "effective_scalar": {
+        "BuildTime": "20",
+        "ButtonImage": "Button_JapanGigaFortressShip",
+        "CommandPoints": "1",
+        "CommandSet": "JapanFortressShipCommandSet",
+        "EditorName": "JapanFortressShip",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "VEHICLE",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_JapanGigaFortressShip",
+        "Side": "Japan",
+        "TransportSlotCount": "100",
+        "UnitCategory": "VEHICLE"
+      },
+      "id": "JapanFortressShip",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "JUFortressShip_SKN"
+          ]
+        },
+        {
+          "conditions": "STRUCTURE_UNPACKING",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_SKN"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW USER_1",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShipHead_FP"
+          ]
+        },
+        {
+          "conditions": "USER_1 USER_3 REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_TRANS"
+          ]
+        },
+        {
+          "conditions": "USER_3 REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_TRANS"
+          ]
+        },
+        {
+          "conditions": "USER_1 REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShipHead_SKN"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_1 USER_3 DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_TRANS"
+          ]
+        },
+        {
+          "conditions": "USER_3 DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_TRANS"
+          ]
+        },
+        {
+          "conditions": "USER_1 DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShipHead_SKN"
+          ]
+        },
+        {
+          "conditions": "DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_1 USER_3",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_TRANS"
+          ]
+        },
+        {
+          "conditions": "USER_3",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_TRANS"
+          ]
+        },
+        {
+          "conditions": "USER_1",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShipHead_SKN"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "STRUCTURE_UNPACKING",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUFortressShip_SKN"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "STRUCTURE_UNPACKING",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "JUEgg_Unpack"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "JapanFortressShipWaterLocomotor",
+          "Speed": "40.0"
+        },
+        {
+          "Condition": "SUPERSONIC",
+          "Locomotor": "JapanFortressShipAirborneLocomotor",
+          "Speed": "30.0"
+        }
+      ],
+      "parent": "BaseVehicle",
+      "parent_status": "complete",
+      "source": {
+        "line": 49,
+        "path": "Uprising/Xml/EP1/Japan/Units/JapanFortressShip.xml"
+      },
+      "tech": [
+        {
+          "group": "GameDependency",
+          "kind": "NeededUpgrade",
+          "value": "Upgrade_JapanNavalYardTech3"
+        },
+        {
+          "group": "GameDependency",
+          "kind": "RequiredObject",
+          "value": "JapanTechStructure"
+        }
+      ],
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipCannonWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipCannonWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipCannonWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipCannonWeapon"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods"
+        },
+        {
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_Aircraft"
+        },
+        {
+          "ObjectStatus": "ADVANCED_MISSILE_PACKS",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_JapanAdvancedMissilePack"
+        },
+        {
+          "ObjectStatus": "ADVANCED_MISSILE_PACKS",
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_Aircraft_JapanAdvancedMissilePack"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods"
+        },
+        {
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_Aircraft"
+        },
+        {
+          "ObjectStatus": "ADVANCED_MISSILE_PACKS",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_JapanAdvancedMissilePack"
+        },
+        {
+          "ObjectStatus": "ADVANCED_MISSILE_PACKS",
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_Aircraft_JapanAdvancedMissilePack"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods"
+        },
+        {
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_Aircraft"
+        },
+        {
+          "ObjectStatus": "ADVANCED_MISSILE_PACKS",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_JapanAdvancedMissilePack"
+        },
+        {
+          "ObjectStatus": "ADVANCED_MISSILE_PACKS",
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_Aircraft_JapanAdvancedMissilePack"
+        },
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods"
+        },
+        {
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_Aircraft"
+        },
+        {
+          "ObjectStatus": "ADVANCED_MISSILE_PACKS",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_JapanAdvancedMissilePack"
+        },
+        {
+          "ObjectStatus": "ADVANCED_MISSILE_PACKS",
+          "Ordering": "SECONDARY_WEAPON",
+          "Template": "JapanFortressShipMissilePods_Aircraft_JapanAdvancedMissilePack"
+        },
+        {
+          "ObjectStatus": "TRANSFORMATION_TOGGLE_STATE",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipAirborneSeigeCannonWeapon"
+        },
+        {
+          "ObjectStatus": "TRANSFORMATION_TOGGLE_STATE WEAPON_UPGRADED_01",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "JapanFortressShipAirborneSeigeCannonWeaponVeteran"
+        }
+      ]
+    },
+    "production_proof": null,
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Uprising/Xml/EP1/Japan/Units/JapanFortressShip.xml#L49",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "uprising"
+  },
+  {
+    "authored_fusion_scene": "Pack, relocate, deploy, produce from the correct class menu, then recover after a save. Preserve team/class/objective state and prohibit production on the wrong lifecycle gate.",
+    "object": {
+      "animation": [
+        {
+          "clips": [
+            {
+              "AnimationMode": "LOOP",
+              "AnimationName": "GSX_CrawlerA_UT1_IDLA"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "when": "BUILD_PLACEMENT_CURSOR"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GSX_CrawlerA_UT1_IDLA"
+            }
+          ],
+          "kind": "PARSE_DEFAULT",
+          "state": "STATE_IDLE"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUX_CrawlerA_DPLY_T2"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "USER_2 CRAWLER_TRANSITION_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUX_CrawlerA_DPLY_T2"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "USER_1 CRAWLER_TRANSITION_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUX_CrawlerA_DPLY"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "CRAWLER_TRANSITION_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT3",
+              "AnimationSpeedFactorMax": "1.0",
+              "AnimationSpeedFactorMin": "1.0"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_VEHICLE_TRANSITION",
+          "when": "CRAWLER_TRANSITION_2 USER_2"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT2",
+              "AnimationSpeedFactorMax": "1.0",
+              "AnimationSpeedFactorMin": "1.0"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_VEHICLE_TRANSITION",
+          "when": "CRAWLER_TRANSITION_2 USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT1",
+              "AnimationSpeedFactorMax": "1.0",
+              "AnimationSpeedFactorMin": "1.0"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_VEHICLE_TRANSITION",
+          "when": "CRAWLER_TRANSITION_2"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_T3_BLDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_OPENING USER_2"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT3_DOPN"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_WAITING_OPEN USER_2"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT3_DOPN"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_CLOSING USER_2"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_T2_BLDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_OPENING USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT2_DOPN"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_WAITING_OPEN USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT2_DOPN"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_CLOSING USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_T1_BLDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_OPENING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT1_DOPN"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_WAITING_OPEN"
+        },
+        {
+          "clips": [
+            {
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT1_DOPN"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DOOR_1_CLOSING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT2_IDLA"
+            },
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT2_IDLB"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_IDLE_2",
+          "when": "USER_1"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT3_IDLA"
+            },
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT3_IDLB"
+            }
+          ],
+          "has_script": true,
+          "kind": "PARSE_NORMAL",
+          "state": "STATE_IDLE_3",
+          "when": "USER_2"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT1-UT2"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_Tech1ToTech2"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "12",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GSX_CrawlerA_UT2-UT3"
+            }
+          ],
+          "kind": "PARSE_TRANSITION",
+          "state": "TRANS_Tech2ToTech3"
+        }
+      ],
+      "behavior_classes": [
+        "SpecialModelConditionReplaceOfotherBehavior",
+        "SlowDeath",
+        "WeaponSetUpdate",
+        "AttributeModifierUpgrade",
+        "StatusBitsUpgrade",
+        "ReplaceSelfSpecialAbility",
+        "ShieldSphereUpdate",
+        "ShieldSphereDamageUpgrade",
+        "ModelConditionUpgrade",
+        "AttributeModifierAuraUpdate",
+        "FXListBehavior",
+        "ProjectedBuildabilityOverrideBehavior",
+        "EnergyPointsUpgrade",
+        "ShieldSphereUpgrade",
+        "StructureUnpackUpdate",
+        "StancesBehavior",
+        "BuildingDestructionBehavior"
+      ],
+      "body": [
+        {
+          "MaxHealth": "=$CRAWLER_HEALTH_DEFENSE",
+          "type": "ActiveBody"
+        }
+      ],
+      "clip_events": [
+        {
+          "Effect": "FX_GDICrawlerA_Burrow",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "when": "USER_2 CRAWLER_TRANSITION_1"
+        },
+        {
+          "Effect": "FX_GDICrawlerA_Burrow",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "when": "USER_1 CRAWLER_TRANSITION_1"
+        },
+        {
+          "Effect": "FX_GDICrawlerA_Burrow",
+          "FireWhenSkipped": "true",
+          "Frame": "10",
+          "when": "CRAWLER_TRANSITION_1"
+        },
+        {
+          "Bone": "Crawler",
+          "Effect": "FX_NOD_BurrowB_Large",
+          "FireWhenSkipped": "true",
+          "Frame": "25",
+          "state": "STATE_VEHICLE_TRANSITION",
+          "when": "CRAWLER_TRANSITION_2 USER_2"
+        },
+        {
+          "Bone": "Crawler",
+          "Effect": "FX_NOD_BurrowB_Large",
+          "FireWhenSkipped": "true",
+          "Frame": "25",
+          "state": "STATE_VEHICLE_TRANSITION",
+          "when": "CRAWLER_TRANSITION_2 USER_1"
+        },
+        {
+          "Bone": "Crawler",
+          "Effect": "FX_NOD_BurrowB_Large",
+          "FireWhenSkipped": "true",
+          "Frame": "25",
+          "state": "STATE_VEHICLE_TRANSITION",
+          "when": "CRAWLER_TRANSITION_2"
+        }
+      ],
+      "effective_scalar": {
+        "ButtonImage": "Btn_GDI_Crawler_A_str_tech1",
+        "CommandPoints": "20",
+        "CommandSet": "GDICrawlerStructureCommandSet",
+        "EditorName": "GDI_D1_Struct_Crawler(Defense Crawler)",
+        "EditorSorting": "STRUCTURE",
+        "RadarPriority": "STRUCTURE",
+        "SelectPortrait": "Portrait_GDI_Crawler_A_str_tech1",
+        "Side": "GDI",
+        "UnitCategory": "CRAWLER",
+        "WeaponCategory": "BLAST"
+      },
+      "id": "GDICrawlerAStructure",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "GSX_CrawlerA_SKN"
+          ]
+        },
+        {
+          "conditions": "CRAWLER_TRANSITION_1",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUX_CrawlerA_SKN"
+          ]
+        },
+        {
+          "conditions": "USER_2",
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "FXInvisBone"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "SPHERE_MODULE_ACTIVE",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXInvisBone"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "SPHERE_MODULE_ACTIVE USER_8",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXShieldGDICrawlerUpgrade"
+          ]
+        },
+        {
+          "conditions": "SPHERE_MODULE_ACTIVE",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXShieldGDICrawler"
+          ]
+        }
+      ],
+      "parent": "BaseCrawlerStructure",
+      "parent_status": "complete",
+      "source": {
+        "line": 61,
+        "path": "Tiberian Twilight/Xml/GDI/Crawlers/GDICrawlerAStructure.xml"
+      },
+      "weapons": [
+        {
+          "ObjectStatus": "WEAPON_UPGRADED_01",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "GDICrawlerAStructureWeapon"
+        },
+        {
+          "ObjectStatus": "WEAPON_UPGRADED_02",
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "GDICrawlerAStructureWeaponUpgraded"
+        }
+      ]
+    },
+    "production_proof": null,
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Tiberian%20Twilight/Xml/GDI/Crawlers/GDICrawlerAStructure.xml#L61",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "tt"
+  },
+  {
+    "authored_fusion_scene": "Exercise a GDI Support tier selection, queue spend, flight, missile cycles and return to a legal order. Scope all numeric balance to the chosen profile.",
+    "object": {
+      "account_costs": [
+        {
+          "Account": "=$ACCOUNT_CREDIT",
+          "Amount": "0"
+        }
+      ],
+      "animation": [
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_AIDA",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            }
+          ],
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_AIDA",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "RECYCLED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_AIDA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "LOCOMOTOR_TAXIING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_RVRS"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING BACKING_UP"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUM_AircraftA_ACLA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "ACCELERATE"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "ONCE",
+              "AnimationName": "GUM_AircraftA_DCLA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "DECELERATE"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_TRNL"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_LEFT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_TRNR"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING TURN_RIGHT"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_TRN180R"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "TURN_RIGHT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_TRN180L"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "TURN_LEFT_HIGH_SPEED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_MOVD"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING REALLYDAMAGED"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_MOVA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "MOVING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_TKFA"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "CLIMBING"
+        },
+        {
+          "clips": [
+            {
+              "AnimationBlendTime": "15",
+              "AnimationMode": "LOOP",
+              "AnimationName": "GUM_AircraftA_AIDD",
+              "AnimationSpeedFactorMax": "1.1",
+              "AnimationSpeedFactorMin": "0.9"
+            }
+          ],
+          "kind": "PARSE_NORMAL",
+          "when": "REALLYDAMAGED"
+        }
+      ],
+      "behavior_classes": [
+        "WeaponSetUpdate",
+        "Physics",
+        "CreateObjectDie",
+        "DestroyDie",
+        "FXListBehavior",
+        "AttributeModifierUpgrade",
+        "JetAIUpdate"
+      ],
+      "body": [
+        {
+          "MaxHealth": "600",
+          "type": "ActiveBody"
+        }
+      ],
+      "effective_scalar": {
+        "BuildTime": "12",
+        "ButtonImage": "Btn_GDI_Aircraft_A",
+        "CommandPoints": "=$GDI_AIRCRAFT_A_COMMANDPOINT_COST",
+        "CommandSet": "GDIAircraftACommandSet",
+        "EditorName": "GDI_S1_Medium_Rocket(Orca)",
+        "EditorSorting": "UNIT",
+        "ProductionQueueType": "INFANTRY",
+        "RadarPriority": "UNIT",
+        "SelectPortrait": "Portrait_GDI_Aircraft_A",
+        "Side": "GDI",
+        "ThreatLevel": "10",
+        "TransportSlotCount": "1",
+        "UnitCategory": "AIRCRAFT",
+        "WeaponCategory": "MISSILE"
+      },
+      "id": "GDIAircraftA",
+      "models": [
+        {
+          "kind": "PARSE_DEFAULT",
+          "models": [
+            "GUM_AircraftA_SKN"
+          ]
+        },
+        {
+          "conditions": "FORMATION_PREVIEW",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUM_AircraftA_FP"
+          ]
+        },
+        {
+          "conditions": "REALLYDAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUM_AircraftA_SKN"
+          ]
+        },
+        {
+          "conditions": "DAMAGED",
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "GUM_AircraftA_SKN"
+          ]
+        },
+        {
+          "kind": "PARSE_DEFAULT"
+        },
+        {
+          "conditions": "OVER_WATER",
+          "kind": "PARSE_NORMAL"
+        },
+        {
+          "conditions": "USER_1",
+          "kind": "PARSE_NORMAL"
+        },
+        {
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXInvisBone"
+          ]
+        },
+        {
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXInvisBone"
+          ]
+        },
+        {
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXInvisBone"
+          ]
+        },
+        {
+          "kind": "PARSE_NORMAL",
+          "models": [
+            "FXInvisBone"
+          ]
+        }
+      ],
+      "movement": [
+        {
+          "Condition": "TAXIING",
+          "Locomotor": "BasicHelicopterTaxiLocomotor",
+          "Speed": "130"
+        },
+        {
+          "Condition": "NORMAL",
+          "Locomotor": "GDIAircraftALocomotor",
+          "Speed": "130.0"
+        }
+      ],
+      "parent": "BaseMediumAircraft",
+      "parent_status": "complete",
+      "source": {
+        "line": 58,
+        "path": "Tiberian Twilight/Xml/GDI/Units/GDIAircraftA.xml"
+      },
+      "weapons": [
+        {
+          "Ordering": "PRIMARY_WEAPON",
+          "Template": "GDIAircraftARocketWeapon"
+        }
+      ]
+    },
+    "production_proof": {
+      "command": "Command_ConstructGDIAircraftA",
+      "command_membership_source": {
+        "line": 22,
+        "path": "Tiberian Twilight/Xml/GDI/BuildAllGDIUnits.xml"
+      },
+      "command_set": "PlayerSpellBookCommandSetFull",
+      "command_source": {
+        "line": 169,
+        "path": "Tiberian Twilight/Xml/GlobalData/LogicCommand.xml"
+      },
+      "producer": "PlayerSpellBook",
+      "producer_source": {
+        "line": 16,
+        "path": "Tiberian Twilight/Xml/System/PlayerSpellBook.xml"
+      },
+      "producer_static_include_reachable": true,
+      "set_declaring_cmd": "PlayerSpellBookCommandSetFull",
+      "set_inherited_membership": false,
+      "set_source": {
+        "line": 127,
+        "path": "Tiberian Twilight/Xml/GlobalData/LogicCommandSet.xml"
+      },
+      "set_uses_join_operations": false,
+      "target": "GDIAircraftA",
+      "target_source": {
+        "line": 58,
+        "path": "Tiberian Twilight/Xml/GDI/Units/GDIAircraftA.xml"
+      },
+      "target_static_include_reachable": true,
+      "type": "UNIT_BUILD"
+    },
+    "source": "https://github.com/electronicarts/CnC_Modding_Support/blob/3aad8e412961ab543192ae70f8503dc8e178e095/Tiberian%20Twilight/Xml/GDI/Units/GDIAircraftA.xml#L58",
+    "status": "source-observed / Fusion reference scene specified / no runtime certification",
+    "title_key": "tt"
+  }
+]

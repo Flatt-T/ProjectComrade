@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fusion:research:catalogue:v1:catalogue",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "context": {
+      "enum": [
+        "research",
+        "synthetic_test"
+      ]
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:source_profile"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:faction"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:entity"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:capability"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:terrain_feature"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:map_theme"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:observation"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:conflict"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:asset_provenance"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:adaptation"
+          },
+          {
+            "$ref": "urn:fusion:research:catalogue:v1:completion"
+          }
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "context",
+    "records"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "scope": "True Three.js glTF import, pose interpolation and ray-casting under Node; its projected geometry was rasterized by a standalone EGL/OpenGL context. OpenGL API and software driver are identified below. No mobile frame timing, browser event dispatch or application integration measured.",
+  "three_revision": "180",
+  "opengl": "4.5 (Core Profile) Mesa 25.0.7-2+deb13u1",
+  "renderer": "llvmpipe (LLVM 19.1.7, 256 bits)",
+  "size": [
+    224,
+    160
+  ],
+  "first_picked_mesh": "cab",
+  "distinct_picked_meshes": 3,
+  "clips": [
+    {
+      "name": "service.deploy",
+      "duration": 1.7000000476837158,
+      "tracks": 6
+    },
+    {
+      "name": "service.retract",
+      "duration": 1.7000000476837158,
+      "tracks": 6
+    },
+    {
+      "name": "service.scan",
+      "duration": 2,
+      "tracks": 6
+    }
+  ],
+  "pixel_differences": {
+    "visible_pixels": 4687,
+    "travel_to_braced": 369,
+    "braced_to_working": 597,
+    "working_to_scan": 422,
+    "travel_to_return": 0
+  }
+}
