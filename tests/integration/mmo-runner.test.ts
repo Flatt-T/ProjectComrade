@@ -438,4 +438,79 @@ describeDb('mmo region runner (real PostgreSQL + real Fusion sim)', () => {
         [fx.regionId, original]);
     }
   });
+  it('absorbs long unhibernated downtime as journaled slept time, replayably (beta 2026-11-27)', { timeout: 120_000 }, async () => {
+    // Beta 2026-11-27: a region's newest checkpoint had no hibernation metadata
+    // and sat 48 h behind the wall clock; start() stepped all of it live
+    // (~6 h at ~126 ticks/s) while every subscribe blocked. Beyond the live
+    // window the gap must become a journaled accrual, and a replay from the
+    // pre-downtime checkpoint must reproduce the authority exactly.
+    const own = await seedFixtureWorld({ leaseMs: 300_000 });
+    const quiet = { enabled: false };
+    const r0 = new RegionRunner({ regionId: own.regionId, workerId: own.workerId, leaseMs: 60_000, tickMs: TICK_MS, pollMs: 20, quiescence: quiet });
+    await r0.start();
+    await sleep(150);
+    await r0.stop(); // checkpoint without hibernation metadata
+    const before = await mmoQuery<{ snapshot_id: string }>(
+      'select snapshot_id from region_snapshot where region_id = $1', [own.regionId]);
+    expect(before.length).toBeGreaterThan(0);
+
+    const DOWNTIME_MS = 60 * 60_000;
+    await mmoQuery('update region set started_at_ms = started_at_ms - $2 where region_id = $1',
+      [own.regionId, DOWNTIME_MS]);
+    // One frozen clock for both runners: neither advances past start(), so the
+    // authority and the replay land on the same tick.
+    const wall = Date.now();
+    const logs: { e: string; d?: Record<string, unknown> }[] = [];
+    const opts = {
+      regionId: own.regionId, workerId: own.workerId, leaseMs: 60_000, tickMs: TICK_MS, pollMs: 20,
+      quiescence: quiet, maxLiveCatchUpMs: 3_000, now: () => wall,
+      log: (e: string, d?: Record<string, unknown>) => logs.push({ e, d }),
+    };
+    const r1 = new RegionRunner(opts);
+    const t0 = performance.now();
+    await r1.start();
+    const startMs = performance.now() - t0;
+    const g1 = r1.currentGame!;
+    const tick1 = g1.tick;
+    const sum1 = g1.checksum();
+    const credits1 = g1.players.map(p => p.credits);
+    await r1.stop();
+
+    const absorbed = logs.filter(l => l.e === 'region-downtime-absorbed');
+    expect(absorbed).toHaveLength(1);
+    const slept = Number(absorbed[0].d!.sleptTicks);
+    const live = Number(absorbed[0].d!.liveTicks);
+    // Bounded live work; the rest is slept time.
+    expect(live).toBeLessThanOrEqual(Math.ceil(3_000 / TICK_MS));
+    expect(slept).toBeGreaterThan(DOWNTIME_MS / TICK_MS * 0.9);
+    expect(startMs).toBeLessThan(60_000);
+    const accruals = await mmoQuery<{ payload: { downtime?: boolean; ticks: number } }>(
+      `select payload from region_event where region_id = $1 and event_kind = 'accrual'`, [own.regionId]);
+    expect(accruals).toHaveLength(1);
+    expect(accruals[0].payload.downtime).toBe(true);
+    expect(accruals[0].payload.ticks).toBe(slept);
+    // The clock anchor moved with the accrual: wall time maps to the sim tick.
+    const anchored = Number((await regionRow(own.regionId))!.started_at_ms);
+    expect(Math.abs((wall - anchored) / TICK_MS - tick1)).toBeLessThanOrEqual(1);
+
+    // Replay: discard r1's checkpoint so r2 restores the pre-downtime one and
+    // re-derives everything from the journal.
+    await mmoQuery('delete from region_snapshot where region_id = $1 and not (snapshot_id = any($2::uuid[]))',
+      [own.regionId, before.map(b => b.snapshot_id)]);
+    logs.length = 0;
+    const r2 = new RegionRunner(opts);
+    await r2.start();
+    try {
+      const g2 = r2.currentGame!;
+      expect(g2.tick).toBe(tick1);
+      expect(g2.players.map(p => p.credits)).toEqual(credits1);
+      expect(g2.checksum()).toBe(sum1);
+      expect(logs.some(l => l.e === 'region-downtime-absorbed')).toBe(false);
+      const again = await mmoQuery<{ n: string }>(
+        `select count(*)::text as n from region_event where region_id = $1 and event_kind = 'accrual'`, [own.regionId]);
+      expect(again[0].n).toBe('1');
+    } finally {
+      await r2.stop();
+    }
+  });
 });
